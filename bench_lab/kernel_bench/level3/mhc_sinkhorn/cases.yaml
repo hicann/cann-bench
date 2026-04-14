@@ -1,0 +1,167 @@
+cases:
+# ==================== 基准场景 (对齐 shape, 默认参数) ====================
+- operator: MhcSinkhorn
+  case_id: 1
+  input_shape: [[1, 128, 8]]
+  dtype: [float16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-1K-对齐-B=1-S=128-E=8-默认参数
+- operator: MhcSinkhorn
+  case_id: 2
+  input_shape: [[2, 256, 16]]
+  dtype: [float32]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-8K-对齐-B=2-S=256-E=16-默认参数
+- operator: MhcSinkhorn
+  case_id: 3
+  input_shape: [[4, 512, 32]]
+  dtype: [bfloat16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-64K-对齐-B=4-S=512-E=32-默认参数
+- operator: MhcSinkhorn
+  case_id: 4
+  input_shape: [[8, 1024, 64]]
+  dtype: [float16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float16-512K-对齐-B=8-S=1024-E=64-默认参数
+- operator: MhcSinkhorn
+  case_id: 5
+  input_shape: [[16, 2048, 128]]
+  dtype: [float32]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-4M-对齐-B=16-S=2048-E=128-默认参数
+# ==================== 温度变化 ====================
+- operator: MhcSinkhorn
+  case_id: 6
+  input_shape: [[4, 512, 32]]
+  dtype: [float16]
+  attrs: {temperature: 0.1, n_iters: 3}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-64K-对齐-低温度0.1-趋近硬路由
+- operator: MhcSinkhorn
+  case_id: 7
+  input_shape: [[4, 512, 32]]
+  dtype: [float32]
+  attrs: {temperature: 0.5, n_iters: 3}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-64K-对齐-中低温度0.5
+- operator: MhcSinkhorn
+  case_id: 8
+  input_shape: [[4, 512, 32]]
+  dtype: [bfloat16]
+  attrs: {temperature: 2.0, n_iters: 3}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-64K-对齐-高温度2.0-趋近均匀分配
+# ==================== 迭代次数变化 ====================
+- operator: MhcSinkhorn
+  case_id: 9
+  input_shape: [[8, 1024, 64]]
+  dtype: [float32]
+  attrs: {temperature: 1.0, n_iters: 1}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float32-512K-对齐-单次迭代n_iters=1
+- operator: MhcSinkhorn
+  case_id: 10
+  input_shape: [[8, 1024, 64]]
+  dtype: [float16]
+  attrs: {temperature: 1.0, n_iters: 5}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float16-512K-对齐-中等迭代n_iters=5
+- operator: MhcSinkhorn
+  case_id: 11
+  input_shape: [[8, 1024, 64]]
+  dtype: [bfloat16]
+  attrs: {temperature: 1.0, n_iters: 10}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: bfloat16-512K-对齐-高迭代n_iters=10
+# ==================== 非对齐 shape ====================
+- operator: MhcSinkhorn
+  case_id: 12
+  input_shape: [[3, 127, 7]]
+  dtype: [float16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-2.7K-质数非对齐-B=3-S=127-E=7
+- operator: MhcSinkhorn
+  case_id: 13
+  input_shape: [[5, 257, 17]]
+  dtype: [float32]
+  attrs: {temperature: 0.5, n_iters: 5}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-22K-质数非对齐-B=5-S=257-E=17-混合参数
+- operator: MhcSinkhorn
+  case_id: 14
+  input_shape: [[7, 509, 31]]
+  dtype: [bfloat16]
+  attrs: {temperature: 2.0, n_iters: 1}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-110K-质数非对齐-B=7-S=509-E=31-混合参数
+- operator: MhcSinkhorn
+  case_id: 15
+  input_shape: [[6, 1023, 63]]
+  dtype: [float16]
+  attrs: {temperature: 0.1, n_iters: 10}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: float16-387K-非对齐-B=6-低温高迭代
+# ==================== 大规模场景 ====================
+- operator: MhcSinkhorn
+  case_id: 16
+  input_shape: [[32, 4096, 256]]
+  dtype: [float32]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-32M-对齐-大规模-B=32-S=4096-E=256
+- operator: MhcSinkhorn
+  case_id: 17
+  input_shape: [[16, 4096, 128]]
+  dtype: [float16]
+  attrs: {temperature: 0.5, n_iters: 5}
+  value_range: [-100, 100]
+  baseline_perf_us: None
+  note: float16-8M-对齐-大规模-大值域
+# ==================== 特殊值覆盖 ====================
+- operator: MhcSinkhorn
+  case_id: 18
+  input_shape: [[2, 256, 16]]
+  dtype: [float16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-65504, 65504]
+  baseline_perf_us: None
+  note: float16-8K-对齐-float16边界值
+- operator: MhcSinkhorn
+  case_id: 19
+  input_shape: [[2, 256, 16]]
+  dtype: [float32]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [0, 0]
+  baseline_perf_us: None
+  note: float32-8K-对齐-零值输入
+- operator: MhcSinkhorn
+  case_id: 20
+  input_shape: [[2, 256, 16]]
+  dtype: [bfloat16]
+  attrs: {temperature: 1.0, n_iters: 3}
+  value_range: [-0.01, 0.01]
+  baseline_perf_us: None
+  note: bfloat16-8K-对齐-微小值域

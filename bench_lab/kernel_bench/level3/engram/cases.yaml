@@ -1,0 +1,168 @@
+cases:
+# ==================== 基准场景 (对齐 shape, 默认参数) ====================
+- operator: Engram
+  case_id: 1
+  input_shape: [[1, 128, 256], [1, 64, 256]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-32K-对齐-B=1-S=128-D=256-M=64-默认参数
+- operator: Engram
+  case_id: 2
+  input_shape: [[2, 256, 512], [2, 128, 512]]
+  dtype: [float32, float32]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-262K-对齐-B=2-S=256-D=512-M=128-默认参数
+- operator: Engram
+  case_id: 3
+  input_shape: [[4, 512, 1024], [4, 256, 1024]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-2M-对齐-B=4-S=512-D=1024-M=256-默认参数
+- operator: Engram
+  case_id: 4
+  input_shape: [[8, 1024, 512], [8, 256, 512]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float16-4M-对齐-B=8-S=1024-D=512-M=256-默认参数
+- operator: Engram
+  case_id: 5
+  input_shape: [[16, 2048, 256], [16, 512, 256]]
+  dtype: [float32, float32]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-8M-对齐-B=16-S=2048-D=256-M=512-默认参数
+# ==================== alpha 变化 ====================
+- operator: Engram
+  case_id: 6
+  input_shape: [[4, 512, 512], [4, 128, 512]]
+  dtype: [float16, float16]
+  attrs: {alpha: 0.1, scale: -1.0}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-1M-对齐-低alpha=0.1-弱记忆增强
+- operator: Engram
+  case_id: 7
+  input_shape: [[4, 512, 512], [4, 128, 512]]
+  dtype: [float32, float32]
+  attrs: {alpha: 0.5, scale: -1.0}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-1M-对齐-中alpha=0.5
+- operator: Engram
+  case_id: 8
+  input_shape: [[4, 512, 512], [4, 128, 512]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {alpha: 2.0, scale: -1.0}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-1M-对齐-高alpha=2.0-强记忆增强
+# ==================== scale 变化 ====================
+- operator: Engram
+  case_id: 9
+  input_shape: [[4, 512, 256], [4, 128, 256]]
+  dtype: [float32, float32]
+  attrs: {alpha: 1.0, scale: 0.0625}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float32-512K-对齐-显式scale=0.0625
+- operator: Engram
+  case_id: 10
+  input_shape: [[4, 512, 256], [4, 128, 256]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: 0.125}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: float16-512K-对齐-显式scale=0.125
+# ==================== 非对齐 shape ====================
+- operator: Engram
+  case_id: 11
+  input_shape: [[3, 127, 257], [3, 63, 257]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-97K-质数非对齐-B=3-S=127-D=257-M=63
+- operator: Engram
+  case_id: 12
+  input_shape: [[5, 253, 509], [5, 127, 509]]
+  dtype: [float32, float32]
+  attrs: {alpha: 0.5, scale: -1.0}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-644K-质数非对齐-B=5-S=253-D=509-M=127-混合参数
+- operator: Engram
+  case_id: 13
+  input_shape: [[7, 511, 1023], [7, 255, 1023]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {alpha: 2.0, scale: -1.0}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-3.7M-非对齐-B=7-S=511-D=1023-M=255-高alpha
+- operator: Engram
+  case_id: 14
+  input_shape: [[6, 1023, 255], [6, 63, 255]]
+  dtype: [float16, float16]
+  attrs: {alpha: 0.1, scale: 0.1}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: float16-1.6M-非对齐-显式scale-低alpha
+# ==================== 大规模场景 ====================
+- operator: Engram
+  case_id: 15
+  input_shape: [[32, 4096, 512], [32, 1024, 512]]
+  dtype: [float32, float32]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-67M-对齐-大规模-B=32-S=4096-D=512-M=1024
+- operator: Engram
+  case_id: 16
+  input_shape: [[16, 4096, 1024], [16, 512, 1024]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-100, 100]
+  baseline_perf_us: None
+  note: float16-67M-对齐-大规模-大值域
+# ==================== 小 memory 场景 ====================
+- operator: Engram
+  case_id: 17
+  input_shape: [[8, 1024, 512], [8, 16, 512]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-4M-对齐-小memory-M=16
+# ==================== 特殊值覆盖 ====================
+- operator: Engram
+  case_id: 18
+  input_shape: [[2, 256, 512], [2, 128, 512]]
+  dtype: [float16, float16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-65504, 65504]
+  baseline_perf_us: None
+  note: float16-262K-对齐-float16边界值
+- operator: Engram
+  case_id: 19
+  input_shape: [[2, 256, 512], [2, 128, 512]]
+  dtype: [float32, float32]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [0, 0]
+  baseline_perf_us: None
+  note: float32-262K-对齐-零值输入
+- operator: Engram
+  case_id: 20
+  input_shape: [[2, 256, 512], [2, 128, 512]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {alpha: 1.0, scale: -1.0}
+  value_range: [-0.01, 0.01]
+  baseline_perf_us: None
+  note: bfloat16-262K-对齐-微小值域

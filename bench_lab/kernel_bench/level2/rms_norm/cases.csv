@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
+RmsNorm,1,"[[32, 128, 768], [768]]","['float16', 'float16']",{'epsilon': 1e-06},[-1, 1],None,float16-3M-对齐-hidden768-对称小值域
+RmsNorm,2,"[[32, 128, 1024], [1024]]","['float32', 'float32']",{'epsilon': 1e-06},[-2, 2],None,float32-4M-对齐-hidden1024-对称小值域
+RmsNorm,3,"[[32, 128, 2048], [2048]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-06},[-3, 3],None,bfloat16-8M-对齐-hidden2048-对称小值域
+RmsNorm,4,"[[16, 256, 4096], [4096]]","['float16', 'float16']",{'epsilon': 1e-06},[-10, 10],None,float16-16M-对齐-hidden4096-对称中值域
+RmsNorm,5,"[[8, 512, 8192], [8192]]","['float32', 'float32']",{'epsilon': 1e-06},[-100, 100],None,float32-33M-对齐-hidden8192-对称大值域
+RmsNorm,6,"[[4, 1024, 4096], [4096]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-05},[-5, 5],None,bfloat16-16M-对齐-hidden4096-epsilon=1e-5
+RmsNorm,7,"[[64, 64, 1024], [1024]]","['float16', 'float16']",{'epsilon': 1e-08},[-0.1, 0.1],None,float16-4M-对齐-epsilon=1e-8-对称微小值域
+RmsNorm,8,"[[16, 512, 2048], [2048]]","['float32', 'float32']",{'epsilon': 1e-05},[-1, 1],None,float32-16M-对齐-epsilon=1e-5
+RmsNorm,9,"[[8, 1024, 4096], [4096]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-12},[-0.5, 0.5],None,bfloat16-33M-对齐-epsilon=1e-12-对称微小值域
+RmsNorm,10,"[[33, 127, 769], [769]]","['float16', 'float16']",{'epsilon': 1e-06},[-1, 2],None,float16-3M-非对齐-hidden769
+RmsNorm,11,"[[31, 129, 2049], [2049]]","['float32', 'float32']",{'epsilon': 1e-06},[-50, 100],None,float32-8M-非对齐-hidden2049
+RmsNorm,12,"[[17, 255, 4097], [4097]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-06},[-3, 6],None,bfloat16-17M-非对齐-hidden4097
+RmsNorm,13,"[[7, 1009, 1021], [1021]]","['float16', 'float16']",{'epsilon': 1e-06},[-1, 1],None,float16-7M-质数非对齐
+RmsNorm,14,"[[11, 367, 373], [373]]","['float32', 'float32']",{'epsilon': 1e-06},[-10, 10],None,float32-1M-质数非对齐
+RmsNorm,15,"[[1000003, 2], [2]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-06},['-inf', 'inf'],None,bfloat16-2M-质数非对齐-inf特殊值
+RmsNorm,16,"[[11, 13, 17, 67], [67]]","['float16', 'float16']",{'epsilon': 1e-06},['nan', 'nan'],None,float16-163K-质数非对齐-nan特殊值-4D
+RmsNorm,17,"[[3, 7, 11, 4096], [4096]]","['float32', 'float32']",{'epsilon': 1e-06},[0, 0],None,float32-1M-质数非对齐-全零特殊值-4D
+RmsNorm,18,"[[2, 511, 8192], [8192]]","['bfloat16', 'bfloat16']",{'epsilon': 1e-06},[-0.2, 0.2],None,bfloat16-8M-非对齐-hidden8192-对称微小值域
+RmsNorm,19,"[[4, 255, 4096], [4096]]","['float16', 'float16']",{'epsilon': 1e-06},[-65504, 65504],None,float16-4M-非对齐-float16边界值
+RmsNorm,20,"[[2, 3, 17, 1024, 128], [128]]","['float32', 'float32']",{'epsilon': 1e-06},[-20, 40],None,float32-12M-非对齐-非对称大值域-5D

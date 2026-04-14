@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
+GroupNorm,1,"[[8, 32, 64, 64], [32], [32]]","['float16', 'float16', 'float16']","{'num_groups': 8, 'epsilon': 1e-05}",[-1, 1],None,float16-1M-对齐-groups=8-C=32-对称小值域
+GroupNorm,2,"[[4, 64, 128, 128], [64], [64]]","['float32', 'float32', 'float32']","{'num_groups': 16, 'epsilon': 1e-05}",[-2, 2],None,float32-67M-对齐-groups=16-C=64-对称小值域
+GroupNorm,3,"[[2, 128, 256, 256], [128], [128]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 32, 'epsilon': 1e-05}",[-3, 3],None,bfloat16-16M-对齐-groups=32-C=128-对称小值域
+GroupNorm,4,"[[16, 256, 32, 32], [256], [256]]","['float16', 'float16', 'float16']","{'num_groups': 1, 'epsilon': 1e-05}",[-10, 10],None,float16-4M-对齐-groups=1-InstanceNorm等价-对称中值域
+GroupNorm,5,"[[8, 512, 16, 16], [512], [512]]","['float32', 'float32', 'float32']","{'num_groups': 2, 'epsilon': 1e-05}",[-100, 100],None,float32-1M-对齐-groups=2-对称大值域
+GroupNorm,6,"[[4, 64, 64, 64], [64], [64]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 4, 'epsilon': 1e-05}",[-5, 5],None,bfloat16-1M-对齐-groups=4
+GroupNorm,7,"[[2, 256, 128, 128], [256], [256]]","['float16', 'float16', 'float16']","{'num_groups': 32, 'epsilon': 1e-05}",[-0.1, 0.1],None,float16-8M-对齐-groups=32-C=256-对称微小值域
+GroupNorm,8,"[[16, 128, 32, 32], [128], [128]]","['float32', 'float32', 'float32']","{'num_groups': 16, 'epsilon': 1e-06}",[-1, 1],None,float32-2M-对齐-epsilon=1e-6
+GroupNorm,9,"[[8, 64, 64, 64], [64], [64]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 8, 'epsilon': 0.001}",[-0.5, 0.5],None,bfloat16-2M-对齐-epsilon=1e-3-对称微小值域
+GroupNorm,10,"[[7, 32, 63, 65], [32], [32]]","['float16', 'float16', 'float16']","{'num_groups': 8, 'epsilon': 1e-05}",[-1, 2],None,float16-917K-非对齐-空间维非对齐
+GroupNorm,11,"[[3, 64, 127, 129], [64], [64]]","['float32', 'float32', 'float32']","{'num_groups': 16, 'epsilon': 1e-05}",[-50, 100],None,float32-3M-非对齐-空间维非对齐
+GroupNorm,12,"[[5, 48, 33, 65], [48], [48]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 4, 'epsilon': 1e-05}",[-3, 6],None,bfloat16-514K-非对齐-C=48-groups=4
+GroupNorm,13,"[[1024, 256], [256], [256]]","['float16', 'float16', 'float16']","{'num_groups': 16, 'epsilon': 1e-05}",[-1, 1],None,float16-262K-对齐-2D输入-无空间维
+GroupNorm,14,"[[2048, 512], [512], [512]]","['float32', 'float32', 'float32']","{'num_groups': 32, 'epsilon': 1e-05}",[-10, 10],None,float32-1M-对齐-2D输入-groups=32
+GroupNorm,15,"[[4, 32, 251, 251], [32], [32]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 8, 'epsilon': 1e-05}","['-inf', 'inf']",None,bfloat16-8M-质数空间维-inf特殊值
+GroupNorm,16,"[[2, 64, 67, 71], [64], [64]]","['float16', 'float16', 'float16']","{'num_groups': 16, 'epsilon': 1e-05}",['nan', 'nan'],None,float16-608K-质数空间维-nan特殊值
+GroupNorm,17,"[[8, 128, 32, 32], [128], [128]]","['float32', 'float32', 'float32']","{'num_groups': 8, 'epsilon': 1e-05}",[0, 0],None,float32-1M-对齐-全零特殊值
+GroupNorm,18,"[[2, 256, 127, 129], [256], [256]]","['bfloat16', 'bfloat16', 'bfloat16']","{'num_groups': 32, 'epsilon': 1e-05}",[-0.2, 0.2],None,bfloat16-8M-非对齐-C=256-groups=32-对称微小值域
+GroupNorm,19,"[[4, 128, 255, 257], [128], [128]]","['float16', 'float16', 'float16']","{'num_groups': 16, 'epsilon': 1e-05}",[-65504, 65504],None,float16-33M-非对齐-float16边界值
+GroupNorm,20,"[[1, 512, 64, 64], [512], [512]]","['float32', 'float32', 'float32']","{'num_groups': 32, 'epsilon': 1e-05}",[-20, 40],None,float32-2M-对齐-大通道-非对称大值域

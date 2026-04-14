@@ -1,0 +1,59 @@
+operator:
+  name: GQA
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    对于第 i 个 query head，使用第 floor(i * numKVHeads / numHeads) 个 KV head
+    head_i = softmax(Q_i @ K_g(i)^T / sqrt(d_k)) @ V_g(i)
+    GQA = Concat(head_1, ..., head_h) @ W_o
+  description: 分组查询注意力 (Grouped Query Attention)，多个 query head 共享一组 key/value head，减少 KV cache 内存占用
+  shape_support: 'query: [B, S, N_q, D]'
+  attrs:
+  - name: numHeads
+    type: int
+    description: query 头数
+    required: true
+  - name: numKVHeads
+    type: int
+    description: KV 头数，需整除 numHeads
+    required: true
+  - name: scaleValue
+    type: float
+    default: -1.0
+    description: 缩放因子
+    required: false
+  inputs:
+  - name: query
+    description: 查询张量，shape 为 [B, S, N_q, D]，N_q = numHeads
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: key
+    description: 键张量，shape 为 [B, S_kv, N_kv, D]，N_kv = numKVHeads
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: value
+    description: 值张量，shape 为 [B, S_kv, N_kv, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight_o
+    description: 输出投影权重 (可为None表示不做输出投影)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  outputs:
+  - name: y
+    description: 输出张量，shape 为 [B, S, N_q, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: gqa(Tensor query, Tensor key, Tensor value, Tensor? weight_o, int numHeads,
+    int numKVHeads, float scaleValue) -> Tensor y

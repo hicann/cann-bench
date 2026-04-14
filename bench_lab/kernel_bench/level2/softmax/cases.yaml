@@ -1,0 +1,167 @@
+cases:
+# ==================== 基准场景 (对齐 shape, dim=-1) ====================
+- operator: Softmax
+  case_id: 1
+  input_shape: [[1024, 1024]]
+  dtype: [float16]
+  attrs: {dim: -1}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-1M-对齐-对称小值域-dim=-1
+- operator: Softmax
+  case_id: 2
+  input_shape: [[2048, 2048]]
+  dtype: [float32]
+  attrs: {dim: -1}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-4M-对齐-对称小值域-dim=-1
+- operator: Softmax
+  case_id: 3
+  input_shape: [[4096, 4096]]
+  dtype: [bfloat16]
+  attrs: {dim: -1}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-16M-对齐-对称小值域-dim=-1
+# ==================== dim 变化 ====================
+- operator: Softmax
+  case_id: 4
+  input_shape: [[8192, 8192]]
+  dtype: [float16]
+  attrs: {dim: 0}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float16-67M-对齐-对称中值域-dim=0
+- operator: Softmax
+  case_id: 5
+  input_shape: [[16384, 16384]]
+  dtype: [float32]
+  attrs: {dim: 1}
+  value_range: [-100, 100]
+  baseline_perf_us: None
+  note: float32-268M-对齐-对称大值域-dim=1
+- operator: Softmax
+  case_id: 6
+  input_shape: [[32, 64, 128, 256]]
+  dtype: [bfloat16]
+  attrs: {dim: 2}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-67M-对齐-4D-dim=2
+# ==================== 非对齐 shape ====================
+- operator: Softmax
+  case_id: 7
+  input_shape: [[1023, 2047]]
+  dtype: [float16]
+  attrs: {dim: -1}
+  value_range: [-0.1, 0.1]
+  baseline_perf_us: None
+  note: float16-2M-非对齐-对称微小值域-dim=-1
+- operator: Softmax
+  case_id: 8
+  input_shape: [[2049, 4097]]
+  dtype: [float32]
+  attrs: {dim: -1}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float32-8M-非对齐-dim=-1
+- operator: Softmax
+  case_id: 9
+  input_shape: [[4095, 8191]]
+  dtype: [bfloat16]
+  attrs: {dim: 0}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: bfloat16-33M-非对齐-dim=0
+# ==================== 质数非对齐 shape ====================
+- operator: Softmax
+  case_id: 10
+  input_shape: [[1009, 1021]]
+  dtype: [float16]
+  attrs: {dim: -1}
+  value_range: [-1, 2]
+  baseline_perf_us: None
+  note: float16-1M-质数非对齐-dim=-1
+- operator: Softmax
+  case_id: 11
+  input_shape: [[367, 373, 379]]
+  dtype: [float32]
+  attrs: {dim: 1}
+  value_range: [-50, 100]
+  baseline_perf_us: None
+  note: float32-51M-质数非对齐-3D-dim=1
+- operator: Softmax
+  case_id: 12
+  input_shape: [[11, 13, 17, 4001]]
+  dtype: [bfloat16]
+  attrs: {dim: -1}
+  value_range: [-3, 6]
+  baseline_perf_us: None
+  note: bfloat16-9M-质数非对齐-4D-dim=-1
+# ==================== 特殊值覆盖 ====================
+- operator: Softmax
+  case_id: 13
+  input_shape: [[1000003, 2]]
+  dtype: [float16]
+  attrs: {dim: -1}
+  value_range: [-inf, inf]
+  baseline_perf_us: None
+  note: float16-2M-质数非对齐-inf特殊值
+- operator: Softmax
+  case_id: 14
+  input_shape: [[11, 13, 17, 67, 67]]
+  dtype: [float32]
+  attrs: {dim: -1}
+  value_range: [nan, nan]
+  baseline_perf_us: None
+  note: float32-10M-质数非对齐-nan特殊值-5D
+- operator: Softmax
+  case_id: 15
+  input_shape: [[3, 7, 11, 13, 1013]]
+  dtype: [bfloat16]
+  attrs: {dim: -1}
+  value_range: [0, 0]
+  baseline_perf_us: None
+  note: bfloat16-3M-质数非对齐-全零特殊值-5D
+# ==================== 大 shape 与混合场景 ====================
+- operator: Softmax
+  case_id: 16
+  input_shape: [[512, 2049]]
+  dtype: [float16]
+  attrs: {dim: 0}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: float16-1M-非对齐-dim=0
+- operator: Softmax
+  case_id: 17
+  input_shape: [[255, 8193]]
+  dtype: [float32]
+  attrs: {dim: 1}
+  value_range: [-1000, 1000]
+  baseline_perf_us: None
+  note: float32-2M-非对齐-对称大值域-dim=1
+- operator: Softmax
+  case_id: 18
+  input_shape: [[2, 511, 2049]]
+  dtype: [bfloat16]
+  attrs: {dim: -1}
+  value_range: [-0.2, 0.2]
+  baseline_perf_us: None
+  note: bfloat16-2M-非对齐-对称微小值域-3D
+- operator: Softmax
+  case_id: 19
+  input_shape: [[4, 255, 2049]]
+  dtype: [float16]
+  attrs: {dim: 1}
+  value_range: [-65504, 65504]
+  baseline_perf_us: None
+  note: float16-2M-非对齐-float16边界值-dim=1
+- operator: Softmax
+  case_id: 20
+  input_shape: [[2, 3, 17, 1024, 101]]
+  dtype: [float32]
+  attrs: {dim: -1}
+  value_range: [-20, 40]
+  baseline_perf_us: None
+  note: float32-10M-非对齐-非对称大值域-5D

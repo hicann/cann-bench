@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
+MLA,1,"[[2, 128, 16, 128], [2, 128, 512], [512, 16, 128], [512, 16, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,float16-B2S128N16D128Dc512-对齐-基准
+MLA,2,"[[4, 256, 32, 128], [4, 256, 1024], [1024, 32, 128], [1024, 32, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,float32-B4S256N32D128Dc1024-对齐-标准
+MLA,3,"[[2, 512, 16, 128], [2, 512, 512], [512, 16, 128], [512, 16, 128]]","['bfloat16', 'bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S512N16D128Dc512-对齐-长序列
+MLA,4,"[[1, 1024, 32, 128], [1, 1024, 1536], [1536, 32, 128], [1536, 32, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S1024N32D128Dc1536-对齐-DeepSeek参考
+MLA,5,"[[8, 64, 16, 128], [8, 64, 512], [512, 16, 128], [512, 16, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 16, 'scaleValue': -1.0}","[-2, 2]",None,float32-B8S64N16D128Dc512-对齐-大batch
+MLA,6,"[[1, 1, 32, 128], [1, 2048, 1024], [1024, 32, 128], [1024, 32, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S1Skv2048N32D128Dc1024-解码阶段
+MLA,7,"[[2, 256, 16, 128], [2, 512, 512], [512, 16, 128], [512, 16, 128]]","['bfloat16', 'bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S256Skv512N16D128Dc512-cross长度
+MLA,8,"[[2, 128, 32, 128], [2, 128, 1024], [1024, 32, 128], [1024, 32, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 32, 'scaleValue': 0.08838}","[-1, 1]",None,float32-B2S128N32D128Dc1024-显式scale
+MLA,9,"[[3, 131, 16, 128], [3, 131, 512], [512, 16, 128], [512, 16, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,float16-B3S131N16D128Dc512-质数非对齐
+MLA,10,"[[2, 127, 32, 96], [2, 127, 768], [768, 32, 96], [768, 32, 96]]","['bfloat16', 'bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S127N32D96Dc768-非对齐D
+MLA,11,"[[1, 4096, 16, 128], [1, 4096, 512], [512, 16, 128], [512, 16, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S4096N16D128Dc512-超长序列
+MLA,12,"[[2, 256, 8, 64], [2, 256, 256], [256, 8, 64], [256, 8, 64]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float32-B2S256N8D64Dc256-小模型-低压缩
+MLA,13,"[[1, 128, 32, 128], [1, 128, 256], [256, 32, 128], [256, 32, 128]]","['bfloat16', 'bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B1S128N32D128Dc256-高压缩比
+MLA,14,"[[2, 256, 64, 128], [2, 256, 2048], [2048, 64, 128], [2048, 64, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 64, 'scaleValue': -1.0}","[-1, 1]",None,float16-B2S256N64D128Dc2048-多头
+MLA,15,"[[1, 2048, 32, 128], [1, 2048, 1536], [1536, 32, 128], [1536, 32, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,float32-B1S2048N32D128Dc1536-DeepSeek-V2
+MLA,16,"[[2, 128, 16, 128], [2, 128, 512], [512, 16, 128], [512, 16, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 16, 'scaleValue': -1.0}","[0, 0]",None,float16-B2S128N16D128Dc512-零值输入
+MLA,17,"[[2, 128, 16, 128], [2, 128, 512], [512, 16, 128], [512, 16, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 16, 'scaleValue': -1.0}","[-0.01, 0.01]",None,float32-B2S128N16D128Dc512-对称微小值域
+MLA,18,"[[2, 128, 16, 128], [2, 128, 512], [512, 16, 128], [512, 16, 128]]","['bfloat16', 'bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 16, 'scaleValue': -1.0}","[-10, 10]",None,bfloat16-B2S128N16D128Dc512-对称中值域
+MLA,19,"[[2, 509, 16, 128], [2, 257, 512], [512, 16, 128], [512, 16, 128]]","['float16', 'float16', 'float16', 'float16']","{'numHeads': 16, 'scaleValue': -1.0}","[-1, 1]",None,float16-B2S509Skv257N16D128Dc512-质数cross
+MLA,20,"[[4, 128, 32, 128], [4, 128, 1024], [1024, 32, 128], [1024, 32, 128]]","['float32', 'float32', 'float32', 'float32']","{'numHeads': 32, 'scaleValue': -1.0}","[-5, 5]",None,float32-B4S128N32D128Dc1024-对称大值域

@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
+GQA,1,"[[2, 128, 32, 128], [2, 128, 8, 128], [2, 128, 8, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float16-B2S128H32KV8D128-对齐-4:1分组
+GQA,2,"[[4, 256, 32, 128], [4, 256, 8, 128], [4, 256, 8, 128]]","['float32', 'float32', 'float32']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float32-B4S256H32KV8D128-对齐-4:1分组
+GQA,3,"[[2, 512, 64, 128], [2, 512, 8, 128], [2, 512, 8, 128]]","['bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 64, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S512H64KV8D128-对齐-8:1分组
+GQA,4,"[[1, 1024, 32, 128], [1, 1024, 4, 128], [1, 1024, 4, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 4, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S1024H32KV4D128-对齐-8:1分组
+GQA,5,"[[8, 64, 16, 64], [8, 64, 4, 64], [8, 64, 4, 64]]","['float32', 'float32', 'float32']","{'numHeads': 16, 'numKVHeads': 4, 'scaleValue': -1.0}","[-2, 2]",None,float32-B8S64H16KV4D64-对齐-大batch
+GQA,6,"[[2, 128, 32, 128], [2, 128, 1, 128], [2, 128, 1, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 1, 'scaleValue': -1.0}","[-1, 1]",None,float16-B2S128H32KV1D128-MQA退化
+GQA,7,"[[2, 128, 32, 128], [2, 128, 32, 128], [2, 128, 32, 128]]","['bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 32, 'numKVHeads': 32, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S128H32KV32D128-MHA退化
+GQA,8,"[[2, 128, 32, 128], [2, 256, 8, 128], [2, 256, 8, 128]]","['float32', 'float32', 'float32']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float32-B2S128Skv256H32KV8D128-cross-attention
+GQA,9,"[[1, 1, 32, 128], [1, 2048, 8, 128], [1, 2048, 8, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S1Skv2048H32KV8D128-解码阶段
+GQA,10,"[[1, 4096, 32, 128], [1, 4096, 8, 128], [1, 4096, 8, 128]]","['bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B1S4096H32KV8D128-超长序列
+GQA,11,"[[2, 128, 32, 128], [2, 128, 8, 128], [2, 128, 8, 128]]","['float32', 'float32', 'float32']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': 0.08838}","[-1, 1]",None,float32-B2S128H32KV8D128-显式scale
+GQA,12,"[[3, 131, 32, 128], [3, 131, 8, 128], [3, 131, 8, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float16-B3S131H32KV8D128-质数非对齐
+GQA,13,"[[2, 127, 24, 96], [2, 127, 6, 96], [2, 127, 6, 96]]","['bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 24, 'numKVHeads': 6, 'scaleValue': -1.0}","[-1, 1]",None,bfloat16-B2S127H24KV6D96-非对齐D
+GQA,14,"[[1, 2048, 40, 128], [1, 2048, 8, 128], [1, 2048, 8, 128]]","['float16', 'float16', 'float16']","{'numHeads': 40, 'numKVHeads': 8, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S2048H40KV8D128-5:1分组-LLaMA
+GQA,15,"[[2, 256, 48, 128], [2, 256, 6, 128], [2, 256, 6, 128]]","['float32', 'float32', 'float32']","{'numHeads': 48, 'numKVHeads': 6, 'scaleValue': -1.0}","[-1, 1]",None,float32-B2S256H48KV6D128-8:1分组
+GQA,16,"[[2, 128, 32, 128], [2, 128, 8, 128], [2, 128, 8, 128]]","['float16', 'float16', 'float16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[0, 0]",None,float16-B2S128H32KV8D128-零值输入
+GQA,17,"[[2, 128, 32, 128], [2, 128, 8, 128], [2, 128, 8, 128]]","['float32', 'float32', 'float32']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-0.01, 0.01]",None,float32-B2S128H32KV8D128-对称微小值域
+GQA,18,"[[2, 128, 32, 128], [2, 128, 8, 128], [2, 128, 8, 128]]","['bfloat16', 'bfloat16', 'bfloat16']","{'numHeads': 32, 'numKVHeads': 8, 'scaleValue': -1.0}","[-10, 10]",None,bfloat16-B2S128H32KV8D128-对称中值域
+GQA,19,"[[1, 128, 8, 64], [1, 128, 2, 64], [1, 128, 2, 64]]","['float16', 'float16', 'float16']","{'numHeads': 8, 'numKVHeads': 2, 'scaleValue': -1.0}","[-1, 1]",None,float16-B1S128H8KV2D64-小模型
+GQA,20,"[[2, 512, 32, 128], [2, 512, 2, 128], [2, 512, 2, 128]]","['float32', 'float32', 'float32']","{'numHeads': 32, 'numKVHeads': 2, 'scaleValue': -1.0}","[-5, 5]",None,float32-B2S512H32KV2D128-16:1分组

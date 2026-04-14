@@ -1,0 +1,33 @@
+operator:
+  name: MhcSinkhorn
+  category: VVFusion
+  difficulty: L3
+  formula: P = Sinkhorn(exp(logits / temperature), n_iters)
+  description: MHC(Multi-Head Communication) Sinkhorn 算子，用于实现基于 Sinkhorn 迭代的软路由分配，常用于 MoE (Mixture of Experts) 模型中将 token 分配给不同专家
+  shape_support: 'logits: 3D [B, S, E]，B=batch, S=seq_len, E=num_experts'
+  attrs:
+  - name: temperature
+    type: float
+    default: 1.0
+    description: Sinkhorn 温度参数
+    required: false
+  - name: n_iters
+    type: int
+    default: 3
+    description: Sinkhorn 迭代次数
+    required: false
+  inputs:
+  - name: logits
+    description: 输入 logits 张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: routing_weights
+    description: Sinkhorn 迭代后的路由权重张量，与输入 shape 和 dtype 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: mhc_sinkhorn(Tensor logits, float temperature, int n_iters) -> Tensor routing_weights

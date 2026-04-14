@@ -1,0 +1,168 @@
+cases:
+# ==================== 基准场景 (对齐 shape, 4D, 常见 num_groups) ====================
+- operator: GroupNorm
+  case_id: 1
+  input_shape: [[8, 32, 64, 64], [32], [32]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 8, epsilon: 1e-5}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-1M-对齐-groups=8-C=32-对称小值域
+- operator: GroupNorm
+  case_id: 2
+  input_shape: [[4, 64, 128, 128], [64], [64]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 16, epsilon: 1e-5}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-67M-对齐-groups=16-C=64-对称小值域
+- operator: GroupNorm
+  case_id: 3
+  input_shape: [[2, 128, 256, 256], [128], [128]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 32, epsilon: 1e-5}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-16M-对齐-groups=32-C=128-对称小值域
+# ==================== num_groups 变化 ====================
+- operator: GroupNorm
+  case_id: 4
+  input_shape: [[16, 256, 32, 32], [256], [256]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 1, epsilon: 1e-5}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float16-4M-对齐-groups=1-InstanceNorm等价-对称中值域
+- operator: GroupNorm
+  case_id: 5
+  input_shape: [[8, 512, 16, 16], [512], [512]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 2, epsilon: 1e-5}
+  value_range: [-100, 100]
+  baseline_perf_us: None
+  note: float32-1M-对齐-groups=2-对称大值域
+- operator: GroupNorm
+  case_id: 6
+  input_shape: [[4, 64, 64, 64], [64], [64]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 4, epsilon: 1e-5}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-1M-对齐-groups=4
+- operator: GroupNorm
+  case_id: 7
+  input_shape: [[2, 256, 128, 128], [256], [256]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 32, epsilon: 1e-5}
+  value_range: [-0.1, 0.1]
+  baseline_perf_us: None
+  note: float16-8M-对齐-groups=32-C=256-对称微小值域
+# ==================== epsilon 变化 ====================
+- operator: GroupNorm
+  case_id: 8
+  input_shape: [[16, 128, 32, 32], [128], [128]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 16, epsilon: 1e-6}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float32-2M-对齐-epsilon=1e-6
+- operator: GroupNorm
+  case_id: 9
+  input_shape: [[8, 64, 64, 64], [64], [64]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 8, epsilon: 1e-3}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: bfloat16-2M-对齐-epsilon=1e-3-对称微小值域
+# ==================== 非对齐 shape ====================
+- operator: GroupNorm
+  case_id: 10
+  input_shape: [[7, 32, 63, 65], [32], [32]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 8, epsilon: 1e-5}
+  value_range: [-1, 2]
+  baseline_perf_us: None
+  note: float16-917K-非对齐-空间维非对齐
+- operator: GroupNorm
+  case_id: 11
+  input_shape: [[3, 64, 127, 129], [64], [64]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 16, epsilon: 1e-5}
+  value_range: [-50, 100]
+  baseline_perf_us: None
+  note: float32-3M-非对齐-空间维非对齐
+- operator: GroupNorm
+  case_id: 12
+  input_shape: [[5, 48, 33, 65], [48], [48]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 4, epsilon: 1e-5}
+  value_range: [-3, 6]
+  baseline_perf_us: None
+  note: bfloat16-514K-非对齐-C=48-groups=4
+# ==================== 2D 输入 (无空间维度) ====================
+- operator: GroupNorm
+  case_id: 13
+  input_shape: [[1024, 256], [256], [256]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 16, epsilon: 1e-5}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-262K-对齐-2D输入-无空间维
+- operator: GroupNorm
+  case_id: 14
+  input_shape: [[2048, 512], [512], [512]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 32, epsilon: 1e-5}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-1M-对齐-2D输入-groups=32
+# ==================== 特殊值覆盖 ====================
+- operator: GroupNorm
+  case_id: 15
+  input_shape: [[4, 32, 251, 251], [32], [32]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 8, epsilon: 1e-5}
+  value_range: [-inf, inf]
+  baseline_perf_us: None
+  note: bfloat16-8M-质数空间维-inf特殊值
+- operator: GroupNorm
+  case_id: 16
+  input_shape: [[2, 64, 67, 71], [64], [64]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 16, epsilon: 1e-5}
+  value_range: [nan, nan]
+  baseline_perf_us: None
+  note: float16-608K-质数空间维-nan特殊值
+- operator: GroupNorm
+  case_id: 17
+  input_shape: [[8, 128, 32, 32], [128], [128]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 8, epsilon: 1e-5}
+  value_range: [0, 0]
+  baseline_perf_us: None
+  note: float32-1M-对齐-全零特殊值
+# ==================== 大 shape 与混合场景 ====================
+- operator: GroupNorm
+  case_id: 18
+  input_shape: [[2, 256, 127, 129], [256], [256]]
+  dtype: [bfloat16, bfloat16, bfloat16]
+  attrs: {num_groups: 32, epsilon: 1e-5}
+  value_range: [-0.2, 0.2]
+  baseline_perf_us: None
+  note: bfloat16-8M-非对齐-C=256-groups=32-对称微小值域
+- operator: GroupNorm
+  case_id: 19
+  input_shape: [[4, 128, 255, 257], [128], [128]]
+  dtype: [float16, float16, float16]
+  attrs: {num_groups: 16, epsilon: 1e-5}
+  value_range: [-65504, 65504]
+  baseline_perf_us: None
+  note: float16-33M-非对齐-float16边界值
+- operator: GroupNorm
+  case_id: 20
+  input_shape: [[1, 512, 64, 64], [512], [512]]
+  dtype: [float32, float32, float32]
+  attrs: {num_groups: 32, epsilon: 1e-5}
+  value_range: [-20, 40]
+  baseline_perf_us: None
+  note: float32-2M-对齐-大通道-非对称大值域

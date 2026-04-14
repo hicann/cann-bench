@@ -1,0 +1,105 @@
+operator:
+  name: MHA
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    head_i = Attention(Q_i, K_i, V_i) = softmax(Q_i @ K_i^T / sqrt(d_k)) @ V_i
+    MHA(Q, K, V) = Concat(head_1, ..., head_h) @ W_o
+  description: 多头注意力机制 (Multi-Head Attention)，将输入通过多个注意力头并行计算后拼接输出
+  shape_support: 'query: [B, S, D]'
+  attrs:
+  - name: numHeads
+    type: int
+    description: 注意力头数
+    required: true
+  - name: scaleValue
+    type: float
+    default: -1.0
+    description: 缩放因子，<=0时自动使用 1/sqrt(d_k)
+    required: false
+  - name: dropoutRate
+    type: float
+    default: 0.0
+    description: dropout比率
+    required: false
+  inputs:
+  - name: query
+    description: 查询张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: key
+    description: 键张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: value
+    description: 值张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight_q
+    description: Query 投影权重
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight_k
+    description: Key 投影权重
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight_v
+    description: Value 投影权重
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight_o
+    description: 输出投影权重
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: bias_q
+    description: Query 投影偏置 (可选)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  - name: bias_k
+    description: Key 投影偏置 (可选)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  - name: bias_v
+    description: Value 投影偏置 (可选)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  - name: bias_o
+    description: 输出投影偏置 (可选)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  outputs:
+  - name: y
+    description: 输出张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: mha(Tensor query, Tensor key, Tensor value, Tensor weight_q, Tensor weight_k,
+    Tensor weight_v, Tensor weight_o, Tensor? bias_q, Tensor? bias_k, Tensor? bias_v,
+    Tensor? bias_o, int numHeads, float scaleValue, float dropoutRate) -> Tensor y

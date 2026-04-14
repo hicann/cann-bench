@@ -1,0 +1,55 @@
+operator:
+  name: MLA
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    c_kv = x @ W_dkv  (低秩压缩)
+    K = c_kv @ W_uk   (解压缩得到 key)
+    V = c_kv @ W_uv   (解压缩得到 value)
+    y = softmax(Q @ K^T / sqrt(d)) @ V
+  description: 多头潜在注意力 (Multi-Head Latent Attention)，通过低秩压缩 KV 缓存降低推理内存，使用潜在向量 (latent vector) 进行注意力计算
+  shape_support: 'query: [B, S, N, D]'
+  attrs:
+  - name: numHeads
+    type: int
+    description: 注意力头数
+    required: true
+  - name: scaleValue
+    type: float
+    default: -1.0
+    description: 缩放因子
+    required: false
+  inputs:
+  - name: query
+    description: 查询张量，shape 为 [B, S, N, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: compressed_kv
+    description: 低秩压缩的 KV 缓存，shape 为 [B, S_kv, D_c]，D_c < N*D
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: w_uk
+    description: key 解压缩权重，shape 为 [D_c, N, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: w_uv
+    description: value 解压缩权重，shape 为 [D_c, N, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: y
+    description: 输出张量，shape 为 [B, S, N, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: mla(Tensor query, Tensor compressed_kv, Tensor w_uk, Tensor w_uv, int numHeads,
+    float scaleValue) -> Tensor y

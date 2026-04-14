@@ -1,0 +1,39 @@
+operator:
+  name: Engram
+  category: VVFusion
+  difficulty: L3
+  formula: y = x + alpha * softmax(x @ memory^T / sqrt(d)) @ memory
+  description: Engram 算子，实现记忆增强的注意力机制中的记忆编码与检索融合操作，将输入特征与记忆库进行交互计算
+  shape_support: 'x: 3D [B, S, D]，memory: 3D [B, M, D]'
+  attrs:
+  - name: alpha
+    type: float
+    default: 1.0
+    description: 记忆增强系数
+    required: false
+  - name: scale
+    type: float
+    default: -1.0
+    description: 缩放因子，<=0 表示自动使用 1/sqrt(D)
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: memory
+    description: 记忆库张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: y
+    description: 记忆增强后的输出张量，与输入 x 的 shape 和 dtype 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: engram(Tensor x, Tensor memory, float alpha, float scale) -> Tensor y
