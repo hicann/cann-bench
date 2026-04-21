@@ -72,19 +72,16 @@ cann_bench.dynamic_quant(Tensor x, int axis=-1, int dst_type=0) -> Tensor y
 
 ## 4. 精度要求
 
-计算结果与 PyTorch Golden 实现逐元素对比，需满足以下误差阈值：
+计算结果与 PyTorch Golden 实现逐元素对比：
 
-| 数据类型 | 验证方式 | rtol | atol |
-|---------|---------|------|------|
-| float16 | 相对误差 | 1e-3 | 1e-3 |
-| float32 | 相对误差 | 1e-4 | 1e-4 |
-| bfloat16 | 相对误差 | 4e-3 | 4e-3 |
+| 数据类型 | 验证方式 | 阈值 |
+|---------|---------|------|
+| float16（dst_type 为浮点透传） | 相对误差：`\|output-golden\| ≤ atol + rtol×\|golden\|` | rtol=1e-3, atol=1e-3 |
+| bfloat16（dst_type 为浮点透传） | 相对误差：`\|output-golden\| ≤ atol + rtol×\|golden\|` | rtol=4e-3, atol=4e-3 |
+| float32（dst_type 为浮点透传） | 相对误差 | rtol=1e-4, atol=1e-4 |
+| int8（dst_type=0） | 允许量化边界 off-by-1，最大绝对偏差 ≤ 1；off-by-1 元素占比 | < 1e-4 |
 
-**对比公式**：
-
-$$
-|output - golden| \leq atol + rtol \times |golden|
-$$
+**说明**：int8 量化输出允许因 float32 累加顺序差异在 round 时舍到相邻整数；出现 |Δ|≥2 的元素直接判负。
 
 ## 5. 标准 Golden 代码
 

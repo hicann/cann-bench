@@ -1,0 +1,49 @@
+operator:
+  name: GroupNorm
+  category: Normalization
+  difficulty: L2
+  formula: |
+    y = (x - mean) / sqrt(var + eps) * gamma + beta
+  description: 计算分组归一化
+  shape_support: |
+    x (input): (N, C, ...) - N=batch size, C=通道数，后续为空间维度
+    gamma (weight): (C,) - 缩放参数
+    beta (bias): (C,) - 偏置参数
+  attrs:
+  - name: num_groups
+    type: int
+    default: null
+    description: 分组数
+    required: true
+  - name: epsilon
+    type: float
+    default: 1e-5
+    description: 数值稳定性参数
+    required: false
+  inputs:
+  - name: x
+    description: 输入张量，shape 为 (N, C, ...)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: gamma
+    description: 缩放参数，shape 为 (C,)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: beta
+    description: 偏置参数，shape 为 (C,)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: y
+    description: 分组归一化后的张量，与输入 shape 和 dtype 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: group_norm(Tensor x, Tensor gamma, Tensor beta, int num_groups, float epsilon) -> Tensor y

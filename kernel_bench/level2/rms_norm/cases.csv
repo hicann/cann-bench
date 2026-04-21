@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
+RmsNorm,1,"[[32, 128, 768], [768]]","['float16', 'float16']",{'epsilon': '1e-6'},"[-1, 1]",None,float16-3M-aligned-hidden768-symmetric-small
+RmsNorm,2,"[[32, 128, 1024], [1024]]","['float32', 'float32']",{'epsilon': '1e-6'},"[-2, 2]",None,float32-4M-aligned-hidden1024-symmetric-small
+RmsNorm,3,"[[32, 128, 2048], [2048]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-6'},"[-3, 3]",None,bfloat16-8M-aligned-hidden2048-symmetric-small
+RmsNorm,4,"[[16, 256, 4096], [4096]]","['float16', 'float16']",{'epsilon': '1e-6'},"[-10, 10]",None,float16-16M-aligned-hidden4096-symmetric-mid
+RmsNorm,5,"[[8, 512, 8192], [8192]]","['float32', 'float32']",{'epsilon': '1e-6'},"[-100, 100]",None,float32-33M-aligned-hidden8192-symmetric-large
+RmsNorm,6,"[[4, 1023, 4097], [4097]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-5'},"[-5, 5]",None,bfloat16-16M-nonaligned-hidden4097-epsilon1e5
+RmsNorm,7,"[[63, 67, 1023], [1023]]","['float16', 'float16']",{'epsilon': '1e-8'},"[-0.1, 0.1]",None,float16-4M-非对齐-epsilon1e8-symmetric-tiny
+RmsNorm,8,"[[16, 511, 2049], [2049]]","['float32', 'float32']",{'epsilon': '1e-4'},"[-1, 1]",None,float32-16M-nonaligned-hidden2049-epsilon1e4
+RmsNorm,9,"[[8, 1021, 4099], [4099]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-12'},"[-0.5, 0.5]",None,bfloat16-33M-nonaligned-hidden4099-epsilon1e12
+RmsNorm,10,"[[33, 127, 769], [769]]","['float16', 'float16']",{'epsilon': '1e-6'},"[-1, 2]",None,float16-3M-nonaligned-hidden769
+RmsNorm,11,"[[31, 129, 2049], [2049]]","['float32', 'float32']",{'epsilon': '1e-6'},"[-50, 100]",None,float32-8M-nonaligned-hidden2049
+RmsNorm,12,"[[17, 255, 4097], [4097]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-6'},"[-3, 6]",None,bfloat16-17M-nonaligned-hidden4097
+RmsNorm,13,"[[7, 1009, 1021], [1021]]","['float16', 'float16']",{'epsilon': '1e-7'},"[-1, 1]",None,float16-7M-nonaligned-prime-hidden1021-epsilon1e7
+RmsNorm,14,"[[11, 367, 373], [373]]","['float32', 'float32']",{'epsilon': '1e-5'},"[-10, 10]",None,float32-1M-nonaligned-prime-hidden373-epsilon1e5
+RmsNorm,15,"[[1000003, 2], [2]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-6'},"['-inf', 'inf']",None,bfloat16-2M-nonaligned-prime-inf-special
+RmsNorm,16,"[[11, 13, 17, 67], [67]]","['float16', 'float16']",{'epsilon': '1e-8'},"['nan', 'nan']",None,float16-163K-nonaligned-prime-4D-nan-special
+RmsNorm,17,"[[3, 7, 11, 4096], [4096]]","['float32', 'float32']",{'epsilon': '1e-4'},"[0, 0]",None,float32-1M-nonaligned-prime-4D-zero-special-value
+RmsNorm,18,"[[2, 511, 8192], [8192]]","['bfloat16', 'bfloat16']",{'epsilon': '1e-6'},"[-0.2, 0.2]",None,bfloat16-8M-nonaligned-hidden8192-symmetric-tiny
+RmsNorm,19,"[[4, 255, 4096], [4096]]","['float16', 'float16']",{'epsilon': '1e-3'},"[-65504, 65504]",None,float16-4M-nonaligned-float16-boundary-epsilon1e3
+RmsNorm,20,"[[2, 3, 17, 1024, 128], [128]]","['float32', 'float32']",{'epsilon': '1e-6'},"[-20, 40]",None,float32-12M-nonaligned-5D-asymmetric-range

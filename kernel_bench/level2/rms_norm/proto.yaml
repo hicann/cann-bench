@@ -1,0 +1,37 @@
+operator:
+  name: RmsNorm
+  category: Normalization
+  difficulty: L2
+  formula: |
+    y = x / sqrt(mean(x^2) + eps) * gamma
+  description: 计算 RMS (均方根) 归一化
+  shape_support: |
+    x (input): (..., D) - 任意前导维度，最后一维为归一化维度 D
+    gamma (weight): (D,) - 缩放参数，shape 为输入最后一维大小
+  attrs:
+  - name: epsilon
+    type: float
+    default: 1e-6
+    description: 数值稳定性参数
+    required: false
+  inputs:
+  - name: x
+    description: 输入张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: gamma
+    description: 缩放参数，shape 为输入最后一维大小
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: y
+    description: RMS 归一化后的张量，与输入 shape 和 dtype 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: rms_norm(Tensor x, Tensor gamma, float epsilon) -> Tensor y

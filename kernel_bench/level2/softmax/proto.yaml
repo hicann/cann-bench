@@ -1,0 +1,30 @@
+operator:
+  name: Softmax
+  category: Normalization
+  difficulty: L2
+  formula: |
+    y_i = exp(x_i) / sum(exp(x_j))
+  description: 沿指定维度计算 Softmax 归一化
+  shape_support: |
+    x (input): 任意维度张量，沿 dim 指定的维度计算 Softmax
+  attrs:
+  - name: dim
+    type: int
+    default: -1
+    description: 计算 Softmax 的维度
+    required: false
+  inputs:
+  - name: x
+    description: 输入张量
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: y
+    description: Softmax 归一化后的张量，与输入 shape 和 dtype 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: softmax(Tensor x, int dim) -> Tensor y

@@ -1,0 +1,168 @@
+cases:
+# ==================== Base cases (aligned, common hidden_size) ====================
+- operator: RmsNorm
+  case_id: 1
+  input_shape: [[32, 128, 768], [768]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-3M-aligned-hidden768-symmetric-small
+- operator: RmsNorm
+  case_id: 2
+  input_shape: [[32, 128, 1024], [1024]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-6}
+  value_range: [-2, 2]
+  baseline_perf_us: None
+  note: float32-4M-aligned-hidden1024-symmetric-small
+- operator: RmsNorm
+  case_id: 3
+  input_shape: [[32, 128, 2048], [2048]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-3, 3]
+  baseline_perf_us: None
+  note: bfloat16-8M-aligned-hidden2048-symmetric-small
+# ==================== Large hidden_size ====================
+- operator: RmsNorm
+  case_id: 4
+  input_shape: [[16, 256, 4096], [4096]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float16-16M-aligned-hidden4096-symmetric-mid
+- operator: RmsNorm
+  case_id: 5
+  input_shape: [[8, 512, 8192], [8192]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-6}
+  value_range: [-100, 100]
+  baseline_perf_us: None
+  note: float32-33M-aligned-hidden8192-symmetric-large
+- operator: RmsNorm
+  case_id: 6
+  input_shape: [[4, 1023, 4097], [4097]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-5}
+  value_range: [-5, 5]
+  baseline_perf_us: None
+  note: bfloat16-16M-nonaligned-hidden4097-epsilon1e5
+# ==================== epsilon variation ====================
+- operator: RmsNorm
+  case_id: 7
+  input_shape: [[63, 67, 1023], [1023]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-8}
+  value_range: [-0.1, 0.1]
+  baseline_perf_us: None
+  note: float16-4M-非对齐-epsilon1e8-symmetric-tiny
+- operator: RmsNorm
+  case_id: 8
+  input_shape: [[16, 511, 2049], [2049]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-4}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float32-16M-nonaligned-hidden2049-epsilon1e4
+- operator: RmsNorm
+  case_id: 9
+  input_shape: [[8, 1021, 4099], [4099]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-12}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: None
+  note: bfloat16-33M-nonaligned-hidden4099-epsilon1e12
+# ==================== Non-aligned shapes ====================
+- operator: RmsNorm
+  case_id: 10
+  input_shape: [[33, 127, 769], [769]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-1, 2]
+  baseline_perf_us: None
+  note: float16-3M-nonaligned-hidden769
+- operator: RmsNorm
+  case_id: 11
+  input_shape: [[31, 129, 2049], [2049]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-6}
+  value_range: [-50, 100]
+  baseline_perf_us: None
+  note: float32-8M-nonaligned-hidden2049
+- operator: RmsNorm
+  case_id: 12
+  input_shape: [[17, 255, 4097], [4097]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-3, 6]
+  baseline_perf_us: None
+  note: bfloat16-17M-nonaligned-hidden4097
+# ==================== Prime non-aligned shapes ====================
+- operator: RmsNorm
+  case_id: 13
+  input_shape: [[7, 1009, 1021], [1021]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-7}
+  value_range: [-1, 1]
+  baseline_perf_us: None
+  note: float16-7M-nonaligned-prime-hidden1021-epsilon1e7
+- operator: RmsNorm
+  case_id: 14
+  input_shape: [[11, 367, 373], [373]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-5}
+  value_range: [-10, 10]
+  baseline_perf_us: None
+  note: float32-1M-nonaligned-prime-hidden373-epsilon1e5
+# ==================== Special values ====================
+- operator: RmsNorm
+  case_id: 15
+  input_shape: [[1000003, 2], [2]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-inf, inf]
+  baseline_perf_us: None
+  note: bfloat16-2M-nonaligned-prime-inf-special
+- operator: RmsNorm
+  case_id: 16
+  input_shape: [[11, 13, 17, 67], [67]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-8}
+  value_range: [nan, nan]
+  baseline_perf_us: None
+  note: float16-163K-nonaligned-prime-4D-nan-special
+- operator: RmsNorm
+  case_id: 17
+  input_shape: [[3, 7, 11, 4096], [4096]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-4}
+  value_range: [0, 0]
+  baseline_perf_us: None
+  note: float32-1M-nonaligned-prime-4D-zero-special-value
+# ==================== Large batch & multi-dim ====================
+- operator: RmsNorm
+  case_id: 18
+  input_shape: [[2, 511, 8192], [8192]]
+  dtype: [bfloat16, bfloat16]
+  attrs: {epsilon: 1e-6}
+  value_range: [-0.2, 0.2]
+  baseline_perf_us: None
+  note: bfloat16-8M-nonaligned-hidden8192-symmetric-tiny
+- operator: RmsNorm
+  case_id: 19
+  input_shape: [[4, 255, 4096], [4096]]
+  dtype: [float16, float16]
+  attrs: {epsilon: 1e-3}
+  value_range: [-65504, 65504]
+  baseline_perf_us: None
+  note: float16-4M-nonaligned-float16-boundary-epsilon1e3
+- operator: RmsNorm
+  case_id: 20
+  input_shape: [[2, 3, 17, 1024, 128], [128]]
+  dtype: [float32, float32]
+  attrs: {epsilon: 1e-6}
+  value_range: [-20, 40]
+  baseline_perf_us: None
+  note: float32-12M-nonaligned-5D-asymmetric-range
