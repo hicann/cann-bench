@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 命令行入口
 
@@ -11,6 +24,7 @@
 """
 
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
@@ -47,6 +61,23 @@ def create_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument('--eval-code', type=str, default=None,
                              help='评测代号')
     eval_parser.add_argument('-v', '--verbose', action='store_true', help='详细输出')
+    eval_parser.add_argument('--no-subprocess-isolation', action='store_true',
+                             help='关闭子进程隔离（默认开启）。开启后每个算子在独立 '
+                                  '子进程评测，一个 kernel 挂死/崩溃不会污染后面的 '
+                                  '算子。关闭可少 ~5s/op 的 fork + import 开销。')
+    eval_parser.add_argument('--op-timeout-sec', type=int, default=240,
+                             help='子进程隔离下 per-op 超时。超时先 SIGTERM，10s 宽限后 SIGKILL。'
+                                  '默认 240 秒。')
+    eval_parser.add_argument('--no-iterative-compile', action='store_true',
+                             help='关闭迭代隔离编译（默认开启）。开启时 build.sh 失败会自动'
+                                  '识别并隔离编译不过的算子到 _quarantine/，剩下的算子继续'
+                                  '编译和评测；此开关关闭该逻辑，任何一个算子编译失败整个'
+                                  '提交直接判定为失败，用于想要严格"全过或全挂"的场景。')
+    # 内部开关：子进程模式下由父进程传入，不要手工设置
+    eval_parser.add_argument('--skip-install', action='store_true',
+                             help=argparse.SUPPRESS)
+    eval_parser.add_argument('--child-json-output', type=str, default=None,
+                             help=argparse.SUPPRESS)
 
     # list 命令
     list_parser = subparsers.add_parser('list', help='列出算子/用例')
@@ -102,14 +133,33 @@ def cmd_eval(args):
 
     case_filter = {'case_id': args.case_id} if args.case_id else None
 
+    subprocess_isolation = not getattr(args, 'no_subprocess_isolation', False)
+    op_timeout_sec = getattr(args, 'op_timeout_sec', 240)
+    skip_install = getattr(args, 'skip_install', False)
+    child_json_output = getattr(args, 'child_json_output', None)
+    iterative_compile = not getattr(args, 'no_iterative_compile', False)
+
     # 确定评测方式
-    if args.source_dir:
-        # 从源码目录评测（自动扫描编译安装）
+    if args.source_dir and not skip_install:
+        # 从源码目录评测（自动扫描、迭代编译、安装、并行评测）
         session_result = evaluator.evaluate_from_source(
             source_dir=args.source_dir,
             operator_filter=operator_filter,
             case_filter=case_filter,
             verbose=args.verbose,
+            subprocess_isolation=subprocess_isolation,
+            op_timeout_sec=op_timeout_sec,
+            iterative_compile=iterative_compile,
+        )
+        for op_result in session_result.operators:
+            report_generator.add_operator_result(op_result)
+
+    elif args.source_dir and skip_install:
+        # --skip-install：子进程模式下父进程已经装好 wheel，这里只要扫描
+        # 已安装的 cann_bench 跑指定算子即可（内部不再 fork 子进程）
+        session_result = evaluator.evaluate_skip_build(
+            operator_filter=operator_filter,
+            case_filter=case_filter,
         )
         for op_result in session_result.operators:
             report_generator.add_operator_result(op_result)
@@ -135,12 +185,26 @@ def cmd_eval(args):
 
     # 生成报告
     report = report_generator.generate()
-    report_generator.save_all(report)
-    report_generator.print_summary(report)
+
+    # 子进程模式：只把每个算子的 to_dict() 写到 --child-json-output，父进程
+    # lift 出来合入最终会话结果；不走常规 save_all / print_summary（那会在
+    # 父进程里再做一次）。
+    if child_json_output:
+        payload = {"operators": [op.to_dict() for op in report_generator.operator_results]}
+        Path(child_json_output).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        report_generator.save_all(report)
+        report_generator.print_summary(report)
 
     # 关闭评测器
     evaluator.shutdown()
 
+    # Child subprocesses signal success/failure through the JSON frag, not
+    # the exit code — the parent only uses rc to detect crashes (segfault,
+    # OOM kill, timeout). A run where every case legitimately FAILed is
+    # still a successful run from the child's perspective.
+    if child_json_output:
+        return 0
     return 0 if report.passed_cases > 0 else 1
 
 

@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 评测报告生成器
 
@@ -79,6 +92,10 @@ class OperatorReport:
     avg_speedup: float
     score: float
     cases: List[EvalResult]
+    # 透传 EvalOperatorResult 上的诊断字段到最终报告；summary_generator
+    # 读这两个字段渲染"编译失败"和"子进程失败"的分组。
+    compilation_error: Optional[str] = None
+    subprocess_failure_reason: Optional[str] = None
 
     @classmethod
     def from_eval_operator_result(cls, result: EvalOperatorResult, score: float) -> "OperatorReport":
@@ -94,6 +111,8 @@ class OperatorReport:
             avg_speedup=result.avg_speedup,
             score=score,
             cases=cases,
+            compilation_error=getattr(result, 'compilation_error', None),
+            subprocess_failure_reason=getattr(result, 'subprocess_failure_reason', None),
         )
 
 

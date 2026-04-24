@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 用例加载器
 
@@ -9,7 +22,31 @@
 import yaml
 from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import Any, Dict, List, Optional
+
+
+def _coerce_baseline_us(value: Any) -> float:
+    """Normalize ``baseline_perf_us`` into a float.
+
+    Some yaml files encode a missing baseline as the literal ``None`` —
+    unquoted, it parses as the string ``"None"``, which is truthy and
+    later breaks numeric comparisons (``'>' not supported between str and
+    int``). Accept None, numeric, or numeric-like strings; anything else
+    collapses to 0.0.
+    """
+    if value is None:
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        s = value.strip()
+        if not s or s.lower() in ("none", "null", "nan"):
+            return 0.0
+        try:
+            return float(s)
+        except ValueError:
+            return 0.0
+    return 0.0
 
 
 @dataclass
@@ -133,7 +170,7 @@ class CaseLoader:
             value_ranges=raw.get('value_range', []) or [],
             note=raw.get('note', '') or '',
             yaml_path=yaml_path,
-            baseline_perf_us=raw.get('baseline_perf_us', 0.0) or 0.0
+            baseline_perf_us=_coerce_baseline_us(raw.get('baseline_perf_us'))
         )
 
     def get_statistics(self) -> Dict[int, Dict[str, int]]:

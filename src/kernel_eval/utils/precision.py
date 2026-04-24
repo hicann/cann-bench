@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 精度验证工具
 
@@ -191,6 +204,14 @@ def _compare_single_tensor(
     dtype: str,
 ) -> CompareResult:
     """对比单个张量（计算MERE/MARE）"""
+    # Golden runs on CPU (see OpRunner.run_golden) while the AI op runs on
+    # NPU. Normalize both sides to CPU so subtract/equal don't trip on
+    # mixed devices.
+    if output.is_cuda or output.device.type == "npu":
+        output = output.cpu()
+    if golden.is_cuda or golden.device.type == "npu":
+        golden = golden.cpu()
+
     # 检查形状
     if output.shape != golden.shape:
         return CompareResult(
@@ -242,6 +263,8 @@ def _compare_single_tensor(
         if not torch.equal(output, golden):
             diff = torch.abs(output - golden)
             mismatch_count = int((diff != 0).sum())
+            # torch.Tensor.mean 不支持整数 dtype，先升到 float
+            diff_float = diff.float() if not diff.is_floating_point() else diff
             return CompareResult(
                 passed=False,
                 dtype=dtype,
@@ -249,7 +272,7 @@ def _compare_single_tensor(
                 mere=0.0,
                 mare=0.0,
                 max_diff=float(diff.max()) if diff.numel() > 0 else 0.0,
-                mean_diff=float(diff.mean()) if diff.numel() > 0 else 0.0,
+                mean_diff=float(diff_float.mean()) if diff.numel() > 0 else 0.0,
                 mismatch_count=mismatch_count,
                 total_count=output.numel(),
                 mismatch_ratio=mismatch_count / output.numel() if output.numel() > 0 else 0.0,

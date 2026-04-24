@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 Summary生成模块
 
@@ -28,6 +41,10 @@ class OperatorSummary:
     geometric_mean_speedup: float
     mere_avg: float
     mare_avg: float
+    # 可选字段：当算子跑不起来时的原因（编译失败 / 子进程超时或崩溃）。
+    # 为 None 时渲染普通的 case 表；非空时在小节头下方优先渲染原因块。
+    compilation_error: Optional[str] = None
+    subprocess_failure_reason: Optional[str] = None
 
 
 @dataclass
@@ -108,7 +125,9 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
         pass_rate=pass_rate,
         geometric_mean_speedup=geometric_mean_speedup,
         mere_avg=mere_avg,
-        mare_avg=mare_avg
+        mare_avg=mare_avg,
+        compilation_error=op_result.get("compilation_error"),
+        subprocess_failure_reason=op_result.get("subprocess_failure_reason"),
     )
 
 
@@ -203,6 +222,35 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
         )
 
     lines.append("")
+
+    # 列出需要用户关注的异常：编译失败的算子（贴出错误摘要），以及子进程
+    # 超时 / 崩溃的算子（贴出原因）。跑完但精度/性能不过的算子不在这里出现
+    # —— 那些 case 级细节由 report_generator 写到 markdown 报告里。
+    compile_failed = [op for op in summary.operators if op.compilation_error]
+    subprocess_failed = [op for op in summary.operators if op.subprocess_failure_reason]
+
+    if compile_failed:
+        lines.append("## 编译失败的算子")
+        lines.append("")
+        lines.append(f"共 {len(compile_failed)} 个算子在 `build.sh` 阶段失败，未进入评测。")
+        lines.append("错误摘要（完整日志见 `logs/compile_round_*.log` 或 `build_errors.json`）：")
+        lines.append("")
+        for op in compile_failed:
+            lines.append(f"### {op.operator}（L{op.level}）")
+            lines.append("")
+            lines.append("```")
+            lines.append(op.compilation_error.strip())
+            lines.append("```")
+            lines.append("")
+
+    if subprocess_failed:
+        lines.append("## 子进程失败的算子")
+        lines.append("")
+        lines.append(f"共 {len(subprocess_failed)} 个算子在子进程隔离评测下异常：")
+        lines.append("")
+        for op in subprocess_failed:
+            lines.append(f"- **{op.operator}** (L{op.level}): {op.subprocess_failure_reason}")
+        lines.append("")
 
     # 结论
     if summary.overall_pass_rate >= 0.9:

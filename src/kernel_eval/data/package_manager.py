@@ -1,23 +1,52 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 包管理模块
 
 职责：
 1. 扫描源码目录结构
-2. 检查/编译whl包和run包
+2. 检查/编译whl包和run包（支持迭代隔离编译失败的算子）
 3. 安装whl包和run包
 4. 扫描cann_bench模块提供的算子接口
 5. 匹配kernel_bench中的算子定义
 """
 
 import os
+import re
+import shutil
 import subprocess
 import sys
 import importlib
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..config import get_config
+
+
+# 在迭代编译中识别失败的算子：
+# bisheng/g++ 直接报错的行形如 `.../csrc/ops/<op>/op_kernel/foo.cpp:LINE:COL: error:`
+# make 的 Error 1 行形如 `.../csrc/ops/<op>/op_kernel/foo.cpp.o] Error 1`
+_OP_ERROR_LINE_RE = re.compile(
+    r"csrc/ops/([A-Za-z0-9_]+)/op_[a-z]+/[^\s:]+\.cpp"
+    r"(?:\.o)?(?:[^\n]*\berror\b|[^\]]*\]\s+Error 1)"
+)
+
+# 最多迭代多少轮，避免一直循环
+_MAX_COMPILE_ROUNDS = 6
+# SIGTERM 宽限时间
+_BUILD_TIMEOUT_SEC = 600
 
 
 @dataclass
@@ -28,6 +57,10 @@ class PackageInfo:
     run_path: Optional[str] = None
     has_build_sh: bool = False
     has_dist: bool = False
+    # 编译失败的算子及其错误摘要 {op_name: error_excerpt}。
+    # 在开启 iterative compile 时由 build_packages 填充，evaluator 会把它们
+    # 作为"编译失败"记录合入最终报告。
+    compile_errors: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -106,10 +139,27 @@ class PackageManager:
 
         return whl_path, run_path
 
-    def build_packages(self, source_dir: str) -> PackageInfo:
-        """执行build.sh编译生成包
+    def build_packages(self, source_dir: str, iterative: bool = True) -> PackageInfo:
+        """执行build.sh编译生成包。
 
-        执行build.sh后，扫描dist目录获取生成的包路径
+        默认使用**迭代隔离模式**：若 `build.sh` 失败，扫描编译输出识别出哪些
+        `csrc/ops/<op>/` 下的 kernel/plugin 源码未编译通过，把它们挪到
+        `<submission>/_quarantine/<op>/`，记录错误摘要，再重试。最多迭代
+        `_MAX_COMPILE_ROUNDS` 轮。这样即便 50 个算子里有 30 个编译不过，
+        剩下 20 个也能进入正常评测流程。
+
+        Args:
+            source_dir: 提交源码根目录（含 build.sh）
+            iterative: 启用迭代编译（默认 True）。设 False 时回退到一次性编译，
+                       失败即 raise —— 用于希望"整体要么全过要么全失败"的场景。
+
+        Returns:
+            PackageInfo — 若迭代成功，含 whl_path 和非空 compile_errors
+            （映射为 {snake_case_op_name: 错误摘要}）。
+
+        Raises:
+            RuntimeError: 最后一轮仍然失败且没产出 whl；或者 iterative=False
+                          下 build.sh 首次失败。
         """
         source_path = Path(source_dir)
         build_sh = source_path / "build.sh"
@@ -117,37 +167,133 @@ class PackageManager:
         if not build_sh.exists():
             raise FileNotFoundError(f"build.sh不存在: {build_sh}")
 
+        if not iterative:
+            return self._build_once(source_path)
+
+        compile_errors: Dict[str, str] = {}
+        log_dir = source_path / "_compile_logs"
+        log_dir.mkdir(exist_ok=True)
+
+        for round_n in range(1, _MAX_COMPILE_ROUNDS + 1):
+            self._clean_build_artifacts(source_path)
+            log_path = log_dir / f"compile_round_{round_n}.log"
+            print(f"[INFO] 编译第 {round_n} 轮: bash build.sh → {log_path.name}")
+
+            rc, log_text = self._run_build(source_path, log_path)
+            if rc == 0 and self._wheel_exists(source_path):
+                print(f"[INFO] 编译成功（第 {round_n} 轮）")
+                package_info = self.scan_source_dir(source_dir)
+                package_info.compile_errors = compile_errors
+                return package_info
+
+            # 解析出失败的算子
+            errs = self._parse_failing_ops(log_text)
+            if not errs:
+                print(f"[ERROR] 编译失败但未识别到 csrc/ops/<op>/ 错误，放弃")
+                print(f"[ERROR] 日志见 {log_path}")
+                raise RuntimeError(
+                    f"build.sh 失败（第 {round_n} 轮），无法定位失败算子；"
+                    f"详见 {log_path}"
+                )
+
+            new_ops = {op: msg for op, msg in errs.items() if op not in compile_errors}
+            if not new_ops:
+                print(f"[ERROR] 同一批算子在第 {round_n} 轮仍然失败，放弃")
+                raise RuntimeError(
+                    f"build.sh 失败（第 {round_n} 轮），隔离后仍然是同一批算子在报错"
+                )
+
+            moved = self._quarantine_ops(source_path, set(new_ops.keys()))
+            print(f"[INFO] 第 {round_n} 轮隔离 {len(moved)} 个算子: {sorted(moved)}")
+            compile_errors.update(new_ops)
+
+        # 超过 _MAX_COMPILE_ROUNDS 仍未成功
+        raise RuntimeError(
+            f"build.sh 经过 {_MAX_COMPILE_ROUNDS} 轮迭代仍未产出 whl 包，放弃"
+        )
+
+    def _build_once(self, source_path: Path) -> PackageInfo:
+        """非迭代模式：老行为，失败即抛异常。"""
         print(f"[INFO] 执行编译: bash build.sh")
-
-        # 执行build.sh
-        try:
-            result = subprocess.run(
-                ["bash", "build.sh"],
-                cwd=str(source_path),
-                capture_output=True,
-                text=True,
-                timeout=300  # 5分钟超时
-            )
-            if result.returncode != 0:
-                print(f"[ERROR] 编译失败:")
-                print(result.stderr)
-                raise RuntimeError(f"build.sh执行失败: {result.stderr}")
-
-            print(f"[INFO] 编译成功")
-            if result.stdout:
-                print(result.stdout[:500])  # 只打印前500字符
-
-        except subprocess.TimeoutExpired:
-            raise RuntimeError("build.sh执行超时（超过5分钟）")
-        except Exception as e:
-            raise RuntimeError(f"build.sh执行异常: {e}")
-
-        # 扫描编译结果
-        package_info = self.scan_source_dir(source_dir)
+        log_path = source_path / "_compile.log"
+        rc, log_text = self._run_build(source_path, log_path)
+        if rc != 0:
+            print(f"[ERROR] 编译失败（完整日志 {log_path}）:")
+            print(log_text[-2000:])
+            raise RuntimeError(f"build.sh 执行失败，rc={rc}")
+        print(f"[INFO] 编译成功")
+        package_info = self.scan_source_dir(str(source_path))
         if not package_info.whl_path:
             raise RuntimeError("编译后未找到whl包")
-
         return package_info
+
+    def _run_build(self, source_path: Path, log_path: Path) -> Tuple[int, str]:
+        """跑 bash build.sh，把 stdout+stderr 同步写日志文件。
+        返回 (returncode, 日志文本)。超时视作编译失败。"""
+        try:
+            with log_path.open("w") as logf:
+                proc = subprocess.run(
+                    ["bash", "build.sh"],
+                    cwd=str(source_path),
+                    stdout=logf,
+                    stderr=subprocess.STDOUT,
+                    timeout=_BUILD_TIMEOUT_SEC,
+                )
+            rc = proc.returncode
+        except subprocess.TimeoutExpired:
+            rc = 124  # 约定的 timeout 退出码
+        except Exception as e:
+            log_path.write_text(f"[build_submission] 启动失败: {e}\n")
+            rc = 1
+        log_text = log_path.read_text(errors="replace") if log_path.exists() else ""
+        return rc, log_text
+
+    def _parse_failing_ops(self, log_text: str) -> Dict[str, str]:
+        """从编译日志里识别出哪些 op 的源码导致了错误，并给每个 op 切一段错误摘要。"""
+        # 第一遍：识别出失败的算子名
+        ops = set()
+        for m in _OP_ERROR_LINE_RE.finditer(log_text):
+            ops.add(m.group(1))
+        # 第二遍：给每个算子抓 1-3 段错误上下文
+        errors: Dict[str, str] = {}
+        for op in ops:
+            pat = re.compile(
+                r"(^[^\n]*csrc/ops/" + re.escape(op) + r"/[^\n]*\berror\b:[^\n]*\n"
+                r"(?:[^\n]*\n){0,3})",
+                re.MULTILINE,
+            )
+            hits = pat.findall(log_text)
+            excerpt = "".join(hits[:3]).strip() or "(error detail not captured)"
+            errors[op] = excerpt
+        return errors
+
+    def _quarantine_ops(self, source_path: Path, op_names: set) -> List[str]:
+        """把 csrc/ops/<op>/ 目录挪到 _quarantine/<op>/ 下，阻止下一轮 CMake
+        configure 再把它加回来。成功移动的算子列表作为返回值。"""
+        quarantine = source_path / "_quarantine"
+        quarantine.mkdir(exist_ok=True)
+        moved = []
+        for op in op_names:
+            src = source_path / "csrc" / "ops" / op
+            if not src.is_dir():
+                continue
+            dst = quarantine / op
+            if dst.exists():
+                shutil.rmtree(src, ignore_errors=True)
+            else:
+                shutil.move(str(src), str(dst))
+            moved.append(op)
+        return moved
+
+    def _clean_build_artifacts(self, source_path: Path) -> None:
+        for p in ("build", "dist"):
+            shutil.rmtree(source_path / p, ignore_errors=True)
+        for egg in source_path.glob("*.egg-info"):
+            shutil.rmtree(egg, ignore_errors=True)
+
+    def _wheel_exists(self, source_path: Path) -> bool:
+        dist = source_path / "dist"
+        return dist.is_dir() and any(dist.glob("*.whl"))
 
     def install_run_package(self, run_path: str) -> bool:
         """安装run包（NPU内核包）
@@ -353,18 +499,21 @@ class PackageManager:
     def prepare_from_source(
         self,
         source_dir: str,
-        verbose: bool = False
+        verbose: bool = False,
+        iterative_compile: bool = True,
     ) -> Tuple[List[str], PackageInfo]:
         """从源码目录准备评测环境
 
         流程：
         1. 扫描源码目录
-        2. 检查/编译包
+        2. 检查/编译包（iterative_compile=True 时把编译失败的算子隔离并记录，
+           False 时任意算子编译失败即 raise）
         3. 安装包
         4. 扫描接口
         5. 返回算子列表
 
-        返回: (算子列表, 包信息)
+        返回: (算子列表, 包信息 — 其 compile_errors 字段在 iterative 模式下
+              可能非空，供评测器合成 FAIL 记录)
         """
         print(f"[INFO] 扫描源码目录: {source_dir}")
 
@@ -389,7 +538,7 @@ class PackageManager:
                 raise RuntimeError(f"源码目录无build.sh且无whl包，无法编译")
 
             print(f"[INFO] 无现有whl包，执行编译...")
-            package_info = self.build_packages(source_dir)
+            package_info = self.build_packages(source_dir, iterative=iterative_compile)
 
         # Step 3: 安装包
         if not self.install_packages(package_info):

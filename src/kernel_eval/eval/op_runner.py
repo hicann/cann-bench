@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 算子执行器
 
@@ -76,8 +89,62 @@ class OpRunner:
             )
 
     def run_golden(self, golden_func: Callable, params: Dict, case_id: str, input_tensors: List) -> OpRunResult:
-        """执行Golden函数（不采集性能）"""
-        return self.run(golden_func, params, case_id, input_tensors)
+        """Execute the golden reference on CPU. Single shot, no profiler, no
+        device transfer — golden is the precision reference, not the
+        performance subject.
+
+        Floats are promoted to fp64 so the reference is more precise than
+        the device's native dtype; the accuracy checker casts both sides
+        back to fp32 for MERE/MARE so thresholds stay keyed to the device
+        dtype. Integer/bool tensors keep their dtype — some ops refuse a
+        Double substitute.
+
+        Running golden on the device instead of on CPU isn't safe in general:
+        some device kernels can be orders of magnitude slower than CPU for
+        certain dtype/shape combinations, and a subset return wrong values
+        on edge cases, which would silently corrupt the reference and flip
+        correct AI ops to FAIL. Golden is for correctness, not performance.
+        """
+        import torch
+        try:
+            def _to_fp64_cpu(t: torch.Tensor) -> torch.Tensor:
+                t = t.cpu()
+                return t.double() if t.is_floating_point() else t
+
+            cpu_tensors: List[Any] = []
+            for item in input_tensors:
+                if isinstance(item, torch.Tensor):
+                    cpu_tensors.append(_to_fp64_cpu(item))
+                elif isinstance(item, (list, tuple)):
+                    cpu_tensors.append([
+                        _to_fp64_cpu(sub) if isinstance(sub, torch.Tensor) else sub
+                        for sub in item
+                    ])
+                else:
+                    cpu_tensors.append(item)
+
+            updated_params = self._update_params(params, cpu_tensors)
+
+            t0 = time.perf_counter()
+            with torch.no_grad():
+                outputs = golden_func(**updated_params)
+            elapsed_us = (time.perf_counter() - t0) * 1_000_000
+
+            return OpRunResult(
+                success=True,
+                outputs=outputs,
+                elapsed_us=elapsed_us,
+                device="cpu",
+            )
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            return OpRunResult(
+                success=False,
+                error=str(e),
+                elapsed_us=0,
+                device="cpu",
+                traceback=tb_str,
+            )
 
     def run_ai_op(self, ai_op_func: Callable, params: Dict, case_id: str, input_tensors: List,
                   enable_perf: bool = True) -> OpRunResult:

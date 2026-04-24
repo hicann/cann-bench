@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 综合评测调度器
 
@@ -9,9 +22,53 @@
 """
 
 import gc
+import os
+import re
+import sys
 import traceback
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Any
 from dataclasses import dataclass
+
+
+def _snake_case_candidates(name: str) -> List[str]:
+    """Generate plausible snake_case forms of a CamelCase operator name.
+
+    The reference ``cann_bench`` module is inconsistent: some ops use
+    ``pool3_d`` (digit glued to preceding letters, underscore before the
+    trailing letter) while others use ``sampler_3d`` (underscore before
+    the digit, digit glued to the trailing letter). Acronyms like
+    ``ROIAlign`` → ``roi_align`` and ``NMS`` → ``nms`` also don't survive
+    a naive "insert _ before every capital" pass. Emit the reasonable
+    variants in order and let the caller ``hasattr`` the first that hits.
+    """
+    cands: List[str] = []
+    # V1: naive — underscore before every uppercase letter.
+    # Covers plain CamelCase like MaskedScale → masked_scale and weird
+    # digit-suffix ops like AdaptiveAvgPool3D → adaptive_avg_pool3_d.
+    v1 = re.sub(r"([A-Z])", r"_\1", name).lower().lstrip("_")
+    v1 = re.sub(r"_{2,}", "_", v1)
+    cands.append(v1)
+    # V2: acronym-aware — keep runs of capitals together, then split
+    # camelCase / letter-or-digit-then-capital boundaries. Covers
+    # ROIAlign → roi_align, NMS → nms, TopK → top_k.
+    s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", name)
+    s = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", s)
+    v2 = s.lower()
+    if v2 not in cands:
+        cands.append(v2)
+    # V3: V2 plus an underscore between a lowercase letter and a digit —
+    # grid_sampler3_d → grid_sampler_3_d.
+    v3 = re.sub(r"([a-z])(\d)", r"\1_\2", s).lower()
+    if v3 not in cands:
+        cands.append(v3)
+    # V4: V3 but re-joining digit_<letter> so trailing units stick
+    # together — grid_sampler_3_d → grid_sampler_3d (the convention
+    # GridSampler3D actually uses in cann_bench).
+    v4 = re.sub(r"(\d)_([a-z])", r"\1\2", v3)
+    if v4 not in cands:
+        cands.append(v4)
+    return cands
 
 from ..config import Config, get_config
 from ..data.case_loader import CaseLoader, CaseInfo
@@ -79,9 +136,19 @@ class EvalOperatorResult:
     results: List[EvalCaseResult]
     pass_rate: float
     avg_speedup: float
+    # 当算子跑不起来时附带的诊断信息：
+    #   - compilation_error: build.sh 阶段隔离出来的算子，每条 case 都标记
+    #     为 FAIL。PackageManager 的迭代编译 populate 到 package_info，再
+    #     由 evaluate_from_source 合成。
+    #   - subprocess_failure_reason: 开启子进程隔离后，该算子的 subprocess
+    #     超时 / 崩溃 / 返回非零 / 输出异常。evaluator._run_operator_subprocess
+    #     在异常路径下 populate。
+    # 两个字段都是 Optional，常规路径下为 None 不写入 JSON。
+    compilation_error: Optional[str] = None
+    subprocess_failure_reason: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             'operator': self.operator,
             'level': self.level,
             'total_cases': self.total_cases,
@@ -92,6 +159,11 @@ class EvalOperatorResult:
             'avg_speedup': self.avg_speedup,
             'results': [r.to_dict() for r in self.results],
         }
+        if self.compilation_error:
+            d['compilation_error'] = self.compilation_error
+        if self.subprocess_failure_reason:
+            d['subprocess_failure_reason'] = self.subprocess_failure_reason
+        return d
 
 
 @dataclass
@@ -160,14 +232,7 @@ class Evaluator:
 
         try:
             import cann_bench
-            # CamelCase → snake_case（如 MaskedScale → masked_scale）
-            def to_snake_case(name: str) -> str:
-                import re
-                s = re.sub(r'([A-Z])', r'_\1', name).lower().lstrip('_')
-                return re.sub(r'_{2,}', '_', s)
-
-            candidates = [
-                to_snake_case(operator_name),
+            candidates = _snake_case_candidates(operator_name) + [
                 operator_name.lower(),
                 operator_name,
             ]
@@ -390,16 +455,21 @@ class Evaluator:
         operator_filter: List[str] = None,
         case_filter: Dict = None,
         verbose: bool = False,
+        subprocess_isolation: bool = True,
+        op_timeout_sec: int = 240,
+        iterative_compile: bool = True,
     ) -> EvalSessionResult:
         """
         从源码目录执行完整评测
 
         流程：
-        1. 扫描源码目录
-        2. 检查/编译包
-        3. 安装包
-        4. 扫描接口
-        5. 逐个评测算子
+        1. 扫描源码目录 + **迭代编译**（失败算子被隔离到 _quarantine/，
+           错误摘要带到 package_info.compile_errors）
+        2. 安装包
+        3. 扫描接口
+        4. 为每个"编译失败"的算子合成 FAIL 记录
+        5. 逐个评测剩下的算子（默认每个算子跑在独立子进程里，一个算子
+           挂死 AI Core 不会污染后面）
         6. 返回评测结果
 
         Args:
@@ -407,22 +477,43 @@ class Evaluator:
             operator_filter: 算子筛选列表
             case_filter: 用例筛选条件
             verbose: 详细输出
+            subprocess_isolation: 每个算子 fork 子进程评测（默认 True）
+            op_timeout_sec: 子进程隔离下的 per-op 超时（默认 240 秒）
 
         Returns:
-            EvalSessionResult: 评测会话结果
+            EvalSessionResult: 评测会话结果（包含运行正常的算子 +
+            编译失败的算子 + 子进程异常的算子）
         """
         print("")
         print("=" * 60)
         print("开始评测")
         print("=" * 60)
 
-        # 1. 准备环境（编译安装）
+        # 1. 准备环境（编译安装）—— 迭代模式下失败算子会被隔离，错误摘要
+        #    落到 package_info.compile_errors；关闭迭代（老行为）则 build.sh
+        #    首次失败即 raise，整个评测停在这一步。
         matched_operators, package_info = self.package_manager.prepare_from_source(
             source_dir,
             verbose=verbose,
+            iterative_compile=iterative_compile,
         )
 
-        if not matched_operators:
+        # 给 kernel_bench 里有对应定义的"编译失败"算子合成 FAIL 记录，让它们
+        # 不至于从报告里消失。matched_operators 不含这些（因为 cann_bench 里
+        # 没有它们的函数），这里从 compile_errors 反向查找算子定义。
+        compile_failed_results: List[EvalOperatorResult] = []
+        for snake_op_name, err in (package_info.compile_errors or {}).items():
+            op_info = self._find_operator_info_by_snake(snake_op_name)
+            if op_info is None:
+                # kernel_bench 里没这个算子，静默丢弃（和"submission 多出"情况对齐）
+                continue
+            if operator_filter and op_info.name not in operator_filter:
+                continue
+            compile_failed_results.append(
+                self._synthesize_compile_failure(op_info, err, case_filter)
+            )
+
+        if not matched_operators and not compile_failed_results:
             return EvalSessionResult(
                 operators=[],
                 package_info=package_info,
@@ -433,13 +524,23 @@ class Evaluator:
             matched_operators = [op for op in matched_operators if op in operator_filter]
             print(f"[INFO] 筛选后算子: {matched_operators}")
 
-        # 3. 逐个评测算子
-        results = []
+        # 3. 逐个评测算子（先把编译失败合成结果合入，再跑可运行的算子）
+        results: List[EvalOperatorResult] = list(compile_failed_results)
+        print(f"[INFO] 编译失败: {len(compile_failed_results)} 个算子 | 可运行: "
+              f"{len(matched_operators)} 个算子 "
+              f"({'subprocess-per-op' if subprocess_isolation else 'in-process'})")
         for operator_name in matched_operators:
             # 获取算子信息（确定level）
             op_info = self._find_operator_info(operator_name)
             if not op_info:
                 print(f"[WARN] 算子 {operator_name} 未找到定义，跳过")
+                continue
+
+            if subprocess_isolation:
+                result = self._run_operator_subprocess(
+                    operator_name, op_info.level, source_dir, case_filter, op_timeout_sec
+                )
+                results.append(result)
                 continue
 
             # 加载AI算子函数
@@ -562,6 +663,206 @@ class Evaluator:
             if op_info.name == operator_name:
                 return op_info
         return None
+
+    def _find_operator_info_by_snake(self, snake_name: str) -> Optional[OperatorInfo]:
+        """通过 snake_case 名称（build_submission 里的 op 目录名）反查 OperatorInfo。
+        与 load_ai_operator 的 CamelCase→snake_case 规则保持一致。"""
+        target = snake_name.lower()
+        operators = self.operator_loader.list_operators()
+        for op_info in operators:
+            if target in _snake_case_candidates(op_info.name):
+                return op_info
+        return None
+
+    def _synthesize_compile_failure(
+        self,
+        op_info: OperatorInfo,
+        error_excerpt: str,
+        case_filter: Optional[Dict] = None,
+    ) -> EvalOperatorResult:
+        """为编译失败的算子生成一条 all-FAIL 的 EvalOperatorResult，
+        这样它仍然出现在 session 结果里，summary.md / 报告看得到原因。"""
+        from ..data.case_loader import CaseInfo as _CI  # 避免循环导入
+        try:
+            cases = self.case_loader.scan_by_operator(op_info.level, op_info.name)
+            if case_filter:
+                cases = self._filter_cases(cases, case_filter)
+        except Exception:
+            cases = []
+
+        # 取错误摘要的第一行做 case-level detail（大段错误单独放在 op-level 字段里）
+        first_line = (error_excerpt.strip().splitlines() or ["(no detail)"])[0]
+        reason_short = f"compile failed: {first_line[:180]}"
+
+        case_results: List[EvalCaseResult] = []
+        for c in cases:
+            case_results.append(EvalCaseResult(
+                case_id=str(getattr(c, "case_id", 0)),
+                level=op_info.level,
+                operator=op_info.name,
+                case_num=int(getattr(c, "case_id", 0) or 0),
+                success=False,
+                error_msg=reason_short,
+            ))
+
+        return EvalOperatorResult(
+            operator=op_info.name,
+            level=op_info.level,
+            total_cases=len(case_results),
+            passed_cases=0,
+            failed_cases=len(case_results),
+            skipped_cases=0,
+            results=case_results,
+            pass_rate=0.0,
+            avg_speedup=0.0,
+            compilation_error=error_excerpt,
+        )
+
+    def _synthesize_subprocess_failure(
+        self,
+        operator_name: str,
+        level: int,
+        reason: str,
+        case_filter: Optional[Dict] = None,
+    ) -> EvalOperatorResult:
+        """子进程超时 / 崩溃时合成 all-FAIL 的 EvalOperatorResult。"""
+        try:
+            cases = self.case_loader.scan_by_operator(level, operator_name)
+            if case_filter:
+                cases = self._filter_cases(cases, case_filter)
+        except Exception:
+            cases = []
+
+        short = f"subprocess failed: {reason}"
+        case_results: List[EvalCaseResult] = []
+        for c in cases:
+            case_results.append(EvalCaseResult(
+                case_id=str(getattr(c, "case_id", 0)),
+                level=level,
+                operator=operator_name,
+                case_num=int(getattr(c, "case_id", 0) or 0),
+                success=False,
+                error_msg=short,
+            ))
+
+        return EvalOperatorResult(
+            operator=operator_name,
+            level=level,
+            total_cases=len(case_results),
+            passed_cases=0,
+            failed_cases=len(case_results),
+            skipped_cases=0,
+            results=case_results,
+            pass_rate=0.0,
+            avg_speedup=0.0,
+            subprocess_failure_reason=reason,
+        )
+
+    def _run_operator_subprocess(
+        self,
+        operator_name: str,
+        level: int,
+        source_dir: str,
+        case_filter: Optional[Dict],
+        timeout_sec: int,
+    ) -> EvalOperatorResult:
+        """Fork 一个子进程运行单个算子的评测。子进程用 --skip-install
+        +  --no-subprocess-isolation 避免重复安装和无限递归；超时先 SIGTERM
+        给 finally 块做 NPU 清理的机会，10s 宽限后 SIGKILL。成功则 load 子
+        进程写出的 JSON，lift 出这个算子的 EvalOperatorResult；异常则合成
+        一条 subprocess_failure_reason 记录。"""
+        import json as _json
+        import subprocess as _sp
+        import tempfile as _tf
+
+        fd, frag_path = _tf.mkstemp(suffix=".json", prefix="cannbench_child_")
+        os.close(fd)
+        try:
+            # 子进程通过 `python -m kernel_eval.cli eval --source-dir X
+            # --operator <name> --skip-install --no-subprocess-isolation
+            # --child-json-output <frag>` 的形式被调起。skip-install 走
+            # prepare_skip_build 路径（wheel 已安装，不用再跑 build）。
+            cmd = [
+                sys.executable, "-m", "kernel_eval.cli", "eval",
+                "--source-dir", str(source_dir),
+                "--operator", operator_name,
+                "--child-json-output", frag_path,
+                "--no-subprocess-isolation",
+                "--skip-install",
+            ]
+            if case_filter and "case_id" in case_filter:
+                cmd += ["--case-id", str(case_filter["case_id"])]
+
+            print(f"[INFO] {operator_name}: subprocess (timeout {timeout_sec}s)")
+            proc = _sp.Popen(cmd, start_new_session=True)
+            try:
+                rc = proc.wait(timeout=timeout_sec)
+                if rc != 0:
+                    return self._synthesize_subprocess_failure(
+                        operator_name, level,
+                        f"subprocess exited rc={rc}", case_filter,
+                    )
+            except _sp.TimeoutExpired:
+                print(f"[WARN] {operator_name} 超过 {timeout_sec}s — SIGTERM")
+                proc.terminate()
+                try:
+                    proc.wait(timeout=10)
+                except _sp.TimeoutExpired:
+                    print(f"[WARN] {operator_name} 宽限后仍未退出 — SIGKILL")
+                    proc.kill()
+                    proc.wait()
+                return self._synthesize_subprocess_failure(
+                    operator_name, level,
+                    f"exceeded {timeout_sec}s timeout — killed", case_filter,
+                )
+
+            if not os.path.exists(frag_path) or os.path.getsize(frag_path) == 0:
+                return self._synthesize_subprocess_failure(
+                    operator_name, level,
+                    "subprocess produced no output", case_filter,
+                )
+            try:
+                data = _json.loads(Path(frag_path).read_text())
+            except Exception as e:
+                return self._synthesize_subprocess_failure(
+                    operator_name, level,
+                    f"parse child JSON: {e}", case_filter,
+                )
+            ops = data.get("operators", [])
+            if not ops:
+                return self._synthesize_subprocess_failure(
+                    operator_name, level,
+                    "subprocess output had no operators", case_filter,
+                )
+            # rehydrate EvalOperatorResult from dict — 最小必要字段
+            op_d = ops[0]
+            case_results: List[EvalCaseResult] = []
+            for r in op_d.get("results", []):
+                case_results.append(EvalCaseResult(
+                    case_id=str(r.get("case_id", "")),
+                    level=r.get("level", level),
+                    operator=r.get("operator", operator_name),
+                    case_num=int(r.get("case_num", r.get("case_id", 0) or 0)),
+                    success=bool(r.get("success", False)),
+                    error_msg=r.get("error_msg"),
+                    baseline_perf_us=r.get("baseline_perf_us", 0.0),
+                ))
+            return EvalOperatorResult(
+                operator=op_d.get("operator", operator_name),
+                level=op_d.get("level", level),
+                total_cases=op_d.get("total_cases", len(case_results)),
+                passed_cases=op_d.get("passed_cases", 0),
+                failed_cases=op_d.get("failed_cases", len(case_results)),
+                skipped_cases=op_d.get("skipped_cases", 0),
+                results=case_results,
+                pass_rate=op_d.get("pass_rate", 0.0),
+                avg_speedup=op_d.get("avg_speedup", 0.0),
+            )
+        finally:
+            try:
+                os.unlink(frag_path)
+            except OSError:
+                pass
 
     def _filter_cases(self, cases: List[CaseInfo], filter_dict: Dict) -> List[CaseInfo]:
         """筛选用例"""

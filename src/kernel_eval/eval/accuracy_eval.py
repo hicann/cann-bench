@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 精度评测器
 
@@ -86,13 +99,24 @@ class AccuracyEvaluator:
         Returns:
             Golden输出Tensor
         """
-        # 转换输入到CPU fp64
+        # 转换输入到CPU fp64 —— 只对浮点 tensor 做 upcast，整型/bool 保持原 dtype。
+        # 否则像 GCD（int16/int32 输入）、CrossEntropyLoss（int64 target）这类
+        # 算子的 golden 会在 CPU 上因为 dtype 错误报错，例如：
+        #   "gcd_cpu not implemented for 'Double'"
+        #   "expected scalar type Long but found Double"
+        def _to_fp64_golden(t: torch.Tensor) -> torch.Tensor:
+            t = t.cpu()
+            return t.double() if t.is_floating_point() else t
+
         fp64_inputs = []
         for item in inputs:
             if isinstance(item, torch.Tensor):
-                fp64_inputs.append(item.cpu().double())
+                fp64_inputs.append(_to_fp64_golden(item))
             elif isinstance(item, (list, tuple)):
-                fp64_inputs.append([sub.cpu().double() if isinstance(sub, torch.Tensor) else sub for sub in item])
+                fp64_inputs.append([
+                    _to_fp64_golden(sub) if isinstance(sub, torch.Tensor) else sub
+                    for sub in item
+                ])
             else:
                 fp64_inputs.append(item)
 

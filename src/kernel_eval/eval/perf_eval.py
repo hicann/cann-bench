@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """
 性能评测器
 
@@ -89,11 +102,16 @@ class PerfEvaluator:
         """准备升频清cache的tensors
 
         Matrix + reduce tensors sized to cover typical AI-core/L2 footprints.
+        Pinned to the configured NPU — bare ``.npu()`` would go to current
+        device 0 and either hijack the wrong card or fail outright when the
+        runner is using a different device.
         """
         if self._warmup_tensors is None and self.freq_boost:
-            mm1 = torch.rand((10240, 10240), dtype=torch.float16).npu()
-            mm2 = torch.rand((10240, 10240), dtype=torch.float16).npu()
-            reduce_input = torch.rand((96, 1024, 1024), dtype=torch.float16).npu()
+            device = (self.device_manager.get_device()
+                      if self.device_manager is not None else "npu")
+            mm1 = torch.rand((10240, 10240), dtype=torch.float16).to(device)
+            mm2 = torch.rand((10240, 10240), dtype=torch.float16).to(device)
+            reduce_input = torch.rand((96, 1024, 1024), dtype=torch.float16).to(device)
             self._warmup_tensors = (mm1, mm2, reduce_input)
 
     def _boost_freq_and_clear_cache(self):
@@ -102,13 +120,17 @@ class PerfEvaluator:
         执行 MatMul + ReduceMax 以：
         1. 提升 NPU 频率到稳定状态
         2. 清空 L2 cache，保证测量一致性
+
+        Sync targets the warmup tensor's actual device — ``torch.npu.synchronize()``
+        with no arg syncs the current device, which can disagree with the
+        device the warmup tensors live on.
         """
         if self._warmup_tensors is not None:
             mm1, mm2, reduce_input = self._warmup_tensors
             torch.matmul(mm1, mm2)
-            torch.npu.synchronize()
+            torch.npu.synchronize(mm1.device)
             torch.max(reduce_input)
-            torch.npu.synchronize()
+            torch.npu.synchronize(mm1.device)
 
     def measure_kernel_us(
         self,
@@ -314,6 +336,17 @@ class PerfEvaluator:
             pass
 
         return total
+
+    def _parse_case_id(self, case_id: str) -> Tuple[str, str, str]:
+        """Split a CaseInfo.get_case_id_str() like ``L2_Gcd_5`` into
+        ``("level2", "Gcd", "5")`` for use as the prof_data archive path.
+        Falls back to safe defaults so an unexpected format doesn't crash
+        the profiler — we'd rather lose the archive layout than the run.
+        """
+        m = re.match(r"^L(?P<level>\d+)_(?P<op>.+)_(?P<case>\d+)$", case_id)
+        if not m:
+            return "level_unknown", case_id or "unknown", "0"
+        return f"level{m['level']}", m["op"], m["case"]
 
     def run_profiled(self, case_id: str, func: Callable, *args, **kwargs) -> Tuple[Any, PerfResult]:
         """使用 schedule 机制执行 warmup + repeat 次，对 repeat 次结果取平均
