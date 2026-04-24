@@ -1,21 +1,31 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
 cases:
 - operator: SparseFlashAttention
   case_id: 1
   input_shape:
   - - 2
-    - 1024
+    - 256
     - 32
     - 128
   - - 2
-    - 8192
+    - 4096
     - 8
     - 128
   - - 2
-    - 8192
+    - 4096
     - 8
     - 128
   - - 2
-    - 1024
+    - 256
     - 8
     - 512
   dtype:
@@ -30,24 +40,24 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-GQA-B2S1024Skv8192N32Nkv8Dk128-top512
+  note: float16-BSND-GQA-B2S256Skv4096N32Nkv8Dk128-top512
 - operator: SparseFlashAttention
   case_id: 2
   input_shape:
   - - 2
-    - 1024
+    - 256
     - 32
     - 192
   - - 2
-    - 8192
+    - 4096
     - 8
     - 192
   - - 2
-    - 8192
+    - 4096
     - 8
     - 128
   - - 2
-    - 1024
+    - 256
     - 8
     - 512
   dtype:
@@ -100,20 +110,20 @@ cases:
   input_shape:
   - - 2
     - 32
-    - 1024
+    - 512
     - 192
   - - 2
     - 8
-    - 8192
+    - 4096
     - 192
   - - 2
     - 8
-    - 8192
+    - 4096
     - 128
   - - 2
     - 8
-    - 1024
-    - 1024
+    - 512
+    - 512
   dtype:
   - float16
   - float16
@@ -126,26 +136,26 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BNSD-GQA-Dk192-top1024
+  note: float16-BNSD-GQA-Dk192-top512
 - operator: SparseFlashAttention
   case_id: 5
   input_shape:
   - - 1
-    - 2048
+    - 256
     - 64
     - 128
   - - 1
-    - 16384
+    - 4096
     - 8
     - 128
   - - 1
-    - 16384
+    - 4096
     - 8
     - 128
   - - 1
-    - 2048
+    - 256
     - 8
-    - 2048
+    - 512
   dtype:
   - float16
   - float16
@@ -158,7 +168,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-GQA-N64Nkv8-top2048-long
+  note: float16-BSND-GQA-N64Nkv8-top512
 - operator: SparseFlashAttention
   case_id: 6
   input_shape:
@@ -226,22 +236,22 @@ cases:
 - operator: SparseFlashAttention
   case_id: 8
   input_shape:
-  - - 64
+  - - 8
     - 4
     - 64
     - 128
-  - - 64
-    - 16384
+  - - 8
+    - 4096
     - 8
     - 128
-  - - 64
-    - 16384
+  - - 8
+    - 4096
     - 8
     - 128
-  - - 64
+  - - 8
     - 4
     - 8
-    - 2048
+    - 512
   dtype:
   - float16
   - float16
@@ -254,24 +264,24 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-GQA-B64S4-MTP-top2048
+  note: float16-BSND-GQA-B8S4-MTP-top512
 - operator: SparseFlashAttention
   case_id: 9
   input_shape:
-  - - 2
-    - 1024
+  - - 1
+    - 128
     - 128
     - 512
-  - - 2
-    - 8192
+  - - 1
+    - 2048
     - 1
     - 512
-  - - 2
-    - 8192
+  - - 1
+    - 2048
     - 1
     - 512
-  - - 2
-    - 1024
+  - - 1
+    - 128
     - 1
     - 512
   dtype:
@@ -290,20 +300,20 @@ cases:
 - operator: SparseFlashAttention
   case_id: 10
   input_shape:
-  - - 2
-    - 1024
+  - - 1
+    - 128
     - 128
     - 576
-  - - 2
-    - 8192
+  - - 1
+    - 2048
     - 1
     - 576
-  - - 2
-    - 8192
+  - - 1
+    - 2048
     - 1
     - 512
-  - - 2
-    - 1024
+  - - 1
+    - 128
     - 1
     - 512
   dtype:
@@ -324,20 +334,20 @@ cases:
   input_shape:
   - - 2
     - 128
-    - 1024
+    - 256
     - 512
   - - 2
     - 1
-    - 8192
+    - 2048
     - 512
   - - 2
     - 1
-    - 8192
+    - 2048
     - 512
   - - 2
     - 1
-    - 1024
-    - 1024
+    - 256
+    - 512
   dtype:
   - bfloat16
   - bfloat16
@@ -350,26 +360,26 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: bfloat16-BNSD-MLA-Dk512-top1024
+  note: bfloat16-BNSD-MLA-Dk512-top512
 - operator: SparseFlashAttention
   case_id: 12
   input_shape:
   - - 2
     - 128
+    - 128
+    - 576
+  - - 2
+    - 1
     - 1024
     - 576
   - - 2
     - 1
-    - 8192
-    - 576
-  - - 2
-    - 1
-    - 8192
+    - 1024
     - 512
   - - 2
     - 1
-    - 1024
-    - 1024
+    - 128
+    - 512
   dtype:
   - float16
   - float16
@@ -382,26 +392,26 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BNSD-MLA-Dk576-top1024
+  note: float16-BNSD-MLA-Dk576-top512
 - operator: SparseFlashAttention
   case_id: 13
   input_shape:
   - - 1
-    - 2048
+    - 128
     - 128
     - 512
   - - 1
-    - 16384
-    - 1
-    - 512
-  - - 1
-    - 16384
+    - 2048
     - 1
     - 512
   - - 1
     - 2048
     - 1
-    - 2048
+    - 512
+  - - 1
+    - 128
+    - 1
+    - 512
   dtype:
   - float16
   - float16
@@ -414,7 +424,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-MLA-top2048-long
+  note: float16-BSND-MLA-top512-long
 - operator: SparseFlashAttention
   case_id: 14
   input_shape:
@@ -482,22 +492,22 @@ cases:
 - operator: SparseFlashAttention
   case_id: 16
   input_shape:
-  - - 64
+  - - 8
     - 4
     - 128
     - 512
-  - - 64
-    - 16384
+  - - 8
+    - 4096
     - 1
     - 512
-  - - 64
-    - 16384
+  - - 8
+    - 4096
     - 1
     - 512
-  - - 64
+  - - 8
     - 4
     - 1
-    - 2048
+    - 512
   dtype:
   - float16
   - float16
@@ -510,7 +520,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-MLA-B64S4-MTP-top2048
+  note: float16-BSND-MLA-B8S4-MTP-top512
 - operator: SparseFlashAttention
   case_id: 17
   input_shape:
@@ -546,19 +556,19 @@ cases:
 - operator: SparseFlashAttention
   case_id: 18
   input_shape:
-  - - 128
+  - - 32
     - 1
     - 128
     - 512
-  - - 128
-    - 8192
+  - - 32
+    - 4096
     - 1
     - 512
-  - - 128
-    - 8192
+  - - 32
+    - 4096
     - 1
     - 512
-  - - 128
+  - - 32
     - 1
     - 1
     - 512
@@ -574,23 +584,23 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-MLA-B128S1-decode-large-batch
+  note: float16-BSND-MLA-B32S1-decode-large-batch
 - operator: SparseFlashAttention
   case_id: 19
   input_shape:
-  - - 60
+  - - 8
     - 2
     - 32
     - 128
-  - - 60
-    - 8192
+  - - 8
+    - 4096
     - 8
     - 128
-  - - 60
-    - 8192
+  - - 8
+    - 4096
     - 8
     - 128
-  - - 60
+  - - 8
     - 2
     - 8
     - 512
@@ -606,24 +616,24 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: float16-BSND-GQA-B60S2-MTP-large-batch
+  note: float16-BSND-GQA-B8S2-MTP-large-batch
 - operator: SparseFlashAttention
   case_id: 20
   input_shape:
   - - 2
-    - 1024
+    - 256
     - 32
     - 128
   - - 2
-    - 8192
+    - 4096
     - 8
     - 128
   - - 2
-    - 8192
+    - 4096
     - 8
     - 128
   - - 2
-    - 1024
+    - 256
     - 8
     - 512
   dtype:

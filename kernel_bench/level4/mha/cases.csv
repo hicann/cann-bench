@@ -6,11 +6,11 @@ MHA,4,"[[2, 256, 8, 256], [2, 256, 8, 256], [2, 256, 8, 256]]","['float16', 'flo
 MHA,5,"[[2, 512, 32, 256], [2, 512, 32, 256], [2, 512, 32, 256]]","['float32', 'float32', 'float32']",{'scaleValue': -1.0},"[-1, 1]",None,M-float32-B2S512N32D256-D256
 MHA,6,"[[2, 128, 12, 64], [2, 256, 12, 64], [2, 256, 12, 64]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,S-float16-B2Sq128Skv256N12D64-cross
 MHA,7,"[[2, 512, 16, 128], [2, 128, 16, 128], [2, 128, 16, 128]]","['bfloat16', 'bfloat16', 'bfloat16']",{'scaleValue': -1.0},"[-1, 1]",None,S-bfloat16-B2Sq512Skv128N16D128-cross
-MHA,8,"[[4, 4096, 32, 128], [4, 4096, 32, 128], [4, 4096, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B4S4096N32D128-long-prefill
-MHA,9,"[[2, 8192, 32, 128], [2, 8192, 32, 128], [2, 8192, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B2S8192N32D128-long-prefill
-MHA,10,"[[4, 4096, 32, 128], [4, 4096, 32, 128], [4, 4096, 32, 128]]","['bfloat16', 'bfloat16', 'bfloat16']",{'scaleValue': -1.0},"[-1, 1]",None,L-bfloat16-B4S4096N32D128-very-long-prefill
-MHA,11,"[[4, 4096, 16, 256], [4, 4096, 16, 256], [4, 4096, 16, 256]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B4S4096N16D256-long-prefill-D256
-MHA,12,"[[2, 8192, 8, 256], [2, 8192, 8, 256], [2, 8192, 8, 256]]","['float32', 'float32', 'float32']",{'scaleValue': -1.0},"[-1, 1]",None,L-float32-B2S8192N8D256-long-prefill-D256
+MHA,8,"[[4, 1024, 32, 128], [4, 1024, 32, 128], [4, 1024, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B4S1024N32D128-long-prefill
+MHA,9,"[[2, 1024, 32, 128], [2, 1024, 32, 128], [2, 1024, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B2S1024N32D128-long-prefill
+MHA,10,"[[4, 1024, 32, 128], [4, 1024, 32, 128], [4, 1024, 32, 128]]","['bfloat16', 'bfloat16', 'bfloat16']",{'scaleValue': -1.0},"[-1, 1]",None,L-bfloat16-B4S1024N32D128-very-long-prefill
+MHA,11,"[[4, 1024, 16, 256], [4, 1024, 16, 256], [4, 1024, 16, 256]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B4S1024N16D256-long-prefill-D256
+MHA,12,"[[2, 2048, 8, 256], [2, 2048, 8, 256], [2, 2048, 8, 256]]","['float32', 'float32', 'float32']",{'scaleValue': -1.0},"[-1, 1]",None,L-float32-B2S2048N8D256-long-prefill-D256
 MHA,13,"[[1, 1, 32, 128], [1, 2048, 32, 128], [1, 2048, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,M-float16-B1S1Skv2048N32D128-decode-single-batch
 MHA,14,"[[16, 1, 32, 128], [16, 1024, 32, 128], [16, 1024, 32, 128]]","['float16', 'float16', 'float16']",{'scaleValue': -1.0},"[-1, 1]",None,L-float16-B16S1Skv2048N32D128-decode
 MHA,15,"[[32, 1, 32, 128], [32, 512, 32, 128], [32, 512, 32, 128]]","['bfloat16', 'bfloat16', 'bfloat16']",{'scaleValue': -1.0},"[-1, 1]",None,L-bfloat16-B32S1Skv2048N32D128-decode

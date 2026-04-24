@@ -71,13 +71,15 @@ def sparse_flash_attention(
     # 计算完整 scores 后用 mask 屏蔽未选位置: [B, N2, G, S1, S2]
     # 在同一 (b, n2, s1) 下 sparseIndices 无重复，mask 与 gather 语义等价
     scores = torch.einsum('bngsd,bnkd->bngsk', q_g, k) * scaleValue
-    scores = scores.masked_fill(~mask.unsqueeze(2), float('-inf'))
+    scores.masked_fill_(~mask.unsqueeze(2), float('-inf'))
 
-    # Softmax 在 S2 维上归一化（未选位置贡献 0）
-    attn_weights = torch.softmax(scores, dim=-1)
+    # 原地 softmax，避免同时持有 scores 和 attn_weights 两份张量
+    scores -= scores.max(dim=-1, keepdim=True).values
+    scores.exp_()
+    scores /= scores.sum(dim=-1, keepdim=True)
 
     # 加权求和: [B, N2, G, S1, Dv] -> [B, N1, S1, Dv]
-    out = torch.einsum('bngsk,bnkd->bngsd', attn_weights, v)
+    out = torch.einsum('bngsk,bnkd->bngsd', scores, v)
     out = out.reshape(B, N1, S1, -1)
 
     # 转回原始布局

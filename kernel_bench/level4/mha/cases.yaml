@@ -1,342 +1,817 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
 cases:
 - operator: MHA
   case_id: 1
   input_shape:
-  - [2, 128, 8, 64]
-  - [2, 128, 8, 64]
-  - [2, 128, 8, 64]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 8
+    - 64
+  - - 2
+    - 128
+    - 8
+    - 64
+  - - 2
+    - 128
+    - 8
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128N8D64-prefill
 - operator: MHA
   case_id: 2
   input_shape:
-  - [4, 256, 16, 64]
-  - [4, 256, 16, 64]
-  - [4, 256, 16, 64]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 256
+    - 16
+    - 64
+  - - 4
+    - 256
+    - 16
+    - 64
+  - - 4
+    - 256
+    - 16
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float32-B4S256N16D64-prefill
 - operator: MHA
   case_id: 3
   input_shape:
-  - [2, 512, 32, 128]
-  - [2, 512, 32, 128]
-  - [2, 512, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 512
+    - 32
+    - 128
+  - - 2
+    - 512
+    - 32
+    - 128
+  - - 2
+    - 512
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-bfloat16-B2S512N32D128-prefill
 - operator: MHA
   case_id: 4
   input_shape:
-  - [2, 256, 8, 256]
-  - [2, 256, 8, 256]
-  - [2, 256, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 256
+    - 8
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S256N8D256-D256
 - operator: MHA
   case_id: 5
   input_shape:
-  - [2, 512, 32, 256]
-  - [2, 512, 32, 256]
-  - [2, 512, 32, 256]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 512
+    - 32
+    - 256
+  - - 2
+    - 512
+    - 32
+    - 256
+  - - 2
+    - 512
+    - 32
+    - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float32-B2S512N32D256-D256
 - operator: MHA
   case_id: 6
   input_shape:
-  - [2, 128, 12, 64]
-  - [2, 256, 12, 64]
-  - [2, 256, 12, 64]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 12
+    - 64
+  - - 2
+    - 256
+    - 12
+    - 64
+  - - 2
+    - 256
+    - 12
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2Sq128Skv256N12D64-cross
 - operator: MHA
   case_id: 7
   input_shape:
-  - [2, 512, 16, 128]
-  - [2, 128, 16, 128]
-  - [2, 128, 16, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 512
+    - 16
+    - 128
+  - - 2
+    - 128
+    - 16
+    - 128
+  - - 2
+    - 128
+    - 16
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-bfloat16-B2Sq512Skv128N16D128-cross
 - operator: MHA
   case_id: 8
   input_shape:
-  - [4, 4096, 32, 128]
-  - [4, 4096, 32, 128]
-  - [4, 4096, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S4096N32D128-long-prefill
+  note: L-float16-B4S1024N32D128-long-prefill
 - operator: MHA
   case_id: 9
   input_shape:
-  - [2, 8192, 32, 128]
-  - [2, 8192, 32, 128]
-  - [2, 8192, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 1024
+    - 32
+    - 128
+  - - 2
+    - 1024
+    - 32
+    - 128
+  - - 2
+    - 1024
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B2S8192N32D128-long-prefill
+  note: L-float16-B2S1024N32D128-long-prefill
 - operator: MHA
   case_id: 10
   input_shape:
-  - [4, 4096, 32, 128]
-  - [4, 4096, 32, 128]
-  - [4, 4096, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-bfloat16-B4S4096N32D128-very-long-prefill
+  note: L-bfloat16-B4S1024N32D128-very-long-prefill
 - operator: MHA
   case_id: 11
   input_shape:
-  - [4, 4096, 16, 256]
-  - [4, 4096, 16, 256]
-  - [4, 4096, 16, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 1024
+    - 16
+    - 256
+  - - 4
+    - 1024
+    - 16
+    - 256
+  - - 4
+    - 1024
+    - 16
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S4096N16D256-long-prefill-D256
+  note: L-float16-B4S1024N16D256-long-prefill-D256
 - operator: MHA
   case_id: 12
   input_shape:
-  - [2, 8192, 8, 256]
-  - [2, 8192, 8, 256]
-  - [2, 8192, 8, 256]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 2048
+    - 8
+    - 256
+  - - 2
+    - 2048
+    - 8
+    - 256
+  - - 2
+    - 2048
+    - 8
+    - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float32-B2S8192N8D256-long-prefill-D256
+  note: L-float32-B2S2048N8D256-long-prefill-D256
 - operator: MHA
   case_id: 13
   input_shape:
-  - [1, 1, 32, 128]
-  - [1, 2048, 32, 128]
-  - [1, 2048, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 1
+    - 1
+    - 32
+    - 128
+  - - 1
+    - 2048
+    - 32
+    - 128
+  - - 1
+    - 2048
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float16-B1S1Skv2048N32D128-decode-single-batch
 - operator: MHA
   case_id: 14
   input_shape:
-  - [16, 1, 32, 128]
-  - [16, 1024, 32, 128]
-  - [16, 1024, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 16
+    - 1
+    - 32
+    - 128
+  - - 16
+    - 1024
+    - 32
+    - 128
+  - - 16
+    - 1024
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B16S1Skv2048N32D128-decode
 - operator: MHA
   case_id: 15
   input_shape:
-  - [32, 1, 32, 128]
-  - [32, 512, 32, 128]
-  - [32, 512, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 32
+    - 1
+    - 32
+    - 128
+  - - 32
+    - 512
+    - 32
+    - 128
+  - - 32
+    - 512
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B32S1Skv2048N32D128-decode
 - operator: MHA
   case_id: 16
   input_shape:
-  - [60, 1, 32, 128]
-  - [60, 512, 32, 128]
-  - [60, 512, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 1
+    - 32
+    - 128
+  - - 60
+    - 512
+    - 32
+    - 128
+  - - 60
+    - 512
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048N32D128-decode-large-batch
 - operator: MHA
   case_id: 17
   input_shape:
-  - [72, 1, 32, 128]
-  - [72, 256, 32, 128]
-  - [72, 256, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 72
+    - 1
+    - 32
+    - 128
+  - - 72
+    - 256
+    - 32
+    - 128
+  - - 72
+    - 256
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B72S1Skv2048N32D128-decode-large-batch
 - operator: MHA
   case_id: 18
   input_shape:
-  - [96, 1, 32, 128]
-  - [96, 256, 32, 128]
-  - [96, 256, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 1
+    - 32
+    - 128
+  - - 96
+    - 256
+    - 32
+    - 128
+  - - 96
+    - 256
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B96S1Skv4096N32D128-decode-large-batch
 - operator: MHA
   case_id: 19
   input_shape:
-  - [128, 1, 32, 128]
-  - [128, 128, 32, 128]
-  - [128, 128, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 1
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B128S1Skv4096N32D128-decode-large-batch
 - operator: MHA
   case_id: 20
   input_shape:
-  - [60, 1, 16, 256]
-  - [60, 512, 16, 256]
-  - [60, 512, 16, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 1
+    - 16
+    - 256
+  - - 60
+    - 512
+    - 16
+    - 256
+  - - 60
+    - 512
+    - 16
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048N16D256-decode-large-batch-D256
 - operator: MHA
   case_id: 21
   input_shape:
-  - [96, 1, 16, 128]
-  - [96, 256, 16, 128]
-  - [96, 256, 16, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 1
+    - 16
+    - 128
+  - - 96
+    - 256
+    - 16
+    - 128
+  - - 96
+    - 256
+    - 16
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float32-B96S1Skv4096N16D128-decode-large-batch-D256
 - operator: MHA
   case_id: 22
   input_shape:
-  - [128, 1, 32, 128]
-  - [128, 128, 32, 128]
-  - [128, 128, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 1
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B128S1Skv2048N32D128-decode-large-batch-D256
 - operator: MHA
   case_id: 23
   input_shape:
-  - [60, 2, 32, 128]
-  - [60, 512, 32, 128]
-  - [60, 512, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 2
+    - 32
+    - 128
+  - - 60
+    - 512
+    - 32
+    - 128
+  - - 60
+    - 512
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048N32D128-MTP-large-batch
 - operator: MHA
   case_id: 24
   input_shape:
-  - [72, 4, 32, 128]
-  - [72, 256, 32, 128]
-  - [72, 256, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 72
+    - 4
+    - 32
+    - 128
+  - - 72
+    - 256
+    - 32
+    - 128
+  - - 72
+    - 256
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B72Sq4Skv2048N32D128-MTP-large-batch
 - operator: MHA
   case_id: 25
   input_shape:
-  - [96, 2, 32, 128]
-  - [96, 256, 32, 128]
-  - [96, 256, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 2
+    - 32
+    - 128
+  - - 96
+    - 256
+    - 32
+    - 128
+  - - 96
+    - 256
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B96Sq2Skv4096N32D128-MTP-large-batch
 - operator: MHA
   case_id: 26
   input_shape:
-  - [128, 4, 32, 128]
-  - [128, 128, 32, 128]
-  - [128, 128, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 4
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  - - 128
+    - 128
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B128Sq4Skv4096N32D128-MTP-large-batch
 - operator: MHA
   case_id: 27
   input_shape:
-  - [60, 2, 16, 256]
-  - [60, 512, 16, 256]
-  - [60, 512, 16, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 2
+    - 16
+    - 256
+  - - 60
+    - 512
+    - 16
+    - 256
+  - - 60
+    - 512
+    - 16
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048N16D256-MTP-large-batch-D256
 - operator: MHA
   case_id: 28
   input_shape:
-  - [128, 4, 16, 128]
-  - [128, 256, 16, 128]
-  - [128, 256, 16, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 4
+    - 16
+    - 128
+  - - 128
+    - 256
+    - 16
+    - 128
+  - - 128
+    - 256
+    - 16
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B128Sq4Skv4096N16D128-MTP-large-batch-D256
 - operator: MHA
   case_id: 29
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: 0.08838}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: 0.08838
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128N32D128-explicit-scale
 - operator: MHA
   case_id: 30
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [0, 0]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - 0
+  - 0
   baseline_perf_us: null
   note: S-float16-B2S128N32D128-zero-input
 - operator: MHA
   case_id: 31
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-0.01, 0.01]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -0.01
+  - 0.01
   baseline_perf_us: null
   note: M-float32-B2S128N32D128-tiny-value-range

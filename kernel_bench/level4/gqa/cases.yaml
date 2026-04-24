@@ -1,463 +1,1103 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
 cases:
 - operator: GQA
   case_id: 1
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 8, 128]
-  - [2, 128, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq32Nkv8D128-G4-prefill
 - operator: GQA
   case_id: 2
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 4, 128]
-  - [2, 128, 4, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 4
+    - 128
+  - - 2
+    - 128
+    - 4
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq32Nkv4D128-G8-prefill
 - operator: GQA
   case_id: 3
   input_shape:
-  - [2, 128, 48, 128]
-  - [2, 128, 4, 128]
-  - [2, 128, 4, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 48
+    - 128
+  - - 2
+    - 128
+    - 4
+    - 128
+  - - 2
+    - 128
+    - 4
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq48Nkv4D128-G12-prefill
 - operator: GQA
   case_id: 4
   input_shape:
-  - [2, 128, 128, 128]
-  - [2, 128, 8, 128]
-  - [2, 128, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 128
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq128Nkv8D128-G16-prefill
 - operator: GQA
   case_id: 5
   input_shape:
-  - [4, 256, 64, 128]
-  - [4, 256, 8, 128]
-  - [4, 256, 8, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 256
+    - 64
+    - 128
+  - - 4
+    - 256
+    - 8
+    - 128
+  - - 4
+    - 256
+    - 8
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float32-B4S256Nq64Nkv8D128-G8-prefill
 - operator: GQA
   case_id: 6
   input_shape:
-  - [4, 256, 96, 128]
-  - [4, 256, 8, 128]
-  - [4, 256, 8, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 256
+    - 96
+    - 128
+  - - 4
+    - 256
+    - 8
+    - 128
+  - - 4
+    - 256
+    - 8
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float32-B4S256Nq96Nkv8D128-G12-prefill
 - operator: GQA
   case_id: 7
   input_shape:
-  - [2, 128, 32, 256]
-  - [2, 128, 8, 256]
-  - [2, 128, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 256
+  - - 2
+    - 128
+    - 8
+    - 256
+  - - 2
+    - 128
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq32Nkv8D256-G4-D256
 - operator: GQA
   case_id: 8
   input_shape:
-  - [2, 256, 64, 256]
-  - [2, 256, 8, 256]
-  - [2, 256, 8, 256]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 256
+    - 64
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float32-B2S256Nq64Nkv8D256-G8-D256
 - operator: GQA
   case_id: 9
   input_shape:
-  - [2, 256, 48, 256]
-  - [2, 256, 4, 256]
-  - [2, 256, 4, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 256
+    - 48
+    - 256
+  - - 2
+    - 256
+    - 4
+    - 256
+  - - 2
+    - 256
+    - 4
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float16-B2S256Nq48Nkv4D256-G12-D256
 - operator: GQA
   case_id: 10
   input_shape:
-  - [2, 256, 128, 256]
-  - [2, 256, 8, 256]
-  - [2, 256, 8, 256]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 256
+    - 128
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  - - 2
+    - 256
+    - 8
+    - 256
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-bfloat16-B2S256Nq128Nkv8D256-G16-D256
 - operator: GQA
   case_id: 11
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 256, 8, 128]
-  - [2, 256, 8, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 256
+    - 8
+    - 128
+  - - 2
+    - 256
+    - 8
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float32-B2Sq128Skv256Nq32Nkv8D128-G4-cross
 - operator: GQA
   case_id: 12
   input_shape:
-  - [2, 512, 64, 128]
-  - [2, 128, 8, 128]
-  - [2, 128, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 512
+    - 64
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: M-float16-B2Sq512Skv128Nq64Nkv8D128-G8-cross
 - operator: GQA
   case_id: 13
   input_shape:
-  - [4, 4096, 32, 128]
-  - [4, 4096, 8, 128]
-  - [4, 4096, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 8
+    - 128
+  - - 4
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S4096Nq32Nkv8D128-G4-long-prefill
+  note: L-float16-B4S1024Nq32Nkv8D128-G4-long-prefill
 - operator: GQA
   case_id: 14
   input_shape:
-  - [4, 4096, 64, 128]
-  - [4, 4096, 8, 128]
-  - [4, 4096, 8, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 512
+    - 64
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-bfloat16-B4S4096Nq64Nkv8D128-G8-long-prefill
+  note: L-bfloat16-B4S512Nq64Nkv8D128-G8-long-prefill
 - operator: GQA
   case_id: 15
   input_shape:
-  - [4, 4096, 96, 128]
-  - [4, 4096, 8, 128]
-  - [4, 4096, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 512
+    - 96
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S4096Nq96Nkv8D128-G12-long-prefill
+  note: L-float16-B4S512Nq96Nkv8D128-G12-long-prefill
 - operator: GQA
   case_id: 16
   input_shape:
-  - [4, 1024, 128, 128]
-  - [4, 1024, 8, 128]
-  - [4, 1024, 8, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 512
+    - 128
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float32-B4S1024Nq128Nkv8D128-G16-long-prefill
+  note: L-float32-B4S512Nq128Nkv8D128-G16-long-prefill
 - operator: GQA
   case_id: 17
   input_shape:
-  - [2, 8192, 32, 128]
-  - [2, 8192, 8, 128]
-  - [2, 8192, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 1024
+    - 32
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B2S8192Nq32Nkv8D128-G4-long-prefill
+  note: L-float16-B2S1024Nq32Nkv8D128-G4-long-prefill
 - operator: GQA
   case_id: 18
   input_shape:
-  - [2, 4096, 128, 128]
-  - [2, 4096, 8, 128]
-  - [2, 4096, 8, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 512
+    - 128
+    - 128
+  - - 2
+    - 512
+    - 8
+    - 128
+  - - 2
+    - 512
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-bfloat16-B2S4096Nq128Nkv8D128-G16-long-prefill
+  note: L-bfloat16-B2S512Nq128Nkv8D128-G16-long-prefill
 - operator: GQA
   case_id: 19
   input_shape:
-  - [4, 8192, 32, 128]
-  - [4, 8192, 8, 128]
-  - [4, 8192, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 1024
+    - 32
+    - 128
+  - - 4
+    - 1024
+    - 8
+    - 128
+  - - 4
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S8192Nq32Nkv8D128-G4-very-long-prefill
+  note: L-float16-B4S1024Nq32Nkv8D128-G4-very-long-prefill
 - operator: GQA
   case_id: 20
   input_shape:
-  - [4, 2048, 128, 128]
-  - [4, 2048, 8, 128]
-  - [4, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 4
+    - 512
+    - 128
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  - - 4
+    - 512
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
-  note: L-float16-B4S2048Nq128Nkv8D128-G16-very-long-prefill
+  note: L-float16-B4S512Nq128Nkv8D128-G16-very-long-prefill
 - operator: GQA
   case_id: 21
   input_shape:
-  - [16, 1, 32, 128]
-  - [16, 2048, 8, 128]
-  - [16, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 16
+    - 1
+    - 32
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B16S1Skv2048Nq32Nkv8D128-G4-decode
 - operator: GQA
   case_id: 22
   input_shape:
-  - [16, 1, 64, 128]
-  - [16, 2048, 8, 128]
-  - [16, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 16
+    - 1
+    - 64
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B16S1Skv2048Nq64Nkv8D128-G8-decode
 - operator: GQA
   case_id: 23
   input_shape:
-  - [16, 1, 96, 128]
-  - [16, 2048, 8, 128]
-  - [16, 2048, 8, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 16
+    - 1
+    - 96
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B16S1Skv2048Nq96Nkv8D128-G12-decode
 - operator: GQA
   case_id: 24
   input_shape:
-  - [16, 1, 128, 128]
-  - [16, 2048, 8, 128]
-  - [16, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 16
+    - 1
+    - 128
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  - - 16
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B16S1Skv2048Nq128Nkv8D128-G16-decode
 - operator: GQA
   case_id: 25
   input_shape:
-  - [60, 1, 32, 128]
-  - [60, 2048, 8, 128]
-  - [60, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 1
+    - 32
+    - 128
+  - - 60
+    - 2048
+    - 8
+    - 128
+  - - 60
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048Nq32Nkv8D128-G4-decode-large-batch
 - operator: GQA
   case_id: 26
   input_shape:
-  - [72, 1, 64, 128]
-  - [72, 1024, 8, 128]
-  - [72, 1024, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 72
+    - 1
+    - 64
+    - 128
+  - - 72
+    - 1024
+    - 8
+    - 128
+  - - 72
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B72S1Skv2048Nq64Nkv8D128-G8-decode-large-batch
 - operator: GQA
   case_id: 27
   input_shape:
-  - [96, 1, 96, 128]
-  - [96, 1024, 8, 128]
-  - [96, 1024, 8, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 1
+    - 96
+    - 128
+  - - 96
+    - 1024
+    - 8
+    - 128
+  - - 96
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B96S1Skv4096Nq96Nkv8D128-G12-decode-large-batch
 - operator: GQA
   case_id: 28
   input_shape:
-  - [128, 1, 128, 128]
-  - [128, 512, 8, 128]
-  - [128, 512, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 1
+    - 128
+    - 128
+  - - 128
+    - 512
+    - 8
+    - 128
+  - - 128
+    - 512
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B128S1Skv4096Nq128Nkv8D128-G16-decode-large-batch
 - operator: GQA
   case_id: 29
   input_shape:
-  - [60, 1, 32, 256]
-  - [60, 1024, 8, 256]
-  - [60, 1024, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 1
+    - 32
+    - 256
+  - - 60
+    - 1024
+    - 8
+    - 256
+  - - 60
+    - 1024
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048Nq32Nkv8D256-G4-decode-large-batch-D256
 - operator: GQA
   case_id: 30
   input_shape:
-  - [72, 1, 64, 256]
-  - [72, 256, 8, 256]
-  - [72, 256, 8, 256]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 72
+    - 1
+    - 64
+    - 256
+  - - 72
+    - 256
+    - 8
+    - 256
+  - - 72
+    - 256
+    - 8
+    - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float32-B72S1Skv2048Nq64Nkv8D256-G8-decode-large-batch-D256
 - operator: GQA
   case_id: 31
   input_shape:
-  - [96, 1, 96, 256]
-  - [96, 512, 8, 256]
-  - [96, 512, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 1
+    - 96
+    - 256
+  - - 96
+    - 512
+    - 8
+    - 256
+  - - 96
+    - 512
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B96S1Skv4096Nq96Nkv8D256-G12-decode-large-batch-D256
 - operator: GQA
   case_id: 32
   input_shape:
-  - [128, 1, 128, 256]
-  - [128, 256, 8, 256]
-  - [128, 256, 8, 256]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 1
+    - 128
+    - 256
+  - - 128
+    - 256
+    - 8
+    - 256
+  - - 128
+    - 256
+    - 8
+    - 256
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B128S1Skv4096Nq128Nkv8D256-G16-decode-large-batch-D256
 - operator: GQA
   case_id: 33
   input_shape:
-  - [60, 2, 32, 128]
-  - [60, 2048, 8, 128]
-  - [60, 2048, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 2
+    - 32
+    - 128
+  - - 60
+    - 2048
+    - 8
+    - 128
+  - - 60
+    - 2048
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048Nq32Nkv8D128-G4-MTP-large-batch
 - operator: GQA
   case_id: 34
   input_shape:
-  - [72, 4, 64, 128]
-  - [72, 1024, 8, 128]
-  - [72, 1024, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 72
+    - 4
+    - 64
+    - 128
+  - - 72
+    - 1024
+    - 8
+    - 128
+  - - 72
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B72Sq4Skv2048Nq64Nkv8D128-G8-MTP-large-batch
 - operator: GQA
   case_id: 35
   input_shape:
-  - [96, 2, 96, 128]
-  - [96, 1024, 8, 128]
-  - [96, 1024, 8, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 2
+    - 96
+    - 128
+  - - 96
+    - 1024
+    - 8
+    - 128
+  - - 96
+    - 1024
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B96Sq2Skv4096Nq96Nkv8D128-G12-MTP-large-batch
 - operator: GQA
   case_id: 36
   input_shape:
-  - [128, 4, 128, 128]
-  - [128, 512, 8, 128]
-  - [128, 512, 8, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 4
+    - 128
+    - 128
+  - - 128
+    - 512
+    - 8
+    - 128
+  - - 128
+    - 512
+    - 8
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B128Sq4Skv4096Nq128Nkv8D128-G16-MTP-large-batch
 - operator: GQA
   case_id: 37
   input_shape:
-  - [60, 2, 32, 256]
-  - [60, 1024, 8, 256]
-  - [60, 1024, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 60
+    - 2
+    - 32
+    - 256
+  - - 60
+    - 1024
+    - 8
+    - 256
+  - - 60
+    - 1024
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048Nq32Nkv8D256-G4-MTP-large-batch-D256
 - operator: GQA
   case_id: 38
   input_shape:
-  - [96, 4, 96, 256]
-  - [96, 512, 8, 256]
-  - [96, 512, 8, 256]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 96
+    - 4
+    - 96
+    - 256
+  - - 96
+    - 512
+    - 8
+    - 256
+  - - 96
+    - 512
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-float16-B96Sq4Skv4096Nq96Nkv8D256-G12-MTP-large-batch-D256
 - operator: GQA
   case_id: 39
   input_shape:
-  - [128, 2, 128, 256]
-  - [128, 256, 8, 256]
-  - [128, 256, 8, 256]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 128
+    - 2
+    - 128
+    - 256
+  - - 128
+    - 256
+    - 8
+    - 256
+  - - 128
+    - 256
+    - 8
+    - 256
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: L-bfloat16-B128Sq2Skv4096Nq128Nkv8D256-G16-MTP-large-batch-D256
 - operator: GQA
   case_id: 40
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 1, 128]
-  - [2, 128, 1, 128]
-  dtype: [float16, float16, float16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 1
+    - 128
+  - - 2
+    - 128
+    - 1
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float16-B2S128Nq32Nkv1D128-G32-MQA-degenerate
 - operator: GQA
   case_id: 41
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  - [2, 128, 32, 128]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {scaleValue: -1.0}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 32
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    scaleValue: -1.0
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-bfloat16-B2S128Nq32Nkv32D128-G1-MHA-degenerate
 - operator: GQA
   case_id: 42
   input_shape:
-  - [2, 128, 32, 128]
-  - [2, 128, 8, 128]
-  - [2, 128, 8, 128]
-  dtype: [float32, float32, float32]
-  attrs: {scaleValue: 0.08838}
-  value_range: [-1, 1]
+  - - 2
+    - 128
+    - 32
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  - - 2
+    - 128
+    - 8
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    scaleValue: 0.08838
+  value_range:
+  - -1
+  - 1
   baseline_perf_us: null
   note: S-float32-B2S128Nq32Nkv8D128-G4-explicit-scale
