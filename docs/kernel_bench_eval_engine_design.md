@@ -15,7 +15,7 @@
 
 ### 1.1 背景
 
-根据 `docs/kernel_bench_design_v1.0.md` 设计文档，需要构建一套AI生成Ascend C算子代码评测体系，用于量化评估AI生成的算子代码质量，涵盖编译正确性、功能正确性、性能优化性三个核心维度。
+根据 `docs/kernel_bench_design_v1.0.md` 设计文档，构建一套AI生成Ascend C算子代码评测体系，用于量化评估AI生成的算子代码质量，涵盖编译正确性、功能正确性、性能优化性三个核心维度。
 
 ### 1.2 两工程架构设计
 
@@ -88,7 +88,7 @@
 **命名说明**：
 - `kernel_eval`：评测工程代码目录（src/kernel_eval）
 - `kernel_bench`：测试用例数据目录（kernel_bench/level*/op_name/）
-- `kernel-bench`：CLI命令名
+- `./scripts/run_evaluation.sh`：CLI命令脚本（推荐使用）
 
 ---
 
@@ -108,7 +108,7 @@ src/kernel_eval/
 │   ├── case_loader.py       # 测试用例加载
 │   ├── golden_loader.py     # Golden函数加载
 │   ├── data_generator.py    # 数据生成（含特殊值、tensor list）
-│   └ package_manager.py     # 包管理（源码扫描、编译、安装、接口扫描）
+│   └── package_manager.py   # 包管理（源码扫描、编译、安装、接口扫描）
 │
 ├── eval/                    # 评测层
 │   ├── __init__.py
@@ -243,6 +243,8 @@ source_dir/
 cd source_dir && bash build.sh
 ```
 
+**迭代隔离编译**（默认开启）：如果编译失败，系统会自动识别并隔离编译不过的算子到 `_quarantine/` 目录，然后对剩余的算子重新执行编译和评测。这可以确保部分算子编译失败不会导致整个评测任务失败。
+
 编译后检查 `dist/` 目录是否生成whl包和run包。
 
 **Step 4: 安装包**
@@ -304,6 +306,8 @@ if hasattr(torch.ops, 'cann_bench'):
 
 **Step 8: 执行评测**
 
+**子进程隔离**（默认开启）：每个算子在独立的子进程中执行评测，避免一个算子的挂死或崩溃影响其他算子的评测。每个子进程都有独立的超时控制（默认240秒），超时后会先发送SIGTERM信号，10秒宽限期后发送SIGKILL信号强制终止。
+
 对每个匹配到的算子执行评测：
 1. 安全验证（Timing API完整性）
 2. 加载用例数据
@@ -316,35 +320,82 @@ if hasattr(torch.ops, 'cann_bench'):
 
 ### 3.3 命令行参数
 
+#### 通用参数
+
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| `--source-dir` | AI生成的算子源码目录 | 无 |
-| `--operator` | 算子名称筛选 | 无 |
-| `--level` | 难度级别筛选 (1/2/3/4) | 无 |
-| `--case-id` | 用例编号筛选 | 无 |
-| `--output` | 报告输出目录 | reports/ |
-| `--eval-code` | 评测代号 | 自动生成 |
+| `-a, --action <action>` | 操作类型: eval(评测), list(列表), info(详情), config(配置) | eval |
 | `-v, --verbose` | 详细输出 | False |
 
+#### 评测(eval)相关参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `--source-dir <dir>` | AI生成的算子源码目录（自动扫描编译安装） | 无 |
+| `-l, --level <level>` | 算子难度级别 (1/2/3/4) | 无 |
+| `-o, --operator <name>` | 算子名称 (如 Exp, Softmax) | 无 |
+| `-c, --case-id <id>` | 用例编号 | 无 |
+| `--no-subprocess-isolation` | 关闭子进程隔离（默认开启）。开启后每个算子在独立子进程评测，一个kernel挂死/崩溃不会污染后面的算子 | False |
+| `--op-timeout-sec` | 子进程隔离下 per-op 超时。超时先 SIGTERM，10s 宽限后 SIGKILL | 240秒 |
+| `--no-iterative-compile` | 关闭迭代隔离编译（默认开启）。开启时build.sh失败会自动识别并隔离编译不过的算子到_quarantine/，剩下的算子继续编译和评测 | False |
+
 当不指定 `--source-dir` 时，默认跳过编译安装，直接使用已安装的cann_bench模块。
+
+#### 列表(list)相关参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `-l, --level <level>` | 按级别筛选 (1/2/3/4) | 无 |
+| `-o, --operator <name>` | 按算子筛选 | 无 |
+
+#### 详情(info)相关参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `-o, --operator <name>` | 算子名称（必填） | 无 |
+| `-l, --level <level>` | 难度级别 | 无 |
+
+#### 配置(config)相关参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| 无 | 显示当前配置 | - |
 
 ### 3.4 使用示例
 
 ```bash
 # 从源码目录评测（自动编译安装）
-kernel-bench eval --source-dir /path/to/ai_ops
+./scripts/run_evaluation.sh --action eval --source-dir /path/to/ai_ops
 
-# 仅执行Golden验证（不安装whl）
-kernel-bench eval --operator Exp --level 1
+# 使用子进程隔离评测（默认开启）
+./scripts/run_evaluation.sh --action eval --source-dir /path/to/ai_ops
+
+# 关闭子进程隔离以提高速度
+./scripts/run_evaluation.sh --action eval --source-dir /path/to/ai_ops --no-subprocess-isolation
+
+# 设置算子超时时间
+./scripts/run_evaluation.sh --action eval --source-dir /path/to/ai_ops --op-timeout-sec 300
+
+# 关闭迭代隔离编译（严格模式）
+./scripts/run_evaluation.sh --action eval --source-dir /path/to/ai_ops --no-iterative-compile
+
+# 仅执行指定算子的评测
+./scripts/run_evaluation.sh --action eval --operator Exp --level 1
 
 # 评测单个用例
-kernel-bench eval --operator Exp --level 1 --case-id 1
+./scripts/run_evaluation.sh --action eval --operator Exp --level 1 --case-id 1
 
-# 评测指定level的所有算子
-kernel-bench list --level 1
+# 列出所有level 1的算子
+./scripts/run_evaluation.sh --action list --level 1
+
+# 列出指定算子的所有用例
+./scripts/run_evaluation.sh --action list --operator Exp
 
 # 查看算子详情
-kernel-bench info --operator Exp
+./scripts/run_evaluation.sh --action info --operator Exp
+
+# 显示当前配置
+./scripts/run_evaluation.sh --action config
 ```
 
 ### 3.5 异常处理

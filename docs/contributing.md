@@ -1,9 +1,14 @@
 # kernel_bench 算子贡献指南
 
-# TODO 约定bench_lab的贡献规则，增加自定义目录xxx
-本文档描述 `kernel_bench/level{1,2,3,4}/<op_name>/` 目录下每个算子交付件的文件格式要求与字段定义。
+**创建算子目录**  
+  在 `bench_lab/` 目录下创建以任务名（例如 `driver_bench`）+算子名称命名的文件夹（例如 `bench_lab/driver_bench/my_new_op/`）。
 
-每个算子必须交付以下 5 个文件：
+## 贡献规范
+
+- **算子原型**：需符合Ascend C算子开发规范，支持动态shape、数据类型兼容性等特性。
+- **参考实现**：需通过PyTorch官方接口实现，确保在CPU/NPU环境可正确运行。
+- **测试用例**：需覆典型场景。
+- **文档描述**：需清晰说明算子功能、适用场景及与同类算子的差异。
 
 | 文件 | 用途 |
 |------|------|
@@ -57,7 +62,7 @@ operator:
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `name` | string | 是 | 算子名称，使用 PascalCase（如 `Conv2D`、`ApplyAdamW`） |
-| `category` | string | 是 | 算子类别，取值见下方枚举 |
+| `category` | string | 是 | 算子类别 |
 | `difficulty` | string | 是 | 难度等级，取值 `L1` / `L2` / `L3` / `L4`，须与所在 `levelN/` 目录一致 |
 | `formula` | string | 是 | 数学公式，单行直接写字符串；多行使用 YAML `|` 块标量 |
 | `description` | string | 是 | 一句话中文描述 |
@@ -68,7 +73,7 @@ operator:
 | `schema` | string | 是 | API 函数签名 |
 | `note` | string | 否 | 补充说明 |
 
-### 1.3 category 枚举
+### 1.3 category 常见枚举
 
 | 取值 | 含义 | 代表算子 |
 |------|------|----------|
@@ -294,27 +299,13 @@ cann_bench.<op_name>(<参数列表>) -> Tensor <output>
 - <约束1>
 - <约束2>
 
-## 4. 精度要求
-
-| 数据类型 | 验证方式 | rtol | atol |
-|---------|---------|------|------|
-| float16 | 相对误差 | 1e-3 | 1e-3 |
-| float32 | 相对误差 | 1e-4 | 1e-4 |
-| bfloat16 | 相对误差 | 4e-3 | 4e-3 |
-
-**对比公式**：
-
-$$
-|output - golden| \leq atol + rtol \times |golden|
-$$
-
-## 5. 标准 Golden 代码
+## 4. 标准 Golden 代码
 
 ```python
 <完整 golden.py 内容>
 ```
 
-## 6. 额外信息
+## 5. 额外信息
 
 ### 算子调用示例
 
@@ -324,14 +315,7 @@ import cann_bench
 
 <示例代码>
 ```
-
-### 性能基线参考
-
-<基于 cases.yaml 的说明>
-
-### 相关算子
-
-- **<算子名>**：<关系描述>
+y = cann_bench.<op_name>(x, weight, bias, stride, padding, dilation, groups)
 ```
 
 ### 3.2 与 proto.yaml 的一致性要求
@@ -346,9 +330,6 @@ import cann_bench
 | 数据类型表 | `operator.inputs[].dtype` + `operator.outputs[].dtype` |
 | schema | `operator.schema` |
 | Golden 代码 | `golden.py` 全文 |
-
-> **关键**：desc.md 中数据类型表须覆盖 proto.yaml 中定义的所有 dtype，不能遗漏。
-
 ---
 
 ## 4. cases.yaml
@@ -387,8 +368,8 @@ cases:
 
 ### 4.3 用例设计原则
 
-用例应覆盖以下场景（建议 20+ 个用例）：
-
+结合评测目标，设计用例覆盖场景，例如当前kernel_bench用例覆盖泛化场景（建议 20+ 个用例）：
+**note:当前场景仅供参考**
 | 场景类别 | 说明 |
 |---------|------|
 | **基准场景** | 对齐 shape（64 的倍数）、典型 kernel/stride/padding |
