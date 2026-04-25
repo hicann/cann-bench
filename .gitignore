@@ -39,6 +39,9 @@ env/
 htmlcov/
 .tox/
 .nox/
+kernel_meta/
+extra-info/
+fusion_result.json
 
 # Project specific
 skill/
@@ -48,3 +51,6 @@ case_generate/
 # Test reports (generated)
 test/reports/
 test/tmp/
+reports
+cann_bench_project/
+.arts
