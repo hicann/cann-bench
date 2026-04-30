@@ -17,10 +17,10 @@ from typing import Tuple
 """
 GroupedMatmulSwigluQuant 算子 Torch Golden 参考实现
 
-对齐 torch_npu.npu_grouped_matmul_swiglu_quant_v2 的默认配置:
+计算流程：
     y, y_scale = Quant( SwiGLU( Dequant( GroupedMatmul(x, weight) ) ) )
 
-语义约定:
+语义约定：
   - GroupedMatmul 按 group_list 把 x 的行切成 E 组，每组与 weight[g] 做 matmul
   - group_list 采用 cumsum 语义（累计和）
   - Dequant 使用 x_scale (per-token) × weight_scale (per-channel)

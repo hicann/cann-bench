@@ -83,17 +83,30 @@ cann_bench.grouped_matmul_swiglu_quant(
 
 ## 4. 精度要求
 
-计算结果与 PyTorch Golden 实现逐元素对比：
+采用[生态算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/experimental_standard.md)进行验证。
 
-| 数据类型 | 验证方式 | 阈值 |
-|---------|---------|------|
-| y (int8) | 允许量化边界 off-by-1，最大绝对偏差 ≤ 1；off-by-1 元素占比 | < 1e-4 |
-| y_scale (float32) | 容差比较：`\|output - golden\| ≤ atol + rtol × \|golden\|` | rtol=1e-3，atol=1e-5 |
+**误差指标**：
 
-**说明**：
+1. 平均相对误差（MERE）：采样点中相对误差平均值
 
-- `y` 的偏差仅允许来自量化边界 rounding（float32 累加顺序差异导致 `round()` 舍到相邻整数）；出现 |Δ|≥2 的元素直接判负。
-- `y_scale` 使用相对+绝对双阈值，覆盖 scale 本身量级差异较大的情形（见 `accuracy_check.py`）。
+   $$
+   \text{MERE} = \text{avg}(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
+   $$
+
+2. 最大相对误差（MARE）：采样点中相对误差最大值
+
+   $$
+   \text{MARE} = \max(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
+   $$
+
+**通过标准**：
+
+| 数据类型 | FLOAT16 | BFLOAT16 | FLOAT32 | HiFLOAT32 | FLOAT8 E4M3 | FLOAT8 E5M2 |
+|----------|---------|----------|---------|-----------|-------------|-------------|
+| **通过阈值(Threshold)** | 2^-10 | 2^-7 | 2^-13 | 2^-11 | 2^-3 | 2^-2 |
+
+当平均相对误差 MERE < Threshold，最大相对误差 MARE < 10 * Threshold 时判定为通过。
+
 
 ## 5. 标准 Golden 代码
 
@@ -160,21 +173,3 @@ y, y_scale = cann_bench.grouped_matmul_swiglu_quant(
 ### 参考文档
 
 - `torch_npu.npu_grouped_matmul_swiglu_quant_v2`：<https://www.hiascend.com/document/detail/zh/Pytorch/730/apiref/torchnpuCustomsapi/docs/context/torch_npu-npu_grouped_matmul_swiglu_quant_v2.md>
-
-### 性能基线参考
-
-`cases.csv` 共 20 个代表性 case，`baseline_perf_us` 通过直接调用 `torch_npu.npu_grouped_matmul_swiglu_quant_v2`（W8A8 NZ 路径，FRACTAL_NZ 权重）采集：
-
-- 测试卡：Ascend 910B2（单卡）
-- 测试脚本：`benchmark_baseline_v2.py`，复用 CAKE2 `AdvancedPerformanceEngine`（10240×10240 fp16 matmul + 96×1024×1024 reduce-max 作为频率预热 + L2 cache clear；ACL profiling + msprof 导出；pattern 区间中位数作为稳定耗时）
-- 每个 case：20 次有效采样，剔除冷启动后取中位数
-
-硬件约束（v2 W8A8 NZ 路径）：
-- `K` 需 16 对齐
-- `N` 需 32 对齐；本版本 `N` 上限 10240
-
-### 相关算子
-
-- **MlaProlog**：Multi-Head Latent Attention 前处理，同为 L4 级多步融合算子
-- **SparseFlashAttention**：稀疏注意力计算，同为 L4 级融合复合算子
-- **LSTM**：循环神经网络融合算子，同为 L4 级融合算子

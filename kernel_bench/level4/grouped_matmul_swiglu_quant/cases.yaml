@@ -26,7 +26,7 @@ cases:
   - [0.001, 0.01]
   - [0, 128]
   group_list: [16, 32, 48, 64, 80, 96, 112, 128]
-  baseline_perf_us: 187.48
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-decode-M=128-E=8-K=7168-N=4096-balanced(~16/expert)
 - operator: GroupedMatmulSwigluQuant
   case_id: 2
@@ -45,7 +45,7 @@ cases:
   - [0.001, 0.01]
   - [0, 256]
   group_list: [32, 64, 96, 128, 160, 192, 224, 256]
-  baseline_perf_us: 190.18
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-decode-M=256-E=8-K=7168-N=4096-balanced(~32/expert)
 - operator: GroupedMatmulSwigluQuant
   case_id: 3
@@ -64,7 +64,7 @@ cases:
   - [0.001, 0.01]
   - [0, 1024]
   group_list: [128, 256, 384, 512, 640, 768, 896, 1024]
-  baseline_perf_us: 234.54
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-prefill-M=1024-E=8-K=7168-N=4096-balanced(~128/expert)
 - operator: GroupedMatmulSwigluQuant
   case_id: 4
@@ -83,7 +83,7 @@ cases:
   - [0.001, 0.01]
   - [0, 2048]
   group_list: [256, 512, 768, 1024, 1280, 1536, 1792, 2048]
-  baseline_perf_us: 303.8
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-prefill-M=2048-E=8-K=7168-N=4096-balanced(~256/expert)
 - operator: GroupedMatmulSwigluQuant
   case_id: 5
@@ -102,7 +102,7 @@ cases:
   - [0.001, 0.01]
   - [0, 4096]
   group_list: [512, 1024, 1536, 2048, 2560, 3072, 3584, 4096]
-  baseline_perf_us: 533.23
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-big-batch-M=4096-E=8-K=7168-N=4096
 - operator: GroupedMatmulSwigluQuant
   case_id: 6
@@ -121,7 +121,7 @@ cases:
   - [0.001, 0.01]
   - [0, 512]
   group_list: [307, 337, 367, 396, 425, 454, 483, 512]
-  baseline_perf_us: 225.27
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-imbalanced-M=512-E=8-one-hot-expert-token-skew
 - operator: GroupedMatmulSwigluQuant
   case_id: 7
@@ -140,7 +140,7 @@ cases:
   - [0.001, 0.01]
   - [0, 128]
   group_list: [22, 44, 44, 65, 86, 86, 107, 128]
-  baseline_perf_us: 143.09
+  baseline_perf_us: null
   note: L-DSv3-EP16-per-card-empty-expert-M=128-E=8-含2个空group(idx2和idx5)
 - operator: GroupedMatmulSwigluQuant
   case_id: 8
@@ -159,7 +159,7 @@ cases:
   - [0.001, 0.01]
   - [0, 512]
   group_list: [32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512]
-  baseline_perf_us: 352.14
+  baseline_perf_us: null
   note: L-DSv3-EP8-per-card-128专家8卡-M=512-E=16-K=7168-N=4096-balanced-32-per-expert
 - operator: GroupedMatmulSwigluQuant
   case_id: 9
@@ -178,7 +178,7 @@ cases:
   - [0.001, 0.01]
   - [0, 32]
   group_list: [4, 8, 12, 16, 20, 24, 28, 32]
-  baseline_perf_us: 243.82
+  baseline_perf_us: null
   note: L-Mixtral-like-scaled-M=32-E=8-K=4096-N=10240-受硬件N<=10240约束的缩减版
 - operator: GroupedMatmulSwigluQuant
   case_id: 10
@@ -197,7 +197,7 @@ cases:
   - [0.001, 0.01]
   - [0, 1024]
   group_list: [128, 256, 384, 512, 640, 768, 896, 1024]
-  baseline_perf_us: 98.77
+  baseline_perf_us: null
   note: M-Qwen2-MoE-like-M=1024-E=8-K=3584-N=2816-moe_inter=1408
 - operator: GroupedMatmulSwigluQuant
   case_id: 11
@@ -216,7 +216,7 @@ cases:
   - [0.001, 0.01]
   - [256, 256]
   group_list: [256]
-  baseline_perf_us: 52.52
+  baseline_perf_us: null
   note: M-single-expert退化-E=1-M=256-K=4096-N=4096-纯GMM
 - operator: GroupedMatmulSwigluQuant
   case_id: 12
@@ -235,7 +235,7 @@ cases:
   - [0.001, 0.01]
   - [0, 64]
   group_list: [32, 64]
-  baseline_perf_us: 18.15
+  baseline_perf_us: null
   note: S-small-aligned-M=64-E=2-K=256-N=512-小规模冒烟
 - operator: GroupedMatmulSwigluQuant
   case_id: 13
@@ -254,7 +254,7 @@ cases:
   - [0.001, 0.01]
   - [0, 1024]
   group_list: [256, 512, 768, 1024]
-  baseline_perf_us: 69.47
+  baseline_perf_us: null
   note: M-medium-aligned-M=1024-E=4-K=2048-N=4096-对齐中规模
 - operator: GroupedMatmulSwigluQuant
   case_id: 14
@@ -273,7 +273,7 @@ cases:
   - [0.001, 0.01]
   - [0, 2048]
   group_list: [128, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664, 1792, 1920, 2048]
-  baseline_perf_us: 259.15
+  baseline_perf_us: null
   note: L-large-aligned-M=2048-E=16-K=4096-N=4096-多专家大规模
 - operator: GroupedMatmulSwigluQuant
   case_id: 15
@@ -292,7 +292,7 @@ cases:
   - [0.001, 0.01]
   - [0, 1009]
   group_list: [253, 505, 757, 1009]
-  baseline_perf_us: 33.62
+  baseline_perf_us: null
   note: S-prime-M-M=1009-E=4-K=1024-N=1024-M质数非对齐
 - operator: GroupedMatmulSwigluQuant
   case_id: 16
@@ -311,7 +311,7 @@ cases:
   - [0.001, 0.01]
   - [0, 512]
   group_list: [128, 256, 384, 512]
-  baseline_perf_us: 29.51
+  baseline_perf_us: null
   note: S-non-pow2-K-M=512-E=4-K=1040(16x65)-N=1024-K非2幂但16对齐
 - operator: GroupedMatmulSwigluQuant
   case_id: 17
@@ -330,7 +330,7 @@ cases:
   - [0.001, 0.01]
   - [0, 512]
   group_list: [128, 256, 384, 512]
-  baseline_perf_us: 32.68
+  baseline_perf_us: null
   note: S-non-pow2-N-M=512-E=4-K=1024-N=1056(32x33)-SwiGLU拆分后=528
 - operator: GroupedMatmulSwigluQuant
   case_id: 18
@@ -349,7 +349,7 @@ cases:
   - [0.0001, 0.001]
   - [0, 512]
   group_list: [128, 256, 384, 512]
-  baseline_perf_us: 27.15
+  baseline_perf_us: null
   note: S-micro-dequant-scale-M=512-E=4-两端scale=1e-4到1e-3-微小反量化
 - operator: GroupedMatmulSwigluQuant
   case_id: 19
@@ -368,7 +368,7 @@ cases:
   - [0.01, 0.1]
   - [0, 512]
   group_list: [128, 256, 384, 512]
-  baseline_perf_us: 27.24
+  baseline_perf_us: null
   note: S-large-dequant-scale-M=512-E=4-两端scale=0.01到0.1-大反量化
 - operator: GroupedMatmulSwigluQuant
   case_id: 20
@@ -387,5 +387,5 @@ cases:
   - [0.001, 0.01]
   - [0, 1024]
   group_list: [128, 256, 384, 512, 640, 768, 896, 1024]
-  baseline_perf_us: 134.46
+  baseline_perf_us: null
   note: L-narrow-activation-range-M=1024-E=8-x限定±32防止K=4096累加溢出

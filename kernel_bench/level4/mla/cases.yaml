@@ -90,82 +90,6 @@ cases:
   input_shape:
   - - 2
     - 128
-    - 128
-    - 448
-  - - 2
-    - 128
-    - 128
-    - 64
-  - - 2
-    - 128
-    - 1
-    - 448
-  - - 2
-    - 128
-    - 1
-    - 64
-  - - 2
-    - 128
-    - 1
-    - 448
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: M-float16-BSND-B2S128Nq128Nkv1-dnope448drope64-prefill
-- operator: MLA
-  case_id: 4
-  input_shape:
-  - - 2
-    - 128
-    - 64
-    - 512
-  - - 2
-    - 128
-    - 64
-    - 64
-  - - 2
-    - 128
-    - 1
-    - 512
-  - - 2
-    - 128
-    - 1
-    - 64
-  - - 2
-    - 128
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: M-float16-BSND-B2S128Nq64Nkv1-dnope512drope64
-- operator: MLA
-  case_id: 5
-  input_shape:
-  - - 2
-    - 128
     - 64
     - 448
   - - 2
@@ -200,7 +124,7 @@ cases:
   baseline_perf_us: null
   note: M-bfloat16-BSND-B2S128Nq64Nkv1-dnope448drope64
 - operator: MLA
-  case_id: 6
+  case_id: 4
   input_shape:
   - - 2
     - 256
@@ -238,273 +162,83 @@ cases:
   baseline_perf_us: null
   note: M-float16-BSND-B2Sq256Skv128Nq128-dnope512-cross
 - operator: MLA
+  case_id: 5
+  input_shape:
+  - - 2
+    - 256
+    - 128
+    - 512
+  - - 2
+    - 256
+    - 128
+    - 64
+  - - 2
+    - 256
+    - 1
+    - 512
+  - - 2
+    - 256
+    - 1
+    - 64
+  - - 2
+    - 256
+    - 1
+    - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    numKVHeads: 1
+    scaleValue: -1.0
+    inputLayout: BSND
+  value_range:
+  - -1
+  - 1
+  baseline_perf_us: null
+  note: L-float16-BSND-B2S256Nq128-dnope512-long-prefill
+- operator: MLA
+  case_id: 6
+  input_shape:
+  - - 2
+    - 256
+    - 128
+    - 448
+  - - 2
+    - 256
+    - 128
+    - 64
+  - - 2
+    - 256
+    - 1
+    - 448
+  - - 2
+    - 256
+    - 1
+    - 64
+  - - 2
+    - 256
+    - 1
+    - 448
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    numKVHeads: 1
+    scaleValue: -1.0
+    inputLayout: BSND
+  value_range:
+  - -1
+  - 1
+  baseline_perf_us: null
+  note: L-float16-BSND-B2S256Nq128-dnope448-long-prefill
+- operator: MLA
   case_id: 7
-  input_shape:
-  - - 2
-    - 128
-    - 128
-    - 512
-  - - 2
-    - 128
-    - 128
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 512
-  - - 2
-    - 512
-    - 1
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 512
-  dtype:
-  - float32
-  - float32
-  - float32
-  - float32
-  - float32
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: M-float32-BSND-B2Sq128Skv512Nq128-dnope512-cross
-- operator: MLA
-  case_id: 8
-  input_shape:
-  - - 4
-    - 512
-    - 128
-    - 512
-  - - 4
-    - 512
-    - 128
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 512
-  - - 4
-    - 512
-    - 1
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B4S512Nq128-dnope512-long-prefill
-- operator: MLA
-  case_id: 9
-  input_shape:
-  - - 4
-    - 512
-    - 64
-    - 448
-  - - 4
-    - 512
-    - 64
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 448
-  - - 4
-    - 512
-    - 1
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 448
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-BSND-B4S512Nq64-dnope448-long-prefill
-- operator: MLA
-  case_id: 10
-  input_shape:
-  - - 2
-    - 512
-    - 128
-    - 512
-  - - 2
-    - 512
-    - 128
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 512
-  - - 2
-    - 512
-    - 1
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B2S512Nq128-dnope512-long-prefill
-- operator: MLA
-  case_id: 11
-  input_shape:
-  - - 2
-    - 512
-    - 128
-    - 448
-  - - 2
-    - 512
-    - 128
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 448
-  - - 2
-    - 512
-    - 1
-    - 64
-  - - 2
-    - 512
-    - 1
-    - 448
-  dtype:
-  - float32
-  - float32
-  - float32
-  - float32
-  - float32
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float32-BSND-B2S512Nq128-dnope448-long-prefill
-- operator: MLA
-  case_id: 12
-  input_shape:
-  - - 4
-    - 512
-    - 128
-    - 512
-  - - 4
-    - 512
-    - 128
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 512
-  - - 4
-    - 512
-    - 1
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B4S512Nq128-dnope512-very-long-prefill
-- operator: MLA
-  case_id: 13
-  input_shape:
-  - - 4
-    - 512
-    - 64
-    - 448
-  - - 4
-    - 512
-    - 64
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 448
-  - - 4
-    - 512
-    - 1
-    - 64
-  - - 4
-    - 512
-    - 1
-    - 448
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-BSND-B4S512Nq64-dnope448-very-long-prefill
-- operator: MLA
-  case_id: 14
   input_shape:
   - - 1
     - 1
@@ -542,7 +276,7 @@ cases:
   baseline_perf_us: null
   note: S-float16-BSND-B1S1Skv2048Nq128-decode-single-batch
 - operator: MLA
-  case_id: 15
+  case_id: 8
   input_shape:
   - - 16
     - 1
@@ -580,7 +314,7 @@ cases:
   baseline_perf_us: null
   note: M-float16-BSND-B16S1Skv2048Nq128-decode
 - operator: MLA
-  case_id: 16
+  case_id: 9
   input_shape:
   - - 32
     - 1
@@ -618,7 +352,7 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-BSND-B32S1Skv2048Nq128-decode
 - operator: MLA
-  case_id: 17
+  case_id: 10
   input_shape:
   - - 60
     - 1
@@ -656,83 +390,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-BSND-B60S1Skv2048Nq128-dnope512-decode-large-batch
 - operator: MLA
-  case_id: 18
-  input_shape:
-  - - 72
-    - 1
-    - 128
-    - 448
-  - - 72
-    - 1
-    - 128
-    - 64
-  - - 72
-    - 2048
-    - 1
-    - 448
-  - - 72
-    - 2048
-    - 1
-    - 64
-  - - 72
-    - 2048
-    - 1
-    - 448
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B72S1Skv2048Nq128-dnope448-decode-large-batch
-- operator: MLA
-  case_id: 19
-  input_shape:
-  - - 96
-    - 1
-    - 128
-    - 512
-  - - 96
-    - 1
-    - 128
-    - 64
-  - - 96
-    - 2048
-    - 1
-    - 512
-  - - 96
-    - 2048
-    - 1
-    - 64
-  - - 96
-    - 2048
-    - 1
-    - 512
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-BSND-B96S1Skv4096Nq128-dnope512-decode-large-batch
-- operator: MLA
-  case_id: 20
+  case_id: 11
   input_shape:
   - - 128
     - 1
@@ -770,7 +428,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-BSND-B128S1Skv4096Nq128-dnope512-decode-large-batch
 - operator: MLA
-  case_id: 21
+  case_id: 12
   input_shape:
   - - 60
     - 1
@@ -808,45 +466,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-BSND-B60S1Skv2048Nq64-dnope512-decode-large-batch
 - operator: MLA
-  case_id: 22
-  input_shape:
-  - - 128
-    - 1
-    - 64
-    - 448
-  - - 128
-    - 1
-    - 64
-    - 64
-  - - 128
-    - 1024
-    - 1
-    - 448
-  - - 128
-    - 1024
-    - 1
-    - 64
-  - - 128
-    - 1024
-    - 1
-    - 448
-  dtype:
-  - float32
-  - float32
-  - float32
-  - float32
-  - float32
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float32-BSND-B128S1Skv4096Nq64-dnope448-decode-large-batch
-- operator: MLA
-  case_id: 23
+  case_id: 13
   input_shape:
   - - 2
     - 128
@@ -884,7 +504,7 @@ cases:
   baseline_perf_us: null
   note: M-float16-BNSD-B2Nq128S128-dnope512drope64-prefill
 - operator: MLA
-  case_id: 24
+  case_id: 14
   input_shape:
   - - 2
     - 128
@@ -922,45 +542,7 @@ cases:
   baseline_perf_us: null
   note: M-float16-BNSD-B2Nq128S128-dnope448drope64-prefill
 - operator: MLA
-  case_id: 25
-  input_shape:
-  - - 4
-    - 128
-    - 512
-    - 512
-  - - 4
-    - 128
-    - 512
-    - 64
-  - - 4
-    - 1
-    - 512
-    - 512
-  - - 4
-    - 1
-    - 512
-    - 64
-  - - 4
-    - 1
-    - 512
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BNSD
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BNSD-B4Nq128S512-dnope512-long-prefill
-- operator: MLA
-  case_id: 26
+  case_id: 15
   input_shape:
   - - 2
     - 128
@@ -998,7 +580,7 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-BNSD-B2Nq128S512-dnope512-long-prefill
 - operator: MLA
-  case_id: 27
+  case_id: 16
   input_shape:
   - - 60
     - 128
@@ -1036,101 +618,25 @@ cases:
   baseline_perf_us: null
   note: L-float16-BNSD-B60Nq128S1Skv2048-decode-large-batch
 - operator: MLA
-  case_id: 28
+  case_id: 17
   input_shape:
-  - - 96
-    - 128
-    - 1
-    - 512
-  - - 96
-    - 128
-    - 1
-    - 64
-  - - 96
-    - 1
-    - 2048
-    - 512
-  - - 96
-    - 1
-    - 2048
-    - 64
-  - - 96
-    - 1
-    - 2048
-    - 512
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BNSD
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-BNSD-B96Nq128S1Skv4096-decode-large-batch
-- operator: MLA
-  case_id: 29
-  input_shape:
-  - - 128
-    - 64
-    - 1
-    - 448
-  - - 128
-    - 64
-    - 1
-    - 64
-  - - 128
-    - 1
-    - 2048
-    - 448
-  - - 128
-    - 1
-    - 2048
-    - 64
-  - - 128
-    - 1
-    - 2048
-    - 448
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BNSD
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BNSD-B128Nq64S1Skv4096-dnope448-decode-large-batch
-- operator: MLA
-  case_id: 30
-  input_shape:
-  - - 60
+  - - 16
     - 2
     - 128
     - 512
-  - - 60
+  - - 16
     - 2
     - 128
     - 64
-  - - 60
+  - - 16
     - 2048
     - 1
     - 512
-  - - 60
+  - - 16
     - 2048
     - 1
     - 64
-  - - 60
+  - - 16
     - 2048
     - 1
     - 512
@@ -1148,47 +654,9 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: L-float16-BSND-B60Sq2Skv2048Nq128-dnope512-MTP-large-batch
+  note: L-float16-BSND-B16Sq2Skv2048Nq128-dnope512-MTP
 - operator: MLA
-  case_id: 31
-  input_shape:
-  - - 72
-    - 4
-    - 128
-    - 448
-  - - 72
-    - 4
-    - 128
-    - 64
-  - - 72
-    - 2048
-    - 1
-    - 448
-  - - 72
-    - 2048
-    - 1
-    - 64
-  - - 72
-    - 2048
-    - 1
-    - 448
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B72Sq4Skv2048Nq128-dnope448-MTP-large-batch
-- operator: MLA
-  case_id: 32
+  case_id: 18
   input_shape:
   - - 96
     - 2
@@ -1226,139 +694,25 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-BSND-B96Sq2Skv4096Nq128-dnope512-MTP-large-batch
 - operator: MLA
-  case_id: 33
+  case_id: 19
   input_shape:
-  - - 128
-    - 4
-    - 128
-    - 512
-  - - 128
-    - 4
-    - 128
-    - 64
-  - - 128
-    - 1024
-    - 1
-    - 512
-  - - 128
-    - 1024
-    - 1
-    - 64
-  - - 128
-    - 1024
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B128Sq4Skv4096Nq128-dnope512-MTP-large-batch
-- operator: MLA
-  case_id: 34
-  input_shape:
-  - - 60
-    - 2
-    - 64
-    - 512
-  - - 60
-    - 2
-    - 64
-    - 64
-  - - 60
-    - 2048
-    - 1
-    - 512
-  - - 60
-    - 2048
-    - 1
-    - 64
-  - - 60
-    - 2048
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BSND-B60Sq2Skv2048Nq64-dnope512-MTP-large-batch
-- operator: MLA
-  case_id: 35
-  input_shape:
-  - - 128
-    - 4
-    - 64
-    - 448
-  - - 128
-    - 4
-    - 64
-    - 64
-  - - 128
-    - 512
-    - 1
-    - 448
-  - - 128
-    - 512
-    - 1
-    - 64
-  - - 128
-    - 512
-    - 1
-    - 448
-  dtype:
-  - float32
-  - float32
-  - float32
-  - float32
-  - float32
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BSND
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float32-BSND-B128Sq4Skv4096Nq64-dnope448-MTP-large-batch
-- operator: MLA
-  case_id: 36
-  input_shape:
-  - - 60
+  - - 16
     - 128
     - 2
     - 512
-  - - 60
+  - - 16
     - 128
     - 2
     - 64
-  - - 60
+  - - 16
     - 1
     - 2048
     - 512
-  - - 60
+  - - 16
     - 1
     - 2048
     - 64
-  - - 60
+  - - 16
     - 1
     - 2048
     - 512
@@ -1376,85 +730,9 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  note: L-float16-BNSD-B60Nq128Sq2Skv2048-dnope512-MTP-large-batch
+  note: L-float16-BNSD-B16Nq128Sq2Skv2048-dnope512-MTP
 - operator: MLA
-  case_id: 37
-  input_shape:
-  - - 96
-    - 128
-    - 4
-    - 512
-  - - 96
-    - 128
-    - 4
-    - 64
-  - - 96
-    - 1
-    - 2048
-    - 512
-  - - 96
-    - 1
-    - 2048
-    - 64
-  - - 96
-    - 1
-    - 2048
-    - 512
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BNSD
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-BNSD-B96Nq128Sq4Skv4096-dnope512-MTP-large-batch
-- operator: MLA
-  case_id: 38
-  input_shape:
-  - - 128
-    - 64
-    - 2
-    - 448
-  - - 128
-    - 64
-    - 2
-    - 64
-  - - 128
-    - 1
-    - 2048
-    - 448
-  - - 128
-    - 1
-    - 2048
-    - 64
-  - - 128
-    - 1
-    - 2048
-    - 448
-  dtype:
-  - float16
-  - float16
-  - float16
-  - float16
-  - float16
-  attrs:
-    numKVHeads: 1
-    scaleValue: -1.0
-    inputLayout: BNSD
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-BNSD-B128Nq64Sq2Skv4096-dnope448-MTP-large-batch
-- operator: MLA
-  case_id: 39
+  case_id: 20
   input_shape:
   - - 2
     - 128

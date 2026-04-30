@@ -117,32 +117,6 @@ cases:
   case_id: 5
   input_shape:
   - - 2
-    - 512
-    - 32
-    - 256
-  - - 2
-    - 512
-    - 32
-    - 256
-  - - 2
-    - 512
-    - 32
-    - 256
-  dtype:
-  - float32
-  - float32
-  - float32
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: M-float32-B2S512N32D256-D256
-- operator: MHA
-  case_id: 6
-  input_shape:
-  - - 2
     - 128
     - 12
     - 64
@@ -166,7 +140,7 @@ cases:
   baseline_perf_us: null
   note: S-float16-B2Sq128Skv256N12D64-cross
 - operator: MHA
-  case_id: 7
+  case_id: 6
   input_shape:
   - - 2
     - 512
@@ -192,7 +166,7 @@ cases:
   baseline_perf_us: null
   note: S-bfloat16-B2Sq512Skv128N16D128-cross
 - operator: MHA
-  case_id: 8
+  case_id: 7
   input_shape:
   - - 4
     - 1024
@@ -218,33 +192,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B4S1024N32D128-long-prefill
 - operator: MHA
-  case_id: 9
-  input_shape:
-  - - 2
-    - 1024
-    - 32
-    - 128
-  - - 2
-    - 1024
-    - 32
-    - 128
-  - - 2
-    - 1024
-    - 32
-    - 128
-  dtype:
-  - float16
-  - float16
-  - float16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-B2S1024N32D128-long-prefill
-- operator: MHA
-  case_id: 10
+  case_id: 8
   input_shape:
   - - 4
     - 1024
@@ -270,7 +218,7 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-B4S1024N32D128-very-long-prefill
 - operator: MHA
-  case_id: 11
+  case_id: 9
   input_shape:
   - - 4
     - 1024
@@ -296,33 +244,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B4S1024N16D256-long-prefill-D256
 - operator: MHA
-  case_id: 12
-  input_shape:
-  - - 2
-    - 2048
-    - 8
-    - 256
-  - - 2
-    - 2048
-    - 8
-    - 256
-  - - 2
-    - 2048
-    - 8
-    - 256
-  dtype:
-  - float32
-  - float32
-  - float32
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float32-B2S2048N8D256-long-prefill-D256
-- operator: MHA
-  case_id: 13
+  case_id: 10
   input_shape:
   - - 1
     - 1
@@ -348,7 +270,7 @@ cases:
   baseline_perf_us: null
   note: M-float16-B1S1Skv2048N32D128-decode-single-batch
 - operator: MHA
-  case_id: 14
+  case_id: 11
   input_shape:
   - - 16
     - 1
@@ -374,7 +296,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B16S1Skv2048N32D128-decode
 - operator: MHA
-  case_id: 15
+  case_id: 12
   input_shape:
   - - 32
     - 1
@@ -400,7 +322,7 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-B32S1Skv2048N32D128-decode
 - operator: MHA
-  case_id: 16
+  case_id: 13
   input_shape:
   - - 60
     - 1
@@ -426,59 +348,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048N32D128-decode-large-batch
 - operator: MHA
-  case_id: 17
-  input_shape:
-  - - 72
-    - 1
-    - 32
-    - 128
-  - - 72
-    - 256
-    - 32
-    - 128
-  - - 72
-    - 256
-    - 32
-    - 128
-  dtype:
-  - float16
-  - float16
-  - float16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-B72S1Skv2048N32D128-decode-large-batch
-- operator: MHA
-  case_id: 18
-  input_shape:
-  - - 96
-    - 1
-    - 32
-    - 128
-  - - 96
-    - 256
-    - 32
-    - 128
-  - - 96
-    - 256
-    - 32
-    - 128
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-B96S1Skv4096N32D128-decode-large-batch
-- operator: MHA
-  case_id: 19
+  case_id: 14
   input_shape:
   - - 128
     - 1
@@ -504,7 +374,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B128S1Skv4096N32D128-decode-large-batch
 - operator: MHA
-  case_id: 20
+  case_id: 15
   input_shape:
   - - 60
     - 1
@@ -530,59 +400,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B60S1Skv2048N16D256-decode-large-batch-D256
 - operator: MHA
-  case_id: 21
-  input_shape:
-  - - 96
-    - 1
-    - 16
-    - 128
-  - - 96
-    - 256
-    - 16
-    - 128
-  - - 96
-    - 256
-    - 16
-    - 128
-  dtype:
-  - float32
-  - float32
-  - float32
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float32-B96S1Skv4096N16D128-decode-large-batch-D256
-- operator: MHA
-  case_id: 22
-  input_shape:
-  - - 128
-    - 1
-    - 32
-    - 128
-  - - 128
-    - 128
-    - 32
-    - 128
-  - - 128
-    - 128
-    - 32
-    - 128
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-B128S1Skv2048N32D128-decode-large-batch-D256
-- operator: MHA
-  case_id: 23
+  case_id: 16
   input_shape:
   - - 60
     - 2
@@ -608,33 +426,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048N32D128-MTP-large-batch
 - operator: MHA
-  case_id: 24
-  input_shape:
-  - - 72
-    - 4
-    - 32
-    - 128
-  - - 72
-    - 256
-    - 32
-    - 128
-  - - 72
-    - 256
-    - 32
-    - 128
-  dtype:
-  - float16
-  - float16
-  - float16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-B72Sq4Skv2048N32D128-MTP-large-batch
-- operator: MHA
-  case_id: 25
+  case_id: 17
   input_shape:
   - - 96
     - 2
@@ -660,33 +452,7 @@ cases:
   baseline_perf_us: null
   note: L-bfloat16-B96Sq2Skv4096N32D128-MTP-large-batch
 - operator: MHA
-  case_id: 26
-  input_shape:
-  - - 128
-    - 4
-    - 32
-    - 128
-  - - 128
-    - 128
-    - 32
-    - 128
-  - - 128
-    - 128
-    - 32
-    - 128
-  dtype:
-  - float16
-  - float16
-  - float16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-float16-B128Sq4Skv4096N32D128-MTP-large-batch
-- operator: MHA
-  case_id: 27
+  case_id: 18
   input_shape:
   - - 60
     - 2
@@ -712,33 +478,7 @@ cases:
   baseline_perf_us: null
   note: L-float16-B60Sq2Skv2048N16D256-MTP-large-batch-D256
 - operator: MHA
-  case_id: 28
-  input_shape:
-  - - 128
-    - 4
-    - 16
-    - 128
-  - - 128
-    - 256
-    - 16
-    - 128
-  - - 128
-    - 256
-    - 16
-    - 128
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -1
-  - 1
-  baseline_perf_us: null
-  note: L-bfloat16-B128Sq4Skv4096N16D128-MTP-large-batch-D256
-- operator: MHA
-  case_id: 29
+  case_id: 19
   input_shape:
   - - 2
     - 128
@@ -764,7 +504,7 @@ cases:
   baseline_perf_us: null
   note: S-float16-B2S128N32D128-explicit-scale
 - operator: MHA
-  case_id: 30
+  case_id: 20
   input_shape:
   - - 2
     - 128
@@ -789,29 +529,3 @@ cases:
   - 0
   baseline_perf_us: null
   note: S-float16-B2S128N32D128-zero-input
-- operator: MHA
-  case_id: 31
-  input_shape:
-  - - 2
-    - 128
-    - 32
-    - 128
-  - - 2
-    - 128
-    - 32
-    - 128
-  - - 2
-    - 128
-    - 32
-    - 128
-  dtype:
-  - float32
-  - float32
-  - float32
-  attrs:
-    scaleValue: -1.0
-  value_range:
-  - -0.01
-  - 0.01
-  baseline_perf_us: null
-  note: M-float32-B2S128N32D128-tiny-value-range

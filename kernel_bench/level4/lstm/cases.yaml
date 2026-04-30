@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: LSTM
   case_id: 1
@@ -15,18 +5,19 @@ cases:
   - - 10
     - 4
     - 64
-  - - 128
-    - 64
-  - - 128
-    - 32
-  - - 128
-  - - 128
+  - - - 128
+      - 64
+  - - - 128
+      - 32
+  - &id001
+    - - 128
+  - *id001
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -39,14 +30,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float32-case1
 - operator: LSTM
@@ -55,18 +46,19 @@ cases:
   - - 20
     - 16
     - 128
-  - - 256
-    - 128
-  - - 256
-    - 64
-  - - 256
-  - - 256
+  - - - 256
+      - 128
+  - - - 256
+      - 64
+  - &id002
+    - - 256
+  - *id002
   dtype:
   - float16
-  - float16
-  - float16
-  - float16
-  - float16
+  - - float16
+  - - float16
+  - - float16
+  - - float16
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -79,14 +71,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float16-case2
 - operator: LSTM
@@ -95,18 +87,19 @@ cases:
   - - 50
     - 32
     - 256
-  - - 512
-    - 256
-  - - 512
-    - 128
-  - - 512
-  - - 512
+  - - - 512
+      - 256
+  - - - 512
+      - 128
+  - &id003
+    - - 512
+  - *id003
   dtype:
   - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
+  - - bfloat16
+  - - bfloat16
+  - - bfloat16
+  - - bfloat16
   attrs:
     inputSize: 256
     hiddenSize: 128
@@ -119,14 +112,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-bfloat16-case3
 - operator: LSTM
@@ -135,18 +128,28 @@ cases:
   - - 12
     - 5
     - 64
-  - - 256
-    - 64
-  - - 256
-    - 32
-  - - 256
-  - - 256
+  - - - 128
+      - 64
+    - - 128
+      - 64
+  - - - 128
+      - 32
+    - - 128
+      - 32
+  - &id004
+    - - 128
+    - - 128
+  - *id004
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -159,14 +162,22 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id005
+      - -0.1
+      - 0.1
+    - *id005
+  - - &id006
+      - -0.1
+      - 0.1
+    - *id006
+  - - &id007
+      - -0.01
+      - 0.01
+    - *id007
+  - - &id008
+      - -0.01
+      - 0.01
+    - *id008
   baseline_perf_us: null
   note: S-float32-case4
 - operator: LSTM
@@ -175,18 +186,28 @@ cases:
   - - 24
     - 8
     - 128
-  - - 512
-    - 128
-  - - 512
-    - 64
-  - - 512
-  - - 512
+  - - - 256
+      - 128
+    - - 256
+      - 128
+  - - - 256
+      - 64
+    - - 256
+      - 64
+  - &id009
+    - - 256
+    - - 256
+  - *id009
   dtype:
   - float16
-  - float16
-  - float16
-  - float16
-  - float16
+  - - float16
+    - float16
+  - - float16
+    - float16
+  - - float16
+    - float16
+  - - float16
+    - float16
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -199,14 +220,22 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id010
+      - -0.1
+      - 0.1
+    - *id010
+  - - &id011
+      - -0.1
+      - 0.1
+    - *id011
+  - - &id012
+      - -0.01
+      - 0.01
+    - *id012
+  - - &id013
+      - -0.01
+      - 0.01
+    - *id013
   baseline_perf_us: null
   note: S-float16-case5
 - operator: LSTM
@@ -215,18 +244,28 @@ cases:
   - - 8
     - 8
     - 96
-  - - 512
-    - 96
-  - - 512
-    - 64
-  - - 512
-  - - 512
+  - - - 256
+      - 96
+    - - 256
+      - 64
+  - - - 256
+      - 64
+    - - 256
+      - 64
+  - &id014
+    - - 256
+    - - 256
+  - *id014
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
   attrs:
     inputSize: 96
     hiddenSize: 64
@@ -239,14 +278,22 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id015
+      - -0.1
+      - 0.1
+    - *id015
+  - - &id016
+      - -0.1
+      - 0.1
+    - *id016
+  - - &id017
+      - -0.01
+      - 0.01
+    - *id017
+  - - &id018
+      - -0.01
+      - 0.01
+    - *id018
   baseline_perf_us: null
   note: S-float32-case6
 - operator: LSTM
@@ -255,18 +302,37 @@ cases:
   - - 30
     - 16
     - 256
-  - - 1536
-    - 256
-  - - 1536
-    - 128
-  - - 1536
-  - - 1536
+  - - - 512
+      - 256
+    - - 512
+      - 128
+    - - 512
+      - 128
+  - - - 512
+      - 128
+    - - 512
+      - 128
+    - - 512
+      - 128
+  - &id019
+    - - 512
+    - - 512
+    - - 512
+  - *id019
   dtype:
   - float16
-  - float16
-  - float16
-  - float16
-  - float16
+  - - float16
+    - float16
+    - float16
+  - - float16
+    - float16
+    - float16
+  - - float16
+    - float16
+    - float16
+  - - float16
+    - float16
+    - float16
   attrs:
     inputSize: 256
     hiddenSize: 128
@@ -279,14 +345,26 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id020
+      - -0.1
+      - 0.1
+    - *id020
+    - *id020
+  - - &id021
+      - -0.1
+      - 0.1
+    - *id021
+    - *id021
+  - - &id022
+      - -0.01
+      - 0.01
+    - *id022
+    - *id022
+  - - &id023
+      - -0.01
+      - 0.01
+    - *id023
+    - *id023
   baseline_perf_us: null
   note: S-float16-case7
 - operator: LSTM
@@ -295,18 +373,46 @@ cases:
   - - 16
     - 6
     - 96
-  - - 1024
-    - 128
-  - - 1024
-    - 64
-  - - 1024
-  - - 1024
+  - - - 256
+      - 96
+    - - 256
+      - 96
+    - - 256
+      - 128
+    - - 256
+      - 128
+  - - - 256
+      - 64
+    - - 256
+      - 64
+    - - 256
+      - 64
+    - - 256
+      - 64
+  - &id024
+    - - 256
+    - - 256
+    - - 256
+    - - 256
+  - *id024
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+    - float32
+    - float32
+    - float32
+  - - float32
+    - float32
+    - float32
+    - float32
+  - - float32
+    - float32
+    - float32
+    - float32
+  - - float32
+    - float32
+    - float32
+    - float32
   attrs:
     inputSize: 96
     hiddenSize: 64
@@ -319,14 +425,30 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id025
+      - -0.1
+      - 0.1
+    - *id025
+    - *id025
+    - *id025
+  - - &id026
+      - -0.1
+      - 0.1
+    - *id026
+    - *id026
+    - *id026
+  - - &id027
+      - -0.01
+      - 0.01
+    - *id027
+    - *id027
+    - *id027
+  - - &id028
+      - -0.01
+      - 0.01
+    - *id028
+    - *id028
+    - *id028
   baseline_perf_us: null
   note: S-float32-case8
 - operator: LSTM
@@ -335,18 +457,46 @@ cases:
   - - 15
     - 12
     - 128
-  - - 1024
-    - 128
-  - - 1024
-    - 64
-  - - 1024
-  - - 1024
+  - - - 256
+      - 128
+    - - 256
+      - 128
+    - - 256
+      - 128
+    - - 256
+      - 128
+  - - - 256
+      - 64
+    - - 256
+      - 64
+    - - 256
+      - 64
+    - - 256
+      - 64
+  - &id029
+    - - 256
+    - - 256
+    - - 256
+    - - 256
+  - *id029
   dtype:
   - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
+  - - bfloat16
+    - bfloat16
+    - bfloat16
+    - bfloat16
+  - - bfloat16
+    - bfloat16
+    - bfloat16
+    - bfloat16
+  - - bfloat16
+    - bfloat16
+    - bfloat16
+    - bfloat16
+  - - bfloat16
+    - bfloat16
+    - bfloat16
+    - bfloat16
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -359,14 +509,30 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id030
+      - -0.1
+      - 0.1
+    - *id030
+    - *id030
+    - *id030
+  - - &id031
+      - -0.1
+      - 0.1
+    - *id031
+    - *id031
+    - *id031
+  - - &id032
+      - -0.01
+      - 0.01
+    - *id032
+    - *id032
+    - *id032
+  - - &id033
+      - -0.01
+      - 0.01
+    - *id033
+    - *id033
+    - *id033
   baseline_perf_us: null
   note: S-bfloat16-case9
 - operator: LSTM
@@ -375,18 +541,19 @@ cases:
   - - 6
     - 8
     - 64
-  - - 128
-    - 64
-  - - 128
-    - 32
-  - - 128
-  - - 128
+  - - - 128
+      - 64
+  - - - 128
+      - 32
+  - &id034
+    - - 128
+  - *id034
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -399,14 +566,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float32-case10
 - operator: LSTM
@@ -415,14 +582,14 @@ cases:
   - - 8
     - 3
     - 64
-  - - 128
-    - 64
-  - - 128
-    - 32
+  - - - 128
+      - 64
+  - - - 128
+      - 32
   dtype:
   - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -435,10 +602,10 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
   baseline_perf_us: null
   note: S-float32-case11
 - operator: LSTM
@@ -447,14 +614,20 @@ cases:
   - - 18
     - 7
     - 128
-  - - 512
-    - 128
-  - - 512
-    - 64
+  - - - 256
+      - 128
+    - - 256
+      - 128
+  - - - 256
+      - 64
+    - - 256
+      - 64
   dtype:
   - bfloat16
-  - bfloat16
-  - bfloat16
+  - - bfloat16
+    - bfloat16
+  - - bfloat16
+    - bfloat16
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -467,10 +640,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
+  - - &id035
+      - -0.1
+      - 0.1
+    - *id035
+  - - &id036
+      - -0.1
+      - 0.1
+    - *id036
   baseline_perf_us: null
   note: S-bfloat16-case12
 - operator: LSTM
@@ -479,18 +656,19 @@ cases:
   - - 100
     - 8
     - 256
-  - - 512
-    - 256
-  - - 512
-    - 128
-  - - 512
-  - - 512
+  - - - 512
+      - 256
+  - - - 512
+      - 128
+  - &id037
+    - - 512
+  - *id037
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 256
     hiddenSize: 128
@@ -503,14 +681,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float32-case13
 - operator: LSTM
@@ -519,18 +697,19 @@ cases:
   - - 200
     - 3
     - 512
-  - - 1024
-    - 512
-  - - 1024
-    - 256
-  - - 1024
-  - - 1024
+  - - - 1024
+      - 512
+  - - - 1024
+      - 256
+  - &id038
+    - - 1024
+  - *id038
   dtype:
   - float16
-  - float16
-  - float16
-  - float16
-  - float16
+  - - float16
+  - - float16
+  - - float16
+  - - float16
   attrs:
     inputSize: 512
     hiddenSize: 256
@@ -543,14 +722,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float16-case14
 - operator: LSTM
@@ -559,12 +738,13 @@ cases:
   - - 7
     - 6
     - 64
-  - - 128
-    - 64
-  - - 128
-    - 32
-  - - 128
-  - - 128
+  - - - 128
+      - 64
+  - - - 128
+      - 32
+  - &id039
+    - - 128
+  - *id039
   - - 1
     - 6
     - 32
@@ -573,10 +753,10 @@ cases:
     - 32
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   - float32
   - float32
   attrs:
@@ -591,14 +771,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   - - -0.1
     - 0.1
   - - -0.1
@@ -611,18 +791,19 @@ cases:
   - - 5
     - 2
     - 32
-  - - 64
-    - 32
-  - - 64
-    - 16
-  - - 64
-  - - 64
+  - - - 64
+      - 32
+  - - - 64
+      - 16
+  - &id040
+    - - 64
+  - *id040
   dtype:
   - float16
-  - float16
-  - float16
-  - float16
-  - float16
+  - - float16
+  - - float16
+  - - float16
+  - - float16
   attrs:
     inputSize: 32
     hiddenSize: 16
@@ -635,14 +816,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float16-case16
 - operator: LSTM
@@ -651,18 +832,19 @@ cases:
   - - 10
     - 4
     - 127
-  - - 508
-    - 127
-  - - 508
-    - 127
-  - - 508
-  - - 508
+  - - - 508
+      - 127
+  - - - 508
+      - 127
+  - &id041
+    - - 508
+  - *id041
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 127
     hiddenSize: 127
@@ -675,14 +857,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float32-case17
 - operator: LSTM
@@ -691,18 +873,19 @@ cases:
   - - 15
     - 6
     - 63
-  - - 124
-    - 63
-  - - 124
-    - 31
-  - - 124
-  - - 124
+  - - - 124
+      - 63
+  - - - 124
+      - 31
+  - &id042
+    - - 124
+  - *id042
   dtype:
   - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - bfloat16
+  - - bfloat16
+  - - bfloat16
+  - - bfloat16
+  - - bfloat16
   attrs:
     inputSize: 63
     hiddenSize: 31
@@ -715,14 +898,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-bfloat16-case18
 - operator: LSTM
@@ -731,18 +914,19 @@ cases:
   - - 14
     - 10
     - 128
-  - - 256
-    - 128
-  - - 256
-    - 64
-  - - 256
-  - - 256
+  - - - 256
+      - 128
+  - - - 256
+      - 16
+  - &id043
+    - - 256
+  - *id043
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+  - - float32
+  - - float32
+  - - float32
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -755,14 +939,14 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - - -0.1
+      - 0.1
+  - - - -0.1
+      - 0.1
+  - - - -0.01
+      - 0.01
+  - - - -0.01
+      - 0.01
   baseline_perf_us: null
   note: S-float32-case19
 - operator: LSTM
@@ -771,18 +955,28 @@ cases:
   - - 22
     - 10
     - 128
-  - - 512
-    - 128
-  - - 512
-    - 64
-  - - 512
-  - - 512
+  - - - 256
+      - 128
+    - - 256
+      - 16
+  - - - 256
+      - 16
+    - - 256
+      - 16
+  - &id044
+    - - 256
+    - - 256
+  - *id044
   dtype:
   - float32
-  - float32
-  - float32
-  - float32
-  - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
+  - - float32
+    - float32
   attrs:
     inputSize: 128
     hiddenSize: 64
@@ -795,13 +989,21 @@ cases:
   value_range:
   - - -1.0
     - 1.0
-  - - -0.1
-    - 0.1
-  - - -0.1
-    - 0.1
-  - - -0.01
-    - 0.01
-  - - -0.01
-    - 0.01
+  - - &id045
+      - -0.1
+      - 0.1
+    - *id045
+  - - &id046
+      - -0.1
+      - 0.1
+    - *id046
+  - - &id047
+      - -0.01
+      - 0.01
+    - *id047
+  - - &id048
+      - -0.01
+      - 0.01
+    - *id048
   baseline_perf_us: null
   note: S-float32-case20

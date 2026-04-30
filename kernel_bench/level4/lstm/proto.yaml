@@ -103,14 +103,14 @@ operator:
     - float16
     - bfloat16
   - name: bias_ih
-    description: 输入到隐藏层偏置列表（可选），每个 tensor shape: (4*hiddenSize)，列表长度 = numLayers * num_directions
+    description: "输入到隐藏层偏置列表（可选），每个 tensor shape: (4*hiddenSize)，列表长度 = numLayers * num_directions"
     dtype:
     - float32
     - float16
     - bfloat16
     optional: true
   - name: bias_hh
-    description: 隐藏层到隐藏层偏置列表（可选），每个 tensor shape: (4*hiddenSize)，列表长度 = numLayers * num_directions
+    description: "隐藏层到隐藏层偏置列表（可选），每个 tensor shape: (4*hiddenSize)，列表长度 = numLayers * num_directions"
     dtype:
     - float32
     - float16

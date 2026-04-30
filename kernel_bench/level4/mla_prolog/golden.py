@@ -79,6 +79,19 @@ def mla_prolog(
         c_kv: [B, S, Hckv] 归一化后的压缩 KV, bfloat16
         k_rope: [B, S, Dr] key 位置编码, bfloat16
     """
+    original_dtype = token_x.dtype
+    _low_prec = original_dtype in (torch.float16, torch.bfloat16)
+    if _low_prec:
+        token_x = token_x.float()
+        w_dq = w_dq.float()
+        w_uq_qr = w_uq_qr.float()
+        w_uk = w_uk.float()
+        w_dkv_kr = w_dkv_kr.float()
+        rmsnorm_gamma_cq = rmsnorm_gamma_cq.float()
+        rmsnorm_gamma_ckv = rmsnorm_gamma_ckv.float()
+        rope_sin = rope_sin.float()
+        rope_cos = rope_cos.float()
+
     B, S, He = token_x.shape
     N = n_heads
     Hckv = w_uk.shape[2]
@@ -86,30 +99,28 @@ def mla_prolog(
     Dr = rope_sin.shape[-1]
 
     # === Query Path ===
-    # Step 1: c_q_raw = token_x @ W_DQ
-    c_q_raw = torch.matmul(token_x, w_dq)                           # [B, S, Hcq]
-    # Step 2: c_q = RMSNorm(c_q_raw)
-    c_q = rms_norm(c_q_raw, rmsnorm_gamma_cq, rmsnorm_epsilon_cq)   # [B, S, Hcq]
-    # Step 3: qr = c_q @ W_UQ_QR -> split + reshape
-    qr = torch.matmul(c_q, w_uq_qr)                                # [B, S, N*(D+Dr)]
+    c_q_raw = torch.matmul(token_x, w_dq)
+    c_q = rms_norm(c_q_raw, rmsnorm_gamma_cq, rmsnorm_epsilon_cq)
+    qr = torch.matmul(c_q, w_uq_qr)
     qr = qr.reshape(B, S, N, D + Dr)
-    q_c = qr[..., :D]                                               # [B, S, N, D]
-    q_r_raw = qr[..., D:]                                           # [B, S, N, Dr]
-    # Step 4: q_n = q_c @ W_UK (per-head batched matmul)
-    query = torch.einsum('bsnd,ndh->bsnh', q_c, w_uk)               # [B, S, N, Hckv]
-    # Step 5: q_r = RoPE(q_r_raw, cos, sin)
+    q_c = qr[..., :D]
+    q_r_raw = qr[..., D:]
+    query = torch.einsum('bsnd,ndh->bsnh', q_c, w_uk)
     cos_exp = rope_cos.unsqueeze(2).expand(-1, -1, N, -1)
     sin_exp = rope_sin.unsqueeze(2).expand(-1, -1, N, -1)
-    query_rope = apply_rope(q_r_raw, cos_exp, sin_exp)              # [B, S, N, Dr]
+    query_rope = apply_rope(q_r_raw, cos_exp, sin_exp)
 
     # === Key Path ===
-    # Step 6: dkv_kr = token_x @ W_DKV_KR -> split
-    dkv_kr = torch.matmul(token_x, w_dkv_kr)                        # [B, S, Hckv+Dr]
-    ckv_raw = dkv_kr[..., :Hckv]                                    # [B, S, Hckv]
-    kr_raw = dkv_kr[..., Hckv:]                                     # [B, S, Dr]
-    # Step 7: c_kv = RMSNorm(ckv_raw)
-    c_kv = rms_norm(ckv_raw, rmsnorm_gamma_ckv, rmsnorm_epsilon_ckv) # [B, S, Hckv]
-    # Step 8: k_r = RoPE(kr_raw, cos, sin)
-    k_rope = apply_rope(kr_raw, rope_cos, rope_sin)                  # [B, S, Dr]
+    dkv_kr = torch.matmul(token_x, w_dkv_kr)
+    ckv_raw = dkv_kr[..., :Hckv]
+    kr_raw = dkv_kr[..., Hckv:]
+    c_kv = rms_norm(ckv_raw, rmsnorm_gamma_ckv, rmsnorm_epsilon_ckv)
+    k_rope = apply_rope(kr_raw, rope_cos, rope_sin)
+
+    if _low_prec:
+        query = query.to(original_dtype)
+        query_rope = query_rope.to(original_dtype)
+        c_kv = c_kv.to(original_dtype)
+        k_rope = k_rope.to(original_dtype)
 
     return query, query_rope, c_kv, k_rope

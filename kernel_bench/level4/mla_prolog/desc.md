@@ -1,10 +1,10 @@
-# MLAPre 算子 API 描述
+# MlaProlog 算子 API 描述
 
 ## 1. 背景与动机
 
-`MLAPre` 是 Multi-Head Latent Attention（MLA）前处理拆分算子，对应 DeepSeek-V2 中 MLA 机制的 Query/Key 投影与位置编码阶段。当前仅考虑 bfloat16 非量化路径，过滤掉量化参数、PagedAttention 缓存格式和数据格式转换（FRACTAL_NZ）等配置。
+`MlaProlog` 是 Multi-Head Latent Attention（MLA）前处理拆分算子，对应 DeepSeek-V2 中 MLA 机制的 Query/Key 投影与位置编码阶段。当前仅考虑 bfloat16 非量化路径，过滤掉量化参数、PagedAttention 缓存格式和数据格式转换（FRACTAL_NZ）等配置。
 
-完整的 MLA 算子包含 13 步计算（投影 + RoPE + Attention + Value 聚合），复杂度较高。MLAPre 将前半段（Query/Key 的投影与位置编码，共 8 步）拆分为独立算子，覆盖 4 次 CUBE 矩阵乘法、2 次 RMSNorm 归一化和 2 次 RoPE 旋转位置编码。
+完整的 MLA 算子包含 13 步计算（投影 + RoPE + Attention + Value 聚合），复杂度较高。MlaProlog 将前半段（Query/Key 的投影与位置编码，共 8 步）拆分为独立算子，覆盖 4 次 CUBE 矩阵乘法、2 次 RMSNorm 归一化和 2 次 RoPE 旋转位置编码。
 
 **主要应用场景**:
 - DeepSeek-V2/V3 等采用 MLA 机制的 LLM 推理前处理
@@ -15,6 +15,9 @@
 - 独立优化：前处理的 CUBE+VEC 融合可独立于 Attention 计算调优
 - 接口简化：统一输入为 token_x，权重合并减少参数数量
 - W_UK 吸收：将 Key 上投影权重吸收到 Query 侧，减少后续在线计算量
+
+**算子特征**:
+- 难度等级：L4（FusedComposite）
 
 ## 2. 算子定义
 
@@ -255,7 +258,7 @@ def mla_pre_golden(
     rmsnorm_epsilon_cq=1e-5, rmsnorm_epsilon_ckv=1e-5,
 ):
     """
-    MLAPre golden reference.
+    MlaProlog golden reference.
 
     Args:
         token_x: [B, S, He], bf16
@@ -315,7 +318,7 @@ def mla_pre_golden(
 
 **学术参考**:
 - DeepSeek-AI (2024). "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model". arXiv:2405.04434.
-  - 提出 MLA 机制，MLAPre 覆盖其 Query/Key 投影与位置编码阶段
+  - 提出 MLA 机制，MlaProlog 覆盖其 Query/Key 投影与位置编码阶段
 - Su, J. et al. (2024). "RoFormer: Enhanced Transformer with Rotary Position Embedding". Neurocomputation 568.
   - Rotary Position Embedding (RoPE) 数学定义
 
@@ -323,4 +326,4 @@ def mla_pre_golden(
 - `torch_npu.npu_mla_prolog` — Ascend NPU MLA 前处理融合算子（本算子的设计参考来源）
 
 **相关 CakeBench Case**:
-- `level_4_vector_cube_fused/MultiHeadLatentAttention` — 完整 MLA 算子（MLAPre 为其前半段拆分）
+- `level_4_vector_cube_fused/MultiHeadLatentAttention` — 完整 MLA 算子（MlaProlog 为其前半段拆分）

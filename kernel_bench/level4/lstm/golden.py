@@ -17,19 +17,19 @@ from typing import List, Optional, Tuple, Union
 """
 LSTM 算子 Torch Golden 参考实现
 
-支持两种输入格式：
-1. TensorList 格式：weight_ih/hh 为列表，每层/方向一个 tensor
-2. 展平格式：weight_ih/hh 为单个 tensor，所有层/方向权重按行拼接
-
-proto.yaml 定义使用 TensorList，但测试框架单元素列表会展开为单个 tensor。
+对标 PyTorch torch.nn.LSTM 接口，使用 TensorList 格式传递权重。
+每层每方向的权重是独立的 tensor：
+  - weight_ih_l0, weight_hh_l0, bias_ih_l0, bias_hh_l0 (forward)
+  - weight_ih_l0_reverse, weight_hh_l0_reverse, ... (reverse, if bidirectional)
+  - weight_ih_l1, ... (layer 1, if numLayers > 1)
 """
 
 def lstm(
     x: torch.Tensor,
-    weight_ih: Union[List[torch.Tensor], torch.Tensor],
-    weight_hh: Union[List[torch.Tensor], torch.Tensor],
-    bias_ih: Optional[Union[List[torch.Tensor], torch.Tensor]] = None,
-    bias_hh: Optional[Union[List[torch.Tensor], torch.Tensor]] = None,
+    weight_ih: List[torch.Tensor],
+    weight_hh: List[torch.Tensor],
+    bias_ih: Optional[List[torch.Tensor]] = None,
+    bias_hh: Optional[List[torch.Tensor]] = None,
     h0: Optional[torch.Tensor] = None,
     c0: Optional[torch.Tensor] = None,
     inputSize: int = 0,
@@ -42,16 +42,16 @@ def lstm(
     projSize: int = 0
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
-    LSTM 前向计算
+    LSTM 前向计算（对标 PyTorch torch.nn.LSTM）
 
     Args:
         x: 输入序列 (S, B, inputSize) 或 (B, S, inputSize) if batch_first
-        weight_ih: TensorList 或单个展平 tensor
-        weight_hh: TensorList 或单个展平 tensor
-        bias_ih: TensorList? 或单个展平 tensor
-        bias_hh: TensorList? 或单个展平 tensor
-        h0: 初始隐藏状态
-        c0: 初始细胞状态
+        weight_ih: TensorList，每层每方向一个 [4*hiddenSize, input_dim] tensor
+        weight_hh: TensorList，每层每方向一个 [4*hiddenSize, hiddenSize or projSize] tensor
+        bias_ih: TensorList?, 每层每方向一个 [4*hiddenSize] tensor
+        bias_hh: TensorList?, 每层每方向一个 [4*hiddenSize] tensor
+        h0: 初始隐藏状态 [numLayers*num_directions, B, hiddenSize or projSize]
+        c0: 初始细胞状态 [numLayers*num_directions, B, hiddenSize]
         inputSize: 输入特征维度
         hiddenSize: 隐藏状态维度
         numLayers: 层数
@@ -84,29 +84,32 @@ def lstm(
     input_dtype = x.dtype
     lstm_layer = lstm_layer.float().to(x.device)
 
-    # 统一转换为列表格式处理
-    weight_ih_list = _ensure_list(weight_ih)
-    weight_hh_list = _ensure_list(weight_hh)
-    bias_ih_list = _ensure_list(bias_ih) if bias else None
-    bias_hh_list = _ensure_list(bias_hh) if bias else None
+    # 计算每层的输入维度
+    layer_inputs = [inputSize]
+    for layer in range(1, numLayers):
+        if projSize > 0:
+            layer_inputs.append(projSize * num_directions)
+        else:
+            layer_inputs.append(hiddenSize * num_directions)
 
+    # 设置权重参数（TensorList 格式）
     with torch.no_grad():
         for layer in range(numLayers):
-            layer_input = inputSize if layer == 0 else hiddenSize * num_directions
+            layer_input = layer_inputs[layer]
             for d in range(num_directions):
                 idx = layer * num_directions + d
                 suffix = f"l{layer}" if d == 0 else f"l{layer}_reverse"
 
-                # 从列表中取对应 tensor
-                wi = weight_ih_list[idx][:gate_size, :layer_input]
-                wh = weight_hh_list[idx][:gate_size, :effective_hidden]
+                # 从 TensorList 中取对应 tensor
+                wi = weight_ih[idx][:gate_size, :layer_input]
+                wh = weight_hh[idx][:gate_size, :effective_hidden]
 
                 getattr(lstm_layer, f'weight_ih_{suffix}').copy_(wi.float())
                 getattr(lstm_layer, f'weight_hh_{suffix}').copy_(wh.float())
 
-                if bias and bias_ih_list is not None and bias_hh_list is not None:
-                    bi = bias_ih_list[idx][:gate_size]
-                    bh = bias_hh_list[idx][:gate_size]
+                if bias and bias_ih is not None and bias_hh is not None:
+                    bi = bias_ih[idx][:gate_size]
+                    bh = bias_hh[idx][:gate_size]
                     getattr(lstm_layer, f'bias_ih_{suffix}').copy_(bi.float())
                     getattr(lstm_layer, f'bias_hh_{suffix}').copy_(bh.float())
 
@@ -131,13 +134,3 @@ def lstm(
     cn = cn.to(input_dtype)
 
     return y, hn, cn
-
-
-def _ensure_list(val):
-    """确保值为列表格式"""
-    if val is None:
-        return None
-    if isinstance(val, list):
-        return val
-    # 单个 tensor -> 转换为单元素列表
-    return [val]
