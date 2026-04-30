@@ -1,4 +1,4 @@
-# 算子代码生成评测方案V1.0.0
+# 算子代码生成评测基准规范
 
 ## 1. 方案概述
 
@@ -33,21 +33,15 @@
 
 ### 1.4 版本演进
 
-| 版本 | 主要变更 |
-|------|----------|
-| V1.0.0 | 初版，建立基础评测框架|
-| V0.2.0 | 引入三大维度评测、算子分类体系 |
-| V0.3.0 | 完善算子复杂度定义、规范用例输入输出 |
-| V0.4.0 | 增加评测报告结构、优化评测流程 |
-| V0.5.0 | 规范算子交付件要求 |
-| V0.6.0 | 调整算子清单，明确第一版泛化场景55个算子|
+详细版本变更记录请参阅 [docs/changelog.md](../changelog.md)。
+
 ---
 
 ### 1.5 演进规划
 
 本评测方案以"场景驱动、社区共建、持续演进"为核心理念，分阶段推进榜单建设与评分体系完善。
 
-#### 1.5.1 阶段一：基础覆盖（当前版本 V1.0.0）
+#### 1.5.1 阶段一：基础覆盖（当前阶段）
 
 聚焦算子场景覆盖和泛化性，建立基础评测框架：
 
@@ -269,7 +263,7 @@ import cann_bench
 y = cann_bench.exp(x, -1.0, 1.0, 0.0)
 ```
 
-### 3.2 算子评测用例
+### 3.3 算子评测用例
 
 该评测体系有两种用例：
 - 开放用例：随算子评测标准一起发布，由算子任务集中算子典型场景Shape和Attr属性组合（一般一个算子20条左右）；
@@ -291,7 +285,7 @@ Exp,1,"[[1024, 1024]]",['float16'],"{'base': -1.0, 'scale': 1.0, 'shift': 0.0}",
 Exp,2,"[[2048, 2048]]",['float32'],"{'base': -1.0, 'scale': 1.5, 'shift': 0.0}","[-2, 2]",18.27,float32-4M-对齐-对称小值域-scale=1.5
 ```
 
-### 3.3 Golden脚本
+### 3.4 Golden脚本
 
 根据proto.yaml中算子的定义，提供相应算子的Golden脚本
 
@@ -378,7 +372,7 @@ benchmark 总分     = Σ_{所有算子} 单算子综合评分
 
 > 早期设计曾沿用业界代码生成评测中的 `Pass@k` 命名，但在"单算子单提交"的官方评测约束下，`n=1、k=1`，该指标实际退化为 pass/fail 二值判断，因此本方案不再使用 `Pass@k` 表述。若未来官方评测放开允许一次提交多份候选代码，再行按标准 Pass@k 公式扩展。
 
-#### 4.4 精度标准
+### 4.4 精度标准
 
 当前采用[生态算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/experimental_standard.md)，后续会引入[昇腾算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/commercial_standard.md)
 
@@ -405,158 +399,113 @@ benchmark 总分     = Σ_{所有算子} 单算子综合评分
 
 **单标杆比对**：与更高精度的实现的单一精度标杆（CPU或昇腾小算子拼接）直接比较。
 
-<table style="width: 120%; border-collapse: collapse;">
-    <colgroup>
-      <col style="width: 25%;" />
-      <col style="width: 12.5%;" />
-      <col style="width: 12.5%;" />
-      <col style="width: 12.5%;" />
-      <col style="width: 12.5%;" />
-      <col style="width: 12.5%;" />
-      <col style="width: 12.5%;" />
-    </colgroup>
-    <thead>
-      <tr>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">数据类型</th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>FLOAT16</strong></th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>BFLOAT16</strong></th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>FLOAT32</strong></th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>HiFLOAT32</strong></th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>FLOAT8 E4M3</strong></th>
-        <th style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>FLOAT8 E5M2</strong></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;"><strong>通过阈值<br>(Threshold)</strong></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-10</sup></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-7</sup></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-13</sup></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-11</sup></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-3</sup></td>
-        <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">2<sup>-2</sup></td>
-      </tr>
-    </tbody>
-  </table>
+| 数据类型 | FLOAT16 | BFLOAT16 | FLOAT32 | HiFLOAT32 | FLOAT8 E4M3 | FLOAT8 E5M2 |
+|----------|---------|----------|---------|-----------|-------------|-------------|
+| **通过阈值(Threshold)** | 2^-10 | 2^-7 | 2^-13 | 2^-11 | 2^-3 | 2^-2 |
 
 **通过标准：**
 当平均相对误差MERE < Threshold ， 最大相对误差MARE < 10 * Threshold判定为通过
 
-### 4.5 性能评测
+##### 小值域通过说明
 
-性能评测流程
+当算子输出结果为极小值（接近0）时，相对误差计算可能不稳定，因此需要使用小值域通过标准评估精度。
+
+**小值域阈值对应表：**
+
+| 指标类型 | FLOAT16 | BFLOAT16 | FLOAT32 | HiFLOAT32 | FLOAT8 E4M3 | FLOAT8 E5M2 |
+|----------|---------|----------|---------|-----------|-------------|-------------|
+| **小值域阈值(Small Value Threshold)** | 2^-11 | 2^-8 | 2^-14 | 2^-12 | 2^-4 | 2^-3 |
+| **小值域error指标** | 2^-16 | 2^-16 | 2^-30 | 2^-28 | 2^-6 | 2^-5 |
+
+当真值小于 Small Value Threshold 时，采用小值域通过标准。定义误差度量指标**小值域数值错误数量（ErrorCount）**：
+
+$$
+\mathbf{ErrorCount}=\sum \mathbb{I}\left(
+\mathbf{|golden|} < threshold \land
+\left|\mathbf{actual} - \mathbf{golden}\right| > \mathbf{error}
+\right)
+$$
+
+- $\mathbb{I}(⋅)$ 是指示函数（条件成立时为 1，否则为 0）
+- $∧$ 表示逻辑"且"
+- $error$、$threshold$ 请参考上表
+
+**小值域通过标准：**
+
+$$
+\frac{\text{ErrorCount}_{\text{npu}}}{\max(\text{ErrorCount}_{\text{cpu标准精度}}, 1)} \leq 2
+$$
+
+**说明：** 此标准适用于所有数据类型。
+
+### 4.5 性能评测规范
+
+**评测原则**：性能评测需保证测量一致性、防止作弊攻击、准确反映算子真实性能。
+
+**评测流程**：
+
 ```
-功能通过 → 预热执行 → 正式性能测试 → 计算统计结果 → 与基准对比 → 计算加速比
-```
-
-**性能采集方式1**
-预热3次后，执行5次取中位数，使用msprof工具，先执行3次预热消除缓存影响，再执行5次正式测试，取中位数作为最终执行时间，排除异常值影响
-```
-msprof op --warm-up=3 --launch-count=5 --output=./msprof_output ./your_op arg1 arg2
-```
-**性能采集方式2**
-基于torch_npu.profiler的性能采集方案，通过解析chrome trace JSON获取NPU内核执行时间。
-
-```python
-import torch_npu
-
-# 配置 experimental_config
-experimental_config = torch_npu.profiler._ExperimentalConfig(
-    export_type=[torch_npu.profiler.ExportType.Text],
-    profiler_level=torch_npu.profiler.ProfilerLevel.Level0,
-    aic_metrics=torch_npu.profiler.AiCMetrics.AiCoreNone,
-)
-
-# 使用 schedule 机制：warmup预热 + repeat采集
-with torch_npu.profiler.profile(
-    activities=[
-        torch_npu.profiler.ProfilerActivity.CPU,
-        torch_npu.profiler.ProfilerActivity.NPU,
-    ],
-    schedule=torch_npu.profiler.schedule(
-        wait=0, warmup=3, active=5, repeat=1
-    ),
-    on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(prof_dir),
-    record_shapes=False,
-    profile_memory=False,
-    with_stack=False,
-    experimental_config=experimental_config,
-) as prof:
-    # 执行 warmup + active 次循环
-    for _ in range(warmup + repeat):
-        outputs = func(*args, **kwargs)
-        prof.step()
+功能通过 → NPU升频清cache → 预热执行 → 正式性能测试 → 解析trace → 计算统计结果 → 与基准对比
 ```
 
-**性能数据解析**
-解析生成的trace_view.json文件，通过cat字段区分Host/Device阶段，获取NPU内核执行时间：
-```python
-# 解析 chrome trace JSON
-events = data.get('traceEvents', [])
-for event in events:
-    if event.get('ph') != 'X':  # 只处理完整事件
-        continue
-    dur = event.get('dur', 0)
-    name = event.get('name', '')
+**核心要求**：
 
-    # 通过 cat 字段判断：有 cat = Host端，无 cat = Device端
-    if 'cat' in event:
-        host_ops[name] = host_ops.get(name, 0) + dur
-    else:
-        device_kernels[name] = device_kernels.get(name, 0) + dur
-        total_kernel_us += dur
+| 要求项 | 说明 |
+|--------|------|
+| Kernel-only测量 | 仅统计 NPU 内核执行时间，剥离 Python 派发开销 |
+| NPU升频清cache | 每次测量前执行 MatMul + ReduceMax，保证 NPU 频率稳定并清空 L2 cache |
+| 输入池防缓存 | 预分配 clone 输入池轮换使用，防止按 data_ptr 缓存输出 |
+| Warmup Kernel过滤 | 自动过滤升频用的 MatMul/ReduceMax kernel，只统计目标算子时间 |
 
-# 对 repeat 次采集结果取平均
-kernel_time_us = total_kernel_us / repeat
-```
+**采集参数标准**：
 
-**采集参数配置**
-| 参数 | 默认值 | 说明 |
+| 参数 | 标准值 | 说明 |
 |------|--------|------|
 | warmup | 3 | 预热次数，消除缓存影响 |
 | repeat | 5 | 正式采集次数 |
-| ProfilerLevel | Level0 | 采集详细程度 |
-| export_type | Text | 输出格式 |
+| freq_boost | True | 启用 NPU 升频清 cache |
+| ProfilerLevel | Level0 | 采集详细程度（kernel-only） |
 
-**特点**
-- 基于Python接口，无需外部命令行工具
-- 支持异步解析，不影响后续测试执行
-- 自动归档profiling数据到 `test/reports/prof_data/{level}/{op_name}/{caseid}/`
-- 可获取Host端和Device端各算子的详细耗时
+**性能指标计算**：
 
-### 4.6 防作弊
-**避免使用内置算子**
-  对于aclnn调用，删除环境内内置算子的二进制实现（环境上不安装内置算子kernel），避免直接在aclnn层路由到内置算子实现
-> TODO
+- **Kernel时间**：通过解析 chrome trace 中 `cat="dequeue"` 事件获取 NPU 内核执行时间
+- **加速比**：`SpeedUp = baseline_perf_us / kernel_perf_us`
+- **几何平均加速比**：对多个用例的加速比取几何平均
 
-## 5 应用层
-评测报告、评测工程、CANN评测结果网站等
-### 5.1 评测报告
-**评测报告核心要素**
-- 评测集版本号：每个版本号对应明确的算子任务清单和开放和未开放的用例集合，用例验收标准以及性能基线
-- 评测代号：自定义提交评测任务的组织代号
-- 基础模型：GLM5/Opus等
-- Agent/Skill: CANNBot等
-- 综合得分：计算综合得分
-- 子项得分：评估各个子项维度的得分（编译、功能精度、性能）
-- 各算子任务得分情况
+> 详细实现请参阅 [evaluator_design.md](../design/evaluator_design.md)
 
-### 5.2 Web在线网站
+### 4.6 防作弊规范
 
+| 防护项 | 规范要求 |
+|--------|----------|
+| 禁用内置算子 | 删除环境内内置算子的二进制实现，避免直接路由到内置算子 |
+| Timing API防护 | 快照关键 API 身份，安装 wheel 后验证是否被篡改 |
+| 返回值类型检查 | 严格检查 `type(output) is torch.Tensor`，拒绝 FakeTensor |
+| 二次验证 | 用新鲜输入重跑，防止缓存作弊 |
 
-## 6 规划
-- 工程平台构建
-  - [ ] 完成剩余 Level3/Level4 算子核对验证, 发布第一版算子评测集合
-  - [ ] 建立持续评测 CI 流水线
-  - [ ] 发布评测网站
+> 详细实现请参阅 [evaluator_design.md](../design/evaluator_design.md)
 
-- 评测集构建
-  - [ ] 增加更多算子类型覆盖
-  - [ ] 根据领域场景分类，算子特征等，构建出更多独立榜单集合，覆盖不同评测场景的需求
+## 5. 应用层规范
 
-- 评测标准构建
-  - [ ] 评测精度标准，精度衡量方法构建
-  - [ ] 评测性能基线，理论性能评估
-  - [ ] 评分算法优化（例如算子复杂度、用例难度），科学评价生成能力
-  - [ ] 算子分级/分类方法
-  - [ ] 防作弊体系构建
+### 5.1 评测报告规范
+
+**评测报告必须包含的核心要素**：
+
+| 要素 | 说明 |
+|------|------|
+| 评测集版本号 | 对应明确的算子任务清单、用例集合、验收标准、性能基线 |
+| 评测代号 | 自定义提交评测任务的组织代号 |
+| 基础模型 | 使用的基础模型（GLM、Claude、GPT等） |
+| Agent/Skill | 使用的 Agent/Skill 方案 |
+| 综合得分 | 按评分规则计算的综合得分 |
+| 子项得分 | 编译、功能精度、性能各维度得分 |
+| 算子任务明细 | 各算子任务的详细得分情况 |
+
+### 5.2 评测平台规范
+
+评测平台应提供以下能力：
+
+- 多维度榜单查询（按级别、按领域、按模型）
+- 历史版本对比
+- 趋势分析
+- 在线评测任务提交

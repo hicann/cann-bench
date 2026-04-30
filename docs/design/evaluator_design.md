@@ -1,4 +1,4 @@
-# 算子评测工程方案设计 V2.0
+# 算子评测工程设计
 
 ## 目录
 - [1. Context](#1-context)
@@ -15,7 +15,7 @@
 
 ### 1.1 背景
 
-根据 `docs/kernel_bench_design_v1.0.md` 设计文档，构建一套AI生成Ascend C算子代码评测体系，用于量化评估AI生成的算子代码质量，涵盖编译正确性、功能正确性、性能优化性三个核心维度。
+根据 `docs/spec/benchmark_spec.md` 设计文档，构建一套AI生成Ascend C算子代码评测体系，用于量化评估AI生成的算子代码质量，涵盖编译正确性、功能正确性、性能优化性三个核心维度。
 
 ### 1.2 两工程架构设计
 
@@ -487,61 +487,141 @@ def compute_golden_fp64(golden_fn, inputs, param_builder, case):
         return golden_fn(**params)
 ```
 
-#### 4.2.2 MERE/MARE精度标准
+#### 4.2.2 精度标准实现
 
-**误差计算公式**：
-- **MERE (平均相对误差)**: avg(|actual - golden| / (|golden| + 1e-7))
-- **MARE (最大相对误差)**: max(|actual - golden| / (|golden| + 1e-7))
+精度标准（MERE/MARE误差指标、精度阈值表、小值域通过标准）已在 [benchmark_spec.md](../spec/benchmark_spec.md) 中定义。本工程实现精度验证流程：
 
-**精度阈值表**：
-
-| 数据类型 | Threshold | 说明 |
-|---------|-----------|------|
-| float16 | 2^-10 ≈ 0.000976 | 半精度 |
-| bfloat16 | 2^-7 ≈ 0.007812 | BF16 |
-| float32 | 2^-13 ≈ 0.000122 | 单精度 |
-| hifloat32 | 2^-11 ≈ 0.000488 | 高精度单精度 |
-| float8_e4m3 | 2^-3 ≈ 0.125 | FP8 E4M3 |
-| float8_e5m2 | 2^-2 ≈ 0.25 | FP8 E5M2 |
-| int8/16/32/64 | 0 | 完全相等 |
-
-**通过条件**：MERE < Threshold 且 MARE < 10 × Threshold
+```python
+def verify_accuracy(actual, golden, dtype):
+    # 计算MERE/MARE
+    mere = compute_mere(actual, golden)
+    mare = compute_mare(actual, golden)
+    
+    # 获取精度阈值
+    threshold = get_precision_threshold(dtype)
+    
+    # 判断是否通过
+    if mere < threshold and mare < 10 * threshold:
+        return True
+    
+    # 小值域检查（当golden接近0时）
+    return check_small_value_region(actual, golden, dtype)
+```
 
 ### 4.3 性能评测设计
 
 #### 4.3.1 Profiler Kernel-Only测量
 
-**原理**：使用 `torch_npu.profiler` 采集NPU端chrome trace，解析出设备内核事件的累计耗时，剥离Python派发开销。Device kernel events没有cat字段，Host-side events有cat字段。
+**原理**：使用 `torch_npu.profiler` 采集NPU端chrome trace，使用 `ProfilerLevel.Level0` 采集最小开销的 kernel 执行时间。通过解析 `cat="dequeue"` 事件获取 NPU 内核执行时间，自动过滤升频用的 MatMul/ReduceMax kernel。
 
 ```python
-def measure_kernel_us(fn, warmup=3, repeat=5):
-    with torch_npu.profiler.profile(...) as prof:
+def measure_kernel_us(fn, warmup=3, repeat=5, freq_boost=True):
+    import torch_npu
+    
+    experimental_config = torch_npu.profiler._ExperimentalConfig(
+        export_type=[torch_npu.profiler.ExportType.Text],
+        profiler_level=torch_npu.profiler.ProfilerLevel.Level0,
+        aic_metrics=torch_npu.profiler.AiCMetrics.AiCoreNone,
+    )
+    
+    with torch_npu.profiler.profile(
+        activities=[
+            torch_npu.profiler.ProfilerActivity.CPU,
+            torch_npu.profiler.ProfilerActivity.NPU,
+        ],
+        schedule=torch_npu.profiler.schedule(
+            wait=0, warmup=warmup, active=repeat, repeat=1
+        ),
+        on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(prof_dir),
+        experimental_config=experimental_config,
+    ) as prof:
         for _ in range(warmup + repeat):
-            boost_freq_and_clear_cache()  # 升频清cache
+            if freq_boost:
+                boost_freq_and_clear_cache()  # 升频清cache
             fn()
             prof.step()
     
-    # 解析trace，提取无cat字段的events
-    return parse_trace_kernel_only(trace_file) / repeat
+    # 解析trace，提取 cat="dequeue" 事件（NPU内核执行时间）
+    # 过滤 warmup kernels (matmul, max, reducemax, reduced)
+    return parse_trace_dequeue_events(trace_file) / repeat
+```
+
+**Trace解析逻辑**：
+
+```python
+# Warmup kernel关键词（需过滤）
+warmup_keywords = ("matmul", "max", "reducemax", "reduced")
+
+for event in events:
+    if event.get('ph') != 'X':
+        continue
+    dur = event.get('dur', 0)
+    if dur <= 0:
+        continue
+    name = event.get('name', '')
+    
+    # cat="dequeue" 是 CANN 权威分类，表示 NPU 内核执行时间
+    if event.get('cat') == 'dequeue':
+        # 过滤 warmup kernels
+        if any(kw in name.lower() for kw in warmup_keywords):
+            continue
+        device_kernels[name] = device_kernels.get(name, 0) + dur
+        total_kernel_us += dur
+    
+    # cat="cpu_op" 表示 CPU 侧 API 调用时间（仅供参考）
+    elif event.get('cat') == 'cpu_op':
+        if any(kw in name.lower() for kw in warmup_keywords):
+            continue
+        host_ops[name] = host_ops.get(name, 0) + dur
 ```
 
 #### 4.3.2 NPU升频与L2清空
 
-**原理**：每次profiler step前执行MatMul+ReduceMax，保证NPU频率稳定并清空L2 cache，确保测量一致性。
+**原理**：每次profiler step前执行MatMul+ReduceMax，保证NPU频率稳定并清空L2 cache，确保测量一致性。Warmup tensors预分配并固定到目标设备，避免设备不匹配。
 
 ```python
-def boost_freq_and_clear_cache():
-    mm1 = torch.rand((10240, 10240), dtype=torch.float16).npu()
-    mm2 = torch.rand((10240, 10240), dtype=torch.float16).npu()
-    reduce_input = torch.rand((96, 1024, 1024), dtype=torch.float16).npu()
-    
+def prepare_warmup_tensors(device):
+    """预分配升频清cache的tensors"""
+    mm1 = torch.rand((10240, 10240), dtype=torch.float16).to(device)
+    mm2 = torch.rand((10240, 10240), dtype=torch.float16).to(device)
+    reduce_input = torch.rand((96, 1024, 1024), dtype=torch.float16).to(device)
+    return (mm1, mm2, reduce_input)
+
+def boost_freq_and_clear_cache(warmup_tensors):
+    """NPU升频 + 清L2 cache"""
+    mm1, mm2, reduce_input = warmup_tensors
     torch.matmul(mm1, mm2)
-    torch.npu.synchronize()
+    torch.npu.synchronize(mm1.device)  # 同步目标设备
     torch.max(reduce_input)
-    torch.npu.synchronize()
+    torch.npu.synchronize(mm1.device)
 ```
 
-#### 4.3.3 多硬件Baseline支持
+#### 4.3.3 InputPool防缓存攻击
+
+**原理**：预分配一组clone输入，轮换使用，每次调用data_ptr不同，防止按地址缓存输出。
+
+```python
+class InputPool:
+    """预分配clone输入池，防止data_ptr缓存攻击"""
+    
+    def __init__(self, inputs, pool_size, max_memory_mb=512):
+        self.pool = []
+        # 根据内存限制计算实际池大小
+        actual_size = min(pool_size, max_pool_size, max_sets_by_memory)
+        # 预分配clone池
+        for _ in range(actual_size):
+            cloned = [item.clone() if isinstance(item, torch.Tensor) else item 
+                      for item in inputs]
+            self.pool.append(cloned)
+    
+    def get_next(self):
+        """获取下一个输入集（每次data_ptr不同）"""
+        inputs = self.pool[self.idx % len(self.pool)]
+        self.idx += 1
+        return inputs
+```
+
+#### 4.3.4 多硬件Baseline支持
 
 **cases.yaml格式**：
 ```yaml
@@ -689,8 +769,10 @@ def geometric_mean_speedup(speedups):
 
 ### 7.1 参考文档
 
-- `docs/kernel_bench_design_v1.0.md`：算子代码生成评测方案V1.0
-- `docs/quick_start.md`：快速入门指南
+- `docs/spec/benchmark_spec.md`：算子代码生成评测基准规范
+- `docs/design/evaluator_design.md`：评测工程设计文档（本文档）
+- `docs/guide/quick_start.md`：快速入门指南
+- `docs/changelog.md`：版本变更记录
 - `../opbase/docs/zh/ops_precision_standard/experimental_standard.md`：精度标准
 
 ### 7.2 包命名约定
@@ -715,7 +797,4 @@ benchmark 总分 = Σ 所有算子综合评分 (= Level1 + Level2 + Level3 + Lev
 
 ### 7.4 版本演进
 
-| 版本 | 主要变更 |
-|------|----------|
-| V1.0 | 初版，基础评测架构 |
-| V2.0 | 安全防护、CPU fp64 Golden、二次验证、Profiler kernel-only、多硬件baseline、几何平均加速比、目录重命名为kernel_eval |
+详细版本变更记录请参阅 [docs/changelog.md](../changelog.md)。
