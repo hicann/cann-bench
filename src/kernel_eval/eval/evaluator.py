@@ -203,6 +203,7 @@ class Evaluator:
             device_manager=self.device_manager,
             warmup=self.config.warmup,
             repeat=self.config.repeat,
+            archive_prof=False,  # 使用临时目录避免 torch_npu 解析旧数据产生的 ERROR 日志
         )
 
         # 初始化算子执行器
@@ -232,6 +233,7 @@ class Evaluator:
 
         try:
             import cann_bench
+
             candidates = _snake_case_candidates(operator_name) + [
                 operator_name.lower(),
                 operator_name,
@@ -245,11 +247,12 @@ class Evaluator:
             # 尝试 torch.ops.cann_bench
             try:
                 import torch
-                for name in candidates:
-                    if hasattr(torch.ops.cann_bench, name):
-                        func = getattr(torch.ops.cann_bench, name)
-                        self._ai_op_cache[cache_key] = func
-                        return func
+                if hasattr(torch.ops, 'cann_bench'):
+                    for name in candidates:
+                        if hasattr(torch.ops.cann_bench, name):
+                            func = getattr(torch.ops.cann_bench, name)
+                            self._ai_op_cache[cache_key] = func
+                            return func
             except Exception:
                 pass
 
@@ -277,6 +280,14 @@ class Evaluator:
             get_input_func = self.golden_loader.get_input_function(case.level, case.operator)
             if get_input_func is not None:
                 params_for_get_input = self.param_builder.build_call_params(golden_func, case, input_tensors)
+                # 将 case.attrs 中的 _exist 标志也传递给 get_input
+                case_attrs = getattr(case, 'attrs', None) or {}
+                for attr_key, attr_val in case_attrs.items():
+                    if attr_key not in params_for_get_input:
+                        params_for_get_input[attr_key] = attr_val
+                # 确保 skip2_exist 被传递
+                if 'skip2_exist' not in params_for_get_input:
+                    params_for_get_input['skip2_exist'] = case_attrs.get('skip2_exist', True)
                 input_tensors = get_input_func(**params_for_get_input)
                 if isinstance(input_tensors, tuple):
                     input_tensors = list(input_tensors)
@@ -311,8 +322,8 @@ class Evaluator:
                     baseline_perf_us=case.baseline_perf_us,
                 )
 
-            # 6. 执行AI算子
-            ai_result = self.op_runner.run_ai_op(ai_op_func, params, case_id_str, input_tensors, enable_perf=True)
+            # 6. 精度验证：先执行AI算子（不开profiler，只跑一次），确认精度通过后再采集性能
+            ai_result = self.op_runner.run_ai_op(ai_op_func, params, case_id_str, input_tensors, enable_perf=False)
             if not ai_result.success:
                 return EvalCaseResult(
                     case_id=case_id_str,
@@ -326,21 +337,94 @@ class Evaluator:
                     baseline_perf_us=case.baseline_perf_us,
                 )
 
-            # 7. 精度验证
-            dtype = case.dtypes[0] if case.dtypes else 'float32'
+            # 7. 精度对比
+            import torch
+            # 优先使用AI算子输出的dtype
+            dtype = None
+            if isinstance(ai_result.outputs, torch.Tensor):
+                dtype = str(ai_result.outputs.dtype).replace('torch.', '')
+            elif isinstance(ai_result.outputs, (list, tuple)) and ai_result.outputs:
+                first_out = ai_result.outputs[0]
+                if isinstance(first_out, torch.Tensor):
+                    dtype = str(first_out.dtype).replace('torch.', '')
+
+            # 如果无法从AI output确定dtype，使用case中定义的输出dtype
+            if dtype is None:
+                try:
+                    op_info = self.operator_loader.get_operator(case.operator, case.level)
+                    if op_info and op_info.outputs and op_info.outputs[0].dtype:
+                        output_dtype_list = op_info.outputs[0].dtype
+                        if isinstance(output_dtype_list, list):
+                            dtype = output_dtype_list[0]
+                        else:
+                            dtype = output_dtype_list
+                except Exception:
+                    pass
+
+            # 最后使用case的输入dtype作为后备
+            if dtype is None:
+                dtype = case.dtypes[0] if case.dtypes else 'float32'
+
+            # 获取算子自定义精度阈值（如果有）
+            merged_thresholds = self._get_merged_thresholds(case.operator, case.level)
+
+            # 计算 CPU 同精度输出（用于小值域比较）
+            # 使用原始 dtype 的输入调用 golden_fn
+            cpu_inputs = []
+            for item in input_tensors:
+                if isinstance(item, torch.Tensor):
+                    cpu_inputs.append(item.cpu())
+                elif isinstance(item, (list, tuple)):
+                    cpu_inputs.append([sub.cpu() if isinstance(sub, torch.Tensor) else sub for sub in item])
+                else:
+                    cpu_inputs.append(item)
+
+            cpu_params = self.param_builder.build_call_params(golden_func, case, cpu_inputs)
+            with torch.no_grad():
+                cpu_out = golden_func(**cpu_params)
+
+            # 保留多输出格式，不做截断
+            # cpu_out 可能是 tuple/list（多输出）或 Tensor（单输出）
+
+            # 获取需要跳过的输出索引
+            ignore_output_indices = self._get_ignore_output_indices(case.operator, case.level)
+
             accuracy_result = self.accuracy_evaluator.evaluate(
                 ai_output=ai_result.outputs,
                 golden_output=golden_result.outputs,
                 dtype=dtype,
+                custom_thresholds=merged_thresholds,
+                cpu_output=cpu_out,
+                ignore_output_indices=ignore_output_indices,
             )
 
-            # 8. 性能评测结果：profiler路径取perf_result，非profiler路径用simple timing包装
-            perf_result = ai_result.perf_result
-            if perf_result is None and ai_result.elapsed_us > 0:
-                perf_result = PerfResult(
-                    case_id=case_id_str,
-                    elapsed_us=ai_result.elapsed_us,
+            # 8. 精度通过后才采集性能（避免对精度不合格的算子浪费profiling时间）
+            perf_result = None
+            if accuracy_result.passed and self.perf_evaluator and self.perf_evaluator.enabled:
+                ai_perf_result = self.op_runner.run_ai_op(
+                    ai_op_func, params, case_id_str, input_tensors, enable_perf=True
                 )
+                if ai_perf_result.success:
+                    perf_result = ai_perf_result.perf_result
+                    if perf_result is None and ai_perf_result.elapsed_us > 0:
+                        perf_result = PerfResult(
+                            case_id=case_id_str,
+                            elapsed_us=ai_perf_result.elapsed_us,
+                        )
+            elif accuracy_result.passed:
+                # 关闭性能采集时用simple timing作为参考耗时
+                if ai_result.elapsed_us > 0:
+                    perf_result = PerfResult(
+                        case_id=case_id_str,
+                        elapsed_us=ai_result.elapsed_us,
+                    )
+            else:
+                # 精度不通过，用simple timing兜底
+                if ai_result.elapsed_us > 0:
+                    perf_result = PerfResult(
+                        case_id=case_id_str,
+                        elapsed_us=ai_result.elapsed_us,
+                    )
 
             # 清理内存
             self._cleanup_memory()
@@ -421,12 +505,20 @@ class Evaluator:
 
             # 打印进度
             status_icon = "✅" if result.success else "❌"
-            elapsed_str = f"{result.ai_run_result.elapsed_us:.2f}μs" if result.ai_run_result else "N/A"
+            if result.success and result.perf_result and result.perf_result.elapsed_us > 0:
+                elapsed_str = f"{result.perf_result.elapsed_us:.2f}μs"
+            elif result.ai_run_result and result.ai_run_result.elapsed_us > 0:
+                elapsed_str = f"{result.ai_run_result.elapsed_us:.2f}μs"
+            else:
+                elapsed_str = "N/A"
             speedup_str = f"{result.get_speedup():.2f}x" if result.get_speedup() > 0 else "N/A"
-            print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon} (耗时: {elapsed_str}, 加速比: {speedup_str})")
+            if result.success:
+                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon} (耗时: {elapsed_str}, 加速比: {speedup_str})")
+            else:
+                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon}")
 
-        # 等待性能解析完成
-        self.perf_evaluator.wait_all()
+        # 性能解析已在 op_runner.run 中完成，无需额外等待
+        # self.perf_evaluator.wait_all()
 
         # 计算统计
         passed = sum(1 for r in results if r.success)
@@ -794,7 +886,18 @@ class Evaluator:
                 cmd += ["--case-id", str(case_filter["case_id"])]
 
             print(f"[INFO] {operator_name}: subprocess (timeout {timeout_sec}s)")
-            proc = _sp.Popen(cmd, start_new_session=True)
+            # 确保子进程能找到 kernel_eval 模块：将当前模块所在目录（src/）添加到 PYTHONPATH
+            env = os.environ.copy()
+            kernel_eval_root = str(Path(__file__).parent.parent.parent)  # evaluator.py -> eval -> kernel_eval -> src
+            existing_pythonpath = env.get("PYTHONPATH", "")
+            if existing_pythonpath:
+                # 避免重复添加
+                paths = existing_pythonpath.split(":")
+                if kernel_eval_root not in paths:
+                    env["PYTHONPATH"] = f"{kernel_eval_root}:{existing_pythonpath}"
+            else:
+                env["PYTHONPATH"] = kernel_eval_root
+            proc = _sp.Popen(cmd, start_new_session=True, env=env)
             try:
                 rc = proc.wait(timeout=timeout_sec)
                 if rc != 0:
@@ -872,6 +975,27 @@ class Evaluator:
         if 'dtype' in filter_dict:
             result = [c for c in result if filter_dict['dtype'].lower() in [d.lower() for d in c.dtypes]]
         return result
+
+    def _get_merged_thresholds(self, operator: str, level: int) -> Dict[str, float]:
+        """获取合并后的精度阈值（全局 + 自定义，自定义优先）"""
+        # 从proto.yaml获取自定义阈值
+        op_info = self.operator_loader.get_operator(operator, level)
+        if op_info and op_info.precision_thresholds:
+            # 合并：全局阈值为基础，自定义阈值覆盖
+            merged = dict(self.config.precision_thresholds)
+            merged.update(op_info.precision_thresholds)
+            return merged
+        return self.config.precision_thresholds
+
+    def _get_ignore_output_indices(self, operator: str, level: int) -> List[int]:
+        """获取需要忽略对比的输出索引列表"""
+        ignore_indices = []
+        op_info = self.operator_loader.get_operator(operator, level)
+        if op_info and op_info.outputs:
+            for idx, output in enumerate(op_info.outputs):
+                if not output.compare:
+                    ignore_indices.append(idx)
+        return ignore_indices
 
     def _cleanup_memory(self):
         """清理内存"""

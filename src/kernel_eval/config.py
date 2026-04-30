@@ -43,7 +43,8 @@ class Config:
     auto_fallback: bool = True
 
     # 性能配置
-    enable_profiler: bool = False  # 是否启用性能分析
+    # NPU 模式下默认启用 profiler 以获取 kernel-only 时间
+    enable_profiler: bool = True
 
     # 评测配置
     warmup: int = 3              # 性能评测预热次数

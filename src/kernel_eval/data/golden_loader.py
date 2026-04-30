@@ -24,15 +24,17 @@ import importlib.util
 import re
 import yaml
 from pathlib import Path
-from typing import Callable, Optional, Dict
+from typing import Callable, Optional, Dict, List
 
 
 def _camel_to_snake(name: str) -> str:
     """将 PascalCase 名称转换为 snake_case，用于匹配目录名"""
-    # 处理数字+大写的组合: 3D -> _3_D, 2D -> _2_D
-    s0 = re.sub(r'([0-9])([A-Z])', r'\1_\2', name)
-    s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', s0)
-    return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    # 处理字母+数字的边界: er3D -> er_3D
+    s = re.sub(r'([a-zA-Z])([0-9])', r'\1_\2', name)
+    # 处理数字+大写的组合: 3D -> _3_D (在已有下划线后避免重复)
+    s = re.sub(r'([0-9])([A-Z])', r'\1_\2', s)
+    s = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', s)
+    return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s).lower()
 
 
 class GoldenLoader:
@@ -71,9 +73,21 @@ class GoldenLoader:
                         snake_name = _camel_to_snake(operator)
                         try:
                             content = golden.read_text(encoding='utf-8')
-                            if f"def {func_name}(" in content or f"def {snake_name}(" in content:
-                                self._dir_cache.setdefault(level, {})[operator] = entry.name
-                                return entry.name
+                            # 提取 golden.py 中定义的函数名
+                            defined_funcs = re.findall(r'def\s+(\w+)\s*\(', content)
+                            op_lower = operator.lower()
+                            for func in defined_funcs:
+                                # 完全匹配优先
+                                if func == op_lower:
+                                    self._dir_cache.setdefault(level, {})[operator] = entry.name
+                                    return entry.name
+                            # 模糊匹配：去掉下划线和数字后比较
+                            def norm(s):
+                                return s.replace('_', '').replace('0', '').replace('1', '').replace('2', '').replace('3', '')
+                            for func in defined_funcs:
+                                if norm(func) == norm(op_lower):
+                                    self._dir_cache.setdefault(level, {})[operator] = entry.name
+                                    return entry.name
                         except Exception:
                             pass
 

@@ -56,6 +56,8 @@ def create_parser() -> argparse.ArgumentParser:
                              help='难度级别筛选')
     eval_parser.add_argument('--case-id', type=int, default=None,
                              help='用例编号筛选')
+    eval_parser.add_argument('--device-id', type=int, default=0,
+                             help='NPU 设备 ID（默认: 0）')
     eval_parser.add_argument('--output', type=str, default=None,
                              help='报告输出目录')
     eval_parser.add_argument('--eval-code', type=str, default=None,
@@ -73,6 +75,8 @@ def create_parser() -> argparse.ArgumentParser:
                                   '识别并隔离编译不过的算子到 _quarantine/，剩下的算子继续'
                                   '编译和评测；此开关关闭该逻辑，任何一个算子编译失败整个'
                                   '提交直接判定为失败，用于想要严格"全过或全挂"的场景。')
+    eval_parser.add_argument('--no-perf', action='store_true',
+                             help='关闭性能采集，仅做精度验证')
     # 内部开关：子进程模式下由父进程传入，不要手工设置
     eval_parser.add_argument('--skip-install', action='store_true',
                              help=argparse.SUPPRESS)
@@ -116,6 +120,10 @@ def cmd_eval(args):
         config.reports_dir = args.output
     if args.source_dir:
         config.source_dir = args.source_dir
+    if hasattr(args, 'device_id'):
+        config.device_id = args.device_id
+    if getattr(args, 'no_perf', False):
+        config.enable_profiler = False
 
     set_config(config)
 

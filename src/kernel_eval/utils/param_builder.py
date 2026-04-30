@@ -45,16 +45,27 @@ class ParamBuilder:
         params = {}
 
         # 分类参数：tensor 参数、tensor list 参数、属性参数
+        # 同时区分 optional 和必需参数
         tensor_params = []
         tensor_list_params = []
+        optional_tensor_params = []
+        optional_tensor_list_params = []
         attr_params = []
 
         for name, param in sig.parameters.items():
             annotation = str(param.annotation) if param.annotation != Parameter.empty else ""
+            is_optional = 'Optional' in annotation or 'NoneType' in annotation or param.default != Parameter.empty
+
             if 'List[' in annotation and 'Tensor' in annotation:
-                tensor_list_params.append(name)
+                if is_optional:
+                    optional_tensor_list_params.append(name)
+                else:
+                    tensor_list_params.append(name)
             elif 'Tensor' in annotation:
-                tensor_params.append(name)
+                if is_optional:
+                    optional_tensor_params.append(name)
+                else:
+                    tensor_params.append(name)
             else:
                 attr_params.append(name)
 
@@ -62,14 +73,19 @@ class ParamBuilder:
         original_shapes = getattr(case, 'input_shapes', None)
 
         # 构建 tensor 参数映射表：位置 -> 参数名
-        # 根据 original_shapes 中的 null 位置跳过对应的参数
-        tensor_param_map = self._build_tensor_param_map(tensor_params, tensor_list_params, original_shapes)
+        # 优先映射必需参数，再映射 optional 参数
+        tensor_param_map = self._build_tensor_param_map_with_optional(
+            tensor_params, tensor_list_params,
+            optional_tensor_params, optional_tensor_list_params,
+            original_shapes
+        )
 
         # 匹配张量参数
         tensor_idx = 0
         for position, param_name in sorted(tensor_param_map.items(), key=lambda x: x[0]):
             if tensor_idx < len(input_tensors):
                 val = input_tensors[tensor_idx]
+                all_tensor_list_params = tensor_list_params + optional_tensor_list_params
                 # 如果值是列表且参数期望单个张量，展开列表到后续参数
                 if isinstance(val, list) and param_name in tensor_params:
                     # 当前参数取第一个元素
@@ -78,7 +94,7 @@ class ParamBuilder:
                     # 将剩余元素作为独立的输入项
                     if len(val) > 1:
                         input_tensors = input_tensors[:tensor_idx] + [v for v in val[1:]] + input_tensors[tensor_idx:]
-                elif param_name in tensor_list_params:
+                elif param_name in all_tensor_list_params:
                     params[param_name] = val if isinstance(val, list) else [val]
                     tensor_idx += 1
                 else:
@@ -149,8 +165,11 @@ class ParamBuilder:
                         param_idx = all_tensor_params.index(p_name) + 1
                 tensor_idx += len(sub_map)
             elif is_null:
-                # null 位置：跳过对应的参数（这个参数不传入 tensor）
+                # null 位置：仍需映射，包含 None 占位符
+                # 这样 input_tensors 中的 None 会被正确映射到对应参数
                 if param_idx < len(all_tensor_params):
+                    param_map[tensor_idx] = all_tensor_params[param_idx]
+                    tensor_idx += 1
                     param_idx += 1
             else:
                 # 有效 shape（包括 [N, C, H, W] 这种 shape）：映射当前 tensor 到当前参数
@@ -165,21 +184,25 @@ class ParamBuilder:
         """规范化 input_shapes 格式
 
         处理 CaseLoader 包装的格式，返回统一的扁平 shapes 列表。
+
+        关键判断：
+        - 如果 original_shapes 只有1个元素且内部是多个shape，可能是包装结构，需要展开
+        - 如果 original_shapes 有多个元素，外层结构是真实的参数结构，不应该展开
         """
         if not isinstance(original_shapes, list) or not original_shapes:
             return None
 
-        # CaseLoader 包装：[[shape1, shape2, ...]] -> [shape1, shape2, ...]
-        first = original_shapes[0]
-        # 判断是否被包装：第一个元素是 list 且其内部元素也是 list（或 None）
-        if isinstance(first, list) and first:
-            # 检查 first 的第一个元素是否是 list（shape）或 None
-            inner_first = first[0] if first else None
-            if isinstance(inner_first, list) or inner_first is None:
-                # 被包装，展开
-                return first
+        # 只有当 original_shapes 只有1个元素时，才可能是包装结构
+        if len(original_shapes) == 1:
+            first = original_shapes[0]
+            if isinstance(first, list) and first:
+                # 检查 first 的第一个元素是否是 list（shape）或 None
+                inner_first = first[0] if first else None
+                if isinstance(inner_first, list) or inner_first is None:
+                    # 被包装，展开
+                    return first
 
-        # 已经是扁平格式：[shape1, shape2, ...]
+        # 已经是扁平格式或多参数结构：保持原样
         return original_shapes
 
     def _convert_value(self, value: Any) -> Any:
@@ -196,3 +219,99 @@ class ParamBuilder:
             except ValueError:
                 pass
         return value
+
+    def _build_tensor_param_map_with_optional(
+            self,
+            tensor_params: List[str],
+            tensor_list_params: List[str],
+            optional_tensor_params: List[str],
+            optional_tensor_list_params: List[str],
+            original_shapes: Optional[List]
+        ) -> Dict[int, str]:
+        """构建 tensor 参数位置映射表，按函数签名顺序映射
+
+        Args:
+            tensor_params: 必需 tensor 参数名列表
+            tensor_list_params: 必需 tensor list 参数名列表
+            optional_tensor_params: optional tensor 参数名列表
+            optional_tensor_list_params: optional tensor list 参数名列表
+            original_shapes: 原始 input_shapes
+
+        Returns:
+            字典 {tensor_index: param_name}
+        """
+        # 所有 tensor 参数，按签名顺序排列
+        # 必需参数在前，optional 参数在后（但需保持签名顺序）
+        # 注意：签名顺序是 tensor_params, tensor_list_params, optional_tensor_params, optional_tensor_list_params
+        # 但实际签名顺序可能混合，这里简化处理：先必需再 optional
+
+        # 简化方案：按必需/optional 分组，每组内按参数类型顺序排列
+        required_params = tensor_params + tensor_list_params
+        # optional 参数按签名顺序：先 tensor_list 类型的 optional，再 tensor 类型的 optional
+        optional_params = optional_tensor_list_params + optional_tensor_params
+
+        all_params = required_params + optional_params
+
+        if original_shapes is None:
+            # 没有 shapes 信息，优先映射必需参数
+            result = {}
+            idx = 0
+            for name in required_params:
+                result[idx] = name
+                idx += 1
+            return result
+
+        # 处理 input_shapes 格式
+        shapes_to_check = self._normalize_input_shapes(original_shapes)
+        if shapes_to_check is None:
+            result = {}
+            idx = 0
+            for name in required_params:
+                result[idx] = name
+                idx += 1
+            return result
+
+        # 统计有效 shapes 数量（不含 null）
+        valid_shapes_count = sum(1 for s in shapes_to_check if s is not None)
+
+        # 按顺序映射：先必需参数，再 optional 参数
+        param_map = {}
+        tensor_idx = 0
+        param_idx = 0
+
+        for position, shape_item in enumerate(shapes_to_check):
+            is_null = shape_item is None
+
+            # 判断是否为嵌套结构
+            is_nested = (isinstance(shape_item, list) and shape_item and
+                         isinstance(shape_item[0], list) and shape_item[0] and
+                         not isinstance(shape_item[0][0], int))
+
+            if is_nested:
+                # 嵌套结构，递归处理
+                remaining_required = required_params[param_idx:] if param_idx < len(required_params) else []
+                remaining_optional = optional_params if param_idx >= len(required_params) else []
+                sub_map = self._build_tensor_param_map_with_optional(
+                    remaining_required, [],
+                    [], remaining_optional,
+                    shape_item
+                )
+                for t_idx, p_name in sub_map.items():
+                    param_map[tensor_idx + t_idx] = p_name
+                tensor_idx += len(sub_map)
+                param_idx = min(param_idx + len(sub_map), len(all_params))
+            elif is_null:
+                # null 位置：仍需映射，包含 None 占位符
+                # 这样 input_tensors 中的 None 会被正确映射到对应参数
+                if param_idx < len(all_params):
+                    param_map[tensor_idx] = all_params[param_idx]
+                    tensor_idx += 1
+                    param_idx += 1
+            else:
+                # 有效 shape
+                if param_idx < len(all_params):
+                    param_map[tensor_idx] = all_params[param_idx]
+                    tensor_idx += 1
+                    param_idx += 1
+
+        return param_map

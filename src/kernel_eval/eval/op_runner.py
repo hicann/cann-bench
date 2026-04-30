@@ -58,7 +58,9 @@ class OpRunner:
             # 执行
             use_profiler = self.perf_evaluator is not None and self.perf_evaluator.enabled and self.device_manager.is_npu_mode()
             if use_profiler:
-                outputs, perf_result = self.perf_evaluator.run_profiled(case_id, func, **updated_params)
+                # 提取位置参数（保持参数顺序），避免kwargs导致torch_npu profiler解析ERROR
+                args = [updated_params[k] for k in params.keys()]
+                outputs, perf_result = self.perf_evaluator.run_profiled(case_id, func, *args)
                 # 等待当前 case 的解析完成，获取性能数据
                 self.perf_evaluator.wait_all()
                 elapsed_us = perf_result.elapsed_us
@@ -193,6 +195,9 @@ class OpRunner:
 
         for key, value in params.items():
             if isinstance(value, torch.Tensor):
+                # 跳过None值
+                while tensor_idx < len(device_tensors) and device_tensors[tensor_idx] is None:
+                    tensor_idx += 1
                 if tensor_idx < len(device_tensors):
                     item = device_tensors[tensor_idx]
                     updated[key] = item if isinstance(item, torch.Tensor) else item[0]
@@ -200,6 +205,8 @@ class OpRunner:
                 else:
                     updated[key] = self.device_manager.to_device(value)
             elif isinstance(value, list) and value and isinstance(value[0], torch.Tensor):
+                while tensor_idx < len(device_tensors) and device_tensors[tensor_idx] is None:
+                    tensor_idx += 1
                 if tensor_idx < len(device_tensors):
                     updated[key] = device_tensors[tensor_idx] if isinstance(device_tensors[tensor_idx], list) else [device_tensors[tensor_idx]]
                     tensor_idx += 1

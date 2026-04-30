@@ -42,6 +42,7 @@ class TensorInfo:
     name: str
     description: str = ""
     dtype: List[str] = field(default_factory=list)
+    compare: bool = True  # 是否参与精度对比，默认True
 
 
 @dataclass
@@ -55,6 +56,7 @@ class OperatorInfo:
     description: str = ""
     shape_support: str = ""
     note: str = ""
+    precision_thresholds: Dict[str, float] = field(default_factory=dict)  # 自定义精度阈值
     attrs: List[AttrInfo] = field(default_factory=list)
     inputs: List[TensorInfo] = field(default_factory=list)
     outputs: List[TensorInfo] = field(default_factory=list)
@@ -187,8 +189,12 @@ class OperatorLoader:
             outputs.append(TensorInfo(
                 name=output_data.get('name', ''),
                 description=output_data.get('description', ''),
-                dtype=dtype_list
+                dtype=dtype_list,
+                compare=output_data.get('compare', True)
             ))
+
+        # 解析自定义精度阈值
+        precision_thresholds = data.get('precision_thresholds', {}) or {}
 
         return OperatorInfo(
             name=data.get('name', ''),
@@ -199,6 +205,7 @@ class OperatorLoader:
             description=data.get('description', ''),
             shape_support=data.get('shape_support', ''),
             note=data.get('note', ''),
+            precision_thresholds=precision_thresholds,
             attrs=attrs,
             inputs=inputs,
             outputs=outputs,

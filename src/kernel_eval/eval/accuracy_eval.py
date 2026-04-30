@@ -48,6 +48,12 @@ class AccuracyResult:
     total_count: int = 0
     mismatch_ratio: float = 0.0
     trial: int = 1  # 验证轮次（1或2）
+    small_value_error_count: int = 0  # 小值域 NPU 错误计数
+    small_value_cpu_error_count: int = 0  # 小值域 CPU 错误计数
+    small_value_total_count: int = 0  # 小值域总计数
+    cancel_error_count: int = 0  # 相消位置 NPU 错误计数
+    cancel_cpu_error_count: int = 0  # 相消位置 CPU 错误计数
+    cancel_total_count: int = 0  # 相消位置总计数
     error_msg: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -63,6 +69,12 @@ class AccuracyResult:
             'total_count': self.total_count,
             'mismatch_ratio': self.mismatch_ratio,
             'trial': self.trial,
+            'small_value_error_count': self.small_value_error_count,
+            'small_value_cpu_error_count': self.small_value_cpu_error_count,
+            'small_value_total_count': self.small_value_total_count,
+            'cancel_error_count': self.cancel_error_count,
+            'cancel_cpu_error_count': self.cancel_cpu_error_count,
+            'cancel_total_count': self.cancel_total_count,
             'error_msg': self.error_msg,
         }
 
@@ -138,16 +150,22 @@ class AccuracyEvaluator:
         ai_output: Union[torch.Tensor, Tuple, List],
         golden_output: Union[torch.Tensor, Tuple, List],
         dtype: str,
-        trial: int = 1
+        trial: int = 1,
+        custom_thresholds: Dict[str, float] = None,
+        cpu_output: Union[torch.Tensor, Tuple, List] = None,
+        ignore_output_indices: List[int] = None,
     ) -> AccuracyResult:
         """
-        评测AI算子输出的精度（采用MERE/MARE标准）
+        评测AI算子输出的精度（采用MERE/MARE标准 + 小值域处理）
 
         Args:
             ai_output: AI生成算子的输出
-            golden_output: Golden参考输出
+            golden_output: Golden参考输出（FP64精度）
             dtype: 数据类型字符串
             trial: 验证轮次（1或2）
+            custom_thresholds: 自定义精度阈值表，优先级高于全局配置
+            cpu_output: CPU 相同精度下的输出（用于小值域比较）
+            ignore_output_indices: 需要忽略对比的输出索引列表
 
         Returns:
             AccuracyResult: 精度评测结果
@@ -167,11 +185,11 @@ class AccuracyEvaluator:
                 error_msg=str(e)
             )
 
-        # 获取阈值
-        threshold = self._get_threshold(dtype)
+        # 获取阈值（优先使用自定义阈值）
+        threshold = self._get_threshold(dtype, custom_thresholds)
 
-        # 对比张量（双方都转fp32计算MERE/MARE）
-        compare_result = compare_tensors(ai_output, golden_output, dtype, threshold)
+        # 对比张量（传入 cpu_output 用于小值域比较）
+        compare_result = compare_tensors(ai_output, golden_output, dtype, threshold, cpu_output, ignore_output_indices)
 
         return AccuracyResult(
             passed=compare_result.passed,
@@ -185,6 +203,12 @@ class AccuracyEvaluator:
             total_count=compare_result.total_count,
             mismatch_ratio=compare_result.mismatch_ratio,
             trial=trial,
+            small_value_error_count=compare_result.small_value_error_count,
+            small_value_cpu_error_count=compare_result.small_value_cpu_error_count,
+            small_value_total_count=compare_result.small_value_total_count,
+            cancel_error_count=compare_result.cancel_error_count,
+            cancel_cpu_error_count=compare_result.cancel_cpu_error_count,
+            cancel_total_count=compare_result.cancel_total_count,
             error_msg=compare_result.error_msg,
         )
 
@@ -270,8 +294,26 @@ class AccuracyEvaluator:
     ) -> AccuracyResult:
         """单轮评测"""
         try:
-            # Golden计算（CPU fp64）
+            # Golden计算（CPU fp64）- 高精度参考
             golden_out = self.compute_golden_fp64(golden_fn, inputs, param_builder, case)
+
+            # CPU 原精度计算 - 用于小值域比较
+            # 使用原始 dtype 的输入直接调用 golden_fn
+            cpu_inputs = []
+            for item in inputs:
+                if isinstance(item, torch.Tensor):
+                    cpu_inputs.append(item.cpu())
+                elif isinstance(item, (list, tuple)):
+                    cpu_inputs.append([sub.cpu() if isinstance(sub, torch.Tensor) else sub for sub in item])
+                else:
+                    cpu_inputs.append(item)
+
+            cpu_params = param_builder.build_call_params(golden_fn, case, cpu_inputs)
+            with torch.no_grad():
+                cpu_out = golden_fn(**cpu_params)
+
+            if isinstance(cpu_out, (tuple, list)):
+                cpu_out = cpu_out[0] if cpu_out else None
 
             # Custom算子计算（NPU或CPU）
             if device.startswith('npu'):
@@ -301,6 +343,7 @@ class AccuracyEvaluator:
                 check_output_type(custom_out, torch.Tensor, strict=True)
 
             # 精度对比（双方都转CPU）
+            # 传入 cpu_out 用于小值域比较
             if golden_out is None or custom_out is None:
                 return AccuracyResult(
                     passed=False,
@@ -312,7 +355,7 @@ class AccuracyEvaluator:
                     error_msg="输出为空"
                 )
 
-            return self.evaluate(custom_out.cpu(), golden_out.cpu().float(), dtype, trial)
+            return self.evaluate(custom_out.cpu(), golden_out.cpu(), dtype, trial, cpu_output=cpu_out)
 
         except Exception as e:
             return AccuracyResult(
@@ -361,13 +404,15 @@ class AccuracyEvaluator:
 
         return results
 
-    def _get_threshold(self, dtype: str) -> float:
-        """获取精度阈值"""
+    def _get_threshold(self, dtype: str, custom_thresholds: Dict[str, float] = None) -> float:
+        """获取精度阈值（优先使用自定义阈值）"""
+        # 优先使用调用时传入的自定义阈值
+        thresholds = custom_thresholds or self.thresholds
         dtype_lower = dtype.lower()
-        if dtype_lower in self.thresholds:
-            return self.thresholds[dtype_lower]
+        if dtype_lower in thresholds:
+            return thresholds[dtype_lower]
         # 默认使用 float32 阈值
-        return self.thresholds.get('float32', 2**-13)
+        return thresholds.get('float32', 2**-13)
 
     def check_output_shape(self, ai_output: torch.Tensor, expected_shape: tuple) -> bool:
         """检查输出形状是否匹配"""
