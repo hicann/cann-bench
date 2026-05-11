@@ -37,15 +37,17 @@ operator:
     dtype:
     - float16
     - bfloat16
+    optional: true
   - name: bias
     description: 偏置张量（可选），shape 为 [N] 或 [1, N]
     dtype:
     - float16
     - bfloat16
+    optional: true
   outputs:
   - name: y
     description: 输出张量，shape 为 [M, N]
     dtype:
     - float16
     - bfloat16
-  schema: weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantScale, Tensor antiquantOffset, Tensor bias) -> Tensor y
+  schema: weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantScale, Tensor? antiquantOffset=None, Tensor? bias=None) -> Tensor y

@@ -28,7 +28,7 @@ import yaml
 
 
 def _coerce_baseline_us(value: Any) -> float:
-    """Normalize ``baseline_perf_us`` into a float.
+    """Normalize ``baseline_perf_us`` / ``t_hw_us`` into a float.
 
     Some yaml files encode a missing baseline as the literal ``None`` —
     unquoted, it parses as the string ``"None"``, which is truthy and
@@ -64,6 +64,7 @@ class CaseInfo:
     note: str           # 备注
     yaml_path: str      # YAML文件路径
     baseline_perf_us: float = 0.0  # 性能基线
+    t_hw_us: float = 0.0  # 硬件下界 T_HW
 
     def get_case_id_str(self) -> str:
         return f"{self.rel_path}_{self.case_id}"
@@ -226,7 +227,8 @@ class CaseLoader:
             value_ranges=raw.get('value_range', []) or [],
             note=raw.get('note', '') or '',
             yaml_path=yaml_path,
-            baseline_perf_us=_coerce_baseline_us(raw.get('baseline_perf_us'))
+            baseline_perf_us=_coerce_baseline_us(raw.get('baseline_perf_us')),
+            t_hw_us=_coerce_baseline_us(raw.get('t_hw_us')),
         )
 
     def get_statistics(self) -> Dict[str, Any]:

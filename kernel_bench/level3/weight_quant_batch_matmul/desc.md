@@ -38,7 +38,7 @@ $$
 ### 算子原型
 
 ```python
-cann_bench.weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantScale, Tensor antiquantOffset, Tensor bias) -> Tensor y
+cann_bench.weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantScale, Tensor? antiquantOffset=None, Tensor? bias=None) -> Tensor y
 ```
 
 ### 输入参数说明

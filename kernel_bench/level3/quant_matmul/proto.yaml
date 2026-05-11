@@ -21,8 +21,8 @@ operator:
   attrs:
   - name: output_dtype
     type: string
-    default: "int8"
-    description: 输出数据类型，取值 "int8", "float16", "bfloat16", "int32"
+    default: null
+    description: 输出数据类型，取值 "int8"（默认）, "float16", "bfloat16", "int32"
     required: false
   - name: group_sizes
     type: int[]
@@ -80,4 +80,4 @@ operator:
     - bfloat16
     - int32
     shape: '[..., m, n]'
-  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? offset=None, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype="int8", int[]? group_sizes=None) -> Tensor out
+  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? offset=None, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype=None, int[]? group_sizes=None) -> Tensor out

@@ -40,6 +40,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 24.03
   note: float16-BSND-GQA-B2S256Skv4096N32Nkv8Dk128-top512
 - operator: SparseFlashAttention
   case_id: 2
@@ -72,6 +73,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 29.49
   note: float16-BSND-GQA-Dk192Dv128-top512
 - operator: SparseFlashAttention
   case_id: 3
@@ -104,6 +106,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 100.66
   note: bfloat16-BNSD-GQA-top1024
 - operator: SparseFlashAttention
   case_id: 4
@@ -136,6 +139,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 37.14
   note: float16-BNSD-GQA-Dk192-top512
 - operator: SparseFlashAttention
   case_id: 5
@@ -168,6 +172,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 13.11
   note: float16-BSND-GQA-N64Nkv8-top512
 - operator: SparseFlashAttention
   case_id: 6
@@ -200,6 +205,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 279.83
   note: float16-BSND-GQA-B16S1-decode-top512
 - operator: SparseFlashAttention
   case_id: 7
@@ -232,6 +238,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 699.8
   note: bfloat16-BNSD-GQA-B32S1-decode-Dk192-top1024
 - operator: SparseFlashAttention
   case_id: 8
@@ -264,6 +271,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 70.45
   note: float16-BSND-GQA-B8S4-MTP-top512
 - operator: SparseFlashAttention
   case_id: 9
@@ -296,6 +304,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 48.53
   note: float16-BSND-MLA-Dk512Dv512-top512
 - operator: SparseFlashAttention
   case_id: 10
@@ -328,6 +337,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 51.56
   note: float16-BSND-MLA-Dk576Dv512-top512
 - operator: SparseFlashAttention
   case_id: 11
@@ -360,6 +370,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 194.12
   note: bfloat16-BNSD-MLA-Dk512-top512
 - operator: SparseFlashAttention
   case_id: 12
@@ -392,6 +403,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 103.13
   note: float16-BNSD-MLA-Dk576-top512
 - operator: SparseFlashAttention
   case_id: 13
@@ -424,6 +436,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 48.53
   note: float16-BSND-MLA-top512-long
 - operator: SparseFlashAttention
   case_id: 14
@@ -456,6 +469,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 140.92
   note: float16-BSND-MLA-B16S1-decode-top512
 - operator: SparseFlashAttention
   case_id: 15
@@ -488,6 +502,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 298.39
   note: bfloat16-BNSD-MLA-B32S1-decode-Dk576-top1024
 - operator: SparseFlashAttention
   case_id: 16
@@ -520,6 +535,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 37.17
   note: float16-BSND-MLA-B8S4-MTP-top512
 - operator: SparseFlashAttention
   case_id: 17
@@ -552,6 +568,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 151.07
   note: float16-BNSD-MLA-B16S4-MTP-Dk576-top512
 - operator: SparseFlashAttention
   case_id: 18
@@ -584,6 +601,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 142.03
   note: float16-BSND-MLA-B32S1-decode-large-batch
 - operator: SparseFlashAttention
   case_id: 19
@@ -616,6 +634,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 70.11
   note: float16-BSND-GQA-B8S2-MTP-large-batch
 - operator: SparseFlashAttention
   case_id: 20
@@ -648,4 +667,5 @@ cases:
   - 0
   - 0
   baseline_perf_us: null
+  t_hw_us: 24.03
   note: float16-BSND-GQA-zero-input

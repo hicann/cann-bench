@@ -27,17 +27,27 @@
 
 | 维度 | 指标 | 权重 | 说明 |
 |------|------|------|------|
-| 编译正确性 | Pass/Fail | Wc=2 | 是否编译通过 |
-| 功能正确性 | 精度用例通过数 | Wf=3 | 通过精度用例的数量 |
-| 性能优化性 | 加速比 (SpeedUp) | Wp=5 | 验证性能/测试基准性能 |
+| 编译正确性 | Pass/Fail | w_c=0.2 | 是否编译通过（算子级一次） |
+| 功能正确性 | 精度用例通过 | w_f=0.3 | 单用例是否通过精度门 |
+| 性能优化性 | SOL-anchored score | w_p=0.5 | 见下方公式 |
 
-单算子综合评分 = 编译通过得分 + 功能通过用例数 × (功能得分 + 性能得分)
-  - 编译通过得分 = compile_pass × Wc    # 单算子一次，整份提交的编译结果
-  - 功能得分     = Wf                   # 每个功能通过的用例
-  - 性能得分     = SpeedUp × Wp         # 每个功能通过的用例（按该用例实测）
+**单用例 SOL-anchored 性能得分** (bench.tex Eq. 3)：
 
-Level-N 得分 = 该 level 内所有算子综合评分之和
-benchmark 总分 = 所有算子综合评分之和（= Level1 + Level2 + Level3 + Level4）
+$$
+\text{score}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}
+$$
+
+其中 `T_HW = t_hw_us`（硬件下界，cases.yaml 中提供）；`T_baseline = baseline_perf_us`；`T_cand` 为候选 kernel 实测时间。
+
+**单算子综合评分** (bench.tex Eq. 4)：
+
+$$
+\text{EachOperatorScore} = \left[ w_c \cdot \delta_{\text{pass}} + \sum_{i \in \text{cases}} \frac{\delta_{\text{accuracy},i} (w_f + w_p \cdot \text{score}_i)}{|\text{cases}|} \right] \cdot 100
+$$
+
+- 满分 100，编译失败时 `δ_pass=0` ⇒ 整算子计 0
+- Level-N 得分 = Σ 该 level 内算子 EachOperatorScore
+- benchmark 总分 = Σ 全部算子 EachOperatorScore（= Level1 + Level2 + Level3 + Level4）
 
 ## 🔍 Directory Structure
 

@@ -32,7 +32,6 @@ import shutil
 import sys
 import tempfile
 import time
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
 from typing import Optional, Dict, Any, Tuple, List, Callable
 from dataclasses import dataclass, field
 
@@ -46,45 +45,6 @@ from .input_pool import InputPool
 # Warmup kernel 精确形状特征（用于过滤）
 WARMUP_MATMUL_SHAPE = '"10240,10240;10240,10240"'
 WARMUP_REDUCE_SHAPE = '"96,1024,1024;3"'
-
-
-@contextmanager
-def _suppress_profiler_logs():
-    """Suppress torch_npu.profiler parser logs during profiling.
-
-    torch_npu.profiler uses Python logging module to output parser errors.
-    These errors (CANNTimelineParser, RelationParser etc.) are noise when
-    using Level1 profiler because some parsers require Level2 data.
-
-    We temporarily set the profiler logger level to CRITICAL to suppress
-    these INFO/WARNING/ERROR logs from the parser tasks.
-    """
-    import logging
-
-    # Get profiler related loggers
-    profiler_logger = logging.getLogger('torch_npu.profiler')
-    ascend_logger = logging.getLogger('ascend')
-
-    # Save original levels
-    original_profiler_level = profiler_logger.level
-    original_ascend_level = ascend_logger.level
-
-    # Set to CRITICAL to suppress INFO/WARNING/ERROR logs
-    profiler_logger.setLevel(logging.CRITICAL)
-    ascend_logger.setLevel(logging.CRITICAL)
-
-    try:
-        yield
-    finally:
-        # Restore original levels
-        profiler_logger.setLevel(original_profiler_level)
-        ascend_logger.setLevel(original_ascend_level)
-
-
-@contextmanager
-def _null_context():
-    """空上下文管理器"""
-    yield
 
 
 @dataclass
@@ -188,7 +148,30 @@ class PerfEvaluator:
         L2 cache 清理仅在测量 step 前执行（warmup step 跳过）。
         原先 (warmup+repeat) × (MatMul+ReduceMax) → 1 × (MatMul+ReduceMax) + repeat × ReduceMax。
         """
+        import logging
+        import os
+        import sys
         import torch_npu
+
+        # Suppress profiler parser logs via multiple mechanisms:
+        # 1. Set environment variables before any process spawns
+        os.environ['ASCEND_SLOG_PRINT_TO_STDOUT'] = '0'
+        os.environ['ASCEND_GLOBAL_LOG_LEVEL'] = '3'
+
+        # 2. Monkey-patch logging.basicConfig to force ERROR level
+        original_basicConfig = logging.basicConfig
+        def _silent_basicConfig(**kwargs):
+            kwargs['level'] = logging.ERROR
+            kwargs['force'] = True
+            return original_basicConfig(**kwargs)
+        logging.basicConfig = _silent_basicConfig
+
+        # 3. Pre-configure all loggers
+        for name in ['', 'torch', 'torch_npu', 'torch_npu.profiler', 'ascend', 'profiler']:
+            lg = logging.getLogger(name)
+            lg.setLevel(logging.ERROR)
+            lg.handlers = []
+            lg.addHandler(logging.NullHandler())
 
         # 获取 profiler_level，支持 Level1 和 Level2
         profiler_level = getattr(self.config, 'profiler_level', 'Level1')
@@ -208,26 +191,54 @@ class PerfEvaluator:
         if self.freq_boost:
             self._boost_freq_and_clear_cache()
 
-        with torch_npu.profiler.profile(
-            activities=[
-                torch_npu.profiler.ProfilerActivity.CPU,
-                torch_npu.profiler.ProfilerActivity.NPU,
-            ],
-            schedule=torch_npu.profiler.schedule(
-                wait=0, warmup=warmup, active=repeat, repeat=1
-            ),
-            on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(prof_dir),
-            record_shapes=False,
-            profile_memory=False,
-            with_stack=False,
-            experimental_config=experimental_config,
-        ) as prof:
-            for i in range(warmup + repeat):
-                # 仅在测量 step (非 warmup) 前清空 L2 cache
-                if self.freq_boost and i >= warmup:
-                    self._clear_cache()
-                fn()
-                prof.step()
+        # Save original stdout/stderr file descriptors
+        # 使用 os.dup2 在系统级别重定向，影响所有子进程
+        saved_stdout_fd = os.dup(1)
+        saved_stderr_fd = os.dup(2)
+        devnull_fd = os.open(os.devnull, os.O_WRONLY)
+
+        try:
+            # Redirect stdout and stderr to /dev/null at system level
+            os.dup2(devnull_fd, 1)
+            os.dup2(devnull_fd, 2)
+
+            with torch_npu.profiler.profile(
+                activities=[
+                    torch_npu.profiler.ProfilerActivity.CPU,
+                    torch_npu.profiler.ProfilerActivity.NPU,
+                ],
+                schedule=torch_npu.profiler.schedule(
+                    wait=0, warmup=warmup, active=repeat, repeat=1
+                ),
+                on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(prof_dir),
+                record_shapes=False,
+                profile_memory=False,
+                with_stack=False,
+                experimental_config=experimental_config,
+            ) as prof:
+                for i in range(warmup + repeat):
+                    if self.freq_boost and i >= warmup:
+                        self._clear_cache()
+                    fn()
+                    prof.step()
+
+            # 等待 profiler 解析完成（在恢复 stdout/stderr 之前）
+            # 解析器进程在 profiler context 退出后开始工作
+            try:
+                from torch_npu.profiler.analysis.prof_common_func._multi_process_pool import MultiProcessPool
+                pool = MultiProcessPool()
+                pool.close_pool(wait=True)  # 等待解析完成
+            except Exception:
+                pass
+
+        finally:
+            # Restore original stdout/stderr
+            os.dup2(saved_stdout_fd, 1)
+            os.dup2(saved_stderr_fd, 2)
+            os.close(saved_stdout_fd)
+            os.close(saved_stderr_fd)
+            os.close(devnull_fd)
+            logging.basicConfig = original_basicConfig
 
     def run_profiled(self, case_id: str, func: Callable, *args,
                      warmup: int = None, repeat: int = None,
@@ -421,10 +432,19 @@ class PerfEvaluator:
         """兼容旧接口，当前为同步解析，无需等待。"""
 
     def shutdown(self):
-        """清理warmup tensors"""
+        """清理warmup tensors 并强制关闭 profiler 进程池"""
         if self._warmup_tensors is not None:
             del self._warmup_tensors
             self._warmup_tensors = None
+
+        # 强制关闭 profiler ProcessPoolExecutor，不等待 fork 子进程
+        try:
+            from torch_npu.profiler.analysis.prof_common_func._multi_process_pool import MultiProcessPool
+            pool = MultiProcessPool()
+            # close_pool(wait=False) 不等待 fork 子进程完成，直接关闭
+            pool.close_pool(wait=False)
+        except Exception:
+            pass
 
     def _parse_kernel_details_csv(self, csv_file: str) -> Tuple[Dict[str, Dict[str, float]], float]:
         """解析 kernel_details.csv，提取 NPU kernel 执行时间（取中位数）

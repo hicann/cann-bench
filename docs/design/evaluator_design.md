@@ -815,18 +815,36 @@ def geometric_mean_speedup(speedups):
 | whl包 | `cann_bench_xxx.whl` | Python包，包含算子接口 |
 | run包 | `cann_bench_xxx.run` | NPU内核二进制包 |
 
-### 7.3 评分公式
+### 7.3 评分公式 (bench.tex §3.3 / Eq. 3, 4, 5)
 
 ```
-编译通过得分 = compile_pass × Wc  (Wc=2，compile_pass ∈ {0, 1}，整份提交编译是否通过，与用例数无关)
-功能得分     = case_pass × Wf     (Wf=3，case_pass ∈ {0, 1}，单个用例是否通过精度校验)
-性能得分     = SpeedUp × Wp       (Wp=5，仅对功能通过的用例计入，SpeedUp 按该用例实测)
+权重: w_c = 0.2, w_f = 0.3, w_p = 0.5  (sum = 1, 单算子满分 100)
 
-单算子综合评分 = 编译通过得分 + Σ_{功能通过的用例 i} (Wf + SpeedUp_i × Wp)
+单用例 SOL-anchored 性能得分 (Eq. 3):
+  score_i = (T_baseline - T_HW) / ((T_cand - T_HW) + (T_baseline - T_HW))
 
-Level-N 得分   = Σ 该 level 内算子综合评分
-benchmark 总分 = Σ 所有算子综合评分 (= Level1 + Level2 + Level3 + Level4)
+  T_HW    = cases.yaml 中 t_hw_us (硬件下界)
+  T_baseline = cases.yaml 中 baseline_perf_us
+  T_cand  = 候选 kernel 实测时间
+
+  锚点:
+    T_cand = T_baseline ⇒ score = 0.5
+    T_cand = T_HW       ⇒ score = 1.0
+    T_cand → ∞          ⇒ score → 0
+
+单算子综合评分 (Eq. 4):
+  EachOperatorScore = [ w_c · δ_pass + Σ_i δ_acc,i · (w_f + w_p · score_i) / N ] · 100
+
+  δ_pass ∈ {0, 1}      整份提交编译是否通过 (与用例数无关)
+  δ_acc,i ∈ {0, 1}     用例 i 是否通过精度门; δ_pass = 0 时 δ_acc,i ≡ 0
+  N = len(cases)
+
+聚合 (Eq. 5):
+  Level-N 得分   = Σ 该 level 内 EachOperatorScore
+  benchmark 总分 = Σ 所有算子 EachOperatorScore (= Level1 + Level2 + Level3 + Level4)
 ```
+
+实现位于 `src/kernel_eval/report/scoring.py`。
 
 ### 7.4 版本演进
 

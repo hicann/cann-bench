@@ -34,15 +34,15 @@ def grouped_matmul(
 
     Args:
         x: 输入矩阵TensorList，每个tensor shape为[m_i, k_i]
-        weight: 权重矩阵TensorList，每个tensor shape为[n_i, k_i]（transpose_weight=false）
-               或[k_i, n_i]（transpose_weight=true）
+        weight: 权重矩阵TensorList，每个tensor shape为[k_i, n_i]（transpose_weight=false）
+               或[n_i, k_i]（transpose_weight=true）
         bias: 偏置TensorList（可选），每个tensor shape为[n_i]
         split_item: 输出切分模式
                    - 0/1: 输出多tensor（每组独立），返回TensorList
                    - 2/3: 输出单tensor（结果连续存放），返回合并后的单tensor
         transpose_weight: 是否转置权重
-                         - false: weight shape为[n_i, k_i]，matmul为x[m,k] @ weight[n,k]^T
-                         - true: weight shape为[k_i, n_i]，matmul为x[m,k] @ weight[k,n]
+                         - false: weight shape为[k_i, n_i]，matmul为x[m,k] @ weight[k,n]
+                         - true: weight shape为[n_i, k_i]，matmul为x[m,k] @ weight[n,k]^T
 
     Returns:
         输出TensorList（split_item=0/1）或单tensor（split_item=2/3）
@@ -56,14 +56,14 @@ def grouped_matmul(
         weight_i = weight[i].float()
 
         if transpose_weight:
-            # weight shape: [k_i, n_i]
-            # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
-            y_i = torch.matmul(x_i, weight_i)
-        else:
             # weight shape: [n_i, k_i]
             # 需要转置: [n_i, k_i]^T = [k_i, n_i]
             # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
             y_i = torch.matmul(x_i, weight_i.transpose(-2, -1))
+        else:
+            # weight shape: [k_i, n_i]
+            # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
+            y_i = torch.matmul(x_i, weight_i)
 
         # 加偏置（可选）
         if bias is not None and bias[i] is not None:

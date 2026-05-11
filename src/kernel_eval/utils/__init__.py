@@ -22,6 +22,7 @@
 5. Baseline解析（多硬件支持）
 6. 命名转换（PascalCase→snake_case）
 7. 张量处理（精度转换、设备迁移）
+8. 目录解析（task-dir 参数处理）
 """
 
 from .device_manager import DeviceManager, DeviceConfig
@@ -38,6 +39,11 @@ from .tensor_utils import (
     tensor_to_fp64_cpu, tensors_to_cpu,
     tensors_to_fp64_cpu, tensors_to_device,
 )
+from .path_resolver import (
+    resolve_task_dir,
+    is_operator_directory,
+    find_bench_root,
+)
 
 __all__ = [
     "DeviceManager", "DeviceConfig",
@@ -50,4 +56,5 @@ __all__ = [
     "camel_to_snake", "snake_case_candidates",
     "tensor_to_fp64_cpu", "tensors_to_cpu",
     "tensors_to_fp64_cpu", "tensors_to_device",
+    "resolve_task_dir", "is_operator_directory", "find_bench_root",
 ]

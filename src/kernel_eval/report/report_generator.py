@@ -46,6 +46,8 @@ class EvalResult:
     accuracy: Optional[Dict] = None
     speedup: float = 0.0
     baseline_perf_us: float = 0.0
+    t_hw_us: float = 0.0
+    perf_score: Optional[float] = None  # bench.tex Eq. 3: per-case SOL score
     _perf_result: Any = None
 
     def resolve_profiling(self):
@@ -73,6 +75,8 @@ class EvalResult:
             accuracy=result.accuracy_result.to_dict() if result.accuracy_result else None,
             speedup=result.get_speedup(),
             baseline_perf_us=result.baseline_perf_us,
+            t_hw_us=result.t_hw_us,
+            perf_score=result.get_perf_score(),
             timestamp=datetime.now().isoformat(),
         )
 

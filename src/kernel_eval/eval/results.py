@@ -17,12 +17,57 @@
 职责：
 1. 定义评测结果数据结构
 2. 提供 to_dict 序列化方法
+3. 提供结果统计公共函数
 
 从 evaluator.py 拆分出来，避免循环导入。
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
+
+
+@dataclass
+class CaseResultSummary:
+    """用例结果统计摘要"""
+    passed: int
+    failed: int
+    skipped: int
+    avg_speedup: float
+    pass_rate: float
+
+
+def summarize_case_results(case_results: List[Any]) -> CaseResultSummary:
+    """统计用例结果
+
+    Args:
+        case_results: EvalCaseResult 列表
+
+    Returns:
+        CaseResultSummary 统计摘要
+
+    Note:
+        - passed: success=True 的用例数
+        - failed: success=False 且 accuracy_result 不为 None 的用例数（精度失败）
+        - skipped: success=False 且 accuracy_result 为 None 的用例数（执行失败/跳过）
+        - avg_speedup: 成功用例的平均加速比
+        - pass_rate: 通过率
+    """
+    passed = sum(1 for r in case_results if r.success)
+    failed = sum(1 for r in case_results if not r.success and r.accuracy_result is not None)
+    skipped = sum(1 for r in case_results if not r.success and r.accuracy_result is None)
+    speedups = [r.get_speedup() for r in case_results if r.success and r.get_speedup() > 0]
+    avg_speedup = sum(speedups) / len(speedups) if speedups else 0.0
+    total = len(case_results)
+    pass_rate = passed / total if total > 0 else 0.0
+
+    return CaseResultSummary(
+        passed=passed,
+        failed=failed,
+        skipped=skipped,
+        avg_speedup=avg_speedup,
+        pass_rate=pass_rate,
+    )
+
 
 from .op_runner import OpRunResult
 from .accuracy_eval import AccuracyResult
@@ -44,12 +89,32 @@ class EvalCaseResult:
     ai_run_result: Optional[OpRunResult] = None
     error_msg: Optional[str] = None
     baseline_perf_us: float = 0.0
+    t_hw_us: float = 0.0  # 硬件下界 T_HW
 
     def get_speedup(self) -> float:
-        """计算加速比"""
+        """计算加速比（保留为诊断指标）"""
         if self.perf_result and self.baseline_perf_us > 0:
             return self.baseline_perf_us / self.perf_result.elapsed_us if self.perf_result.elapsed_us > 0 else 0.0
         return 0.0
+
+    def get_perf_score(self) -> Optional[float]:
+        """单用例 SOL-anchored 性能得分（bench.tex Eq. 3）
+
+        score = (T_baseline - T_HW) / ((T_cand - T_HW) + (T_baseline - T_HW))
+
+        缺失 baseline / t_hw / 实测时间时返回 None，由调用方决定该用例如何处理。
+        """
+        if not self.perf_result or self.perf_result.elapsed_us <= 0:
+            return None
+        if self.baseline_perf_us <= 0 or self.t_hw_us <= 0:
+            return None
+        t_cand = float(self.perf_result.elapsed_us)
+        t_base = float(self.baseline_perf_us)
+        t_hw = float(self.t_hw_us)
+        denom = (t_cand - t_hw) + (t_base - t_hw)
+        if denom <= 0:
+            return None
+        return (t_base - t_hw) / denom
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -62,12 +127,14 @@ class EvalCaseResult:
             'perf': {
                 'elapsed_us': self.perf_result.elapsed_us if self.perf_result else 0,
                 'speedup': self.get_speedup(),
+                'perf_score': self.get_perf_score(),
                 'op_times': self.perf_result.op_times if self.perf_result else {},
             } if self.perf_result else None,
             'golden_elapsed_us': self.golden_run_result.elapsed_us if self.golden_run_result else 0,
             'ai_elapsed_us': self.ai_run_result.elapsed_us if self.ai_run_result else 0,
             'error_msg': self.error_msg,
             'baseline_perf_us': self.baseline_perf_us,
+            't_hw_us': self.t_hw_us,
         }
 
     @classmethod
@@ -105,6 +172,7 @@ class EvalCaseResult:
             perf_result=perf_result,
             error_msg=data.get('error_msg'),
             baseline_perf_us=data.get('baseline_perf_us', 0.0),
+            t_hw_us=data.get('t_hw_us', 0.0),
         )
 
 
@@ -124,6 +192,11 @@ class EvalOperatorResult:
     compilation_error: Optional[str] = None
     subprocess_failure_reason: Optional[str] = None
 
+    @property
+    def compile_passed(self) -> bool:
+        """δ_pass：编译通过标记。无 compilation_error 视为通过。"""
+        return self.compilation_error is None
+
     def to_dict(self) -> Dict[str, Any]:
         d = {
             'rel_path': self.rel_path,
@@ -134,6 +207,7 @@ class EvalOperatorResult:
             'skipped_cases': self.skipped_cases,
             'pass_rate': self.pass_rate,
             'avg_speedup': self.avg_speedup,
+            'compile_passed': self.compile_passed,
             'results': [r.to_dict() for r in self.results],
         }
         if self.compilation_error:

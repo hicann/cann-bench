@@ -26,6 +26,7 @@ cases:
   - [-0.01, 0.01]
   - [-0.1, 0.1]
   baseline_perf_us: null
+  t_hw_us: 0.76
   note: S-float16-int8-512K-对齐-M=1024-K=512-N=256-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 2
@@ -44,6 +45,7 @@ cases:
   - [-0.02, 0.02]
   - [-0.2, 0.2]
   baseline_perf_us: null
+  t_hw_us: 6.07
   note: S-bfloat16-int8-2M-对齐-M=2048-K=1024-N=512-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 3
@@ -62,6 +64,7 @@ cases:
   - [-0.03, 0.03]
   - [-0.3, 0.3]
   baseline_perf_us: null
+  t_hw_us: 1.11
   note: S-float16-int8-1M-对齐-M=4096-K=256-N=128-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 4
@@ -76,6 +79,7 @@ cases:
   - [-128, 127]
   - [0.01, 1]
   baseline_perf_us: null
+  t_hw_us: 1.09
   note: S-bfloat16-int8-1M-非对齐-无offset无bias
 - operator: WeightQuantBatchMatmul
   case_id: 5
@@ -92,6 +96,7 @@ cases:
   - [0.1, 10]
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 1.04
   note: S-float16-int8-1M-非对齐-有offset无bias
 - operator: WeightQuantBatchMatmul
   case_id: 6
@@ -110,6 +115,7 @@ cases:
   - 
   - [-10, 10]
   baseline_perf_us: null
+  t_hw_us: 1.06
   note: bfloat16-int8-1M-非对齐-无offset有bias
 - operator: WeightQuantBatchMatmul
   case_id: 7
@@ -128,6 +134,7 @@ cases:
   - [-0.05, 0.05]
   - [-0.5, 0.5]
   baseline_perf_us: null
+  t_hw_us: 6.07
   note: S-float16-int8-1M-K大N大-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 8
@@ -146,6 +153,7 @@ cases:
   - [-0.1, 0.1]
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 3.02
   note: S-bfloat16-int8-1M-质数非对齐-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 9
@@ -160,6 +168,7 @@ cases:
   - [-128, 127]
   - [0.1, 5]
   baseline_perf_us: null
+  t_hw_us: 0.09
   note: S-float16-int8-64K-质数非对齐-无可选参数
 - operator: WeightQuantBatchMatmul
   case_id: 10
@@ -176,6 +185,7 @@ cases:
   - [1, 50]
   - [-5, 5]
   baseline_perf_us: null
+  t_hw_us: 6.07
   note: S-bfloat16-int8-512K-质数大K大N-有offset
 - operator: WeightQuantBatchMatmul
   case_id: 11
@@ -194,6 +204,7 @@ cases:
   - [-1, 1]
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 0.1
   note: S-float16-int8-32K-非对齐-float16边界值
 - operator: WeightQuantBatchMatmul
   case_id: 12
@@ -212,6 +223,7 @@ cases:
   - [-0.5, 0.5]
   - [-10, 10]
   baseline_perf_us: null
+  t_hw_us: 0.03
   note: S-bfloat16-int8-8K-对齐-float32边界值
 - operator: WeightQuantBatchMatmul
   case_id: 13
@@ -230,6 +242,7 @@ cases:
   - [-inf, inf]
   - [-inf, inf]
   baseline_perf_us: null
+  t_hw_us: 0.01
   note: S-float16-int8-2K-对齐-inf特殊值
 - operator: WeightQuantBatchMatmul
   case_id: 14
@@ -244,6 +257,7 @@ cases:
   - [-128, 127]
   - [0.01, 1]
   baseline_perf_us: null
+  t_hw_us: 0.0
   note: S-bfloat16-int8-512-对齐-nan特殊值-无可选参数
 - operator: WeightQuantBatchMatmul
   case_id: 15
@@ -262,6 +276,7 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: null
+  t_hw_us: 0.0
   note: S-float16-int8-128-对齐-零值
 - operator: WeightQuantBatchMatmul
   case_id: 16
@@ -280,6 +295,7 @@ cases:
   - [-0.05, 0.05]
   - [-0.5, 0.5]
   baseline_perf_us: null
+  t_hw_us: 0.07
   note: S-float16-int8-512-小batch-全参数
 - operator: WeightQuantBatchMatmul
   case_id: 17
@@ -296,6 +312,7 @@ cases:
   - [0.1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: null
+  t_hw_us: 0.28
   note: S-bfloat16-int8-2K-质数非对齐-有offset无bias
 - operator: WeightQuantBatchMatmul
   case_id: 18
@@ -314,6 +331,7 @@ cases:
   - 
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 0.07
   note: float16-int8-2K-质数非对齐-无offset有bias
 - operator: WeightQuantBatchMatmul
   case_id: 19
@@ -332,6 +350,7 @@ cases:
   - [-0.02, 0.02]
   - [-0.2, 0.2]
   baseline_perf_us: null
+  t_hw_us: 0.0
   note: S-bfloat16-int8-512-质数非对齐-全参数-微小值域
 - operator: WeightQuantBatchMatmul
   case_id: 20
@@ -350,4 +369,5 @@ cases:
   - [-0.3, 0.6]
   - [-5, 5]
   baseline_perf_us: null
+  t_hw_us: 0.01
   note: S-float16-int8-2K-质数非对齐-全参数-非对称中值域

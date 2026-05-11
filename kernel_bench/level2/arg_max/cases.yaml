@@ -16,8 +16,9 @@ cases:
   dtype: [float16]
   attrs: {dimension: -1}
   value_range: [-1, 1]
-  baseline_perf_us: 69.94
-  note: S-float16-1M-对齐-1D-dim=-1
+  baseline_perf_us: 69.90
+  t_hw_us: 1.09
+  note: "S-float16-1M-对齐-1D-dim=-1 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 2
   input_shape:
@@ -25,8 +26,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: -1}
   value_range: [-2, 2]
-  baseline_perf_us: 37.3
-  note: M-float32-4M-对齐-2D-dim=-1
+  baseline_perf_us: 40.32
+  t_hw_us: 8.74
+  note: "M-float32-4M-对齐-2D-dim=-1 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 3
   input_shape:
@@ -34,8 +36,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dimension: -1}
   value_range: [-3, 3]
-  baseline_perf_us: 80.99
-  note: M-bfloat16-16M-对齐-2D-dim=-1
+  baseline_perf_us: 84.64
+  t_hw_us: 17.48
+  note: "M-bfloat16-16M-对齐-2D-dim=-1 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 4
   input_shape:
@@ -43,8 +46,9 @@ cases:
   dtype: [int32]
   attrs: {dimension: 0}
   value_range: [-10000, 10000]
-  baseline_perf_us: 3116.12
-  note: L-int32-67M-对齐-2D-dim=0-中值域
+  baseline_perf_us: 3118.96
+  t_hw_us: 139.81
+  note: "L-int32-67M-对齐-2D-dim=0-中值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 5
   input_shape:
@@ -52,8 +56,9 @@ cases:
   dtype: [int64]
   attrs: {dimension: -1}
   value_range: [-100000, 100000]
-  baseline_perf_us: 11960.98
-  note: L-int64-268M-对齐-2D-dim=-1-大值域
+  baseline_perf_us: 11962.60
+  t_hw_us: 139.81
+  note: "L-int64-268M-对齐-2D-dim=-1-大值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 6
   input_shape:
@@ -61,8 +66,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: 0}
   value_range: [-1000, 1000]
-  baseline_perf_us: 3266.03
-  note: L-float32-1G-对齐-2D-dim=0-大值域
+  baseline_perf_us: 3271.65
+  t_hw_us: 139.81
+  note: "L-float32-1G-对齐-2D-dim=0-大值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 7
   input_shape:
@@ -70,8 +76,9 @@ cases:
   dtype: [float16]
   attrs: {dimension: -1}
   value_range: [-0.1, 0.1]
-  baseline_perf_us: 16.05
-  note: S-float16-1M-非对齐-2D-dim=-1-微小值域
+  baseline_perf_us: 19.08
+  t_hw_us: 1.09
+  note: "S-float16-1M-非对齐-2D-dim=-1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 8
   input_shape:
@@ -79,8 +86,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: 0}
   value_range: [-1, 2]
-  baseline_perf_us: 389.78
-  note: S-float32-1M-质数非对齐-2D-dim=0-非对称
+  baseline_perf_us: 391.47
+  t_hw_us: 2.15
+  note: "S-float32-1M-质数非对齐-2D-dim=0-非对称 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 9
   input_shape:
@@ -88,8 +96,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dimension: -1}
   value_range: [-5, 10]
-  baseline_perf_us: 22.2
-  note: S-bfloat16-1M-非对齐-2D-dim=-1-非对称
+  baseline_perf_us: 25.70
+  t_hw_us: 1.23
+  note: "S-bfloat16-1M-非对齐-2D-dim=-1-非对称 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 10
   input_shape:
@@ -97,8 +106,9 @@ cases:
   dtype: [int32]
   attrs: {dimension: 1}
   value_range: [-50, 100]
-  baseline_perf_us: 1379.47
-  note: L-int32-50M-质数非对齐-3D-dim=1
+  baseline_perf_us: 1387.15
+  t_hw_us: 103.53
+  note: "L-int32-50M-质数非对齐-3D-dim=1 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 11
   input_shape:
@@ -106,8 +116,9 @@ cases:
   dtype: [float16]
   attrs: {dimension: -1}
   value_range: [-65504, 65504]
-  baseline_perf_us: 24.18
-  note: S-float16-1M-非对齐-2D-dim=-1-float16边界值
+  baseline_perf_us: 27.18
+  t_hw_us: 1.10
+  note: "S-float16-1M-非对齐-2D-dim=-1-float16边界值 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 12
   input_shape:
@@ -115,8 +126,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: -1}
   value_range: [-88, 88]
-  baseline_perf_us: 11.98
-  note: S-float32-1M-质数非对齐-4D-dim=-1-float32边界值
+  baseline_perf_us: 15.22
+  t_hw_us: 2.28
+  note: "S-float32-1M-质数非对齐-4D-dim=-1-float32边界值 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 13
   input_shape:
@@ -124,8 +136,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dimension: 1}
   value_range: [-0.01, 0.01]
-  baseline_perf_us: 18.26
-  note: S-bfloat16-900K-质数非对齐-4D-dim=1-微小值域
+  baseline_perf_us: 21.08
+  t_hw_us: 0.94
+  note: "S-bfloat16-900K-质数非对齐-4D-dim=1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 14
   input_shape:
@@ -133,8 +146,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: -1}
   value_range: [-inf, inf]
-  baseline_perf_us: 142.83
-  note: S-float32-1M-质数非对齐-1D-dim=-1-inf特殊值
+  baseline_perf_us: 143.20
+  t_hw_us: 2.18
+  note: "S-float32-1M-质数非对齐-1D-dim=-1-inf特殊值 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 15
   input_shape:
@@ -142,8 +156,9 @@ cases:
   dtype: [float16]
   attrs: {dimension: 2}
   value_range: [nan, nan]
-  baseline_perf_us: 79.6
-  note: M-float16-10M-质数非对齐-5D-dim=2-nan特殊值
+  baseline_perf_us: 82.70
+  t_hw_us: 11.36
+  note: "M-float16-10M-质数非对齐-5D-dim=2-nan特殊值 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 16
   input_shape:
@@ -151,8 +166,9 @@ cases:
   dtype: [int64]
   attrs: {dimension: -1}
   value_range: [0, 0]
-  baseline_perf_us: 1332.61
-  note: M-int64-3M-质数非对齐-5D-dim=-1-零值
+  baseline_perf_us: 1335.99
+  t_hw_us: 12.68
+  note: "M-int64-3M-质数非对齐-5D-dim=-1-零值 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 17
   input_shape:
@@ -160,8 +176,9 @@ cases:
   dtype: [float32]
   attrs: {dimension: -1}
   value_range: [-0.5, 0.5]
-  baseline_perf_us: 14.49
-  note: S-float32-1M-非对齐-2D-dim=-1-微小值域
+  baseline_perf_us: 17.64
+  t_hw_us: 2.19
+  note: "S-float32-1M-非对齐-2D-dim=-1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 18
   input_shape:
@@ -169,8 +186,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dimension: 0}
   value_range: [-1, 3]
-  baseline_perf_us: 115.39
-  note: S-bfloat16-2M-非对齐-2D-dim=0-非对称
+  baseline_perf_us: 117.84
+  t_hw_us: 2.18
+  note: "S-bfloat16-2M-非对齐-2D-dim=0-非对称 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 19
   input_shape:
@@ -178,8 +196,9 @@ cases:
   dtype: [int32]
   attrs: {dimension: -1}
   value_range: [-1000, 1000]
-  baseline_perf_us: 131.52
-  note: S-int32-2M-非对齐-2D-dim=-1-大值域
+  baseline_perf_us: 134.56
+  t_hw_us: 4.36
+  note: "S-int32-2M-非对齐-2D-dim=-1-大值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 20
   input_shape:
@@ -187,5 +206,6 @@ cases:
   dtype: [float16]
   attrs: {dimension: 1}
   value_range: [-3, 6]
-  baseline_perf_us: 408.64
-  note: S-float16-2M-非对齐-3D-dim=1-非对称中值域
+  baseline_perf_us: 409.99
+  t_hw_us: 2.18
+  note: "S-float16-2M-非对齐-3D-dim=1-非对称中值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"

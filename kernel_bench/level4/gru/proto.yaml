@@ -122,4 +122,4 @@ operator:
     - float32
     - float16
     - bfloat16
-  schema: gru(Tensor x, Tensor[] weight_ih, Tensor[] weight_hh, int inputSize, int hiddenSize, int numLayers, bool bias=False, bool batchFirst=False, float dropout=0.0, bool bidirectional=False, Tensor[]? bias_ih=None, Tensor[]? bias_hh=None, Tensor? h0=None) -> (Tensor y, Tensor hn)
+  schema: gru(Tensor x, Tensor[] weight_ih, Tensor[] weight_hh, int inputSize, int hiddenSize, int numLayers, bool bias=True, bool batchFirst=False, float dropout=0.0, bool bidirectional=False, Tensor[]? bias_ih=None, Tensor[]? bias_hh=None, Tensor? h0=None) -> (Tensor y, Tensor hn)

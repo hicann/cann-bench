@@ -28,6 +28,13 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
+from .scoring import (
+    WEIGHT_COMPILATION,
+    WEIGHT_FUNCTION,
+    WEIGHT_PERFORMANCE,
+    per_case_sol_score,
+)
+
 
 @dataclass
 class OperatorSummary:
@@ -41,6 +48,12 @@ class OperatorSummary:
     geometric_mean_speedup: float = 0.0
     mere_avg: float = 0.0
     mare_avg: float = 0.0
+    # bench.tex 三轴得分（0-100 量纲）
+    compile_passed: bool = False
+    compilation_score: float = 0.0
+    function_score: float = 0.0
+    performance_score: float = 0.0
+    composite_score: float = 0.0  # EachOperatorScore，[0, 100]
     # 可选字段：当算子跑不起来时的原因（编译失败 / 子进程超时或崩溃）。
     # 为 None 时渲染普通的 case 表；非空时在小节头下方优先渲染原因块。
     compilation_error: Optional[str] = None
@@ -59,6 +72,9 @@ class EvaluationSummary:
     overall_geometric_mean_speedup: float
     operators: List[OperatorSummary]
     timestamp: str
+    # bench.tex Eq. 5: Σ EachOperatorScore (跨算子求和) 与各 Level 的小计
+    benchmark_total_score: float = 0.0
+    level_scores: Dict[str, float] = None  # type: ignore[assignment]
 
 
 def calculate_geometric_mean(values: List[float]) -> float:
@@ -81,6 +97,52 @@ def calculate_geometric_mean(values: List[float]) -> float:
 
     # 几何平均 = exp(mean(log(x)))
     return math.exp(sum(math.log(max(v, 1e-9)) for v in valid) / len(valid))
+
+
+def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
+    """从 op_result 字典直接计算 bench.tex Eq. 4 的三轴得分与综合得分。
+
+    权重与单用例公式从 scoring 模块导入，确保单一事实来源。
+    支持两种 JSON 形状：
+      - EvalCaseResult.to_dict 形状：perf={'elapsed_us', 'perf_score', ...}（嵌套）
+      - EvalResult.to_dict 形状：elapsed_us / perf_score 直接放在 case 顶层
+    """
+    w_c, w_f, w_p = WEIGHT_COMPILATION, WEIGHT_FUNCTION, WEIGHT_PERFORMANCE
+    compile_passed = op_result.get("compile_passed",
+                                   op_result.get("compilation_error") is None)
+    delta_pass = 1 if compile_passed else 0
+    # 同时识别两种 case 列表字段名：results (EvalOperatorResult) / cases (OperatorReport)
+    cases = op_result.get("results") or op_result.get("cases") or []
+    total_cases = max(op_result.get("total_cases", len(cases)), 1)
+
+    n_func_pass = 0
+    perf_score_sum = 0.0
+    if compile_passed:
+        for case in cases:
+            success = case.get("success", case.get("status") == "success")
+            if not success:
+                continue
+            n_func_pass += 1
+            perf = case.get("perf") or {}
+            score_i = perf.get("perf_score", case.get("perf_score"))
+            if score_i is None:
+                t_cand = perf.get("elapsed_us") or case.get("elapsed_us") or 0
+                t_base = case.get("baseline_perf_us") or 0
+                t_hw = case.get("t_hw_us") or 0
+                score_i = per_case_sol_score(t_base, t_cand, t_hw)
+            perf_score_sum += score_i if score_i is not None else 0.0
+
+    compilation_score = w_c * delta_pass * 100.0
+    function_score = (n_func_pass * w_f / total_cases) * 100.0
+    performance_score = (perf_score_sum * w_p / total_cases) * 100.0
+    composite = compilation_score + function_score + performance_score
+    return {
+        "compile_passed": compile_passed,
+        "compilation_score": compilation_score,
+        "function_score": function_score,
+        "performance_score": performance_score,
+        "composite_score": composite,
+    }
 
 
 def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
@@ -116,6 +178,8 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
     mere_avg = sum(meres) / len(meres) if meres else 0.0
     mare_avg = sum(mares) / len(mares) if mares else 0.0
 
+    scores = _composite_score_from_dict(op_result)
+
     return OperatorSummary(
         operator=operator,
         rel_path=rel_path,
@@ -126,6 +190,11 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
         geometric_mean_speedup=geometric_mean_speedup,
         mere_avg=mere_avg,
         mare_avg=mare_avg,
+        compile_passed=scores["compile_passed"],
+        compilation_score=scores["compilation_score"],
+        function_score=scores["function_score"],
+        performance_score=scores["performance_score"],
+        composite_score=scores["composite_score"],
         compilation_error=op_result.get("compilation_error"),
         subprocess_failure_reason=op_result.get("subprocess_failure_reason"),
     )
@@ -165,6 +234,14 @@ def generate_summary(
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # bench.tex Eq. 5: benchmark / level 总分 = Σ EachOperatorScore
+    benchmark_total_score = sum(op.composite_score for op in operators)
+    level_scores: Dict[str, float] = {}
+    for op in operators:
+        # 取 rel_path 第一段作为 level 标签 (e.g. "level1/exp" -> "level1")
+        level_key = op.rel_path.split('/', 1)[0] if op.rel_path else "unknown"
+        level_scores[level_key] = level_scores.get(level_key, 0.0) + op.composite_score
+
     return EvaluationSummary(
         eval_code=eval_code,
         hardware=hardware,
@@ -174,7 +251,9 @@ def generate_summary(
         overall_pass_rate=overall_pass_rate,
         overall_geometric_mean_speedup=overall_geometric_mean_speedup,
         operators=operators,
-        timestamp=timestamp
+        timestamp=timestamp,
+        benchmark_total_score=benchmark_total_score,
+        level_scores=level_scores,
     )
 
 
@@ -205,20 +284,25 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
     lines.append(f"- **总用例数**: {summary.total_cases}")
     lines.append(f"- **通过用例**: {summary.total_passed}")
     lines.append(f"- **通过率**: {summary.overall_pass_rate:.2%}")
-    lines.append(f"- **几何平均加速比**: {summary.overall_geometric_mean_speedup:.3f}x")
+    lines.append(f"- **几何平均加速比 (诊断)**: {summary.overall_geometric_mean_speedup:.3f}x")
+    lines.append(f"- **Benchmark 总分** (Σ EachOperatorScore): {summary.benchmark_total_score:.2f}")
+    if summary.level_scores:
+        for level in sorted(summary.level_scores.keys()):
+            lines.append(f"  - {level}: {summary.level_scores[level]:.2f}")
     lines.append("")
 
     # 各算子结果
     lines.append("## 算子详情")
     lines.append("")
-    lines.append("| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 几何平均加速比 | 平均MERE | 平均MARE |")
-    lines.append("|------|------|--------|------|------|--------|---------------|----------|----------|")
+    lines.append("| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 综合得分 | 编译 | 功能 | 性能 | 几何加速比 |")
+    lines.append("|------|------|--------|------|------|--------|----------|------|------|------|-----------|")
 
     for op in summary.operators:
         lines.append(
             f"| {op.operator} | {op.rel_path} | {op.total_cases} | {op.passed_cases} | "
-            f"{op.failed_cases} | {op.pass_rate:.2%} | {op.geometric_mean_speedup:.3f}x | "
-            f"{op.mere_avg:.2e} | {op.mare_avg:.2e} |"
+            f"{op.failed_cases} | {op.pass_rate:.2%} | {op.composite_score:.2f} | "
+            f"{op.compilation_score:.2f} | {op.function_score:.2f} | {op.performance_score:.2f} | "
+            f"{op.geometric_mean_speedup:.3f}x |"
         )
 
     lines.append("")

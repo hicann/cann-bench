@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-MoeGatingTopKSoftmax,1,"[[1024, 16]]","[""float16""]","{""k"": 2}","[[-1, 1]]",,S-float16-2D-无finished-tokens1024-experts16-k2
-MoeGatingTopKSoftmax,2,"[[16384, 32]]","[""float32""]","{""k"": 4}","[[-2, 2]]",,M-float32-2D-无finished-tokens16384-experts32-k4
-MoeGatingTopKSoftmax,3,"[[131072, 64]]","[""bfloat16""]","{""k"": 8}","[[-3, 3]]",,L-bfloat16-2D-无finished-tokens131072-experts64-k8
-MoeGatingTopKSoftmax,4,"[[4, 1024, 128]]","[""float16""]","{""k"": 16}","[[-10, 10]]",,M-float16-3D-无finished-B4-tokens1024-experts128-k16
-MoeGatingTopKSoftmax,5,"[[8192, 256]]","[""float32""]","{""k"": 32}","[[-100, 100]]",,M-float32-2D-无finished-tokens8192-experts256-k32
-MoeGatingTopKSoftmax,6,"[[1024, 16], [1024]]","[""float16"", ""bool""]","{""k"": 2}","[[-1, 1], [0, 1]]",,S-float16-2D-带finished-tokens1024-experts16-k2
-MoeGatingTopKSoftmax,7,"[[4, 1024, 32], [4, 1024]]","[""float32"", ""bool""]","{""k"": 4}","[[-2, 2], [0, 1]]",,M-float32-3D-带finished-B4-tokens1024-experts32-k4
-MoeGatingTopKSoftmax,8,"[[65536, 64], [65536]]","[""bfloat16"", ""bool""]","{""k"": 8}","[[-3, 3], [0, 1]]",,L-bfloat16-2D-带finished-tokens65536-experts64-k8
-MoeGatingTopKSoftmax,9,"[[4096, 512]]","[""float16""]","{""k"": 64}","[[-1000, 1000]]",,M-float16-2D-无finished-tokens4096-experts512-k64
-MoeGatingTopKSoftmax,10,"[[2048, 1024]]","[""bfloat16""]","{""k"": 128}","[[-1, 1]]",,M-bfloat16-2D-无finished-tokens2048-experts1024-k128
-MoeGatingTopKSoftmax,11,"[[1009, 32]]","[""float16""]","{""k"": 4}","[[-10, 10]]",,S-float16-2D-质数tokens1009-experts32-k4
-MoeGatingTopKSoftmax,12,"[[2048, 511]]","[""float32""]","{""k"": 8}","[[-2, 2]]",,M-float32-2D-质数experts511-tokens2048-k8
-MoeGatingTopKSoftmax,13,"[[8, 1009, 127]]","[""bfloat16""]","{""k"": 16}","[[-100, 100]]",,M-bfloat16-3D-质数非对齐-B8-tokens1009-experts127-k16
-MoeGatingTopKSoftmax,14,"[[64, 8]]","[""float16""]","{""k"": 2}","[[-1, 1]]",,XS-float16-2D-最小tokens64-experts8-k2
-MoeGatingTopKSoftmax,15,"[[1024, 4]]","[""float32""]","{""k"": 2}","[[-0.1, 0.1]]",,S-float32-2D-最小experts4-tokens1024-k2
-MoeGatingTopKSoftmax,16,"[[512, 16]]","[""bfloat16""]","{""k"": 1}","[[-1, 1]]",,XS-bfloat16-2D-k最小值1-tokens512-experts16
-MoeGatingTopKSoftmax,17,"[[2048, 256]]","[""float16""]","{""k"": 8}","[[-65504, 65504]]",,M-float16-2D-边界值范围-tokens2048-experts256-k8
-MoeGatingTopKSoftmax,18,"[[4096, 128]]","[""float32""]","{""k"": 16}","[[-88, 88]]",,M-float32-2D-float32边界值-tokens4096-experts128-k16
-MoeGatingTopKSoftmax,19,"[[1024, 32]]","[""float16""]","{""k"": 4}","[[-0.01, 0.01]]",,S-float16-2D-微小值域-tokens1024-experts32-k4
-MoeGatingTopKSoftmax,20,"[[512, 64]]","[""bfloat16""]","{""k"": 8}","[[0, 0]]",,XS-bfloat16-2D-零值输入-tokens512-experts64-k8
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+MoeGatingTopKSoftmax,1,"[[1024, 16]]","[""float16""]","{""k"": 2}","[[-1, 1]]",,0.03,S-float16-2D-无finished-tokens1024-experts16-k2
+MoeGatingTopKSoftmax,2,"[[16384, 32]]","[""float32""]","{""k"": 4}","[[-2, 2]]",,1.09,M-float32-2D-无finished-tokens16384-experts32-k4
+MoeGatingTopKSoftmax,3,"[[131072, 64]]","[""bfloat16""]","{""k"": 8}","[[-3, 3]]",,18.53,L-bfloat16-2D-无finished-tokens131072-experts64-k8
+MoeGatingTopKSoftmax,4,"[[4, 1024, 128]]","[""float16""]","{""k"": 16}","[[-10, 10]]",,1.25,M-float16-3D-无finished-B4-tokens1024-experts128-k16
+MoeGatingTopKSoftmax,5,"[[8192, 256]]","[""float32""]","{""k"": 32}","[[-100, 100]]",,4.94,M-float32-2D-无finished-tokens8192-experts256-k32
+MoeGatingTopKSoftmax,6,"[[1024, 16], [1024]]","[""float16"", ""bool""]","{""k"": 2}","[[-1, 1], [0, 1]]",,0.03,S-float16-2D-带finished-tokens1024-experts16-k2
+MoeGatingTopKSoftmax,7,"[[4, 1024, 32], [4, 1024]]","[""float32"", ""bool""]","{""k"": 4}","[[-2, 2], [0, 1]]",,0.28,M-float32-3D-带finished-B4-tokens1024-experts32-k4
+MoeGatingTopKSoftmax,8,"[[65536, 64], [65536]]","[""bfloat16"", ""bool""]","{""k"": 8}","[[-3, 3], [0, 1]]",,9.35,L-bfloat16-2D-带finished-tokens65536-experts64-k8
+MoeGatingTopKSoftmax,9,"[[4096, 512]]","[""float16""]","{""k"": 64}","[[-1000, 1000]]",,5.68,M-float16-2D-无finished-tokens4096-experts512-k64
+MoeGatingTopKSoftmax,10,"[[2048, 1024]]","[""bfloat16""]","{""k"": 128}","[[-1, 1]]",,6.03,M-bfloat16-2D-无finished-tokens2048-experts1024-k128
+MoeGatingTopKSoftmax,11,"[[1009, 32]]","[""float16""]","{""k"": 4}","[[-10, 10]]",,0.07,S-float16-2D-质数tokens1009-experts32-k4
+MoeGatingTopKSoftmax,12,"[[2048, 511]]","[""float32""]","{""k"": 8}","[[-2, 2]]",,2.18,M-float32-2D-质数experts511-tokens2048-k8
+MoeGatingTopKSoftmax,13,"[[8, 1009, 127]]","[""bfloat16""]","{""k"": 16}","[[-100, 100]]",,2.43,M-bfloat16-3D-质数非对齐-B8-tokens1009-experts127-k16
+MoeGatingTopKSoftmax,14,"[[64, 8]]","[""float16""]","{""k"": 2}","[[-1, 1]]",,0.0,XS-float16-2D-最小tokens64-experts8-k2
+MoeGatingTopKSoftmax,15,"[[1024, 4]]","[""float32""]","{""k"": 2}","[[-0.1, 0.1]]",,0.01,S-float32-2D-最小experts4-tokens1024-k2
+MoeGatingTopKSoftmax,16,"[[512, 16]]","[""bfloat16""]","{""k"": 1}","[[-1, 1]]",,0.02,XS-bfloat16-2D-k最小值1-tokens512-experts16
+MoeGatingTopKSoftmax,17,"[[2048, 256]]","[""float16""]","{""k"": 8}","[[-65504, 65504]]",,1.14,M-float16-2D-边界值范围-tokens2048-experts256-k8
+MoeGatingTopKSoftmax,18,"[[4096, 128]]","[""float32""]","{""k"": 16}","[[-88, 88]]",,1.15,M-float32-2D-float32边界值-tokens4096-experts128-k16
+MoeGatingTopKSoftmax,19,"[[1024, 32]]","[""float16""]","{""k"": 4}","[[-0.01, 0.01]]",,0.07,S-float16-2D-微小值域-tokens1024-experts32-k4
+MoeGatingTopKSoftmax,20,"[[512, 64]]","[""bfloat16""]","{""k"": 8}","[[0, 0]]",,0.07,XS-bfloat16-2D-零值输入-tokens512-experts64-k8

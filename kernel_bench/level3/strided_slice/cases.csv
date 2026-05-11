@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-StridedSlice,1,[[1048576]],"[""float16""]","{""begin"": [0], ""end"": [524288], ""strides"": [2]}","[-1, 1]",,S-float16-1M-对齐-1D-stride=2
-StridedSlice,2,"[[2048, 2048]]","[""float32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 1]}","[-2, 2]",,M-float32-4M-对齐-2D-全切片
-StridedSlice,3,"[[4096, 4096]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [2048, 2048], ""strides"": [2, 2]}","[-3, 3]",,M-bfloat16-16M-对齐-2D-stride=2
-StridedSlice,4,"[[8192, 8192]]","[""int32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 2]}","[-10000, 10000]",,L-int32-67M-对齐-2D-非对称stride
-StridedSlice,5,"[[4096, 8192]]","[""int64""]","{""begin"": [0, 0], ""end"": [8192, 8192], ""strides"": [2, 2]}","[-100000, 100000]",,L-int64-268M-对齐-2D-stride=2
-StridedSlice,6,"[[8192, 8192]]","[""float32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [2, 4]}","[-1000, 1000]",,"L-float32-1G-对齐-2D-stride=2,4"
-StridedSlice,7,"[[1023, 1023]]","[""float16""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 1]}","[-0.1, 0.1]",,S-float16-1M-非对齐-2D-全切片-微小值域
-StridedSlice,8,"[[1009, 1021]]","[""float32""]","{""begin"": [0, 0], ""end"": [500, 500], ""strides"": [2, 2]}","[-1, 2]",,S-float32-1M-质数非对齐-2D-stride=2-非对称
-StridedSlice,9,"[[1537, 769]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 3]}","[-5, 10]",,"S-bfloat16-1M-非对齐-2D-stride=1,3-非对称"
-StridedSlice,10,"[[363, 367, 373]]","[""int32""]","{""begin"": [0, 0, 0], ""end"": [100, 100, 100], ""strides"": [1, 1, 1]}","[-50, 100]",,L-int32-50M-质数非对齐-3D-局部切片
-StridedSlice,11,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 256], ""end"": [1024, 1024], ""strides"": [1, 1], ""begin_mask"": 1}","[-1, 1]",,S-float16-1M-2D-begin_mask=1(维度0从0开始)
-StridedSlice,12,"[[2048, 2048]]","[""float32""]","{""begin"": [1024, 512], ""end"": [2048, 2048], ""strides"": [2, 2], ""begin_mask"": 3}","[-2, 2]",,"M-float32-4M-2D-begin_mask=3(维度0,1从0开始)-stride=2"
-StridedSlice,13,"[[1024, 1024]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [512, 256], ""strides"": [1, 1], ""end_mask"": 1}","[-3, 3]",,S-bfloat16-1M-2D-end_mask=1(维度0切到末尾)
-StridedSlice,14,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 0], ""end"": [513, 1024], ""strides"": [1, 1], ""shrink_axis_mask"": 1}","[-1, 1]",,S-float16-1M-2D-shrink_axis_mask=1(收缩维度0)-输出shape=[1024]
-StridedSlice,15,"[[2048, 2048]]","[""float32""]","{""begin"": [0, 1024], ""end"": [2048, 1025], ""strides"": [1, 1], ""shrink_axis_mask"": 2}","[-2, 2]",,M-float32-4M-2D-shrink_axis_mask=2(收缩维度1)-输出shape=[2048]
-StridedSlice,16,"[[512, 512]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [512, 512], ""strides"": [1, 1], ""new_axis_mask"": 1}","[-3, 3]",,"S-bfloat16-256K-2D-new_axis_mask=1(在维度0插入新维度)-输出shape=[1,512,512]"
-StridedSlice,17,"[[1024, 1024]]","[""int32""]","{""begin"": [0, 0], ""end"": [1024, 1024], ""strides"": [1, 1], ""new_axis_mask"": 2}","[-1000, 1000]",,"S-int32-1M-2D-new_axis_mask=2(在维度1插入新维度)-输出shape=[1024,1,1024]"
-StridedSlice,18,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 0], ""end"": [513, 512], ""strides"": [1, 1], ""shrink_axis_mask"": 1, ""end_mask"": 2}","[-1, 1]",,S-float16-1M-2D-shrink_axis_mask=1+end_mask=2(收缩维度0+维度1切到末尾)
-StridedSlice,19,"[[512, 512]]","[""float32""]","{""begin"": [256, 0], ""end"": [257, 512], ""strides"": [1, 1], ""shrink_axis_mask"": 1, ""new_axis_mask"": 2}","[-2, 2]",,S-float32-256K-2D-shrink_axis_mask=1+new_axis_mask=2(收缩维度0+在维度1插入新维度)
-StridedSlice,20,"[[64, 128, 128, 128]]","[""bfloat16""]","{""begin"": [0, 0, 0, 0], ""end"": [64, -1, -1, -1], ""strides"": [1, 1, 1, 1], ""ellipsis_mask"": 1}","[-3, 3]",,L-bfloat16-64M-4D-ellipsis_mask=1(维度0省略号展开中间维度)
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+StridedSlice,1,[[1048576]],"[""float16""]","{""begin"": [0], ""end"": [524288], ""strides"": [2]}","[-1, 1]",,1.09,S-float16-1M-对齐-1D-stride=2
+StridedSlice,2,"[[2048, 2048]]","[""float32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 1]}","[-2, 2]",,8.74,M-float32-4M-对齐-2D-全切片
+StridedSlice,3,"[[4096, 4096]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [2048, 2048], ""strides"": [2, 2]}","[-3, 3]",,17.48,M-bfloat16-16M-对齐-2D-stride=2
+StridedSlice,4,"[[8192, 8192]]","[""int32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 2]}","[-10000, 10000]",,139.81,L-int32-67M-对齐-2D-非对称stride
+StridedSlice,5,"[[4096, 8192]]","[""int64""]","{""begin"": [0, 0], ""end"": [8192, 8192], ""strides"": [2, 2]}","[-100000, 100000]",,139.81,L-int64-268M-对齐-2D-stride=2
+StridedSlice,6,"[[8192, 8192]]","[""float32""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [2, 4]}","[-1000, 1000]",,139.81,"L-float32-1G-对齐-2D-stride=2,4"
+StridedSlice,7,"[[1023, 1023]]","[""float16""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 1]}","[-0.1, 0.1]",,1.09,S-float16-1M-非对齐-2D-全切片-微小值域
+StridedSlice,8,"[[1009, 1021]]","[""float32""]","{""begin"": [0, 0], ""end"": [500, 500], ""strides"": [2, 2]}","[-1, 2]",,2.15,S-float32-1M-质数非对齐-2D-stride=2-非对称
+StridedSlice,9,"[[1537, 769]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [-1, -1], ""strides"": [1, 3]}","[-5, 10]",,1.23,"S-bfloat16-1M-非对齐-2D-stride=1,3-非对称"
+StridedSlice,10,"[[363, 367, 373]]","[""int32""]","{""begin"": [0, 0, 0], ""end"": [100, 100, 100], ""strides"": [1, 1, 1]}","[-50, 100]",,103.52,L-int32-50M-质数非对齐-3D-局部切片
+StridedSlice,11,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 256], ""end"": [1024, 1024], ""strides"": [1, 1], ""begin_mask"": 1}","[-1, 1]",,1.09,S-float16-1M-2D-begin_mask=1(维度0从0开始)
+StridedSlice,12,"[[2048, 2048]]","[""float32""]","{""begin"": [1024, 512], ""end"": [2048, 2048], ""strides"": [2, 2], ""begin_mask"": 3}","[-2, 2]",,8.74,"M-float32-4M-2D-begin_mask=3(维度0,1从0开始)-stride=2"
+StridedSlice,13,"[[1024, 1024]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [512, 256], ""strides"": [1, 1], ""end_mask"": 1}","[-3, 3]",,1.09,S-bfloat16-1M-2D-end_mask=1(维度0切到末尾)
+StridedSlice,14,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 0], ""end"": [513, 1024], ""strides"": [1, 1], ""shrink_axis_mask"": 1}","[-1, 1]",,1.09,S-float16-1M-2D-shrink_axis_mask=1(收缩维度0)-输出shape=[1024]
+StridedSlice,15,"[[2048, 2048]]","[""float32""]","{""begin"": [0, 1024], ""end"": [2048, 1025], ""strides"": [1, 1], ""shrink_axis_mask"": 2}","[-2, 2]",,8.74,M-float32-4M-2D-shrink_axis_mask=2(收缩维度1)-输出shape=[2048]
+StridedSlice,16,"[[512, 512]]","[""bfloat16""]","{""begin"": [0, 0], ""end"": [512, 512], ""strides"": [1, 1], ""new_axis_mask"": 1}","[-3, 3]",,0.27,"S-bfloat16-256K-2D-new_axis_mask=1(在维度0插入新维度)-输出shape=[1,512,512]"
+StridedSlice,17,"[[1024, 1024]]","[""int32""]","{""begin"": [0, 0], ""end"": [1024, 1024], ""strides"": [1, 1], ""new_axis_mask"": 2}","[-1000, 1000]",,2.18,"S-int32-1M-2D-new_axis_mask=2(在维度1插入新维度)-输出shape=[1024,1,1024]"
+StridedSlice,18,"[[1024, 1024]]","[""float16""]","{""begin"": [512, 0], ""end"": [513, 512], ""strides"": [1, 1], ""shrink_axis_mask"": 1, ""end_mask"": 2}","[-1, 1]",,1.09,S-float16-1M-2D-shrink_axis_mask=1+end_mask=2(收缩维度0+维度1切到末尾)
+StridedSlice,19,"[[512, 512]]","[""float32""]","{""begin"": [256, 0], ""end"": [257, 512], ""strides"": [1, 1], ""shrink_axis_mask"": 1, ""new_axis_mask"": 2}","[-2, 2]",,0.55,S-float32-256K-2D-shrink_axis_mask=1+new_axis_mask=2(收缩维度0+在维度1插入新维度)
+StridedSlice,20,"[[64, 128, 128, 128]]","[""bfloat16""]","{""begin"": [0, 0, 0, 0], ""end"": [64, -1, -1, -1], ""strides"": [1, 1, 1, 1], ""ellipsis_mask"": 1}","[-3, 3]",,139.81,L-bfloat16-64M-4D-ellipsis_mask=1(维度0省略号展开中间维度)

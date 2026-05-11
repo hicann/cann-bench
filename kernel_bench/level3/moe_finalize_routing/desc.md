@@ -52,11 +52,11 @@ $$
 ```python
 cann_bench.moe_finalize_routing(
     Tensor expanded_permuted_rows,
+    Tensor? expanded_src_to_dst_row = None,
     Tensor? skip1 = None,
     Tensor? skip2 = None,
     Tensor? bias = None,
     Tensor? scales = None,
-    Tensor expanded_src_to_dst_row,
     Tensor? expert_for_source_row = None,
     int drop_pad_mode = 0
 ) -> Tensor out
@@ -67,11 +67,11 @@ cann_bench.moe_finalize_routing(
 | 参数 | 类型 | 默认值 | 描述 | Shape |
 |------|------|--------|------|-------|
 | expanded_permuted_rows | Tensor | 必选 | MoE FFN 输出，经过专家处理的结果 | (NUM_ROWS * K, H) 或 (E, C, H) |
+| expanded_src_to_dst_row | Tensor | None | 行索引映射，保存每个专家处理结果的索引 | (NUM_ROWS * K) |
 | skip1 | Tensor | None | 共享专家1，残差连接 | (NUM_ROWS, H) |
 | skip2 | Tensor | None | 共享专家2，残差连接 | (NUM_ROWS, H) |
 | bias | Tensor | None | 专家偏置 | (E, H) |
 | scales | Tensor | None | 路由权重，专家缩放因子 | (NUM_ROWS, K) |
-| expanded_src_to_dst_row | Tensor | 必选 | 行索引映射，保存每个专家处理结果的索引 | (NUM_ROWS * K) |
 | expert_for_source_row | Tensor | None | 专家索引，每行处理的专家号 | (NUM_ROWS, K) |
 | drop_pad_mode | int | 0 | 模式选择，取值范围 [0, 3] | - |
 
@@ -134,13 +134,13 @@ from copy import deepcopy
 
 def moe_finalize_routing(
     expanded_permuted_rows: torch.Tensor,
+    expanded_src_to_dst_row: torch.Tensor = None,
     skip1: torch.Tensor = None,
     skip2: torch.Tensor = None,
     bias: torch.Tensor = None,
     scales: torch.Tensor = None,
-    expanded_src_to_dst_row: torch.Tensor,
     expert_for_source_row: torch.Tensor = None,
-    drop_pad_mode: int = 0
+    drop_pad_mode: int = 0,
 ) -> torch.Tensor:
     """
     MoE Finalize Routing 算子 Torch Golden 参考实现
@@ -149,11 +149,11 @@ def moe_finalize_routing(
 
     Args:
         expanded_permuted_rows: MoE FFN 输出，shape 为 (NUM_ROWS * K, H) 或 (E, C, H)
+        expanded_src_to_dst_row: 行索引映射，shape 为 (NUM_ROWS * K)
         skip1: 共享专家1，shape 为 (NUM_ROWS, H)
         skip2: 共享专家2，shape 为 (NUM_ROWS, H)
         bias: 专家偏置，shape 为 (E, H)
         scales: 路由权重，shape 为 (NUM_ROWS, K)
-        expanded_src_to_dst_row: 行索引映射，shape 为 (NUM_ROWS * K)
         expert_for_source_row: 专家索引，shape 为 (NUM_ROWS, K)
         drop_pad_mode: 模式选择，取值范围 [0, 3]
 
@@ -238,8 +238,12 @@ expanded_src_to_dst_row = torch.randint(0, num_rows * topk, (num_rows * topk,), 
 expert_for_source_row = torch.randint(0, expert_num, (num_rows, topk), dtype=torch.int32, device="npu")
 
 out = cann_bench.moe_finalize_routing(
-    expanded_permuted_rows, skip1, skip2, bias, scales,
-    expanded_src_to_dst_row, expert_for_source_row, drop_pad_mode=0
+    expanded_permuted_rows,
+    expanded_src_to_dst_row=expanded_src_to_dst_row,
+    skip1=skip1, skip2=skip2,
+    bias=bias, scales=scales,
+    expert_for_source_row=expert_for_source_row,
+    drop_pad_mode=0,
 )
 
 # drop pad 模式示例 (drop_pad_mode=1)
@@ -248,7 +252,11 @@ expanded_permuted_rows_3d = torch.randn(expert_num, expert_capacity, hidden_dim,
 expanded_src_to_dst_row_pad = torch.randint(-1, expert_num * expert_capacity - 1, (num_rows,), dtype=torch.int32, device="npu")
 
 out = cann_bench.moe_finalize_routing(
-    expanded_permuted_rows_3d, skip1, skip2, bias, None,
-    expanded_src_to_dst_row_pad, expert_for_source_row, drop_pad_mode=1
+    expanded_permuted_rows_3d,
+    expanded_src_to_dst_row=expanded_src_to_dst_row_pad,
+    skip1=skip1, skip2=skip2,
+    bias=bias, scales=None,
+    expert_for_source_row=expert_for_source_row,
+    drop_pad_mode=1,
 )
 ```

@@ -23,13 +23,14 @@
 6. 子进程执行（算子级进程隔离）
 7. 失败结果合成（编译/安全/子进程失败）
 8. 算子匹配（名称查找、AI算子加载）
+9. 结果统计公共函数
 """
 
 from .op_runner import OpRunner, OpRunResult
 from .accuracy_eval import AccuracyEvaluator, AccuracyResult
 from .perf_eval import PerfEvaluator, PerfResult
 from .input_pool import InputPool, InputPoolConfig, create_input_pool
-from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult
+from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult, summarize_case_results, CaseResultSummary
 from .failure_synthesizer import FailureSynthesizer
 from .operator_matcher import OperatorMatcher
 from .subprocess_runner import SubprocessRunner
@@ -41,6 +42,7 @@ __all__ = [
     "PerfEvaluator", "PerfResult",
     "InputPool", "InputPoolConfig", "create_input_pool",
     "EvalCaseResult", "EvalOperatorResult", "EvalSessionResult",
+    "summarize_case_results", "CaseResultSummary",
     "FailureSynthesizer",
     "OperatorMatcher",
     "SubprocessRunner",

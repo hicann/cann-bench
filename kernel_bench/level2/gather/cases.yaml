@@ -19,8 +19,9 @@ cases:
   value_range:
   - [-1, 1]
   - [0, 1023]
-  baseline_perf_us: 174.41
-  note: S-float16-int32_idx-1M-对齐-对称小值域-batch_dims=0
+  baseline_perf_us: 668.61
+  t_hw_us: 2.18
+  note: "S-float16-int32_idx-1M-对齐-对称小值域-batch_dims=0 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 2
   input_shape:
@@ -31,8 +32,9 @@ cases:
   value_range:
   - [-2, 2]
   - [0, 2047]
-  baseline_perf_us: 216.12
-  note: M-float32-int64_idx-4M-对齐-对称小值域-batch_dims=0
+  baseline_perf_us: 12888.78
+  t_hw_us: 17.48
+  note: "M-float32-int64_idx-4M-对齐-对称小值域-batch_dims=0 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 3
   input_shape:
@@ -43,7 +45,8 @@ cases:
   value_range:
   - [-3, 3]
   - [0, 4095]
-  baseline_perf_us: 470.99
+  baseline_perf_us: null
+  t_hw_us: 34.95
   note: M-bfloat16-int32_idx-16M-对齐-对称小值域-batch_dims=0
 - operator: Gather
   case_id: 4
@@ -55,7 +58,8 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 8191]
-  baseline_perf_us: 3050.18
+  baseline_perf_us: null
+  t_hw_us: 209.72
   note: L-int32-int32_idx-67M-对齐-对称中值域-batch_dims=0
 - operator: Gather
   case_id: 5
@@ -67,7 +71,8 @@ cases:
   value_range:
   - [-100000, 100000]
   - [0, 4095]
-  baseline_perf_us: 11209.77
+  baseline_perf_us: null
+  t_hw_us: 139.81
   note: L-int64-int64_idx-268M-对齐-对称大值域-batch_dims=0
 - operator: Gather
   case_id: 6
@@ -79,7 +84,8 @@ cases:
   value_range:
   - [-128, 127]
   - [0, 16383]
-  baseline_perf_us: 51775.2
+  baseline_perf_us: null
+  t_hw_us: 209.72
   note: L-int8-int32_idx-1G-对齐-int8全范围-batch_dims=0
 - operator: Gather
   case_id: 7
@@ -91,8 +97,9 @@ cases:
   value_range:
   - [-0.1, 0.1]
   - [0, 1022]
-  baseline_perf_us: 342.78
-  note: S-float16-int64_idx-1M-非对齐-对称微小值域-batch_dims=1
+  baseline_perf_us: 966.42
+  t_hw_us: 3.27
+  note: "S-float16-int64_idx-1M-非对齐-对称微小值域-batch_dims=1 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 8
   input_shape:
@@ -103,8 +110,9 @@ cases:
   value_range:
   - [-1, 2]
   - [0, 1008]
-  baseline_perf_us: 203.36
-  note: S-float32-int32_idx-1M-质数非对齐-非对称小值域
+  baseline_perf_us: 1757.26
+  t_hw_us: 3.22
+  note: "S-float32-int32_idx-1M-质数非对齐-非对称小值域 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 9
   input_shape:
@@ -115,8 +123,9 @@ cases:
   value_range:
   - [-5, 10]
   - [0, 1536]
-  baseline_perf_us: 164.74
-  note: S-bfloat16-int64_idx-1M-非对齐-非对称中值域
+  baseline_perf_us: 857.38
+  t_hw_us: 3.70
+  note: "S-bfloat16-int64_idx-1M-非对齐-非对称中值域 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 10
   input_shape:
@@ -127,7 +136,8 @@ cases:
   value_range:
   - [-50, 100]
   - [0, 362]
-  baseline_perf_us: 1691.87
+  baseline_perf_us: null
+  t_hw_us: 103.38
   note: L-float16-int32_idx-50M-质数非对齐-非对称大值域-3D-batch_dims=1
 - operator: Gather
   case_id: 11
@@ -139,8 +149,9 @@ cases:
   value_range:
   - [-65504, 65504]
   - [0, 2048]
-  baseline_perf_us: 123.26
-  note: S-float32-int64_idx-1M-非对齐-float16边界值
+  baseline_perf_us: 993.64
+  t_hw_us: 4.38
+  note: "S-float32-int64_idx-1M-非对齐-float16边界值 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 12
   input_shape:
@@ -151,7 +162,8 @@ cases:
   value_range:
   - [-88, 88]
   - [0, 2]
-  baseline_perf_us: 5591.6
+  baseline_perf_us: null
+  t_hw_us: 2.65
   note: S-bfloat16-int32_idx-1M-质数非对齐-float32边界值-4D-batch_dims=1
 - operator: Gather
   case_id: 13
@@ -163,8 +175,9 @@ cases:
   value_range:
   - [-inf, inf]
   - [0, 1000002]
-  baseline_perf_us: 216.96
-  note: S-float32-int64_idx-1M-质数非对齐-inf特殊值-1D
+  baseline_perf_us: 9.50
+  t_hw_us: 2.09
+  note: "S-float32-int64_idx-1M-质数非对齐-inf特殊值-1D | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 14
   input_shape:
@@ -175,7 +188,8 @@ cases:
   value_range:
   - [nan, nan]
   - [0, 10]
-  baseline_perf_us: 60366.85
+  baseline_perf_us: null
+  t_hw_us: 25.84
   note: M-float16-int32_idx-10M-质数非对齐-nan特殊值-5D-batch_dims=1
 - operator: Gather
   case_id: 15
@@ -187,7 +201,8 @@ cases:
   value_range:
   - [0, 0]
   - [0, 2]
-  baseline_perf_us: 25294.49
+  baseline_perf_us: null
+  t_hw_us: 14.79
   note: M-float32-int64_idx-3M-质数非对齐-零值-5D-batch_dims=1
 - operator: Gather
   case_id: 16
@@ -199,8 +214,9 @@ cases:
   value_range:
   - [-0.5, 0.5]
   - [0, 511]
-  baseline_perf_us: 191.12
-  note: S-bfloat16-int32_idx-1M-非对齐-对称微小值域
+  baseline_perf_us: 1760.23
+  t_hw_us: 2.19
+  note: "S-bfloat16-int32_idx-1M-非对齐-对称微小值域 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 17
   input_shape:
@@ -211,8 +227,9 @@ cases:
   value_range:
   - [-1, 3]
   - [0, 254]
-  baseline_perf_us: 302.89
-  note: M-float16-int64_idx-2M-非对齐-非对称小值域
+  baseline_perf_us: 13925.84
+  t_hw_us: 6.51
+  note: "M-float16-int64_idx-2M-非对齐-非对称小值域 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 18
   input_shape:
@@ -223,8 +240,9 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 4096]
-  baseline_perf_us: 164.51
-  note: M-float32-int32_idx-2M-非对齐-对称大值域
+  baseline_perf_us: 1981.94
+  t_hw_us: 6.54
+  note: "M-float32-int32_idx-2M-非对齐-对称大值域 | baseline_kernels: GatherV3×1"
 - operator: Gather
   case_id: 19
   input_shape:
@@ -235,7 +253,8 @@ cases:
   value_range:
   - [-0.2, 0.2]
   - [0, 510]
-  baseline_perf_us: 294.41
+  baseline_perf_us: null
+  t_hw_us: 6.54
   note: M-bfloat16-int64_idx-2M-非对齐-对称微小值域-3D-batch_dims=1
 - operator: Gather
   case_id: 20
@@ -247,5 +266,6 @@ cases:
   value_range:
   - [-3, 6]
   - [0, 254]
-  baseline_perf_us: 675.24
+  baseline_perf_us: null
+  t_hw_us: 6.52
   note: M-float32-int32_idx-2M-非对齐-非对称中值域-3D-batch_dims=2

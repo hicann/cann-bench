@@ -17,7 +17,8 @@ cases:
   attrs: {scalarValue: 1.0}
   value_range: [-1, 1]
   baseline_perf_us: 16.64
-  note: S-float16-2M-对齐-对称小值域-scalarValue=1.0
+  t_hw_us: 2.18
+  note: "S-float16-2M-对齐-对称小值域-scalarValue=1.0 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 2
   input_shape:
@@ -26,7 +27,8 @@ cases:
   attrs: {scalarValue: 1.0}
   value_range: [-2, 2]
   baseline_perf_us: 39.18
-  note: M-float32-8M-对齐-对称小值域-scalarValue=1.0
+  t_hw_us: 17.48
+  note: "M-float32-8M-对齐-对称小值域-scalarValue=1.0 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 3
   input_shape:
@@ -35,7 +37,8 @@ cases:
   attrs: {scalarValue: 1.0}
   value_range: [-3, 3]
   baseline_perf_us: 63.74
-  note: M-bfloat16-33M-对齐-对称小值域-scalarValue=1.0
+  t_hw_us: 34.95
+  note: "M-bfloat16-33M-对齐-对称小值域-scalarValue=1.0 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 4
   input_shape:
@@ -44,7 +47,8 @@ cases:
   attrs: {scalarValue: 0.5}
   value_range: [-10, 10]
   baseline_perf_us: 318.71
-  note: L-float16-134M-对齐-对称中值域-scalarValue=0.5
+  t_hw_us: 139.81
+  note: "L-float16-134M-对齐-对称中值域-scalarValue=0.5 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 5
   input_shape:
@@ -52,8 +56,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 2.0}
   value_range: [-100, 100]
-  baseline_perf_us: null
-  note: L-float32-132M-质数非对齐-对称大值域-scalarValue=2.0
+  baseline_perf_us: 1653.91
+  t_hw_us: 278.33
+  note: "L-float32-132M-质数非对齐-对称大值域-scalarValue=2.0 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 6
   input_shape:
@@ -61,8 +66,9 @@ cases:
   dtype: [bfloat16]
   attrs: {scalarValue: 0.1}
   value_range: [-0.1, 0.1]
-  baseline_perf_us: null
-  note: S-bfloat16-2M-非对齐-对称微小值域-scalarValue=0.1
+  baseline_perf_us: 29.08
+  t_hw_us: 2.18
+  note: "S-bfloat16-2M-非对齐-对称微小值域-scalarValue=0.1 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 7
   input_shape:
@@ -70,8 +76,9 @@ cases:
   dtype: [float16]
   attrs: {scalarValue: 1.0}
   value_range: [-1, 2]
-  baseline_perf_us: null
-  note: S-float16-2M-质数非对齐-非对称小值域
+  baseline_perf_us: 27.18
+  t_hw_us: 2.12
+  note: "S-float16-2M-质数非对齐-非对称小值域 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 8
   input_shape:
@@ -79,8 +86,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 0.5}
   value_range: [-5, 10]
-  baseline_perf_us: null
-  note: S-float32-2M-非对齐-非对称中值域-scalarValue=0.5
+  baseline_perf_us: 34.16
+  t_hw_us: 4.92
+  note: "S-float32-2M-非对齐-非对称中值域-scalarValue=0.5 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 9
   input_shape:
@@ -88,8 +96,9 @@ cases:
   dtype: [bfloat16]
   attrs: {scalarValue: 1.0}
   value_range: [-50, 100]
-  baseline_perf_us: null
-  note: S-bfloat16-50M-质数非对齐-非对称大值域-3D
+  baseline_perf_us: 208.96
+  t_hw_us: 2.08
+  note: "S-bfloat16-50M-质数非对齐-非对称大值域-3D | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 10
   input_shape:
@@ -97,8 +106,9 @@ cases:
   dtype: [float16]
   attrs: {scalarValue: 1.5}
   value_range: [-65504, 65504]
-  baseline_perf_us: null
-  note: S-float16-2M-非对齐-float16边界值-scalarValue=1.5
+  baseline_perf_us: 26.88
+  t_hw_us: 2.19
+  note: "S-float16-2M-非对齐-float16边界值-scalarValue=1.5 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 11
   input_shape:
@@ -106,8 +116,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 1.0}
   value_range: [-88, 88]
-  baseline_perf_us: null
-  note: S-float32-2M-质数非对齐-float32边界值-4D
+  baseline_perf_us: 17.38
+  t_hw_us: 0.58
+  note: "S-float32-2M-质数非对齐-float32边界值-4D | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 12
   input_shape:
@@ -116,7 +127,8 @@ cases:
   attrs: {scalarValue: 0.0}
   value_range: [-inf, inf]
   baseline_perf_us: 1657.63
-  note: S-bfloat16-2M-质数非对齐-scalarValue=0.0-inf特殊值
+  t_hw_us: 2.08
+  note: "S-bfloat16-2M-质数非对齐-scalarValue=0.0-inf特殊值 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 13
   input_shape:
@@ -124,8 +136,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: nan}
   value_range: [nan, nan]
-  baseline_perf_us: null
-  note: S-float32-10M-质数非对齐-scalarValue=nan-nan特殊值-4D
+  baseline_perf_us: 19.22
+  t_hw_us: 0.34
+  note: "S-float32-10M-质数非对齐-scalarValue=nan-nan特殊值-4D | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 14
   input_shape:
@@ -133,8 +146,9 @@ cases:
   dtype: [float16]
   attrs: {scalarValue: 1.0}
   value_range: [0, 0]
-  baseline_perf_us: null
-  note: S-float16-3M-质数非对齐-零值-5D
+  baseline_perf_us: 34.26
+  t_hw_us: 3.17
+  note: "S-float16-3M-质数非对齐-零值-5D | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 15
   input_shape:
@@ -142,8 +156,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 1.0}
   value_range: [-0.5, 0.5]
-  baseline_perf_us: null
-  note: S-float32-2M-非对齐-对称微小值域
+  baseline_perf_us: 30.04
+  t_hw_us: 4.37
+  note: "S-float32-2M-非对齐-对称微小值域 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 16
   input_shape:
@@ -151,8 +166,9 @@ cases:
   dtype: [bfloat16]
   attrs: {scalarValue: 0.5}
   value_range: [-1, 3]
-  baseline_perf_us: null
-  note: S-bfloat16-4M-非对齐-非对称小值域-scalarValue=0.5
+  baseline_perf_us: 34.70
+  t_hw_us: 4.35
+  note: "S-bfloat16-4M-非对齐-非对称小值域-scalarValue=0.5 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 17
   input_shape:
@@ -160,8 +176,9 @@ cases:
   dtype: [float16]
   attrs: {scalarValue: 2.0}
   value_range: [-1000, 1000]
-  baseline_perf_us: null
-  note: S-float16-4M-非对齐-对称大值域-scalarValue=2.0
+  baseline_perf_us: 42.28
+  t_hw_us: 4.37
+  note: "S-float16-4M-非对齐-对称大值域-scalarValue=2.0 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 18
   input_shape:
@@ -169,8 +186,9 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 1.0}
   value_range: [-0.2, 0.2]
-  baseline_perf_us: null
-  note: M-float32-8M-非对齐-对称微小值域-3D
+  baseline_perf_us: 62.84
+  t_hw_us: 17.46
+  note: "M-float32-8M-非对齐-对称微小值域-3D | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 19
   input_shape:
@@ -178,8 +196,9 @@ cases:
   dtype: [bfloat16]
   attrs: {scalarValue: 1.5}
   value_range: [-3, 6]
-  baseline_perf_us: null
-  note: M-bfloat16-8M-非对齐-非对称中值域-3D-scalarValue=1.5
+  baseline_perf_us: 49.86
+  t_hw_us: 8.72
+  note: "M-bfloat16-8M-非对齐-非对称中值域-3D-scalarValue=1.5 | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 20
   input_shape:
@@ -187,5 +206,6 @@ cases:
   dtype: [float32]
   attrs: {scalarValue: 1.0}
   value_range: [-20, 40]
-  baseline_perf_us: null
-  note: M-float32-10M-非对齐-非对称大值域-5D
+  baseline_perf_us: 152.44
+  t_hw_us: 10.99
+  note: "M-float32-10M-非对齐-非对称大值域-5D | baseline_kernels: Slice×1 + SwiGlu×1"

@@ -19,8 +19,9 @@ cases:
   value_range:
   - [-1, 1]
   - [0, 1023]
-  baseline_perf_us: 36938.2
-  note: S-float16-int32_ids-1M-对齐-对称小值域
+  baseline_perf_us: 30.42
+  t_hw_us: 1.09
+  note: "S-float16-int32_ids-1M-对齐-对称小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 2
   input_shape:
@@ -31,8 +32,9 @@ cases:
   value_range:
   - [-2, 2]
   - [0, 2047]
-  baseline_perf_us: 72156.03
-  note: M-float32-int32_ids-4M-对齐-对称小值域
+  baseline_perf_us: 30.58
+  t_hw_us: 8.74
+  note: "M-float32-int32_ids-4M-对齐-对称小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 3
   input_shape:
@@ -43,8 +45,9 @@ cases:
   value_range:
   - [-3, 3]
   - [0, 4095]
-  baseline_perf_us: 155521.96
-  note: M-bfloat16-int64_ids-16M-对齐-对称小值域
+  baseline_perf_us: 118.32
+  t_hw_us: 17.49
+  note: "M-bfloat16-int64_ids-16M-对齐-对称小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + Sort×1 + InplaceIndexAddWithSorted×1"
 - operator: UnsortedSegmentSum
   case_id: 4
   input_shape:
@@ -55,8 +58,9 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 8191]
-  baseline_perf_us: 350806.08
-  note: L-int32-int32_ids-67M-对齐-对称中值域
+  baseline_perf_us: 656.25
+  t_hw_us: 139.83
+  note: "L-int32-int32_ids-67M-对齐-对称中值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 5
   input_shape:
@@ -67,8 +71,9 @@ cases:
   value_range:
   - [-100000, 100000]
   - [0, 16383]
-  baseline_perf_us: 451367.99
-  note: L-int64-int64_ids-268M-对齐-对称大值域
+  baseline_perf_us: 137694.79
+  t_hw_us: 489.24
+  note: "L-int64-int64_ids-268M-对齐-对称大值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 6
   input_shape:
@@ -79,8 +84,9 @@ cases:
   value_range:
   - [-0.1, 0.1]
   - [0, 1022]
-  baseline_perf_us: 40096.91
-  note: S-float16-int32_ids-1M-非对齐-对称微小值域
+  baseline_perf_us: 32.42
+  t_hw_us: 1.09
+  note: "S-float16-int32_ids-1M-非对齐-对称微小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 7
   input_shape:
@@ -91,8 +97,9 @@ cases:
   value_range:
   - [-1, 2]
   - [0, 1008]
-  baseline_perf_us: 40285.21
-  note: S-float32-int32_ids-1M-质数非对齐-非对称小值域
+  baseline_perf_us: 18.62
+  t_hw_us: 2.15
+  note: "S-float32-int32_ids-1M-质数非对齐-非对称小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 8
   input_shape:
@@ -103,8 +110,9 @@ cases:
   value_range:
   - [-5, 10]
   - [0, 1536]
-  baseline_perf_us: 56613.96
-  note: S-bfloat16-int32_ids-1M-非对齐-非对称中值域
+  baseline_perf_us: 36.32
+  t_hw_us: 1.23
+  note: "S-bfloat16-int32_ids-1M-非对齐-非对称中值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×2 + Sort×1 + InplaceIndexAddWithSorted×1"
 - operator: UnsortedSegmentSum
   case_id: 9
   input_shape:
@@ -115,8 +123,9 @@ cases:
   value_range:
   - [-50, 100]
   - [0, 362]
-  baseline_perf_us: 18648.15
-  note: M-float16-int32_ids-50M-质数非对齐-非对称大值域-3D
+  baseline_perf_us: 128.02
+  t_hw_us: 51.76
+  note: "M-float16-int32_ids-50M-质数非对齐-非对称大值域-3D | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 10
   input_shape:
@@ -127,8 +136,9 @@ cases:
   value_range:
   - [-65504, 65504]
   - [0, 2048]
-  baseline_perf_us: 74108.52
-  note: S-float32-int64_ids-1M-非对齐-float16边界值
+  baseline_perf_us: 33.18
+  t_hw_us: 2.20
+  note: "S-float32-int64_ids-1M-非对齐-float16边界值 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 11
   input_shape:
@@ -139,8 +149,9 @@ cases:
   value_range:
   - [-88, 88]
   - [0, 2]
-  baseline_perf_us: 156.02
-  note: S-bfloat16-int32_ids-1M-质数非对齐-float32边界值-4D
+  baseline_perf_us: 85.56
+  t_hw_us: 1.14
+  note: "S-bfloat16-int32_ids-1M-质数非对齐-float32边界值-4D | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×2 + Sort×1 + InplaceIndexAddWithSorted×1"
 - operator: UnsortedSegmentSum
   case_id: 12
   input_shape:
@@ -151,8 +162,9 @@ cases:
   value_range:
   - [-inf, inf]
   - [0, 1023]
-  baseline_perf_us: 82543.76
-  note: S-float16-int32_ids-1M-质数非对齐-inf特殊值-1D-v2
+  baseline_perf_us: 14226.22
+  t_hw_us: 3.28
+  note: "S-float16-int32_ids-1M-质数非对齐-inf特殊值-1D-v2 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 13
   input_shape:
@@ -163,8 +175,9 @@ cases:
   value_range:
   - [nan, nan]
   - [0, 10]
-  baseline_perf_us: 1257.19
-  note: M-float32-int32_ids-10M-质数非对齐-nan特殊值-5D
+  baseline_perf_us: 124.50
+  t_hw_us: 22.73
+  note: "M-float32-int32_ids-10M-质数非对齐-nan特殊值-5D | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 14
   input_shape:
@@ -175,8 +188,9 @@ cases:
   value_range:
   - [0, 0]
   - [0, 2]
-  baseline_perf_us: 234.98
-  note: S-bfloat16-int32_ids-3M-质数非对齐-零值-5D
+  baseline_perf_us: 157.22
+  t_hw_us: 3.17
+  note: "S-bfloat16-int32_ids-3M-质数非对齐-零值-5D | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×2 + Sort×1 + InplaceIndexAddWithSorted×1"
 - operator: UnsortedSegmentSum
   case_id: 15
   input_shape:
@@ -187,8 +201,9 @@ cases:
   value_range:
   - [-10, 10]
   - [0, 0]
-  baseline_perf_us: 3994.77
-  note: S-float32-num_segments=1-1M-质数非对齐-全归约
+  baseline_perf_us: 937.86
+  t_hw_us: 4.37
+  note: "S-float32-num_segments=1-1M-质数非对齐-全归约 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 16
   input_shape:
@@ -199,8 +214,9 @@ cases:
   value_range:
   - [-100, 100]
   - [0, 4095]
-  baseline_perf_us: 348382.47
-  note: M-float16-num_segments=4096-2M-对齐-多段
+  baseline_perf_us: 21693.19
+  t_hw_us: 6.55
+  note: "M-float16-num_segments=4096-2M-对齐-多段 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 17
   input_shape:
@@ -211,8 +227,9 @@ cases:
   value_range:
   - [-0.5, 0.5]
   - [0, 511]
-  baseline_perf_us: 20619.71
-  note: S-bfloat16-int32_ids-1M-非对齐-对称微小值域
+  baseline_perf_us: 28.42
+  t_hw_us: 1.09
+  note: "S-bfloat16-int32_ids-1M-非对齐-对称微小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×2 + Sort×1 + InplaceIndexAddWithSorted×1"
 - operator: UnsortedSegmentSum
   case_id: 18
   input_shape:
@@ -223,8 +240,9 @@ cases:
   value_range:
   - [-1, 3]
   - [0, 254]
-  baseline_perf_us: 10220.56
-  note: S-float16-int64_ids-2M-非对齐-非对称小值域
+  baseline_perf_us: 21.28
+  t_hw_us: 2.18
+  note: "S-float16-int64_ids-2M-非对齐-非对称小值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + InplaceIndexAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 19
   input_shape:
@@ -235,8 +253,9 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 4096]
-  baseline_perf_us: 148816.55
-  note: S-float32-int32_ids-2M-非对齐-对称大值域
+  baseline_perf_us: 28.46
+  t_hw_us: 4.37
+  note: "S-float32-int32_ids-2M-非对齐-对称大值域 | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
 - operator: UnsortedSegmentSum
   case_id: 20
   input_shape:
@@ -247,5 +266,6 @@ cases:
   value_range:
   - [-3, 6]
   - [0, 1]
-  baseline_perf_us: 166.75
-  note: S-bfloat16-int32_ids-2M-非对齐-非对称中值域-3D
+  baseline_perf_us: 160.04
+  t_hw_us: 2.18
+  note: "S-bfloat16-int32_ids-2M-非对齐-非对称中值域-3D | baseline_kernels: ReduceMax×1 + ZerosLike×1 + Cast×2 + Sort×1 + InplaceIndexAddWithSorted×1"

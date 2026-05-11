@@ -26,6 +26,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 1.57
   note: S-float32-1K-对齐-iou=0.5
 - operator: NMS
   case_id: 2
@@ -44,6 +45,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.3
 - operator: NMS
   case_id: 3
@@ -62,6 +64,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.7
 - operator: NMS
   case_id: 4
@@ -80,6 +83,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.1极低阈值
 - operator: NMS
   case_id: 5
@@ -98,6 +102,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.9极高阈值
 - operator: NMS
   case_id: 6
@@ -116,6 +121,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.05-极低阈值
 - operator: NMS
   case_id: 7
@@ -134,6 +140,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 1.57
   note: S-float32-1K-非对齐-iou=0.5-微小值域
 - operator: NMS
   case_id: 8
@@ -152,6 +159,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 1.53
   note: S-float32-1K-质数非对齐-iou=0.3-非对称
 - operator: NMS
   case_id: 9
@@ -170,6 +178,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 3.54
   note: S-float32-2K-非对齐-iou=0.7-非对称
 - operator: NMS
   case_id: 10
@@ -188,6 +197,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 13.51
   note: S-float32-3K-质数非对齐-iou=0.4
 - operator: NMS
   case_id: 11
@@ -206,6 +216,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 6.30
   note: S-float32-2K-非对齐-float16边界值
 - operator: NMS
   case_id: 12
@@ -224,6 +235,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 24.02
   note: S-float32-4K-质数非对齐-float32边界值
 - operator: NMS
   case_id: 13
@@ -242,6 +254,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 13.51
   note: S-float32-3K-质数非对齐-inf特殊值
 - operator: NMS
   case_id: 14
@@ -260,6 +273,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-5K-质数非对齐-nan特殊值
 - operator: NMS
   case_id: 15
@@ -278,6 +292,7 @@ cases:
   - - 0
     - 0
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-质数非对齐-零值
 - operator: NMS
   case_id: 16
@@ -296,6 +311,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 0.39
   note: S-float32-512-非对齐-iou=0.2-微小值域
 - operator: NMS
   case_id: 17
@@ -314,6 +330,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 6.29
   note: S-float32-2K-非对齐-iou=0.8-非对称
 - operator: NMS
   case_id: 18
@@ -332,6 +349,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.16
   note: S-float32-4K-非对齐-iou=0.35-大值域
 - operator: NMS
   case_id: 19
@@ -350,6 +368,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-4K-对齐-iou=0.45-微小值域
 - operator: NMS
   case_id: 20
@@ -368,4 +387,5 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
+  t_hw_us: 25.17
   note: S-float32-7K-质数非对齐-iou=0.55-非对称中值域

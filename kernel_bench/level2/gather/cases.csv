@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-Gather,1,"[[1024, 1024], [512, 1024]]","[""float16"", ""int32""]","{""batch_dims"": 0}","[[-1, 1], [0, 1023]]",174.41,S-float16-int32_idx-1M-对齐-对称小值域-batch_dims=0
-Gather,2,"[[2048, 2048], [1024, 2048]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[-2, 2], [0, 2047]]",216.12,M-float32-int64_idx-4M-对齐-对称小值域-batch_dims=0
-Gather,3,"[[4096, 4096], [2048, 4096]]","[""bfloat16"", ""int32""]","{""batch_dims"": 0}","[[-3, 3], [0, 4095]]",470.99,M-bfloat16-int32_idx-16M-对齐-对称小值域-batch_dims=0
-Gather,4,"[[8192, 8192], [4096, 8192]]","[""int32"", ""int32""]","{""batch_dims"": 0}","[[-1000, 1000], [0, 8191]]",3050.18,L-int32-int32_idx-67M-对齐-对称中值域-batch_dims=0
-Gather,5,"[[4096, 4096], [4096, 4096]]","[""int64"", ""int64""]","{""batch_dims"": 0}","[[-100000, 100000], [0, 4095]]",11209.77,L-int64-int64_idx-268M-对齐-对称大值域-batch_dims=0
-Gather,6,"[[16384, 8192], [8192, 8192]]","[""int8"", ""int32""]","{""batch_dims"": 0}","[[-128, 127], [0, 16383]]",51775.2,L-int8-int32_idx-1G-对齐-int8全范围-batch_dims=0
-Gather,7,"[[1023, 1023], [511, 1023]]","[""float16"", ""int64""]","{""batch_dims"": 1}","[[-0.1, 0.1], [0, 1022]]",342.78,S-float16-int64_idx-1M-非对齐-对称微小值域-batch_dims=1
-Gather,8,"[[1009, 1021], [505, 1021]]","[""float32"", ""int32""]","{""batch_dims"": 0}","[[-1, 2], [0, 1008]]",203.36,S-float32-int32_idx-1M-质数非对齐-非对称小值域
-Gather,9,"[[1537, 769], [769, 769]]","[""bfloat16"", ""int64""]","{""batch_dims"": 0}","[[-5, 10], [0, 1536]]",164.74,S-bfloat16-int64_idx-1M-非对齐-非对称中值域
-Gather,10,"[[363, 367, 373], [181, 367, 373]]","[""float16"", ""int32""]","{""batch_dims"": 1}","[[-50, 100], [0, 362]]",1691.87,L-float16-int32_idx-50M-质数非对齐-非对称大值域-3D-batch_dims=1
-Gather,11,"[[2049, 513], [1024, 513]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[-65504, 65504], [0, 2048]]",123.26,S-float32-int64_idx-1M-非对齐-float16边界值
-Gather,12,"[[3, 7, 13, 4001], [2, 7, 13, 4001]]","[""bfloat16"", ""int32""]","{""batch_dims"": 1}","[[-88, 88], [0, 2]]",5591.6,S-bfloat16-int32_idx-1M-质数非对齐-float32边界值-4D-batch_dims=1
-Gather,13,"[[1000003], [1000]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[""-inf"", ""inf""], [0, 1000002]]",216.96,S-float32-int64_idx-1M-质数非对齐-inf特殊值-1D
-Gather,14,"[[11, 13, 17, 67, 67], [7, 13, 17, 67, 67]]","[""float16"", ""int32""]","{""batch_dims"": 1}","[[""nan"", ""nan""], [0, 10]]",60366.85,M-float16-int32_idx-10M-质数非对齐-nan特殊值-5D-batch_dims=1
-Gather,15,"[[3, 7, 11, 13, 1013], [2, 7, 11, 13, 1013]]","[""float32"", ""int64""]","{""batch_dims"": 1}","[[0, 0], [0, 2]]",25294.49,M-float32-int64_idx-3M-质数非对齐-零值-5D-batch_dims=1
-Gather,16,"[[512, 2049], [256, 2049]]","[""bfloat16"", ""int32""]","{""batch_dims"": 0}","[[-0.5, 0.5], [0, 511]]",191.12,S-bfloat16-int32_idx-1M-非对齐-对称微小值域
-Gather,17,"[[255, 8193], [127, 8193]]","[""float16"", ""int64""]","{""batch_dims"": 0}","[[-1, 3], [0, 254]]",302.89,M-float16-int64_idx-2M-非对齐-非对称小值域
-Gather,18,"[[4097, 511], [2048, 511]]","[""float32"", ""int32""]","{""batch_dims"": 0}","[[-1000, 1000], [0, 4096]]",164.51,M-float32-int32_idx-2M-非对齐-对称大值域
-Gather,19,"[[2, 511, 2049], [2, 255, 2049]]","[""bfloat16"", ""int64""]","{""batch_dims"": 1}","[[-0.2, 0.2], [0, 510]]",294.41,M-bfloat16-int64_idx-2M-非对齐-对称微小值域-3D-batch_dims=1
-Gather,20,"[[4, 255, 2049], [4, 127, 2049]]","[""float32"", ""int32""]","{""batch_dims"": 2}","[[-3, 6], [0, 254]]",675.24,M-float32-int32_idx-2M-非对齐-非对称中值域-3D-batch_dims=2
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+Gather,1,"[[1024, 1024], [512, 1024]]","[""float16"", ""int32""]","{""batch_dims"": 0}","[[-1, 1], [0, 1023]]",668.61,2.18,S-float16-int32_idx-1M-对齐-对称小值域-batch_dims=0 | baseline_kernels: GatherV3×1
+Gather,2,"[[2048, 2048], [1024, 2048]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[-2, 2], [0, 2047]]",12888.78,17.48,M-float32-int64_idx-4M-对齐-对称小值域-batch_dims=0 | baseline_kernels: GatherV3×1
+Gather,3,"[[4096, 4096], [2048, 4096]]","[""bfloat16"", ""int32""]","{""batch_dims"": 0}","[[-3, 3], [0, 4095]]",,34.95,M-bfloat16-int32_idx-16M-对齐-对称小值域-batch_dims=0
+Gather,4,"[[8192, 8192], [4096, 8192]]","[""int32"", ""int32""]","{""batch_dims"": 0}","[[-1000, 1000], [0, 8191]]",,209.72,L-int32-int32_idx-67M-对齐-对称中值域-batch_dims=0
+Gather,5,"[[4096, 4096], [4096, 4096]]","[""int64"", ""int64""]","{""batch_dims"": 0}","[[-100000, 100000], [0, 4095]]",,139.81,L-int64-int64_idx-268M-对齐-对称大值域-batch_dims=0
+Gather,6,"[[16384, 8192], [8192, 8192]]","[""int8"", ""int32""]","{""batch_dims"": 0}","[[-128, 127], [0, 16383]]",,209.72,L-int8-int32_idx-1G-对齐-int8全范围-batch_dims=0
+Gather,7,"[[1023, 1023], [511, 1023]]","[""float16"", ""int64""]","{""batch_dims"": 1}","[[-0.1, 0.1], [0, 1022]]",966.42,3.27,S-float16-int64_idx-1M-非对齐-对称微小值域-batch_dims=1 | baseline_kernels: GatherV3×1
+Gather,8,"[[1009, 1021], [505, 1021]]","[""float32"", ""int32""]","{""batch_dims"": 0}","[[-1, 2], [0, 1008]]",1757.26,3.22,S-float32-int32_idx-1M-质数非对齐-非对称小值域 | baseline_kernels: GatherV3×1
+Gather,9,"[[1537, 769], [769, 769]]","[""bfloat16"", ""int64""]","{""batch_dims"": 0}","[[-5, 10], [0, 1536]]",857.38,3.7,S-bfloat16-int64_idx-1M-非对齐-非对称中值域 | baseline_kernels: GatherV3×1
+Gather,10,"[[363, 367, 373], [181, 367, 373]]","[""float16"", ""int32""]","{""batch_dims"": 1}","[[-50, 100], [0, 362]]",,103.38,L-float16-int32_idx-50M-质数非对齐-非对称大值域-3D-batch_dims=1
+Gather,11,"[[2049, 513], [1024, 513]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[-65504, 65504], [0, 2048]]",993.64,4.38,S-float32-int64_idx-1M-非对齐-float16边界值 | baseline_kernels: GatherV3×1
+Gather,12,"[[3, 7, 13, 4001], [2, 7, 13, 4001]]","[""bfloat16"", ""int32""]","{""batch_dims"": 1}","[[-88, 88], [0, 2]]",,2.65,S-bfloat16-int32_idx-1M-质数非对齐-float32边界值-4D-batch_dims=1
+Gather,13,"[[1000003], [1000]]","[""float32"", ""int64""]","{""batch_dims"": 0}","[[""-inf"", ""inf""], [0, 1000002]]",9.5,2.09,S-float32-int64_idx-1M-质数非对齐-inf特殊值-1D | baseline_kernels: GatherV3×1
+Gather,14,"[[11, 13, 17, 67, 67], [7, 13, 17, 67, 67]]","[""float16"", ""int32""]","{""batch_dims"": 1}","[[""nan"", ""nan""], [0, 10]]",,25.84,M-float16-int32_idx-10M-质数非对齐-nan特殊值-5D-batch_dims=1
+Gather,15,"[[3, 7, 11, 13, 1013], [2, 7, 11, 13, 1013]]","[""float32"", ""int64""]","{""batch_dims"": 1}","[[0, 0], [0, 2]]",,14.79,M-float32-int64_idx-3M-质数非对齐-零值-5D-batch_dims=1
+Gather,16,"[[512, 2049], [256, 2049]]","[""bfloat16"", ""int32""]","{""batch_dims"": 0}","[[-0.5, 0.5], [0, 511]]",1760.23,2.19,S-bfloat16-int32_idx-1M-非对齐-对称微小值域 | baseline_kernels: GatherV3×1
+Gather,17,"[[255, 8193], [127, 8193]]","[""float16"", ""int64""]","{""batch_dims"": 0}","[[-1, 3], [0, 254]]",13925.84,6.51,M-float16-int64_idx-2M-非对齐-非对称小值域 | baseline_kernels: GatherV3×1
+Gather,18,"[[4097, 511], [2048, 511]]","[""float32"", ""int32""]","{""batch_dims"": 0}","[[-1000, 1000], [0, 4096]]",1981.94,6.54,M-float32-int32_idx-2M-非对齐-对称大值域 | baseline_kernels: GatherV3×1
+Gather,19,"[[2, 511, 2049], [2, 255, 2049]]","[""bfloat16"", ""int64""]","{""batch_dims"": 1}","[[-0.2, 0.2], [0, 510]]",,6.54,M-bfloat16-int64_idx-2M-非对齐-对称微小值域-3D-batch_dims=1
+Gather,20,"[[4, 255, 2049], [4, 127, 2049]]","[""float32"", ""int32""]","{""batch_dims"": 2}","[[-3, 6], [0, 254]]",,6.52,M-float32-int32_idx-2M-非对齐-非对称中值域-3D-batch_dims=2

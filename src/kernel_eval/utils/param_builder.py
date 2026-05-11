@@ -18,6 +18,7 @@
 1. 解析golden函数签名
 2. 根据用例数据构建调用参数
 3. 处理 input_shape 中 null 位置，正确映射 tensor 参数
+4. 按 proto.yaml inputs 顺序直接映射（规范格式）
 """
 
 from typing import Dict, List, Any, Callable, Optional
@@ -29,6 +30,97 @@ class ParamBuilder:
 
     def __init__(self, importer=None):
         self.importer = importer
+
+    def build_params_by_proto_order(
+        self,
+        input_tensors: List[Any],
+        proto_inputs: List[Any],
+        case_attrs: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        """按 proto.yaml inputs 顺序直接构建参数（规范格式）
+
+        适用场景：cases.yaml 已规范化，使用 null 占位符
+
+        Args:
+            input_tensors: 已生成的输入张量列表（包含 None 占位）
+            proto_inputs: proto.yaml 中定义的 inputs 列表
+            case_attrs: 用例属性字典
+
+        Returns:
+            参数字典，按 proto_inputs 顺序映射
+
+        规范要求：
+            - input_tensors 长度必须与 proto_inputs 长度一致
+            - 省略的 optional 参数用 None 占位
+        """
+        params = {}
+        case_attrs = case_attrs or {}
+
+        # 检查长度一致性
+        if len(input_tensors) != len(proto_inputs):
+            # 兼容旧格式：长度不一致时按实际 tensor 数量映射
+            return self._build_params_legacy(input_tensors, proto_inputs, case_attrs)
+
+        # 按 proto.yaml inputs 顺序直接映射
+        for i, input_info in enumerate(proto_inputs):
+            input_name = input_info.name
+            tensor = input_tensors[i]
+
+            # None 表示 optional 参数省略
+            if tensor is None:
+                params[input_name] = None
+            else:
+                params[input_name] = tensor
+
+        # 添加属性参数
+        for attr_key, attr_val in case_attrs.items():
+            if attr_key not in params:
+                params[attr_key] = attr_val
+
+        return params
+
+    def _build_params_legacy(
+        self,
+        input_tensors: List[Any],
+        proto_inputs: List[Any],
+        case_attrs: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """兼容旧格式的参数构建（cases.yaml 无 null 占位）"""
+        params = {}
+
+        # 统计实际 tensor 数量
+        actual_tensors = [t for t in input_tensors if t is not None]
+        proto_tensor_count = len([i for i in proto_inputs if 'Tensor' in str(i.dtype) or isinstance(i.dtype, list)])
+
+        # 如果长度一致，直接映射
+        if len(actual_tensors) == proto_tensor_count:
+            tensor_idx = 0
+            for input_info in proto_inputs:
+                if 'Tensor' in str(input_info.dtype) or isinstance(input_info.dtype, list):
+                    if tensor_idx < len(input_tensors):
+                        params[input_info.name] = input_tensors[tensor_idx]
+                        tensor_idx += 1
+                    else:
+                        params[input_info.name] = None
+                # optional 参数未提供
+                elif getattr(input_info, 'optional', False):
+                    params[input_info.name] = None
+        else:
+            # 复杂映射：按签名顺序处理
+            tensor_idx = 0
+            for input_info in proto_inputs:
+                if tensor_idx < len(input_tensors):
+                    params[input_info.name] = input_tensors[tensor_idx]
+                    tensor_idx += 1
+                else:
+                    params[input_info.name] = None
+
+        # 添加属性参数
+        for attr_key, attr_val in case_attrs.items():
+            if attr_key not in params:
+                params[attr_key] = attr_val
+
+        return params
 
     def build_call_params(self, golden_func: Callable, case: Any, input_tensors: List, override_shapes: List = None) -> Dict[str, Any]:
         """构建golden函数调用参数

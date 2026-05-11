@@ -276,6 +276,7 @@ class Evaluator:
                     golden_run_result=golden_result,
                     error_msg=f"Golden执行失败: {golden_result.error}",
                     baseline_perf_us=case.baseline_perf_us,
+                    t_hw_us=case.t_hw_us,
                 )
 
             # 5. 如果没有传入AI算子函数，尝试加载
@@ -297,6 +298,7 @@ class Evaluator:
                             threshold=0, mere=0, mare=0,
                         ),
                         baseline_perf_us=case.baseline_perf_us,
+                        t_hw_us=case.t_hw_us,
                     )
 
             # 6. 执行AI算子（profiler 一次运行同时提供输出和性能数据，避免跑两遍）
@@ -316,6 +318,7 @@ class Evaluator:
                     ai_run_result=ai_result,
                     error_msg=f"AI算子执行失败: {ai_result.error}",
                     baseline_perf_us=case.baseline_perf_us,
+                    t_hw_us=case.t_hw_us,
                 )
 
             # 7. 精度对比（使用与性能采集同一次运行的输出）
@@ -388,6 +391,7 @@ class Evaluator:
                 ai_run_result=ai_result,
                 error_msg=error_msg,
                 baseline_perf_us=case.baseline_perf_us,
+                t_hw_us=case.t_hw_us,
             )
 
         except Exception as e:

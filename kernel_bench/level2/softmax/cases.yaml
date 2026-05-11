@@ -16,8 +16,9 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-1, 1]
-  baseline_perf_us: 20.26
-  note: S-float16-1M-对齐-对称小值域-dim=-1
+  baseline_perf_us: 19.12
+  t_hw_us: 1.57
+  note: "S-float16-1M-对齐-对称小值域-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 2
   input_shape:
@@ -25,8 +26,9 @@ cases:
   dtype: [float32]
   attrs: {dim: -1}
   value_range: [-2, 2]
-  baseline_perf_us: 37.6
-  note: M-float32-4M-对齐-对称小值域-dim=-1
+  baseline_perf_us: 37.60
+  t_hw_us: 8.74
+  note: "M-float32-4M-对齐-对称小值域-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 3
   input_shape:
@@ -34,8 +36,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-3, 3]
-  baseline_perf_us: 92.52
-  note: M-bfloat16-16M-对齐-对称小值域-dim=-1
+  baseline_perf_us: 92.42
+  t_hw_us: 25.17
+  note: "M-bfloat16-16M-对齐-对称小值域-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 4
   input_shape:
@@ -43,8 +46,9 @@ cases:
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-10, 10]
-  baseline_perf_us: 1306.65
-  note: L-float16-67M-对齐-对称中值域-dim=0
+  baseline_perf_us: 1297.45
+  t_hw_us: 100.66
+  note: "L-float16-67M-对齐-对称中值域-dim=0 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 5
   input_shape:
@@ -53,7 +57,8 @@ cases:
   attrs: {dim: 1}
   value_range: [-100, 100]
   baseline_perf_us: 422.76
-  note: L-float32-268M-对齐-对称大值域-dim=1
+  t_hw_us: 139.81
+  note: "L-float32-268M-对齐-对称大值域-dim=1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 6
   input_shape:
@@ -62,7 +67,8 @@ cases:
   attrs: {dim: 2}
   value_range: [-5, 5]
   baseline_perf_us: 789.27
-  note: L-bfloat16-67M-非对齐-4D-dim=2
+  t_hw_us: 101.69
+  note: "L-bfloat16-67M-非对齐-4D-dim=2 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 7
   input_shape:
@@ -70,8 +76,9 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-0.1, 0.1]
-  baseline_perf_us: 20.02
-  note: S-float16-2M-非对齐-对称微小值域-dim=-1
+  baseline_perf_us: 19.98
+  t_hw_us: 3.14
+  note: "S-float16-2M-非对齐-对称微小值域-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 8
   input_shape:
@@ -80,7 +87,8 @@ cases:
   attrs: {dim: -1}
   value_range: [-1, 1]
   baseline_perf_us: 57.88
-  note: M-float32-8M-非对齐-dim=-1
+  t_hw_us: 17.49
+  note: "M-float32-8M-非对齐-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 9
   input_shape:
@@ -89,7 +97,8 @@ cases:
   attrs: {dim: 0}
   value_range: [-0.5, 0.5]
   baseline_perf_us: 480.74
-  note: M-bfloat16-33M-非对齐-dim=0
+  t_hw_us: 50.31
+  note: "M-bfloat16-33M-非对齐-dim=0 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 10
   input_shape:
@@ -98,7 +107,8 @@ cases:
   attrs: {dim: -1}
   value_range: [-1, 2]
   baseline_perf_us: 13.87
-  note: S-float16-1M-质数非对齐-dim=-1
+  t_hw_us: 1.55
+  note: "S-float16-1M-质数非对齐-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 11
   input_shape:
@@ -106,8 +116,9 @@ cases:
   dtype: [float32]
   attrs: {dim: 1}
   value_range: [-50, 100]
-  baseline_perf_us: 1068.19
-  note: L-float32-51M-质数非对齐-3D-dim=1
+  baseline_perf_us: 1067.96
+  t_hw_us: 108.09
+  note: "L-float32-51M-质数非对齐-3D-dim=1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 12
   input_shape:
@@ -115,8 +126,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-3, 6]
-  baseline_perf_us: 62.6
-  note: M-bfloat16-9M-质数非对齐-4D-dim=-1
+  baseline_perf_us: 62.60
+  t_hw_us: 14.59
+  note: "M-bfloat16-9M-质数非对齐-4D-dim=-1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 13
   input_shape:
@@ -124,8 +136,9 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-inf, inf]
-  baseline_perf_us: 220.9
-  note: S-float16-2M-质数非对齐-inf特殊值
+  baseline_perf_us: 194.28
+  t_hw_us: 3.0
+  note: "S-float16-2M-质数非对齐-inf特殊值 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 14
   input_shape:
@@ -134,7 +147,8 @@ cases:
   attrs: {dim: -1}
   value_range: [nan, nan]
   baseline_perf_us: 242.74
-  note: M-float32-10M-质数非对齐-nan特殊值-5D
+  t_hw_us: 22.73
+  note: "M-float32-10M-质数非对齐-nan特殊值-5D | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 15
   input_shape:
@@ -143,7 +157,8 @@ cases:
   attrs: {dim: -1}
   value_range: [0, 0]
   baseline_perf_us: 30.54
-  note: S-bfloat16-3M-质数非对齐-零值特殊值-5D
+  t_hw_us: 4.56
+  note: "S-bfloat16-3M-质数非对齐-零值特殊值-5D | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 16
   input_shape:
@@ -151,8 +166,9 @@ cases:
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-0.5, 0.5]
-  baseline_perf_us: 43.36
-  note: S-float16-1M-非对齐-dim=0
+  baseline_perf_us: 41.74
+  t_hw_us: 1.57
+  note: "S-float16-1M-非对齐-dim=0 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 17
   input_shape:
@@ -160,8 +176,9 @@ cases:
   dtype: [float32]
   attrs: {dim: 1}
   value_range: [-1000, 1000]
-  baseline_perf_us: 19.69
-  note: S-float32-2M-非对齐-对称大值域-dim=1
+  baseline_perf_us: 18.96
+  t_hw_us: 4.35
+  note: "S-float32-2M-非对齐-对称大值域-dim=1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 18
   input_shape:
@@ -169,8 +186,9 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-0.2, 0.2]
-  baseline_perf_us: 20.1
-  note: S-bfloat16-2M-非对齐-对称微小值域-3D
+  baseline_perf_us: 20.10
+  t_hw_us: 3.14
+  note: "S-bfloat16-2M-非对齐-对称微小值域-3D | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 19
   input_shape:
@@ -178,8 +196,9 @@ cases:
   dtype: [float16]
   attrs: {dim: 1}
   value_range: [-65504, 65504]
-  baseline_perf_us: 53.81
-  note: S-float16-2M-非对齐-float16边界值-dim=1
+  baseline_perf_us: 52.90
+  t_hw_us: 3.13
+  note: "S-float16-2M-非对齐-float16边界值-dim=1 | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 20
   input_shape:
@@ -188,4 +207,5 @@ cases:
   attrs: {dim: -1}
   value_range: [-20, 40]
   baseline_perf_us: 217.84
-  note: M-float32-10M-非对齐-非对称大值域-5D
+  t_hw_us: 21.98
+  note: "M-float32-10M-非对齐-非对称大值域-5D | baseline_kernels: SoftmaxV2×1"

@@ -20,6 +20,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 0.03
   note: S-float16-2D-无finished-tokens1024-experts16-k2
 
 # 中规模 2D
@@ -32,6 +33,7 @@ cases:
   value_range:
   - [-2, 2]
   baseline_perf_us: null
+  t_hw_us: 1.09
   note: M-float32-2D-无finished-tokens16384-experts32-k4
 
 # 大规模 2D
@@ -44,6 +46,7 @@ cases:
   value_range:
   - [-3, 3]
   baseline_perf_us: null
+  t_hw_us: 18.53
   note: L-bfloat16-2D-无finished-tokens131072-experts64-k8
 
 # 3D 输入
@@ -56,6 +59,7 @@ cases:
   value_range:
   - [-10, 10]
   baseline_perf_us: null
+  t_hw_us: 1.25
   note: M-float16-3D-无finished-B4-tokens1024-experts128-k16
 
 # 大k值
@@ -68,6 +72,7 @@ cases:
   value_range:
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 4.94
   note: M-float32-2D-无finished-tokens8192-experts256-k32
 
 # ========== 带 finished 参数 ==========
@@ -83,6 +88,7 @@ cases:
   - [-1, 1]
   - [0, 1]
   baseline_perf_us: null
+  t_hw_us: 0.03
   note: S-float16-2D-带finished-tokens1024-experts16-k2
 
 # 3D 带 finished
@@ -97,6 +103,7 @@ cases:
   - [-2, 2]
   - [0, 1]
   baseline_perf_us: null
+  t_hw_us: 0.28
   note: M-float32-3D-带finished-B4-tokens1024-experts32-k4
 
 # 大规模带 finished
@@ -111,6 +118,7 @@ cases:
   - [-3, 3]
   - [0, 1]
   baseline_perf_us: null
+  t_hw_us: 9.35
   note: L-bfloat16-2D-带finished-tokens65536-experts64-k8
 
 # ========== 不同数据类型 ==========
@@ -123,6 +131,7 @@ cases:
   value_range:
   - [-1000, 1000]
   baseline_perf_us: null
+  t_hw_us: 5.68
   note: M-float16-2D-无finished-tokens4096-experts512-k64
 
 - operator: MoeGatingTopKSoftmax
@@ -134,6 +143,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 6.03
   note: M-bfloat16-2D-无finished-tokens2048-experts1024-k128
 
 # ========== 非对齐场景（质数） ==========
@@ -147,6 +157,7 @@ cases:
   value_range:
   - [-10, 10]
   baseline_perf_us: null
+  t_hw_us: 0.07
   note: S-float16-2D-质数tokens1009-experts32-k4
 
 # 质数 experts
@@ -159,6 +170,7 @@ cases:
   value_range:
   - [-2, 2]
   baseline_perf_us: null
+  t_hw_us: 2.18
   note: M-float32-2D-质数experts511-tokens2048-k8
 
 # 3D 质数
@@ -171,6 +183,7 @@ cases:
   value_range:
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 2.43
   note: M-bfloat16-3D-质数非对齐-B8-tokens1009-experts127-k16
 
 # ========== 小规模边界测试 ==========
@@ -184,6 +197,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 0.00
   note: XS-float16-2D-最小tokens64-experts8-k2
 
 # 最小 experts
@@ -196,6 +210,7 @@ cases:
   value_range:
   - [-0.1, 0.1]
   baseline_perf_us: null
+  t_hw_us: 0.01
   note: S-float32-2D-最小experts4-tokens1024-k2
 
 # k=1 最小值
@@ -208,6 +223,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 0.02
   note: XS-bfloat16-2D-k最小值1-tokens512-experts16
 
 # ========== 边界值和特殊值测试 ==========
@@ -221,6 +237,7 @@ cases:
   value_range:
   - [-65504, 65504]
   baseline_perf_us: null
+  t_hw_us: 1.14
   note: M-float16-2D-边界值范围-tokens2048-experts256-k8
 
 # float32 边界值
@@ -233,6 +250,7 @@ cases:
   value_range:
   - [-88, 88]
   baseline_perf_us: null
+  t_hw_us: 1.15
   note: M-float32-2D-float32边界值-tokens4096-experts128-k16
 
 # 小值域测试
@@ -245,6 +263,7 @@ cases:
   value_range:
   - [-0.01, 0.01]
   baseline_perf_us: null
+  t_hw_us: 0.07
   note: S-float16-2D-微小值域-tokens1024-experts32-k4
 
 # 零值测试
@@ -257,4 +276,5 @@ cases:
   value_range:
   - [0, 0]
   baseline_perf_us: null
+  t_hw_us: 0.07
   note: XS-bfloat16-2D-零值输入-tokens512-experts64-k8

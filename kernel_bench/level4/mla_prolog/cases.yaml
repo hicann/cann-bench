@@ -50,6 +50,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.84
   note: bfloat16-DSv3-B1S1-decode
 - operator: MlaProlog
   case_id: 2
@@ -92,6 +93,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.86
   note: bfloat16-DSv3-B4S1-decode
 - operator: MlaProlog
   case_id: 3
@@ -134,6 +136,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 64.07
   note: bfloat16-DSv3-B32S1-decode
 - operator: MlaProlog
   case_id: 4
@@ -176,6 +179,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 64.32
   note: bfloat16-DSv3-B64S1-decode
 - operator: MlaProlog
   case_id: 5
@@ -218,6 +222,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 64.80
   note: bfloat16-DSv3-B128S1-decode-large-batch
 - operator: MlaProlog
   case_id: 6
@@ -260,6 +265,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.86
   note: bfloat16-DSv3-B1S4-prefill
 - operator: MlaProlog
   case_id: 7
@@ -302,6 +308,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.95
   note: bfloat16-DSv3-B1S16-prefill
 - operator: MlaProlog
   case_id: 8
@@ -344,6 +351,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.95
   note: bfloat16-DSv3-B4S4-prefill
 - operator: MlaProlog
   case_id: 9
@@ -386,6 +394,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 177.25
   note: bfloat16-DSv3-B4S128-prefill
 - operator: MlaProlog
   case_id: 10
@@ -428,6 +437,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 177.25
   note: bfloat16-DSv3-B2S256-prefill
 - operator: MlaProlog
   case_id: 11
@@ -470,6 +480,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 59.33
   note: bfloat16-DSv2-B1S1-decode
 - operator: MlaProlog
   case_id: 12
@@ -512,6 +523,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 59.50
   note: bfloat16-DSv2-B32S1-decode
 - operator: MlaProlog
   case_id: 13
@@ -554,6 +566,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 60.03
   note: bfloat16-DSv2-B128S1-decode-large-batch
 - operator: MlaProlog
   case_id: 14
@@ -596,6 +609,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 59.41
   note: bfloat16-DSv2-B1S16-prefill
 - operator: MlaProlog
   case_id: 15
@@ -638,6 +652,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 164.74
   note: bfloat16-DSv2-B4S128-prefill
 - operator: MlaProlog
   case_id: 16
@@ -680,6 +695,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 64.74
   note: bfloat16-DSv3-B60S2-MTP-large-batch
 - operator: MlaProlog
   case_id: 17
@@ -722,6 +738,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 177.25
   note: bfloat16-DSv3-B128S4-MTP-large-batch
 - operator: MlaProlog
   case_id: 18
@@ -764,6 +781,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 61.78
   note: bfloat16-DSv2-B96S2-MTP-large-batch
 - operator: MlaProlog
   case_id: 19
@@ -806,6 +824,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 63.84
   note: bfloat16-DSv3-B1S1-different-epsilon
 - operator: MlaProlog
   case_id: 20
@@ -848,4 +867,5 @@ cases:
   - 0
   - 0
   baseline_perf_us: null
+  t_hw_us: 63.84
   note: bfloat16-DSv3-B1S1-zero-input

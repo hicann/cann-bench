@@ -41,6 +41,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 5.51
   note: S-float16-完整参数-drop_less_列排列-对齐-K8-H512-E16
 - operator: MoeFinalizeRouting
   case_id: 2
@@ -84,6 +85,7 @@ cases:
   - - 0
     - 31
   baseline_perf_us: null
+  t_hw_us: 105.13
   note: L-float32-完整参数-drop_less_列排列-对齐-K4-H1024-E32
 - operator: MoeFinalizeRouting
   case_id: 3
@@ -127,6 +129,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 35.01
   note: M-bfloat16-完整参数-drop_less_行排列-对齐-K2-H2048-E8
 - operator: MoeFinalizeRouting
   case_id: 4
@@ -168,6 +171,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 5.51
   note: S-float16-无skip2-drop_less-对齐-K4
 - operator: MoeFinalizeRouting
   case_id: 5
@@ -207,6 +211,7 @@ cases:
     - 1
   - null
   baseline_perf_us: null
+  t_hw_us: 8.24
   note: M-float32-无bias-drop_less-对齐-K8
 - operator: MoeFinalizeRouting
   case_id: 6
@@ -248,6 +253,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 1.65
   note: S-float16-无scales-K1-drop_less-对齐
 - operator: MoeFinalizeRouting
   case_id: 7
@@ -287,6 +293,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 1.27
   note: M-bfloat16-无skip-drop_less-对齐
 - operator: MoeFinalizeRouting
   case_id: 8
@@ -330,6 +337,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 5.5
   note: S-float16-完整参数-质数非对齐-drop_less-K8
 - operator: MoeFinalizeRouting
   case_id: 9
@@ -373,6 +381,7 @@ cases:
   - - 0
     - 31
   baseline_perf_us: null
+  t_hw_us: 10.1
   note: M-bfloat16-大K16-对齐-drop_less
 - operator: MoeFinalizeRouting
   case_id: 10
@@ -414,6 +423,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 0.29
   note: S-float16-drop_pad_列排列-展平2D-K1
 - operator: MoeFinalizeRouting
   case_id: 11
@@ -457,6 +467,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 0.57
   note: M-float32-drop_pad_行排列-展平2D-K2
 - operator: MoeFinalizeRouting
   case_id: 12
@@ -500,6 +511,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 6.61
   note: M-bfloat16-fp32_scales-混合精度-drop_less
 - operator: MoeFinalizeRouting
   case_id: 13
@@ -543,6 +555,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 0.21
   note: S-float16-边界值-drop_less
 - operator: MoeFinalizeRouting
   case_id: 14
@@ -586,6 +599,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 0.05
   note: XS-float32-小规模-完整参数-drop_less
 - operator: MoeFinalizeRouting
   case_id: 15
@@ -629,6 +643,7 @@ cases:
   - - 0
     - 63
   baseline_perf_us: null
+  t_hw_us: 176.16
   note: XL-float16-超大规模-drop_less-对齐-K8
 - operator: MoeFinalizeRouting
   case_id: 16
@@ -670,6 +685,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 0.1
   note: S-float16-H32最小值-无skip2
 - operator: MoeFinalizeRouting
   case_id: 17
@@ -711,6 +727,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 3.29
   note: M-float32-K1最小值-无scales
 - operator: MoeFinalizeRouting
   case_id: 18
@@ -754,6 +771,7 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 6.48
   note: M-float16-质数非对齐NUM_ROWS-H1021
 - operator: MoeFinalizeRouting
   case_id: 19
@@ -797,6 +815,7 @@ cases:
   - - 0
     - 7
   baseline_perf_us: null
+  t_hw_us: 0.42
   note: S-float32-零值输入测试
 - operator: MoeFinalizeRouting
   case_id: 20
@@ -841,4 +860,5 @@ cases:
   - - 0
     - 15
   baseline_perf_us: null
+  t_hw_us: 0.21
   note: M-float16-drop_pad-含无效索引-1

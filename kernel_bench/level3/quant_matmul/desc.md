@@ -76,7 +76,7 @@ cann_bench.quant_matmul(
 | offset | Tensor (可选) | `[t]` (t=1 或 n)，或 2D（与 scale 相同） | float32 / float16 | 反量化偏移。scale 为 2D 时必选 |
 | pertoken_scale | Tensor (可选) | `[m]` | float32 | per-token 缩放因子 |
 | bias | Tensor (可选) | `[n]` / `[1, n]` / `[batch, 1, n]` | int32 / bfloat16 / float16 / float32 | 偏置项 |
-| output_dtype | str (可选) | - | - | 输出 dtype："int8" / "float16" / "bfloat16" / "int32"，默认 int8 |
+| output_dtype | str (可选) | None | - | 输出 dtype："int8" / "float16" / "bfloat16" / "int32"，None 等价于 "int8" |
 | group_sizes | int[] (可选) | - | - | 分组量化粒度 [group_m, group_n, group_k] |
 
 ### 输出

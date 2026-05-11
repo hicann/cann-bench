@@ -14,7 +14,7 @@ operator:
   difficulty: L3
   formula: y_i = x_i @ weight_i + bias_i
   description: 分组矩阵乘法算子，每组矩阵乘的维度大小可以不同
-  shape_support: 'x: TensorList of [m_i, k_i], weight: TensorList of [n_i, k_i] or [k_i, n_i]'
+  shape_support: 'x: TensorList of [m_i, k_i], weight: TensorList of [k_i, n_i] or [n_i, k_i]'
   attrs:
   - name: split_item
     type: int
@@ -24,7 +24,7 @@ operator:
   - name: transpose_weight
     type: bool
     default: false
-    description: 是否转置权重，false时weight shape为[n_i, k_i]，true时为[k_i, n_i]
+    description: 是否转置权重，false时weight shape为[k_i, n_i]（直接参与matmul），true时为[n_i, k_i]（需转置后参与matmul）
     required: false
   inputs:
   - name: x
@@ -34,7 +34,7 @@ operator:
     - bfloat16
     - float32
   - name: weight
-    description: 权重矩阵TensorList，每个tensor shape为[n_i, k_i]（transpose_weight=false）或[k_i, n_i]（transpose_weight=true）
+    description: 权重矩阵TensorList，每个tensor shape为[k_i, n_i]（transpose_weight=false）或[n_i, k_i]（transpose_weight=true）
     dtype:
     - float16
     - bfloat16

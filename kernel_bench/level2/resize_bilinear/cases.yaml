@@ -18,8 +18,9 @@ cases:
     output_size: [256, 256]
     align_corners: false
   value_range: [-1, 1]
-  baseline_perf_us: 77.98
-  note: S-float16-8M-对齐-下采样2x-对称小值域
+  baseline_perf_us: 76.92
+  t_hw_us: 4.37
+  note: "S-float16-8M-对齐-下采样2x-对称小值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 2
   input_shape:
@@ -29,8 +30,9 @@ cases:
     output_size: [512, 512]
     align_corners: false
   value_range: [-2, 2]
-  baseline_perf_us: 158.96
-  note: M-float32-16M-对齐-下采样2x-对称小值域
+  baseline_perf_us: 162.42
+  t_hw_us: 34.95
+  note: "M-float32-16M-对齐-下采样2x-对称小值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 3
   input_shape:
@@ -40,8 +42,9 @@ cases:
     output_size: [1024, 1024]
     align_corners: false
   value_range: [-3, 3]
-  baseline_perf_us: 3692.13
-  note: L-bfloat16-32M-对齐-下采样2x-对称小值域
+  baseline_perf_us: 3301.59
+  t_hw_us: 69.91
+  note: "L-bfloat16-32M-对齐-下采样2x-对称小值域 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 4
   input_shape:
@@ -51,8 +54,9 @@ cases:
     output_size: [512, 512]
     align_corners: true
   value_range: [-10, 10]
-  baseline_perf_us: 170.33
-  note: S-float16-2M-对齐-上采样2x-对齐角点-对称中值域
+  baseline_perf_us: 171.98
+  t_hw_us: 17.13
+  note: "S-float16-2M-对齐-上采样2x-对齐角点-对称中值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 5
   input_shape:
@@ -62,8 +66,9 @@ cases:
     output_size: [1024, 1024]
     align_corners: true
   value_range: [-100, 100]
-  baseline_perf_us: 3117.1
-  note: S-float32-8M-对齐-上采样8x-对齐角点-对称大值域
+  baseline_perf_us: 2960.56
+  t_hw_us: 123.03
+  note: "S-float32-8M-对齐-上采样8x-对齐角点-对称大值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 6
   input_shape:
@@ -73,8 +78,9 @@ cases:
     output_size: [511, 511]
     align_corners: false
   value_range: [-0.1, 0.1]
-  baseline_perf_us: 524.55
-  note: M-bfloat16-23M-非对齐-下采样-对称微小值域
+  baseline_perf_us: 527.89
+  t_hw_us: 25.07
+  note: "M-bfloat16-23M-非对齐-下采样-对称微小值域 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 7
   input_shape:
@@ -84,8 +90,9 @@ cases:
     output_size: [256, 256]
     align_corners: false
   value_range: [-1, 2]
-  baseline_perf_us: 95.01
-  note: M-float16-13M-质数非对齐-下采样-非对称小值域
+  baseline_perf_us: 98.08
+  t_hw_us: 13.95
+  note: "M-float16-13M-质数非对齐-下采样-非对称小值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 8
   input_shape:
@@ -95,8 +102,9 @@ cases:
     output_size: [128, 128]
     align_corners: true
   value_range: [-5, 10]
-  baseline_perf_us: 251.57
-  note: M-float32-24M-非对齐-下采样-对齐角点-非对称中值域
+  baseline_perf_us: 249.81
+  t_hw_us: 51.71
+  note: "M-float32-24M-非对齐-下采样-对齐角点-非对称中值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 9
   input_shape:
@@ -106,8 +114,9 @@ cases:
     output_size: [64, 64]
     align_corners: false
   value_range: [-50, 100]
-  baseline_perf_us: 625.58
-  note: M-bfloat16-49M-质数非对齐-上采样-非对称大值域
+  baseline_perf_us: 621.47
+  t_hw_us: 51.76
+  note: "M-bfloat16-49M-质数非对齐-上采样-非对称大值域 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 10
   input_shape:
@@ -117,8 +126,9 @@ cases:
     output_size: [1024, 256]
     align_corners: false
   value_range: [-65504, 65504]
-  baseline_perf_us: 346.87
-  note: M-float16-33M-非对齐-float16边界值
+  baseline_perf_us: 345.93
+  t_hw_us: 35.04
+  note: "M-float16-33M-非对齐-float16边界值 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 11
   input_shape:
@@ -128,8 +138,9 @@ cases:
     output_size: [512, 512]
     align_corners: false
   value_range: [-88, 88]
-  baseline_perf_us: 176.26
-  note: M-float32-3M-质数非对齐-float32边界值
+  baseline_perf_us: 175.10
+  t_hw_us: 6.57
+  note: "M-float32-3M-质数非对齐-float32边界值 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 12
   input_shape:
@@ -139,8 +150,9 @@ cases:
     output_size: [1001, 1001]
     align_corners: false
   value_range: [-inf, inf]
-  baseline_perf_us: 3707.15
-  note: L-bfloat16-32M-质数非对齐-inf特殊值
+  baseline_perf_us: 3347.13
+  t_hw_us: 66.87
+  note: "L-bfloat16-32M-质数非对齐-inf特殊值 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 13
   input_shape:
@@ -150,8 +162,9 @@ cases:
     output_size: [256, 256]
     align_corners: false
   value_range: [nan, nan]
-  baseline_perf_us: 244.92
-  note: S-float32-163K-质数非对齐-nan特殊值-4D
+  baseline_perf_us: 244.25
+  t_hw_us: 17.18
+  note: "S-float32-163K-质数非对齐-nan特殊值-4D | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 14
   input_shape:
@@ -161,8 +174,9 @@ cases:
     output_size: [128, 128]
     align_corners: false
   value_range: [0, 0]
-  baseline_perf_us: 248.86
-  note: S-float16-1M-质数非对齐-零值-4D
+  baseline_perf_us: 245.67
+  t_hw_us: 1.14
+  note: "S-float16-1M-质数非对齐-零值-4D | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 15
   input_shape:
@@ -172,8 +186,9 @@ cases:
     output_size: [256, 1024]
     align_corners: false
   value_range: [-0.5, 0.5]
-  baseline_perf_us: 1047.42
-  note: L-float32-65M-非对齐-对称微小值域-扁平C
+  baseline_perf_us: 1054.40
+  t_hw_us: 139.88
+  note: "L-float32-65M-非对齐-对称微小值域-扁平C | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 16
   input_shape:
@@ -183,8 +198,9 @@ cases:
     output_size: [512, 512]
     align_corners: true
   value_range: [-1, 3]
-  baseline_perf_us: 24634.7
-  note: L-bfloat16-130M-非对齐-非对称小值域-对齐角点
+  baseline_perf_us: 21676.77
+  t_hw_us: 138.72
+  note: "L-bfloat16-130M-非对齐-非对称小值域-对齐角点 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 17
   input_shape:
@@ -194,8 +210,9 @@ cases:
     output_size: [2048, 256]
     align_corners: false
   value_range: [-1000, 1000]
-  baseline_perf_us: 196.64
-  note: M-float16-16M-非对齐-对称大值域
+  baseline_perf_us: 194.76
+  t_hw_us: 17.45
+  note: "M-float16-16M-非对齐-对称大值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 18
   input_shape:
@@ -205,8 +222,9 @@ cases:
     output_size: [511, 1024]
     align_corners: false
   value_range: [-0.2, 0.2]
-  baseline_perf_us: 313.27
-  note: M-float32-6M-非对齐-对称微小值域
+  baseline_perf_us: 316.35
+  t_hw_us: 13.1
+  note: "M-float32-6M-非对齐-对称微小值域 | baseline_kernels: Cast×1 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 19
   input_shape:
@@ -216,8 +234,9 @@ cases:
     output_size: [256, 512]
     align_corners: false
   value_range: [-3, 6]
-  baseline_perf_us: 1165.15
-  note: L-bfloat16-58M-非对齐-非对称中值域
+  baseline_perf_us: 1158.18
+  t_hw_us: 60.99
+  note: "L-bfloat16-58M-非对齐-非对称中值域 | baseline_kernels: Cast×4 + TransData×3 + ResizeBilinearV2×1"
 - operator: ResizeBilinear
   case_id: 20
   input_shape:
@@ -227,5 +246,6 @@ cases:
     output_size: [500001]
     align_corners: false
   value_range: [-20, 40]
-  baseline_perf_us: 0
+  baseline_perf_us: null
+  t_hw_us: 2.08
   note: S-float32-1M-质数非对齐-非对称大值域-3D

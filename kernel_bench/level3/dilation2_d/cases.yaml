@@ -26,6 +26,7 @@ cases:
   - [-1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: null
+  t_hw_us: 0.74
   note: S-float16-512K-对齐-3x3-stride=1-dilation=1-SAME
 - operator: Dilation2D
   case_id: 2
@@ -44,6 +45,7 @@ cases:
   - [-2, 2]
   - [-0.2, 0.2]
   baseline_perf_us: null
+  t_hw_us: 34.25
   note: M-float16-8M-对齐-5x5-stride=1-dilation=1-SAME
 - operator: Dilation2D
   case_id: 3
@@ -62,6 +64,7 @@ cases:
   - [-3, 3]
   - [-0.3, 0.3]
   baseline_perf_us: null
+  t_hw_us: 34.95
   note: M-float16-33M-对齐-stride=2-dilation=2
 - operator: Dilation2D
   case_id: 4
@@ -80,6 +83,7 @@ cases:
   - [-10, 10]
   - [-1, 1]
   baseline_perf_us: null
+  t_hw_us: 45.18
   note: M-float16-33M-非对齐-dilation=3-VALID
 - operator: Dilation2D
   case_id: 5
@@ -98,6 +102,7 @@ cases:
   - [-100, 100]
   - [-10, 10]
   baseline_perf_us: null
+  t_hw_us: 31.52
   note: M-float16-30M-非对齐-stride=2-ceil_mode=true
 - operator: Dilation2D
   case_id: 6
@@ -116,6 +121,7 @@ cases:
   - [-1000, 1000]
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 95.07
   note: L-float16-268M-对齐-dilation=4-大值域
 - operator: Dilation2D
   case_id: 7
@@ -134,6 +140,7 @@ cases:
   - [-0.1, 0.1]
   - [-0.01, 0.01]
   baseline_perf_us: null
+  t_hw_us: 1.06
   note: S-float16-700K-非对齐-stride=1-dilation=1-微小值域
 - operator: Dilation2D
   case_id: 8
@@ -152,6 +159,7 @@ cases:
   - [-1, 2]
   - [-0.1, 0.2]
   baseline_perf_us: null
+  t_hw_us: 0.69
   note: S-float16-400K-质数非对齐-dilation=2-非对称
 - operator: Dilation2D
   case_id: 9
@@ -170,6 +178,7 @@ cases:
   - [-5, 10]
   - [-0.5, 1]
   baseline_perf_us: null
+  t_hw_us: 0.08
   note: S-float16-50K-质数非对齐-stride=2-VALID-非对称
 - operator: Dilation2D
   case_id: 10
@@ -188,6 +197,7 @@ cases:
   - [-50, 100]
   - [-5, 10]
   baseline_perf_us: null
+  t_hw_us: 1.27
   note: S-float16-4M-质数非对齐-dilation=3
 - operator: Dilation2D
   case_id: 11
@@ -206,6 +216,7 @@ cases:
   - [-65504, 65504]
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 0.73
   note: S-float16-500K-非对齐-float16边界值
 - operator: Dilation2D
   case_id: 12
@@ -224,6 +235,7 @@ cases:
   - [-88, 88]
   - [-8, 8]
   baseline_perf_us: null
+  t_hw_us: 0.6
   note: S-float16-300K-质数非对齐-float32边界值
 - operator: Dilation2D
   case_id: 13
@@ -242,6 +254,7 @@ cases:
   - [-inf, inf]
   - [-inf, inf]
   baseline_perf_us: null
+  t_hw_us: 0.71
   note: S-float16-500K-非对齐-inf特殊值
 - operator: Dilation2D
   case_id: 14
@@ -260,6 +273,7 @@ cases:
   - [nan, nan]
   - [nan, nan]
   baseline_perf_us: null
+  t_hw_us: 0.01
   note: S-float16-5K-质数非对齐-nan特殊值
 - operator: Dilation2D
   case_id: 15
@@ -278,6 +292,7 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: null
+  t_hw_us: 0.34
   note: S-float16-200K-非对齐-零值
 - operator: Dilation2D
   case_id: 16
@@ -296,6 +311,7 @@ cases:
   - [-0.5, 0.5]
   - [-0.05, 0.05]
   baseline_perf_us: null
+  t_hw_us: 0.53
   note: S-float16-500K-混合非对齐-stride=2-dilation=2-微小值域
 - operator: Dilation2D
   case_id: 17
@@ -314,6 +330,7 @@ cases:
   - [-1, 3]
   - [-0.1, 0.3]
   baseline_perf_us: null
+  t_hw_us: 1.75
   note: S-float16-2M-非对齐-dilation=4-VALID-非对称
 - operator: Dilation2D
   case_id: 18
@@ -332,6 +349,7 @@ cases:
   - [-1000, 1000]
   - [-100, 100]
   baseline_perf_us: null
+  t_hw_us: 8.57
   note: M-float16-8M-非对齐-stride=2-ceil_mode-大值域
 - operator: Dilation2D
   case_id: 19
@@ -350,6 +368,7 @@ cases:
   - [-0.2, 0.2]
   - [-0.02, 0.02]
   baseline_perf_us: null
+  t_hw_us: 0.17
   note: S-float16-100K-质数非对齐-dilation=3-微小值域
 - operator: Dilation2D
   case_id: 20
@@ -368,4 +387,5 @@ cases:
   - [-3, 6]
   - [-0.3, 0.6]
   baseline_perf_us: null
+  t_hw_us: 5.8
   note: S-float16-4M-质数非对齐-dilation=2-非对称中值域

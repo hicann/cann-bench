@@ -34,13 +34,9 @@ os.environ.setdefault('TORCH_DEVICE_BACKEND_AUTOLOAD', '0')
 # 默认静默模式，抑制第三方库日志和警告
 import logging
 logging.getLogger().setLevel(logging.WARNING)
-# torch_npu.profiler 输出大量 parser error 日志
-for name in ['torch', 'torch_npu', 'torch_npu.profiler', 'ascend', ' profiler']:
+for name in ['torch', 'torch_npu', 'ascend']:
     logging.getLogger(name).setLevel(logging.ERROR)
 warnings.filterwarnings('ignore', category=UserWarning)
-# 抑制 CANN/Ascend 日志
-os.environ.setdefault('ASCEND_SLOG_PRINT_TO_STDOUT', '0')
-os.environ.setdefault('ASCEND_GLOBAL_LOG_LEVEL', '3')
 
 # 解析参数以提前检测 --verbose
 args = argparse.ArgumentParser(add_help=False)
@@ -50,7 +46,7 @@ known_args, _ = args.parse_known_args()
 # 详细模式下恢复日志级别
 if known_args.verbose:
     logging.getLogger().setLevel(logging.INFO)
-    for name in ['torch', 'torch_npu', 'torch_npu.profiler', 'ascend', ' profiler']:
+    for name in ['torch', 'torch_npu', 'ascend']:
         logging.getLogger(name).setLevel(logging.INFO)
     warnings.filterwarnings('default', category=UserWarning)
 
@@ -69,6 +65,7 @@ from src.kernel_eval.eval.evaluator import EvalOperatorResult
 from src.kernel_eval.eval.process_pool import ProcessPoolCoordinator, ProcessConfig
 from src.kernel_eval.config import get_config, set_config, Config
 from src.kernel_eval.data.golden_packager import GoldenPackager
+from src.kernel_eval.utils.path_resolver import resolve_task_dir
 
 
 def ensure_golden_package_installed(bench_root: str, verbose: bool = False) -> bool:
@@ -134,8 +131,8 @@ def parse_args():
     # 多进程并行配置
     parser.add_argument('--processes-per-card', type=int, default=2,
                         help='每卡进程数（默认: 2）')
-    parser.add_argument('--timeout-per-process', type=int, default=300,
-                        help='单进程超时时间（秒，默认: 300）')
+    parser.add_argument('--timeout-per-operator', type=int, default=300,
+                        help='单算子超时时间（秒，默认: 300）。进程总超时 = 算子数 × timeout_per_operator')
 
     # 目录配置（替代 --level）
     parser.add_argument('--task-dir', type=str, default=None,
@@ -173,59 +170,6 @@ def filter_cases(cases: list, operator=None, case_id=None) -> list:
     return result
 
 
-def resolve_bench_root(dir_arg: str) -> tuple:
-    """解析 --task-dir 参数，确定 bench_root 和目标筛选路径
-
-    Args:
-        dir_arg: 用户指定的目录路径
-
-    Returns:
-        (bench_root, filter_prefix或None)
-        filter_prefix: 用于筛选算子的路径前缀，如 "level1" 或 "level2/scatter"
-    """
-    if dir_arg is None:
-        # 默认使用 kernel_bench
-        return str(project_root / "kernel_bench"), None
-
-    dir_path = Path(dir_arg)
-    if not dir_path.exists():
-        # 尝试作为相对于项目根目录的路径
-        dir_path = project_root / dir_arg
-        if not dir_path.exists():
-            raise ValueError(f"目录不存在: {dir_arg}")
-
-    # 检查是否为算子目录（包含 proto.yaml, cases.yaml, golden.py）
-    required_files = ['proto.yaml', 'cases.yaml', 'golden.py']
-    is_operator_dir = all((dir_path / f).exists() for f in required_files)
-
-    # 找到真正的 bench_root（向上查找直到 kernel_bench 或项目根目录）
-    bench_root = dir_path
-    while bench_root.name != 'kernel_bench' and bench_root != project_root:
-        bench_root = bench_root.parent
-
-    if bench_root == project_root:
-        # 没找到 kernel_bench，使用原目录作为 bench_root
-        bench_root = dir_path
-        filter_prefix = None
-    else:
-        # 计算筛选前缀（相对于 kernel_bench）
-        try:
-            filter_prefix = str(dir_path.relative_to(bench_root))
-        except ValueError:
-            filter_prefix = None
-
-    # 如果 filter_prefix 是 "."，说明 dir_path 即 bench_root 本身，不需筛选
-    if filter_prefix == ".":
-        filter_prefix = None
-
-    if is_operator_dir:
-        # 是算子目录，filter_prefix 就是 rel_path
-        return str(bench_root), filter_prefix
-    else:
-        # 是 bench 根目录或子目录
-        return str(bench_root), filter_prefix
-
-
 def run_cpu_mode(args) -> dict:
     """CPU 模式：验证 golden 可执行
 
@@ -237,7 +181,7 @@ def run_cpu_mode(args) -> dict:
     print("=" * 60)
 
     # 解析目录参数
-    bench_root, filter_prefix = resolve_bench_root(args.task_dir)
+    bench_root, filter_prefix = resolve_task_dir(args.task_dir, project_root)
     print(f"[INFO] Bench目录: {bench_root}")
     if filter_prefix:
         print(f"[INFO] 筛选路径: {filter_prefix}")
@@ -335,7 +279,7 @@ def run_npu_mode(args) -> EvalOperatorResult:
     import time
 
     # 解析目录参数
-    bench_root, target_rel_path = resolve_bench_root(args.task_dir)
+    bench_root, target_rel_path = resolve_task_dir(args.task_dir, project_root)
 
     # 配置
     config = get_config()
@@ -385,23 +329,9 @@ def run_npu_mode(args) -> EvalOperatorResult:
         print(f"NPU 单卡进程池模式 (NPU:{args.device_id})")
     else:
         print("NPU 多卡进程池模式")
-        # 打印 NPU 信息
-        try:
-            import torch_npu
-            if torch.npu.is_available():
-                card_count = torch.npu.device_count()
-                print(f"[INFO] 检测到 {card_count} 张 NPU 卡")
-                for i in range(card_count):
-                    try:
-                        name = torch.npu.get_device_name(i) if hasattr(torch.npu, 'get_device_name') else 'unknown'
-                        print(f"  NPU:{i} - {name}")
-                    except Exception:
-                        print(f"  NPU:{i}")
-        except ImportError:
-            pass
     print("=" * 60)
     print(f"[CONFIG] 每卡进程数: {args.processes_per_card}")
-    print(f"[CONFIG] 进程超时: {args.timeout_per_process}s")
+    print(f"[CONFIG] 单算子超时: {args.timeout_per_operator}s")
     print(f"[CONFIG] Warmup/Repeat: {args.warmup}/{args.repeat}")
     if args.no_perf:
         print("[CONFIG] 性能采集: 关闭（仅精度验证）")
@@ -409,7 +339,7 @@ def run_npu_mode(args) -> EvalOperatorResult:
     # 创建进程池配置
     process_config = ProcessConfig(
         processes_per_card=args.processes_per_card,
-        timeout_per_process=args.timeout_per_process,
+        timeout_per_operator=args.timeout_per_operator,
         enable_profiler=not args.no_perf,
     )
 

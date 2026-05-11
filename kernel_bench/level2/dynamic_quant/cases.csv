@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-DynamicQuant,1,"[[1024, 1024]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-1, 1]",35.48,S-float16-1M-对齐-对称小值域-axis=-1-dst_type=int8
-DynamicQuant,2,"[[2048, 2048]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-2, 2]",70.83,M-float32-4M-对齐-对称小值域-axis=-1-dst_type=int8
-DynamicQuant,3,"[[4096, 4096]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-3, 3]",191.08,M-bfloat16-16M-对齐-对称小值域-axis=-1-dst_type=int8
-DynamicQuant,4,"[[8192, 8192]]","[""float16""]","{""axis"": 0, ""dst_type"": 0}","[-10, 10]",3008.96,L-float16-67M-对齐-对称中值域-axis=0-dst_type=int8
-DynamicQuant,5,"[[8192, 8192]]","[""float32""]","{""axis"": -1, ""dst_type"": 1}","[-100, 100]",1483.73,L-float32-268M-对齐-对称大值域-dst_type=1
-DynamicQuant,6,"[[8192, 16384]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 2}","[-1000, 1000]",1827.91,L-bfloat16-1G-对齐-对称大值域-dst_type=2
-DynamicQuant,7,"[[1023, 1023]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-0.1, 0.1]",37.16,S-float16-1M-非对齐-对称微小值域-axis=-1
-DynamicQuant,8,"[[1009, 1021]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-1, 2]",31.95,S-float32-1M-质数非对齐-非对称小值域-axis=-1
-DynamicQuant,9,"[[1537, 769]]","[""bfloat16""]","{""axis"": 0, ""dst_type"": 0}","[-5, 10]",480.07,S-bfloat16-1M-非对齐-非对称中值域-axis=0
-DynamicQuant,10,"[[363, 367, 373]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-50, 100]",1251.33,M-float16-50M-质数非对齐-非对称大值域-3D
-DynamicQuant,11,"[[2049, 513]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-65504, 65504]",40.14,S-float32-1M-非对齐-float16边界值-axis=-1
-DynamicQuant,12,"[[3, 7, 13, 4001]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-88, 88]",47.24,S-bfloat16-1M-质数非对齐-float32边界值-4D
-DynamicQuant,13,"[[2, 7, 256, 251]]","[""float16""]","{""axis"": -1, ""dst_type"": 1}","[-0.01, 0.01]",46.62,S-float16-900K-质数非对齐-对称微小值域-4D-dst_type=1
-DynamicQuant,14,"[[11, 13, 17, 67, 67]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-1000, 1000]",416.58,M-float32-10M-质数非对齐-5D
-DynamicQuant,15,[[1048583]],"[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[""-inf"", ""inf""]",137.85,S-bfloat16-1M-质数非对齐-inf特殊值-1D
-DynamicQuant,16,"[[3, 7, 11, 13, 1013]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[""nan"", ""nan""]",64.76,S-float16-3M-质数非对齐-nan特殊值-5D
-DynamicQuant,17,"[[512, 2049]]","[""float32""]","{""axis"": 0, ""dst_type"": 0}","[0, 0]",167.21,S-float32-1M-非对齐-零值-axis=0
-DynamicQuant,18,"[[255, 8193]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-0.5, 0.5]",40.34,S-bfloat16-2M-非对齐-对称微小值域-axis=-1
-DynamicQuant,19,"[[4097, 511]]","[""float16""]","{""axis"": -1, ""dst_type"": 2}","[-1, 3]",66.09,S-float16-2M-非对齐-非对称小值域-dst_type=2
-DynamicQuant,20,"[[2, 511, 2049]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-3, 6]",48.33,S-float32-2M-非对齐-非对称中值域-3D-axis=-1
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+DynamicQuant,1,"[[1024, 1024]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-1, 1]",11.68,1.57,S-float16-1M-对齐-对称小值域-axis=-1-dst_type=int8 | baseline_kernels: DynamicQuant×1
+DynamicQuant,2,"[[2048, 2048]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-2, 2]",,8.74,M-float32-4M-对齐-对称小值域-axis=-1-dst_type=int8
+DynamicQuant,3,"[[4096, 4096]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-3, 3]",48.34,25.17,M-bfloat16-16M-对齐-对称小值域-axis=-1-dst_type=int8 | baseline_kernels: DynamicQuant×1
+DynamicQuant,4,"[[8192, 8192]]","[""float16""]","{""axis"": 0, ""dst_type"": 0}","[-10, 10]",176.24,100.67,L-float16-67M-对齐-对称中值域-axis=0-dst_type=int8 | baseline_kernels: DynamicQuant×1
+DynamicQuant,5,"[[8192, 8192]]","[""float32""]","{""axis"": -1, ""dst_type"": 1}","[-100, 100]",,139.81,L-float32-268M-对齐-对称大值域-dst_type=1
+DynamicQuant,6,"[[8192, 16384]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 2}","[-1000, 1000]",363.97,201.33,L-bfloat16-1G-对齐-对称大值域-dst_type=2 | baseline_kernels: DynamicQuant×1
+DynamicQuant,7,"[[1023, 1023]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-0.1, 0.1]",16.02,1.57,S-float16-1M-非对齐-对称微小值域-axis=-1 | baseline_kernels: DynamicQuant×1
+DynamicQuant,8,"[[1009, 1021]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-1, 2]",,2.15,S-float32-1M-质数非对齐-非对称小值域-axis=-1
+DynamicQuant,9,"[[1537, 769]]","[""bfloat16""]","{""axis"": 0, ""dst_type"": 0}","[-5, 10]",18.06,1.77,S-bfloat16-1M-非对齐-非对称中值域-axis=0 | baseline_kernels: DynamicQuant×1
+DynamicQuant,10,"[[363, 367, 373]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[-50, 100]",603.67,74.63,M-float16-50M-质数非对齐-非对称大值域-3D | baseline_kernels: DynamicQuant×1
+DynamicQuant,11,"[[2049, 513]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-65504, 65504]",,2.19,S-float32-1M-非对齐-float16边界值-axis=-1
+DynamicQuant,12,"[[3, 7, 13, 4001]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-88, 88]",12.54,1.64,S-bfloat16-1M-质数非对齐-float32边界值-4D | baseline_kernels: DynamicQuant×1
+DynamicQuant,13,"[[2, 7, 256, 251]]","[""float16""]","{""axis"": -1, ""dst_type"": 1}","[-0.01, 0.01]",26.24,1.35,S-float16-900K-质数非对齐-对称微小值域-4D-dst_type=1 | baseline_kernels: DynamicQuant×1
+DynamicQuant,14,"[[11, 13, 17, 67, 67]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-1000, 1000]",,22.73,M-float32-10M-质数非对齐-5D
+DynamicQuant,15,[[1048583]],"[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[""-inf"", ""inf""]",,1.57,S-bfloat16-1M-质数非对齐-inf特殊值-1D
+DynamicQuant,16,"[[3, 7, 11, 13, 1013]]","[""float16""]","{""axis"": -1, ""dst_type"": 0}","[""nan"", ""nan""]",27.1,4.57,S-float16-3M-质数非对齐-nan特殊值-5D | baseline_kernels: DynamicQuant×1
+DynamicQuant,17,"[[512, 2049]]","[""float32""]","{""axis"": 0, ""dst_type"": 0}","[0, 0]",,2.19,S-float32-1M-非对齐-零值-axis=0
+DynamicQuant,18,"[[255, 8193]]","[""bfloat16""]","{""axis"": -1, ""dst_type"": 0}","[-0.5, 0.5]",15.1,3.13,S-bfloat16-2M-非对齐-对称微小值域-axis=-1 | baseline_kernels: DynamicQuant×1
+DynamicQuant,19,"[[4097, 511]]","[""float16""]","{""axis"": -1, ""dst_type"": 2}","[-1, 3]",29.76,3.14,S-float16-2M-非对齐-非对称小值域-dst_type=2 | baseline_kernels: DynamicQuant×1
+DynamicQuant,20,"[[2, 511, 2049]]","[""float32""]","{""axis"": -1, ""dst_type"": 0}","[-3, 6]",,4.36,S-float32-2M-非对齐-非对称中值域-3D-axis=-1

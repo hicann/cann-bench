@@ -46,6 +46,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 25.78
   note: M-float16-BSND-B2S128Nq128Nkv1-dnope512drope64-prefill
 - operator: MLA
   case_id: 2
@@ -84,6 +85,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 3300.09
   note: L-float32-BSND-B4S256Nq128Nkv1-dnope512drope64-prefill
 - operator: MLA
   case_id: 3
@@ -122,6 +124,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 11.37
   note: M-bfloat16-BSND-B2S128Nq64Nkv1-dnope448drope64
 - operator: MLA
   case_id: 4
@@ -160,6 +163,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 51.56
   note: M-float16-BSND-B2Sq256Skv128Nq128-dnope512-cross
 - operator: MLA
   case_id: 5
@@ -198,6 +202,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 103.13
   note: L-float16-BSND-B2S256Nq128-dnope512-long-prefill
 - operator: MLA
   case_id: 6
@@ -236,6 +241,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 91.0
   note: L-float16-BSND-B2S256Nq128-dnope448-long-prefill
 - operator: MLA
   case_id: 7
@@ -274,6 +280,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 2.4
   note: S-float16-BSND-B1S1Skv2048Nq128-decode-single-batch
 - operator: MLA
   case_id: 8
@@ -312,6 +319,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 38.37
   note: M-float16-BSND-B16S1Skv2048Nq128-decode
 - operator: MLA
   case_id: 9
@@ -350,6 +358,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 76.73
   note: L-bfloat16-BSND-B32S1Skv2048Nq128-decode
 - operator: MLA
   case_id: 10
@@ -388,6 +397,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 143.87
   note: L-float16-BSND-B60S1Skv2048Nq128-dnope512-decode-large-batch
 - operator: MLA
   case_id: 11
@@ -426,6 +436,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 158.38
   note: L-float16-BSND-B128S1Skv4096Nq128-dnope512-decode-large-batch
 - operator: MLA
   case_id: 12
@@ -464,6 +475,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 141.57
   note: L-float16-BSND-B60S1Skv2048Nq64-dnope512-decode-large-batch
 - operator: MLA
   case_id: 13
@@ -502,6 +514,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 25.78
   note: M-float16-BNSD-B2Nq128S128-dnope512drope64-prefill
 - operator: MLA
   case_id: 14
@@ -540,6 +553,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 22.75
   note: M-float16-BNSD-B2Nq128S128-dnope448drope64-prefill
 - operator: MLA
   case_id: 15
@@ -578,6 +592,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 412.51
   note: L-bfloat16-BNSD-B2Nq128S512-dnope512-long-prefill
 - operator: MLA
   case_id: 16
@@ -616,6 +631,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 143.87
   note: L-float16-BNSD-B60Nq128S1Skv2048-decode-large-batch
 - operator: MLA
   case_id: 17
@@ -654,6 +670,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 51.56
   note: L-float16-BSND-B16Sq2Skv2048Nq128-dnope512-MTP
 - operator: MLA
   case_id: 18
@@ -692,6 +709,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 309.38
   note: L-bfloat16-BSND-B96Sq2Skv4096Nq128-dnope512-MTP-large-batch
 - operator: MLA
   case_id: 19
@@ -730,6 +748,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 51.56
   note: L-float16-BNSD-B16Nq128Sq2Skv2048-dnope512-MTP
 - operator: MLA
   case_id: 20
@@ -768,4 +787,5 @@ cases:
   - 0
   - 0
   baseline_perf_us: null
+  t_hw_us: 25.78
   note: M-float16-BSND-zero-input

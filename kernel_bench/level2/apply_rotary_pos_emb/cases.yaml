@@ -23,7 +23,8 @@ cases:
   - [-1, 1]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 405.82
+  baseline_perf_us: null
+  t_hw_us: 35.02
   note: M-float16-16M-对齐-layout=0-half-B,S,N,D
 - operator: ApplyRotaryPosEmb
   case_id: 2
@@ -39,7 +40,8 @@ cases:
   - [-2, 2]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 685.09
+  baseline_perf_us: null
+  t_hw_us: 59.22
   note: L-float32-14M-质数非对齐-layout=0-half-B,S,N,D
 - operator: ApplyRotaryPosEmb
   case_id: 3
@@ -55,7 +57,8 @@ cases:
   - [-3, 3]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 485.06
+  baseline_perf_us: null
+  t_hw_us: 29.12
   note: M-bfloat16-14M-质数非对齐-layout=0-half-B,S,N,D
 - operator: ApplyRotaryPosEmb
   case_id: 4
@@ -71,7 +74,8 @@ cases:
   - [-10, 10]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 415.14
+  baseline_perf_us: null
+  t_hw_us: 32.77
   note: M-float16-15M-质数非对齐-layout=1-half-B,N,S,D
 - operator: ApplyRotaryPosEmb
   case_id: 5
@@ -87,7 +91,8 @@ cases:
   - [-100, 100]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 3048.82
+  baseline_perf_us: null
+  t_hw_us: 140.36
   note: L-float32-33M-对齐-layout=0-interleaved-B,S,N,D
 - operator: ApplyRotaryPosEmb
   case_id: 6
@@ -103,7 +108,8 @@ cases:
   - [-1000, 1000]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 548.3
+  baseline_perf_us: null
+  t_hw_us: 34.78
   note: M-bfloat16-16M-质数非对齐-layout=1-interleaved-B,N,S,D
 - operator: ApplyRotaryPosEmb
   case_id: 7
@@ -119,7 +125,8 @@ cases:
   - [-0.1, 0.1]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 300.9
+  baseline_perf_us: null
+  t_hw_us: 23.1
   note: M-float16-10M-非对齐-layout=0-half-微小值域
 - operator: ApplyRotaryPosEmb
   case_id: 8
@@ -135,7 +142,8 @@ cases:
   - [-1, 2]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 324.0
+  baseline_perf_us: null
+  t_hw_us: 26.64
   note: M-float32-7M-质数非对齐-layout=0-half-非对称
 - operator: ApplyRotaryPosEmb
   case_id: 9
@@ -151,7 +159,8 @@ cases:
   - [-5, 10]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 362.53
+  baseline_perf_us: null
+  t_hw_us: 39.62
   note: M-bfloat16-2M-非对齐-layout=1-half-非对称
 - operator: ApplyRotaryPosEmb
   case_id: 10
@@ -167,7 +176,8 @@ cases:
   - [-50, 100]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 332.96
+  baseline_perf_us: null
+  t_hw_us: 16.3
   note: M-float16-8M-质数非对齐-layout=0-interleaved
 - operator: ApplyRotaryPosEmb
   case_id: 11
@@ -183,7 +193,8 @@ cases:
   - [-65504, 65504]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 1730.46
+  baseline_perf_us: null
+  t_hw_us: 98.62
   note: L-float32-24M-非对齐-float16边界值
 - operator: ApplyRotaryPosEmb
   case_id: 12
@@ -199,7 +210,8 @@ cases:
   - [-88, 88]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 150.83
+  baseline_perf_us: null
+  t_hw_us: 4.8
   note: S-bfloat16-2M-质数非对齐-float32边界值
 - operator: ApplyRotaryPosEmb
   case_id: 13
@@ -215,7 +227,8 @@ cases:
   - [-inf, inf]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 11217.98
+  baseline_perf_us: null
+  t_hw_us: 206.25
   note: L-float16-28M-质数非对齐-inf特殊值-small_head
 - operator: ApplyRotaryPosEmb
   case_id: 14
@@ -231,7 +244,8 @@ cases:
   - [nan, nan]
   - [nan, nan]
   - [nan, nan]
-  baseline_perf_us: 79.35
+  baseline_perf_us: null
+  t_hw_us: 2.86
   note: S-float32-1M-质数非对齐-nan特殊值
 - operator: ApplyRotaryPosEmb
   case_id: 15
@@ -247,7 +261,8 @@ cases:
   - [0, 0]
   - [0, 0]
   - [0, 0]
-  baseline_perf_us: 146.98
+  baseline_perf_us: null
+  t_hw_us: 1.9
   note: S-bfloat16-360K-质数非对齐-零值测试
 - operator: ApplyRotaryPosEmb
   case_id: 16
@@ -263,7 +278,8 @@ cases:
   - [-0.5, 0.5]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 315.35
+  baseline_perf_us: null
+  t_hw_us: 33.38
   note: M-float16-16M-混合质数非对齐-layout=0-half-微小值域
 - operator: ApplyRotaryPosEmb
   case_id: 17
@@ -279,7 +295,8 @@ cases:
   - [-1, 3]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 6531.07
+  baseline_perf_us: null
+  t_hw_us: 262.16
   note: L-float32-60M-非对齐-layout=1-interleaved-非对称
 - operator: ApplyRotaryPosEmb
   case_id: 18
@@ -295,7 +312,8 @@ cases:
   - [-1000, 1000]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 1081.89
+  baseline_perf_us: null
+  t_hw_us: 70.18
   note: L-bfloat16-33M-非对齐-layout=0-half-大值域
 - operator: ApplyRotaryPosEmb
   case_id: 19
@@ -311,7 +329,8 @@ cases:
   - [-0.2, 0.2]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 80.32
+  baseline_perf_us: null
+  t_hw_us: 2.17
   note: S-float16-1M-质数非对齐-layout=1-half-微小值域
 - operator: ApplyRotaryPosEmb
   case_id: 20
@@ -327,5 +346,6 @@ cases:
   - [-3, 6]
   - [-1, 1]
   - [-1, 1]
-  baseline_perf_us: 765.19
+  baseline_perf_us: null
+  t_hw_us: 54.04
   note: M-float32-12M-质数非对齐-layout=0-interleaved-非对称中值域

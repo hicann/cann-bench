@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-Gelu,1,"[[1024, 1024]]","[""float16""]","{""approximate"": ""none""}","[-1, 1]",6.78,S-float16-1M-对齐-对称小值域-精确模式
-Gelu,2,"[[2048, 2048]]","[""float32""]","{""approximate"": ""none""}","[-2, 2]",17.30,M-float32-4M-对齐-对称小值域-精确模式
-Gelu,3,"[[4096, 4096]]","[""bfloat16""]","{""approximate"": ""none""}","[-3, 3]",62.32,M-bfloat16-16M-对齐-对称小值域-精确模式
-Gelu,4,"[[8192, 8192]]","[""float16""]","{""approximate"": ""tanh""}","[-10, 10]",232.59,L-float16-67M-对齐-对称中值域-tanh近似
-Gelu,5,"[[8192, 8192]]","[""float32""]","{""approximate"": ""tanh""}","[-100, 100]",354.19,L-float32-268M-对齐-对称大值域-tanh近似
-Gelu,6,"[[1023, 1023]]","[""bfloat16""]","{""approximate"": ""tanh""}","[-0.1, 0.1]",7.18,S-bfloat16-1M-非对齐-对称微小值域-tanh近似
-Gelu,7,"[[1009, 1021]]","[""float16""]","{""approximate"": ""none""}","[-1, 2]",6.72,S-float16-1M-质数非对齐-非对称小值域-5D-精确模式
-Gelu,8,"[[1537, 769]]","[""float32""]","{""approximate"": ""tanh""}","[-5, 10]",6.98,S-float32-1M-非对齐-非对称中值域-tanh近似
-Gelu,9,"[[363, 367, 373]]","[""bfloat16""]","{""approximate"": ""none""}","[-50, 100]",177.48,M-bfloat16-50M-质数非对齐-非对称大值域-3D-精确模式
-Gelu,10,"[[2049, 513]]","[""float16""]","{""approximate"": ""tanh""}","[-65504, 65504]",6.94,S-float16-1M-非对齐-float16边界值-tanh近似
-Gelu,11,"[[3, 7, 13, 4001]]","[""float32""]","{""approximate"": ""none""}","[-88, 88]",7.22,S-float32-1M-质数非对齐-float32边界值-4D-精确模式
-Gelu,12,[[1000003]],"[""bfloat16""]","{""approximate"": ""tanh""}","[""-inf"", ""inf""]",6.78,S-bfloat16-1M-质数非对齐-inf特殊值-1D-tanh近似
-Gelu,13,"[[11, 13, 17, 67, 67]]","[""float32""]","{""approximate"": ""none""}","[""nan"", ""nan""]",39.22,M-float32-10M-质数非对齐-nan特殊值-5D-精确模式
-Gelu,14,"[[3, 7, 11, 13, 1009]]","[""float16""]","{""approximate"": ""tanh""}","[0, 0]",13.66,S-float16-3M-质数非对齐-零值-5D-tanh近似
-Gelu,15,"[[512, 2049]]","[""float32""]","{""approximate"": ""none""}","[-0.5, 0.5]",6.46,S-float32-1M-非对齐-对称微小值域-精确模式
-Gelu,16,"[[255, 8193]]","[""bfloat16""]","{""approximate"": ""none""}","[-1, 3]",10.66,S-bfloat16-2M-非对齐-非对称小值域-精确模式
-Gelu,17,"[[4097, 511]]","[""float16""]","{""approximate"": ""tanh""}","[-1000, 1000]",10.62,S-float16-2M-非对齐-对称大值域-tanh近似
-Gelu,18,"[[2, 511, 2049]]","[""float32""]","{""approximate"": ""none""}","[-0.2, 0.2]",10.12,S-float32-2M-非对齐-对称微小值域-3D-精确模式
-Gelu,19,"[[4, 255, 2049]]","[""bfloat16""]","{""approximate"": ""tanh""}","[-3, 6]",10.78,S-bfloat16-2M-非对齐-非对称中值域-3D-tanh近似
-Gelu,20,"[[2, 3, 17, 1024, 101]]","[""float32""]","{""approximate"": ""none""}","[-20, 40]",37.98,M-float32-10M-非对齐-非对称大值域-5D-精确模式
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+Gelu,1,"[[1024, 1024]]","[""float16""]","{""approximate"": ""none""}","[-1, 1]",6.78,1.09,S-float16-1M-对齐-对称小值域-精确模式 | baseline_kernels: Gelu×1
+Gelu,2,"[[2048, 2048]]","[""float32""]","{""approximate"": ""none""}","[-2, 2]",17.3,8.74,M-float32-4M-对齐-对称小值域-精确模式 | baseline_kernels: Gelu×1
+Gelu,3,"[[4096, 4096]]","[""bfloat16""]","{""approximate"": ""none""}","[-3, 3]",62.32,22.37,M-bfloat16-16M-对齐-对称小值域-精确模式 | baseline_kernels: Gelu×1
+Gelu,4,"[[8192, 8192]]","[""float16""]","{""approximate"": ""tanh""}","[-10, 10]",232.59,69.91,L-float16-67M-对齐-对称中值域-tanh近似 | baseline_kernels: Gelu×1
+Gelu,5,"[[8192, 8192]]","[""float32""]","{""approximate"": ""tanh""}","[-100, 100]",354.19,139.81,L-float32-268M-对齐-对称大值域-tanh近似 | baseline_kernels: Gelu×1
+Gelu,6,"[[1023, 1023]]","[""bfloat16""]","{""approximate"": ""tanh""}","[-0.1, 0.1]",7.18,2.09,S-bfloat16-1M-非对齐-对称微小值域-tanh近似 | baseline_kernels: Gelu×1
+Gelu,7,"[[1009, 1021]]","[""float16""]","{""approximate"": ""none""}","[-1, 2]",6.72,1.07,S-float16-1M-质数非对齐-非对称小值域-5D-精确模式 | baseline_kernels: Gelu×1
+Gelu,8,"[[1537, 769]]","[""float32""]","{""approximate"": ""tanh""}","[-5, 10]",6.98,2.46,S-float32-1M-非对齐-非对称中值域-tanh近似 | baseline_kernels: Gelu×1
+Gelu,9,"[[363, 367, 373]]","[""bfloat16""]","{""approximate"": ""none""}","[-50, 100]",177.48,66.26,M-bfloat16-50M-质数非对齐-非对称大值域-3D-精确模式 | baseline_kernels: Gelu×1
+Gelu,10,"[[2049, 513]]","[""float16""]","{""approximate"": ""tanh""}","[-65504, 65504]",6.94,1.09,S-float16-1M-非对齐-float16边界值-tanh近似 | baseline_kernels: Gelu×1
+Gelu,11,"[[3, 7, 13, 4001]]","[""float32""]","{""approximate"": ""none""}","[-88, 88]",7.22,2.28,S-float32-1M-质数非对齐-float32边界值-4D-精确模式 | baseline_kernels: Gelu×1
+Gelu,12,[[1000003]],"[""bfloat16""]","{""approximate"": ""tanh""}","[""-inf"", ""inf""]",6.78,2.0,S-bfloat16-1M-质数非对齐-inf特殊值-1D-tanh近似 | baseline_kernels: Gelu×1
+Gelu,13,"[[11, 13, 17, 67, 67]]","[""float32""]","{""approximate"": ""none""}","[""nan"", ""nan""]",39.22,22.73,M-float32-10M-质数非对齐-nan特殊值-5D-精确模式 | baseline_kernels: Gelu×1
+Gelu,14,"[[3, 7, 11, 13, 1009]]","[""float16""]","{""approximate"": ""tanh""}","[0, 0]",13.66,3.16,S-float16-3M-质数非对齐-零值-5D-tanh近似 | baseline_kernels: Gelu×1
+Gelu,15,"[[512, 2049]]","[""float32""]","{""approximate"": ""none""}","[-0.5, 0.5]",6.46,2.19,S-float32-1M-非对齐-对称微小值域-精确模式 | baseline_kernels: Gelu×1
+Gelu,16,"[[255, 8193]]","[""bfloat16""]","{""approximate"": ""none""}","[-1, 3]",10.66,2.79,S-bfloat16-2M-非对齐-非对称小值域-精确模式 | baseline_kernels: Gelu×1
+Gelu,17,"[[4097, 511]]","[""float16""]","{""approximate"": ""tanh""}","[-1000, 1000]",10.62,2.18,S-float16-2M-非对齐-对称大值域-tanh近似 | baseline_kernels: Gelu×1
+Gelu,18,"[[2, 511, 2049]]","[""float32""]","{""approximate"": ""none""}","[-0.2, 0.2]",10.12,4.36,S-float32-2M-非对齐-对称微小值域-3D-精确模式 | baseline_kernels: Gelu×1
+Gelu,19,"[[4, 255, 2049]]","[""bfloat16""]","{""approximate"": ""tanh""}","[-3, 6]",10.78,4.18,S-bfloat16-2M-非对齐-非对称中值域-3D-tanh近似 | baseline_kernels: Gelu×1
+Gelu,20,"[[2, 3, 17, 1024, 101]]","[""float32""]","{""approximate"": ""none""}","[-20, 40]",37.98,21.98,M-float32-10M-非对齐-非对称大值域-5D-精确模式 | baseline_kernels: Gelu×1

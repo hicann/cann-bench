@@ -280,10 +280,15 @@ y = cann_bench.exp(x, -1.0, 1.0, 0.0)
 
 **算子用例定义文件：** cases.csv
 ```
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-Exp,1,"[[1024, 1024]]",['float16'],"{'base': -1.0, 'scale': 1.0, 'shift': 0.0}","[-1, 1]",21.05,float16-1M-对齐-对称小值域-base=-1
-Exp,2,"[[2048, 2048]]",['float32'],"{'base': -1.0, 'scale': 1.5, 'shift': 0.0}","[-2, 2]",18.27,float32-4M-对齐-对称小值域-scale=1.5
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+Exp,1,"[[1024, 1024]]",["float16"],"{""base"": -1.0, ""scale"": 1.0, ""shift"": 0.0}","[-1, 1]",13.96,2.18,float16-1M-对齐-对称小值域-base=-1
+Exp,2,"[[2048, 2048]]",["float32"],"{""base"": -1.0, ""scale"": 1.5, ""shift"": 0.0}","[-2, 2]",46.86,17.48,float32-4M-对齐-对称小值域-scale=1.5
 ```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `baseline_perf_us` | float / 空 | PyTorch 参考实现在目标 NPU 上的实测时间 |
+| `t_hw_us` | float / 空 | 硬件下界 T_HW（微秒），用于 SOL-anchored 性能评分 |
 
 ### 3.4 Golden脚本
 
@@ -326,40 +331,50 @@ def exp(
 
 | 维度 | 权重 | 评测重点 | 评测工具 | 评分范围 |
 |------|------|----------|----------|----------|
-| 编译正确性 | Wc=2 | 编译通过 | cmake、gtest | [0, 100] |
-| 功能正确性 | Wf=3 | 通过测试用例Golden对比 | cmake、gtest | [0, 100] |
-| 性能优化性 | Wp=5 | 相比基准时间的比例| msprof、cannsim | [0, 100] |
+| 编译正确性 | w_c = 0.2 | 编译通过 | cmake、gtest | δ_pass ∈ {0, 1} |
+| 功能正确性 | w_f = 0.3 | 通过测试用例Golden对比 | cmake、gtest | δ_acc,i ∈ {0, 1} |
+| 性能优化性 | w_p = 0.5 | SOL-anchored 分数（见 §4.2）| msprof、cannsim | score_i ∈ [0, ≥1] |
+
+权重之和 = 1，单算子满分 100。
 
 ### 4.2 核心评测指标
 
-- **编译正确性**: 是否编译通过（Pass/Fail，二值）
-- **功能正确性**: 精度用例通过数量 
-- **性能优化性**: 相比基准性能的加速比(当前)；相比理论性能的比例(规划)
-```
-单算子综合评分
-├── 编译正确性 (权重 Wc=2)
-│   └── compile_pass ∈ {0, 1}（整份提交编译是否通过，与用例数无关）
-├── 功能正确性 (权重 Wf=3)
-│   └── 用例通过数 (通过精度用例的数量)
-└── 性能优化性 (权重 Wp=5)
-    └── 加速比 (验证性能 / 基准性能)
+- **编译正确性**: 整份提交是否编译通过 (δ_pass ∈ {0, 1})
+- **功能正确性**: 单用例是否通过精度门 (δ_acc,i ∈ {0, 1})
+- **性能优化性**: SOL-anchored 分数 score_i
 
-计算方式：
-编译通过得分 = compile_pass × Wc         # 单算子一次，编译 Pass=1 / Fail=0
-单用例功能得分 = case_pass × Wf          # case_pass ∈ {0, 1}，该用例是否通过精度校验
-单用例性能得分 = SpeedUp_i × Wp          # 仅对功能通过的用例计入，SpeedUp_i 为该用例实测
+**单用例 SOL-anchored 性能得分** (bench.tex Eq. 3)：
 
-单算子综合评分 = 编译通过得分
-              + Σ_{功能通过的用例 i} ( Wf + SpeedUp_i × Wp )
+$$
+\text{score}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}
+$$
 
-即：编译项为单算子一次的标量贡献；功能与性能项按该算子"功能通过用例"逐一累加。
-```
+锚点意义：
+- T_cand = T_baseline ⇒ score = 0.5（持平基准实现）
+- T_cand = T_HW ⇒ score = 1.0（达到硬件下界）
+- T_cand → ∞ ⇒ score → 0（远低于基准）
 
-**聚合规则**：
+T_HW 由 cases.yaml 中 `t_hw_us` 字段给出，是该用例在 910B2 上的硬件下界。`baseline_perf_us` 同 yaml 同行。
+
+**单算子综合评分** (bench.tex Eq. 4)：
 
 ```
-Level-N 得分       = Σ_{op ∈ Level-N} 单算子综合评分
-benchmark 总分     = Σ_{所有算子} 单算子综合评分
+EachOperatorScore = [ w_c · δ_pass + Σ_i δ_acc,i · (w_f + w_p · score_i) / N ] · 100
+
+其中：
+  δ_pass ∈ {0, 1}: 整份提交编译是否通过（与用例数无关）
+  δ_acc,i ∈ {0, 1}: 用例 i 是否通过精度校验，δ_pass = 0 时 δ_acc,i ≡ 0
+  score_i: 单用例 SOL-anchored 性能得分
+  N = len(cases)
+```
+
+权重默认为 (w_c, w_f, w_p) = (0.2, 0.3, 0.5)，归一化后单算子满分 100。
+
+**聚合规则** (bench.tex Eq. 5)：
+
+```
+Level-N 得分       = Σ_{op ∈ Level-N} EachOperatorScore
+benchmark 总分     = Σ_{所有算子} EachOperatorScore
                    = Level1 得分 + Level2 得分 + Level3 得分 + Level4 得分
 ```
 
@@ -468,9 +483,11 @@ $$
 
 **性能指标计算**：
 
-- **Kernel时间**：通过解析 chrome trace 中 `cat="dequeue"` 事件获取 NPU 内核执行时间
-- **加速比**：`SpeedUp = baseline_perf_us / kernel_perf_us`
-- **几何平均加速比**：对多个用例的加速比取几何平均
+- **Kernel时间** (`T_cand`)：通过解析 chrome trace 中 `cat="dequeue"` 事件获取 NPU 内核执行时间
+- **SOL-anchored 性能得分** (评分主指标，参见 §4.1 公式)：
+  - `score_i = (T_baseline - T_HW) / ((T_cand - T_HW) + (T_baseline - T_HW))`
+- **加速比** (诊断保留)：`SpeedUp = baseline_perf_us / kernel_perf_us`
+- **几何平均加速比** (诊断保留)：对多个用例的加速比取几何平均
 
 > 详细实现请参阅 [evaluator_design.md](../design/evaluator_design.md)
 

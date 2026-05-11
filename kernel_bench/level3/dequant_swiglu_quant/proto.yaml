@@ -12,38 +12,59 @@ operator:
   name: DequantSwigluQuant
   category: FusedComposite
   difficulty: L3
-  formula: y = quantize(SwiGLU(dequantize(x)))
-  description: 反量化、SwiGLU和量化的融合
-  shape_support: 'x: 任意维度，H必须为偶数'
+  formula: |
+    dequant_out = (x.float() * weight_scale + 0) * activation_scale.unsqueeze(-1)   # x=int32 path
+    dequant_out = x                                                                  # x=bfloat16 path
+    A, B = split(dequant_out, last_dim, 2)
+    swiglu_out = SiLU(A) * B   if activate_left else   SiLU(B) * A
+    if quant_scale is not None: swiglu_out = swiglu_out * quant_scale
+    y, scale  = Quantize(swiglu_out)   # static (quant_mode=0) or dynamic per-token (=1)
+  description: 反量化 + SwiGLU + 动态量化（per-token）三步融合（精简版，去掉 group_index/swiglu_mode/bias/quant_offset/static-quant-mode）
+  shape_support: 'x: [TokensNum, 2H]; 输出 y: [TokensNum, H], scale: [TokensNum]'
   attrs:
   - name: activate_left
     type: bool
     default: false
-    description: 是否激活左侧
-    required: false
-  - name: quant_mode
-    type: string
-    default: static
-    description: 量化模式'
-    required: false
-  - name: dst_type
-    type: int
-    default: 0
-    description: 目标数据类型 (0:DT_INT8)
+    description: |
+      False: SwiGLU = SiLU(B) * A，B 为 split 后的右半边
+      True : SwiGLU = SiLU(A) * B，A 为 split 后的左半边
     required: false
   inputs:
   - name: x
-    description: 输入张量
+    description: 主输入张量；尾轴必须为偶数
     dtype:
-    - float16
-    - bfloat16
     - int32
-  precision_thresholds:
-    int8: 1  # 量化误差允许±1
+    - bfloat16
+    - float16
+    shape: '[TokensNum, 2H]'
+  - name: weight_scale
+    description: 权重量化的反量化系数；当 x=int32 时必须非 None，当 x=bfloat16/float16 时必须 None
+    dtype:
+    - float32
+    shape: '[1, 2H]'
+    optional: true
+  - name: activation_scale
+    description: per-token 激活量化的反量化系数；当 x=int32 时必须非 None，当 x=bfloat16/float16 时必须 None
+    dtype:
+    - float32
+    shape: '[TokensNum]'
+    optional: true
+  - name: quant_scale
+    description: smooth quant 系数，量化前对 swiglu_out 逐元素乘
+    dtype:
+    - float32
+    shape: '[1, H]'
+    optional: true
   outputs:
   - name: y
-    description: 输出张量
+    description: 量化后的输出张量
     dtype:
     - int8
-  schema: dequant_swiglu_quant(Tensor x, bool activate_left, str quant_mode, int dst_type)
-    -> Tensor y
+    shape: '[TokensNum, H]'
+  - name: scale
+    description: per-token 量化 scale；动态量化模式下为实测值
+    dtype:
+    - float32
+    shape: '[TokensNum]'
+  schema: dequant_swiglu_quant(Tensor x, Tensor? weight_scale=None, Tensor? activation_scale=None,
+    Tensor? quant_scale=None, bool activate_left=False) -> (Tensor y, Tensor scale)

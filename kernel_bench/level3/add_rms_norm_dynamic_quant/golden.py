@@ -44,6 +44,8 @@ def add_rms_norm_dynamic_quant(
         scaleOut: 量化使用的 scale 值
     """
 
+    out_dtype = x1.dtype
+
     # Promote bf16/fp16 inputs to fp32 for golden computation.
     # This aligns the golden's scale calculation with the NPU's native
     # precision, avoiding fp64-vs-bf16 quantization rounding gaps.
@@ -68,4 +70,4 @@ def add_rms_norm_dynamic_quant(
         scale = (7.0 / y_norm.abs().max()).to(torch.float32)
         y = torch.clamp((y_norm * scale.item()).round(), -8, 7).to(torch.int8)
 
-    return y, xOut, scale
+    return y, xOut.to(out_dtype), scale

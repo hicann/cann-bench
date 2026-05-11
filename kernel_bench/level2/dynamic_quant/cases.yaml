@@ -16,8 +16,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-1, 1]
-  baseline_perf_us: 35.48
-  note: S-float16-1M-对齐-对称小值域-axis=-1-dst_type=int8
+  baseline_perf_us: 11.68
+  t_hw_us: 1.57
+  note: "S-float16-1M-对齐-对称小值域-axis=-1-dst_type=int8 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 2
   input_shape:
@@ -25,7 +26,8 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-2, 2]
-  baseline_perf_us: 70.83
+  baseline_perf_us: null
+  t_hw_us: 8.74
   note: M-float32-4M-对齐-对称小值域-axis=-1-dst_type=int8
 - operator: DynamicQuant
   case_id: 3
@@ -34,8 +36,9 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-3, 3]
-  baseline_perf_us: 191.08
-  note: M-bfloat16-16M-对齐-对称小值域-axis=-1-dst_type=int8
+  baseline_perf_us: 48.34
+  t_hw_us: 25.17
+  note: "M-bfloat16-16M-对齐-对称小值域-axis=-1-dst_type=int8 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 4
   input_shape:
@@ -43,8 +46,9 @@ cases:
   dtype: [float16]
   attrs: {axis: 0, dst_type: 0}
   value_range: [-10, 10]
-  baseline_perf_us: 3008.96
-  note: L-float16-67M-对齐-对称中值域-axis=0-dst_type=int8
+  baseline_perf_us: 176.24
+  t_hw_us: 100.67
+  note: "L-float16-67M-对齐-对称中值域-axis=0-dst_type=int8 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 5
   input_shape:
@@ -52,7 +56,8 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 1}
   value_range: [-100, 100]
-  baseline_perf_us: 1483.73
+  baseline_perf_us: null
+  t_hw_us: 139.81
   note: L-float32-268M-对齐-对称大值域-dst_type=1
 - operator: DynamicQuant
   case_id: 6
@@ -61,8 +66,9 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: -1, dst_type: 2}
   value_range: [-1000, 1000]
-  baseline_perf_us: 1827.91
-  note: L-bfloat16-1G-对齐-对称大值域-dst_type=2
+  baseline_perf_us: 363.97
+  t_hw_us: 201.33
+  note: "L-bfloat16-1G-对齐-对称大值域-dst_type=2 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 7
   input_shape:
@@ -70,8 +76,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-0.1, 0.1]
-  baseline_perf_us: 37.16
-  note: S-float16-1M-非对齐-对称微小值域-axis=-1
+  baseline_perf_us: 16.02
+  t_hw_us: 1.57
+  note: "S-float16-1M-非对齐-对称微小值域-axis=-1 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 8
   input_shape:
@@ -79,7 +86,8 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-1, 2]
-  baseline_perf_us: 31.95
+  baseline_perf_us: null
+  t_hw_us: 2.15
   note: S-float32-1M-质数非对齐-非对称小值域-axis=-1
 - operator: DynamicQuant
   case_id: 9
@@ -88,8 +96,9 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: 0, dst_type: 0}
   value_range: [-5, 10]
-  baseline_perf_us: 480.07
-  note: S-bfloat16-1M-非对齐-非对称中值域-axis=0
+  baseline_perf_us: 18.06
+  t_hw_us: 1.77
+  note: "S-bfloat16-1M-非对齐-非对称中值域-axis=0 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 10
   input_shape:
@@ -97,8 +106,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-50, 100]
-  baseline_perf_us: 1251.33
-  note: M-float16-50M-质数非对齐-非对称大值域-3D
+  baseline_perf_us: 603.67
+  t_hw_us: 74.63
+  note: "M-float16-50M-质数非对齐-非对称大值域-3D | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 11
   input_shape:
@@ -106,7 +116,8 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-65504, 65504]
-  baseline_perf_us: 40.14
+  baseline_perf_us: null
+  t_hw_us: 2.19
   note: S-float32-1M-非对齐-float16边界值-axis=-1
 - operator: DynamicQuant
   case_id: 12
@@ -115,8 +126,9 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-88, 88]
-  baseline_perf_us: 47.24
-  note: S-bfloat16-1M-质数非对齐-float32边界值-4D
+  baseline_perf_us: 12.54
+  t_hw_us: 1.64
+  note: "S-bfloat16-1M-质数非对齐-float32边界值-4D | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 13
   input_shape:
@@ -124,8 +136,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 1}
   value_range: [-0.01, 0.01]
-  baseline_perf_us: 46.62
-  note: S-float16-900K-质数非对齐-对称微小值域-4D-dst_type=1
+  baseline_perf_us: 26.24
+  t_hw_us: 1.35
+  note: "S-float16-900K-质数非对齐-对称微小值域-4D-dst_type=1 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 14
   input_shape:
@@ -133,7 +146,8 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-1000, 1000]
-  baseline_perf_us: 416.58
+  baseline_perf_us: null
+  t_hw_us: 22.73
   note: M-float32-10M-质数非对齐-5D
 - operator: DynamicQuant
   case_id: 15
@@ -142,7 +156,8 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-inf, inf]
-  baseline_perf_us: 137.85
+  baseline_perf_us: null
+  t_hw_us: 1.57
   note: S-bfloat16-1M-质数非对齐-inf特殊值-1D
 - operator: DynamicQuant
   case_id: 16
@@ -151,8 +166,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [nan, nan]
-  baseline_perf_us: 64.76
-  note: S-float16-3M-质数非对齐-nan特殊值-5D
+  baseline_perf_us: 27.10
+  t_hw_us: 4.57
+  note: "S-float16-3M-质数非对齐-nan特殊值-5D | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 17
   input_shape:
@@ -160,7 +176,8 @@ cases:
   dtype: [float32]
   attrs: {axis: 0, dst_type: 0}
   value_range: [0, 0]
-  baseline_perf_us: 167.21
+  baseline_perf_us: null
+  t_hw_us: 2.19
   note: S-float32-1M-非对齐-零值-axis=0
 - operator: DynamicQuant
   case_id: 18
@@ -169,8 +186,9 @@ cases:
   dtype: [bfloat16]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-0.5, 0.5]
-  baseline_perf_us: 40.34
-  note: S-bfloat16-2M-非对齐-对称微小值域-axis=-1
+  baseline_perf_us: 15.10
+  t_hw_us: 3.13
+  note: "S-bfloat16-2M-非对齐-对称微小值域-axis=-1 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 19
   input_shape:
@@ -178,8 +196,9 @@ cases:
   dtype: [float16]
   attrs: {axis: -1, dst_type: 2}
   value_range: [-1, 3]
-  baseline_perf_us: 66.09
-  note: S-float16-2M-非对齐-非对称小值域-dst_type=2
+  baseline_perf_us: 29.76
+  t_hw_us: 3.14
+  note: "S-float16-2M-非对齐-非对称小值域-dst_type=2 | baseline_kernels: DynamicQuant×1"
 - operator: DynamicQuant
   case_id: 20
   input_shape:
@@ -187,5 +206,6 @@ cases:
   dtype: [float32]
   attrs: {axis: -1, dst_type: 0}
   value_range: [-3, 6]
-  baseline_perf_us: 48.33
+  baseline_perf_us: null
+  t_hw_us: 4.36
   note: S-float32-2M-非对齐-非对称中值域-3D-axis=-1

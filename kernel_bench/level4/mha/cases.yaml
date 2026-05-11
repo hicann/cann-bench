@@ -34,6 +34,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 0.44
   note: S-float16-B2S128N8D64-prefill
 - operator: MHA
   case_id: 2
@@ -60,6 +61,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 178.96
   note: M-float32-B4S256N16D64-prefill
 - operator: MHA
   case_id: 3
@@ -86,6 +88,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 27.96
   note: M-bfloat16-B2S512N32D128-prefill
 - operator: MHA
   case_id: 4
@@ -112,6 +115,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 3.28
   note: S-float16-B2S256N8D256-D256
 - operator: MHA
   case_id: 5
@@ -138,6 +142,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 1.31
   note: S-float16-B2Sq128Skv256N12D64-cross
 - operator: MHA
   case_id: 6
@@ -164,6 +169,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 3.50
   note: S-bfloat16-B2Sq512Skv128N16D128-cross
 - operator: MHA
   case_id: 7
@@ -190,6 +196,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 223.70
   note: L-float16-B4S1024N32D128-long-prefill
 - operator: MHA
   case_id: 8
@@ -216,6 +223,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 223.70
   note: L-bfloat16-B4S1024N32D128-very-long-prefill
 - operator: MHA
   case_id: 9
@@ -242,6 +250,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 194.12
   note: L-float16-B4S1024N16D256-long-prefill-D256
 - operator: MHA
   case_id: 10
@@ -268,6 +277,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 17.48
   note: M-float16-B1S1Skv2048N32D128-decode-single-batch
 - operator: MHA
   case_id: 11
@@ -294,6 +304,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 139.88
   note: L-float16-B16S1Skv2048N32D128-decode
 - operator: MHA
   case_id: 12
@@ -320,6 +331,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 139.95
   note: L-bfloat16-B32S1Skv2048N32D128-decode
 - operator: MHA
   case_id: 13
@@ -346,6 +358,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 262.40
   note: L-float16-B60S1Skv2048N32D128-decode-large-batch
 - operator: MHA
   case_id: 14
@@ -372,6 +385,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 140.36
   note: L-float16-B128S1Skv4096N32D128-decode-large-batch
 - operator: MHA
   case_id: 15
@@ -398,6 +412,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 262.40
   note: L-float16-B60S1Skv2048N16D256-decode-large-batch-D256
 - operator: MHA
   case_id: 16
@@ -424,6 +439,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 262.66
   note: L-float16-B60Sq2Skv2048N32D128-MTP-large-batch
 - operator: MHA
   case_id: 17
@@ -450,6 +466,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 210.53
   note: L-bfloat16-B96Sq2Skv4096N32D128-MTP-large-batch
 - operator: MHA
   case_id: 18
@@ -476,6 +493,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 262.66
   note: L-float16-B60Sq2Skv2048N16D256-MTP-large-batch-D256
 - operator: MHA
   case_id: 19
@@ -502,6 +520,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
+  t_hw_us: 3.28
   note: S-float16-B2S128N32D128-explicit-scale
 - operator: MHA
   case_id: 20
@@ -528,4 +547,5 @@ cases:
   - 0
   - 0
   baseline_perf_us: null
+  t_hw_us: 3.28
   note: S-float16-B2S128N32D128-zero-input

@@ -129,7 +129,7 @@ def yaml_to_csv(input_file: str, output_file: Optional[str] = None) -> bool:
             all_fields.update(case.keys())
         
         # 定义标准字段顺序
-        standard_fields = ['operator', 'case_id', 'input_shape', 'dtype', 'attrs', 'value_range', 'baseline_perf_us', 'note']
+        standard_fields = ['operator', 'case_id', 'input_shape', 'dtype', 'attrs', 'value_range', 'baseline_perf_us', 't_hw_us', 'note']
         
         # 合并字段：标准字段在前，其他字段在后
         csv_fields = []

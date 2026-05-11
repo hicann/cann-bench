@@ -24,7 +24,7 @@ $$
 
 其中：
 - $x_i$ shape 为 $[m_i, k_i]$
-- $weight_i$ shape 为 $[n_i, k_i]$（transpose_weight=false）或 $[k_i, n_i]$（transpose_weight=true）
+- $weight_i$ shape 为 $[k_i, n_i]$（transpose_weight=false）或 $[n_i, k_i]$（transpose_weight=true）
 - $bias_i$ shape 为 $[n_i]$
 - $y_i$ shape 为 $[m_i, n_i]$
 
@@ -60,7 +60,7 @@ cann_bench.grouped_matmul(
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | x | TensorList | 必选 | 输入矩阵 TensorList，每个 tensor shape 为 $[m_i, k_i]$ |
-| weight | TensorList | 必选 | 权重矩阵 TensorList，每个 tensor shape 为 $[n_i, k_i]$（transpose_weight=false）或 $[k_i, n_i]$（transpose_weight=true） |
+| weight | TensorList | 必选 | 权重矩阵 TensorList，每个 tensor shape 为 $[k_i, n_i]$（transpose_weight=false）或 $[n_i, k_i]$（transpose_weight=true） |
 | bias | TensorList | None | 偏置 TensorList（可选），每个 tensor shape 为 $[n_i]$ |
 | split_item | int | 0 | 输出切分模式，0/1=输出多 tensor，2/3=输出单 tensor（结果连续存放） |
 | transpose_weight | bool | false | 是否转置权重 |
@@ -87,8 +87,8 @@ cann_bench.grouped_matmul(
   - split_item=2/3：输出为单 tensor，所有组的结果沿 M 轴合并
 - **多多单场景约束**：当 split_item=2/3 且 y 为单 tensor 时，weight 中每个 tensor 的 N 轴必须相等
 - **transpose_weight**：
-  - false：weight shape 为 $[n_i, k_i]$，需转置后参与 matmul
-  - true：weight shape 为 $[k_i, n_i]$，直接参与 matmul
+  - false：weight shape 为 $[k_i, n_i]$，直接参与 matmul
+  - true：weight shape 为 $[n_i, k_i]$，需转置后参与 matmul
 - **维度限制**：每维大小在 32 字节对齐后应小于 int32 最大值
 
 ## 4. 精度要求
@@ -144,15 +144,15 @@ def grouped_matmul(
 
     Args:
         x: 输入矩阵TensorList，每个tensor shape为[m_i, k_i]
-        weight: 权重矩阵TensorList，每个tensor shape为[n_i, k_i]（transpose_weight=false）
-               或[k_i, n_i]（transpose_weight=true）
+        weight: 权重矩阵TensorList，每个tensor shape为[k_i, n_i]（transpose_weight=false）
+               或[n_i, k_i]（transpose_weight=true）
         bias: 偏置TensorList（可选），每个tensor shape为[n_i]
         split_item: 输出切分模式
                    - 0/1: 输出多tensor（每组独立），返回TensorList
                    - 2/3: 输出单tensor（结果连续存放），返回合并后的单tensor
         transpose_weight: 是否转置权重
-                         - false: weight shape为[n_i, k_i]，matmul为x[m,k] @ weight[n,k]^T
-                         - true: weight shape为[k_i, n_i]，matmul为x[m,k] @ weight[k,n]
+                         - false: weight shape为[k_i, n_i]，matmul为x[m,k] @ weight[k,n]
+                         - true: weight shape为[n_i, k_i]，matmul为x[m,k] @ weight[n,k]^T
 
     Returns:
         输出TensorList（split_item=0/1）或单tensor（split_item=2/3）
@@ -166,14 +166,14 @@ def grouped_matmul(
         weight_i = weight[i].float()
 
         if transpose_weight:
-            # weight shape: [k_i, n_i]
-            # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
-            y_i = torch.matmul(x_i, weight_i)
-        else:
             # weight shape: [n_i, k_i]
             # 需要转置: [n_i, k_i]^T = [k_i, n_i]
             # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
             y_i = torch.matmul(x_i, weight_i.transpose(-2, -1))
+        else:
+            # weight shape: [k_i, n_i]
+            # matmul: [m_i, k_i] @ [k_i, n_i] = [m_i, n_i]
+            y_i = torch.matmul(x_i, weight_i)
 
         # 加偏置（可选）
         if bias is not None and bias[i] is not None:
@@ -205,7 +205,8 @@ import cann_bench
 # 多多多场景：x、weight、y 都为 TensorList
 x = [torch.randn(1024, 512, dtype=torch.float16, device="npu"),
      torch.randn(2048, 512, dtype=torch.float16, device="npu")]
-weight = [torch.randn(1024, 512, dtype=torch.float16, device="npu"),
+# transpose_weight=False：weight shape 为 [k_i, n_i]，直接参与 matmul
+weight = [torch.randn(512, 1024, dtype=torch.float16, device="npu"),
           torch.randn(512, 512, dtype=torch.float16, device="npu")]
 bias = [torch.randn(1024, dtype=torch.float16, device="npu"),
         torch.randn(512, dtype=torch.float16, device="npu")]
@@ -213,8 +214,8 @@ bias = [torch.randn(1024, dtype=torch.float16, device="npu"),
 y = cann_bench.grouped_matmul(x, weight, bias, split_item=0, transpose_weight=False)
 # y 是 TensorList：[tensor[1024, 1024], tensor[2048, 512]]
 
-# transpose_weight=True 示例
-weight_t = [torch.randn(512, 1024, dtype=torch.float16, device="npu"),
+# transpose_weight=True 示例：weight shape 为 [n_i, k_i]，需转置后参与 matmul
+weight_t = [torch.randn(1024, 512, dtype=torch.float16, device="npu"),
             torch.randn(512, 512, dtype=torch.float16, device="npu")]
 y = cann_bench.grouped_matmul(x, weight_t, bias, split_item=0, transpose_weight=True)
 

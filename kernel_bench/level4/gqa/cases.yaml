@@ -33,8 +33,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float16-B2S128Nq32Nkv8D128-G4-prefill
+  baseline_perf_us: 34.54
+  t_hw_us: 1.75
+  note: "S-float16-B2S128Nq32Nkv8D128-G4-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 2
   input_shape:
@@ -59,8 +60,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float16-B2S128Nq48Nkv4D128-G12-prefill
+  baseline_perf_us: 43.16
+  t_hw_us: 2.62
+  note: "S-float16-B2S128Nq48Nkv4D128-G12-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 3
   input_shape:
@@ -85,8 +87,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float16-B2S128Nq128Nkv8D128-G16-prefill
+  baseline_perf_us: 58.14
+  t_hw_us: 6.99
+  note: "S-float16-B2S128Nq128Nkv8D128-G16-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 4
   input_shape:
@@ -111,8 +114,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: M-float32-B4S256Nq64Nkv8D128-G8-prefill
+  baseline_perf_us: 160.60
+  t_hw_us: 1454.03
+  note: "M-float32-B4S256Nq64Nkv8D128-G8-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 5
   input_shape:
@@ -137,8 +141,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float16-B2S128Nq32Nkv8D256-G4-D256
+  baseline_perf_us: 36.64
+  t_hw_us: 3.28
+  note: "S-float16-B2S128Nq32Nkv8D256-G4-D256 | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 6
   input_shape:
@@ -163,8 +168,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: M-bfloat16-B2S256Nq128Nkv8D256-G16-D256
+  baseline_perf_us: 142.62
+  t_hw_us: 48.53
+  note: "M-bfloat16-B2S256Nq128Nkv8D256-G16-D256 | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 7
   input_shape:
@@ -189,8 +195,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float32-B2Sq128Skv256Nq32Nkv8D128-G4-cross
+  baseline_perf_us: 45.76
+  t_hw_us: 181.75
+  note: "S-float32-B2Sq128Skv256Nq32Nkv8D128-G4-cross | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 8
   input_shape:
@@ -215,8 +222,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B4S1024Nq32Nkv8D128-G4-long-prefill
+  baseline_perf_us: 461.49
+  t_hw_us: 223.7
+  note: "L-float16-B4S1024Nq32Nkv8D128-G4-long-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 9
   input_shape:
@@ -241,8 +249,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-bfloat16-B4S512Nq64Nkv8D128-G8-long-prefill
+  baseline_perf_us: 260.56
+  t_hw_us: 111.85
+  note: "L-bfloat16-B4S512Nq64Nkv8D128-G8-long-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 10
   input_shape:
@@ -267,8 +276,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float32-B4S512Nq128Nkv8D128-G16-long-prefill
+  baseline_perf_us: 994.10
+  t_hw_us: 11632.2
+  note: "L-float32-B4S512Nq128Nkv8D128-G16-long-prefill | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 11
   input_shape:
@@ -293,8 +303,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B16S1Skv2048Nq32Nkv8D128-G4-decode
+  baseline_perf_us: 397.55
+  t_hw_us: 69.97
+  note: "L-float16-B16S1Skv2048Nq32Nkv8D128-G4-decode | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 12
   input_shape:
@@ -319,8 +330,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-bfloat16-B16S1Skv2048Nq96Nkv8D128-G12-decode
+  baseline_perf_us: 1040.52
+  t_hw_us: 70.11
+  note: "L-bfloat16-B16S1Skv2048Nq96Nkv8D128-G12-decode | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 13
   input_shape:
@@ -345,8 +357,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B60S1Skv2048Nq32Nkv8D128-G4-decode-large-batch
+  baseline_perf_us: 1377.33
+  t_hw_us: 262.4
+  note: "L-float16-B60S1Skv2048Nq32Nkv8D128-G4-decode-large-batch | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 14
   input_shape:
@@ -371,8 +384,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B128S1Skv4096Nq128Nkv8D128-G16-decode-large-batch
+  baseline_perf_us: 2478.87
+  t_hw_us: 141.99
+  note: "L-float16-B128S1Skv4096Nq128Nkv8D128-G16-decode-large-batch | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 15
   input_shape:
@@ -397,8 +411,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B60S1Skv2048Nq32Nkv8D256-G4-decode-large-batch-D256
+  baseline_perf_us: 1080.02
+  t_hw_us: 262.66
+  note: "L-float16-B60S1Skv2048Nq32Nkv8D256-G4-decode-large-batch-D256 | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 16
   input_shape:
@@ -423,8 +438,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B60Sq2Skv2048Nq32Nkv8D128-G4-MTP-large-batch
+  baseline_perf_us: 1378.25
+  t_hw_us: 262.66
+  note: "L-float16-B60Sq2Skv2048Nq32Nkv8D128-G4-MTP-large-batch | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 17
   input_shape:
@@ -449,8 +465,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: L-float16-B128Sq4Skv4096Nq128Nkv8D128-G16-MTP-large-batch
+  baseline_perf_us: 2480.43
+  t_hw_us: 148.55
+  note: "L-float16-B128Sq4Skv4096Nq128Nkv8D128-G16-MTP-large-batch | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 18
   input_shape:
@@ -475,8 +492,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float16-B2S128Nq32Nkv1D128-G32-MQA-degenerate
+  baseline_perf_us: 33.56
+  t_hw_us: 1.75
+  note: "S-float16-B2S128Nq32Nkv1D128-G32-MQA-degenerate | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 19
   input_shape:
@@ -501,8 +519,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-bfloat16-B2S128Nq32Nkv32D128-G1-MHA-degenerate
+  baseline_perf_us: 34.20
+  t_hw_us: 3.28
+  note: "S-bfloat16-B2S128Nq32Nkv32D128-G1-MHA-degenerate | baseline_kernels: FlashAttentionScore×1"
 - operator: GQA
   case_id: 20
   input_shape:
@@ -527,5 +546,6 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  note: S-float32-B2S128Nq32Nkv8D128-G4-explicit-scale
+  baseline_perf_us: 39.56
+  t_hw_us: 90.88
+  note: "S-float32-B2S128Nq32Nkv8D128-G4-explicit-scale | baseline_kernels: FlashAttentionScore×1"

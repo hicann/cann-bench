@@ -12,12 +12,16 @@ cases:
   - &id001
     - - 128
   - *id001
+  - null  # h0 省略
+  - null  # c0 省略
   dtype:
   - float32
   - - float32
   - - float32
   - - float32
   - - float32
+  - null
+  - null
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -38,8 +42,11 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float32-case1
+  - null
+  - null
+  baseline_perf_us: 150.10
+  t_hw_us: 0.03
+  note: "S-float32-case1 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 2
   input_shape:
@@ -79,8 +86,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float16-case2
+  baseline_perf_us: 188.78
+  t_hw_us: 0.1
+  note: "S-float16-case2 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 3
   input_shape:
@@ -120,8 +128,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-bfloat16-case3
+  baseline_perf_us: 621.33
+  t_hw_us: 1.78
+  note: "S-bfloat16-case3 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + Cast×13 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 4
   input_shape:
@@ -178,8 +187,9 @@ cases:
       - -0.01
       - 0.01
     - *id008
-  baseline_perf_us: null
-  note: S-float32-case4
+  baseline_perf_us: 377.07
+  t_hw_us: 0.06
+  note: "S-float32-case4 | baseline_kernels: ZerosLike×3 + ConcatD×5 + Add×2 + Transpose×2 + DynamicRNN×2 + TransData×10 + ReverseV2×4"
 - operator: LSTM
   case_id: 5
   input_shape:
@@ -236,8 +246,9 @@ cases:
       - -0.01
       - 0.01
     - *id013
-  baseline_perf_us: null
-  note: S-float16-case5
+  baseline_perf_us: 468.57
+  t_hw_us: 0.13
+  note: "S-float16-case5 | baseline_kernels: ZerosLike×3 + ConcatD×5 + Add×2 + Transpose×2 + DynamicRNN×2 + TransData×10 + ReverseV2×4"
 - operator: LSTM
   case_id: 6
   input_shape:
@@ -294,8 +305,9 @@ cases:
       - -0.01
       - 0.01
     - *id018
-  baseline_perf_us: null
-  note: S-float32-case6
+  baseline_perf_us: 143.36
+  t_hw_us: 0.17
+  note: "S-float32-case6 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 7
   input_shape:
@@ -365,8 +377,9 @@ cases:
       - 0.01
     - *id023
     - *id023
-  baseline_perf_us: null
-  note: S-float16-case7
+  baseline_perf_us: 287.85
+  t_hw_us: 1.24
+  note: "S-float16-case7 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 8
   input_shape:
@@ -449,8 +462,9 @@ cases:
     - *id028
     - *id028
     - *id028
-  baseline_perf_us: null
-  note: S-float32-case8
+  baseline_perf_us: 461.63
+  t_hw_us: 0.41
+  note: "S-float32-case8 | baseline_kernels: ZerosLike×3 + ConcatD×5 + Add×2 + Transpose×2 + DynamicRNN×2 + TransData×10 + ReverseV2×4"
 - operator: LSTM
   case_id: 9
   input_shape:
@@ -533,8 +547,9 @@ cases:
     - *id033
     - *id033
     - *id033
-  baseline_perf_us: null
-  note: S-bfloat16-case9
+  baseline_perf_us: 787.14
+  t_hw_us: 0.24
+  note: "S-bfloat16-case9 | baseline_kernels: ZerosLike×3 + ConcatD×5 + Add×2 + Transpose×2 + Cast×26 + DynamicRNN×2 + TransData×10 + ReverseV2×4"
 - operator: LSTM
   case_id: 10
   input_shape:
@@ -574,8 +589,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float32-case10
+  baseline_perf_us: 122.38
+  t_hw_us: 0.03
+  note: "S-float32-case10 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 11
   input_shape:
@@ -586,10 +602,18 @@ cases:
       - 64
   - - - 128
       - 32
+  - null  # bias_ih 省略（bias=false）
+  - null  # bias_hh 省略（bias=false）
+  - null  # h0 省略
+  - null  # c0 省略
   dtype:
   - float32
   - - float32
   - - float32
+  - null
+  - null
+  - null
+  - null
   attrs:
     inputSize: 64
     hiddenSize: 32
@@ -606,8 +630,13 @@ cases:
       - 0.1
   - - - -0.1
       - 0.1
-  baseline_perf_us: null
-  note: S-float32-case11
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: 135.70
+  t_hw_us: 0.03
+  note: "S-float32-case11 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 12
   input_shape:
@@ -648,8 +677,9 @@ cases:
       - -0.1
       - 0.1
     - *id036
-  baseline_perf_us: null
-  note: S-bfloat16-case12
+  baseline_perf_us: 760.60
+  t_hw_us: 0.12
+  note: "S-bfloat16-case12 | baseline_kernels: ZerosLike×3 + ConcatD×5 + Add×2 + Transpose×2 + Cast×26 + DynamicRNN×2 + TransData×10 + ReverseV2×4"
 - operator: LSTM
   case_id: 13
   input_shape:
@@ -689,8 +719,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float32-case13
+  baseline_perf_us: 1028.46
+  t_hw_us: 0.89
+  note: "S-float32-case13 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 14
   input_shape:
@@ -730,8 +761,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float16-case14
+  baseline_perf_us: 1559.71
+  t_hw_us: 2.67
+  note: "S-float16-case14 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 15
   input_shape:
@@ -783,8 +815,9 @@ cases:
     - 0.1
   - - -0.1
     - 0.1
-  baseline_perf_us: null
-  note: S-float32-case15
+  baseline_perf_us: 127.40
+  t_hw_us: 0.03
+  note: "S-float32-case15 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 16
   input_shape:
@@ -824,8 +857,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float16-case16
+  baseline_perf_us: 97.28
+  t_hw_us: 0.0
+  note: "S-float16-case16 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 17
   input_shape:
@@ -865,8 +899,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float32-case17
+  baseline_perf_us: 207.54
+  t_hw_us: 0.28
+  note: "S-float32-case17 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 18
   input_shape:
@@ -906,8 +941,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-bfloat16-case18
+  baseline_perf_us: 224.14
+  t_hw_us: 0.02
+  note: "S-bfloat16-case18 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + Cast×13 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 19
   input_shape:
@@ -947,8 +983,9 @@ cases:
       - 0.01
   - - - -0.01
       - 0.01
-  baseline_perf_us: null
-  note: S-float32-case19
+  baseline_perf_us: 190.86
+  t_hw_us: 0.12
+  note: "S-float32-case19 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"
 - operator: LSTM
   case_id: 20
   input_shape:
@@ -1005,5 +1042,6 @@ cases:
       - -0.01
       - 0.01
     - *id048
-  baseline_perf_us: null
-  note: S-float32-case20
+  baseline_perf_us: 249.12
+  t_hw_us: 0.16
+  note: "S-float32-case20 | baseline_kernels: ZerosLike×3 + ConcatD×1 + Add×1 + Transpose×1 + DynamicRNN×1 + TransData×5"

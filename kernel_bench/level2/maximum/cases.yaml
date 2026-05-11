@@ -20,7 +20,8 @@ cases:
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 5.29
-  note: S-float16-1M-对齐-对称小值域
+  t_hw_us: 2.18
+  note: "S-float16-1M-对齐-对称小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 2
   input_shape:
@@ -31,8 +32,9 @@ cases:
   value_range:
   - [-2, 2]
   - [-2, 2]
-  baseline_perf_us: 33.04
-  note: M-float32-4M-对齐-对称小值域
+  baseline_perf_us: 31.78
+  t_hw_us: 17.48
+  note: "M-float32-4M-对齐-对称小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 3
   input_shape:
@@ -43,8 +45,9 @@ cases:
   value_range:
   - [-3, 3]
   - [-3, 3]
-  baseline_perf_us: 66.66
-  note: M-bfloat16-16M-对齐-对称小值域
+  baseline_perf_us: 63.56
+  t_hw_us: 34.95
+  note: "M-bfloat16-16M-对齐-对称小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 4
   input_shape:
@@ -56,7 +59,8 @@ cases:
   - [-1000, 1000]
   - [-1000, 1000]
   baseline_perf_us: 625.83
-  note: L-int32-67M-对齐-对称中值域
+  t_hw_us: 279.62
+  note: "L-int32-67M-对齐-对称中值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 5
   input_shape:
@@ -68,7 +72,8 @@ cases:
   - [-100000, 100000]
   - [-100000, 100000]
   baseline_perf_us: 733.21
-  note: L-int64-268M-对齐-对称大值域
+  t_hw_us: 139.81
+  note: "L-int64-268M-对齐-对称大值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 6
   input_shape:
@@ -79,8 +84,9 @@ cases:
   value_range:
   - [-128, 127]
   - [-128, 127]
-  baseline_perf_us: 319.88
-  note: L-int8-536M-对齐-int8全范围
+  baseline_perf_us: 310.59
+  t_hw_us: 139.81
+  note: "L-int8-536M-对齐-int8全范围 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 7
   input_shape:
@@ -91,8 +97,9 @@ cases:
   value_range:
   - [-0.1, 0.1]
   - [-0.1, 0.1]
-  baseline_perf_us: 5.49
-  note: S-float16-1M-非对齐-对称微小值域
+  baseline_perf_us: 5.42
+  t_hw_us: 2.18
+  note: "S-float16-1M-非对齐-对称微小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 8
   input_shape:
@@ -103,8 +110,9 @@ cases:
   value_range:
   - [-1, 2]
   - [-1, 2]
-  baseline_perf_us: 10.7
-  note: S-float32-1M-质数非对齐-非对称小值域
+  baseline_perf_us: 10.12
+  t_hw_us: 4.29
+  note: "S-float32-1M-质数非对齐-非对称小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 9
   input_shape:
@@ -116,7 +124,8 @@ cases:
   - [-5, 10]
   - [-5, 10]
   baseline_perf_us: 7.44
-  note: S-bfloat16-1M-非对齐-非对称中值域
+  t_hw_us: 2.46
+  note: "S-bfloat16-1M-非对齐-非对称中值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 10
   input_shape:
@@ -127,8 +136,9 @@ cases:
   value_range:
   - [-50, 100]
   - [-50, 100]
-  baseline_perf_us: 192.58
-  note: L-float16-50M-质数非对齐-非对称大值域-3D
+  baseline_perf_us: 189.96
+  t_hw_us: 103.51
+  note: "L-float16-50M-质数非对齐-非对称大值域-3D | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 11
   input_shape:
@@ -140,7 +150,8 @@ cases:
   - [-10, 10]
   - [-0.1, 0.1]
   baseline_perf_us: 10.33
-  note: S-float32-1M-非对齐-尾轴Broadcast
+  t_hw_us: 2.19
+  note: "S-float32-1M-非对齐-尾轴Broadcast | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 12
   input_shape:
@@ -152,7 +163,8 @@ cases:
   - [-100, 100]
   - [-10, 10]
   baseline_perf_us: 214.43
-  note: M-float32-31M-非对齐-多轴Broadcast-4D
+  t_hw_us: 20.18
+  note: "M-float32-31M-非对齐-多轴Broadcast-4D | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 13
   input_shape:
@@ -164,7 +176,8 @@ cases:
   - [-10000, 10000]
   - [-1000, 1000]
   baseline_perf_us: 39.22
-  note: M-int32-7M-非对齐-5D-多轴Broadcast
+  t_hw_us: 16.39
+  note: "M-int32-7M-非对齐-5D-多轴Broadcast | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 14
   input_shape:
@@ -175,8 +188,9 @@ cases:
   value_range:
   - [-inf, inf]
   - [-inf, inf]
-  baseline_perf_us: 10.96
-  note: S-float32-1M-质数非对齐-inf特殊值-1D
+  baseline_perf_us: 10.08
+  t_hw_us: 4.17
+  note: "S-float32-1M-质数非对齐-inf特殊值-1D | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 15
   input_shape:
@@ -187,8 +201,9 @@ cases:
   value_range:
   - [nan, nan]
   - [-1, 1]
-  baseline_perf_us: 37.6
-  note: M-float16-10M-质数非对齐-nan特殊值-5D
+  baseline_perf_us: 37.60
+  t_hw_us: 22.74
+  note: "M-float16-10M-质数非对齐-nan特殊值-5D | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 16
   input_shape:
@@ -200,7 +215,8 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: 23.81
-  note: M-float32-3M-质数非对齐-零值-5D
+  t_hw_us: 12.68
+  note: "M-float32-3M-质数非对齐-零值-5D | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 17
   input_shape:
@@ -212,7 +228,8 @@ cases:
   - [-0.5, 0.5]
   - [-0.5, 0.5]
   baseline_perf_us: 6.52
-  note: S-bfloat16-1M-非对齐-对称微小值域
+  t_hw_us: 2.19
+  note: "S-bfloat16-1M-非对齐-对称微小值域 | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 18
   input_shape:
@@ -223,8 +240,9 @@ cases:
   value_range:
   - [-65504, 65504]
   - [-1, 1]
-  baseline_perf_us: 11.28
-  note: S-float16-2M-非对齐-float16边界值-Broadcast
+  baseline_perf_us: 9.16
+  t_hw_us: 4.35
+  note: "S-float16-2M-非对齐-float16边界值-Broadcast | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 19
   input_shape:
@@ -235,8 +253,9 @@ cases:
   value_range:
   - [-32768, 32767]
   - [-100, 100]
-  baseline_perf_us: 2302.59
-  note: S-int16-2M-非对齐-int16全范围-Broadcast
+  baseline_perf_us: 2164.60
+  t_hw_us: 2.18
+  note: "S-int16-2M-非对齐-int16全范围-Broadcast | baseline_kernels: Maximum×1"
 - operator: Maximum
   case_id: 20
   input_shape:
@@ -248,4 +267,5 @@ cases:
   - [-20, 40]
   - [-10, 10]
   baseline_perf_us: 132.85
-  note: M-float32-10M-非对齐-非对称大值域-5D-Broadcast
+  t_hw_us: 21.98
+  note: "M-float32-10M-非对齐-非对称大值域-5D-Broadcast | baseline_kernels: Maximum×1"

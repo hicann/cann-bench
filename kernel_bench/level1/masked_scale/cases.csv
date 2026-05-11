@@ -1,21 +1,21 @@
-operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,note
-MaskedScale,1,"[[1024, 1024], [1024, 1024]]","[""float16"", ""int8""]","{""scale"": 1.0}","[[-1, 1], [0, 1]]",,S-float16-int8_mask-1M-对齐-对称小值域
-MaskedScale,2,"[[2048, 2048], [2048, 2048]]","[""float32"", ""uint8""]","{""scale"": 1.0}","[[-2, 2], [0, 1]]",,M-float32-uint8_mask-4M-对齐-对称小值域
-MaskedScale,3,"[[4096, 4096], [4096, 4096]]","[""bfloat16"", ""float16""]","{""scale"": 1.0}","[[-3, 3], [0, 1]]",,M-bfloat16-float16_mask-16M-对齐-对称小值域
-MaskedScale,4,"[[8192, 8192], [8192, 8192]]","[""float16"", ""float32""]","{""scale"": 0.5}","[[-10, 10], [0, 1]]",,L-float16-float32_mask-67M-对齐-scale=0.5-对称中值域
-MaskedScale,5,"[[8192, 8192], [8192, 8192]]","[""float32"", ""int8""]","{""scale"": 2.0}","[[-100, 100], [0, 1]]",,L-float32-int8_mask-268M-对齐-scale=2.0-对称大值域
-MaskedScale,6,"[[1023, 1023], [1023, 1023]]","[""bfloat16"", ""uint8""]","{""scale"": -1.0}","[[-0.1, 0.1], [0, 1]]",,S-bfloat16-uint8_mask-1M-非对齐-scale=-1.0-对称微小值域
-MaskedScale,7,"[[1009, 1021], [1009, 1021]]","[""float16"", ""int8""]","{""scale"": 0.0}","[[-1, 2], [0, 127]]",,S-float16-int8_mask-1M-质数非对齐-scale=0.0-非对称小值域
-MaskedScale,8,"[[1537, 769], [1537, 769]]","[""float32"", ""float16""]","{""scale"": 10.0}","[[-5, 10], [0, 1]]",,S-float32-float16_mask-1M-非对齐-scale=10.0-非对称中值域
-MaskedScale,9,"[[363, 367, 373], [363, 367, 373]]","[""bfloat16"", ""float32""]","{""scale"": 1.5}","[[-50, 100], [0, 1]]",,L-bfloat16-float32_mask-50M-质数非对齐-scale=1.5-非对称大值域
-MaskedScale,10,"[[2049, 513], [2049, 513]]","[""float16"", ""uint8""]","{""scale"": 1.0}","[[-65504, 65504], [0, 255]]",,S-float16-uint8_mask-1M-非对齐-float16边界值-uint8全范围
-MaskedScale,11,"[[3, 7, 13, 4003], [3, 7, 13, 4003]]","[""float32"", ""int8""]","{""scale"": 1.0}","[[-88, 88], [0, 1]]",,S-float32-int8_mask-1M-质数非对齐-float32边界值
-MaskedScale,12,"[[1000007], [1000007]]","[""bfloat16"", ""bfloat16""]","{""scale"": ""inf""}","[[""-inf"", ""inf""], [0, 1]]",,S-bfloat16-bfloat16_mask-1M-质数非对齐-scale=inf-inf特殊值
-MaskedScale,13,"[[11, 13, 17, 67, 67], [11, 13, 17, 67, 67]]","[""float32"", ""float32""]","{""scale"": ""nan""}","[[""nan"", ""nan""], [0, 1]]",,M-float32-float32_mask-10M-质数非对齐-scale=nan-nan特殊值
-MaskedScale,14,"[[3, 7, 11, 13, 1013], [3, 7, 11, 13, 1013]]","[""float16"", ""int8""]","{""scale"": 1.0}","[[0, 0], [0, 1]]",,S-float16-int8_mask-3M-质数非对齐-零值
-MaskedScale,15,"[[512, 2049], [512, 2049]]","[""float32"", ""uint8""]","{""scale"": 1.0}","[[-0.5, 0.5], [0, 1]]",,S-float32-uint8_mask-1M-非对齐-对称微小值域
-MaskedScale,16,"[[255, 8193], [255, 8193]]","[""bfloat16"", ""int8""]","{""scale"": 1.2}","[[-1, 3], [0, 1]]",,S-bfloat16-int8_mask-2M-非对齐-非对称小值域-scale=1.2
-MaskedScale,17,"[[4097, 511], [4097, 511]]","[""float16"", ""uint8""]","{""scale"": -0.5}","[[-1000, 1000], [0, 1]]",,S-float16-uint8_mask-2M-非对齐-对称大值域-scale=-0.5
-MaskedScale,18,"[[2, 511, 2049], [2, 511, 2049]]","[""float32"", ""float16""]","{""scale"": 0.75}","[[-0.2, 0.2], [0, 1]]",,M-float32-float16_mask-2M-非对齐-对称微小值域-scale=0.75
-MaskedScale,19,"[[4, 255, 2049], [4, 255, 2049]]","[""bfloat16"", ""float32""]","{""scale"": 3.0}","[[-3, 6], [0, 1]]",,M-bfloat16-float32_mask-2M-非对齐-非对称中值域-scale=3.0
-MaskedScale,20,"[[2, 3, 17, 1024, 101], [2, 3, 17, 1024, 101]]","[""float32"", ""int8""]","{""scale"": 1.0}","[[-20, 40], [0, 1]]",,M-float32-int8_mask-10M-非对齐-非对称大值域
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+MaskedScale,1,"[[1024, 1024], [1024, 1024]]","[""float16"", ""int8""]","{""scale"": 1.0}","[[-1, 1], [0, 1]]",15.54,1.64,S-float16-int8_mask-1M-对齐-对称小值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,2,"[[2048, 2048], [2048, 2048]]","[""float32"", ""uint8""]","{""scale"": 1.0}","[[-2, 2], [0, 1]]",37.7,10.92,M-float32-uint8_mask-4M-对齐-对称小值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,3,"[[4096, 4096], [4096, 4096]]","[""bfloat16"", ""float16""]","{""scale"": 1.0}","[[-3, 3], [0, 1]]",87.98,34.95,M-bfloat16-float16_mask-16M-对齐-对称小值域 | baseline_kernels: Cast×1 + Mul×1 + Muls×1
+MaskedScale,4,"[[8192, 8192], [8192, 8192]]","[""float16"", ""float32""]","{""scale"": 0.5}","[[-10, 10], [0, 1]]",835.4,209.71,L-float16-float32_mask-67M-对齐-scale=0.5-对称中值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,5,"[[8192, 8192], [8192, 8192]]","[""float32"", ""int8""]","{""scale"": 2.0}","[[-100, 100], [0, 1]]",1333.75,174.76,L-float32-int8_mask-268M-对齐-scale=2.0-对称大值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,6,"[[1023, 1023], [1023, 1023]]","[""bfloat16"", ""uint8""]","{""scale"": -1.0}","[[-0.1, 0.1], [0, 1]]",14.66,1.64,S-bfloat16-uint8_mask-1M-非对齐-scale=-1.0-对称微小值域 | baseline_kernels: Cast×1 + Mul×1 + Muls×1
+MaskedScale,7,"[[1009, 1021], [1009, 1021]]","[""float16"", ""int8""]","{""scale"": 0.0}","[[-1, 2], [0, 127]]",16.16,1.61,S-float16-int8_mask-1M-质数非对齐-scale=0.0-非对称小值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,8,"[[1537, 769], [1537, 769]]","[""float32"", ""float16""]","{""scale"": 10.0}","[[-5, 10], [0, 1]]",21.84,3.69,S-float32-float16_mask-1M-非对齐-scale=10.0-非对称中值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,9,"[[363, 367, 373], [363, 367, 373]]","[""bfloat16"", ""float32""]","{""scale"": 1.5}","[[-50, 100], [0, 1]]",573.17,155.29,L-bfloat16-float32_mask-50M-质数非对齐-scale=1.5-非对称大值域 | baseline_kernels: Cast×1 + Mul×1 + Muls×1
+MaskedScale,10,"[[2049, 513], [2049, 513]]","[""float16"", ""uint8""]","{""scale"": 1.0}","[[-65504, 65504], [0, 255]]",15.04,1.64,S-float16-uint8_mask-1M-非对齐-float16边界值-uint8全范围 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,11,"[[3, 7, 13, 4003], [3, 7, 13, 4003]]","[""float32"", ""int8""]","{""scale"": 1.0}","[[-88, 88], [0, 1]]",19.28,2.85,S-float32-int8_mask-1M-质数非对齐-float32边界值 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,12,"[[1000007], [1000007]]","[""bfloat16"", ""bfloat16""]","{""scale"": ""inf""}","[[""-inf"", ""inf""], [0, 1]]",11.18,2.08,S-bfloat16-bfloat16_mask-1M-质数非对齐-scale=inf-inf特殊值 | baseline_kernels: Mul×1 + Muls×1
+MaskedScale,13,"[[11, 13, 17, 67, 67], [11, 13, 17, 67, 67]]","[""float32"", ""float32""]","{""scale"": ""nan""}","[[""nan"", ""nan""], [0, 1]]",87.7,45.47,M-float32-float32_mask-10M-质数非对齐-scale=nan-nan特殊值 | baseline_kernels: Mul×2
+MaskedScale,14,"[[3, 7, 11, 13, 1013], [3, 7, 11, 13, 1013]]","[""float16"", ""int8""]","{""scale"": 1.0}","[[0, 0], [0, 1]]",24.22,4.75,S-float16-int8_mask-3M-质数非对齐-零值 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,15,"[[512, 2049], [512, 2049]]","[""float32"", ""uint8""]","{""scale"": 1.0}","[[-0.5, 0.5], [0, 1]]",18.22,2.73,S-float32-uint8_mask-1M-非对齐-对称微小值域 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,16,"[[255, 8193], [255, 8193]]","[""bfloat16"", ""int8""]","{""scale"": 1.2}","[[-1, 3], [0, 1]]",17.9,3.26,S-bfloat16-int8_mask-2M-非对齐-非对称小值域-scale=1.2 | baseline_kernels: Cast×1 + Mul×1 + Muls×1
+MaskedScale,17,"[[4097, 511], [4097, 511]]","[""float16"", ""uint8""]","{""scale"": -0.5}","[[-1000, 1000], [0, 1]]",18.68,3.27,S-float16-uint8_mask-2M-非对齐-对称大值域-scale=-0.5 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,18,"[[2, 511, 2049], [2, 511, 2049]]","[""float32"", ""float16""]","{""scale"": 0.75}","[[-0.2, 0.2], [0, 1]]",26.56,6.54,M-float32-float16_mask-2M-非对齐-对称微小值域-scale=0.75 | baseline_kernels: Cast×1 + Mul×2
+MaskedScale,19,"[[4, 255, 2049], [4, 255, 2049]]","[""bfloat16"", ""float32""]","{""scale"": 3.0}","[[-3, 6], [0, 1]]",24.96,6.53,M-bfloat16-float32_mask-2M-非对齐-非对称中值域-scale=3.0 | baseline_kernels: Cast×1 + Mul×1 + Muls×1
+MaskedScale,20,"[[2, 3, 17, 1024, 101], [2, 3, 17, 1024, 101]]","[""float32"", ""int8""]","{""scale"": 1.0}","[[-20, 40], [0, 1]]",69.12,27.47,M-float32-int8_mask-10M-非对齐-非对称大值域 | baseline_kernels: Cast×1 + Mul×2

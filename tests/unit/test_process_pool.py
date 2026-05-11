@@ -65,18 +65,18 @@ class TestProcessConfig(unittest.TestCase):
         """测试默认配置"""
         config = ProcessConfig()
         self.assertEqual(config.processes_per_card, 2)
-        self.assertEqual(config.timeout_per_process, 300)
+        self.assertEqual(config.timeout_per_operator, 300)
         self.assertTrue(config.enable_profiler)
 
     def test_custom_config(self):
         """测试自定义配置"""
         config = ProcessConfig(
             processes_per_card=4,
-            timeout_per_process=600,
+            timeout_per_operator=600,
             enable_profiler=False,
         )
         self.assertEqual(config.processes_per_card, 4)
-        self.assertEqual(config.timeout_per_process, 600)
+        self.assertEqual(config.timeout_per_operator, 600)
         self.assertFalse(config.enable_profiler)
 
 
@@ -345,14 +345,14 @@ class TestIntegration(unittest.TestCase):
             '--process-id', '0',
             '--card-id', '0',
             '--output', '/tmp/test.json',
-            '--operators', 'Sigmoid,Exp',
+            '--rel-paths', 'level1/sigmoid,level1/exp',
         ])
 
         self.assertEqual(args.command, 'eval-process')
         self.assertEqual(args.process_id, 0)
         self.assertEqual(args.card_id, 0)
         self.assertEqual(args.output, '/tmp/test.json')
-        self.assertEqual(args.operators, 'Sigmoid,Exp')
+        self.assertEqual(args.rel_paths, 'level1/sigmoid,level1/exp')
 
     def test_coordinator_stats(self):
         """测试协调器统计信息"""

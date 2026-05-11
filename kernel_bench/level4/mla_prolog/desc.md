@@ -228,7 +228,7 @@ def rms_norm(x, gamma, epsilon):
     """
     x_f = x.float()
     rms = torch.sqrt(torch.mean(x_f ** 2, dim=-1, keepdim=True) + epsilon)
-    return (gamma.float() * x_f / rms).bfloat16()
+    return (gamma.float() * x_f / rms).to(x.dtype)
 
 
 def apply_rope(x, rope_cos, rope_sin):

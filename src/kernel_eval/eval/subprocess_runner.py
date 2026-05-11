@@ -172,6 +172,7 @@ class SubprocessRunner:
                     success=bool(r.get("success", False)),
                     error_msg=r.get("error_msg"),
                     baseline_perf_us=r.get("baseline_perf_us", 0.0),
+                    t_hw_us=r.get("t_hw_us", 0.0),
                 ))
 
             return EvalOperatorResult(
@@ -324,6 +325,7 @@ class SubprocessRunner:
                     success=bool(r.get("success", False)),
                     error_msg=r.get("error_msg"),
                     baseline_perf_us=r.get("baseline_perf_us", 0.0),
+                    t_hw_us=r.get("t_hw_us", 0.0),
                 ))
 
             passed = sum(1 for r in case_results if r.success)

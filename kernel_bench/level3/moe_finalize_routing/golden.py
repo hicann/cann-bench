@@ -26,13 +26,13 @@ MoeFinalizeRouting 算子 Torch Golden 参考实现
 
 def moe_finalize_routing(
     expanded_permuted_rows: torch.Tensor,
-    drop_pad_mode: int = 0,
     expanded_src_to_dst_row: Optional[torch.Tensor] = None,
     skip1: Optional[torch.Tensor] = None,
     skip2: Optional[torch.Tensor] = None,
     bias: Optional[torch.Tensor] = None,
     scales: Optional[torch.Tensor] = None,
     expert_for_source_row: Optional[torch.Tensor] = None,
+    drop_pad_mode: int = 0,
 ):
     """
     MoE Finalize Routing 算子 Torch Golden 参考实现
@@ -41,17 +41,17 @@ def moe_finalize_routing(
 
     Args:
         expanded_permuted_rows: MoE FFN 输出，shape 为 (NUM_ROWS * K, H) 或 (E, C, H)
-        drop_pad_mode: 模式选择，取值范围 [0, 3]
-            0: drop less, 按列排列
-            1: drop pad, 按列排列
-            2: drop less, 按行排列
-            3: drop pad, 按行排列
         expanded_src_to_dst_row: 行索引映射，shape 为 (NUM_ROWS * K)
         skip1: 共享专家1，shape 为 (NUM_ROWS, H)
         skip2: 共享专家2，shape 为 (NUM_ROWS, H)
         bias: 专家偏置，shape 为 (E, H)
         scales: 路由权重，shape 为 (NUM_ROWS, K)
         expert_for_source_row: 专家索引，shape 为 (NUM_ROWS, K)
+        drop_pad_mode: 模式选择，取值范围 [0, 3]
+            0: drop less, 按列排列
+            1: drop pad, 按列排列
+            2: drop less, 按行排列
+            3: drop pad, 按行排列
 
     Returns:
         输出张量，shape 为 (NUM_ROWS, H)

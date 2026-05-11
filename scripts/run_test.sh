@@ -38,7 +38,7 @@ NO_PERF=false
 
 # 多进程并行配置（统一架构）
 PROCESSES_PER_CARD=2
-TIMEOUT_PER_PROCESS=300
+TIMEOUT_PER_OPERATOR=300
 
 show_help() {
     cat << 'EOF'
@@ -61,7 +61,7 @@ show_help() {
 
 多进程并行配置（统一架构）:
     --processes-per-card <n> 每卡进程数（默认: 2）
-    --timeout-per-process <n> 单进程超时（秒，默认: 300）
+    --timeout-per-operator <n> 单算子超时（秒，默认: 300）。进程总超时 = 算子数 × timeout_per_operator
 
 用例筛选:
     --operator <name>       按算子名称筛选
@@ -131,8 +131,8 @@ while [[ $# -gt 0 ]]; do
             PROCESSES_PER_CARD="$2"
             shift 2
             ;;
-        --timeout-per-process)
-            TIMEOUT_PER_PROCESS="$2"
+        --timeout-per-operator)
+            TIMEOUT_PER_OPERATOR="$2"
             shift 2
             ;;
         --task-dir)
@@ -209,7 +209,7 @@ else
         echo "模式: NPU 多卡进程池评测"
     fi
     echo "进程配置: ${PROCESSES_PER_CARD} 进程/卡"
-    echo "进程超时: ${TIMEOUT_PER_PROCESS}s"
+    echo "单算子超时: ${TIMEOUT_PER_OPERATOR}s"
 fi
 if [[ -n "${BENCH_DIR}" ]]; then
     echo "目录: ${BENCH_DIR}"
@@ -235,7 +235,7 @@ fi
 
 # 多进程并行参数
 args+=("--processes-per-card" "${PROCESSES_PER_CARD}")
-args+=("--timeout-per-process" "${TIMEOUT_PER_PROCESS}")
+args+=("--timeout-per-operator" "${TIMEOUT_PER_OPERATOR}")
 
 # 目录参数（替代 --level）
 if [[ -n "${BENCH_DIR}" ]]; then

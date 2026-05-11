@@ -17,30 +17,33 @@
 基于多卡 × 多进程并行方案实现：
 1. 每个进程独立运行，拥有独立的 torch_npu.profiler 单例
 2. 进程内单线程执行，避免 profiler 竞争
-3. 任务分配策略：rel_path_parallel / case_parallel
+3. 任务分配策略：动态调度（每算子一个进程，每卡并发上限）
 4. 无进程间通信，通过文件传递结果
 
 配置示例：
-    processes_per_card = 2  # 每卡 2 个进程
+    processes_per_card = 2  # 每卡最大并发进程数
     card_count = 2          # 2 张卡
-    total_processes = 4     # 总共 4 个独立进程池
+    timeout_per_operator = 60  # 单算子超时（秒）
 """
 
 import json
 import os
+import select
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from queue import Queue
 from typing import List, Dict, Optional, Any
 
 import torch
 
-from .results import EvalOperatorResult, EvalCaseResult
+from .results import EvalOperatorResult, EvalCaseResult, summarize_case_results
 from ..config import Config, get_config, get_project_root
 from ..data.case_loader import CaseInfo
 
@@ -48,9 +51,268 @@ from ..data.case_loader import CaseInfo
 @dataclass
 class ProcessConfig:
     """进程池配置"""
-    processes_per_card: int = 2      # 每卡进程数
-    timeout_per_process: int = 300   # 单进程超时（秒）
+    processes_per_card: int = 2      # 每卡最大并发进程数
+    timeout_per_operator: int = 300  # 单算子超时（秒）
     enable_profiler: bool = True     # 是否启用 profiler
+
+
+@dataclass
+class OperatorTask:
+    """单个算子评测任务"""
+    rel_path: str
+    card_id: int
+    process: Optional[subprocess.Popen] = None
+    output_file: Optional[str] = None
+    started_at: float = 0.0
+    timeout: int = 60
+    completed: bool = False
+    result: Optional[Dict] = None
+
+
+class OperatorScheduler:
+    """算子调度器 - 动态管理算子进程
+
+    每个算子一个独立进程，同一时刻每卡最多 N 个进程并发执行。
+    实现动态负载均衡，避免静态分配导致的任务不均。
+    """
+
+    def __init__(
+        self,
+        process_config: ProcessConfig,
+        base_config: Config,
+        card_count: int,
+    ):
+        self.process_config = process_config
+        self.base_config = base_config
+        self.card_count = card_count
+
+        self.max_concurrent_per_card = process_config.processes_per_card
+        self.timeout_per_operator = process_config.timeout_per_operator
+
+        # 任务队列和状态
+        self.pending_queue: Queue[str] = Queue()
+        self.running_tasks: Dict[int, List[OperatorTask]] = defaultdict(list)
+        self.completed_results: List[Dict] = []
+        self.lock = threading.Lock()
+
+    def submit_operators(self, rel_paths: List[str]):
+        """提交算子列表到队列"""
+        for rel_path in rel_paths:
+            self.pending_queue.put(rel_path)
+        print(f"[INFO] 提交 {len(rel_paths)} 个算子到调度队列")
+
+    def run(self) -> List[EvalOperatorResult]:
+        """执行调度循环，返回所有结果"""
+        total_operators = self.pending_queue.qsize()
+        started_count = 0
+        completed_count = 0
+
+        print(f"[INFO] 开始动态调度，每卡最大并发: {self.max_concurrent_per_card}")
+
+        while not self.pending_queue.empty() or self._has_running_tasks():
+            # 1. 尝试启动新任务
+            new_tasks = self._start_pending_tasks()
+            for task in new_tasks:
+                started_count += 1
+                print(f"[INFO] [{started_count}/{total_operators}] Card {task.card_id}: 启动算子 {task.rel_path}")
+
+            # 2. 检查完成的任务
+            completed = self._collect_completed_tasks()
+            for task in completed:
+                completed_count += 1
+                status = "✅" if task.result and task.result.get('passed_cases', 0) > 0 else "❌"
+                passed = task.result.get('passed_cases', 0) if task.result else 0
+                total = task.result.get('total_cases', 0) if task.result else 0
+                print(f"[INFO] [{completed_count}/{total_operators}] Card {task.card_id}: 算子 {task.rel_path} 完成 {status} ({passed}/{total})")
+
+            # 3. 短暂等待，避免空转
+            if self._has_running_tasks() and self.pending_queue.empty():
+                time.sleep(0.2)  # 等待运行中的任务
+            else:
+                time.sleep(0.05)
+
+        print(f"[INFO] 调度完成: {completed_count}/{total_operators} 个算子")
+        return [EvalOperatorResult.from_dict(d) for d in self.completed_results]
+
+    def _has_running_tasks(self) -> bool:
+        """检查是否有运行中的任务"""
+        with self.lock:
+            return any(len(tasks) > 0 for tasks in self.running_tasks.values())
+
+    def _get_available_card(self) -> Optional[int]:
+        """找到有空闲槽位的卡"""
+        with self.lock:
+            for card_id in range(self.card_count):
+                if len(self.running_tasks[card_id]) < self.max_concurrent_per_card:
+                    return card_id
+            return None
+
+    def _start_pending_tasks(self) -> List[OperatorTask]:
+        """启动待执行的算子"""
+        started_tasks = []
+
+        while not self.pending_queue.empty():
+            card_id = self._get_available_card()
+            if card_id is None:
+                break  # 所有卡都满了
+
+            try:
+                rel_path = self.pending_queue.get_nowait()
+            except:
+                break
+
+            task = self._create_task(rel_path, card_id)
+
+            with self.lock:
+                self.running_tasks[card_id].append(task)
+
+            started_tasks.append(task)
+
+        return started_tasks
+
+    def _create_task(self, rel_path: str, card_id: int) -> OperatorTask:
+        """创建并启动算子进程"""
+        # 创建输出文件
+        fd, output_file = tempfile.mkstemp(
+            suffix=".json",
+            prefix=f"op_{rel_path.replace('/', '_')}_",
+        )
+        os.close(fd)
+
+        # 构建命令
+        kernel_eval_root = str(get_project_root() / "src")
+        # 使用 card_id 作为 process-id（整数）
+        cmd = [
+            sys.executable, "-m", "kernel_eval.cli", "eval-process",
+            "--process-id", str(card_id),
+            "--card-id", str(card_id),
+            "--output", output_file,
+            "--warmup", str(self.base_config.warmup),
+            "--repeat", str(self.base_config.repeat),
+            "--rel-paths", rel_path,  # 单个算子
+        ]
+
+        if self.process_config.enable_profiler:
+            cmd.append("--enable-profiler")
+
+        # 设置环境变量
+        env = os.environ.copy()
+        existing_pythonpath = env.get("PYTHONPATH", "")
+        if existing_pythonpath:
+            env["PYTHONPATH"] = f"{kernel_eval_root}:{existing_pythonpath}"
+        else:
+            env["PYTHONPATH"] = kernel_eval_root
+        env["KERNEL_BENCH_ROOT"] = self.base_config.kernel_bench_root
+        env["PYTHONUNBUFFERED"] = "1"
+
+        # 继承 CANN 环境变量（日志抑制）
+        cann_env_vars = [
+            "ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME", "ASCEND_OPP_PATH",
+            "ASCEND_AICPU_PATH", "ASCEND_VISIBLE_DEVICES",
+            "TBE_IMPL_PATH",
+        ]
+        for var in cann_env_vars:
+            if var in os.environ:
+                env[var] = os.environ[var]
+
+        # 强制设置日志抑制环境变量（确保子进程继承）
+        env["ASCEND_SLOG_PRINT_TO_STDOUT"] = "0"
+        env["ASCEND_GLOBAL_LOG_LEVEL"] = "3"  # ERROR level
+
+        # 启动进程
+        # start_new_session=True 创建新的进程组，便于清理 profiler fork 子进程
+        process = subprocess.Popen(
+            cmd,
+            env=env,
+            stdout=None,  # 直接输出到终端
+            stderr=None,
+            text=True,
+            start_new_session=True,  # 创建新进程组
+        )
+
+        return OperatorTask(
+            rel_path=rel_path,
+            card_id=card_id,
+            process=process,
+            output_file=output_file,
+            started_at=time.time(),
+            timeout=self.timeout_per_operator,
+        )
+
+    def _collect_completed_tasks(self) -> List[OperatorTask]:
+        """检查并收集已完成的任务"""
+        completed_tasks = []
+
+        with self.lock:
+            for card_id, tasks in list(self.running_tasks.items()):
+                remaining_tasks = []
+
+                for task in tasks:
+                    if task.completed:
+                        continue
+
+                    # 检查是否超时
+                    elapsed = time.time() - task.started_at
+                    if elapsed > task.timeout:
+                        print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 超时 ({task.timeout}s)")
+                        # 杀死整个进程组（包括 profiler fork 子进程）
+                        try:
+                            import signal
+                            pgid = os.getpgid(task.process.pid)
+                            os.killpg(pgid, signal.SIGTERM)
+                            # 给予 2 秒时间让进程组清理
+                            time.sleep(2)
+                            # 检查是否还有进程存活
+                            try:
+                                os.killpg(pgid, 0)  # 检查进程组是否还存在
+                                # 如果还存在，发送 SIGKILL
+                                os.killpg(pgid, signal.SIGKILL)
+                            except OSError:
+                                pass  # 进程组已不存在
+                        except OSError:
+                            # 进程组不存在，直接杀死进程
+                            task.process.kill()
+                        try:
+                            task.process.wait(timeout=2)
+                        except subprocess.TimeoutExpired:
+                            task.process.kill()
+                        task.completed = True
+                        completed_tasks.append(task)
+                        continue
+
+                    # 检查进程状态
+                    poll_result = task.process.poll()
+                    if poll_result is not None:
+                        # 进程已退出，读取结果
+                        task.completed = True
+                        task.result = self._read_result(task)
+                        self.completed_results.append(task.result)
+                        completed_tasks.append(task)
+                        continue
+
+                    # 进程仍在运行，保留
+                    remaining_tasks.append(task)
+
+                self.running_tasks[card_id] = remaining_tasks
+
+        return completed_tasks
+
+    def _read_result(self, task: OperatorTask) -> Dict:
+        """读取任务结果文件"""
+        if task.output_file and os.path.exists(task.output_file):
+            try:
+                with open(task.output_file, 'r') as f:
+                    data = json.load(f)
+                # 清理临时文件
+                os.unlink(task.output_file)
+                return data.get("results", [{}])[0] if data.get("results") else {}
+            except json.JSONDecodeError:
+                print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 结果文件解析失败")
+                return {}
+            except Exception as e:
+                print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 读取结果失败: {e}")
+                return {}
+        return {}
 
 
 class ProcessWorker:
@@ -80,6 +342,7 @@ class ProcessWorker:
         self._output_file: Optional[str] = None
         self._cases_file: Optional[str] = None
         self._started = False
+        self._operator_count: int = 1  # 算子数量，用于动态计算超时
 
     def start(
         self,
@@ -92,6 +355,11 @@ class ProcessWorker:
             rel_paths: 算子相对路径列表（rel_path_parallel 模式）
             cases: 用例列表（case_parallel 模式）
         """
+        # 记录算子数量（用于动态计算超时）
+        if rel_paths:
+            self._operator_count = len(rel_paths)
+        elif cases:
+            self._operator_count = 1  # 单算子模式
         # 创建输出文件
         fd, self._output_file = tempfile.mkstemp(
             suffix=".json",
@@ -145,11 +413,15 @@ class ProcessWorker:
         cann_env_vars = [
             "ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME", "ASCEND_OPP_PATH",
             "ASCEND_AICPU_PATH", "ASCEND_VISIBLE_DEVICES",
-            "TBE_IMPL_PATH", "ASCEND_SLOG_PRINT_TO_STDOUT", "ASCEND_GLOBAL_LOG_LEVEL",
+            "TBE_IMPL_PATH",
         ]
         for var in cann_env_vars:
             if var in os.environ:
                 env[var] = os.environ[var]
+
+        # 强制设置日志抑制环境变量（确保子进程继承）
+        env["ASCEND_SLOG_PRINT_TO_STDOUT"] = "0"
+        env["ASCEND_GLOBAL_LOG_LEVEL"] = "3"  # ERROR level
 
         # 启动子进程
         self._process = subprocess.Popen(
@@ -184,7 +456,7 @@ class ProcessWorker:
         """等待子进程完成并返回结果
 
         Args:
-            timeout: 超时时间（秒）
+            timeout: 超时时间（秒），默认为 case_count × timeout_per_case
 
         Returns:
             结果数据列表（字典格式）
@@ -192,23 +464,53 @@ class ProcessWorker:
         if not self._started or self._process is None:
             return []
 
-        timeout = timeout or self.process_config.timeout_per_process
+        # 动态计算超时：算子数量 × 单算子超时时间
+        if timeout is None:
+            timeout = self._operator_count * self.process_config.timeout_per_operator
+
+        start_time = time.time()
+        deadline = start_time + timeout
 
         try:
-            # 实时读取输出并打印
+            # 使用 select 实现非阻塞读取，确保能及时检测超时
+            import select
+
             stdout_lines = []
             while True:
-                line = self._process.stdout.readline()
-                if not line:
-                    if self._process.poll() is not None:
-                        break
-                    time.sleep(0.1)
-                    continue
-                stdout_lines.append(line)
-                # 打印子进程输出（进度信息）
-                print(line.rstrip())
+                # 计算剩余时间
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    print(f"[WARN] Process {self.process_id} 超时 ({timeout}s)，已终止")
+                    self._process.kill()
+                    self._process.wait(timeout=5)
+                    return []
 
-            self._process.wait(timeout=timeout)
+                # 使用 select 检查 stdout 是否有数据可读
+                # 设置超时为剩余时间，确保不会无限等待
+                try:
+                    readable, _, _ = select.select([self._process.stdout], [], [], min(remaining, 1.0))
+                except (select.error, OSError):
+                    # select 出错（如 stdout 已关闭），检查进程状态
+                    poll_result = self._process.poll()
+                    if poll_result is not None:
+                        break
+                    continue
+
+                if readable:
+                    line = self._process.stdout.readline()
+                    if not line:
+                        # EOF，进程已关闭 stdout
+                        break
+                    stdout_lines.append(line)
+                    print(line.rstrip())
+                else:
+                    # 没有数据可读，检查进程是否已退出
+                    poll_result = self._process.poll()
+                    if poll_result is not None:
+                        break
+
+            # 进程已正常退出，等待并读取结果
+            self._process.wait(timeout=5)
 
             # 读取结果文件
             if self._output_file and os.path.exists(self._output_file):
@@ -219,6 +521,9 @@ class ProcessWorker:
         except subprocess.TimeoutExpired:
             self._process.kill()
             print(f"[WARN] Process {self.process_id} 超时，已终止")
+            return []
+        except json.JSONDecodeError as e:
+            print(f"[WARN] Process {self.process_id} 结果文件解析失败: {e}")
             return []
         finally:
             self._cleanup()
@@ -286,16 +591,89 @@ class ProcessPoolCoordinator:
         self.workers: List[ProcessWorker] = []
 
     def _detect_cards(self) -> int:
-        """检测可用 NPU 卡数"""
+        """检测可用 NPU 卡数，并提供详细的诊断信息"""
         if self.base_config.device_type != "npu":
             return 0
+
+        # 诊断步骤 1: 检查 torch_npu 是否可导入
         try:
             import torch_npu
-            if not torch.npu.is_available():
-                return 0
-            return torch.npu.device_count()
-        except ImportError:
+        except ImportError as e:
+            print("[ERROR] 无法导入 torch_npu 模块")
+            print(f"  原因: {e}")
+            print("  建议:")
+            print("    1. 检查是否安装了 torch_npu: pip list | grep torch_npu")
+            print("    2. 确认 CANN 环境已正确配置")
+            print("    3. 检查 ASCEND_HOME_PATH 等环境变量是否设置")
+            # 尝试调用 npu-smi info 检查硬件状态
+            self._check_npu_smi()
             return 0
+
+        # 诊断步骤 2: 检查 NPU 是否可用
+        if not torch.npu.is_available():
+            print("[ERROR] torch.npu.is_available() 返回 False")
+            print("  建议:")
+            print("    1. 检查 NPU 驱动是否已安装")
+            print("    2. 检查 ASCEND_VISIBLE_DEVICES 环境变量是否正确设置")
+            print("    3. 确认当前用户有 NPU 设备访问权限")
+            # 尝试调用 npu-smi info 检查硬件状态
+            self._check_npu_smi()
+            return 0
+
+        # 诊断步骤 3: 检查 NPU 卡数
+        card_count = torch.npu.device_count()
+        if card_count == 0:
+            print("[ERROR] torch.npu.device_count() 返回 0")
+            print("  建议:")
+            print("    1. 检查是否有设备被 ASCEND_VISIBLE_DEVICES 过滤")
+            # 尝试调用 npu-smi info 检查硬件状态
+            self._check_npu_smi()
+            return 0
+
+        # 成功检测到 NPU
+        print(f"[INFO] 检测到 {card_count} 张 NPU 卡")
+        for i in range(card_count):
+            try:
+                name = torch.npu.get_device_name(i) if hasattr(torch.npu, 'get_device_name') else 'unknown'
+                print(f"  NPU:{i} - {name}")
+            except Exception:
+                print(f"  NPU:{i}")
+
+        return card_count
+
+    def _check_npu_smi(self):
+        """调用 npu-smi info 检查硬件状态"""
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["npu-smi", "info"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                print("\n[诊断] npu-smi info 输出:")
+                # 只打印关键信息，避免输出过长
+                lines = result.stdout.strip().split('\n')
+                # 打印前 20 行（通常包含设备列表）
+                for line in lines[:20]:
+                    print(f"  {line}")
+                if len(lines) > 20:
+                    print(f"  ... (共 {len(lines)} 行，已截断)")
+            elif result.returncode != 0:
+                print("\n[诊断] npu-smi info 执行失败:")
+                print(f"  错误: {result.stderr.strip() if result.stderr else '未知错误'}")
+                print("  可能原因:")
+                print("    1. npu-smi 命令未安装或不在 PATH 中")
+                print("    2. NPU 驱动未正确安装")
+                print("    3. 当前用户无权限执行该命令")
+        except FileNotFoundError:
+            print("\n[诊断] 未找到 npu-smi 命令")
+            print("  建议: 检查 NPU 驱动是否已安装")
+        except subprocess.TimeoutExpired:
+            print("\n[诊断] npu-smi info 执行超时")
+        except Exception as e:
+            print(f"\n[诊断] npu-smi info 执行异常: {e}")
 
     def _create_workers(self) -> List[ProcessWorker]:
         """创建进程工作单元"""
@@ -360,7 +738,7 @@ class ProcessPoolCoordinator:
         """并行评测多个算子
 
         自动选择并行策略：
-        - 多算子：按 rel_path 分配到进程（rel_path_parallel）
+        - 多算子：使用 OperatorScheduler 动态调度（每算子一个进程）
         - 单算子：按用例分配到进程（case_parallel）
 
         Args:
@@ -374,8 +752,8 @@ class ProcessPoolCoordinator:
             print("[WARN] 无可用 NPU 卡")
             return []
 
-        print(f"[INFO] 使用 {self.total_processes} 个进程池并行评测")
-        print(f"[INFO] 配置: {self.card_count} 卡 × {self.process_config.processes_per_card} 进程/卡")
+        print(f"[INFO] 配置: {self.card_count} 卡 × {self.process_config.processes_per_card} 并发/卡")
+        print(f"[INFO] 单算子超时: {self.process_config.timeout_per_operator}s")
 
         # 根据 rel_path 数量选择并行策略
         if len(rel_paths) == 1:
@@ -385,42 +763,21 @@ class ProcessPoolCoordinator:
             result = self.evaluate_cases_parallel(rel_path)
             return [result] if result else []
         else:
-            # 多算子：使用 rel_path_parallel 模式
-            return self._evaluate_multiple_rel_paths(rel_paths)
+            # 多算子：使用 OperatorScheduler 动态调度
+            return self._evaluate_with_scheduler(rel_paths)
 
-    def _evaluate_multiple_rel_paths(
+    def _evaluate_with_scheduler(
         self,
         rel_paths: List[str],
     ) -> List[EvalOperatorResult]:
-        """多算子并行评测（rel_path_parallel 模式）"""
-        # 分配任务
-        distribution = self.distribute_rel_paths(rel_paths)
-
-        print(f"[INFO] 任务分配 (rel_path_parallel):")
-        for proc_id, paths in distribution.items():
-            card_id = proc_id // self.process_config.processes_per_card
-            print(f"  Process {proc_id} (Card {card_id}): {len(paths)} 算子 - {paths}")
-
-        # 创建并启动进程
-        self.workers = self._create_workers()
-        for worker in self.workers:
-            proc_id = worker.process_id
-            if proc_id in distribution:
-                worker.start(rel_paths=distribution[proc_id])
-
-        # 并行等待所有进程完成
-        all_results = []
-        started_workers = [w for w in self.workers if w._started]
-
-        with ThreadPoolExecutor(max_workers=len(started_workers)) as executor:
-            futures = {executor.submit(worker.wait): worker for worker in started_workers}
-            for future in as_completed(futures):
-                results_data = future.result()
-                for data in results_data:
-                    result = EvalOperatorResult.from_dict(data)
-                    all_results.append(result)
-
-        return all_results
+        """使用 OperatorScheduler 动态调度多算子"""
+        scheduler = OperatorScheduler(
+            process_config=self.process_config,
+            base_config=self.base_config,
+            card_count=self.card_count,
+        )
+        scheduler.submit_operators(rel_paths)
+        return scheduler.run()
 
     def evaluate_cases_parallel(
         self,
@@ -493,22 +850,18 @@ class ProcessPoolCoordinator:
                         all_case_results.append(result)
 
         # 合并统计
-        passed = sum(1 for r in all_case_results if r.success)
-        failed = sum(1 for r in all_case_results if not r.success and r.accuracy_result is not None)
-        skipped = sum(1 for r in all_case_results if not r.success and r.accuracy_result is None)
-        speedups = [r.get_speedup() for r in all_case_results if r.success and r.get_speedup() > 0]
-        avg_speedup = sum(speedups) / len(speedups) if speedups else 0.0
+        summary = summarize_case_results(all_case_results)
 
         return EvalOperatorResult(
             rel_path=rel_path,
             operator=operator_name,
             total_cases=len(cases),
-            passed_cases=passed,
-            failed_cases=failed,
-            skipped_cases=skipped,
+            passed_cases=summary.passed,
+            failed_cases=summary.failed,
+            skipped_cases=summary.skipped,
             results=all_case_results,
-            pass_rate=passed / len(cases) if len(cases) > 0 else 0.0,
-            avg_speedup=avg_speedup,
+            pass_rate=summary.pass_rate,
+            avg_speedup=summary.avg_speedup,
         )
 
     def evaluate_cases(
@@ -578,22 +931,18 @@ class ProcessPoolCoordinator:
                         all_case_results.append(result)
 
         # 合并统计
-        passed = sum(1 for r in all_case_results if r.success)
-        failed = sum(1 for r in all_case_results if not r.success and r.accuracy_result is not None)
-        skipped = sum(1 for r in all_case_results if not r.success and r.accuracy_result is None)
-        speedups = [r.get_speedup() for r in all_case_results if r.success and r.get_speedup() > 0]
-        avg_speedup = sum(speedups) / len(speedups) if speedups else 0.0
+        summary = summarize_case_results(all_case_results)
 
         return EvalOperatorResult(
             rel_path=rel_path,
             operator=operator_name,
             total_cases=len(cases),
-            passed_cases=passed,
-            failed_cases=failed,
-            skipped_cases=skipped,
+            passed_cases=summary.passed,
+            failed_cases=summary.failed,
+            skipped_cases=summary.skipped,
             results=all_case_results,
-            pass_rate=passed / len(cases) if len(cases) > 0 else 0.0,
-            avg_speedup=avg_speedup,
+            pass_rate=summary.pass_rate,
+            avg_speedup=summary.avg_speedup,
         )
 
     def shutdown(self):

@@ -21,7 +21,7 @@ Conv3D的filter梯度
 公式: y = conv3d_filter_grad(x, grad, filter_size)
 """
 def conv3_d_backprop_filter(
-    x: torch.Tensor, grad: torch.Tensor, strides: list, pads: list, dilations: list, groups: int, filter_size: list
+    x: torch.Tensor, grad: torch.Tensor, strides: list, pads: list, dilations: list, groups: int = 1, filter_size: list = None
 ) -> torch.Tensor:
     """
     Conv3D的filter梯度
