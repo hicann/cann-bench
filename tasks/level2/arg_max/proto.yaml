@@ -12,16 +12,21 @@ operator:
   name: ArgMax
   category: SortSelect
   difficulty: L2
-  formula: y = argmax(x, axis=dimension)
+  formula: indices = argmax(input, dim=dim)
   description: 返回张量在指定维度上的最大值的索引
-  shape_support: 输入支持0-8维
+  shape_support: 输入支持 0-8 维
   attrs:
-  - name: dimension
+  - name: dim
     type: int64
-    description: 计算argmax的维度
+    description: 计算 argmax 的维度
     required: true
+  - name: keepdim
+    type: bool
+    description: 是否保留约简维度
+    required: false
+    default: false
   inputs:
-  - name: x
+  - name: input
     description: 输入张量
     dtype:
     - float16
@@ -30,8 +35,8 @@ operator:
     - int32
     - int64
   outputs:
-  - name: y
-    description: 输出张量，最大值的索引
+  - name: indices
+    description: 最大值的索引张量，dtype 固定 int64
     dtype:
     - int64
-  schema: arg_max(Tensor x, int dimension) -> Tensor y
+  schema: arg_max(Tensor input, int dim, bool keepdim=false) -> Tensor indices

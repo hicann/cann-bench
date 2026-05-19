@@ -41,7 +41,7 @@ cases:
   - - *id003
   - null  # value_range 也用 null 对应
   baseline_perf_us: null
-  t_hw_us: 0.025200
+  t_hw_us: 1
   note: S-float32-case1
 - operator: GRU
   case_id: 2
@@ -82,7 +82,7 @@ cases:
       - 0.02
   - - *id006
   baseline_perf_us: null
-  t_hw_us: 0.082533
+  t_hw_us: 1
   note: S-float16-case2
 - operator: GRU
   case_id: 3
@@ -177,7 +177,7 @@ cases:
   - - *id012
     - *id012
   baseline_perf_us: null
-  t_hw_us: 0.047867
+  t_hw_us: 1
   note: S-float32-case4
 - operator: GRU
   case_id: 5
@@ -231,7 +231,7 @@ cases:
   - - *id015
     - *id015
   baseline_perf_us: null
-  t_hw_us: 0.104267
+  t_hw_us: 1
   note: S-float16-case5
 - operator: GRU
   case_id: 6
@@ -285,7 +285,7 @@ cases:
   - - *id018
     - *id018
   baseline_perf_us: null
-  t_hw_us: 0.065867
+  t_hw_us: 1
   note: S-float16-case6
 - operator: GRU
   case_id: 7
@@ -352,7 +352,7 @@ cases:
     - *id021
     - *id021
   baseline_perf_us: null
-  t_hw_us: 0.933055
+  t_hw_us: 1
   note: S-float16-case7
 - operator: GRU
   case_id: 8
@@ -432,7 +432,7 @@ cases:
     - *id024
     - *id024
   baseline_perf_us: null
-  t_hw_us: 0.153600
+  t_hw_us: 1
   note: S-float16-case8
 - operator: GRU
   case_id: 9
@@ -512,7 +512,7 @@ cases:
     - *id027
     - *id027
   baseline_perf_us: null
-  t_hw_us: 0.182400
+  t_hw_us: 1
   note: S-bfloat16-case9
 - operator: GRU
   case_id: 10
@@ -553,7 +553,7 @@ cases:
       - 0.05
   - - *id030
   baseline_perf_us: null
-  t_hw_us: 0.013200
+  t_hw_us: 1
   note: S-float16-case10
 - operator: GRU
   case_id: 11
@@ -607,7 +607,7 @@ cases:
   - - *id033
     - *id033
   baseline_perf_us: null
-  t_hw_us: 0.098133
+  t_hw_us: 1
   note: S-float16-case11
 - operator: GRU
   case_id: 12
@@ -648,7 +648,7 @@ cases:
   - null
   - null
   baseline_perf_us: null
-  t_hw_us: 0.011300
+  t_hw_us: 1
   note: S-float16-case12
 - operator: GRU
   case_id: 13
@@ -688,7 +688,7 @@ cases:
   - - *id035
     - *id035
   baseline_perf_us: null
-  t_hw_us: 0.094533
+  t_hw_us: 1
   note: S-bfloat16-case13
 - operator: GRU
   case_id: 14
@@ -729,7 +729,7 @@ cases:
       - 0.05
   - - *id038
   baseline_perf_us: null
-  t_hw_us: 0.666468
+  t_hw_us: 1
   note: S-float16-case14
 - operator: GRU
   case_id: 15
@@ -811,7 +811,7 @@ cases:
       - 0.05
   - - *id044
   baseline_perf_us: null
-  t_hw_us: 0.107421
+  t_hw_us: 1
   note: S-float16-case16
 - operator: GRU
   case_id: 17
@@ -852,7 +852,7 @@ cases:
       - 0.05
   - - *id047
   baseline_perf_us: null
-  t_hw_us: 0.015400
+  t_hw_us: 1
   note: S-bfloat16-case17
 - operator: GRU
   case_id: 18
@@ -899,7 +899,7 @@ cases:
   - - -0.1
     - 0.1
   baseline_perf_us: null
-  t_hw_us: 0.012800
+  t_hw_us: 1
   note: S-float16-case18
 - operator: GRU
   case_id: 19
@@ -985,7 +985,7 @@ cases:
   - - -0.1
     - 0.1
   baseline_perf_us: null
-  t_hw_us: 0.187200
+  t_hw_us: 1
   note: S-float16-case19
 - operator: GRU
   case_id: 20
@@ -1026,5 +1026,5 @@ cases:
       - 0.05
   - - *id056
   baseline_perf_us: null
-  t_hw_us: 0.002867
+  t_hw_us: 1
   note: S-float16-case20

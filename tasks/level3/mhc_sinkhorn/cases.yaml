@@ -12,200 +12,200 @@ cases:
 - operator: MhcSinkhorn
   case_id: 1
   input_shape:
-  - [1, 128, 8]
-  dtype: [float16]
-  attrs: {temperature: 1.0, n_iters: 3}
+  - [1, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.01
-  note: S-float16-1K-对齐-B=1-S=128-E=8-默认参数
+  t_hw_us: null
+  note: "S-fp32-128B-DSv4-decode-B=1-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 2
   input_shape:
-  - [2, 256, 16]
+  - [64, 4, 4]
   dtype: [float32]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-2, 2]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.06
-  note: S-float32-8K-对齐-B=2-S=256-E=16-默认参数
+  t_hw_us: null
+  note: "S-fp32-8KB-DSv4-small-B=64-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 3
   input_shape:
-  - [4, 512, 32]
-  dtype: [bfloat16]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-3, 3]
+  - [512, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.48
-  note: S-bfloat16-64K-对齐-B=4-S=512-E=32-默认参数
+  t_hw_us: null
+  note: "S-fp32-66KB-DSv4-medium-B=512-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 4
   input_shape:
-  - [8, 1024, 64]
-  dtype: [float16]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-5, 5]
+  - [1024, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 3.85
-  note: S-float16-512K-对齐-B=8-S=1024-E=64-默认参数
+  t_hw_us: null
+  note: "S-fp32-131KB-DSv4-typical-prefill-B=1024-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 5
   input_shape:
-  - [16, 2048, 128]
+  - [4096, 4, 4]
   dtype: [float32]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-10, 10]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 29.39
-  note: M-float32-4M-对齐-B=16-S=2048-E=128-默认参数
+  t_hw_us: null
+  note: "S-fp32-524KB-DSv4-large-prefill-B=4096-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 6
   input_shape:
-  - [4, 512, 32]
-  dtype: [float16]
-  attrs: {temperature: 0.1, n_iters: 3}
+  - [16384, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.48
-  note: S-float16-64K-对齐-低温度0.1-趋近硬路由
+  t_hw_us: null
+  note: "S-fp32-2.10MB-DSv4-max-batch-B=16384-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 7
   input_shape:
-  - [4, 512, 32]
+  - [1024, 2, 2]
   dtype: [float32]
-  attrs: {temperature: 0.5, n_iters: 3}
-  value_range: [-2, 2]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.46
-  note: S-float32-64K-对齐-中低温度0.5
+  t_hw_us: null
+  note: "S-fp32-33KB-hc_mult=2-下界-退化场景 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 8
   input_shape:
-  - [4, 512, 32]
-  dtype: [bfloat16]
-  attrs: {temperature: 2.0, n_iters: 3}
-  value_range: [-3, 3]
+  - [1024, 3, 3]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.48
-  note: S-bfloat16-64K-对齐-高温度2.0-趋近均匀分配
+  t_hw_us: null
+  note: "S-fp32-74KB-hc_mult=3-奇数非对齐 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 9
   input_shape:
-  - [8, 1024, 64]
+  - [1024, 6, 6]
   dtype: [float32]
-  attrs: {temperature: 1.0, n_iters: 1}
-  value_range: [-5, 5]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 1.58
-  note: S-float32-512K-对齐-单次迭代n_iters=1
+  t_hw_us: null
+  note: "S-fp32-295KB-hc_mult=6-非2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 10
   input_shape:
-  - [8, 1024, 64]
-  dtype: [float16]
-  attrs: {temperature: 1.0, n_iters: 5}
-  value_range: [-5, 5]
+  - [1024, 8, 8]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 5.96
-  note: S-float16-512K-对齐-中等迭代n_iters=5
+  t_hw_us: null
+  note: "S-fp32-524KB-hc_mult=8-2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 11
   input_shape:
-  - [8, 1024, 64]
-  dtype: [bfloat16]
-  attrs: {temperature: 1.0, n_iters: 10}
-  value_range: [-10, 10]
+  - [1024, 12, 12]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 11.21
-  note: S-bfloat16-512K-对齐-高迭代n_iters=10
+  t_hw_us: null
+  note: "S-fp32-1.18MB-hc_mult=12-非2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 12
   input_shape:
-  - [3, 127, 7]
-  dtype: [float16]
-  attrs: {temperature: 1.0, n_iters: 3}
+  - [1024, 16, 16]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.02
-  note: S-float16-2.7K-质数非对齐-B=3-S=127-E=7
+  t_hw_us: null
+  note: "S-fp32-2.10MB-hc_mult=16-上界 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 13
   input_shape:
-  - [5, 257, 17]
+  - [1024, 4, 4]
   dtype: [float32]
-  attrs: {temperature: 0.5, n_iters: 5}
-  value_range: [-2, 2]
+  attrs: {iter_step: 1, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.24
-  note: S-float32-22K-质数非对齐-B=5-S=257-E=17-混合参数
+  t_hw_us: null
+  note: "S-fp32-131KB-iter_step=1-退化为softmax+1次col_norm | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 14
   input_shape:
-  - [7, 509, 31]
-  dtype: [bfloat16]
-  attrs: {temperature: 2.0, n_iters: 1}
-  value_range: [-5, 5]
+  - [1024, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 5, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.37
-  note: S-bfloat16-110K-质数非对齐-B=7-S=509-E=31-混合参数
+  t_hw_us: null
+  note: "S-fp32-131KB-iter_step=5-少迭代收敛性测试 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 15
   input_shape:
-  - [6, 1023, 63]
-  dtype: [float16]
-  attrs: {temperature: 0.1, n_iters: 10}
-  value_range: [-0.5, 0.5]
+  - [1024, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 40, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 8.27
-  note: S-float16-387K-非对齐-B=6-低温高迭代
+  t_hw_us: null
+  note: "S-fp32-131KB-iter_step=40-上界深收敛 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 16
   input_shape:
-  - [32, 4096, 256]
+  - [1024, 4, 4]
   dtype: [float32]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-10, 10]
+  attrs: {iter_step: 20, eps: 1.0e-08}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 235.02
-  note: L-float32-32M-对齐-大规模-B=32-S=4096-E=256
+  t_hw_us: null
+  note: "S-fp32-131KB-eps=1e-8-fp32紧致 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 17
   input_shape:
-  - [16, 4096, 128]
-  dtype: [float16]
-  attrs: {temperature: 0.5, n_iters: 5}
-  value_range: [-100, 100]
+  - [1024, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-07}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 95.18
-  note: M-float16-8M-对齐-大规模-大值域
+  t_hw_us: null
+  note: "S-fp32-131KB-eps=1e-7-中等 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 18
   input_shape:
-  - [2, 256, 16]
-  dtype: [float16]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-65504, 65504]
+  - [1, 2, 2]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: 0.06
-  note: S-float16-8K-对齐-float16边界值
+  t_hw_us: null
+  note: "S-fp32-32B-tiny-smoke-B=1-hc_mult=2-下界 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 19
   input_shape:
-  - [2, 256, 16]
+  - [1024, 4, 4]
   dtype: [float32]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [0, 0]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [-.inf, .inf]
   baseline_perf_us: null
-  t_hw_us: 0.06
-  note: S-float32-8K-对齐-零值输入
+  t_hw_us: null
+  note: "S-fp32-131KB-inf特殊值-row_max-shift防溢出 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 20
   input_shape:
-  - [2, 256, 16]
-  dtype: [bfloat16]
-  attrs: {temperature: 1.0, n_iters: 3}
-  value_range: [-0.01, 0.01]
+  - [1024, 4, 4]
+  dtype: [float32]
+  attrs: {iter_step: 20, eps: 1.0e-06}
+  value_range: [.nan, .nan]
   baseline_perf_us: null
-  t_hw_us: 0.06
-  note: S-bfloat16-8K-对齐-微小值域
+  t_hw_us: null
+  note: "S-fp32-131KB-nan特殊值-精度比对边界 | baseline_kernels: MhcSinkhorn×1"

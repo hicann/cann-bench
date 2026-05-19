@@ -21,7 +21,7 @@ operator:
     description: 计算累积最小值的轴
     required: true
   inputs:
-  - name: x
+  - name: input
     description: 输入张量
     dtype:
     - float16
@@ -29,11 +29,15 @@ operator:
     - int32
     - bfloat16
   outputs:
-  - name: y
-    description: 输出张量，累积最小值
+  - name: values
+    description: 累积最小值张量，shape 与 input 相同，dtype 与 input 相同
     dtype:
     - float16
     - float32
     - int32
     - bfloat16
-  schema: cummin(Tensor x, int dim) -> Tensor y
+  - name: indices
+    description: 累积最小值对应的索引张量，shape 与 input 相同，dtype 为 int64
+    dtype:
+    - int64
+  schema: cummin(Tensor input, int dim) -> (Tensor values, Tensor indices)

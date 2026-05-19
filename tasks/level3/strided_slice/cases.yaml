@@ -221,7 +221,7 @@ cases:
     new_axis_mask: 1
   value_range: [-3, 3]
   baseline_perf_us: null
-  t_hw_us: 0.27
+  t_hw_us: 1
   note: S-bfloat16-256K-2D-new_axis_mask=1(在维度0插入新维度)-输出shape=[1,512,512]
 - operator: StridedSlice
   case_id: 17
@@ -265,7 +265,7 @@ cases:
     new_axis_mask: 2
   value_range: [-2, 2]
   baseline_perf_us: null
-  t_hw_us: 0.55
+  t_hw_us: 1
   note: S-float32-256K-2D-shrink_axis_mask=1+new_axis_mask=2(收缩维度0+在维度1插入新维度)
 - operator: StridedSlice
   case_id: 20

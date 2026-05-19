@@ -47,7 +47,7 @@ cases:
   - [-3, 3]
   - [-1, 1]
   baseline_perf_us: 40.10
-  t_hw_us: 0.81
+  t_hw_us: 1
   note: "S-float32-256K-对齐-bilinear-7x7-scale=1/8 | baseline_kernels: TransData×1 + ROIAlign×1"
 - operator: ROIAlign
   case_id: 4
@@ -125,7 +125,7 @@ cases:
   - [-5, 10]
   - [-1, 1]
   baseline_perf_us: 29.30
-  t_hw_us: 0.76
+  t_hw_us: 1
   note: "S-float32-300K-质数非对齐-bilinear-5x5-非对称 | baseline_kernels: TransData×1 + ROIAlign×1"
 - operator: ROIAlign
   case_id: 10

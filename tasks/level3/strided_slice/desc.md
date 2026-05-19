@@ -86,7 +86,7 @@ cann_bench.strided_slice(Tensor x, int[] begin, int[] end, int[] strides, int be
 |---|---|---|
 | `x` 维度数（rank） | 0 ~ 8 | cases.csv 实测 1D / 2D / 3D / 4D |
 | `x` 每维大小 | 1 ~ 1048576 | cases.csv 实测最小 64，最大 1048576（1D），2D 最大 8192×8192 |
-| `x` 总元素数 | 1 ~ 2^30 | cases.csv 实测最大约 134M（case 20: [64,128,128,128]） |
+| `x` 总元素数 | 1 ~ 2^30 | cases.csv 实测最大约 128M（case 20: [64,128,128,128]） |
 | `x` dtype | int8 / uint8 / int32 / int64 / float16 / float32 / bfloat16 | cases.csv 实测 int32 / int64 / float16 / float32 / bfloat16（int8 / uint8 未覆盖） |
 | `begin[i]` | -2^31 ~ 2^31-1 | cases.csv 实测 0 ~ 1024（负数索引语义支持但未在 cases 中出现） |
 | `end[i]` | -2^31 ~ 2^31-1 | cases.csv 实测 -1 / 64 ~ 524288（-1 表示倒数第一） |

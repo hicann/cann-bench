@@ -49,7 +49,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 98.30
   t_hw_us: 63.84
   note: bfloat16-DSv3-B1S1-decode
 - operator: MlaProlog
@@ -92,7 +92,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 106.68
   t_hw_us: 63.86
   note: bfloat16-DSv3-B4S1-decode
 - operator: MlaProlog
@@ -135,7 +135,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 111.36
   t_hw_us: 64.07
   note: bfloat16-DSv3-B32S1-decode
 - operator: MlaProlog
@@ -178,7 +178,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 121.30
   t_hw_us: 64.32
   note: bfloat16-DSv3-B64S1-decode
 - operator: MlaProlog
@@ -221,7 +221,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 149.68
   t_hw_us: 64.80
   note: bfloat16-DSv3-B128S1-decode-large-batch
 - operator: MlaProlog
@@ -264,7 +264,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 99.50
   t_hw_us: 63.86
   note: bfloat16-DSv3-B1S4-prefill
 - operator: MlaProlog
@@ -307,7 +307,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 102.96
   t_hw_us: 63.95
   note: bfloat16-DSv3-B1S16-prefill
 - operator: MlaProlog
@@ -350,14 +350,14 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 100.28
   t_hw_us: 63.95
   note: bfloat16-DSv3-B4S4-prefill
 - operator: MlaProlog
   case_id: 9
   input_shape:
   - - 4
-    - 128
+    - 16
     - 7168
   - - 7168
     - 1536
@@ -371,10 +371,10 @@ cases:
   - - 1536
   - - 512
   - - 4
-    - 128
+    - 16
     - 64
   - - 4
-    - 128
+    - 16
     - 64
   dtype:
   - bfloat16
@@ -393,14 +393,14 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  t_hw_us: 177.25
-  note: bfloat16-DSv3-B4S128-prefill
+  baseline_perf_us: 115.12
+  t_hw_us: null
+  note: 'bfloat16-B4S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 10
   input_shape:
   - - 2
-    - 256
+    - 16
     - 7168
   - - 7168
     - 1536
@@ -414,10 +414,10 @@ cases:
   - - 1536
   - - 512
   - - 2
-    - 256
+    - 16
     - 64
   - - 2
-    - 256
+    - 16
     - 64
   dtype:
   - bfloat16
@@ -436,23 +436,23 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  t_hw_us: 177.25
-  note: bfloat16-DSv3-B2S256-prefill
+  baseline_perf_us: 108.88
+  t_hw_us: null
+  note: 'bfloat16-B2S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 11
   input_shape:
   - - 1
     - 1
-    - 5120
-  - - 5120
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
@@ -481,21 +481,21 @@ cases:
   - 1
   baseline_perf_us: null
   t_hw_us: 59.33
-  note: bfloat16-DSv2-B1S1-decode
+  note: 'bfloat16-compact-B1S1-decode | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 12
   input_shape:
   - - 32
     - 1
-    - 5120
-  - - 5120
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
@@ -524,21 +524,21 @@ cases:
   - 1
   baseline_perf_us: null
   t_hw_us: 59.50
-  note: bfloat16-DSv2-B32S1-decode
+  note: 'bfloat16-compact-B32S1-decode | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 13
   input_shape:
   - - 128
     - 1
-    - 5120
-  - - 5120
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
@@ -567,21 +567,21 @@ cases:
   - 1
   baseline_perf_us: null
   t_hw_us: 60.03
-  note: bfloat16-DSv2-B128S1-decode-large-batch
+  note: 'bfloat16-compact-B128S1-decode-large-batch | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 14
   input_shape:
   - - 1
     - 16
-    - 5120
-  - - 5120
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
@@ -608,31 +608,31 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 99.04
   t_hw_us: 59.41
-  note: bfloat16-DSv2-B1S16-prefill
+  note: 'bfloat16-compact-B1S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 15
   input_shape:
   - - 4
-    - 128
-    - 5120
-  - - 5120
+    - 16
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
   - - 4
-    - 128
+    - 16
     - 64
   - - 4
-    - 128
+    - 16
     - 64
   dtype:
   - bfloat16
@@ -651,9 +651,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
-  t_hw_us: 164.74
-  note: bfloat16-DSv2-B4S128-prefill
+  baseline_perf_us: 110.74
+  t_hw_us: null
+  note: 'bfloat16-compact-B4S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 16
   input_shape:
@@ -694,7 +694,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 146.40
   t_hw_us: 64.74
   note: bfloat16-DSv3-B60S2-MTP-large-batch
 - operator: MlaProlog
@@ -737,7 +737,7 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 423.85
   t_hw_us: 177.25
   note: bfloat16-DSv3-B128S4-MTP-large-batch
 - operator: MlaProlog
@@ -745,15 +745,15 @@ cases:
   input_shape:
   - - 96
     - 2
-    - 5120
-  - - 5120
+    - 6144
+  - - 6144
     - 1536
   - - 1536
     - 24576
   - - 128
     - 128
     - 512
-  - - 5120
+  - - 6144
     - 576
   - - 1536
   - - 512
@@ -780,9 +780,9 @@ cases:
   value_range:
   - -1
   - 1
-  baseline_perf_us: null
+  baseline_perf_us: 195.64
   t_hw_us: 61.78
-  note: bfloat16-DSv2-B96S2-MTP-large-batch
+  note: 'bfloat16-compact-B96S2-MTP-large-batch | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 19
   input_shape:

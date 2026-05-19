@@ -49,7 +49,7 @@ $$
 ### 算子原型
 
 ```python
-cann_bench.apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, float beta1, float beta2, float weight_decay, float epsilon=1e-8, bool maximize=false) -> Tensor y
+cann_bench.apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, float beta1, float beta2, float weight_decay, float epsilon=1e-8, int step=1, bool maximize=false) -> Tensor y
 ```
 
 ### 输入参数说明
@@ -65,6 +65,7 @@ cann_bench.apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, f
 | beta2 | float | 必选 | 二阶矩估计的指数衰减率 (默认 0.999) |
 | weight_decay | float | 必选 | 权重衰减系数（解耦） |
 | epsilon | float | 1e-8 | 数值稳定常数 |
+| step | int | 1 | 当前优化步数 t，用于偏置校正分母 (1 - beta^t)；默认 1 等价于单步更新 |
 | maximize | bool | false | 是否最大化目标函数（默认最小化） |
 
 ### 输出
@@ -89,6 +90,7 @@ cann_bench.apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, f
 - `beta1`、`beta2` 取值范围通常为 [0, 1)
 - `epsilon` 用于防止除零，通常取极小正数
 - 当 `maximize=true` 时，更新方向取反（用于最大化目标函数）
+- `step` 默认 1（cases.yaml 不传时走 default），公式分母 `1 - beta^step` 在 step=1 时退化为 `1 - beta`，与历史 baseline 兼容；多步训练场景由调用方按需传入
 
 ### 支持范围
 
@@ -98,7 +100,7 @@ cann_bench.apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, f
 |---|---|---|
 | `var/grad/m/v` 维度数 (ndim) | 1 ~ 8 | cases.csv 实测 1 ~ 5；四个张量 shape/dtype 必须一致 |
 | `var/grad/m/v` 单维大小 | 1 ~ 1048576 | cases.csv 实测 2 ~ 1000003 |
-| `var/grad/m/v` 总元素数 | 1 ~ 256M | cases.csv 实测 ~1M ~ ~50M (363×367×373, case 9) |
+| `var/grad/m/v` 总元素数 | 1 ~ 256M | cases.csv 实测 ~1M ~ ~47M  |
 | `lr` | 0.0 ~ 1.0 | cases.csv 实测 1e-4 ~ 0.1 |
 | `beta1` | 0.0 ~ 1.0 | cases.csv 实测 0.0 ~ 0.99；取值范围 `[0, 1)` |
 | `beta2` | 0.0 ~ 1.0 | cases.csv 实测 0.5 ~ 0.999；取值范围 `[0, 1)` |
@@ -161,53 +163,45 @@ def apply_adam_w(
     beta2: float,
     weight_decay: float,
     epsilon: float = 1e-8,
-    maximize: bool = False
+    step: int = 1,
+    maximize: bool = False,
 ) -> torch.Tensor:
     """
     AdamW 优化器实现，解耦权重衰减
 
     Args:
-        var: 变量张量（需要优化的参数）
-        grad: 梯度张量
-        m: 一阶矩张量（动量）
-        v: 二阶矩张量
-        lr: 学习率
-        beta1: 一阶矩估计的指数衰减率
-        beta2: 二阶矩估计的指数衰减率
-        weight_decay: 权重衰减系数（解耦）
-        epsilon: 数值稳定常数
+        var/grad/m/v: 四个 tensor 输入，shape/dtype 一致
+        lr/beta1/beta2/weight_decay/epsilon: 见上文
+        step: 当前优化步数 t，默认 1
         maximize: 是否最大化目标函数
 
     Returns:
         更新后的变量
     """
-    # 更新一阶矩（动量）
-    m.mul_(beta1).add_(grad, alpha=1 - beta1)
-    # 更新二阶矩
-    v.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
-
-    # 计算偏差修正的一阶矩和二阶矩
-    # 注意：实际使用时需要传入 timestep t，这里简化处理
-    bias_correction1 = 1 - beta1
-    bias_correction2 = 1 - beta2
-
-    m_hat = m / bias_correction1
-    v_hat = v / bias_correction2
-
-    # 计算更新量
-    update = m_hat / (v_hat.sqrt() + epsilon)
-
-    # 解耦的权重衰减
-    if weight_decay != 0:
-        update.add_(var, alpha=weight_decay)
-
-    # 应用更新
-    if maximize:
-        y = var + lr * update
+    input_dtype = var.dtype
+    if input_dtype in (torch.float16, torch.bfloat16):
+        compute_dtype = torch.float32
     else:
-        y = var - lr * update
+        compute_dtype = input_dtype
 
-    return y
+    var = var.to(compute_dtype)
+    grad = grad.to(compute_dtype)
+    m = m.to(compute_dtype)
+    v = v.to(compute_dtype)
+
+    m_new = beta1 * m + (1 - beta1) * grad
+    v_new = beta2 * v + (1 - beta2) * grad * grad
+    # 偏置校正：分母按 step 取指数
+    m_hat = m_new / (1 - beta1 ** step)
+    v_hat = v_new / (1 - beta2 ** step)
+    update = m_hat / (v_hat.sqrt() + epsilon)
+    if weight_decay != 0:
+        update = update + var * weight_decay
+    result = var + lr * update if maximize else var - lr * update
+
+    if input_dtype in (torch.float16, torch.bfloat16):
+        return result.to(input_dtype)
+    return result
 ```
 
 ## 6. 额外信息

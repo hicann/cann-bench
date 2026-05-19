@@ -47,14 +47,14 @@ $$
 ### 算子原型
 
 ```python
-cann_bench.cross_entropy_loss(Tensor x, Tensor target, str reduction, int ignore_index) -> Tensor loss
+cann_bench.cross_entropy_loss(Tensor input, Tensor target, str reduction="mean", int ignore_index=-100) -> Tensor loss
 ```
 
 ### 输入参数说明
 
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| x | Tensor | 必选 | 输入 logits 张量（未经 softmax） |
+| input | Tensor | 必选 | 输入 logits 张量（未经 softmax） |
 | target | Tensor | 必选 | 目标标签索引（hard labels）或概率分布（soft labels） |
 | reduction | string | "mean" | 损失聚合方式 ('none' \| 'mean' \| 'sum') |
 | ignore_index | int | -100 | 忽略的标签索引（不影响损失计算） |
@@ -63,7 +63,7 @@ cann_bench.cross_entropy_loss(Tensor x, Tensor target, str reduction, int ignore
 
 | 参数 | Shape | dtype | 描述 |
 |------|-------|-------|------|
-| loss | reduction='none' 时为 (N,)，否则为标量 | 与输入 x 相同 | 损失值 |
+| loss | reduction='none' 时为 (N,)，否则为标量 | 与 input 相同 | 损失值 |
 
 ### 数据类型
 

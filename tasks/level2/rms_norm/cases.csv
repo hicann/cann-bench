@@ -14,7 +14,7 @@ RmsNorm,12,"[[17, 255, 4097], [4097]]","[""bfloat16"", ""bfloat16""]","{""epsilo
 RmsNorm,13,"[[7, 1009, 1021], [1021]]","[""float16"", ""float16""]","{""epsilon"": ""1e-7""}","[-1, 1]",35.24,7.51,M-float16-7M-nonaligned-prime-hidden1021-epsilon1e7 | baseline_kernels: RmsNorm×1
 RmsNorm,14,"[[11, 367, 373], [373]]","[""float32"", ""float32""]","{""epsilon"": ""1e-5""}","[-10, 10]",24.06,3.14,S-float32-1M-nonaligned-prime-hidden373-epsilon1e5 | baseline_kernels: RmsNorm×1
 RmsNorm,15,"[[1000003, 2], [2]]","[""bfloat16"", ""bfloat16""]","{""epsilon"": ""1e-6""}","[""-inf"", ""inf""]",1136.82,2.33,S-bfloat16-2M-nonaligned-prime-inf-special | baseline_kernels: RmsNorm×1
-RmsNorm,16,"[[11, 13, 17, 67], [67]]","[""float16"", ""float16""]","{""epsilon"": ""1e-8""}","[""nan"", ""nan""]",10.66,0.17,S-float16-163K-nonaligned-prime-4D-nan-special | baseline_kernels: RmsNorm×1
+RmsNorm,16,"[[11, 13, 17, 67], [67]]","[""float16"", ""float16""]","{""epsilon"": ""1e-8""}","[""nan"", ""nan""]",10.66,1,S-float16-163K-nonaligned-prime-4D-nan-special | baseline_kernels: RmsNorm×1
 RmsNorm,17,"[[3, 7, 11, 4096], [4096]]","[""float32"", ""float32""]","{""epsilon"": ""1e-4""}","[0, 0]",10.9,1.98,S-float32-1M-nonaligned-prime-4D-zero-special-value | baseline_kernels: RmsNorm×1
 RmsNorm,18,"[[2, 511, 8192], [8192]]","[""bfloat16"", ""bfloat16""]","{""epsilon"": ""1e-6""}","[-0.2, 0.2]",30.48,8.73,M-bfloat16-8M-nonaligned-hidden8192-symmetric-tiny | baseline_kernels: RmsNorm×1
 RmsNorm,19,"[[4, 255, 4096], [4096]]","[""float16"", ""float16""]","{""epsilon"": ""1e-3""}","[-65504, 65504]",24.58,4.36,S-float16-4M-nonaligned-float16-boundary-epsilon1e3 | baseline_kernels: RmsNorm×1

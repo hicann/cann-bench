@@ -66,7 +66,12 @@ def gqa(
         j = torch.arange(S_kv, device=scores.device).unsqueeze(0)
         causal_mask = j > (i + (S_kv - S))  # 右下角对齐：上三角置 -inf
         scores = scores.masked_fill(causal_mask, float('-inf'))
+    # F217: 全 mask 行 (整行 = -inf) 在 softmax 时得 0/0 = NaN，对齐
+    # sparse_flash_attention 加显式保护 → 全 mask 行权重置 0。
+    scores_max = scores.max(dim=-1, keepdim=True).values
+    all_masked = torch.isinf(scores_max) & (scores_max < 0)
     attn_weights = torch.nn.functional.softmax(scores, dim=-1)
+    attn_weights = torch.where(all_masked, torch.zeros_like(attn_weights), attn_weights)
     attn_output = torch.matmul(attn_weights, v)
 
     # 转回 [B, S, N_q, D]

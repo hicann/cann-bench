@@ -30,7 +30,8 @@ def apply_adam_w(
     beta2: float,
     weight_decay: float,
     epsilon: float = 1e-8,
-    maximize: bool = False
+    step: int = 1,
+    maximize: bool = False,
 ) -> torch.Tensor:
     # 检测输入 dtype
     input_dtype = var.dtype
@@ -48,10 +49,12 @@ def apply_adam_w(
     m = m.to(compute_dtype)
     v = v.to(compute_dtype)
 
+    # Adam 偏置校正——按 step 取指数。step=1 时与旧公式 (1 - beta) 完全等价，
+    # 现有 cases 不传 step 时走 default=1 保持向后兼容。
     m_new = beta1 * m + (1 - beta1) * grad
     v_new = beta2 * v + (1 - beta2) * grad * grad
-    m_hat = m_new / (1 - beta1)
-    v_hat = v_new / (1 - beta2)
+    m_hat = m_new / (1 - beta1 ** step)
+    v_hat = v_new / (1 - beta2 ** step)
     update = m_hat / (v_hat.sqrt() + epsilon)
     if weight_decay != 0:
         update = update + var * weight_decay

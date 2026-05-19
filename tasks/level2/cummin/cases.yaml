@@ -16,7 +16,7 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-1, 1]
-  baseline_perf_us: 2631.55
+  baseline_perf_us: 2629.31
   t_hw_us: 1.092
   note: "S-float16-1M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -26,7 +26,7 @@ cases:
   dtype: [float32]
   attrs: {dim: -1}
   value_range: [-2, 2]
-  baseline_perf_us: 3765.38
+  baseline_perf_us: 3710.91
   t_hw_us: 8.738
   note: "M-float32-4M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -36,7 +36,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-3, 3]
-  baseline_perf_us: 11565.83
+  baseline_perf_us: 11432.97
   t_hw_us: 33.554
   note: "M-bfloat16-16M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -46,7 +46,7 @@ cases:
   dtype: [int32]
   attrs: {dim: -1}
   value_range: [-10000, 10000]
-  baseline_perf_us: 14267.02
+  baseline_perf_us: 13891.70
   t_hw_us: 145.403
   note: "L-int32-67M-对齐-对称中值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -56,7 +56,7 @@ cases:
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-100, 100]
-  baseline_perf_us: 56712.95
+  baseline_perf_us: 56047.64
   t_hw_us: 313.175
   note: "L-float16-268M-对齐-对称大值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1"
 - operator: Cummin
@@ -66,7 +66,7 @@ cases:
   dtype: [float32]
   attrs: {dim: 1}
   value_range: [-1000, 1000]
-  baseline_perf_us: 20517.61
+  baseline_perf_us: 20135.28
   t_hw_us: 145.403
   note: "L-float32-1G-对齐-对称大值域-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -76,7 +76,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-0.1, 0.1]
-  baseline_perf_us: 3194.32
+  baseline_perf_us: 3204.76
   t_hw_us: 1.744
   note: "S-bfloat16-1M-非对齐-对称微小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -86,7 +86,7 @@ cases:
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-1, 2]
-  baseline_perf_us: 3061.78
+  baseline_perf_us: 3055.64
   t_hw_us: 1.073
   note: "S-float16-1M-质数非对齐-非对称小值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1"
 - operator: Cummin
@@ -96,7 +96,7 @@ cases:
   dtype: [float32]
   attrs: {dim: -1}
   value_range: [-5, 10]
-  baseline_perf_us: 819.36
+  baseline_perf_us: 824.36
   t_hw_us: 2.462
   note: "S-float32-1M-非对齐-非对称中值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -106,7 +106,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: 1}
   value_range: [-50, 100]
-  baseline_perf_us: 4381.91
+  baseline_perf_us: 4373.59
   t_hw_us: 74.537
   note: "M-bfloat16-50M-质数非对齐-非对称大值域-3D-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -116,7 +116,7 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-65504, 65504]
-  baseline_perf_us: 1052.42
+  baseline_perf_us: 1058.70
   t_hw_us: 1.095
   note: "S-float16-1M-非对齐-float16边界值-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -126,7 +126,7 @@ cases:
   dtype: [float32]
   attrs: {dim: -1}
   value_range: [-88, 88]
-  baseline_perf_us: 6390.95
+  baseline_perf_us: 6412.19
   t_hw_us: 2.276
   note: "S-float32-1M-质数非对齐-float32边界值-4D-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -136,7 +136,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-.inf, .inf]
-  baseline_perf_us: 753747.10
+  baseline_perf_us: 749479.33
   t_hw_us: 3.333
   note: "S-bfloat16-1M-质数非对齐-inf特殊值-1D-dim=-1 | baseline_kernels: Cummin×1 + Cast×1"
 - operator: Cummin
@@ -146,7 +146,7 @@ cases:
   dtype: [float16]
   attrs: {dim: 2}
   value_range: [.nan, .nan]
-  baseline_perf_us: 629.11
+  baseline_perf_us: 626.09
   t_hw_us: 11.367
   note: "M-float16-10M-质数非对齐-nan特殊值-5D-dim=2 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -156,7 +156,7 @@ cases:
   dtype: [int32]
   attrs: {dim: -1}
   value_range: [0, 0]
-  baseline_perf_us: 2235.02
+  baseline_perf_us: 2246.61
   t_hw_us: 6.338
   note: "M-int32-3M-质数非对齐-零值-5D-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -166,7 +166,7 @@ cases:
   dtype: [float32]
   attrs: {dim: -1}
   value_range: [-0.5, 0.5]
-  baseline_perf_us: 3280.63
+  baseline_perf_us: 3270.78
   t_hw_us: 2.186
   note: "S-float32-1M-非对齐-对称微小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -176,7 +176,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: 0}
   value_range: [-1, 3]
-  baseline_perf_us: 585.37
+  baseline_perf_us: 592.35
   t_hw_us: 2.786
   note: "S-bfloat16-2M-非对齐-非对称小值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1"
 - operator: Cummin
@@ -186,7 +186,7 @@ cases:
   dtype: [float16]
   attrs: {dim: -1}
   value_range: [-1000, 1000]
-  baseline_perf_us: 1651.35
+  baseline_perf_us: 1659.83
   t_hw_us: 2.181
   note: "S-float16-2M-非对齐-对称大值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -196,7 +196,7 @@ cases:
   dtype: [float32]
   attrs: {dim: 1}
   value_range: [-0.2, 0.2]
-  baseline_perf_us: 1611.61
+  baseline_perf_us: 1618.59
   t_hw_us: 4.363
   note: "S-float32-2M-非对齐-对称微小值域-3D-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
 - operator: Cummin
@@ -206,6 +206,6 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: -1}
   value_range: [-3, 6]
-  baseline_perf_us: 6353.09
+  baseline_perf_us: 6353.19
   t_hw_us: 4.180
   note: "S-bfloat16-2M-非对齐-非对称中值域-3D-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"

@@ -84,7 +84,7 @@ cann_bench.exp(Tensor x, float base, float scale, float shift) -> Tensor y
 |---|---|---|
 | `x` 维度数 | 1 ~ 8 | cases.csv 实测 1D ~ 5D；逐元素算子，不限维度数 |
 | `x` 各维大小 | 1 ~ 1048576 | cases.csv 各维实测 2 ~ 8192（含 1D 张量长度 1000007） |
-| `x` 元素总数 | 1 ~ 268M | cases.csv 实测 1M ~ 268M |
+| `x` 元素总数 | 1 ~ 64M | cases.csv 实测 ~1M ~ 64M |
 | `base` | -1.0 ~ 1024.0 | cases.csv 实测 -1.0 / 1.0 / 2.0 / 10.0；≤ 0 时一律视为自然底数 e |
 | `scale` | -1024.0 ~ 1024.0 | cases.csv 实测 0.5 ~ 2.0 |
 | `shift` | -1024.0 ~ 1024.0 | cases.csv 实测 0.0 ~ 2.0 |

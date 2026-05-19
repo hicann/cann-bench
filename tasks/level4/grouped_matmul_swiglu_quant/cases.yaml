@@ -448,7 +448,7 @@ cases:
   - - 0.001
     - 0.01
   baseline_perf_us: 26.34
-  t_hw_us: 0.15
+  t_hw_us: 1
   note: "S-small-aligned-M=64-E=2-K=256-N=512-小规模冒烟 | baseline_kernels: TransData×1 + GroupedMatmulSwigluQuantV2×1"
 - operator: GroupedMatmulSwigluQuant
   case_id: 13

@@ -22,7 +22,7 @@ operator:
     required: true
   - name: align_corners
     type: BOOL
-    default: "false"
+    default: false
     description: 是否对齐角点
     required: false
   - name: scale_factor

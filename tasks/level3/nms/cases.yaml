@@ -311,7 +311,7 @@ cases:
   - - 0
     - 1
   baseline_perf_us: null
-  t_hw_us: 0.39
+  t_hw_us: 1
   note: S-float32-512-非对齐-iou=0.2-微小值域
 - operator: NMS
   case_id: 17

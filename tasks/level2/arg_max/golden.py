@@ -13,27 +13,19 @@
 
 import torch
 
-"""
-ArgMax 算子 Torch Golden 参考实现
 
-返回张量在指定维度上的最大值的索引
-公式: y = argmax(x, axis=dimension)
-"""
-def arg_max(
-    x: torch.Tensor, dimension: int
-) -> torch.Tensor:
-    """
-    返回张量在指定维度上的最大值的索引
+def arg_max(input: torch.Tensor, dim: int, keepdim: bool = False) -> torch.Tensor:
+    """ArgMax 算子 Torch Golden 参考实现 (P1 op, 对齐 torch.argmax).
 
-    公式: y = argmax(x, axis=dimension)
+    公式: indices = argmax(input, dim=dim)
+    返回最大值索引张量;若 keepdim=True 则保留 reduce 轴为 size 1,否则去掉该轴.
 
     Args:
-        x: 输入张量
-        dimension: 计算 argmax 的维度
+        input: 输入张量
+        dim: 计算 argmax 的维度
+        keepdim: 是否保留约简维度,默认 False
 
     Returns:
-        输出张量，最大值的索引（int64）
+        indices (int64): 最大值索引张量
     """
-
-    y = torch.argmax(x, dim=dimension)
-    return y
+    return torch.argmax(input, dim=dim, keepdim=keepdim)

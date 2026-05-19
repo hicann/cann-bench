@@ -12,32 +12,37 @@ operator:
   name: MhcSinkhorn
   category: VVFusion
   difficulty: L3
-  formula: P = Sinkhorn(exp(logits / temperature), n_iters)
-  description: MHC(Multi-Head Communication) Sinkhorn 算子，用于实现基于 Sinkhorn 迭代的软路由分配，常用于 MoE (Mixture of Experts) 模型中将 token 分配给不同专家
-  shape_support: 'logits: 3D [B, S, E]，B=batch, S=seq_len, E=num_experts'
+  formula: |
+    Iter 1:   comb = softmax(comb, dim=-1) + eps;  comb = comb / (col_sum + eps)
+    Iter 2..iter_step:  comb = comb / (row_sum + eps);  comb = comb / (col_sum + eps)
+  description: |
+    mHC (Manifold-Constrained Hyper-Connections) Sinkhorn 算子 — DeepSeek-V4
+    内部 hyper-connection stream 混合矩阵的双随机化投影。linear-domain 实现：
+    第 1 轮 row-softmax + eps 偏移并 column normalize，后续 iter_step-1 轮做
+    交替 row / column 归一化收敛到 Birkhoff Polytope 流形（doubly-stochastic）。
+    详见 arXiv:2512.24880。
+  shape_support: 'comb: [B, hc_mult, hc_mult]，inner 两维必须相等 (方阵)；B ∈ [1, 16384]，hc_mult ∈ [2, 16]，DSv4 实际取 hc_mult=4；fp32 only'
   attrs:
-  - name: temperature
-    type: float
-    default: 1.0
-    description: Sinkhorn 温度参数
-    required: false
-  - name: n_iters
+  - name: iter_step
     type: int
-    default: 3
-    description: Sinkhorn 迭代次数
+    default: 20
+    description: Sinkhorn 总迭代轮数 (1 ~ 40)；第 1 轮含 softmax，其余轮次为纯 row/col normalize。DSv4 production 默认 20
+    required: false
+  - name: eps
+    type: float
+    default: 1.0e-6
+    description: 数值稳定项，所有除法分母上加该常量；fp32 下典型 1e-6 ~ 1e-8
     required: false
   inputs:
-  - name: logits
-    description: 输入 logits 张量
+  - name: comb
+    description: 输入 hyper-connection 混合矩阵，shape [B, hc_mult, hc_mult]，inner 两维必须相等，fp32 only
     dtype:
-    - float16
     - float32
-    - bfloat16
+    shape: '[B, hc_mult, hc_mult]'
   outputs:
-  - name: routing_weights
-    description: Sinkhorn 迭代后的路由权重张量，与输入 shape 和 dtype 相同
+  - name: comb_out
+    description: Sinkhorn 迭代后的双随机方阵，shape 与输入完全一致 (fp32)
     dtype:
-    - float16
     - float32
-    - bfloat16
-  schema: mhc_sinkhorn(Tensor logits, float temperature, int n_iters) -> Tensor routing_weights
+    shape: '[B, hc_mult, hc_mult]'
+  schema: mhc_sinkhorn(Tensor comb, int iter_step=20, float eps=1e-6) -> Tensor comb_out

@@ -78,7 +78,7 @@ cann_bench.foreach_norm(Tensor[] x, float scalar) -> Tensor[] y
 | TensorList 长度（`L`） | 1 ~ 64 | cases.csv 实测 1 ~ 4 |
 | 每个张量维度数 | 1 ~ 8 | cases.csv 实测 1D ~ 5D |
 | 每个张量各维大小 | 1 ~ 1048576 | cases.csv 各维实测 2 ~ 1000003 |
-| 每个张量元素总数 | 1 ~ 268M | cases.csv 每个张量实测 ~1M ~ ~50M |
+| 每个张量元素总数 | 1 ~ 48M | cases.csv 每个张量实测 ~1M ~ ~47M |
 | `scalar`（范数阶数） | -1024.0 ~ 1024.0 | cases.csv 实测 -1.0 ~ 5.0（含 inf）；负阶或 0 阶时输入元素须非零 |
 
 ## 4. 精度要求

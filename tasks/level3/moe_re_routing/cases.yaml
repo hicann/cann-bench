@@ -24,7 +24,7 @@ cases:
   - [1, 128]       # expert_token_num_per_rank 元素范围
   - [-1, 1]
   baseline_perf_us: 6.50
-  t_hw_us: 0.55
+  t_hw_us: 1
   note: "S-float16-完整参数-带scales-rank8-expert8-H512 | baseline_kernels: MoeReRouting×1"
 
 # 中规模测试：tokens_num=16384
@@ -108,7 +108,7 @@ cases:
   - [1, 128]
   - [-1, 1]
   baseline_perf_us: 4.40
-  t_hw_us: 0.14
+  t_hw_us: 1
   note: "S-int8-完整参数-带scales-rank8-expert4-H256 | baseline_kernels: MoeReRouting×1"
 
 - operator: MoeReRouting
@@ -142,7 +142,7 @@ cases:
   - [1, 1024]
   - [-1, 1]
   baseline_perf_us: 19.28
-  t_hw_us: 0.55
+  t_hw_us: 1
   note: "S-float16-单rank-expert8 | baseline_kernels: MoeReRouting×1"
 
 # 单 expert
@@ -159,7 +159,7 @@ cases:
   - [1, 128]
   - [-1, 1]
   baseline_perf_us: 5.58
-  t_hw_us: 0.55
+  t_hw_us: 1
   note: "S-float16-rank8-单expert | baseline_kernels: MoeReRouting×1"
 
 # 大 expert 数
@@ -243,7 +243,7 @@ cases:
   - [1, 128]
   - [-10, 10]
   baseline_perf_us: 6.56
-  t_hw_us: 0.54
+  t_hw_us: 1
   note: "S-float16-质数tokens1009-rank8-expert8 | baseline_kernels: MoeReRouting×1"
 
 - operator: MoeReRouting
@@ -276,7 +276,7 @@ cases:
   - [1, 128]
   - [-0.1, 0.1]
   baseline_perf_us: 5.64
-  t_hw_us: 0.04
+  t_hw_us: 1
   note: "S-float16-小H32-rank8-expert8 | baseline_kernels: MoeReRouting×1"
 
 - operator: MoeReRouting
@@ -292,7 +292,7 @@ cases:
   - [1, 256]
   - null
   baseline_perf_us: 9.32
-  t_hw_us: 0.14
+  t_hw_us: 1
   note: "M-bfloat16-小H64-无scales-rank8-expert16 | baseline_kernels: MoeReRouting×1"
 
 # ========== 超大规模 ==========
@@ -343,5 +343,5 @@ cases:
   - [1, 16]
   - [-1, 1]
   baseline_perf_us: 3.32
-  t_hw_us: 0.01
+  t_hw_us: 1
   note: "XS-float16-最小规模-rank4-expert4-tokens64 | baseline_kernels: MoeReRouting×1"

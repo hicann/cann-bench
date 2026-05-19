@@ -13,8 +13,8 @@ operator:
   category: FusedComposite
   difficulty: L2
   formula: scaleOut = row_max(abs(x)) / 127, yOut = round(x / scaleOut)  # per-token, axis=-1
-  description: 对输入张量进行 per-token 对称动态量化 (沿 last-dim)。NPU API 只支持此路径，不暴露 axis 与 dst_type 参数。
-  shape_support: '输入 x: 2-8 维（NPU API 硬性要求 ≥ 2 维）'
+  description: 对输入张量进行 per-token 对称动态量化 (沿 last-dim)，输出量化张量 y 及每 token 反量化系数 scale。NPU API 不暴露 axis。
+  shape_support: '输入 x: 2-8 维（NPU API 硬性要求 ≥ 2 维）；输出 y: 同 x；输出 scale: x.shape[:-1]'
   # 量化算子输出 int8，允许 ±1 绝对误差（precision.py 行 427 整数容差路径）
   precision_thresholds:
     int8: 1.0
@@ -30,4 +30,8 @@ operator:
     description: 量化后的张量（int8，shape 与 x 一致）
     dtype:
     - int8
-  schema: dynamic_quant(Tensor x) -> Tensor y
+  - name: scale
+    description: 每 token 反量化系数 = row_max(abs(x)) / 127；下游 W8A8 / KV cache 反量化必需
+    dtype:
+    - float32
+  schema: dynamic_quant(Tensor x) -> (Tensor y, Tensor scale)

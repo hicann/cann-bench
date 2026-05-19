@@ -7,7 +7,7 @@ Add、RMSNorm 和动态量化的融合。
 **主要应用场景**：
 - 大语言模型推理中残差连接 + 归一化 + 量化的融合加速
 - Transformer 模型中 RMSNorm 前的残差加法与后处理量化一体化
-- INT8/INT4 低精度推理的动态量化预处理
+- INT8 低精度推理的动态量化预处理
 
 **算子特征**：
 - 难度等级：L3（FusedComposite）
@@ -25,15 +25,18 @@ $$
 具体步骤：
 
 1. **Add 操作**：$xOut = x_1 + x_2$
-2. **RMSNorm**：$\text{normalized} = \frac{xOut}{\sqrt{\text{mean}(xOut^2) + \epsilon}} \times \gamma$
-3. **动态量化**：根据 dst_type 将归一化结果量化为 INT8 或 INT4，同时输出量化 scale
+2. **RMSNorm**：$y_{norm} = \frac{xOut}{\sqrt{\text{mean}(xOut^2) + \epsilon}} \times \gamma$
+3. **Per-token 对称动态量化**（沿 last-dim）：
+   - $scaleOut = \frac{\max_{\text{last-dim}}(|y_{norm}|)}{127}$ — 反量化系数，shape = `x1.shape[:-1]`
+   - $y = \text{round}(y_{norm} / scaleOut)$ — int8，shape = `x1.shape`
+   - 下游算子用 $scaleOut$ 还原浮点：$x_{fp} = y \times scaleOut$
 
 ## 3. 接口规范
 
 ### 算子原型
 
 ```python
-cann_bench.add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float epsilon, int dst_type) -> (Tensor y, Tensor xOut, Tensor scaleOut)
+cann_bench.add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float epsilon) -> (Tensor y, Tensor xOut, Tensor scaleOut)
 ```
 
 ### 输入参数说明
@@ -44,33 +47,31 @@ cann_bench.add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float 
 | x2 | Tensor | 必选 | 第 2 个输入张量 |
 | gamma | Tensor | 必选 | 缩放参数 |
 | epsilon | float | 1e-6 | epsilon 值 |
-| dst_type | int | 0 | 目标数据类型 (0:DT_INT8, 1:DT_INT4) |
 
 ### 输出
 
 | 参数 | Shape | dtype | 描述 |
 |------|-------|-------|------|
-| y | 与输入 x1 相同 | int8 / int4 | 量化后的输出张量 |
+| y | 与输入 x1 相同 | int8 | 量化后的输出张量 |
 | xOut | 与输入 x1 相同 | float16 / bfloat16 | Add 结果，x1 + x2 |
-| scaleOut | 标量 | float32 | 量化使用的 scale 值 |
+| scaleOut | `x1.shape[:-1]` | float32 | 每 token 反量化系数（max/127）；下游 W8A8 / KV cache 反量化必需 |
 
 ### 数据类型
 
 | 输入 (x1, x2, gamma) dtype | 输出 y dtype | 输出 xOut dtype | 输出 scaleOut dtype |
 |---------------------------|-------------|----------------|-------------------|
-| float16 | int8 / int4 | float16 | float32 |
-| bfloat16 | int8 / int4 | bfloat16 | float32 |
-
-**注意**：INT4 量化（dst_type=1）的输出值范围为 [-8, 7]，由于 PyTorch 不支持 int4 dtype，实际存储为 int8 dtype。
+| float16 | int8 | float16 | float32 |
+| bfloat16 | int8 | bfloat16 | float32 |
 
 ### 规则与约束
 
 - x1 和 x2 的 shape 和 dtype 必须一致
 - gamma 的 dtype 须与 x1、x2 一致
 - x1 为 ND 格式
-- dst_type 取值：0 表示 DT_INT8，1 表示 DT_INT4
 - epsilon 用于 RMSNorm 的数值稳定性，默认 1e-6
-- scaleOut 为 float32 类型标量
+- scaleOut shape = `x1.shape[:-1]`，dtype = float32；语义为**反量化系数**（max/127），与 `dynamic_quant` 一致
+- 量化为对称量化（zero_point 恒为 0），scale 基于每 token last-dim 绝对值最大值
+- golden 加 `clamp(min=1e-12)` 防止全零输入触发 0/0 NaN
 
 ### 支持范围
 
@@ -81,7 +82,6 @@ cann_bench.add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float 
 | `M`（x1/x2 第 0 维，batch × seq） | 1 ~ 1048576 | cases.csv 实测 256 ~ 524288 |
 | `N`（x1/x2 最后一维，hidden size） | 1 ~ 16384 | cases.csv 实测 128 ~ 16384；x2 / gamma 最后一维须等于 N |
 | `epsilon` | 1e-12 ~ 1e-2 | cases.csv 实测 1e-6 ~ 1e-3；RMSNorm 数值稳定项，默认 1e-6 |
-| `dst_type` | {0, 1} | cases.csv 实测 0 / 1；0=DT_INT8，1=DT_INT4（值范围 [-8,7]，存储为 int8） |
 
 约束：x1、x2 形状与 dtype 须完全一致；gamma 形状为 `[N]` 且 dtype 与 x1 一致；归一化沿最后一维进行。
 
@@ -120,55 +120,39 @@ import torch
 """
 AddRmsNormDynamicQuant 算子 Torch Golden 参考实现
 
-Add、RMSNorm 和动态量化的融合
-公式：y, xOut, scaleOut = quantize(rmsnorm(x1 + x2) * gamma)
+Add、RMSNorm 和 per-token 对称动态量化的融合，对齐 torch_npu.npu_add_rms_norm_dynamic_quant：
+- scale 为 per-token 反量化系数 (max/127)，shape = x1.shape[:-1]，dtype = fp32
+- 下游算子拿 scale 还原浮点：x_fp = y_int8 * scale
 """
 def add_rms_norm_dynamic_quant(
     x1: torch.Tensor,
     x2: torch.Tensor,
     gamma: torch.Tensor,
     epsilon: float = 1e-6,
-    dst_type: int = 0
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """
-    Add、RMSNorm 和动态量化的融合
-
-    公式：y, xOut, scaleOut = quantize(rmsnorm(x1 + x2) * gamma)
-
-    Args:
-        x1: 第 1 个输入张量
-        x2: 第 2 个输入张量
-        gamma: 缩放参数
-        epsilon: epsilon 值
-        dst_type: 目标数据类型 (0:DT_INT8, 1:DT_INT4)
-
-    Returns:
-        y: 量化后的输出张量
-        xOut: Add 结果，x1 + x2
-        scaleOut: 量化使用的 scale 值
+    """公式:
+        xOut     = x1 + x2
+        y_norm   = xOut / sqrt(mean(xOut^2) + eps) * gamma
+        scaleOut = row_max(abs(y_norm)) / 127      # 反量化系数, shape = x1.shape[:-1]
+        yOut     = round(y_norm / scaleOut)         # int8, shape = x1.shape
     """
 
-    # Add 操作
+    out_dtype = x1.dtype
+    x1 = x1.to(torch.float32)
+    x2 = x2.to(torch.float32)
+    gamma = gamma.to(torch.float32)
+
     xOut = x1 + x2
-
-    # RMSNorm
     variance = xOut.pow(2).mean(-1, keepdim=True)
     rms = torch.sqrt(variance + epsilon)
-    normalized = xOut / rms
-    y_norm = normalized * gamma
+    y_norm = xOut / rms * gamma
 
-    # 动态量化
-    # 将 y_norm 转换为 float32 以保证 scale 计算精度和 dtype 正确
-    y_norm_f32 = y_norm.float()
+    abs_max = y_norm.abs().amax(dim=-1, keepdim=True)
+    scale_out = (abs_max.clamp(min=1e-12) / 127.0).to(torch.float32)
+    y = torch.clamp((y_norm / scale_out).round(), -128, 127).to(torch.int8)
+    scale = scale_out.squeeze(-1).to(torch.float32)
 
-    if dst_type == 0:  # INT8
-        scale = (127.0 / y_norm_f32.abs().max()).to(torch.float32)
-        y = torch.clamp((y_norm_f32 * scale.item()).round(), -128, 127).to(torch.int8)
-    else:  # INT4 (存储为 int8，值范围 [-8, 7])
-        scale = (7.0 / y_norm_f32.abs().max()).to(torch.float32)
-        y = torch.clamp((y_norm_f32 * scale.item()).round(), -8, 7).to(torch.int8)
-
-    return y, xOut, scale
+    return y, xOut.to(out_dtype), scale
 ```
 
 ## 6. 额外信息
@@ -183,6 +167,5 @@ x1 = torch.randn(2, 4096, dtype=torch.float16, device="npu")
 x2 = torch.randn(2, 4096, dtype=torch.float16, device="npu")
 gamma = torch.ones(4096, dtype=torch.float16, device="npu")
 
-y, xOut, scaleOut = cann_bench.add_rms_norm_dynamic_quant(x1, x2, gamma, 1e-6, 0)  # INT8 量化
-y, xOut, scaleOut = cann_bench.add_rms_norm_dynamic_quant(x1, x2, gamma, 1e-6, 1)  # INT4 量化
+y, xOut, scaleOut = cann_bench.add_rms_norm_dynamic_quant(x1, x2, gamma, 1e-6)  # INT8 量化
 ```

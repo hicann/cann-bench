@@ -130,20 +130,20 @@ def mla_pre(
 
 ### 支持范围
 
-输入 tensor 各维度与参数的支持范围：
+支持范围按照 CANN `aclnnMlaPrologV3` / `torch_npu.npu_mla_prolog_v3` 的官方约束设定，保证本算子是 CANN 仓的子集：
 
-| 维度 / 参数 | 范围 | 备注 |
+| 维度 / 参数 | 支持值 | 备注 |
 |---|---|---|
-| `B`（batch，token_x[0]） | 1 ~ 256 | cases.csv 实测 1 ~ 128 |
-| `S`（序列长度，token_x[1]） | 1 ~ 512 | cases.csv 实测 1 ~ 256；S ≥ 1，不支持空序列 |
-| `He`（hidden size，token_x[2] / w_dq[0] / w_dkv_kr[0]） | 1024 ~ 8192 | cases.csv 实测 5120（DSv2）和 7168（DSv3） |
-| `Hcq`（query 压缩维，w_dq[1] / w_uq_qr[0] / γ_cq） | 256 ~ 2048 | cases.csv 实测固定 1536 |
-| `N`（注意力头数，n_heads / w_uk[0]） | 8 ~ 256 | cases.csv 实测固定 128；须与 w_uk[0] 一致 |
-| `D`（每头 query/key 内容维，w_uk[1]） | 16 ~ 256 | cases.csv 实测固定 128；须为 16 的倍数（CUBE 对齐） |
-| `Hckv`（KV 压缩维，w_uk[2] / γ_ckv） | 64 ~ 1024 | cases.csv 实测固定 512 |
-| `Dr`（RoPE 维度，rope_sin[2] / rope_cos[2]） | 16 ~ 128 | cases.csv 实测固定 64；须为偶数（rotate_half 对半分割） |
-| `w_uq_qr[1]` | = N \* (D + Dr) | cases.csv 实测固定 24576 = 128 \* (128 + 64） |
-| `w_dkv_kr[1]` | = Hckv + Dr | cases.csv 实测固定 576 = 512 + 64 |
+| `B`（batch，token_x[0]） | 1 ~ 128 | CANN 上限 65536；cases.csv 实测 1 ~ 128 |
+| `S`（序列长度，token_x[1]） | **1 ~ 16** | CANN 文档硬约束 S ∈ [0, 16]；S ≥ 1（不支持空序列） |
+| `He`（hidden，token_x[2] / w_dq[0] / w_dkv_kr[0]） | **{6144, 7168, 7680}** | CANN 文档枚举值；cases.csv 实测 6144（compact）与 7168（DSv3） |
+| `Hcq`（query 压缩维，w_dq[1] / w_uq_qr[0] / γ_cq） | **固定 1536** | CANN 文档固定值 |
+| `N`（注意力头数，n_heads / w_uk[0]） | **{1, 2, 4, 8, 16, 32, 64, 128}** | CANN 文档枚举值；cases.csv 实测固定 128 |
+| `D`（每头 query/key 内容维，w_uk[1]） | **固定 128** | CANN 文档固定值 |
+| `Hckv`（KV 压缩维，w_uk[2] / γ_ckv） | **固定 512** | CANN 文档固定值 |
+| `Dr`（RoPE 维度，rope_sin[2] / rope_cos[2]） | **固定 64** | CANN 文档固定值 |
+| `w_uq_qr[1]` | = N \* (D + Dr) | cases.csv 实测 24576 = 128 \* (128 + 64） |
+| `w_dkv_kr[1]` | = Hckv + Dr | cases.csv 实测 576 = 512 + 64 |
 | `rmsnorm_epsilon_cq` | 1e-8 ~ 1e-3 | cases.csv 实测 1e-6 / 1e-5（默认 1e-5），必须 > 0 |
 | `rmsnorm_epsilon_ckv` | 1e-8 ~ 1e-3 | cases.csv 实测 1e-8 / 1e-5（默认 1e-5），必须 > 0 |
 | 输入数值范围 | [-1, 1] 典型 | cases.csv 实测 [-1, 1]（19 case）和 [0, 0]（zero-input 1 case） |
@@ -152,6 +152,8 @@ def mla_pre(
 - 所有 9 个 Tensor 输入 dtype 必须为 `bfloat16`
 - 维度一致性：`w_dq[0] == w_dkv_kr[0] == He`、`w_dq[1] == w_uq_qr[0] == len(γ_cq) == Hcq`、`w_uk[2] == len(γ_ckv) == Hckv`、`rope_sin.shape == rope_cos.shape == [B, S, Dr]`
 - `w_uq_qr[1]` 必须能整除为 `N * (D + Dr)`，由调用方保证（算子根据 `n_heads` 与 `w_uk` 推断 D、Dr）
+
+> 说明：CANN 内部 KV cache 维度（Nkv 固定 1、BlockSize ∈ {16, 128}）由调用方在工程侧管理，不属于本算子输入；本算子约束仅覆盖前向计算所需的 9 个 Tensor 与 `n_heads` / `epsilon` 参数。
 
 ## 4. 计算流程
 
@@ -213,10 +215,10 @@ def mla_pre(
 ### 输入约束
 
 - 所有 Tensor 输入 dtype 为 bfloat16
-- D（每头 query/key 内容维度）需为 **16 的倍数**（CUBE 对齐要求）
-- Dr（RoPE 维度）需为**偶数**（rotate_half 对半分割要求）
-- n_heads 须为正整数，N \* (D + Dr) 必须与 w_uq_qr 的第二维一致
-- S ≥ 1（不支持空序列）
+- **S ∈ [1, 16]**（CANN `aclnnMlaPrologV3` 文档硬约束；S ≥ 1 排除空序列）
+- **He ∈ {6144, 7168, 7680}**（CANN 文档枚举值）
+- **D 固定 128，Dr 固定 64，Hcq 固定 1536，Hckv 固定 512**（CANN 文档固定值；权重 shape 必须严格匹配）
+- N ∈ {1, 2, 4, 8, 16, 32, 64, 128}，且 N \* (D + Dr) 必须与 w_uq_qr 的第二维一致
 
 ### 维度一致性
 

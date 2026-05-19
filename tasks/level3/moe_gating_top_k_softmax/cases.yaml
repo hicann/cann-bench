@@ -20,7 +20,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: 14.00
-  t_hw_us: 0.03
+  t_hw_us: 1
   note: "S-float16-2D-无finished-tokens1024-experts16-k2 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 中规模 2D
@@ -88,7 +88,7 @@ cases:
   - [-1, 1]
   - [0, 1]
   baseline_perf_us: 15.88
-  t_hw_us: 0.03
+  t_hw_us: 1
   note: "S-float16-2D-带finished-tokens1024-experts16-k2 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 3D 带 finished
@@ -103,7 +103,7 @@ cases:
   - [-2, 2]
   - [0, 1]
   baseline_perf_us: 18.28
-  t_hw_us: 0.28
+  t_hw_us: 1
   note: "M-float32-3D-带finished-B4-tokens1024-experts32-k4 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 大规模带 finished
@@ -157,7 +157,7 @@ cases:
   value_range:
   - [-10, 10]
   baseline_perf_us: 13.70
-  t_hw_us: 0.07
+  t_hw_us: 1
   note: "S-float16-2D-质数tokens1009-experts32-k4 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 质数 experts
@@ -197,7 +197,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: 7.88
-  t_hw_us: 0.00
+  t_hw_us: 1
   note: "XS-float16-2D-最小tokens64-experts8-k2 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 最小 experts
@@ -210,7 +210,7 @@ cases:
   value_range:
   - [-0.1, 0.1]
   baseline_perf_us: 21.28
-  t_hw_us: 0.01
+  t_hw_us: 1
   note: "S-float32-2D-最小experts4-tokens1024-k2 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # k=1 最小值
@@ -223,7 +223,7 @@ cases:
   value_range:
   - [-1, 1]
   baseline_perf_us: 10.60
-  t_hw_us: 0.02
+  t_hw_us: 1
   note: "XS-bfloat16-2D-k最小值1-tokens512-experts16 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # ========== 边界值和特殊值测试 ==========
@@ -263,7 +263,7 @@ cases:
   value_range:
   - [-0.01, 0.01]
   baseline_perf_us: 13.90
-  t_hw_us: 0.07
+  t_hw_us: 1
   note: "S-float16-2D-微小值域-tokens1024-experts32-k4 | baseline_kernels: MoeGatingTopKSoftmax×1"
 
 # 零值测试
@@ -276,5 +276,5 @@ cases:
   value_range:
   - [0, 0]
   baseline_perf_us: 12.04
-  t_hw_us: 0.07
+  t_hw_us: 1
   note: "XS-bfloat16-2D-零值输入-tokens512-experts64-k8 | baseline_kernels: MoeGatingTopKSoftmax×1"

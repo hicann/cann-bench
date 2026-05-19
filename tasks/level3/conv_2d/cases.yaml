@@ -25,7 +25,7 @@ cases:
   - [-1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: 26.24
-  t_hw_us: 0.427
+  t_hw_us: 1
   note: 'S-float16-256K-对齐-3x3k-same_pad | baseline_kernels: TransData×2 + MemSet×1
     + Conv2D×1'
 - operator: Conv2D
@@ -137,7 +137,7 @@ cases:
   - [-0.1, 0.1]
   - [-0.01, 0.01]
   baseline_perf_us: 26.1
-  t_hw_us: 0.582
+  t_hw_us: 1
   note: 'S-float16-200K-质数非对齐-微小值域 | baseline_kernels: TransData×2 + MemSet×1 + Conv2D×1'
 - operator: Conv2D
   case_id: 8
@@ -173,7 +173,7 @@ cases:
   - [-5, 10]
   - [-0.5, 0.5]
   baseline_perf_us: 32.06
-  t_hw_us: 0.135
+  t_hw_us: 1
   note: 'S-bfloat16-50K-质数非对齐-stride=2 | baseline_kernels: TransData×3 + MemSet×1
     + Cast×1 + Conv2D×1'
 - operator: Conv2D
@@ -211,7 +211,7 @@ cases:
   - [-10, 10]
   - [-1, 1]
   baseline_perf_us: 27.12
-  t_hw_us: 0.468
+  t_hw_us: 1
   note: 'S-float16-500K-非对齐-float16边界值 | baseline_kernels: TransData×2 + MemSet×1
     + Conv2D×1'
 - operator: Conv2D
@@ -230,7 +230,7 @@ cases:
   - [-0.5, 0.5]
   - [-0.05, 0.05]
   baseline_perf_us: 13.9
-  t_hw_us: 0.008
+  t_hw_us: 1
   note: 'S-float32-10K-质数非对齐-float32边界值 | baseline_kernels: TransData×3 + Conv2D×1'
 - operator: Conv2D
   case_id: 13
@@ -266,7 +266,7 @@ cases:
   - [.nan, .nan]
   - [.nan, .nan]
   baseline_perf_us: 24.48
-  t_hw_us: 0.006
+  t_hw_us: 1
   note: 'S-float16-5K-质数非对齐-nan特殊值 | baseline_kernels: TransData×2 + MemSet×1 + Conv2D×1'
 - operator: Conv2D
   case_id: 15
@@ -284,7 +284,7 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: 32.16
-  t_hw_us: 0.776
+  t_hw_us: 1
   note: 'S-bfloat16-400K-非对齐-零值 | baseline_kernels: TransData×3 + MemSet×1 + Cast×1
     + Conv2D×1'
 - operator: Conv2D
@@ -303,7 +303,7 @@ cases:
   - [-0.5, 0.5]
   - [-0.05, 0.05]
   baseline_perf_us: 25.16
-  t_hw_us: 0.400
+  t_hw_us: 1
   note: 'S-float16-200K-混合非对齐-微小值域 | baseline_kernels: TransData×2 + MemSet×1 + Conv2D×1'
 - operator: Conv2D
   case_id: 17
@@ -358,7 +358,7 @@ cases:
   - [-0.2, 0.2]
   - [-0.02, 0.02]
   baseline_perf_us: 26.7
-  t_hw_us: 0.188
+  t_hw_us: 1
   note: 'S-float16-100K-质数非对齐-微小值域 | baseline_kernels: TransData×2 + MemSet×1 + Conv2D×1'
 - operator: Conv2D
   case_id: 20

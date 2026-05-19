@@ -319,7 +319,7 @@ cases:
   - [-128, 127]
   - [0.001, 0.01]
   baseline_perf_us: null
-  t_hw_us: 0.76
+  t_hw_us: 1
   note: non-aligned-K=513-fp16
 
 # N 非对齐
@@ -354,7 +354,7 @@ cases:
   - [-128, 127]
   - [0.001, 0.01]
   baseline_perf_us: null
-  t_hw_us: 0.07
+  t_hw_us: 1
   note: small-smoke-M=32
 
 # 大规模

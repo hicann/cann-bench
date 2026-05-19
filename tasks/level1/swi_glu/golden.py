@@ -12,43 +12,29 @@
 # ----------------------------------------------------------------------------------------------------------
 
 import torch
+import torch.nn.functional as F
 
-"""
-SwiGlu算子Torch Golden参考实现
 
-采用Swish作为激活函数的GLU变体，输入在第-1维拆分成x0和x1两部分
-公式: y = swish(x0) * x1 = x0 * sigmoid(beta * x0) * x1
-"""
-def swi_glu(
-    x: torch.Tensor, scalarValue: float
-) -> torch.Tensor:
-    """
-    采用Swish作为激活函数的GLU变体，输入在第-1维拆分成x0和x1两部分
+def swi_glu(input: torch.Tensor, dim: int = -1) -> torch.Tensor:
+    """标准 SwiGLU 激活的 Torch Golden 参考实现 (P2 op).
 
-    公式: y = swish(x0) * x1 = x0 * sigmoid(beta * x0) * x1
+    公式: output = silu(x0) * x1 = (x0 * sigmoid(x0)) * x1
+    其中 x0, x1 = input.chunk(2, dim=dim).
+
+    标准 SwiGLU (Shazeer 2020 / Llama / PaLM) 固定 Swish 的 beta = 1
+    (即等价于 SiLU),没有可调 beta 参数。aclnnSwiGlu / torch_npu.npu_swiglu
+    也是同样定义,本 spec 与之对齐。
 
     Args:
-        x: 输入张量，会在-1维拆分成x0和x1
-        scalarValue: Swish激活函数的beta参数
+        input: 输入张量,dim 维度上 size 必须是偶数
+        dim: 拆分维度,默认 -1
 
     Returns:
-        输出张量，形状为输入shape除以2
+        output: 与 input 同 dtype/shape 但 dim 维度大小减半
     """
-
-    # 在最后一维拆分为两部分
-    last_dim_size = x.shape[-1]
-
-    # FP16/BF16需要升高精度到FP32计算
-    out_dtype = x.dtype
-    x = x.to(torch.float)
-
-    # 对于奇数维度，只取前偶数个元素进行拆分，确保两部分大小一致
-    if last_dim_size % 2 != 0:
-        # 取前 floor(n/2)*2 个元素
-        usable_size = (last_dim_size // 2) * 2
-        x = x[..., :usable_size]
-
-    x0, x1 = x.chunk(2, dim=-1)
-    swish = x0 * torch.sigmoid(scalarValue * x0)
-    y = swish * x1
-    return y.to(out_dtype)
+    # FP16/BF16 升精度计算,与 ACLNN 内部一致.
+    out_dtype = input.dtype
+    x = input.to(torch.float)
+    x0, x1 = x.chunk(2, dim=dim)
+    output = F.silu(x0) * x1
+    return output.to(out_dtype)

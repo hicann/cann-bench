@@ -56,11 +56,11 @@ def dilation_2d(
     effective_filter_w = (filter_w - 1) * rate_w + 1
 
     if padding_mode == 'SAME':
+        # SAME 模式的输出尺寸由 TF/TensorFlow 语义固定为 ceil(in/stride)，与 ceil_mode 参数无关；
+        # 原代码在 SAME 下叠加 ceil_mode 会导致 (in - 1) % stride != 0 时输出多 1
+        # (F205 P0)。ceil_mode 仅在 VALID / else 分支生效。
         out_h = (in_h + stride_h - 1) // stride_h
         out_w = (in_w + stride_w - 1) // stride_w
-        if ceil_mode:
-            out_h = (in_h + stride_h - 1) // stride_h + (1 if (in_h - 1) % stride_h else 0)
-            out_w = (in_w + stride_w - 1) // stride_w + (1 if (in_w - 1) % stride_w else 0)
         pad_h = max((out_h - 1) * stride_h + effective_filter_h - in_h, 0)
         pad_w = max((out_w - 1) * stride_w + effective_filter_w - in_w, 0)
         pad_top = pad_h // 2

@@ -29,7 +29,7 @@ cases:
   - [-1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: null
-  t_hw_us: 0.21
+  t_hw_us: 1
   note: "S-float16-256K-对齐-3x3k-groups=64"
 - operator: DepthwiseConv2D
   case_id: 2
@@ -161,7 +161,7 @@ cases:
   - [-0.1, 0.1]
   - [-0.01, 0.01]
   baseline_perf_us: null
-  t_hw_us: 0.29
+  t_hw_us: 1
   note: "S-float16-200K-质数非对齐-微小值域"
 - operator: DepthwiseConv2D
   case_id: 8
@@ -205,7 +205,7 @@ cases:
   - [-5, 10]
   - [-0.5, 0.5]
   baseline_perf_us: null
-  t_hw_us: 0.17
+  t_hw_us: 1
   note: "S-bfloat16-50K-质数非对齐-stride=2"
 - operator: DepthwiseConv2D
   case_id: 10
@@ -249,7 +249,7 @@ cases:
   - [-65504, 65504]
   - [-100, 100]
   baseline_perf_us: null
-  t_hw_us: 0.22
+  t_hw_us: 1
   note: "S-float16-500K-非对齐-float16边界值"
 - operator: DepthwiseConv2D
   case_id: 12
@@ -271,7 +271,7 @@ cases:
   - [-88, 88]
   - [-10, 10]
   baseline_perf_us: null
-  t_hw_us: 0.01
+  t_hw_us: 1
   note: "S-float32-10K-质数非对齐-float32边界值"
 - operator: DepthwiseConv2D
   case_id: 13
@@ -293,7 +293,7 @@ cases:
   - [-.inf, .inf]
   - [-.inf, .inf]
   baseline_perf_us: null
-  t_hw_us: 0.38
+  t_hw_us: 1
   note: "S-float32-200K-非对齐-inf特殊值"
 - operator: DepthwiseConv2D
   case_id: 14
@@ -315,7 +315,7 @@ cases:
   - [.nan, .nan]
   - [.nan, .nan]
   baseline_perf_us: null
-  t_hw_us: 0.01
+  t_hw_us: 1
   note: "S-float16-5K-质数非对齐-nan特殊值"
 - operator: DepthwiseConv2D
   case_id: 15
@@ -337,7 +337,7 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: null
-  t_hw_us: 0.77
+  t_hw_us: 1
   note: "S-bfloat16-400K-非对齐-零值"
 - operator: DepthwiseConv2D
   case_id: 16
@@ -359,7 +359,7 @@ cases:
   - [-0.5, 0.5]
   - [-0.05, 0.05]
   baseline_perf_us: null
-  t_hw_us: 0.19
+  t_hw_us: 1
   note: "S-float16-200K-混合非对齐-微小值域"
 - operator: DepthwiseConv2D
   case_id: 17
@@ -425,7 +425,7 @@ cases:
   - [-0.2, 0.2]
   - [-0.02, 0.02]
   baseline_perf_us: null
-  t_hw_us: 0.19
+  t_hw_us: 1
   note: "S-float16-100K-质数非对齐-微小值域"
 - operator: DepthwiseConv2D
   case_id: 20

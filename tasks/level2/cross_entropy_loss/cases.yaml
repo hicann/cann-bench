@@ -19,7 +19,7 @@ cases:
   value_range:
   - [-1, 1]
   - [0, 2047]
-  baseline_perf_us: 75.02
+  baseline_perf_us: 76.38
   t_hw_us: 2.19
   note: "S-float16-int64_target-2M-对齐-对称小值域-mean | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -32,7 +32,7 @@ cases:
   value_range:
   - [-2, 2]
   - [0, 4095]
-  baseline_perf_us: 105.84
+  baseline_perf_us: 103.16
   t_hw_us: 17.48
   note: "M-float32-int64_target-8M-对齐-对称小值域-mean | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -45,7 +45,7 @@ cases:
   value_range:
   - [-3, 3]
   - [0, 8191]
-  baseline_perf_us: 256.69
+  baseline_perf_us: 254.69
   t_hw_us: 34.97
   note: "M-bfloat16-int64_target-33M-对齐-对称小值域-mean | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -58,7 +58,7 @@ cases:
   value_range:
   - [-10, 10]
   - [0, 16383]
-  baseline_perf_us: 1685.83
+  baseline_perf_us: 1672.27
   t_hw_us: 139.84
   note: "L-float16-134M-对齐-对称中值域-sum | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -71,9 +71,9 @@ cases:
   value_range:
   - [-100, 100]
   - [0, 16383]
-  baseline_perf_us: null
+  baseline_perf_us: 599.63
   t_hw_us: 139.83
-  note: L-float32-536M-对齐-对称大值域-none
+  note: 'L-float32-536M-对齐-对称大值域-none | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + NLLLoss×1'
 - operator: CrossEntropyLoss
   case_id: 6
   input_shape:
@@ -84,7 +84,7 @@ cases:
   value_range:
   - [-0.1, 0.1]
   - [0, 2046]
-  baseline_perf_us: 79.48
+  baseline_perf_us: 78.86
   t_hw_us: 2.19
   note: "S-bfloat16-2M-非对齐-对称微小值域-ignore_index=-1 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -97,7 +97,7 @@ cases:
   value_range:
   - [-1, 2]
   - [0, 1020]
-  baseline_perf_us: 70.52
+  baseline_perf_us: 69.76
   t_hw_us: 1.08
   note: "S-float16-1M-质数非对齐-ignore_index=0 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -110,7 +110,7 @@ cases:
   value_range:
   - [-5, 10]
   - [0, 768]
-  baseline_perf_us: 61.56
+  baseline_perf_us: 63.18
   t_hw_us: 2.47
   note: "S-float32-1M-非对齐-ignore_index=100 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -123,7 +123,7 @@ cases:
   value_range:
   - [-50, 100]
   - [0, 372]
-  baseline_perf_us: 1401.59
+  baseline_perf_us: 1393.19
   t_hw_us: 58.11
   note: "M-bfloat16-50M-质数非对齐-3D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -136,7 +136,7 @@ cases:
   value_range:
   - [-400, 400]
   - [0, 512]
-  baseline_perf_us: 73.78
+  baseline_perf_us: 73.36
   t_hw_us: 1.1
   note: "S-float16-1M-非对齐-float16边界值 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -149,7 +149,7 @@ cases:
   value_range:
   - [-88, 88]
   - [0, 4000]
-  baseline_perf_us: 242.65
+  baseline_perf_us: 239.28
   t_hw_us: 2.28
   note: "S-float32-1M-质数非对齐-float32边界值-4D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -162,7 +162,7 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 1]
-  baseline_perf_us: 787.69
+  baseline_perf_us: 786.86
   t_hw_us: 6.25
   note: "M-bfloat16-2M-质数非对齐-大值域-二分类 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -175,7 +175,7 @@ cases:
   value_range:
   - [-10, 10]
   - [0, 66]
-  baseline_perf_us: 431.77
+  baseline_perf_us: 429.05
   t_hw_us: 12.89
   note: "M-float16-10M-质数非对齐-常规值域-5D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -188,7 +188,7 @@ cases:
   value_range:
   - [0, 0]
   - [0, 1012]
-  baseline_perf_us: 194.60
+  baseline_perf_us: 195.50
   t_hw_us: 6.35
   note: "M-float32-3M-质数非对齐-logits=0特殊值-5D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -201,7 +201,7 @@ cases:
   value_range:
   - [-0.5, 0.5]
   - [0, 2048]
-  baseline_perf_us: 65.18
+  baseline_perf_us: 63.04
   t_hw_us: 1.09
   note: "S-bfloat16-1M-非对齐-对称微小值域 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -214,7 +214,7 @@ cases:
   value_range:
   - [-1, 3]
   - [0, 8192]
-  baseline_perf_us: 69.20
+  baseline_perf_us: 69.54
   t_hw_us: 2.18
   note: "S-float16-2M-非对齐-ignore_index=50-sum | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -227,9 +227,9 @@ cases:
   value_range:
   - [-1000, 1000]
   - [0, 510]
-  baseline_perf_us: null
+  baseline_perf_us: 41.12
   t_hw_us: 4.38
-  note: S-float32-2M-非对齐-对称大值域-none
+  note: 'S-float32-2M-非对齐-对称大值域-none | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + NLLLoss×1'
 - operator: CrossEntropyLoss
   case_id: 18
   input_shape:
@@ -240,7 +240,7 @@ cases:
   value_range:
   - [-0.2, 0.2]
   - [0, 2048]
-  baseline_perf_us: 188.74
+  baseline_perf_us: 186.60
   t_hw_us: 2.44
   note: "S-bfloat16-2M-非对齐-对称微小值域-3D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -253,7 +253,7 @@ cases:
   value_range:
   - [-3, 6]
   - [0, 2048]
-  baseline_perf_us: 202.68
+  baseline_perf_us: 200.46
   t_hw_us: 2.44
   note: "S-float16-2M-非对齐-ignore_index=10 | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Cast×4 + Transpose×1 + MemSet×1 + NLLLoss×1"
 - operator: CrossEntropyLoss
@@ -266,6 +266,6 @@ cases:
   value_range:
   - [-20, 40]
   - [0, 100]
-  baseline_perf_us: 302.89
+  baseline_perf_us: 300.11
   t_hw_us: 22.41
   note: "M-float32-10M-非对齐-非对称大值域-5D | baseline_kernels: LogSoftmaxV2×1 + OnesLike×1 + Transpose×1 + MemSet×1 + NLLLoss×1"

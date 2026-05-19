@@ -17,7 +17,7 @@ operator:
     或带 weight: L = -weight[target] * log(exp(x[target]) / sum(exp(x)))
   description: 计算交叉熵损失，用于分类任务
   shape_support: |
-    x (input): (N, C) 或 (N, C, d1, d2, ...) - channel_first 约定，C 为类别维度
+    input: (N, C) 或 (N, C, d1, d2, ...) - channel_first 约定，C 为类别维度
     target: (N,) 或 (N, d1, d2, ...) 硬标签，或 (N, C) 软标签
   attrs:
   - name: reduction
@@ -31,7 +31,7 @@ operator:
     description: 忽略的标签索引（不影响损失计算）
     required: false
   inputs:
-  - name: x
+  - name: input
     description: 输入 logits 张量（未经 softmax）
     dtype:
     - float32
@@ -52,4 +52,4 @@ operator:
     - float32
     - float16
     - bfloat16
-  schema: cross_entropy_loss(Tensor x, Tensor target, str reduction, int ignore_index) -> Tensor loss
+  schema: cross_entropy_loss(Tensor input, Tensor target, str reduction="mean", int ignore_index=-100) -> Tensor loss

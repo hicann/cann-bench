@@ -159,12 +159,17 @@ def rms_norm(
         >>> gamma = torch.ones(4096)
         >>> y = rms_norm(x, gamma, epsilon=1e-6)
     """
+    # fp16 / bf16 输入升 fp32 计算，避免 |x|>256 时 x**2 溢出
+    out_dtype = x.dtype
+    if out_dtype in (torch.float16, torch.bfloat16):
+        x = x.to(torch.float32)
+        gamma = gamma.to(torch.float32)
     # 计算均方根
     rms = torch.sqrt(torch.mean(x ** 2, dim=-1, keepdim=True) + epsilon)
     # 归一化并乘以缩放参数
     y = x / rms * gamma
 
-    return y
+    return y.to(out_dtype)
 ```
 
 ## 6. 额外信息

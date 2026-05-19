@@ -79,13 +79,10 @@ def engram_gate_fusion(
     if conv_state is not None:
         assert conv_state.shape == (B, HC * D, state_len)
 
-    # 计算精度：不低于 FP32，根据输入精度自适应
+    # 计算精度：所有路径下都用 FP32 做内部计算（消除半精度累积误差）；
+    # 输出再转回 input_dtype。
     input_dtype = keys.dtype
     output_dtype = input_dtype
-    if input_dtype == torch.bfloat16:
-        compute_dtype = torch.float32
-    else:
-        compute_dtype = input_dtype
     compute_dtype = torch.float32
 
     def rms_norm(x, w, eps):

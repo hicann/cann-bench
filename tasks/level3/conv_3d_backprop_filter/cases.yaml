@@ -123,7 +123,7 @@ cases:
   - [-1000, 1000]
   - [-1000, 1000]
   baseline_perf_us: 46.76
-  t_hw_us: 0.8192
+  t_hw_us: 1
   note: 'S-bfloat16-900K-质数非对齐-1x1x1k-valid | baseline_kernels: TransData×3 + MemSet×1
     + Conv3DBackpropFilter×1'
 - operator: Conv3DBackpropFilter
@@ -180,7 +180,7 @@ cases:
   - [-5, 10]
   - [-5, 10]
   baseline_perf_us: 52.16
-  t_hw_us: 0.8827
+  t_hw_us: 1
   note: 'S-bfloat16-100K-质数非对齐-stride非对称 | baseline_kernels: TransData×3 + MemSet×1
     + Conv3DBackpropFilter×1'
 - operator: Conv3DBackpropFilter
@@ -278,7 +278,7 @@ cases:
   - [.nan, .nan]
   - [.nan, .nan]
   baseline_perf_us: 38.18
-  t_hw_us: 0.0816
+  t_hw_us: 1
   note: 'S-float16-20K-质数非对齐-nan特殊值 | baseline_kernels: TransData×3 + MemSet×1 + Conv3DBackpropFilter×1'
 - operator: Conv3DBackpropFilter
   case_id: 15
@@ -314,7 +314,7 @@ cases:
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 60.28
-  t_hw_us: 0.3199
+  t_hw_us: 1
   note: 'S-float16-1M-混合非对齐-微小值域 | baseline_kernels: TransData×4 + MemSet×2 + Conv3DBackpropFilter×1'
 - operator: Conv3DBackpropFilter
   case_id: 17

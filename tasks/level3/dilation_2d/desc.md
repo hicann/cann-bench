@@ -43,7 +43,7 @@ cann_bench.dilation_2d(Tensor x, Tensor filter, int[] strides, int[] rates, str 
 | rates | int[] | 必选 | 膨胀率 [1, rate_h, rate_w, 1]，首尾固定为1，用于空洞膨胀 |
 | padding_mode | str | "SAME" | 填充模式：'SAME' 或 'VALID' |
 | pads | int[] | [0, 0, 0, 0] | 填充值 [pad_top, pad_bottom, pad_left, pad_right] |
-| ceil_mode | bool | False | 是否向上取整计算输出尺寸 |
+| ceil_mode | bool | False | 是否向上取整计算输出尺寸（**仅 VALID / 自定义 pads 模式生效**；SAME 模式输出固定为 ceil(in/stride)）|
 | data_format | str | "NHWC" | 数据格式，如 'NHWC' |
 
 ### 输出
@@ -67,7 +67,7 @@ cann_bench.dilation_2d(Tensor x, Tensor filter, int[] strides, int[] rates, str 
 - padding_mode 支持 'SAME' 和 'VALID' 两种模式
 - SAME 模式下自动计算 padding 使输出尺寸为 ceil(input_size / stride)
 - VALID 模式下可通过 pads 参数手动指定填充
-- ceil_mode 控制输出尺寸计算时是否向上取整
+- ceil_mode 控制输出尺寸计算时是否向上取整；**仅在 VALID 或 explicit-pads 模式下生效**。SAME 模式的输出尺寸由 TF 语义固定为 `ceil(in/stride)`，无论 ceil_mode 取何值都不变
 
 ### 支持范围
 
@@ -84,7 +84,7 @@ cann_bench.dilation_2d(Tensor x, Tensor filter, int[] strides, int[] rates, str 
 | `rates` | `[1, rate_h, rate_w, 1]`，`rate_h`, `rate_w` ∈ 1 ~ 8 | cases.csv 实测 rate_h/w ∈ {1, 2, 3, 4}；首尾维度固定为 1 |
 | `padding_mode` | {"SAME", "VALID"} | cases.csv 实测 SAME / VALID 均覆盖 |
 | `pads` | `[pad_top, pad_bottom, pad_left, pad_right]`，每项 0 ~ 8 | cases.csv 实测 全为 [0,0,0,0]（SAME 模式下自动推导填充） |
-| `ceil_mode` | {false, true} | cases.csv 实测 false / true 均覆盖 |
+| `ceil_mode` | {false, true} | cases.csv 实测 false / true 均覆盖；**SAME 模式下被忽略**（与 ceil_mode=false 等价）|
 | `data_format` | {"NHWC"} | cases.csv 实测 仅 NHWC |
 
 约束：
@@ -168,11 +168,9 @@ def dilation_2d(
     effective_filter_w = (filter_w - 1) * rate_w + 1
 
     if padding_mode == 'SAME':
+        # SAME 模式的输出尺寸由 TF 语义固定为 ceil(in/stride)，与 ceil_mode 无关
         out_h = (in_h + stride_h - 1) // stride_h
         out_w = (in_w + stride_w - 1) // stride_w
-        if ceil_mode:
-            out_h = (in_h + stride_h - 1) // stride_h + (1 if (in_h - 1) % stride_h else 0)
-            out_w = (in_w + stride_w - 1) // stride_w + (1 if (in_w - 1) % stride_w else 0)
         pad_h = max((out_h - 1) * stride_h + effective_filter_h - in_h, 0)
         pad_w = max((out_w - 1) * stride_w + effective_filter_w - in_w, 0)
         pad_top = pad_h // 2

@@ -16,14 +16,14 @@ cases:
   - [8192, 8192]
   - [8192]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-1, 1]
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 577.292
-  t_hw_us: 156.60
-  note: 'L-large-prefill-fp16-int8-hidden=8192 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 156.6
+  note: "L-large-prefill-fp16-int8-hidden=8192 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 2
   input_shape:
@@ -31,14 +31,14 @@ cases:
   - [32768, 2048]
   - [2048]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-2, 2]
   - [-2, 2]
   - [-1, 1]
   baseline_perf_us: 699.114
   t_hw_us: 156.63
-  note: 'L-mega-batch-bf16-int8-M=32768-N=2048 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "L-mega-batch-bf16-int8-M=32768-N=2048 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 3
   input_shape:
@@ -46,14 +46,14 @@ cases:
   - [8192, 8192]
   - [8192]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-3, 3]
   - [-3, 3]
   - [-1, 1]
   baseline_perf_us: 576.932
-  t_hw_us: 156.60
-  note: 'L-square-large-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 156.6
+  note: "L-square-large-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 4
   input_shape:
@@ -61,14 +61,14 @@ cases:
   - [4096, 14336]
   - [14336]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-05, dst_type: 0}
+  attrs: {epsilon: 1.0e-05}
   value_range:
   - [-10, 10]
   - [-10, 10]
   - [-1, 1]
   baseline_perf_us: 761.555
   t_hw_us: 137.02
-  note: 'L-wide-FFN-bf16-int8-Llama3-intermediate=14336 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "L-wide-FFN-bf16-int8-Llama3-intermediate=14336 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 5
   input_shape:
@@ -76,14 +76,14 @@ cases:
   - [16384, 4096]
   - [4096]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 1}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-1000, 1000]
   - [-1000, 1000]
   - [-1, 1]
-  baseline_perf_us: 622.193
-  t_hw_us: 156.61
-  note: 'L-large-int4-bf16-dst_type=1-大值域 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  baseline_perf_us: 621.492
+  t_hw_us: 139.81
+  note: "L-large-int8-bf16-大值域 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 6
   input_shape:
@@ -91,14 +91,14 @@ cases:
   - [524288, 128]
   - [128]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 0.001, dst_type: 0}
+  attrs: {epsilon: 1.0e-03}
   value_range:
   - [-0.5, 0.5]
   - [-0.5, 0.5]
   - [-0.5, 0.5]
   baseline_perf_us: 3535.031
   t_hw_us: 157.29
-  note: 'L-flat-extreme-fp16-M=524288-N=128-eps=1e-3 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "L-flat-extreme-fp16-M=524288-N=128-eps=1e-3 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 7
   input_shape:
@@ -106,14 +106,14 @@ cases:
   - [4096, 4096]
   - [4096]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-2, 2]
   - [-2, 2]
   - [-1, 1]
   baseline_perf_us: 160.503
   t_hw_us: 39.15
-  note: 'M-medium-square-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-square-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 8
   input_shape:
@@ -121,14 +121,14 @@ cases:
   - [2048, 8192]
   - [8192]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-5, 10]
   - [-5, 10]
   - [-1, 1]
   baseline_perf_us: 150.323
   t_hw_us: 39.15
-  note: 'M-medium-tall-hidden-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-tall-hidden-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 9
   input_shape:
@@ -136,14 +136,14 @@ cases:
   - [8192, 2048]
   - [2048]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-0.5, 0.5]
   - [-0.5, 0.5]
   - [-0.5, 0.5]
   baseline_perf_us: 179.843
   t_hw_us: 39.16
-  note: 'M-medium-tall-M-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-tall-M-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 10
   input_shape:
@@ -151,14 +151,14 @@ cases:
   - [32768, 512]
   - [512]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-1, 3]
   - [-1, 3]
   - [-1, 1]
   baseline_perf_us: 321.046
   t_hw_us: 39.19
-  note: 'M-medium-small-hidden-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-small-hidden-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 11
   input_shape:
@@ -166,14 +166,14 @@ cases:
   - [1024, 16384]
   - [16384]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-65504, 65504]
   - [-65504, 65504]
   - [-65504, 65504]
   baseline_perf_us: 223.744
   t_hw_us: 39.15
-  note: 'M-medium-wide-hidden-fp16-int8-float16边界值 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-wide-hidden-fp16-int8-float16边界值 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 12
   input_shape:
@@ -181,14 +181,14 @@ cases:
   - [4093, 4093]
   - [4093]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-1, 2]
   - [-1, 2]
   - [-1, 2]
   baseline_perf_us: 174.023
-  t_hw_us: 39.10
-  note: 'M-medium-prime-square-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 39.1
+  note: "M-medium-prime-square-bf16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 13
   input_shape:
@@ -196,14 +196,14 @@ cases:
   - [4093, 2053]
   - [2053]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-05, dst_type: 0}
+  attrs: {epsilon: 1.0e-05}
   value_range:
   - [-3, 6]
   - [-3, 6]
   - [-3, 6]
   baseline_perf_us: 108.282
   t_hw_us: 19.61
-  note: 'M-medium-prime-rect-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "M-medium-prime-rect-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 14
   input_shape:
@@ -211,14 +211,14 @@ cases:
   - [8192, 2048]
   - [2048]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 1}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-88, 88]
   - [-88, 88]
   - [-1, 1]
-  baseline_perf_us: 181.304
-  t_hw_us: 39.16
-  note: 'M-medium-int4-bf16-dst_type=1 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  baseline_perf_us: 180.944
+  t_hw_us: 34.95
+  note: "M-medium-int8-bf16 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 15
   input_shape:
@@ -226,14 +226,14 @@ cases:
   - [512, 512]
   - [512]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-1, 1]
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 13.58
-  t_hw_us: 0.61
-  note: 'S-small-smoke-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 1
+  note: "S-small-smoke-fp16-int8 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 16
   input_shape:
@@ -241,14 +241,14 @@ cases:
   - [1021, 1023]
   - [1023]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [-0.1, 0.1]
   - [-0.1, 0.1]
   - [-0.1, 0.1]
   baseline_perf_us: 27.48
   t_hw_us: 2.44
-  note: 'S-small-prime-bf16-微小值域 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  note: "S-small-prime-bf16-微小值域 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 17
   input_shape:
@@ -256,14 +256,14 @@ cases:
   - [256, 256]
   - [256]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
-  - [-.inf, .inf]
-  - [-.inf, .inf]
-  - [-.inf, .inf]
+  - ["-inf", "inf"]
+  - ["-inf", "inf"]
+  - ["-inf", "inf"]
   baseline_perf_us: 10.18
-  t_hw_us: 0.15
-  note: 'S-inf-special-fp16 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 1
+  note: "S-inf-special-fp16 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 18
   input_shape:
@@ -271,14 +271,14 @@ cases:
   - [512, 256]
   - [256]
   dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
-  - [.nan, .nan]
-  - [.nan, .nan]
-  - [.nan, .nan]
+  - ["nan", "nan"]
+  - ["nan", "nan"]
+  - ["nan", "nan"]
   baseline_perf_us: 12.4
-  t_hw_us: 0.31
-  note: 'S-nan-special-bf16 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 1
+  note: "S-nan-special-bf16 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 19
   input_shape:
@@ -286,26 +286,26 @@ cases:
   - [1024, 128]
   - [128]
   dtype: [float16, float16, float16]
-  attrs: {epsilon: 1.0e-06, dst_type: 0}
+  attrs: {epsilon: 1.0e-06}
   value_range:
   - [0, 0]
   - [0, 0]
   - [0, 0]
   baseline_perf_us: 15.72
-  t_hw_us: 0.31
-  note: 'S-zero-special-fp16 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  t_hw_us: 1
+  note: "S-zero-special-fp16 | baseline_kernels: AddRmsNormDynamicQuant×1"
 - operator: AddRmsNormDynamicQuant
   case_id: 20
   input_shape:
-  - [1024, 1024]
-  - [1024, 1024]
-  - [1024]
-  dtype: [bfloat16, bfloat16, bfloat16]
-  attrs: {epsilon: 1.0e-06, dst_type: 1}
+  - [2048, 4096]
+  - [2048, 4096]
+  - [4096]
+  dtype: [float16, float16, float16]
+  attrs: {epsilon: 1.0e-06}
   value_range:
-  - [-0.2, 0.2]
-  - [-0.2, 0.2]
-  - [-0.2, 0.2]
-  baseline_perf_us: 22.36
-  t_hw_us: 2.45
-  note: 'S-small-int4-bf16-dst_type=1 | baseline_kernels: AddRmsNormDynamicQuant×1'
+  - [-500, 500]
+  - [-500, 500]
+  - [-1, 1]
+  baseline_perf_us: 84.842
+  t_hw_us: 17.48
+  note: "M-medium-large-range-fp16-int8-2048x4096 | baseline_kernels: AddRmsNormDynamicQuant×1"

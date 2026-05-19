@@ -35,7 +35,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: null
-  t_hw_us: 0.41
+  t_hw_us: 1
   note: 'S-float16-B2S128N8D64-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
 - operator: MHA
   case_id: 2

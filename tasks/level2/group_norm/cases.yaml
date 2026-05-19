@@ -79,7 +79,7 @@ cases:
   attrs: {num_groups: 4, epsilon: 1.0e-5}
   value_range: [-5, 5]
   baseline_perf_us: 13.64
-  t_hw_us: 0.79
+  t_hw_us: 1
   note: "S-bfloat16-524K-aligned-3D-input-groups4 | baseline_kernels: GroupNormSilu×1"
 - operator: GroupNorm
   case_id: 7
@@ -151,7 +151,7 @@ cases:
   attrs: {num_groups: 6, epsilon: 1.0e-4}
   value_range: [-3, 6]
   baseline_perf_us: 9.68
-  t_hw_us: 0.77
+  t_hw_us: 1
   note: "S-bfloat16-514K-nonaligned-C48-groups6 | baseline_kernels: GroupNormSilu×1"
 - operator: GroupNorm
   case_id: 13
@@ -163,7 +163,7 @@ cases:
   attrs: {num_groups: 1, epsilon: 1.0e-6}
   value_range: [-1, 1]
   baseline_perf_us: 45.88
-  t_hw_us: 0.4
+  t_hw_us: 1
   note: "S-float16-263K-nonaligned-2D-input-groups1 | baseline_kernels: GroupNormSilu×1"
 - operator: GroupNorm
   case_id: 14
@@ -199,7 +199,7 @@ cases:
   attrs: {num_groups: 8, epsilon: 1.0e-7}
   value_range: [.nan, .nan]
   baseline_perf_us: 9.47
-  t_hw_us: 0.91
+  t_hw_us: 1
   note: "S-float16-608K-nonaligned-prime-spatial-nan-special | baseline_kernels: GroupNormSilu×1"
 - operator: GroupNorm
   case_id: 17

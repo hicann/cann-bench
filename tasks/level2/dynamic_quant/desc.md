@@ -38,7 +38,7 @@ $$
 ### 算子原型
 
 ```python
-cann_bench.dynamic_quant(Tensor x) -> Tensor y
+cann_bench.dynamic_quant(Tensor x) -> (Tensor y, Tensor scale)
 ```
 
 ### 输入参数说明
@@ -52,16 +52,14 @@ cann_bench.dynamic_quant(Tensor x) -> Tensor y
 | 参数 | Shape | dtype | 描述 |
 |------|-------|-------|------|
 | y | 与输入 x 相同 | int8 | 量化后的张量 |
-
-> **说明**：golden 显式 cast 输出到 int8（与 proto.outputs.dtype 一致），让"数学正确性"和"dtype 合约"两层在 golden 这一层就对齐，精度比对直接走整数 ±1 容差路径。性能层水位由 ref 函数测量，跟 golden 解耦。
-> NPU API 实际返回 `(y, scale)` 双输出（`scale` 是 fp32，shape = x.shape[:-1]），但本算子规格只评估 `y`；`scale` 不作为输出参与精度比对。
+| scale | `x.shape[:-1]` | float32 | 每 token 的反量化系数；下游 W8A8 / KV cache 反量化算子必需 |
 
 ### 数据类型
 
-| 输入 dtype | 输出 dtype |
-|-----------|-----------|
-| float16 | int8 |
-| bfloat16 | int8 |
+| 输入 dtype | y dtype | scale dtype |
+|-----------|---------|-------------|
+| float16 | int8 | float32 |
+| bfloat16 | int8 | float32 |
 
 ### 规则与约束
 
@@ -69,7 +67,8 @@ cann_bench.dynamic_quant(Tensor x) -> Tensor y
 - 输入 dtype 仅支持 float16 / bfloat16（NPU API 不支持 float32）
 - 量化为对称量化（zero_point 恒为 0），scale 基于每 token 绝对值最大值计算
 - 输出 shape 与输入 shape 完全一致
-- 当某个 token 全部为 0 时 scale = 0，公式产生 NaN；NPU 实现与 golden 一致地输出 NaN（用户应避免此情形）
+- 全零 token 防除零：golden 对 abs_max 应用 `clamp(min=1e-12)` 保证 scale > 0，避免 0/0 NaN（NPU 实现行为类似；用户仍应避免大量全零输入以免数值无效）
+- golden 对 `round(x / scale)` 应用 `clamp(-128, 127)` 防止 int8 模 256 截断（罕见数值边界场景）
 
 ### 支持范围
 
@@ -81,7 +80,7 @@ cann_bench.dynamic_quant(Tensor x) -> Tensor y
 | 各维度大小 `dim_i` | 1 ~ 16384 | cases.csv 实测最小 2、最大 16,384 |
 | last-dim 大小（量化粒度，每 token 长度） | 1 ~ 16384 | cases.csv 实测 67 ~ 16,384；沿此维取每 token 的 max-abs |
 | token 总数（前导维度乘积） | 1 ~ 2^20 | cases.csv 实测最大约 163K（11×13×17×67） |
-| 张量总元素数 | 1 ~ 2^30 | cases.csv 实测最大约 134M（8192×16384） |
+| 张量总元素数 | 1 ~ 2^30 | cases.csv 实测最大约 128M |
 | 输入 dtype | float16 / bfloat16 | NPU API 不支持 float32 |
 
 ## 4. 精度要求
@@ -119,36 +118,33 @@ cann_bench.dynamic_quant(Tensor x) -> Tensor y
 
 ```python
 import torch
+from typing import Tuple
 
 """
 DynamicQuant 算子 Torch Golden 参考实现
 
-per-token 对称动态量化 (沿 last-dim)，对齐 NPU torch_npu.npu_dynamic_quant 默认行为。
-公式: scaleOut = row_max(abs(x)) / 127, yOut = round(x / scaleOut)
-
-输出显式 cast 到 int8，与 proto.outputs.dtype 一致；让 golden 在数学上和
-dtype 层都明确返回 int8，方便精度比对（性能层水位由 ref 函数测量）。
+per-token 对称动态量化 (沿 last-dim)，对齐 NPU torch_npu.npu_dynamic_quant 默认行为：
+返回 (y, scale) 双输出。scale 是下游 W8A8 / KV cache 反量化算子必需的输入，
+所以是该算子的本质输出之一，不能省。
 """
-def dynamic_quant(x: torch.Tensor) -> torch.Tensor:
-    """Per-token 对称动态量化 (axis=-1, dtype_max=127→int8)。
-
-    NPU API 只支持沿 last-dim 量化、输入 fp16/bf16、输出 int8 (+scale)。
-    此 golden 镜像 NPU API 默认行为，不暴露 axis / dst_type 参数。
+def dynamic_quant(x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Per-token 对称动态量化 (axis=-1, dtype_max=127 → int8)。
 
     Args:
         x: 输入张量 (fp16/bf16)，shape ≥ 2 维
 
     Returns:
-        量化后的张量 (int8, shape 与 x 一致)
+        y:     量化后的张量 (int8, shape 与 x 一致)
+        scale: per-token 反量化系数 (float32, shape = x.shape[:-1])
     """
-    if x.dtype in (torch.float16, torch.bfloat16):
-        x_compute = x.to(torch.float32)
-    else:
-        x_compute = x
-
-    scale_out = torch.max(torch.abs(x_compute), dim=-1, keepdim=True)[0] / 127.0
-    y = torch.round(x_compute / scale_out).to(torch.int8)
-    return y
+    x_compute = x.to(torch.float32)
+    abs_max = torch.max(torch.abs(x_compute), dim=-1, keepdim=True)[0]
+    # clamp(min=1e-12) 防全零 token 触发 0/0 NaN
+    scale_out = abs_max.clamp(min=1e-12) / 127.0
+    # clamp(-128, 127) 防 int8 模 256 截断
+    y = torch.clamp(torch.round(x_compute / scale_out), -128, 127).to(torch.int8)
+    scale = scale_out.squeeze(-1).to(torch.float32)
+    return y, scale
 ```
 
 ## 6. 额外信息
@@ -161,9 +157,16 @@ import cann_bench
 
 # 2D per-token quant
 x = torch.randn(1024, 1024, dtype=torch.float16, device="npu")
-y = cann_bench.dynamic_quant(x)          # y.shape = (1024, 1024), y.dtype = int8
+y, scale = cann_bench.dynamic_quant(x)
+# y.shape = (1024, 1024), y.dtype = int8
+# scale.shape = (1024,),    scale.dtype = float32
 
 # 4D per-token quant（每行最后维量化）
 x = torch.randn(2, 8, 256, 256, dtype=torch.bfloat16, device="npu")
-y = cann_bench.dynamic_quant(x)          # y.shape = (2, 8, 256, 256), y.dtype = int8
+y, scale = cann_bench.dynamic_quant(x)
+# y.shape     = (2, 8, 256, 256), y.dtype     = int8
+# scale.shape = (2, 8, 256),       scale.dtype = float32
+
+# 下游反量化（典型用法）
+dequant_x = y.to(torch.float32) * scale.unsqueeze(-1)
 ```

@@ -183,7 +183,7 @@ cases:
   attrs: {epsilon: 1.0e-8}
   value_range: [.nan, .nan]
   baseline_perf_us: 10.66
-  t_hw_us: 0.17
+  t_hw_us: 1
   note: "S-float16-163K-nonaligned-prime-4D-nan-special | baseline_kernels: RmsNorm×1"
 - operator: RmsNorm
   case_id: 17

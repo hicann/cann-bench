@@ -150,7 +150,7 @@ cases:
     perm: [0, 1, 3, 2]
   value_range: [-0.01, 0.01]
   baseline_perf_us: 15.200
-  t_hw_us: 0.96
+  t_hw_us: 1
   note: 'S-bfloat16-917K-对齐-4D-后两维交换-微小值域 | baseline_kernels: Transpose×1'
 - operator: Transpose
   case_id: 14

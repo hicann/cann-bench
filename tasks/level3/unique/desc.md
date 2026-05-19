@@ -72,7 +72,7 @@ cann_bench.unique(Tensor x, bool return_inverse) -> (Tensor y, Tensor inverse)
 | 维度 / 参数 | 范围 | 备注 |
 |---|---|---|
 | `rank`（输入维度数） | 1 ~ 8 | 去重前展平为一维；cases.csv 实测 1 ~ 5 |
-| `numel`（元素总数） | 1 ~ 2^30 | cases.csv 实测 ~917K ~ 268M |
+| `numel`（元素总数） | 1 ~ 2^30 | cases.csv 实测 ~917K ~ 256M |
 | `return_inverse` | {true, false} | cases.csv 双向覆盖 |
 
 约束（§3 规则与约束之外的结构性不变量，避免与上文重复）：

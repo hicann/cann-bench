@@ -35,7 +35,7 @@ def weight_quant_batch_matmul(
 
     Args:
         x: 左输入矩阵，shape 为 [M, K]，dtype 为 float16/bfloat16
-        weight: 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8/int4
+        weight: 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8
         antiquantScale: 反量化scale参数，shape 为 [N] 或 [1, N]
         antiquantOffset: 反量化offset参数（可选），shape 与 antiquantScale 相同
         bias: 偏置张量（可选），shape 为 [N] 或 [1, N]
@@ -45,7 +45,7 @@ def weight_quant_batch_matmul(
     """
 
     # 反量化 weight: (weight + antiquantOffset) * antiquantScale
-    # weight 是 int8/int4，需要转换为浮点类型进行计算
+    # weight 是 int8，需要转换为浮点类型进行计算
     weight_float = weight.float()  # [K, N]
 
     # antiquantScale shape: [N] 或 [1, N]，需要 broadcast 到 [K, N]

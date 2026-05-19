@@ -6,13 +6,13 @@
 
 **主要应用场景**：
 - 大语言模型推理中的权重量化加速
-- 低精度（INT8/INT4）量化模型的矩阵乘法计算
+- 低精度（INT8）量化模型的矩阵乘法计算
 - 模型压缩与部署场景中的量化矩阵运算
 
 **算子特征**：
 - 难度等级：L3（Contraction）
 - 多输入（x、weight、antiquantScale、可选 antiquantOffset、可选 bias）单输出
-- weight 为量化权重（INT8/INT4），通过反量化参数转换为浮点后参与矩阵乘法
+- weight 为量化权重（INT8），通过反量化参数转换为浮点后参与矩阵乘法
 
 ## 2. 算子定义
 
@@ -46,10 +46,10 @@ cann_bench.weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantSc
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | x | Tensor | 必选 | 左输入矩阵，shape 为 [M, K]，dtype 为 float16/bfloat16 |
-| weight | Tensor | 必选 | 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8/int4 |
+| weight | Tensor | 必选 | 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8 |
 | antiquantScale | Tensor | 必选 | 反量化scale参数，shape 为 [N] 或 [1, N]，dtype 与 x 相同 |
 | antiquantOffset | Tensor | None | 反量化offset参数（可选），shape 与 antiquantScale 相同 |
-| bias | Tensor | None | 偏置张量（可选），shape 为 [N] 或 [1, N] |
+| bias | Tensor | None | 偏置张量（可选），shape 为 [N] 或 [1, N]，dtype 为 float16（x=float16 时）或 float32（x=bfloat16 时） |
 
 ### 输出
 
@@ -59,10 +59,10 @@ cann_bench.weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantSc
 
 ### 数据类型
 
-| x dtype | weight dtype | antiquantScale dtype | 输出 dtype |
-|---------|-------------|---------------------|-----------|
-| float16 | int8/int4 | float16 | float16 |
-| bfloat16 | int8/int4 | bfloat16 | bfloat16 |
+| x dtype | weight dtype | antiquantScale dtype | antiquantOffset dtype | bias dtype | 输出 dtype |
+|---------|-------------|---------------------|----------------------|-----------|-----------|
+| float16 | int8 | float16 | float16 | float16 | float16 |
+| bfloat16 | int8 | bfloat16 | bfloat16 | float32 | bfloat16 |
 
 ### 规则与约束
 
@@ -70,17 +70,18 @@ cann_bench.weight_quant_batch_matmul(Tensor x, Tensor weight, Tensor antiquantSc
 - antiquantScale 的 shape 为 [N] 或 [1, N]，对应 weight 的 N 维度
 - antiquantOffset（可选）shape 与 antiquantScale 相同
 - bias（可选）shape 为 [N] 或 [1, N]
-- antiquantScale/antiquantOffset/bias 的 dtype 与 x 相同
+- antiquantScale / antiquantOffset 的 dtype 与 x 相同（float16 / bfloat16）
+- bias 的 dtype 规则：x 为 float16 时 bias 必须 float16；x 为 bfloat16 时 bias 必须 float32
 
 ### 支持范围
 
-输入 tensor 各维度与参数的支持范围：
+输入 tensor 各维度与参数的支持范围（参考 `torch_npu.npu_weight_quant_batchmatmul` per-channel int8 量化）：
 
 | 维度 / 参数 | 范围 | 备注 |
 |---|---|---|
-| `M`（x 行 / 输出行） | 1 ~ 65536 | cases.csv 实测 1 ~ 32768 |
-| `K`（contraction 维度） | 1 ~ 8192 | cases.csv 实测 31 ~ 4097；x 与 weight 的 K 必须相等 |
-| `N`（weight 列 / 输出列） | 16 ~ 4096 | cases.csv 实测 16 ~ 2049；antiquantScale / antiquantOffset / bias 的最后一维等于 N |
+| `M`（x 行 / 输出行） | 1 ~ 512 | 主要 decode 场景；cases.csv 实测 1 ~ 128 |
+| `K`（contraction 维度） | 1 ~ 65535 | x 与 weight 的 K 必须相等；典型 hidden / intermediate 量级；cases.csv 实测 2048 ~ 28672 |
+| `N`（weight 列 / 输出列） | 1 ~ 65535 | antiquantScale / antiquantOffset / bias 的最后一维等于 N；典型 hidden / intermediate 量级；cases.csv 实测 1408 ~ 14336 |
 | `antiquantOffset` | optional | cases.csv 实测 null 与非 null 两种 |
 | `bias` | optional | cases.csv 实测 null 与非 null 两种 |
 
@@ -138,7 +139,7 @@ def weight_quant_batch_matmul(
 
     Args:
         x: 左输入矩阵，shape 为 [M, K]，dtype 为 float16/bfloat16
-        weight: 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8/int4
+        weight: 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8
         antiquantScale: 反量化scale参数，shape 为 [N] 或 [1, N]
         antiquantOffset: 反量化offset参数（可选），shape 与 antiquantScale 相同
         bias: 偏置张量（可选），shape 为 [N] 或 [1, N]
@@ -178,17 +179,18 @@ def weight_quant_batch_matmul(
 import torch
 import cann_bench
 
-# x: [M, K] = [16, 32]
-x = torch.randn(16, 32, dtype=torch.float16, device="npu")
-# weight: [K, N] = [32, 64]
-weight = torch.randint(-128, 127, (32, 64), dtype=torch.int8, device="npu")
-# antiquantScale: [N] = [64]
-antiquantScale = torch.randn(64, dtype=torch.float16, device="npu")
-# antiquantOffset: [N] = [64] (可选)
-antiquantOffset = torch.randn(64, dtype=torch.float16, device="npu")
-# bias: [N] = [64] (可选)
-bias = torch.randn(64, dtype=torch.float16, device="npu")
+# LLaMA-7B attention O proj, single decode (M=1)
+# x: [M, K] = [1, 4096]
+x = torch.randn(1, 4096, dtype=torch.float16, device="npu")
+# weight: [K, N] = [4096, 4096]
+weight = torch.randint(-128, 127, (4096, 4096), dtype=torch.int8, device="npu")
+# antiquantScale: [N] = [4096]
+antiquantScale = torch.randn(4096, dtype=torch.float16, device="npu") * 0.05 + 0.05
+# antiquantOffset: [N] = [4096] (可选)
+antiquantOffset = torch.randn(4096, dtype=torch.float16, device="npu") * 0.1
+# bias: [N] = [4096] (可选)
+bias = torch.randn(4096, dtype=torch.float16, device="npu") * 0.1
 
 y = cann_bench.weight_quant_batch_matmul(x, weight, antiquantScale, antiquantOffset, bias)
-# y shape: [M, N] = [16, 64]
+# y shape: [M, N] = [1, 4096]
 ```

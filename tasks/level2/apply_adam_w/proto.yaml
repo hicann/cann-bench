@@ -42,9 +42,14 @@ operator:
     default: 1e-8
     description: 数值稳定常数
     required: false
+  - name: step
+    type: int
+    default: 1
+    description: 当前优化步数 t，用于偏置校正分母 (1 - beta^t)；下游可由此换算 beta_power
+    required: false
   - name: maximize
     type: bool
-    default: "false"
+    default: false
     description: 是否最大化目标函数（默认最小化）
     required: false
   inputs:
@@ -79,7 +84,7 @@ operator:
     - float32
     - float16
     - bfloat16
-  schema: apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, float beta1, float beta2, float weight_decay, float epsilon=1e-8, bool maximize=false) -> Tensor y
+  schema: apply_adam_w(Tensor var, Tensor grad, Tensor m, Tensor v, float lr, float beta1, float beta2, float weight_decay, float epsilon=1e-8, int step=1, bool maximize=false) -> Tensor y
   # AdamW 算子涉及复杂的浮点运算（sqrt、除法、乘法累加），精度敏感
   # 极小值场景（如 1e-8 量级）会导致相对误差放大，需要放宽阈值
   precision_thresholds:

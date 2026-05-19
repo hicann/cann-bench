@@ -46,7 +46,7 @@ cases:
   - [-3, 3]
   - [-1, 1]
   baseline_perf_us: 56.34
-  t_hw_us: 0.14
+  t_hw_us: 1
   note: "S-float16-1M-对齐-nearest-zeros-align=true | baseline_kernels: Transpose×1 + GridSample×1"
 - operator: GridSampler3D
   case_id: 4
@@ -111,7 +111,7 @@ cases:
   - [-1, 2]
   - [-1, 1]
   baseline_perf_us: 63.42
-  t_hw_us: 0.93
+  t_hw_us: 1
   note: "S-float32-1M-非对齐-nearest-zeros-align=true | baseline_kernels: Transpose×1 + GridSample×1"
 - operator: GridSampler3D
   case_id: 9
@@ -189,7 +189,7 @@ cases:
   - [.nan, .nan]
   - [-1, 1]
   baseline_perf_us: 115.46
-  t_hw_us: 0.23
+  t_hw_us: 1
   note: "S-float32-100K-质数非对齐-nan特殊值-bilinear | baseline_kernels: Transpose×1 + GridSample×1"
 - operator: GridSampler3D
   case_id: 15
@@ -241,7 +241,7 @@ cases:
   - [-1000, 1000]
   - [-1, 1]
   baseline_perf_us: 47.94
-  t_hw_us: 0.49
+  t_hw_us: 1
   note: "S-float32-1M-混合非对齐-nearest-border-align=true | baseline_kernels: Transpose×1 + GridSample×1"
 - operator: GridSampler3D
   case_id: 19

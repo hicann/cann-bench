@@ -26,7 +26,6 @@ operator:
     description: 右输入矩阵（量化权重），shape 为 [K, N]
     dtype:
     - int8
-    - int4
   - name: antiquantScale
     description: 反量化scale参数，shape 为 [N] 或 [1, N]
     dtype:
@@ -39,10 +38,10 @@ operator:
     - bfloat16
     optional: true
   - name: bias
-    description: 偏置张量（可选），shape 为 [N] 或 [1, N]
+    description: 偏置张量（可选），shape 为 [N] 或 [1, N]；x=float16 时为 float16，x=bfloat16 时为 float32
     dtype:
     - float16
-    - bfloat16
+    - float32
     optional: true
   outputs:
   - name: y

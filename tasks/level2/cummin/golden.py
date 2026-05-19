@@ -13,27 +13,20 @@
 
 import torch
 
-"""
-Cummin算子Torch Golden参考实现
 
-计算输入张量中的累积最小值
-公式: y[i] = min(x[0], x[1], ..., x[i]) 沿指定轴
-"""
-def cummin(
-    x: torch.Tensor, dim: int
-) -> torch.Tensor:
-    """
-    计算输入张量中的累积最小值
+def cummin(input: torch.Tensor, dim: int):
+    """Cummin 算子 Torch Golden 参考实现 (P1 op, 对齐 torch.cummin).
 
-    公式: y[i] = min(x[0], x[1], ..., x[i]) 沿指定轴
+    公式: values[i] = min(input[0], input[1], ..., input[i]) 沿指定轴
+          indices[i] = argmin(input[0:i+1]) 沿指定轴
 
     Args:
-        x: 输入张量
+        input: 输入张量
         dim: 计算累积最小值的轴
 
     Returns:
-        输出张量，累积最小值
+        torch.return_types.cummin (named tuple): (values, indices)
+          • values: 同 input 形状/dtype 的累积最小值张量
+          • indices: 同 input 形状的 int64 索引张量
     """
-
-    y = torch.cummin(x, dim=dim)[0]
-    return y
+    return torch.cummin(input, dim=dim)

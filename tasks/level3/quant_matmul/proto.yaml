@@ -29,7 +29,7 @@ operator:
     required: false
   - name: group_sizes
     type: int[]
-    default: "null"
+    default: null
     description: 分组量化粒度 [group_m, group_n, group_k]，取值范围 [0, 65535]
     required: false
   inputs:

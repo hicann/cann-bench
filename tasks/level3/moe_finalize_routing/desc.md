@@ -24,8 +24,12 @@ $$
 $$
 
 $$
-\text{out}(i,j) = \text{skip1}_{i,j} + \text{skip2}_{i,j} + \sum_{k=0}^{K}(\text{scales}_{i,k} \times (\text{expanded\_permuted\_rows}_{\text{expanded\_src\_to\_dst\_row}_{i+k \times \text{num\_rows},j}} + \text{bias}_{\text{expertid},j}))
+\text{out}(i,j) = \text{skip1}_{i,j} + \text{skip2}_{i,j} + \sum_{k=0}^{K}(\text{scales}_{i,k} \times (\text{expanded\_permuted\_rows}_{\,\text{expanded\_src\_to\_dst\_row}_{i+k \times \text{num\_rows}}\,,\,j} + \text{bias}_{\text{expertid},j}))
 $$
+
+> 索引说明：`expanded_src_to_dst_row` 是 1D 张量 `(NUM_ROWS·K)`，
+> `expanded_src_to_dst_row_{i+k·num_rows}` 整体作为一个标量行索引；
+> 该行索引再与列下标 `j` 一起在二维的 `expanded_permuted_rows` 上取值。
 
 ### 处理流程
 

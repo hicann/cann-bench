@@ -70,7 +70,7 @@ cases:
   value_range:
   - [-1.0, 1.0]
   baseline_perf_us: 7.82
-  t_hw_us: 0.17
+  t_hw_us: 1
   note: "S-bfloat16-128K-质数非对齐-dynamic-小M | baseline_kernels: DequantSwigluQuant×1"
 - operator: DequantSwigluQuant
   case_id: 6
@@ -186,7 +186,7 @@ cases:
   - [-0.1, 0.1]
   - [-0.5, 0.5]
   baseline_perf_us: 8.92
-  t_hw_us: 0.27
+  t_hw_us: 1
   note: "S-int32-128K-质数非对齐-dynamic-小M-W8A8 | baseline_kernels: DequantSwigluQuant×1"
 - operator: DequantSwigluQuant
   case_id: 14

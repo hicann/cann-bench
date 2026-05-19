@@ -76,7 +76,7 @@ cann_bench.top_k(Tensor x, int k, int dim, bool largest) -> (Tensor y, Tensor id
 |---|---|---|
 | `ndim`（输入维度数） | 1 ~ 8 | cases.csv 实测 1D / 2D / 3D / 4D / 5D |
 | `x.shape[i]`（各维大小） | 1 ~ 2^23 | cases.csv 实测 2 ~ 1048576（1D 最大 1048576；2D 最大单维 8193（case 18: [255, 8193]）；高维如 5D 最大 1013） |
-| `numel(x)`（总元素数） | 1 ~ 2^26 | cases.csv 实测 ~917K ~ 67M（case_6: 8192×8192 float32） |
+| `numel(x)`（总元素数） | 1 ~ 2^26 | cases.csv 实测 ~917K ~ 64M |
 | `k` | 1 ~ 2048 | cases.csv 实测 7 ~ 2000；约束 1 ≤ k ≤ x.shape[dim] |
 | `dim` | -ndim ~ ndim-1 | cases.csv 实测 0 / 1 / 2 / -1；支持负数索引 |
 | `largest` | {true, false} | cases.csv 实测 true / false 均覆盖 |

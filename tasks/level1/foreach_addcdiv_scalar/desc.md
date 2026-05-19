@@ -70,7 +70,7 @@ cann_bench.foreach_addcdiv_scalar(Tensor[] x1, Tensor[] x2, Tensor[] x3, float s
 | TensorList 长度（`L`） | 1 ~ 64 | cases.csv 实测 1 ~ 4；x1/x2/x3 三个列表长度必须相同 |
 | 每个张量维度数 | 1 ~ 8 | cases.csv 实测 1D ~ 5D |
 | 每个张量各维大小 | 1 ~ 1048576 | cases.csv 各维实测 2 ~ 8193（含 1D 张量长度 1000003） |
-| 每个张量元素总数 | 1 ~ 268M | cases.csv 实测 1M ~ 67M |
+| 每个张量元素总数 | 1 ~ 64M | cases.csv 实测 ~1M ~ 64M |
 | `scalar` | -1024.0 ~ 1024.0 | cases.csv 实测 -1.0 ~ 2.0（含 inf / nan 特殊值） |
 
 约束：x1[i]、x2[i]、x3[i] 三者 shape 与 dtype 必须一致；x3 中元素应非零。

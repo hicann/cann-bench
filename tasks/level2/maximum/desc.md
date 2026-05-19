@@ -74,7 +74,7 @@ cann_bench.maximum(Tensor x1, Tensor x2) -> Tensor y
 | `x2` rank | 1 ~ 8 | cases.csv 实测 1D ~ 5D；按 PyTorch 标准广播右对齐，rank 可与 `x1` 不同 |
 | `x1` 各维度大小 | 1 ~ 2097152 | cases.csv 实测 2 ~ 1000007 |
 | `x2` 各维度大小 | 1 ~ 2097152 | cases.csv 实测 1 ~ 1000007；为 1 表示该维参与广播 |
-| 广播后总元素数 | ≤ 2^28（约 268M） | cases.csv 实测最大 8192×16384 ≈ 134M（case 6） |
+| 广播后总元素数 | ≤ 2^28（约 256M） | cases.csv 实测最大 8192×16384 = 128M（case 6） |
 
 约束：
 - `x1` 与 `x2` 的 dtype 必须严格相等

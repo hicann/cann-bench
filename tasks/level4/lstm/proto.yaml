@@ -21,6 +21,13 @@ operator:
     h_t = o_t ⊙ tanh(c_t)  # 隐藏状态
   description: Long Short-Term Memory 循环神经网络
   shape_support: 'x: (S, B, input_size), (h0, c0): (num_layers * num_directions, B, hidden_size)'
+  # F160: LSTM 含 4 个 gate (i/f/g/o) + cell state + hidden state 累积误差更大于 GRU；
+  # 沿用 GRU 的同档阈值 0.05 (MARE 阈值 = 0.5)。多层 LSTM 误差进一步放大，必要时由
+  # cases.yaml 个例覆盖更高阈值。
+  precision_thresholds:
+    float32: 0.05    # ≈ 2^-4.3, MARE 阈值 = 0.5
+    float16: 0.05    # ≈ 2^-4.3, MARE 阈值 = 0.5
+    bfloat16: 0.05   # ≈ 2^-4.3, MARE 阈值 = 0.5
   attrs:
   - name: inputSize
     type: int

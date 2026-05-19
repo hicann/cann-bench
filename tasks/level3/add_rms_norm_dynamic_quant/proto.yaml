@@ -21,11 +21,6 @@ operator:
     default: 1e-6
     description: epsilon 值
     required: false
-  - name: dst_type
-    type: int
-    default: 0
-    description: 目标数据类型 (0:DT_INT8, 1:DT_INT4)
-    required: false
   inputs:
   - name: x1
     description: 第 1 个输入张量
@@ -46,7 +41,7 @@ operator:
     int8: 1
   outputs:
   - name: y
-    description: 量化后的输出张量（INT4 值范围 [-8,7]，存储为 int8 dtype）
+    description: 量化后的输出张量
     dtype:
     - int8
   - name: xOut
@@ -55,7 +50,7 @@ operator:
     - float16
     - bfloat16
   - name: scaleOut
-    description: 量化使用的 scale 值
+    description: 每 token 反量化系数 (row_max(abs)/127)，shape = x1.shape[:-1]；下游 W8A8 / KV cache 反量化算子必需；与 level2/dynamic_quant 语义一致
     dtype:
     - float32
-  schema: add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float epsilon, int dst_type) -> (Tensor y, Tensor xOut, Tensor scaleOut)
+  schema: add_rms_norm_dynamic_quant(Tensor x1, Tensor x2, Tensor gamma, float epsilon) -> (Tensor y, Tensor xOut, Tensor scaleOut)

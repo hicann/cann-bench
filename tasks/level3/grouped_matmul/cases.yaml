@@ -28,7 +28,7 @@ cases:
   - [-1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: 9.14
-  t_hw_us: 0.5824
+  t_hw_us: 1
   note: "fp16-小规模均衡-E=4-M=128-K=256-N=512-带bias-split=0 | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 2
@@ -171,7 +171,7 @@ cases:
   - [-1, 1]
   - [-0.1, 0.1]
   baseline_perf_us: 11.76
-  t_hw_us: 0.3902
+  t_hw_us: 1
   note: "fp32-单expert退化-E=1-M=256-K=256-N=256-纯GMM | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 9
@@ -249,7 +249,7 @@ cases:
   - [-100, 100]
   - [-10, 10]
   baseline_perf_us: 7.92
-  t_hw_us: 0.2912
+  t_hw_us: 1
   note: "fp16-小冒烟-E=2-M=64-K=256-N=512-中等值域-带bias | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 13
@@ -292,7 +292,7 @@ cases:
   - [-5, 10]
   - [-1, 1]
   baseline_perf_us: 16.77
-  t_hw_us: 0.2377
+  t_hw_us: 1
   note: "bf16-小尺寸全质数-M=769,K=127,N=255-E=4-非对称值域 | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 15
@@ -329,7 +329,7 @@ cases:
   - [-65504, 65504]
   - [-65504, 65504]
   baseline_perf_us: 7.82
-  t_hw_us: 0.2057
+  t_hw_us: 1
   note: "fp16-边界值-M=1031(prime)-E=4-K=128-N=128-fp16-range-无bias | baseline_kernels:
     GroupedMatmul×1"
 - operator: GroupedMatmul
@@ -351,7 +351,7 @@ cases:
   - [-.inf, .inf]
   - [-1, 1]
   baseline_perf_us: 11.61
-  t_hw_us: 0.272
+  t_hw_us: 1
   note: "bf16-inf特殊值-K=127质数-E=4-M=1024-N=256-带bias | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 18
@@ -369,7 +369,7 @@ cases:
   - [.nan, .nan]
   - [.nan, .nan]
   baseline_perf_us: 6.52
-  t_hw_us: 0.0475
+  t_hw_us: 1
   note: "bf16-nan特殊值-E=4-M=200-K=64-N=128-无bias | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 19
@@ -390,7 +390,7 @@ cases:
   - [0, 0]
   - [0, 0]
   baseline_perf_us: 8.64
-  t_hw_us: 0.0065
+  t_hw_us: 1
   note: "fp16-全零-E=4-M=64-K=32-N=32-tw=true-带bias | baseline_kernels: GroupedMatmul×1"
 - operator: GroupedMatmul
   case_id: 20
