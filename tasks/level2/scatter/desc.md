@@ -81,6 +81,9 @@ cann_bench.scatter(Tensor data, int dim, Tensor indices, Tensor updates, str? re
 - indices 的 dtype 必须为 int32 或 int64
 - reduce 为 None 时执行直接覆盖更新，为 'add' 时执行累加，为 'multiply' 时执行累乘，为 'amax'/'amin' 时取最大/最小值
 - 输出 shape 与 data shape 完全一致
+- 当 indices 中存在重复索引：
+  - `reduce=None`（覆盖模式）：写入顺序与具体实现相关，PyTorch/NPU 均不保证确定性，最终留下来的值可能是任一个对应的 `updates` 元素
+  - `reduce='add'/'multiply'/'amax'/'amin'`：聚合结果与顺序无关，且语义等价于 `scatter_reduce_(include_self=True)`
 
 ### 支持范围
 
@@ -132,7 +135,7 @@ import torch
 Scatter算子Torch Golden参考实现
 
 将updates按索引indices更新到data中
-公式: y[i] = updates[j] where indices[j] == i
+公式: y[index[i][j][k]] = src[i][j][k] (if dim == 0)
 """
 def scatter(
     data: torch.Tensor, dim: int, indices: torch.Tensor, updates: torch.Tensor, reduce: str = None
@@ -140,24 +143,31 @@ def scatter(
     """
     将updates按索引indices更新到data中
 
-    公式: y[i] = updates[j] where indices[j] == i
+    公式: y[index[i][j][k]] = src[i][j][k] (if dim == 0)
 
     Args:
         data: 输入数据张量
         dim: 沿哪个维度scatter
         indices: 索引张量
         updates: 更新值张量
-        reduce: 聚合方式
+        reduce: 聚合方式 (None/update, add, multiply, amin, amax)
 
     Returns:
         输出张量，scatter结果
     """
 
     y = data.clone()
+    idx = indices.long()
     if reduce is None or reduce == 'update':
-        y.scatter_(dim, indices.long(), updates)
+        y.scatter_(dim, idx, updates)
     elif reduce == 'add':
-        y.scatter_add_(dim, indices.long(), updates)
+        y.scatter_add_(dim, idx, updates)
+    elif reduce == 'multiply':
+        y.scatter_reduce_(dim, idx, updates, reduce="prod", include_self=True)
+    elif reduce == 'amin':
+        y.scatter_reduce_(dim, idx, updates, reduce="amin", include_self=True)
+    elif reduce == 'amax':
+        y.scatter_reduce_(dim, idx, updates, reduce="amax", include_self=True)
     return y
 ```
 

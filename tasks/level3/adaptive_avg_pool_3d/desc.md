@@ -59,6 +59,9 @@ cann_bench.adaptive_avg_pool_3d(Tensor x, list[int] output_size) -> Tensor y
 - output_size 指定输出的空间维度大小
 - 输出 dtype 与输入 dtype 一致
 - 输出的 N 和 C 维度与输入保持一致，仅空间维度 (D, H, W) 发生变化
+- 不支持 PyTorch `adaptive_avg_pool3d` 的两个扩展形态：
+  - 4D 无 batch 输入 `[C, D, H, W]`（本算子固定 5D）
+  - `output_size` 中包含 `None` 占位（表示保留该维度）；本算子要求三个维度均为正整数
 
 ### 支持范围
 

@@ -17,11 +17,11 @@ operator:
   shape_support: 输入 ND 格式
   attrs:
   - name: dim
-    type: INT
+    type: Int
     description: 沿哪个维度 scatter
     required: true
   - name: reduce
-    type: STRING
+    type: String
     default: null
     description: 聚合方式，可选值：null(update), 'add', 'multiply', 'amin', 'amax'
     required: false

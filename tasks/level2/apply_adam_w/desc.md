@@ -35,7 +35,7 @@ $$
 $$
 
 $$
-var_t = var_{t-1} - lr \cdot \left( \frac{\hat{m}}{\sqrt{\hat{v}} + \epsilon} + weight\_decay \cdot var_{t-1} \right)
+var_t = var_{t-1} - lr \cdot \left( \frac{\hat{m}}{\sqrt{\hat{v} + \epsilon}} + weight\_decay \cdot var_{t-1} \right)
 $$
 
 其中：
@@ -151,7 +151,7 @@ AdamW 优化器实现，解耦权重衰减
     v_t = beta2 * v_{t-1} + (1 - beta2) * grad^2
     m_hat = m_t / (1 - beta1^t)
     v_hat = v_t / (1 - beta2^t)
-    var_t = var_{t-1} - lr * (m_hat / (sqrt(v_hat) + eps) + weight_decay * var_{t-1})
+    var_t = var_{t-1} - lr * (m_hat / sqrt(v_hat + eps) + weight_decay * var_{t-1})
 """
 def apply_adam_w(
     var: torch.Tensor,
@@ -194,7 +194,7 @@ def apply_adam_w(
     # 偏置校正：分母按 step 取指数
     m_hat = m_new / (1 - beta1 ** step)
     v_hat = v_new / (1 - beta2 ** step)
-    update = m_hat / (v_hat.sqrt() + epsilon)
+    update = m_hat / (v_hat + epsilon).sqrt()
     if weight_decay != 0:
         update = update + var * weight_decay
     result = var + lr * update if maximize else var - lr * update

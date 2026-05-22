@@ -44,4 +44,4 @@ operator:
     - float16
     - float32
     - bfloat16
-  schema: rms_norm(Tensor x, Tensor gamma, float epsilon) -> Tensor y
+  schema: rms_norm(Tensor x, Tensor gamma, float epsilon=1e-6) -> Tensor y

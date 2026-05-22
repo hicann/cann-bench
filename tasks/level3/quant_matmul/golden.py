@@ -17,11 +17,13 @@ from typing import Optional, List
 """
 QuantMatmul 算子 Torch Golden 参考实现
 
+输入 int8，输出 float16/bfloat16。
+
 计算公式：
-    无bias:     out = x1 @ x2 * scale + offset
-    int32 bias: out = (x1 @ x2 + bias) * scale + offset
-    浮点bias:   out = x1 @ x2 * scale + bias (无offset时)
-    pertoken:   out = (x1 @ x2 * scale + offset) * pertoken_scale
+    无bias:             out = x1 @ x2 * scale
+    int32 bias:         out = (x1 @ x2 + bias) * scale
+    浮点bias(post-scale): out = x1 @ x2 * scale + bias
+    pertoken:           out = (x1 @ x2 * scale) * pertoken_scale
 """
 
 
@@ -29,7 +31,6 @@ def quant_matmul(
     x1: torch.Tensor,
     x2: torch.Tensor,
     scale: torch.Tensor,
-    offset: Optional[torch.Tensor] = None,
     pertoken_scale: Optional[torch.Tensor] = None,
     bias: Optional[torch.Tensor] = None,
     output_dtype: Optional[str] = None,
@@ -39,53 +40,37 @@ def quant_matmul(
     量化矩阵乘法
 
     Args:
-        x1: [..., m, k] int8/int32 左矩阵
-        x2: [..., k, n] int8/int32 右矩阵
-        scale: [t] 或 2D，反量化 scale
-        offset: [t] 或 2D，反量化偏移（scale为2D时必选）
-        pertoken_scale: [m] per-token scale
-        bias: [n] 或 [batch, 1, n] 偏置，int32走pre-scale，浮点走post-scale
-        output_dtype: 输出类型 "int8"/"float16"/"bfloat16"/"int32"，默认int8
+        x1: [..., m, k] int8 左矩阵
+        x2: [..., k, n] int8 右矩阵
+        scale: [t] 反量化 scale (float32 / bfloat16)
+        pertoken_scale: [m] per-token scale (float32)
+        bias: [n] 或 [batch, 1, n] 偏置，int32 走 pre-scale，浮点走 post-scale
+        output_dtype: 输出类型 "float16"（默认）或 "bfloat16"
         group_sizes: 分组量化粒度 [group_m, group_n, group_k]
 
     Returns:
-        out: [..., m, n]
+        out: [..., m, n] float16 或 bfloat16
     """
-    # 矩阵乘（int8/int32 用 float32 等效计算）
+    # 矩阵乘（int8 用 float32 等效计算）
     mm = torch.matmul(x1.float(), x2.float())
 
     # int32 bias 在反量化前累加 (pre-scale)
     if bias is not None and bias.dtype == torch.int32:
         mm = mm + bias.float()
 
-    # output_dtype=int32: NPU 直接返回原始 int32 累加器 (含可选 int32 bias),
-    # 不应用 scale/offset/pertoken_scale —— 留给后续算子做反量化融合。
-    # 对应 API 支持表: int32 输出要求 offset=None, pertoken=None。
-    if output_dtype == "int32":
-        return mm.to(torch.int32)
-
     # 反量化 scale
     y = mm * scale.float()
-
-    # offset
-    if offset is not None:
-        y = y + offset.float()
 
     # pertoken_scale 沿 m 维广播
     if pertoken_scale is not None:
         y = y * pertoken_scale.float().unsqueeze(-1)
 
-    # 浮点 bias 在反量化后相加（仅无 offset 时）
-    if bias is not None and bias.dtype != torch.int32 and offset is None:
+    # 浮点 bias 在反量化后相加 (post-scale)
+    if bias is not None and bias.dtype != torch.int32:
         y = y + bias.float()
 
-    # 输出 dtype
-    # int8 走标准量化语义: round-to-nearest + 饱和 clamp 到 [-128, 127],
-    # 与 NPU npu_quant_matmul 的 int8 输出一致。直接 .to(int8) 是截断
-    # 且越界会回绕,与 NPU 不符。
-    if output_dtype is None or output_dtype == "int8":
-        return torch.clamp(torch.round(y), -128, 127).to(torch.int8)
-    elif output_dtype == "float16":
+    # 输出 dtype，默认 float16
+    if output_dtype is None or output_dtype == "float16":
         return y.to(torch.float16)
     elif output_dtype == "bfloat16":
         return y.to(torch.bfloat16)

@@ -13,19 +13,17 @@ operator:
   category: Contraction
   difficulty: L3
   formula: |
-    无bias: out = x1 @ x2 * scale + offset
-    int32 bias: out = (x1 @ x2 + bias) * scale + offset
-    浮点 bias (无offset): out = x1 @ x2 * scale + bias
-  description: 量化矩阵乘法算子，int8/int4输入，支持per-tensor/per-channel/per-group/per-token量化
-  shape_support: 'x1: [..., m, k]; x2: [..., k, n]; scale: [t] 或 2D; 输出: [..., m, n]'
-  # 量化输出允许 ±1 round-mode 差异(NPU round-half-* vs PyTorch round-half-even)
-  precision_thresholds:
-    int8: 1
+    无bias: out = x1 @ x2 * scale
+    int32 bias (pre-scale): out = (x1 @ x2 + bias) * scale
+    浮点 bias (post-scale): out = x1 @ x2 * scale + bias
+    pertoken: out = (x1 @ x2 * scale) * pertoken_scale
+  description: 量化矩阵乘法算子，int8 输入，float16/bfloat16 输出，支持 per-tensor/per-channel 量化
+  shape_support: 'x1: [..., m, k]; x2: [..., k, n]; scale: [t]; 输出: [..., m, n]'
   attrs:
   - name: output_dtype
     type: string
     default: null
-    description: 输出数据类型，取值 "int8"（默认）, "float16", "bfloat16", "int32"
+    description: 输出数据类型，取值 "float16"（默认）或 "bfloat16"
     required: false
   - name: group_sizes
     type: int[]
@@ -34,39 +32,29 @@ operator:
     required: false
   inputs:
   - name: x1
-    description: 左矩阵，int8或int32（int32表示int4，每个存放8个int4）
+    description: 左矩阵，int8
     dtype:
     - int8
-    - int32
     shape: '[..., m, k]，2-6维'
   - name: x2
-    description: 右矩阵，与x1 dtype一致
+    description: 右矩阵，与 x1 dtype 一致
     dtype:
     - int8
-    - int32
     shape: '[..., k, n]，最后一维≤65535'
   - name: scale
-    description: 量化缩放因子，per-tensor[t=1]或per-channel[t=n]，或2D分组量化
+    description: 量化缩放因子，per-tensor[t=1] 或 per-channel[t=n]
     dtype:
     - float32
-    - int64
     - bfloat16
-    shape: '[t] 或 [ceil(k/group_k), n]'
-  - name: offset
-    description: 反量化偏移，scale为2D时必选
-    dtype:
-    - float32
-    - float16
-    shape: '[t] 或与scale相同的2D'
-    optional: true
+    shape: '[t]'
   - name: pertoken_scale
-    description: per-token缩放因子，shape=[m]
+    description: per-token 缩放因子，shape=[m]
     dtype:
     - float32
     shape: '[m]'
     optional: true
   - name: bias
-    description: 偏置项，int32走pre-scale，浮点走post-scale
+    description: 偏置项，int32 走 pre-scale，浮点走 post-scale
     dtype:
     - int32
     - bfloat16
@@ -78,9 +66,7 @@ operator:
   - name: out
     description: 计算结果
     dtype:
-    - int8
     - float16
     - bfloat16
-    - int32
     shape: '[..., m, n]'
-  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? offset=None, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype=None, int[]? group_sizes=None) -> Tensor out
+  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype=None, int[]? group_sizes=None) -> Tensor out

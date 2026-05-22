@@ -70,7 +70,11 @@ cann_bench.softmax(Tensor x, int dim) -> Tensor y
 - dim 指定计算 Softmax 的维度，支持负数索引
 - 输出 shape 和 dtype 与输入完全一致
 - 需注意数值稳定性：内部实现应使用减最大值技巧避免指数溢出
-- 当输入包含 inf 时，对应输出为 0 或 1；当输入包含 nan 时，输出为 nan
+- 特殊值行为（须与 `torch.nn.functional.softmax` 一致，均源自 `x - max(x)` 重整）：
+  - 某切片含任意 `+inf`（无论是否同时含其它有限/`-inf` 元素）：整切片输出 `NaN`（`inf - inf = NaN` 沿切片传播）
+  - 某切片全部为 `-inf`：整切片输出 `NaN`（`max = -inf`，`-inf - (-inf) = NaN`）
+  - 某切片含 `-inf` 与有限元素：`-inf` 位置输出 `0`，有限元素按正常 softmax 归一化
+  - 输入含 `NaN`：整切片输出 `NaN`
 
 ### 支持范围
 

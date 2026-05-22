@@ -17,7 +17,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-1, 1]
   baseline_perf_us: 15.44
-  t_hw_us:
+  t_hw_us: 2.1845
   note: "S-float16-2M-对齐-对称小值域-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 2
@@ -27,7 +27,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-2, 2]
   baseline_perf_us: 35.86
-  t_hw_us:
+  t_hw_us: 17.4763
   note: "M-float32-8M-对齐-对称小值域-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 3
@@ -37,7 +37,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-3, 3]
   baseline_perf_us: 58.84
-  t_hw_us:
+  t_hw_us: 34.9525
   note: "M-bfloat16-33M-对齐-对称小值域-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 4
@@ -47,7 +47,7 @@ cases:
   attrs: {dim: 0}
   value_range: [-10, 10]
   baseline_perf_us: 288.77
-  t_hw_us:
+  t_hw_us: 139.8101
   note: "L-float16-134M-对齐-中值域-dim=0 (split 行轴) | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 5
@@ -57,7 +57,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-100, 100]
   baseline_perf_us: 748.86
-  t_hw_us:
+  t_hw_us: 278.3235
   note: "L-float32-132M-质数非对齐-对称大值域-dim=-1 (last dim 偶) | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 6
@@ -67,7 +67,7 @@ cases:
   attrs: {dim: 0}
   value_range: [-0.1, 0.1]
   baseline_perf_us: 24.14
-  t_hw_us:
+  t_hw_us: 2.1792
   note: "S-bfloat16-2M-非对齐-对称微小值域-dim=0 (split 行轴 1022) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 7
@@ -77,7 +77,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-1, 2]
   baseline_perf_us: 16.10
-  t_hw_us:
+  t_hw_us: 2.1189
   note: "S-float16-2M-质数非对齐-非对称小值域-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 8
@@ -87,7 +87,7 @@ cases:
   attrs: {dim: 0}
   value_range: [-5, 10]
   baseline_perf_us: 31.04
-  t_hw_us:
+  t_hw_us: 4.9248
   note: "S-float32-2M-非对齐-非对称中值域-dim=0 (split 行轴 1538) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 9
@@ -97,7 +97,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-50, 100]
   baseline_perf_us: 228.19
-  t_hw_us:
+  t_hw_us: 1.9428
   note: "S-bfloat16-2M-质数非对齐-非对称大值域-3D-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 10
@@ -107,7 +107,7 @@ cases:
   attrs: {dim: 1}
   value_range: [-65504, 65504]
   baseline_perf_us: 15.46
-  t_hw_us:
+  t_hw_us: 2.1856
   note: "S-float16-2M-非对齐-float16 边界值-dim=1 (split 列轴 1024) | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 11
@@ -117,7 +117,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-88, 88]
   baseline_perf_us: 9.62
-  t_hw_us:
+  t_hw_us: 1.0
   note: "S-float32-2M-质数非对齐-float32 边界值-4D-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 12
@@ -127,7 +127,7 @@ cases:
   attrs: {dim: 1}
   value_range: [-.inf, .inf]
   baseline_perf_us: 1655.61
-  t_hw_us:
+  t_hw_us: 2.0833
   note: "S-bfloat16-2M-质数非对齐-inf 特殊值-dim=1 (split 列轴 2) | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 13
@@ -137,7 +137,7 @@ cases:
   attrs: {dim: 2}
   value_range: [.nan, .nan]
   baseline_perf_us: 14.72
-  t_hw_us:
+  t_hw_us: 1.0
   note: "S-float32-150K-质数非对齐-nan 特殊值-4D-dim=2 (split 第三维 16) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 14
@@ -147,7 +147,7 @@ cases:
   attrs: {dim: -1}
   value_range: [0, 0]
   baseline_perf_us: 21.04
-  t_hw_us:
+  t_hw_us: 3.1657
   note: "S-float16-3M-质数非对齐-零值-5D-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 15
@@ -157,7 +157,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-0.5, 0.5]
   baseline_perf_us: 18.28
-  t_hw_us:
+  t_hw_us: 4.3691
   note: "S-float32-2M-对齐-对称微小值域-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 16
@@ -167,7 +167,7 @@ cases:
   attrs: {dim: 0}
   value_range: [-1, 3]
   baseline_perf_us: 31.28
-  t_hw_us:
+  t_hw_us: 4.3347
   note: "S-bfloat16-4M-非对齐-非对称小值域-dim=0 (split 行轴 254) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 17
@@ -177,7 +177,7 @@ cases:
   attrs: {dim: 0}
   value_range: [-1000, 1000]
   baseline_perf_us: 36.56
-  t_hw_us:
+  t_hw_us: 4.3648
   note: "S-float16-4M-非对齐-对称大值域-dim=0 (split 行轴 4096) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 18
@@ -187,7 +187,7 @@ cases:
   attrs: {dim: -1}
   value_range: [-0.2, 0.2]
   baseline_perf_us: 36.44
-  t_hw_us:
+  t_hw_us: 17.4592
   note: "M-float32-8M-非对齐-对称微小值域-3D-dim=-1 | baseline_kernels: SwiGlu×1"
 - operator: SwiGlu
   case_id: 19
@@ -197,7 +197,7 @@ cases:
   attrs: {dim: 1}
   value_range: [-3, 6]
   baseline_perf_us: 46.80
-  t_hw_us:
+  t_hw_us: 8.7061
   note: "M-bfloat16-8M-非对齐-非对称中值域-3D-dim=1 (split 第二维 510) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 20
@@ -207,5 +207,5 @@ cases:
   attrs: {dim: -1}
   value_range: [-20, 40]
   baseline_perf_us: 78.12
-  t_hw_us:
+  t_hw_us: 10.88
   note: "M-float32-10M-非对齐-非对称大值域-5D-dim=-1 | baseline_kernels: SwiGlu×1"

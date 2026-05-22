@@ -19,7 +19,7 @@ operator:
     x (input): 任意维度张量，沿 dim 指定的维度计算 Softmax
   attrs:
   - name: dim
-    type: int
+    type: Int
     default: -1
     description: 计算 Softmax 的维度
     required: false
@@ -37,4 +37,4 @@ operator:
     - float16
     - float32
     - bfloat16
-  schema: softmax(Tensor x, int dim) -> Tensor y
+  schema: softmax(Tensor x, int dim=-1) -> Tensor y

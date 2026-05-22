@@ -394,7 +394,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: 115.12
-  t_hw_us: null
+  t_hw_us: 64.32
   note: 'bfloat16-B4S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 10
@@ -437,7 +437,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: 108.88
-  t_hw_us: null
+  t_hw_us: 63.95
   note: 'bfloat16-B2S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 11
@@ -652,7 +652,7 @@ cases:
   - -1
   - 1
   baseline_perf_us: 110.74
-  t_hw_us: null
+  t_hw_us: 60.3
   note: 'bfloat16-compact-B4S16-prefill | baseline_kernels: MlaProlog×1'
 - operator: MlaProlog
   case_id: 16

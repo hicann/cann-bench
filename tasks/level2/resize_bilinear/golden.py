@@ -17,53 +17,38 @@ from typing import List, Optional
 """
 ResizeBilinear 算子 Torch Golden 参考实现
 
-使用双线性插值调整图像大小
-公式：y = resize_bilinear(x, size)
+使用双线性插值调整 4D 图像 (N, C, H, W) 的空间维度大小
+公式: y = resize_bilinear(x, size)
+
+参考 PyTorch API: torch.nn.functional.interpolate (mode='bilinear')
+    https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.interpolate.html
 """
+
+
 def resize_bilinear(
     x: torch.Tensor,
     output_size: Optional[List[int]] = None,
     align_corners: bool = False,
-    scale_factor: Optional[List[float]] = None
+    scale_factor: Optional[List[float]] = None,
 ) -> torch.Tensor:
     """
-    使用双线性插值调整图像大小
+    使用双线性插值调整图像大小（仅 4D 输入）。
 
     Args:
         x: 输入张量，形状为 (N, C, H, W)
-        output_size: 输出尺寸 [output_height, output_width]
+        output_size: 输出尺寸 [output_height, output_width]，与 scale_factor 互斥
         align_corners: 是否对齐角点
         scale_factor: 缩放因子 [scale_height, scale_width]，与 output_size 互斥
 
     Returns:
-        输出张量，调整大小后的结果
+        输出张量 (N, C, H_out, W_out)，dtype 与 x 一致
     """
-    # 根据输入维度自动选择插值模式
-    # 3D -> 1D linear, 4D -> 2D bilinear, 5D -> 3D trilinear
-    dim = x.dim()
-    if dim == 3:
-        mode = 'linear'
-    elif dim == 4:
-        mode = 'bilinear'
-    elif dim == 5:
-        mode = 'trilinear'
-    else:
-        raise ValueError(f"ResizeBilinear requires 3D, 4D, or 5D input, got {dim}D")
-
-    # NPU 对 fp16/bf16 使用 fp32 进行内部计算
-    # Golden 也使用 fp32 计算以保持精度一致
-    orig_dtype = x.dtype
-    if orig_dtype in [torch.float16, torch.bfloat16]:
-        x = x.float()
-
-    # 使用 PyTorch 的 interpolate 实现
-    y = torch.nn.functional.interpolate(
+    if x.dim() != 4:
+        raise ValueError(f"ResizeBilinear requires 4D input (N, C, H, W), got {x.dim()}D")
+    return torch.nn.functional.interpolate(
         x,
         size=output_size,
-        scale_factor=scale_factor[0] if scale_factor and len(scale_factor) == 1 else scale_factor,
-        mode=mode,
-        align_corners=align_corners if dim >= 4 else None
+        scale_factor=scale_factor,
+        mode='bilinear',
+        align_corners=align_corners,
     )
-
-    # 转回原始 dtype
-    return y.to(orig_dtype)

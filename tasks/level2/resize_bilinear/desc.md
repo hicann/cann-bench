@@ -75,23 +75,24 @@ cann_bench.resize_bilinear(Tensor x, int[] output_size, bool align_corners=false
 
 ### 支持范围
 
-输入 tensor 各维度与参数的支持范围：
+输入 tensor 各维度与参数的支持范围（仅 4D 输入 `(N, C, H, W)`）：
 
 | 维度 / 参数 | 范围 | 备注 |
 |---|---|---|
 | `N`（batch） | 1 ~ 256 | cases.csv 实测 1 ~ 127 |
 | `C`（通道） | 1 ~ 1024 | cases.csv 实测 1 ~ 363 |
-| `H`（输入高） | 1 ~ 8192 | cases.csv 实测 13 ~ 4097（3D 形态 H 折叠为 1000003，见备注） |
-| `W`（输入宽） | 1 ~ 8192 | cases.csv 实测 67 ~ 4001（4D case），3D case 无此维 |
-| `output_size[0]`（输出高 / 1D 输出长度） | 1 ~ 4096 | cases.csv 实测 64 ~ 2048（4D），3D case 为 500001（一维长度，最大实测 ≈ 5×10^5） |
-| `output_size[1]`（输出宽） | 1 ~ 4096 | cases.csv 实测 64 ~ 1024（仅 4D case 有该维） |
+| `H`（输入高） | 1 ~ 8192 | cases.csv 实测 13 ~ 4097 |
+| `W`（输入宽） | 1 ~ 8192 | cases.csv 实测 67 ~ 4001 |
+| `output_size[0]`（输出高） | 1 ~ 4096 | cases.csv 实测 64 ~ 2048 |
+| `output_size[1]`（输出宽） | 1 ~ 4096 | cases.csv 实测 64 ~ 1024 |
 | `align_corners` | {false, true} | cases.csv 实测两种取值都覆盖 |
-| `scale_factor` | null 或 长度=空间维数的正浮点数组 | cases.csv 实测均为 null（与 `output_size` 互斥，二者只能取一） |
+| `scale_factor` | null 或 长度=2 的正浮点数组 | cases.csv 实测均为 null（与 `output_size` 互斥，二者只能取一） |
 
 约束：
-- `output_size` 与 `scale_factor` 互斥，必须恰好提供其一
-- 输入张量 rank 须与 `output_size`/`scale_factor` 长度匹配：4D 输入 (N, C, H, W) 配 2 元素 `output_size`；3D 输入 (N, C, L) 配 1 元素 `output_size`
-- 输出 shape 的非空间维（N, C）与输入一致，空间维由 `output_size` 或 `H * scale_factor[i]` 计算得到
+- 输入张量 rank 严格为 4，shape 为 `(N, C, H, W)`
+- `output_size` 与 `scale_factor` 互斥，必须恰好提供其一；两者长度均固定为 2（高、宽）
+- 输出 shape 的非空间维（N, C）与输入一致，空间维由 `output_size` 或 `[H * scale_factor[0], W * scale_factor[1]]` 计算得到
+- 不在本算子范围：1D/3D/5D 输入（linear/trilinear 模式）—— 由 PyTorch `interpolate` 的其它分支负责，不在本基准评测范围内
 
 ## 4. 精度要求
 
@@ -129,36 +130,41 @@ from typing import List, Optional
 """
 ResizeBilinear 算子 Torch Golden 参考实现
 
-使用双线性插值调整图像大小
-公式：y = resize_bilinear(x, size)
+使用双线性插值调整 4D 图像 (N, C, H, W) 的空间维度大小
+公式: y = resize_bilinear(x, size)
+
+参考 PyTorch API: torch.nn.functional.interpolate (mode='bilinear')
+    https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.interpolate.html
 """
+
+
 def resize_bilinear(
     x: torch.Tensor,
     output_size: Optional[List[int]] = None,
     align_corners: bool = False,
-    scale_factor: Optional[List[float]] = None
+    scale_factor: Optional[List[float]] = None,
 ) -> torch.Tensor:
     """
-    使用双线性插值调整图像大小
+    使用双线性插值调整图像大小（仅 4D 输入）。
 
     Args:
         x: 输入张量，形状为 (N, C, H, W)
-        output_size: 输出尺寸 [output_height, output_width]
+        output_size: 输出尺寸 [output_height, output_width]，与 scale_factor 互斥
         align_corners: 是否对齐角点
         scale_factor: 缩放因子 [scale_height, scale_width]，与 output_size 互斥
 
     Returns:
-        输出张量，调整大小后的结果
+        输出张量 (N, C, H_out, W_out)，dtype 与 x 一致
     """
-    # 使用 PyTorch 的 interpolate 实现双线性插值
-    y = torch.nn.functional.interpolate(
+    if x.dim() != 4:
+        raise ValueError(f"ResizeBilinear requires 4D input (N, C, H, W), got {x.dim()}D")
+    return torch.nn.functional.interpolate(
         x,
         size=output_size,
-        scale_factor=scale_factor[0] if scale_factor and len(scale_factor) == 1 else scale_factor,
+        scale_factor=scale_factor,
         mode='bilinear',
-        align_corners=align_corners
+        align_corners=align_corners,
     )
-    return y
 ```
 
 ## 6. 额外信息

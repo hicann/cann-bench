@@ -17,7 +17,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-128B-DSv4-decode-B=1-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 2
@@ -27,7 +27,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-8KB-DSv4-small-B=64-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 3
@@ -37,7 +37,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-66KB-DSv4-medium-B=512-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 4
@@ -47,7 +47,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-DSv4-typical-prefill-B=1024-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 5
@@ -57,7 +57,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 2.1955
   note: "S-fp32-524KB-DSv4-large-prefill-B=4096-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 6
@@ -67,7 +67,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 8.7818
   note: "S-fp32-2.10MB-DSv4-max-batch-B=16384-hc_mult=4 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 7
@@ -77,7 +77,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-33KB-hc_mult=2-下界-退化场景 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 8
@@ -87,7 +87,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-74KB-hc_mult=3-奇数非对齐 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 9
@@ -97,7 +97,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.2349
   note: "S-fp32-295KB-hc_mult=6-非2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 10
@@ -107,7 +107,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 2.1955
   note: "S-fp32-524KB-hc_mult=8-2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 11
@@ -117,7 +117,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 4.9398
   note: "S-fp32-1.18MB-hc_mult=12-非2幂 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 12
@@ -127,7 +127,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 8.7818
   note: "S-fp32-2.10MB-hc_mult=16-上界 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 13
@@ -137,7 +137,7 @@ cases:
   attrs: {iter_step: 1, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-iter_step=1-退化为softmax+1次col_norm | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 14
@@ -147,7 +147,7 @@ cases:
   attrs: {iter_step: 5, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-iter_step=5-少迭代收敛性测试 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 15
@@ -157,7 +157,7 @@ cases:
   attrs: {iter_step: 40, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.095
   note: "S-fp32-131KB-iter_step=40-上界深收敛 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 16
@@ -167,7 +167,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-08}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-eps=1e-8-fp32紧致 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 17
@@ -177,7 +177,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-07}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-eps=1e-7-中等 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 18
@@ -187,7 +187,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-1, 1]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-32B-tiny-smoke-B=1-hc_mult=2-下界 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 19
@@ -197,7 +197,7 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [-.inf, .inf]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-inf特殊值-row_max-shift防溢出 | baseline_kernels: MhcSinkhorn×1"
 - operator: MhcSinkhorn
   case_id: 20
@@ -207,5 +207,5 @@ cases:
   attrs: {iter_step: 20, eps: 1.0e-06}
   value_range: [.nan, .nan]
   baseline_perf_us: null
-  t_hw_us: null
+  t_hw_us: 1.0
   note: "S-fp32-131KB-nan特殊值-精度比对边界 | baseline_kernels: MhcSinkhorn×1"

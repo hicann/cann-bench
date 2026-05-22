@@ -32,7 +32,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: demo_shape-B1L13HC4D1024K4dil3-原始 demo 配置 (B=1,L=13,HC=4,D=1024)
   - operator: EngramGateFusion
     case_id: 2
@@ -57,7 +57,7 @@ cases:
       - [-0.1, 0.1]
       - [-0.1, 0.1]
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: single_token_decode-B1L1HC4D1024K4dil3-decode-Decode 单步推理 (L=1, 需 conv_state)
   - operator: EngramGateFusion
     case_id: 3
@@ -82,7 +82,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: short_seq-B1L16HC4D1024K4dil3-短序列 (L=16)
   - operator: EngramGateFusion
     case_id: 4
@@ -107,7 +107,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.2885
     note: medium_seq_single-B1L128HC4D1024K4dil3-中等序列单 batch (L=128)
   - operator: EngramGateFusion
     case_id: 5
@@ -132,7 +132,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 4.9749
     note: medium_seq_batch-B4L128HC4D1024K4dil3-中等序列批量 (B=4,L=128)
   - operator: EngramGateFusion
     case_id: 6
@@ -157,7 +157,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 19.7205
     note: prefill_medium-B4L512HC4D1024K4dil3-Prefill 中等长度 (B=4,L=512)
   - operator: EngramGateFusion
     case_id: 7
@@ -182,7 +182,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 19.7205
     note: long_ctx-B1L2048HC4D1024K4dil3-长上下文 (L=2048)
   - operator: EngramGateFusion
     case_id: 8
@@ -207,7 +207,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 19.7205
     note: large_batch-B8L256HC4D1024K4dil3-大批量推理 (B=8,L=256)
   - operator: EngramGateFusion
     case_id: 9
@@ -232,7 +232,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.5381
     note: non_aligned_len-B2L77HC4D1024K4dil3-非对齐序列长度 (L=77 质数)
   - operator: EngramGateFusion
     case_id: 10
@@ -257,7 +257,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: small_hidden-B1L64HC4D512K4dil3-小 hidden size 变体 (D=512)
   - operator: EngramGateFusion
     case_id: 11
@@ -282,7 +282,7 @@ cases:
       - [-0.1, 0.1]
       - [-0.1, 0.1]
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: decode_state_prefill-B1L8HC4D1024K4dil3-decode-8-token chunk with state (Decode-after-Prefill 场景)
   - operator: EngramGateFusion
     case_id: 12
@@ -307,7 +307,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.2885
     note: alignment_aligned-B2L64HC4D1024K4dil3-标准对齐基线 (B=2,L=64,HC=4,D=1024)
   - operator: EngramGateFusion
     case_id: 13
@@ -332,7 +332,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.876
     note: prime_seq_prime_D-B2L127HC4D769K4dil3-质数 L=127 + 质数 D=769 (kernel 边界)
   - operator: EngramGateFusion
     case_id: 14
@@ -357,7 +357,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: tiny_smoke-B1L4HC4D256K4dil3-最小冒烟 (B=1,L=4,D=256)
   - operator: EngramGateFusion
     case_id: 15
@@ -382,7 +382,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 2.4405
     note: wide_HC-B1L128HC8D1024K4dil3-HC=8 hyper-connection 变体
   - operator: EngramGateFusion
     case_id: 16
@@ -407,7 +407,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: narrow_HC-B1L128HC2D1024K4dil3-HC=2 hyper-connection 变体
   - operator: EngramGateFusion
     case_id: 17
@@ -432,7 +432,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.3227
     note: large_kernel-B1L128HC4D1024K8dil3-K=8 较大卷积核
   - operator: EngramGateFusion
     case_id: 18
@@ -457,7 +457,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.2885
     note: small_dilation-B1L128HC4D1024K4dil1-dilation=1 普通因果卷积
   - operator: EngramGateFusion
     case_id: 19
@@ -482,7 +482,7 @@ cases:
       - [-0.1, 0.1]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: boundary_bf16_values-B1L64HC4D1024K4dil3-bfloat16 大值域 (|x|<=100)
   - operator: EngramGateFusion
     case_id: 20
@@ -507,5 +507,5 @@ cases:
       - [-0.01, 0.01]
       - null
     baseline_perf_us: null
-    t_hw_us: null
+    t_hw_us: 1.0
     note: tiny_values-B1L64HC4D1024K4dil3-微小值域，测试 RMSNorm + gate 数值稳定性

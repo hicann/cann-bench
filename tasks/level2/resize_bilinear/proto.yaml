@@ -13,20 +13,20 @@ operator:
   category: FusedComposite
   difficulty: L2
   formula: y = resize_bilinear(x, size)
-  description: 使用双线性插值调整图像大小
-  shape_support: 输入 4D (N, C, H, W) 或 N 维张量
+  description: 使用双线性插值调整 4D 图像 (N, C, H, W) 的空间维度大小
+  shape_support: 'x: [N, C, H, W]（仅 4D）'
   attrs:
   - name: output_size
-    type: INT64[]
+    type: ListInt
     description: 输出尺寸 [output_height, output_width]
-    required: true
+    required: false
   - name: align_corners
-    type: BOOL
+    type: bool
     default: false
     description: 是否对齐角点
     required: false
   - name: scale_factor
-    type: FLOAT[]
+    type: ListFloat
     description: 缩放因子 [scale_height, scale_width]，与 output_size 互斥
     required: false
   inputs:

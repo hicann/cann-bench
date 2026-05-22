@@ -75,7 +75,7 @@ def gru(
         input_size=inputSize,
         hidden_size=hiddenSize,
         num_layers=numLayers,
-        bias=False,  # 先创建无 bias 版本，后面根据需要添加
+        bias=bias,  # 直接按参数决定是否创建偏置，确保 _all_weights 包含偏置名
         batch_first=batchFirst,
         dropout=dropout if numLayers > 1 else 0.0,
         bidirectional=bidirectional
@@ -106,21 +106,17 @@ def gru(
             setattr(gru_layer, f'weight_ih_{suffix}', wi_param)
             setattr(gru_layer, f'weight_hh_{suffix}', wh_param)
 
-            if bias and bias_ih is not None and bias_hh is not None:
-                bi_data = bias_ih[idx][:gate_size]
-                bh_data = bias_hh[idx][:gate_size]
-                bi_param = torch.nn.Parameter(bi_data.to(target_device))
-                bh_param = torch.nn.Parameter(bh_data.to(target_device))
-                setattr(gru_layer, f'bias_ih_{suffix}', bi_param)
-                setattr(gru_layer, f'bias_hh_{suffix}', bh_param)
-            elif bias:
-                # 有 bias 要求但没传入偏置，创建零偏置（使用输入 dtype）
-                bi_param = torch.nn.Parameter(
-                    torch.zeros(gate_size, dtype=input_dtype, device=target_device)
-                )
-                bh_param = torch.nn.Parameter(
-                    torch.zeros(gate_size, dtype=input_dtype, device=target_device)
-                )
+            if bias:
+                if bias_ih is not None and bias_hh is not None:
+                    bi_param = torch.nn.Parameter(bias_ih[idx][:gate_size].to(target_device))
+                    bh_param = torch.nn.Parameter(bias_hh[idx][:gate_size].to(target_device))
+                else:
+                    bi_param = torch.nn.Parameter(
+                        torch.zeros(gate_size, dtype=input_dtype, device=target_device)
+                    )
+                    bh_param = torch.nn.Parameter(
+                        torch.zeros(gate_size, dtype=input_dtype, device=target_device)
+                    )
                 setattr(gru_layer, f'bias_ih_{suffix}', bi_param)
                 setattr(gru_layer, f'bias_hh_{suffix}', bh_param)
 

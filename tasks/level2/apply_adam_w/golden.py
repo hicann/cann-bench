@@ -55,7 +55,11 @@ def apply_adam_w(
     v_new = beta2 * v + (1 - beta2) * grad * grad
     m_hat = m_new / (1 - beta1 ** step)
     v_hat = v_new / (1 - beta2 ** step)
-    update = m_hat / (v_hat.sqrt() + epsilon)
+    # F618: epsilon must live INSIDE the sqrt to match torch.optim.AdamW and
+    # the PyTorch/TF/JAX reference. The pre-fix form `v_hat.sqrt() + epsilon`
+    # diverges by ~10^4× from the standard when v_hat ≈ 0 (training start /
+    # very small gradients), producing overshooting updates and possible NaN.
+    update = m_hat / (v_hat + epsilon).sqrt()
     if weight_decay != 0:
         update = update + var * weight_decay
     result = var + lr * update if maximize else var - lr * update

@@ -17,7 +17,7 @@ operator:
   shape_support: 输入[N, C, D, H, W] 5维张量
   attrs:
   - name: output_size
-    type: List[int]
+    type: ListInt
     description: 输出尺寸，格式为 [output_d, output_h, output_w]
     required: true
   inputs:
