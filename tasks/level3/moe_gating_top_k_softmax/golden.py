@@ -71,6 +71,11 @@ def moe_gating_top_k_softmax(
         row_idx = row_idx.reshape(output_shape)
 
     # 处理finished参数
+    # F510: `num_expert` (== E) is an out-of-range SENTINEL marking finished
+    # tokens — downstream consumers MUST treat `expert_id == num_expert` as
+    # "skip routing", NOT as a valid expert index. `moe_finalize_routing`
+    # golden bounds-checks before `bias[expert_id, :]` to honor this contract;
+    # any non-golden consumer of `indices` must do the same.
     if finished is not None:
         num_expert = x.shape[-1]
         finished_expanded = finished.unsqueeze(-1).expand_as(indices)

@@ -147,12 +147,24 @@ def moe_finalize_routing(
                     scale_val = scales[i, k]
 
             # 获取专家 ID 和 bias
+            # F510: bound-check expert_id before indexing into bias. The
+            # upstream `moe_gating_top_k_softmax` golden uses `num_expert`
+            # (== E, out-of-range) as a sentinel for finished tokens
+            # (golden.py:77 `torch.where(finished_expanded, num_expert, indices)`).
+            # Without this guard `bias[E, :]` would index out of bounds.
+            # The semantically correct fallback for a finished / sentinel
+            # token is to contribute the unbiased value (skip bias addition).
             if bias is not None and expert_for_source_row is not None:
                 if is_torch:
                     expert_id = expert_for_source_row[i, k].item()
                 else:
                     expert_id = expert_for_source_row[i, k]
-                out[i, :] += scale_val * (dst_row + bias[expert_id, :])
+                num_experts = bias.shape[0]
+                if 0 <= expert_id < num_experts:
+                    out[i, :] += scale_val * (dst_row + bias[expert_id, :])
+                else:
+                    # finished / sentinel token — skip bias term
+                    out[i, :] += scale_val * dst_row
             else:
                 out[i, :] += scale_val * dst_row
 
