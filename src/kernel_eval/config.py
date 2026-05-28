@@ -42,6 +42,7 @@ class Config:
     # 路径配置
     tasks_root: str = ""  # tasks 数据目录路径
     reports_dir: str = ""        # 报告输出目录
+    bench_name: str = "cann"    # 评测集名称
 
     # 源码目录（AI生成的算子源码，通过参数传入）
     source_dir: str = ""        # AI生成的算子源码目录

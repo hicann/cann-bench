@@ -210,6 +210,11 @@ class CaseSpec:
     def to_dict(self) -> Dict[str, Any]:
         return {
             'case_id': self.case_id,
+            'operator': self.operator,
+            'rel_path': self.rel_path,
+            'case_num': self.case_num,
+            'baseline_perf_us': self.baseline_perf_us,
+            't_hw_us': self.t_hw_us,
             'input_shapes': self.input_shapes,
             'dtypes': self.dtypes,
             'attrs': self.attrs,
@@ -217,6 +222,24 @@ class CaseSpec:
             'tolerance': self.tolerance,
             'metadata': self.metadata,
         }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'CaseSpec':
+        """从字典重建"""
+        return cls(
+            case_id=data.get('case_id', ''),
+            operator=data.get('operator', ''),
+            rel_path=data.get('rel_path', ''),
+            case_num=int(data.get('case_num', 0)),
+            baseline_perf_us=float(data.get('baseline_perf_us', 0.0)),
+            t_hw_us=float(data.get('t_hw_us', 0.0)),
+            input_shapes=data.get('input_shapes', []),
+            dtypes=data.get('dtypes', []),
+            attrs=data.get('attrs', {}),
+            value_ranges=data.get('value_ranges', []),
+            tolerance=data.get('tolerance', {"rtol": 1e-4, "atol": 1e-4}),
+            metadata=data.get('metadata', {}),
+        )
 
 
 # === 解决方案规格基类 ===

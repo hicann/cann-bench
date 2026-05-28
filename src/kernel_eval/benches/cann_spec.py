@@ -177,15 +177,31 @@ class CannCaseSpec(CaseSpec):
 
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
-        base = super().to_dict()
-        base.update({
-            'rel_path': self.rel_path,
-            'operator': self.operator,
-            'case_num': self.case_num,
-            'baseline_perf_us': self.baseline_perf_us,
-            't_hw_us': self.t_hw_us,
+        d = super().to_dict()
+        d.update({
             'yaml_path': self.yaml_path,
             'note': self.note,
             'compare_outputs': self.compare_outputs,
         })
-        return base
+        return d
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'CannCaseSpec':
+        """从字典重建"""
+        return cls(
+            case_id=data.get('case_id', ''),
+            operator=data.get('operator', ''),
+            rel_path=data.get('rel_path', ''),
+            case_num=int(data.get('case_num', 0)),
+            baseline_perf_us=float(data.get('baseline_perf_us', 0.0)),
+            t_hw_us=float(data.get('t_hw_us', 0.0)),
+            input_shapes=data.get('input_shapes', []),
+            dtypes=data.get('dtypes', []),
+            attrs=data.get('attrs', {}),
+            value_ranges=data.get('value_ranges', []),
+            tolerance=data.get('tolerance', {"rtol": 1e-4, "atol": 1e-4}),
+            metadata=data.get('metadata', {}),
+            yaml_path=data.get('yaml_path', ''),
+            note=data.get('note', ''),
+            compare_outputs=data.get('compare_outputs', []),
+        )

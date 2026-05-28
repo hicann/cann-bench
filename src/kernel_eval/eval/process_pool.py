@@ -191,6 +191,8 @@ class OperatorScheduler:
             "--output", output_file,
             "--warmup", str(self.base_config.warmup),
             "--repeat", str(self.base_config.repeat),
+            "--bench-name", self.base_config.bench_name,
+            "--reports-dir", self.base_config.reports_dir,
             "--rel-paths", rel_path,  # 单个算子
         ]
 
@@ -400,6 +402,8 @@ class ProcessWorker:
             "--output", self._output_file,
             "--warmup", str(self.base_config.warmup),
             "--repeat", str(self.base_config.repeat),
+            "--bench-name", self.base_config.bench_name,
+            "--reports-dir", self.base_config.reports_dir,
         ]
 
         # 添加 profiler 配置
@@ -460,24 +464,7 @@ class ProcessWorker:
 
     def _serialize_cases(self, cases: List[CaseSpec]) -> List[Dict]:
         """序列化用例数据"""
-        return [
-            {
-                "rel_path": getattr(c, 'rel_path', ''),
-                "operator": getattr(c, 'operator', ''),
-                "case_id": c.case_id,
-                "case_num": getattr(c, 'case_num', 0),
-                "input_shapes": c.input_shapes,
-                "dtypes": c.dtypes,
-                "value_ranges": c.value_ranges,
-                "attrs": getattr(c, 'attrs', {}),
-                "note": getattr(c, 'note', ''),
-                "yaml_path": getattr(c, 'yaml_path', ''),
-                "baseline_perf_us": getattr(c, 'baseline_perf_us', 0.0),
-                "t_hw_us": getattr(c, 't_hw_us', 0.0),
-                "op_dir_name": getattr(c, 'op_dir_name', ''),
-            }
-            for c in cases
-        ]
+        return [c.to_dict() for c in cases]
 
     def wait(self, timeout: int = None) -> List[Dict]:
         """等待子进程完成并返回结果
@@ -878,7 +865,7 @@ class ProcessPoolCoordinator:
         """
         # 加载用例
         from ..registry.loader_registry import get_case_loader
-        loader = get_case_loader(tasks_root=self.base_config.tasks_root)
+        loader = get_case_loader(self.base_config.bench_name, tasks_root=self.base_config.tasks_root)
         cases = loader.scan_by_rel_path(rel_path)
 
         if not cases:

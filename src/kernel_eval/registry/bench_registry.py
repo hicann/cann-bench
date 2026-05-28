@@ -32,6 +32,7 @@ from .golden_registry import get_golden_loader
 from .matcher_registry import get_operator_matcher
 from .checker_registry import get_correctness_checker
 from .scoring_registry import get_scoring_scheme
+from .case_spec_registry import CaseSpecRegistry
 
 
 @dataclass
@@ -47,6 +48,7 @@ class BenchConfig:
     operator_matcher: str = "cann"
     scoring_scheme: str = ""
     checker: str = "cann_default"
+    case_spec_cls: str = "cann"                    # CaseSpec 子类标识
     # Golden 参考输出的精度策略：
     #   fp64_cpu（默认）: 升精度到 float64 + CPU 计算，避免 NPU 溢出污染
     #   native_cpu: 保持原始精度在 CPU 上计算
@@ -81,6 +83,10 @@ class BenchConfig:
         """获取精度判断器实例"""
         return get_correctness_checker(self.checker)
 
+    def get_case_spec_cls(self):
+        """获取 CaseSpec 子类"""
+        return CaseSpecRegistry.get(self.case_spec_cls)
+
     def get_precision_thresholds(self) -> Dict[str, float]:
         """获取精度阈值表"""
         if self.precision_thresholds:
@@ -98,6 +104,7 @@ class BenchConfig:
             'operator_matcher': self.operator_matcher,
             'scoring_scheme': self.scoring_scheme,
             'checker': self.checker,
+            'case_spec_cls': self.case_spec_cls,
             'golden_precision': self.golden_precision,
             'precision_thresholds': self.precision_thresholds,
             'default_tasks_root': self.default_tasks_root,

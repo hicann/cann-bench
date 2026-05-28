@@ -161,6 +161,8 @@ def create_parser() -> argparse.ArgumentParser:
     eval_process_parser = subparsers.add_parser('eval-process', help='进程池子进程执行')
     eval_process_parser.add_argument('--bench-name', type=str, default='cann',
                                       help='评测集名称（默认: cann）')
+    eval_process_parser.add_argument('--reports-dir', type=str, default=None,
+                                      help='报告输出目录')
     eval_process_parser.add_argument('--process-id', type=int, required=True,
                                       help='进程 ID')
     eval_process_parser.add_argument('--card-id', type=int, required=True,
@@ -286,6 +288,10 @@ def _cmd_eval_multi_card(args, bench_root: str, filter_prefix: str, config: Conf
         timeout_per_operator=timeout_per_operator,
         enable_profiler=not args.no_perf,
     )
+
+    config.bench_name = bench_name
+    if getattr(args, 'reports_dir', None):
+        config.reports_dir = args.reports_dir
 
     coordinator = ProcessPoolCoordinator(
         base_config=config,
@@ -788,10 +794,27 @@ def cmd_eval_process(args):
 
     from .eval.evaluator import Evaluator
     from .eval.results import EvalOperatorResult, EvalCaseResult, summarize_case_results
-    from .benches.cann import CannCaseLoader, CannCaseSpec
-    from .benches.cann import GoldenLoader
+    from .registry.bench_registry import get_bench_config
 
-    evaluator = Evaluator(config)
+    bench_name = args.bench_name
+    # 确保评测集已注册（只注册当前需要的）
+    if bench_name == 'cann':
+        from .benches.cann import _register_cann_components
+        _register_cann_components()
+    elif bench_name == 'stanford':
+        from .benches.stanford import _register_stanford_components
+        _register_stanford_components()
+
+    bench_config = get_bench_config(bench_name)
+    case_spec_cls = bench_config.get_case_spec_cls()
+    task_loader = bench_config.get_task_loader(tasks_root=config.tasks_root)
+    case_loader = bench_config.get_case_loader(tasks_root=config.tasks_root)
+    golden_loader = bench_config.get_golden_loader(bench_root=config.tasks_root)
+
+    config.bench_name = bench_name
+    if args.reports_dir:
+        config.reports_dir = args.reports_dir
+    evaluator = Evaluator(config, bench_name=bench_name)
     results = []
 
     try:
@@ -804,21 +827,15 @@ def cmd_eval_process(args):
             for rel_path in rel_paths:
                 print(f"[Process {args.process_id}] 开始评测算子 {rel_path}")
                 # 获取算子信息
-                from .benches.cann import CannTaskLoader
-                op_loader = CannTaskLoader(config.tasks_root)
                 try:
-                    op_info = op_loader.get_operator(rel_path)
+                    op_info = task_loader.get_operator(rel_path)
                     operator_name = op_info.name
                 except Exception as e:
-                    # 兜底从目录名取算子名：目录名是 snake_case，proto.yaml 中的 name 是 PascalCase，
-                    # 报告中会出现命名不一致。打印告警提示 proto.yaml 缺失/损坏。
                     operator_name = Path(rel_path).name
-                    print(f"[WARN] CannTaskLoader.get_operator({rel_path}) 失败 "
-                          f"({type(e).__name__}: {e})，回退到目录名 '{operator_name}'。"
-                          f"该算子在报告中将使用 snake_case 命名，与 proto.yaml 不一致。")
+                    print(f"[WARN] TaskLoader.get_operator({rel_path}) 失败 "
+                          f"({type(e).__name__}: {e})，回退到目录名 '{operator_name}'")
 
                 # 加载该算子的用例并评测
-                case_loader = CannCaseLoader(config.tasks_root)
                 cases = case_loader.scan_by_rel_path(rel_path)
 
                 if not cases:
@@ -826,7 +843,6 @@ def cmd_eval_process(args):
                     continue
 
                 # 评测每个用例
-                golden_loader = GoldenLoader(config.tasks_root)
                 case_results = _evaluate_cases_batch(
                     evaluator, cases, golden_loader, args.process_id)
 
@@ -839,42 +855,14 @@ def cmd_eval_process(args):
             with open(args.cases_file, 'r') as f:
                 cases_data = json.load(f)
 
-            # 重建 CannCaseSpec 对象
-            cases = []
-            for c in cases_data:
-                # case_num: 优先用序列化的整数值，否则从 case_id 字符串提取
-                case_num_raw = c.get('case_num')
-                if case_num_raw is not None:
-                    case_num = int(case_num_raw)
-                else:
-                    parts = str(c.get('case_id', '')).rsplit('_', 1)
-                    case_num = int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 0
-                display_path = c.get('op_dir_name', '') if c.get('op_dir_name') and c['rel_path'] == "." else c['rel_path']
-                case_id_str = f"{display_path}_{case_num}"
-
-                case = CannCaseSpec(
-                    case_id=case_id_str,
-                    rel_path=c['rel_path'],
-                    operator=c['operator'],
-                    case_num=case_num,
-                    input_shapes=c['input_shapes'],
-                    dtypes=c['dtypes'],
-                    value_ranges=c['value_ranges'],
-                    attrs=c.get('attrs', {}),
-                    note=c.get('note', ''),
-                    yaml_path=c.get('yaml_path', ''),
-                    baseline_perf_us=c.get('baseline_perf_us', 0.0),
-                    t_hw_us=c.get('t_hw_us', 0.0),
-                    metadata={'op_dir_name': c.get('op_dir_name', '')},
-                )
-                cases.append(case)
+            # 动态重建 CaseSpec 对象（根据 bench_name 选择子类）
+            cases = [case_spec_cls.from_dict(c) for c in cases_data]
 
             operator = cases[0].operator if cases else 'unknown'
             rel_path = cases[0].rel_path if cases else 'unknown'
 
             print(f"[Process {args.process_id}] 评测用例: {len(cases)} 个 ({operator})")
 
-            golden_loader = GoldenLoader(config.tasks_root)
             case_results = _evaluate_cases_batch(
                 evaluator, cases, golden_loader, args.process_id)
 

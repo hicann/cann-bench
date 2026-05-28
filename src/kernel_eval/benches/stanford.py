@@ -61,6 +61,7 @@ def _register_stanford_components():
     from ..registry.checker_registry import CheckerRegistry
     from ..registry.scoring_registry import ScoringSchemeRegistry
     from ..registry.bench_registry import BenchRegistry, BenchConfig
+    from ..registry.case_spec_registry import CaseSpecRegistry
 
     # 注册 Loader
     if 'stanford' not in LoaderRegistry._task_loaders:
@@ -86,6 +87,11 @@ def _register_stanford_components():
 
     # 注册 BenchConfig
     if 'stanford' not in BenchRegistry._items:
+        # 注册 CaseSpec（Stanford 用基类）
+        if 'stanford' not in CaseSpecRegistry._items:
+            from ..base.models import CaseSpec
+            CaseSpecRegistry.register('stanford', CaseSpec)
+
         BenchRegistry.register('stanford', BenchConfig(
             task_loader='stanford',
             case_loader='stanford',
@@ -93,6 +99,7 @@ def _register_stanford_components():
             operator_matcher='stanford',
             scoring_scheme='stanford',
             checker='stanford_default',
+            case_spec_cls='stanford',
             golden_precision='native_npu',
             precision_thresholds={'atol': 0.01, 'rtol': 0.01},
             default_tasks_root='thirdparty/KernelBench/KernelBench',

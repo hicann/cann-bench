@@ -85,6 +85,7 @@ def _register_cann_components():
     from ..registry.checker_registry import CheckerRegistry
     from ..registry.scoring_registry import ScoringSchemeRegistry
     from ..registry.bench_registry import BenchRegistry, BenchConfig
+    from ..registry.case_spec_registry import CaseSpecRegistry
     from ..utils.thresholds import PRECISION_THRESHOLDS
 
     # 注册 Loader
@@ -115,6 +116,10 @@ def _register_cann_components():
 
     # 注册 BenchConfig
     if 'cann' not in BenchRegistry._items:
+        # 注册 CaseSpec 子类
+        if 'cann' not in CaseSpecRegistry._items:
+            CaseSpecRegistry.register('cann', CannCaseSpec)
+
         BenchRegistry.register('cann', BenchConfig(
             task_loader='cann',
             case_loader='cann',
@@ -122,6 +127,7 @@ def _register_cann_components():
             operator_matcher='cann',
             scoring_scheme='cann',
             checker='cann_default',
+            case_spec_cls='cann',
             precision_thresholds=dict(PRECISION_THRESHOLDS),
             default_tasks_root='tasks',
             description='CANN NPU 算子评测集（默认）',

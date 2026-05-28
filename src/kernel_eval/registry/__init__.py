@@ -42,6 +42,9 @@ from .checker_registry import CheckerRegistry, get_correctness_checker, register
 # === Scoring Registry ===
 from .scoring_registry import ScoringSchemeRegistry, get_scoring_scheme
 
+# === CaseSpec Registry ===
+from .case_spec_registry import CaseSpecRegistry
+
 # === Bench Registry ===
 from .bench_registry import BenchRegistry, BenchConfig, get_bench_config, get_bench_components
 
@@ -65,6 +68,8 @@ __all__ = [
     # Scoring Registry
     "ScoringSchemeRegistry",
     "get_scoring_scheme",
+    # CaseSpec Registry
+    "CaseSpecRegistry",
     # Bench Registry
     "BenchRegistry",
     "BenchConfig",
