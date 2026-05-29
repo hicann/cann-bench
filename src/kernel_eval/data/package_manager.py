@@ -48,6 +48,34 @@ _MAX_COMPILE_ROUNDS = 6
 # SIGTERM 宽限时间
 _BUILD_TIMEOUT_SEC = 600
 
+# CANN OPP 安装路径探测。
+# install.sh 中 --install-path 接收 OPP 根目录（如 /home/.../cann-9.0.0/opp），
+# 安装脚本会在其下创建 vendors/custom_ops/ 子目录。
+_CANN_OPP_VENDOR_SUBDIR = "vendors/custom_ops"
+
+
+def _detect_opp_path() -> str:
+    """动态探测 CANN OPP 根目录路径（传给 install.sh --install-path）。
+
+    优先级：
+    1. ASCEND_OPP_PATH 环境变量（CANN 安装后 source set_env.sh 会设置）
+    2. $ASCEND_HOME_PATH/opp（Toolkit 内嵌 OPP）
+    3. /usr/local/Ascend/opp（OPP 独立安装默认路径）
+    """
+    for base in (
+        os.environ.get("ASCEND_OPP_PATH", ""),
+        os.path.join(os.environ.get("ASCEND_HOME_PATH", ""), "opp"),
+        "/usr/local/Ascend/opp",
+    ):
+        if base and os.path.isdir(base):
+            return base
+    # 均未命中，返回优先级最高的路径（install.sh 会在安装时创建）
+    opp = os.environ.get("ASCEND_OPP_PATH", "")
+    if not opp:
+        home = os.environ.get("ASCEND_HOME_PATH", "")
+        opp = os.path.join(home, "opp") if home else "/usr/local/Ascend/opp"
+    return opp
+
 
 @dataclass
 class PackageInfo:
@@ -298,7 +326,8 @@ class PackageManager:
     def install_run_package(self, run_path: str) -> bool:
         """安装run包（NPU内核包）
 
-        run包为 makeself 格式，使用 --quiet 参数静默安装。
+        run包为 makeself 格式，使用 --quiet 静默安装，--install-path 指定
+        CANN OPP 根目录以触发安装脚本生成 set_env.bash。
         安装失败时抛出 RuntimeError，不静默忽略。
         """
         run_file = Path(run_path)
@@ -307,14 +336,21 @@ class PackageManager:
 
         print(f"[INFO] 安装run包: {run_file.name}")
 
+        # 动态探测 OPP 根目录，传给 --install-path
+        opp_path = _detect_opp_path()
+        print(f"[INFO] OPP 根目录: {opp_path}")
+
         try:
             # 设置可执行权限
             os.chmod(run_path, 0o755)
 
-            # 执行安装（makeself .run 包使用 --quiet 静默安装）
+            # 执行安装：
+            #   --quiet        静默安装
+            #   --install-path OPP 根目录，触发生成 set_env.bash（含 LD_LIBRARY_PATH 等环境变量）
             abs_run_path = str(run_file.resolve())
             result = subprocess.run(
-                [abs_run_path, "--quiet"],
+                [abs_run_path, "--quiet",
+                 f"--install-path={opp_path}"],
                 cwd=str(run_file.parent),
                 capture_output=True,
                 text=True,
@@ -328,6 +364,11 @@ class PackageManager:
                 )
 
             print(f"[INFO] run包安装成功")
+
+            # source set_env.bash 将 LD_LIBRARY_PATH / ASCEND_CUSTOM_OPP_PATH
+            # 设到当前进程，确保 dlopen 能找到 libcust_opapi.so
+            self._source_set_env_bash(opp_path)
+
             return True
 
         except subprocess.TimeoutExpired:
@@ -336,6 +377,42 @@ class PackageManager:
             raise
         except Exception as e:
             raise RuntimeError(f"run包安装异常: {e}")
+
+    @staticmethod
+    def _source_set_env_bash(opp_path: str) -> None:
+        """Source set_env.bash 并将导出变量应用到当前进程。
+
+        install.sh 在传入 --install-path 时会在
+        <opp_path>/vendors/custom_ops/bin/set_env.bash 中写入 export 语句。
+        此方法解析该文件并将变量设到 os.environ，使后续的 dlopen 能正确找到自定义算子库。
+        """
+        vendor_path = Path(opp_path) / _CANN_OPP_VENDOR_SUBDIR
+        set_env_path = vendor_path / "bin" / "set_env.bash"
+
+        if not set_env_path.exists():
+            print(f"[WARN] set_env.bash 不存在: {set_env_path}")
+            # 兜底：直接将 op_api/lib 加入 LD_LIBRARY_PATH
+            lib_dir = vendor_path / "op_api" / "lib"
+            if lib_dir.is_dir():
+                cur = os.environ.get("LD_LIBRARY_PATH", "")
+                lib_str = str(lib_dir)
+                if lib_str not in cur:
+                    os.environ["LD_LIBRARY_PATH"] = f"{lib_str}:{cur}" if cur else lib_str
+                    print(f"[INFO] 已将 {lib_str} 加入 LD_LIBRARY_PATH（兜底）")
+            return
+
+        content = set_env_path.read_text()
+        for match in re.finditer(r'export\s+(\w+)=(.+)', content):
+            var_name = match.group(1)
+            var_value = match.group(2).strip()
+            # 展开 ${VAR_NAME} 引用为当前环境变量值
+            var_value = re.sub(
+                r'\$\{(\w+)\}',
+                lambda m: os.environ.get(m.group(1), ''),
+                var_value,
+            )
+            os.environ[var_name] = var_value
+            print(f"[INFO] source: {var_name}={var_value}")
 
     def install_whl_package(self, whl_path: str) -> bool:
         """安装whl包（Python包）
@@ -357,10 +434,10 @@ class PackageManager:
                 timeout=30
             )
 
-            # 安装新版本
-            print(f"[INFO] 安装: pip install {whl_path}")
+            # 安装新版本（--no-deps 避免重装 torch/torch_npu 等依赖）
+            print(f"[INFO] 安装: pip install --no-deps {whl_path}")
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", whl_path],
+                [sys.executable, "-m", "pip", "install", "--no-deps", whl_path],
                 capture_output=True,
                 text=True,
                 timeout=60

@@ -105,16 +105,12 @@ class CMakeBuildCommand(Command):
         TORCH_NPU_PATH = os.path.dirname(torch_npu.__file__)
         logging.info(f"Using Torch NPU path: {TORCH_NPU_PATH}")
 
-        NPU_ARCH = os.environ.get('NPU_ARCH', 'ascend910b')
-        logging.info(f"Using NPU_ARCH: {NPU_ARCH}")
-
         build_temp = os.path.join(os.getcwd(), 'build_py')
         import sys
         cmake_config_command = ['cmake', '-S', os.getcwd(), '-B', build_temp,
                                 '-DCMAKE_BUILD_TYPE=Release',
                                 f'-DTorch_DIR={Torch_DIR}',
                                 f'-DTORCH_NPU_PATH={TORCH_NPU_PATH}',
-                                f'-DNPU_ARCH={NPU_ARCH}',
                                 f'-DPython3_EXECUTABLE={sys.executable}',
                                 '-DBUILD_PYTHON_EXT=ON'
                                 ]

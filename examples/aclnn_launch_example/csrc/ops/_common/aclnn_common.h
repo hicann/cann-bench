@@ -95,6 +95,7 @@ constexpr aclDataType kATenScalarTypeToAclDataTypeTable[static_cast<int64_t>(at:
 #define GET_OP_API_FUNC(apiName) reinterpret_cast<_##apiName>(GetOpApiFuncAddr(#apiName))
 
 inline const char *GetCustOpApiLibName(void) { return "libcust_opapi.so"; }
+inline const char *GetOpApiLibName(void) { return "libopapi.so"; }
 
 inline void *GetOpApiFuncAddrInLib(void *handler, const char *libName, const char *apiName)
 {
@@ -105,9 +106,9 @@ inline void *GetOpApiFuncAddrInLib(void *handler, const char *libName, const cha
     return funcAddr;
 }
 
-inline void *GetOpApiLibHandler(const char *libName)
+inline void *GetOpApiLibHandler(const char *libName, int flags = RTLD_LAZY)
 {
-    auto handler = dlopen(libName, RTLD_LAZY);
+    auto handler = dlopen(libName, flags);
     if (handler == nullptr) {
         ASCEND_LOGW("dlopen %s failed, error:%s.", libName, dlerror());
     }
@@ -116,6 +117,11 @@ inline void *GetOpApiLibHandler(const char *libName)
 
 inline void *GetOpApiFuncAddr(const char *apiName)
 {
+    // 先加载 libopapi.so（RTLD_GLOBAL），使内部依赖符号（l0op::Contiguous、
+    // l0op::ViewCopy 等）全局可见，供 libcust_opapi.so 解析依赖。
+    // 但 API 符号（aclnnMish 等）仅从 libcust_opapi.so 获取，不 fallback 到内置。
+    static auto opApiHandler = GetOpApiLibHandler(GetOpApiLibName(), RTLD_LAZY | RTLD_GLOBAL);
+
     static auto custOpApiHandler = GetOpApiLibHandler(GetCustOpApiLibName());
     if (custOpApiHandler == nullptr) {
         ASCEND_LOGE("dlopen %s failed, cannot resolve symbol '%s'. "

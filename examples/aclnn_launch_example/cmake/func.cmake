@@ -20,8 +20,8 @@ set(ALL_PLUGIN_INCLUDE_DIRS "" CACHE INTERNAL "All plugin include directories")
 #   HOST_SRCS: host源文件列表
 #   API_SRCS: API源文件列表
 #   KERNEL_DIR: kernel目录名(相对于算子目录，如op_kernel)
-#   KERNEL_FILE: kernel文件名(如add_arch22.cpp)
-#   TILING_INCLUDE_DIR: tiling需要的include目录(如op_kernel/arch22)
+#   KERNEL_FILE: kernel文件名(如add_kernel.cpp)
+#   TILING_INCLUDE_DIR: tiling需要的include目录(如op_kernel)
 #   API_INCLUDE_DIR: API需要的include目录(如op_api)
 macro(register_aclnn_op OP_TYPE HOST_SRCS API_SRCS KERNEL_DIR KERNEL_FILE TILING_INCLUDE_DIR API_INCLUDE_DIR)
     message(STATUS "Registering ACLNN op: ${OP_TYPE}")

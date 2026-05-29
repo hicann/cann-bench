@@ -17,8 +17,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 DIST_DIR="${PROJECT_DIR}/dist"
 
-# Parse arguments
-SOC_VERSION="ascend910b"
+# Parse arguments - SoC version is required
+SOC_VERSION=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --soc=*)
@@ -30,6 +30,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [ -z "${SOC_VERSION}" ]; then
+    echo "[ERROR] SoC version not specified. Use --soc=<soc_version>."
+    exit 1
+fi
 
 echo "=== Building ACLNN run package for ${SOC_VERSION} ==="
 

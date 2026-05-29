@@ -10,7 +10,9 @@ set(SYSTEM_PREFIX ${CMAKE_SYSTEM_PROCESSOR}-linux)
 # ================================== ACLNN Operator Build ==================================
 find_package(ASC REQUIRED)
 
-set(ASCEND_COMPUTE_UNIT ascend910b)
+if(NOT DEFINED ASCEND_COMPUTE_UNIT OR ASCEND_COMPUTE_UNIT STREQUAL "")
+    message(FATAL_ERROR "ASCEND_COMPUTE_UNIT is not set. Pass -DASCEND_COMPUTE_UNIT=<soc_version> to cmake.")
+endif()
 set(package_name custom_ops)
 
 # Output to dist directory
@@ -83,6 +85,22 @@ target_include_directories(cust_opapi PRIVATE
     $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/pkg_inc/base
 )
 
+# Graph proto library (InferShape + OpDef registration)
+file(GLOB proto_src ${ASCEND_AUTOGEN_PATH}/op_proto.cc)
+set_source_files_properties(${proto_src} PROPERTIES GENERATED TRUE)
+npu_op_library(cust_op_proto GRAPH
+    ${ALL_HOST_OPS_SRCS}
+    ${proto_src}
+)
+target_include_directories(cust_op_proto PRIVATE
+    $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/include
+    $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/asc/include/tiling
+    $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/pkg_inc
+    $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/pkg_inc/op_common
+    $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/pkg_inc/base
+    ${ALL_TILING_INCLUDE_DIRS}
+)
+
 # Kernel sources - 从注册信息生成
 foreach(KERNEL_INFO ${ALL_KERNEL_OPS_INFO})
     # 解析格式: OP_TYPE|KERNEL_DIR|KERNEL_FILE
@@ -106,7 +124,7 @@ npu_op_kernel_library(all_kernels
 )
 
 npu_op_package_add(${package_name}
-    LIBRARY cust_optiling cust_opapi all_kernels
+    LIBRARY cust_optiling cust_opapi cust_op_proto all_kernels
 )
 
 # ================================== Python Extension Build ==================================

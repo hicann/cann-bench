@@ -35,15 +35,35 @@ public:
             .UnknownShapeFormat({ge::FORMAT_ND, ge::FORMAT_ND, ge::FORMAT_ND})
             .AutoContiguous();
 
-        OpAICoreConfig aicoreConfig;
-        aicoreConfig.DynamicCompileStaticFlag(true)
+        OpAICoreConfig aicoreConfig910B;
+        aicoreConfig910B.DynamicCompileStaticFlag(true)
             .DynamicFormatFlag(false)
             .DynamicRankSupportFlag(true)
             .DynamicShapeSupportFlag(true)
             .NeedCheckSupportFlag(false)
             .PrecisionReduceFlag(true)
-            .ExtendCfgInfo("opFile.value", "mish_arch22");
-        this->AICore().AddConfig("ascend910b", aicoreConfig);
+            .ExtendCfgInfo("opFile.value", "mish");
+        this->AICore().AddConfig("ascend910b", aicoreConfig910B);
+
+        OpAICoreConfig aicoreConfig910_93;
+        aicoreConfig910_93.DynamicCompileStaticFlag(false)
+            .DynamicFormatFlag(false)
+            .DynamicRankSupportFlag(true)
+            .DynamicShapeSupportFlag(true)
+            .NeedCheckSupportFlag(false)
+            .PrecisionReduceFlag(true)
+            .ExtendCfgInfo("opFile.value", "mish");
+        this->AICore().AddConfig("ascend910_93", aicoreConfig910_93);
+
+        OpAICoreConfig aicoreConfig950;
+        aicoreConfig950.DynamicCompileStaticFlag(true)
+            .DynamicFormatFlag(false)
+            .DynamicRankSupportFlag(true)
+            .DynamicShapeSupportFlag(true)
+            .NeedCheckSupportFlag(false)
+            .PrecisionReduceFlag(true)
+            .ExtendCfgInfo("opFile.value", "mish");
+        this->AICore().AddConfig("ascend950", aicoreConfig950);
     }
 };
 OP_ADD(Mish);

@@ -16,8 +16,34 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="${SCRIPT_DIR}"
 
-# Parse arguments
-SOC_VERSION="ascend910b"
+# Auto-detect SoC version from npu-smi if not specified
+detect_soc_version() {
+    # 优先通过 torch_npu runtime 获取完整 SoC 名称（含子型号，如 Ascend910_9362）
+    # npu-smi info 只报告基类名（如 Ascend910），无法区分 910B 和 910_93 子型号
+    local torch_soc=$(python3 -c "
+import torch, torch_npu
+print(torch.npu.get_device_name(0))
+" 2>/dev/null)
+
+    if [ -n "${torch_soc}" ]; then
+        case "${torch_soc}" in
+            Ascend910B*)  echo "ascend910b" ; return ;;
+            Ascend910_93*) echo "ascend910_93" ; return ;;
+            Ascend950*)   echo "ascend950" ; return ;;
+        esac
+    fi
+
+    # 兜底: npu-smi info（仅基类名，无法区分子型号时返回空）
+    local npu_name=$(npu-smi info 2>/dev/null | grep -oP 'Ascend\S+' | head -1)
+    case "${npu_name}" in
+        Ascend910B1|Ascend910B2|Ascend910B3|Ascend910B4) echo "ascend910b" ;;
+        Ascend910_93*)  echo "ascend910_93" ;;
+        Ascend950*)     echo "ascend950" ;;
+        *)              echo "" ;;
+    esac
+}
+
+SOC_VERSION=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --soc=*)
@@ -29,6 +55,15 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [ -z "${SOC_VERSION}" ]; then
+    SOC_VERSION=$(detect_soc_version)
+    if [ -z "${SOC_VERSION}" ]; then
+        echo "[ERROR] Cannot detect SoC version. Use --soc=<soc_version> to specify."
+        exit 1
+    fi
+    echo "[INFO] Auto-detected SoC: ${SOC_VERSION}"
+fi
 
 echo "=== Building cann_bench packages ==="
 echo "SOC: ${SOC_VERSION}"
