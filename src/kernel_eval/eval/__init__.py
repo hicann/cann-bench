@@ -23,18 +23,13 @@
 6. 子进程执行（算子级进程隔离）
 7. 失败结果合成（编译/安全/子进程失败）
 8. 结果统计公共函数
-9. 通用精度判断器（AllcloseChecker）
 
 架构：
 - 基类从 base/ 导入
-- CANN 特化组件从 benches.cann 导入
+- Checker 从 checkers 模块导入（RelativeErrorChecker / AllCloseChecker）
 
 使用方式:
-    # 通用组件
     from kernel_eval.eval import OpRunner, AccuracyEvaluator, PerfEvaluator
-
-    # CANN 特化 Checker/Matcher
-    from kernel_eval.benches.cann import CannDefaultChecker, OperatorMatcher
 """
 
 from .op_runner import OpRunner, OpRunResult
@@ -48,9 +43,6 @@ from ..base.matcher import OperatorMatcherBase
 from ..registry.matcher_registry import OperatorMatcherRegistry, get_operator_matcher
 from .subprocess_runner import SubprocessRunner
 from .evaluator import Evaluator
-
-# 通用 Checker 实现
-from .allclose_checker import AllcloseChecker, AllcloseOutputResult
 
 # 注册接口（从 registry 导入）
 from ..registry.checker_registry import (
@@ -71,8 +63,6 @@ __all__ = [
     "get_operator_matcher",
     "SubprocessRunner",
     "Evaluator",
-    # 通用 Checker
-    "AllcloseChecker", "AllcloseOutputResult",
     # 注册接口
     "get_correctness_checker",
     "list_correctness_checkers",

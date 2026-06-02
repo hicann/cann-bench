@@ -49,7 +49,7 @@ class TestGoldenLoaderLoadModule:
             (level_dir / "golden.py").write_bytes(b'\xff\xfe\x00\x00\xff\xff')
 
             loader = GoldenLoader(bench_root=str(root))
-            with pytest.raises(SyntaxError):
+            with pytest.raises((SyntaxError, ValueError)):
                 loader._load_module("level1/testop")
 
     def test_corrupt_proto_yaml_logs_warning(self, caplog):

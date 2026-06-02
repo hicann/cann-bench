@@ -77,6 +77,7 @@ class TestProfileOperatorTempDirCleanup:
         with patch.object(evaluator, '_profile', return_value=None), \
              patch.object(evaluator, '_parse_case_id', return_value=('L1/Add', '0001')), \
              patch('os.makedirs', return_value=None), \
+             patch('os.listdir', return_value=[]), \
              patch('shutil.rmtree') as mock_rmtree:
             evaluator.run_profiled("L1/Add/0001", dummy_func, warmup=1, repeat=2)
             mock_rmtree.assert_not_called()

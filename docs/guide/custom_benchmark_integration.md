@@ -28,7 +28,7 @@ cann-bench 支持接入其他评测体系。本文档介绍如何接入自定义
 │  Benches Layer（CANN 特化）                                   │
 │  ├─ cann_loader.py: CannTaskLoader / CannCaseLoader          │
 │  ├─ cann_spec.py: CannTaskSpec / CannCaseSpec                │
-│  ├─ cann_checker.py: CannDefaultChecker / CannOutputResult   │
+│  ├─ relative_error_checker.py: RelativeErrorChecker / RelativeErrorOutputResult   │
 │  ├─ cann_matcher.py: OperatorMatcher                         │
 │  ├─ cann_scoring.py: CannScoringScheme / SOL-Score           │
 │  └─ cann.py: 导出 + Registry 注册                            │
@@ -65,7 +65,7 @@ src/kernel_eval/
 │   ├── cann_loader.py     # CannTaskLoader, CannCaseLoader, GoldenLoader
 │   ├── cann_spec.py       # CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec
 │   ├── cann_solution.py   # CannSolutionSpec
-│   ├── cann_checker.py    # CannDefaultChecker, CannOutputResult
+│   ├── relative_error_checker.py    # RelativeErrorChecker, RelativeErrorOutputResult
 │   ├── cann_matcher.py    # OperatorMatcher
 │   ├── cann_scoring.py    # CannScoringScheme, SimpleComparisonScheme, RecordingOnlyScheme
 │   ├── cann.py            # 导出所有 CANN 组件 + Registry 注册
@@ -113,7 +113,7 @@ BenchRegistry.register('my_bench', BenchConfig(
     task_loader='my_task_loader',
     case_loader='my_case_loader',
     scoring_scheme='simple_comparison',
-    checker='cann_default',
+    checker='relative_error',
     golden_precision='fp64_cpu',  # Golden 精度策略（见下文）
     precision_thresholds={'float16': 0.001, 'float32': 0.0001},
     description='自定义 NPU 评测集',
@@ -1079,7 +1079,7 @@ def get_operator_matcher(eval_system: str = "cann", operator_loader = None) -> O
 
 ## 正确性基准适配
 
-正确性验证的"黄金参考"来源同样可适配。除了内置的 `cann_default` 和 `allclose`，还可接入其他参考来源。
+正确性验证的"黄金参考"来源同样可适配。除了内置的 `relative_error` 和 `allclose`，还可接入其他参考来源。
 
 ### 场景 A：自定义正确性基准
 

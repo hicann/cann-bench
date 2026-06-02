@@ -92,10 +92,10 @@ class Config:
 
     # 精度判断器名称
     # 支持选择不同的精度判断标准：
-    # - "cann_default": MERE/MARE + 小值域 + 相消处理（默认，完整精度标准）
+    # - "relative_error": MERE/MARE + 小值域 + 相消处理（默认，完整精度标准）
     # - "allclose": torch.allclose 简化对比（快速验证/调试）
     # 可通过注册机制添加自定义判断器
-    checker_name: str = "cann_default"
+    checker_name: str = "relative_error"
 
     def __post_init__(self):
         """初始化后自动设置默认路径"""

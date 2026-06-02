@@ -57,7 +57,7 @@ class CannSolutionSpec(SolutionSpec):
     auto_load: bool = True                      # 是否自动加载
     compare_indices: List[int] = field(default_factory=list)  # 需要对比的输出索引
     custom_thresholds: Dict[str, float] = field(default_factory=dict)  # 自定义精度阈值
-    checker_name: str = "cann_default"          # 精度判断器名称
+    checker_name: str = "relative_error"          # 精度判断器名称
 
     def is_golden_verify(self) -> bool:
         """是否为 Golden 自验证场景"""

@@ -15,7 +15,7 @@
 - **Benches 层扁平化**：`benches/cann/` 子目录删除，文件平铺到 `benches/`
   - `cann_loader.py`: CannTaskLoader, CannCaseLoader, GoldenLoader
   - `cann_spec.py`: CANN 特化数据模型
-  - `cann_checker.py`: CannDefaultChecker, CannOutputResult
+  - `cann_checker.py`: RelativeErrorChecker, RelativeErrorOutputResult（CannDefaultChecker/CannOutputResult 为兼容别名）
   - `cann_matcher.py`: OperatorMatcher（重命名自 operator_matcher.py）
   - `cann_scoring.py`: CannScoringScheme, ScoringCalculator 等
   - `cann_solution.py`: CannSolutionSpec
@@ -29,14 +29,21 @@
   - `scoring_registry.py`: ScoringScheme 注册
   - `bench_registry.py`: BenchConfig 聚合配置
 
+- **BREAKING CHANGE — Checker 重命名**：
+  - 注册名 `cann_default` → `relative_error`（保留 `cann_default` 注册别名，`get_correctness_checker("cann_default")` 仍可用）
+  - 类名 `CannDefaultChecker` → `RelativeErrorChecker`，`CannOutputResult` → `RelativeErrorOutputResult`（保留 re-export 兼容别名）
+  - 类名 `AllcloseChecker` → `AllCloseChecker`，`AllcloseOutputResult` → `AllCloseOutputResult`
+  - 模块路径 `kernel_eval.eval.allclose_checker` → `kernel_eval.checkers.allclose_checker`
+  - **迁移方式**：外部配置/脚本中将 `checker: cann_default` 改为 `checker: relative_error`；旧名兼容别名将在后续版本移除
+
 - **向后兼容别名删除**：删除所有 `models/` 目录下的兼容导入
   - 用户应使用 `from kernel_eval.base import TaskSpec` 或 `from kernel_eval.benches.cann import CannTaskSpec`
 
 - **导入路径更新**：
   - 基类：`from kernel_eval.base import TaskSpec, CaseSpec, TaskLoader`
-  - CANN 特化：`from kernel_eval.benches.cann import CannTaskLoader, CannDefaultChecker`
+  - CANN 特化：`from kernel_eval.benches.cann import CannTaskLoader, RelativeErrorChecker`
   - Registry：`from kernel_eval.registry import LoaderRegistry, BenchRegistry`
-  - 通用 Checker：`from kernel_eval.eval import AllcloseChecker`
+  - 通用 Checker：`from kernel_eval.checkers import AllCloseChecker`
 
 - **文档更新**：
   - `docs/guide/custom_benchmark_integration.md`: 更新架构图、导入路径、接入示例

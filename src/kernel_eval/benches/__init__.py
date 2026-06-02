@@ -22,11 +22,11 @@
 目录设计：
 - benches/cann.py: CANN 评测集特化（导出 + 注册）
 - benches/cann_*.py: CANN 特化组件文件
-- benches/kernelbench.py: KernelBench 评测集特化（未来）
+- checkers/relative_error_checker.py: 相对误差判断器（通用标准）
+- checkers/allclose_checker.py: AllClose 判断器（通用标准）
 
 使用方式：
     import kernel_eval.benches  # 自动加载所有评测集并注册
-    from kernel_eval.benches import CannTaskLoader  # 或从 benches.cann 导入
     from kernel_eval.benches.cann import CannTaskLoader  # 推荐
 """
 
@@ -46,9 +46,6 @@ from .cann import (
     CannInputSpec,
     CannOutputSpec,
     CannSolutionSpec,
-    # Checker
-    CannDefaultChecker,
-    CannOutputResult,
     # Matcher
     OperatorMatcher,
     # Scoring
@@ -61,14 +58,16 @@ from .cann import (
     aggregate_eq4,
 )
 
+# 重新导出 Checker + OutputResult（通用标准，不与评测集绑定）
+from ..checkers.relative_error_checker import RelativeErrorChecker, RelativeErrorOutputResult
+from ..checkers.allclose_checker import AllCloseChecker, AllCloseOutputResult
+
 # 重新导出 Stanford 组件
 from .stanford import (
     # Loader
     StanfordTaskLoader,
     StanfordCaseLoader,
     StanfordGoldenLoader,
-    # Checker
-    StanfordChecker,
     # Matcher
     StanfordMatcher,
     # Scoring
@@ -88,9 +87,6 @@ __all__ = [
     "CannInputSpec",
     "CannOutputSpec",
     "CannSolutionSpec",
-    # CANN Checker
-    "CannDefaultChecker",
-    "CannOutputResult",
     # CANN Matcher
     "OperatorMatcher",
     # CANN Scoring
@@ -101,12 +97,15 @@ __all__ = [
     "OperatorScoreInfo",
     "per_case_sol_score",
     "aggregate_eq4",
+    # Checker + OutputResult（通用标准）
+    "RelativeErrorChecker",
+    "RelativeErrorOutputResult",
+    "AllCloseChecker",
+    "AllCloseOutputResult",
     # Stanford Loader
     "StanfordTaskLoader",
     "StanfordCaseLoader",
     "StanfordGoldenLoader",
-    # Stanford Checker
-    "StanfordChecker",
     # Stanford Matcher
     "StanfordMatcher",
     # Stanford Scoring

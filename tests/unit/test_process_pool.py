@@ -185,7 +185,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试协调器创建"""
         mock_detect.return_value = 2
 
-        process_config = ProcessConfig(processes_per_card=2)
+        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -199,7 +199,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试算子分配"""
         mock_detect.return_value = 2
 
-        process_config = ProcessConfig(processes_per_card=2)
+        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -229,7 +229,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试用例分配"""
         mock_detect.return_value = 2
 
-        process_config = ProcessConfig(processes_per_card=2)
+        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -255,7 +255,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试 operator_parallel 模式的卡映射"""
         mock_detect.return_value = 2
 
-        process_config = ProcessConfig(processes_per_card=2)
+        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -289,7 +289,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试单卡模式（指定 device_id）"""
         mock_detect.return_value = 2  # 环境有 2 卡
 
-        process_config = ProcessConfig(processes_per_card=3)
+        process_config = ProcessConfig(processes_per_card=3, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -311,7 +311,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         """测试多卡模式（不指定 device_id）"""
         mock_detect.return_value = 2  # 环境有 2 卡
 
-        process_config = ProcessConfig(processes_per_card=2)
+        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
@@ -363,7 +363,7 @@ class TestIntegration(unittest.TestCase):
 
         coordinator = ProcessPoolCoordinator(
             base_config=base_config,
-            process_config=ProcessConfig(processes_per_card=3),
+            process_config=ProcessConfig(processes_per_card=3, enable_profiler=False),
         )
 
         stats = coordinator.get_stats()

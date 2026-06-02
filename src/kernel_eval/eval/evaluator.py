@@ -89,7 +89,7 @@ class Evaluator:
         # 初始化精度评测器
         self.accuracy_evaluator = AccuracyEvaluator(
             custom_thresholds=self.config.precision_thresholds,
-            checker_name=self.config.checker_name,
+            checker_name=self.bench_config.checker,
         )
 
         # 初始化数据层组件（通过 Registry 获取）
@@ -332,11 +332,11 @@ class Evaluator:
                     metadata = accuracy_result.get_metadata()
                     mere = metadata.get('mere', 0.0)
                     mare = metadata.get('mare', 0.0)
-                    mare_threshold = 10 * accuracy_result.threshold if accuracy_result.threshold > 0 else 0
+                    mare_threshold = 10 * accuracy_result.threshold if accuracy_result.threshold and accuracy_result.threshold > 0 else 0
                     fail_reasons = []
                     if mare >= mare_threshold:
                         fail_reasons.append(f"MARE({mare:.6f}) >= mare_threshold({mare_threshold:.6f})")
-                    if mere >= accuracy_result.threshold:
+                    if accuracy_result.threshold and mere >= accuracy_result.threshold:
                         fail_reasons.append(f"MERE({mere:.6f}) >= threshold({accuracy_result.threshold:.6f})")
                     if accuracy_result.error_msg:
                         fail_reasons.append(accuracy_result.error_msg)
@@ -400,16 +400,20 @@ class Evaluator:
             # 添加精度信息
             if result.success and result.accuracy_result:
                 acc = result.accuracy_result
-                metadata = acc.get_metadata()
-                mare = metadata.get('mare')
-                mere = metadata.get('mere')
-                mare_str = f"MARE={mare:.6f}" if mare is not None else ""
-                mere_str = f"MERE={mere:.6f}" if mere is not None else ""
-                acc_str = f", {mare_str}, {mere_str}" if mare_str or mere_str else ""
-                print(
-                    f"[{i}/{len(cases)}] {case_id_str}: {status_icon} "
-                    f"(耗时: {elapsed_str}, 加速比: {speedup_str}{acc_str})"
-                )
+                if hasattr(acc, 'output_results') and acc.output_results:
+                    output_summaries = [sr.format_summary() for sr in acc.output_results]
+                    acc_str = ", " + ", ".join(output_summaries)
+                else:
+                    metadata = acc.get_metadata()
+                    mare = metadata.get('mare')
+                    mere = metadata.get('mere')
+                    mare_str = f"MARE={mare:.6f}" if mare is not None else ""
+                    mere_str = f"MERE={mere:.6f}" if mere is not None else ""
+                    acc_str = f", {mare_str}, {mere_str}" if mare_str or mere_str else ""
+                    print(
+                        f"[{i}/{len(cases)}] {case_id_str}: {status_icon} "
+                        f"(耗时: {elapsed_str}, 加速比: {speedup_str}{acc_str})"
+                    )
             elif result.success:
                 print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon} (耗时: {elapsed_str}, 加速比: {speedup_str})")
             else:
@@ -724,8 +728,7 @@ class Evaluator:
             if not ai_result2.success:
                 from ..base.result import AccuracyResult
                 return AccuracyResult(
-                    passed=False, dtype=dtype, threshold=first_result.threshold,
-                    mere=0.0, mare=0.0, max_diff=0.0,
+                    passed=False, threshold=first_result.threshold or 0,
                     error_msg=f"二次验证失败：AI 算子崩溃 ({ai_result2.error})",
                 )
 

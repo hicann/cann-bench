@@ -31,52 +31,56 @@ class TestSingleOutputResult:
     """SingleOutputResult 数据类测试"""
 
     def test_creation_float(self):
-        r = SingleOutputResult(index=0, dtype="float32", dtype_category="float",
-                               passed=True, threshold=2**-13, mere=0.001, mare=0.005)
+        r = SingleOutputResult(index=0, dtype="float32", passed=True,
+                               metadata={"dtype_category": "float", "threshold": 2**-13,
+                                         "mere": 0.001, "mare": 0.005})
         assert r.index == 0
         assert r.dtype == "float32"
         assert r.passed is True
 
     def test_creation_int(self):
-        r = SingleOutputResult(index=1, dtype="int64", dtype_category="int",
-                               passed=True, threshold=0, mismatch_count=0, total_count=100)
-        assert r.dtype_category == "int"
+        r = SingleOutputResult(index=1, dtype="int64", passed=True,
+                               mismatch_count=0, total_count=100,
+                               metadata={"dtype_category": "int", "threshold": 0})
+        assert r.metadata["dtype_category"] == "int"
         assert r.mismatch_count == 0
 
     def test_to_dict(self):
-        r = SingleOutputResult(index=0, dtype="float32", dtype_category="float",
-                               passed=True, threshold=0.001, mere=1e-5, mare=2e-5)
+        r = SingleOutputResult(index=0, dtype="float32", passed=True,
+                               metadata={"threshold": 0.001, "mere": 1e-5, "mare": 2e-5})
         d = r.to_dict()
         assert d["index"] == 0
         assert d["passed"] is True
         assert d["mere"] == 1e-5
 
     def test_format_summary_float_pass(self):
-        r = SingleOutputResult(index=0, dtype="float32", dtype_category="float",
-                               passed=True, threshold=2**-13, mere=1e-5, mare=2e-5)
+        r = SingleOutputResult(index=0, dtype="float32", passed=True,
+                               metadata={"dtype_category": "float", "threshold": 2**-13,
+                                         "mere": 1e-5, "mare": 2e-5})
         s = r.format_summary()
         assert "✅" in s
-        assert "MERE" in s
 
     def test_format_summary_float_fail(self):
-        r = SingleOutputResult(index=0, dtype="float32", dtype_category="float",
-                               passed=False, threshold=2**-13, mere=0.01, mare=0.05)
+        r = SingleOutputResult(index=0, dtype="float32", passed=False,
+                               error_msg="MARE exceeded threshold",
+                               metadata={"dtype_category": "float", "threshold": 2**-13,
+                                         "mere": 0.01, "mare": 0.05})
         s = r.format_summary()
         assert "❌" in s
-        assert "MERE" in s
 
     def test_format_summary_int_pass(self):
-        r = SingleOutputResult(index=0, dtype="int64", dtype_category="int",
-                               passed=True, threshold=0)
+        r = SingleOutputResult(index=0, dtype="int64", passed=True,
+                               mismatch_count=0, total_count=100,
+                               metadata={"dtype_category": "int", "threshold": 0})
         s = r.format_summary()
-        assert "exact match" in s
+        assert "✅" in s
 
     def test_format_summary_int_fail(self):
-        r = SingleOutputResult(index=0, dtype="int64", dtype_category="int",
-                               passed=False, threshold=0, mismatch_count=5, total_count=100)
+        r = SingleOutputResult(index=0, dtype="int64", passed=False,
+                               mismatch_count=5, total_count=100,
+                               metadata={"dtype_category": "int", "threshold": 0})
         s = r.format_summary()
-        assert "mismatch" in s
-        assert "5/100" in s
+        assert "❌" in s
 
 
 class TestCompareResult:
@@ -114,12 +118,13 @@ class TestCompareResult:
         assert result.mare == 0.0
 
     def test_format_all_outputs(self):
-        sr = SingleOutputResult(index=0, dtype="float32", dtype_category="float",
-                                passed=True, threshold=2**-13, mere=1e-5, mare=2e-5)
+        sr = SingleOutputResult(index=0, dtype="float32", passed=True,
+                                metadata={"dtype_category": "float", "threshold": 2**-13,
+                                          "mere": 1e-5, "mare": 2e-5})
         result = CompareResult(passed=True, dtype="float32", threshold=2**-13,
                                output_results=[sr])
         s = result.format_all_outputs()
-        assert "MERE" in s
+        assert "float32" in s
 
 
 class TestCompareTensors:

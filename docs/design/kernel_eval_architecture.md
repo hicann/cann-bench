@@ -56,9 +56,9 @@
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
 │  │                         benches/                                    │    │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │    │
-│  │  │cann_loader.py│  │ cann_spec.py │  │cann_checker.py│              │    │
-│  │  │CannTaskLoader│  │CannTaskSpec  │  │CannDefaultChecker│            │    │
-│  │  │CannCaseLoader│  │CannCaseSpec  │  │CannOutputResult │             │    │
+│  │  │cann_loader.py│  │ cann_spec.py │  │relative_error_checker.py│     │    │
+│  │  │CannTaskLoader│  │CannTaskSpec  │  │RelativeErrorChecker│         │    │
+│  │  │CannCaseLoader│  │CannCaseSpec  │  │RelativeErrorOutput│           │    │
 │  │  │GoldenLoader  │  │CannInputSpec │  │              │              │    │
 │  │  │              │  │CannOutputSpec│  │              │              │    │
 │  │  └──────────────┘  └──────────────┘  └──────────────┘              │    │
@@ -180,7 +180,7 @@ src/kernel_eval/
 │   ├── cann_loader.py     # CannTaskLoader, CannCaseLoader, GoldenLoader
 │   ├── cann_spec.py       # CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec
 │   ├── cann_solution.py   # CannSolutionSpec
-│   ├── cann_checker.py    # CannDefaultChecker, CannOutputResult
+│   ├── relative_error_checker.py    # RelativeErrorChecker, RelativeErrorOutputResult
 │   ├── cann_matcher.py    # OperatorMatcher
 │   └── cann_scoring.py    # CannScoringScheme, SimpleComparisonScheme, RecordingOnlyScheme
 │                           #   ScoringCalculator, OperatorScoreInfo, per_case_sol_score, aggregate_eq4
@@ -213,7 +213,7 @@ src/kernel_eval/
 │   ├── process_pool.py    # ProcessPoolCoordinator (多卡并行)
 │   ├── subprocess_runner.py # SubprocessRunner (子进程执行)
 │   ├── failure_synthesizer.py # FailureSynthesizer (失败结果合成)
-│   └──────────────┘ allclose_checker.py # AllcloseChecker (通用精度判断器)
+│   └──────────────┘ allclose_checker.py # AllCloseChecker (通用精度判断器)
 │
 ├── report/                # 报告生成层
 │   ├── __init__.py
@@ -323,10 +323,10 @@ CANN 评测集特化实现（扁平结构）：
 │   │   CannOutputSpec  - CANN 输出规格                                    │  │
 │   └─────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
-│   cann_checker.py:                                                          │
+│   relative_error_checker.py:                                                 │
 │   ┌─────────────────────────────────────────────────────────────────────┐  │
-│   │   CannDefaultChecker - CANN 精度判断器（MERE/MARE + CPU fp64）       │  │
-│   │   CannOutputResult   - CANN 单输出结果                               │  │
+│   │   RelativeErrorChecker - 相对误差精度判断器（MERE/MARE + CPU fp64）  │  │
+│   │   RelativeErrorOutputResult - 相对误差单输出结果                      │  │
 │   └─────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 │   cann_matcher.py:                                                          │
@@ -463,7 +463,7 @@ CANN 评测集特化实现（扁平结构）：
 │   └──────────────────┘        └──────────────────┘                       │
 │                                                                             │
 │   ┌──────────────────┐        ┌──────────────────┐                       │
-│   │  AllcloseChecker │        │     Results      │                       │
+│   │  AllCloseChecker │        │     Results      │                       │
 │   │(allclose_checker)│        │    (results)     │                       │
 │   │                  │        │                  │                       │
 │   │  通用精度判断:   │        │  数据结构:       │                       │
@@ -706,7 +706,7 @@ CANN 评测集特化实现（扁平结构）：
 │   │  │  ⑧ OpRunner.run_operator(op_func, params)                   │   │ │
 │   │  │     → op_output (Tensor, NPU)                               │   │ │
 │   │  │                                                             │   │ │
-│   │  │  ⑨ CheckerRegistry.get('cann_default') → CannDefaultChecker │   │ │
+│   │  │  ⑨ CheckerRegistry.get('relative_error') → RelativeErrorChecker │   │ │
 │   │  │     .check(golden_output, op_output)                        │   │ │
 │   │  │     → AccuracyResult(MERE, MARE, passed)                    │   │ │
 │   │  │                                                             │   │ │
@@ -824,7 +824,7 @@ CANN 评测集特化实现（扁平结构）：
 │       │                                                                    │
 │       ├── benches/cann_loader.py                                           │
 │       ├── benches/cann_spec.py                                             │
-│       ├── benches/cann_checker.py                                          │
+│       ├── checkers/relative_error_checker.py                               │
 │       ├── benches/cann_matcher.py                                          │
 │       ├── benches/cann_scoring.py                                          │
 │       ├── registry/loader_registry.py                                      │
@@ -883,7 +883,7 @@ CANN 评测集特化实现（扁平结构）：
 │       ├── base/result.py                                                   │
 │       ├── registry/checker_registry.py                                     │
 │                                                                             │
-│   benches/cann_checker.py                                                  │
+│   checkers/relative_error_checker.py                                       │
 │       │                                                                    │
 │       ├── base/checker.py                                                  │
 │       ├── base/result.py                                                   │
@@ -920,7 +920,7 @@ CANN 评测集特化实现（扁平结构）：
 | **benches** | cann.py | CANN 组件导出 + Registry 注册 |
 | **benches** | cann_loader.py | CANN 加载器：CannTaskLoader, CannCaseLoader, GoldenLoader |
 | **benches** | cann_spec.py | CANN 数据模型特化 |
-| **benches** | cann_checker.py | CANN Checker：MERE/MARE + CPU fp64 |
+| **checkers** | relative_error_checker.py | 相对误差 Checker：MERE/MARE + CPU fp64 |
 | **benches** | cann_matcher.py | CANN Matcher：torch.ops.cann_bench |
 | **benches** | cann_scoring.py | CANN 评分：SOL-Score + 加速比 + 仅记录 |
 | **registry** | loader_registry.py | Loader 注册机制 |
@@ -938,7 +938,7 @@ CANN 评测集特化实现（扁平结构）：
 | **eval** | process_pool.py | 多卡并行，进程池协调 |
 | **eval** | results.py | 结果数据结构定义 |
 | **eval** | input_pool.py | 输入池管理，防缓存攻击 |
-| **eval** | allclose_checker.py | 通用 Checker：torch.allclose |
+| **checkers** | allclose_checker.py | 通用 Checker：torch.allclose |
 | **eval** | failure_synthesizer.py | 失败结果合成 |
 | **eval** | subprocess_runner.py | 子进程执行 |
 | **utils** | device_manager.py | 设备管理，CPU/NPU 切换 |
@@ -961,18 +961,18 @@ CANN 评测集特化实现（扁平结构）：
 from kernel_eval.base import TaskSpec, CaseSpec, TaskLoader, CaseLoader
 
 # CANN 特化组件
-from kernel_eval.benches.cann import CannTaskLoader, CannCaseLoader, CannDefaultChecker
+from kernel_eval.benches.cann import CannTaskLoader, CannCaseLoader, RelativeErrorChecker
 from kernel_eval.benches.cann import OperatorMatcher, CannScoringScheme
 
 # 或从 benches 直接导入（重新导出）
-from kernel_eval.benches import CannTaskLoader, CannDefaultChecker
+from kernel_eval.benches import CannTaskLoader, RelativeErrorChecker
 
 # Registry
 from kernel_eval.registry import LoaderRegistry, BenchRegistry, BenchConfig
 
 # 评测组件
 from kernel_eval.eval import Evaluator, OpRunner, AccuracyEvaluator, PerfEvaluator
-from kernel_eval.eval import AllcloseChecker  # 通用 Checker
+from kernel_eval.checkers import AllCloseChecker  # 通用 Checker
 
 # 数据工具
 from kernel_eval.data import DataGenerator, PackageManager

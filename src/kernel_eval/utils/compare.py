@@ -53,64 +53,36 @@ _INTEGER_DTYPES = (
 
 @dataclass
 class SingleOutputResult:
-    """单个输出的对比结果（用于多输出算子独立判定）"""
+    """单个输出的对比结果（通用容器，各 checker 通过 metadata 扩展特有指标）"""
     index: int                      # 输出索引
     name: str = ""                  # 输出名称（可选）
     dtype: str = ""                 # 数据类型
-    dtype_category: str = ""        # 'float' 或 'int'
     passed: bool = True
-    threshold: float = 0.0
-    # 浮点类型指标
-    mere: float = 0.0               # 平均相对误差
-    mare: float = 0.0               # 最大相对误差
-    max_diff: float = 0.0
-    mean_diff: float = 0.0
-    # 整数类型指标
     mismatch_count: int = 0         # 不匹配元素数
     total_count: int = 0            # 总元素数
-    max_abs_diff: int = 0           # 最大绝对差值
-    # 小值域/相消指标
-    small_value_error_count: int = 0
-    small_value_cpu_error_count: int = 0
-    small_value_total_count: int = 0
-    cancel_error_count: int = 0
-    cancel_cpu_error_count: int = 0
-    cancel_total_count: int = 0
-    # 错误信息
     error_msg: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             'index': self.index,
             'name': self.name,
             'dtype': self.dtype,
-            'dtype_category': self.dtype_category,
             'passed': self.passed,
-            'threshold': self.threshold,
-            'mere': self.mere,
-            'mare': self.mare,
             'mismatch_count': self.mismatch_count,
             'total_count': self.total_count,
-            'max_abs_diff': self.max_abs_diff,
             'error_msg': self.error_msg,
         }
+        d.update(self.metadata)
+        return d
 
     def format_summary(self) -> str:
-        """格式化单输出判定摘要（用于日志）"""
+        """格式化单输出判定摘要（通用实现，各 checker 子类覆盖此方法）"""
         dtype_str = f"{self.dtype}[{self.name or self.index}]"
-
-        if self.dtype_category == 'int':
-            if self.passed:
-                return f"{dtype_str}: ✅ (exact match)"
-            else:
-                ratio = self.mismatch_count / max(self.total_count, 1)
-                return f"{dtype_str}: ❌ mismatch={self.mismatch_count}/{self.total_count} ({ratio:.2%}), max_diff={self.max_abs_diff}"
-        else:  # float
-            if self.passed:
-                return f"{dtype_str}: ✅ MERE={self.mere:.6f}, MARE={self.mare:.6f}"
-            else:
-                mare_threshold = 10 * self.threshold
-                return f"{dtype_str}: ❌ MERE={self.mere:.6f}, MARE={self.mare:.6f} (threshold={self.threshold:.6f}, mare_threshold={mare_threshold:.6f})"
+        if self.passed:
+            return f"{dtype_str}: ✅"
+        else:
+            return f"{dtype_str}: ❌ {self.error_msg}"
 
 
 @dataclass
@@ -748,9 +720,9 @@ def compare_tensors(
                     index=i,
                     name="",  # 名称由调用方填充
                     dtype=str(out_tensor.dtype).replace('torch.', ''),
-                    dtype_category='int' if out_tensor.dtype in _INTEGER_DTYPES else 'float',
                     passed=True,  # 跳过的输出视为通过
-                    error_msg="(跳过对比)"
+                    error_msg="(跳过对比)",
+                    metadata={'dtype_category': 'int' if out_tensor.dtype in _INTEGER_DTYPES else 'float'},
                 ))
                 continue
 
@@ -767,23 +739,25 @@ def compare_tensors(
                 index=i,
                 name="",  # 名称由调用方填充
                 dtype=out_dtype_str,
-                dtype_category=out_dtype_category,
                 passed=result.passed,
-                threshold=out_threshold,
-                mere=result.mere,
-                mare=result.mare,
-                max_diff=result.max_diff,
-                mean_diff=result.mean_diff,
                 mismatch_count=result.mismatch_count,
                 total_count=result.total_count,
-                max_abs_diff=int(result.max_diff) if out_dtype_category == 'int' else 0,
-                small_value_error_count=result.small_value_error_count,
-                small_value_cpu_error_count=result.small_value_cpu_error_count,
-                small_value_total_count=result.small_value_total_count,
-                cancel_error_count=result.cancel_error_count,
-                cancel_cpu_error_count=result.cancel_cpu_error_count,
-                cancel_total_count=result.cancel_total_count,
                 error_msg=result.error_msg or "",
+                metadata={
+                    'dtype_category': out_dtype_category,
+                    'threshold': out_threshold,
+                    'mere': result.mere,
+                    'mare': result.mare,
+                    'max_diff': result.max_diff,
+                    'mean_diff': result.mean_diff,
+                    'max_abs_diff': int(result.max_diff) if out_dtype_category == 'int' else 0,
+                    'small_value_error_count': result.small_value_error_count,
+                    'small_value_cpu_error_count': result.small_value_cpu_error_count,
+                    'small_value_total_count': result.small_value_total_count,
+                    'cancel_error_count': result.cancel_error_count,
+                    'cancel_cpu_error_count': result.cancel_cpu_error_count,
+                    'cancel_total_count': result.cancel_total_count,
+                },
             )
             single_output_results.append(single_result)
 
@@ -819,7 +793,7 @@ def compare_tensors(
         for sr in single_output_results:
             if not sr.passed and not sr.error_msg.startswith("(跳过"):
                 result_dtype = sr.dtype
-                result_threshold = sr.threshold
+                result_threshold = sr.metadata.get('threshold', threshold)
                 break
 
         return CompareResult(

@@ -164,12 +164,12 @@ class EvalCaseResult:
         accuracy_data = data.get('accuracy')
         accuracy_result = None
         if accuracy_data:
-            # 将旧字段放入 metadata
-            accuracy_result = AccuracyResult(
-                passed=accuracy_data.get('passed', True),
-                threshold=accuracy_data.get('threshold', 0.001),
-                error_msg=accuracy_data.get('error_msg'),
-                metadata={
+            # 优先使用新格式（metadata 为嵌套子 dict）
+            # 兼容旧格式（聚合指标在 accuracy 顶层，无 metadata 子 dict）
+            metadata = accuracy_data.get('metadata', {})
+            if not metadata:
+                # 旧格式：聚合指标散落在 accuracy 顶层，收入 metadata
+                metadata = {
                     'dtype': accuracy_data.get('dtype', 'float32'),
                     'mare': accuracy_data.get('mare', 0.0),
                     'mere': accuracy_data.get('mere', 0.0),
@@ -178,7 +178,6 @@ class EvalCaseResult:
                     'mismatch_count': accuracy_data.get('mismatch_count', 0),
                     'total_count': accuracy_data.get('total_count', 0),
                     'mismatch_ratio': accuracy_data.get('mismatch_ratio', 0.0),
-                    'trial': accuracy_data.get('trial', 1),
                     'small_value_error_count': accuracy_data.get('small_value_error_count', 0),
                     'small_value_cpu_error_count': accuracy_data.get('small_value_cpu_error_count', 0),
                     'small_value_total_count': accuracy_data.get('small_value_total_count', 0),
@@ -186,6 +185,36 @@ class EvalCaseResult:
                     'cancel_cpu_error_count': accuracy_data.get('cancel_cpu_error_count', 0),
                     'cancel_total_count': accuracy_data.get('cancel_total_count', 0),
                 }
+            if 'trial' not in metadata:
+                metadata['trial'] = accuracy_data.get('trial', 1)
+
+            # 反序列化 output_results：通过注册表按 checker_name 查找子类
+            output_results_raw = accuracy_data.get('output_results', [])
+            output_results = []
+            if output_results_raw:
+                checker_name = metadata.get('checker_name', '')
+                # 触发 checker 模块注册（import 会执行 register_output_result）
+                from ..base.result import get_output_result_cls
+                if checker_name:
+                    _checker_modules = {
+                        'relative_error': '..checkers.relative_error_checker',
+                        'cann_default': '..checkers.relative_error_checker',  # 兼容旧名
+                        'allclose': '..checkers.allclose_checker',
+                    }
+                    mod_path = _checker_modules.get(checker_name)
+                    if mod_path:
+                        import importlib
+                        importlib.import_module(mod_path, __package__)
+                output_cls = get_output_result_cls(checker_name)
+                if output_cls is not None:
+                    output_results = [output_cls.from_dict(item) for item in output_results_raw]
+
+            accuracy_result = AccuracyResult(
+                passed=accuracy_data.get('passed', True),
+                threshold=accuracy_data.get('threshold'),
+                error_msg=accuracy_data.get('error_msg'),
+                output_results=output_results,
+                metadata=metadata,
             )
 
         return cls(

@@ -16,7 +16,7 @@ StanfordBench 评测集实现
 
 包含：
 - Loader: StanfordTaskLoader, StanfordCaseLoader, StanfordGoldenLoader
-- Checker: StanfordChecker
+- Checker: AllCloseChecker
 - Matcher: StanfordMatcher
 - Scoring: StanfordScoringScheme
 
@@ -27,7 +27,7 @@ StanfordBench 评测集实现
 
 # === Stanford 特化组件 ===
 from .stanford_loader import StanfordTaskLoader, StanfordCaseLoader, StanfordGoldenLoader
-from .stanford_checker import StanfordChecker
+from ..checkers.allclose_checker import AllCloseChecker, AllCloseOutputResult
 from .stanford_matcher import StanfordMatcher
 from .stanford_scoring import StanfordScoringScheme
 
@@ -37,7 +37,8 @@ __all__ = [
     "StanfordCaseLoader",
     "StanfordGoldenLoader",
     # Checker
-    "StanfordChecker",
+    "AllCloseChecker",
+    "AllCloseOutputResult",
     # Matcher
     "StanfordMatcher",
     # Scoring
@@ -78,8 +79,8 @@ def _register_stanford_components():
         OperatorMatcherRegistry.register('stanford', StanfordMatcher)
 
     # 注册 Checker
-    if 'stanford_default' not in CheckerRegistry.get_all():
-        CheckerRegistry.register('stanford_default', StanfordChecker())
+    if 'allclose' not in CheckerRegistry.get_all():
+        CheckerRegistry.register('allclose', AllCloseChecker())
 
     # 注册 ScoringScheme
     if 'stanford' not in ScoringSchemeRegistry._items:
@@ -98,7 +99,7 @@ def _register_stanford_components():
             golden_loader='stanford',
             operator_matcher='stanford',
             scoring_scheme='stanford',
-            checker='stanford_default',
+            checker='allclose',
             case_spec_cls='stanford',
             golden_precision='native_npu',
             precision_thresholds={'atol': 0.01, 'rtol': 0.01},

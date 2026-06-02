@@ -43,12 +43,12 @@ class AccuracyEvaluator:
     def __init__(
         self,
         custom_thresholds: Dict[str, float] = None,
-        checker_name: str = "cann_default",
+        checker_name: str = "relative_error",
     ):
         """
         Args:
             custom_thresholds: 自定义精度阈值表，格式为 {dtype: threshold}
-            checker_name: 精度判断器名称，默认 "cann_default"
+            checker_name: 精度判断器名称，默认 "relative_error"
         """
         self.thresholds = custom_thresholds or PRECISION_THRESHOLDS
         self.checker_name = checker_name

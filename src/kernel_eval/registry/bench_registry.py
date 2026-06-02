@@ -47,7 +47,7 @@ class BenchConfig:
     golden_loader: str = "cann"
     operator_matcher: str = "cann"
     scoring_scheme: str = ""
-    checker: str = "cann_default"
+    checker: str = "relative_error"
     case_spec_cls: str = "cann"                    # CaseSpec 子类标识
     # Golden 参考输出的精度策略：
     #   fp64_cpu（默认）: 升精度到 float64 + CPU 计算，避免 NPU 溢出污染

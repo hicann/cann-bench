@@ -8,17 +8,22 @@
 import pytest
 import torch
 
-# 导入 benches 模块，触发 CANN 特化组件注册
+# 导入 benches 模块，触发 CANN / Stanford 特化组件注册
 import kernel_eval.benches
 
 from kernel_eval.eval import (
     get_correctness_checker,
     list_correctness_checkers,
     AccuracyResult,
-    AllcloseOutputResult,
 )
-from kernel_eval.benches import CannOutputResult, CannDefaultChecker
-from kernel_eval.eval.allclose_checker import AllcloseChecker
+from kernel_eval.checkers.relative_error_checker import (
+    RelativeErrorChecker,
+    RelativeErrorOutputResult,
+)
+from kernel_eval.checkers.allclose_checker import (
+    AllCloseChecker,
+    AllCloseOutputResult,
+)
 from kernel_eval.registry.checker_registry import (
     register_correctness_checker,
     is_checker_registered,
@@ -33,20 +38,20 @@ class TestRegistry:
 
     def test_default_checkers_registered(self):
         """测试默认判断器已注册"""
-        assert is_checker_registered("cann_default")
+        assert is_checker_registered("relative_error")
         assert is_checker_registered("allclose")
 
     def test_list_checkers(self):
         """测试列出所有判断器"""
         names = list_correctness_checkers()
-        assert "cann_default" in names
+        assert "relative_error" in names
         assert "allclose" in names
 
     def test_get_checker(self):
         """测试获取判断器"""
-        checker = get_correctness_checker("cann_default")
+        checker = get_correctness_checker("relative_error")
         assert checker is not None
-        assert checker.get_name() == "cann_default"
+        assert checker.get_name() == "relative_error"
 
         checker2 = get_correctness_checker("allclose")
         assert checker2 is not None
@@ -60,7 +65,7 @@ class TestRegistry:
     def test_register_duplicate_raises(self):
         """测试重复注册抛出异常"""
         with pytest.raises(ValueError, match="already registered"):
-            @register_correctness_checker("cann_default")
+            @register_correctness_checker("relative_error")
             class DummyChecker(CorrectnessChecker):
                 def get_name(self):
                     return "dummy"
@@ -86,34 +91,34 @@ class TestRegistry:
         """测试清空注册表"""
         # 记录原始注册数量
         original_count = len(list_correctness_checkers())
-        assert original_count >= 2  # 至少有 cann_default 和 allclose
+        assert original_count >= 2  # 至少有 relative_error 和 allclose
 
         # 清空
         clear_checker_registry()
         assert len(list_correctness_checkers()) == 0
 
         # 验证清空后确实为空
-        assert not is_checker_registered("cann_default")
+        assert not is_checker_registered("relative_error")
         assert not is_checker_registered("allclose")
 
 
-class TestCannDefaultChecker:
-    """CANN默认判断器测试"""
+class TestRelativeErrorChecker:
+    """相对误差判断器测试"""
 
     def test_single_output_pass(self):
         """测试单输出通过"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
         assert isinstance(result, AccuracyResult)
         assert result.is_passed()
         assert len(result.get_output_results()) == 1
-        assert isinstance(result.get_output_results()[0], CannOutputResult)
+        assert isinstance(result.get_output_results()[0], RelativeErrorOutputResult)
 
     def test_single_output_fail(self):
         """测试单输出失败"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 100.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
@@ -122,7 +127,7 @@ class TestCannDefaultChecker:
 
     def test_multi_output(self):
         """测试多输出"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = [torch.tensor([1.0, 2.0], dtype=torch.float32),
               torch.tensor([3.0, 4.0], dtype=torch.float32)]
         golden = [torch.tensor([1.0, 2.0], dtype=torch.float64),
@@ -133,7 +138,7 @@ class TestCannDefaultChecker:
 
     def test_ignore_indices(self):
         """测试忽略索引"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = [torch.tensor([1.0, 2.0], dtype=torch.float32),
               torch.tensor([100.0, 200.0], dtype=torch.float32)]  # 应该被忽略
         golden = [torch.tensor([1.0, 2.0], dtype=torch.float64),
@@ -146,7 +151,7 @@ class TestCannDefaultChecker:
 
     def test_output_count_mismatch(self):
         """测试输出数量不匹配"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 2.0], dtype=torch.float32)
         golden = [torch.tensor([1.0, 2.0], dtype=torch.float64),
                   torch.tensor([3.0, 4.0], dtype=torch.float64)]
@@ -156,7 +161,7 @@ class TestCannDefaultChecker:
 
     def test_metadata_contains_mere_mare(self):
         """测试 metadata 包含 mere/mare"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
@@ -165,22 +170,22 @@ class TestCannDefaultChecker:
         assert 'mare' in metadata
 
 
-class TestAllcloseChecker:
-    """Allclose判断器测试"""
+class TestAllCloseChecker:
+    """AllClose判断器测试"""
 
     def test_single_output_pass(self):
         """测试单输出通过"""
-        checker = AllcloseChecker()
+        checker = AllCloseChecker()
         ai = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
         assert isinstance(result, AccuracyResult)
         assert result.is_passed()
-        assert isinstance(result.get_output_results()[0], AllcloseOutputResult)
+        assert isinstance(result.get_output_results()[0], AllCloseOutputResult)
 
     def test_single_output_fail(self):
         """测试单输出失败"""
-        checker = AllcloseChecker()
+        checker = AllCloseChecker()
         ai = torch.tensor([1.0, 100.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
@@ -188,7 +193,7 @@ class TestAllcloseChecker:
 
     def test_multi_output(self):
         """测试多输出"""
-        checker = AllcloseChecker()
+        checker = AllCloseChecker()
         ai = [torch.tensor([1.0, 2.0], dtype=torch.float32),
               torch.tensor([3.0, 4.0], dtype=torch.float32)]
         golden = [torch.tensor([1.0, 2.0], dtype=torch.float32),
@@ -199,7 +204,7 @@ class TestAllcloseChecker:
 
     def test_shape_mismatch(self):
         """测试形状不匹配"""
-        checker = AllcloseChecker()
+        checker = AllCloseChecker()
         ai = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0], dtype=torch.float32)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
@@ -211,7 +216,7 @@ class TestAccuracyResult:
 
     def test_get_first_dtype(self):
         """测试获取第一个 dtype"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 2.0], dtype=torch.float16)
         golden = torch.tensor([1.0, 2.0], dtype=torch.float64)
         result = checker.check(ai, golden, dtype="float16", threshold=0.001)
@@ -219,7 +224,7 @@ class TestAccuracyResult:
 
     def test_get_failed_dtype(self):
         """测试获取失败 dtype"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = [torch.tensor([1.0, 2.0], dtype=torch.float32),
               torch.tensor([100.0, 200.0], dtype=torch.float16)]  # 失败
         golden = [torch.tensor([1.0, 2.0], dtype=torch.float64),
@@ -230,7 +235,7 @@ class TestAccuracyResult:
 
     def test_format_summary(self):
         """测试格式化摘要"""
-        checker = CannDefaultChecker()
+        checker = RelativeErrorChecker()
         ai = torch.tensor([1.0, 2.0], dtype=torch.float32)
         golden = torch.tensor([1.0, 2.0], dtype=torch.float64)
         result = checker.check(ai, golden, dtype="float32", threshold=0.001)
@@ -241,15 +246,13 @@ class TestAccuracyResult:
 class TestOutputResult:
     """OutputResult 测试"""
 
-    def test_cann_output_result_to_dict(self):
-        """测试 CannOutputResult to_dict"""
-        output = CannOutputResult(
+    def test_relative_error_output_result_to_dict(self):
+        """测试 RelativeErrorOutputResult to_dict（指标走 metadata 扁平化）"""
+        output = RelativeErrorOutputResult(
             index=0,
             passed=True,
             dtype="float32",
-            threshold=0.001,
-            mere=0.0,
-            mare=0.0,
+            metadata={'threshold': 0.001, 'mere': 0.0, 'mare': 0.0},
         )
         d = output.to_dict()
         assert d['index'] == 0
@@ -257,12 +260,12 @@ class TestOutputResult:
         assert d['mere'] == 0.0
 
     def test_allclose_output_result_to_dict(self):
-        """测试 AllcloseOutputResult to_dict"""
-        output = AllcloseOutputResult(
+        """测试 AllCloseOutputResult to_dict"""
+        output = AllCloseOutputResult(
             index=0,
             passed=True,
             dtype="float32",
-            threshold=0.001,
+            metadata={'threshold': 0.001},
         )
         d = output.to_dict()
         assert d['index'] == 0

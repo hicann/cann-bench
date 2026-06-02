@@ -26,7 +26,22 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
+
+
+# === 输出结果注册表 ===
+
+_OUTPUT_RESULT_REGISTRY: Dict[str, Type[OutputResult]] = {}
+
+
+def register_output_result(name: str, cls: Type[OutputResult]) -> None:
+    """注册 OutputResult 子类，供反序列化时按 checker_name 查找"""
+    _OUTPUT_RESULT_REGISTRY[name] = cls
+
+
+def get_output_result_cls(name: str) -> Optional[Type[OutputResult]]:
+    """按 checker_name 查找已注册的 OutputResult 子类"""
+    return _OUTPUT_RESULT_REGISTRY.get(name)
 
 
 # === 输出结果基类 ===
@@ -34,13 +49,13 @@ from typing import Any, Dict, List, Optional
 class OutputResult(ABC):
     """单个输出的判断结果抽象基类
 
-    各 Checker 实现不同子类。
+    各 Checker 实现不同子类，子类自行决定需要哪些字段。
+    通用接口只要求 to_dict() 和 format_summary()。
     """
 
     index: int
     passed: bool
     dtype: str
-    threshold: float
     error_msg: str
 
     def get_index(self) -> int:
@@ -54,10 +69,6 @@ class OutputResult(ABC):
     def get_dtype(self) -> str:
         """获取数据类型"""
         return self.dtype
-
-    def get_threshold(self) -> float:
-        """获取精度阈值"""
-        return self.threshold
 
     def get_error_msg(self) -> str:
         """获取错误信息"""
@@ -73,6 +84,12 @@ class OutputResult(ABC):
         """格式化摘要"""
         pass
 
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, d: Dict[str, Any]) -> OutputResult:
+        """从字典反序列化"""
+        pass
+
 
 # === 精度结果 ===
 
@@ -83,7 +100,7 @@ class AccuracyResult:
     包含必要字段 + metadata 扩展字段。
     """
     passed: bool
-    threshold: float
+    threshold: Optional[float] = None
     error_msg: Optional[str] = None
     output_results: List[OutputResult] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -92,7 +109,7 @@ class AccuracyResult:
         """是否通过"""
         return self.passed
 
-    def get_threshold(self) -> float:
+    def get_threshold(self) -> Optional[float]:
         """获取精度阈值"""
         return self.threshold
 
@@ -123,13 +140,15 @@ class AccuracyResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
-        return {
+        d = {
             'passed': self.passed,
-            'threshold': self.threshold,
             'error_msg': self.error_msg,
             'output_results': [r.to_dict() for r in self.output_results],
             'metadata': self.metadata,
         }
+        if self.threshold is not None:
+            d['threshold'] = self.threshold
+        return d
 
     def format_summary(self) -> str:
         """格式化摘要"""

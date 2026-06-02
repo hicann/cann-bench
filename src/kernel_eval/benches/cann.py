@@ -17,7 +17,7 @@ CANN 评测集特化实现
 包含：
 - Loader: CannTaskLoader, CannCaseLoader, GoldenLoader
 - Models: CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec, CannSolutionSpec
-- Checker: CannDefaultChecker, CannOutputResult
+- Checker: RelativeErrorChecker
 - Matcher: OperatorMatcher
 - Scoring: CannScoringScheme, SimpleComparisonScheme, RecordingOnlyScheme
 
@@ -30,7 +30,7 @@ CANN 评测集特化实现
 from .cann_loader import CannTaskLoader, CannCaseLoader, GoldenLoader
 from .cann_spec import CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec
 from .cann_solution import CannSolutionSpec
-from .cann_checker import CannDefaultChecker, CannOutputResult
+from ..checkers.relative_error_checker import RelativeErrorChecker, RelativeErrorOutputResult
 from .cann_matcher import OperatorMatcher
 from .cann_scoring import (
     CannScoringScheme,
@@ -54,8 +54,8 @@ __all__ = [
     "CannOutputSpec",
     "CannSolutionSpec",
     # Checker
-    "CannDefaultChecker",
-    "CannOutputResult",
+    "RelativeErrorChecker",
+    "RelativeErrorOutputResult",
     # Matcher
     "OperatorMatcher",
     # Scoring
@@ -103,8 +103,10 @@ def _register_cann_components():
         OperatorMatcherRegistry.register('cann', OperatorMatcher)
 
     # 注册 Checker
-    if 'cann_default' not in CheckerRegistry.get_all():
-        CheckerRegistry.register('cann_default', CannDefaultChecker())
+    if 'relative_error' not in CheckerRegistry.get_all():
+        checker = RelativeErrorChecker()
+        CheckerRegistry.register('relative_error', checker)
+        CheckerRegistry.register('cann_default', checker)  # 兼容旧名
 
     # 注册 ScoringScheme
     if 'cann' not in ScoringSchemeRegistry._items:
@@ -126,7 +128,7 @@ def _register_cann_components():
             golden_loader='cann',
             operator_matcher='cann',
             scoring_scheme='cann',
-            checker='cann_default',
+            checker='relative_error',
             case_spec_cls='cann',
             precision_thresholds=dict(PRECISION_THRESHOLDS),
             default_tasks_root='tasks',

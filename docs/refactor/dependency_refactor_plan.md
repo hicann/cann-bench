@@ -172,7 +172,7 @@ class CannOperatorMatcher(OperatorMatcherBase):
     ...
 
 # === Checker ===
-class CannDefaultChecker(CorrectnessChecker):
+class RelativeErrorChecker(CorrectnessChecker):
     ...
 
 class CannAccuracyResult(AccuracyResult):
@@ -194,7 +194,7 @@ LoaderRegistry.register_task_loader('cann', CannTaskLoader)
 LoaderRegistry.register_case_loader('cann', CannCaseLoader)
 GoldenLoaderRegistry.register('cann', CannGoldenLoader)
 OperatorMatcherRegistry.register('cann', CannOperatorMatcher)
-CheckerRegistry.register('cann_default', CannDefaultChecker)
+CheckerRegistry.register('relative_error', RelativeErrorChecker)
 ScoringSchemeRegistry.register('cann', CannScoringScheme)
 
 BenchRegistry.register('cann', BenchConfig(
@@ -203,7 +203,7 @@ BenchRegistry.register('cann', BenchConfig(
     golden_loader='cann',
     operator_matcher='cann',
     scoring_scheme='cann',
-    checker='cann_default',
+    checker='relative_error',
     description='CANN NPU 算子评测集',
 ))
 ```

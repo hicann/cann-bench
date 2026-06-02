@@ -177,9 +177,8 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
 
     # 计算几何平均加速比 / MERE / MARE。
     # case 形状有两种：
-    #   - EvalCaseResult.to_dict()：嵌套，perf.speedup / accuracy.mere / accuracy.mare
-    #   - EvalResult.to_dict()（OperatorReport.cases）：扁平，顶层 speedup / accuracy.{mere,mare}
-    # 两种形状都需要兼容。
+    #   mere/mare 来自 metadata 展开（仅 RelativeErrorChecker 产生，
+    #   AllCloseChecker 不会产生这些指标，列表为空时 avg=0）
     speedups = []
     meres = []
     mares = []

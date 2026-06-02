@@ -692,19 +692,16 @@ def _evaluate_cases_batch(evaluator, cases, process_id="0"):
         speedup = result.get_speedup()
         acc_info = ""
         if result.accuracy_result:
-            metadata = result.accuracy_result.get_metadata()
-            mere = metadata.get('mere', 0.0)
-            mare = metadata.get('mare', 0.0)
-            if hasattr(result.accuracy_result, 'output_results') and result.accuracy_result.output_results:
+            if result.accuracy_result.output_results:
                 if result.success:
-                    acc_info = f"MERE={mere:.6f}, MARE={mare:.6f}"
+                    acc_info = result.accuracy_result.output_results[0].format_summary().replace("✅ ", "")
                 else:
                     for sr in result.accuracy_result.output_results:
                         if not sr.is_passed() and not sr.get_error_msg().startswith("(跳过"):
                             acc_info = sr.format_summary().replace("❌ ", "")
                             break
             else:
-                acc_info = f"MERE={mere:.6f}, MARE={mare:.6f}"
+                acc_info = result.accuracy_result.format_summary().replace("✅ ", "").replace("❌ ", "")
         speedup_info = f", speedup={speedup:.2f}x" if speedup > 0 else ""
         if result.error_msg and "\n" in result.error_msg:
             error_hint = result.error_msg.split("\n")[0]
@@ -813,6 +810,7 @@ def cmd_eval_process(args):
     case_loader = bench_config.get_case_loader(tasks_root=config.tasks_root)
 
     config.bench_name = bench_name
+    config.precision_thresholds = bench_config.get_precision_thresholds()
     if args.reports_dir:
         config.reports_dir = args.reports_dir
     evaluator = Evaluator(config, bench_name=bench_name)
