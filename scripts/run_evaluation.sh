@@ -382,7 +382,7 @@ build_cmd_args() {
 # 执行命令
 run_cmd() {
     CMD_ARGS="$1"
-    PYTHONPATH="${SRC_DIR}" python -m kernel_eval.cli ${CMD_ARGS}
+    PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.cli ${CMD_ARGS}
 }
 
 # 主函数
