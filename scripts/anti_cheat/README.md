@@ -37,7 +37,14 @@ bash scripts/anti_cheat/disable_builtin_kernels.sh --yes      # 跳过确认
 bash scripts/anti_cheat/restore_builtin_kernels.sh
 ```
 
-可选参数：`--soc=ascend910b`（Ascend 910B/910_93/950）、`--list=<file>`、`--backup-dir=<dir>`（默认 `$HOME/.cann_bench_kernel_backup`）。
+可选参数：
+
+- `--soc=<dir>`：内置 kernel 树下的 SOC 子目录名，取值如 `ascend910b`（Ascend 910B 系列）、
+  `ascend910_93`（Ascend 910_93xx，即 910C）、`ascend910_95`（950）、`ascend310p` 等。
+  **省略时由 `acl.get_soc_name()` 自动检测**（避免在 910C 机器上沿用默认 `ascend910b`
+  而静默无操作）；若无法从映射中识别芯片名，脚本会**失败而非回退**到旧默认值。
+- `--list=<file>`：自定义 kernel 清单。
+- `--backup-dir=<dir>`：默认 `$HOME/.cann_bench_kernel_backup`。
 
 ## ⚠️ 风险与安全保护
 

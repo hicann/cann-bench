@@ -17,11 +17,16 @@
 # backs it up and removes it from OPP, so no data is ever deleted. Run restore_builtin_kernels.sh to undo.
 #
 # Usage:
-#   bash scripts/anti_cheat/disable_builtin_kernels.sh [--soc=ascend910b] [--list=<file>] [--backup-dir=<dir>] [--dry-run]
+#   bash scripts/anti_cheat/disable_builtin_kernels.sh [--soc=<dir>] [--list=<file>] [--backup-dir=<dir>] [--dry-run]
+#
+# --soc selects the kernel tree subdir under built-in/op_impl/ai_core/tbe/kernel/
+# (e.g. ascend910b, ascend910_93, ascend910_95). When omitted, it is auto-detected
+# from the live chip via `acl.get_soc_name()`; falling back fails loud rather than
+# silently disabling kernels for the wrong SOC.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOC="ascend910b"
+SOC=""
 LIST="${SCRIPT_DIR}/benchmarked_kernels.txt"
 BACKUP_DIR="${CANN_BENCH_KERNEL_BACKUP:-$HOME/.cann_bench_kernel_backup}"
 DRY_RUN=0
@@ -37,10 +42,57 @@ for arg in "$@"; do
   esac
 done
 
+# soc_name_to_kernel_dir <Ascend chip name> → kernel subdir under kernel/<soc>/.
+soc_name_to_kernel_dir() {
+  case "$1" in
+    Ascend910_93*) echo ascend910_93 ;;
+    Ascend910_95*) echo ascend910_95 ;;
+    Ascend910B*)   echo ascend910b ;;
+    Ascend310P*)   echo ascend310p ;;
+    *)             return 1 ;;
+  esac
+}
+
+if [[ -z "$SOC" ]]; then
+  # Detect from the live chip. Fail loud — operating with the wrong default SOC
+  # silently leaves the actual runtime kernel tree untouched (the failure mode
+  # users hit when ascend910b is hardcoded on a 910C / Ascend910_9362 host).
+  soc_name="$(python3 -c 'import acl,sys; n=acl.get_soc_name(); sys.stdout.write(n or "")' 2>/dev/null || true)"
+  if [[ -n "$soc_name" ]]; then
+    if SOC="$(soc_name_to_kernel_dir "$soc_name")"; then
+      echo "[INFO] auto-detected SOC=${SOC} from chip ${soc_name}"
+    else
+      echo "[ERROR] could not map chip name '${soc_name}' to a kernel SOC dir." >&2
+      echo "        Pass --soc=<dir> explicitly (e.g. --soc=ascend910b)." >&2
+      exit 1
+    fi
+  else
+    echo "[ERROR] --soc not given and acl.get_soc_name() failed." >&2
+    echo "        Source CANN set_env.sh (so pyACL is importable) or pass --soc explicitly." >&2
+    exit 1
+  fi
+fi
+
 : "${ASCEND_OPP_PATH:?ASCEND_OPP_PATH not set (source the CANN set_env.sh)}"
 KROOT="${ASCEND_OPP_PATH}/built-in/op_impl/ai_core/tbe/kernel/${SOC}"
 [[ -d "$KROOT" ]] || { echo "kernel root not found: $KROOT"; exit 1; }
 [[ -f "$LIST" ]]  || { echo "list not found: $LIST"; exit 1; }
+
+# Sanity: if the SOC kernel tree is essentially empty (no ops_legacy / ops_nn),
+# the CANN install probably doesn't ship binaries for this SOC (e.g. a 910b-only
+# ops package on a 910C host). Disabling here is a no-op — but it silently
+# "succeeds" and masks the real install gap. Refuse instead.
+have_core_op_dirs=0
+for sub in ops_legacy ops_nn ops_math ops_cv ops_transformer; do
+  [[ -d "$KROOT/$sub" ]] && have_core_op_dirs=$((have_core_op_dirs+1))
+done
+if [[ $have_core_op_dirs -eq 0 ]]; then
+  echo "[ERROR] ${KROOT} has no ops_legacy/ops_nn/... subdirs — this CANN install" >&2
+  echo "        ships no built-in kernels for SOC=${SOC}. Install the matching" >&2
+  echo "        ops package (e.g. Ascend-cann-A3-ops for ascend910_93) before" >&2
+  echo "        running this script." >&2
+  exit 1
+fi
 
 BK="${BACKUP_DIR}/disabled_kernels/${SOC}"
 mkdir -p "$BK"

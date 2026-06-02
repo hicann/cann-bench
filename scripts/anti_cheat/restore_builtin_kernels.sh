@@ -5,11 +5,15 @@
 # Undo disable_builtin_kernels.sh: restore every backed-up built-in kernel binary dir.
 #
 # Usage:
-#   bash scripts/anti_cheat/restore_builtin_kernels.sh [--soc=ascend910b] [--backup-dir=<dir>] [--dry-run]
+#   bash scripts/anti_cheat/restore_builtin_kernels.sh [--soc=<dir>] [--backup-dir=<dir>] [--dry-run]
+#
+# --soc selects the kernel tree subdir under built-in/op_impl/ai_core/tbe/kernel/.
+# When omitted, it is auto-detected from the live chip via `acl.get_soc_name()`
+# to stay symmetric with disable_builtin_kernels.sh.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOC="ascend910b"
+SOC=""
 BACKUP_DIR="${CANN_BENCH_KERNEL_BACKUP:-$HOME/.cann_bench_kernel_backup}"
 DRY_RUN=0
 for arg in "$@"; do
@@ -20,6 +24,33 @@ for arg in "$@"; do
     *) echo "unknown arg: $arg"; exit 1;;
   esac
 done
+
+soc_name_to_kernel_dir() {
+  case "$1" in
+    Ascend910_93*) echo ascend910_93 ;;
+    Ascend910_95*) echo ascend910_95 ;;
+    Ascend910B*)   echo ascend910b ;;
+    Ascend310P*)   echo ascend310p ;;
+    *)             return 1 ;;
+  esac
+}
+
+if [[ -z "$SOC" ]]; then
+  soc_name="$(python3 -c 'import acl,sys; n=acl.get_soc_name(); sys.stdout.write(n or "")' 2>/dev/null || true)"
+  if [[ -n "$soc_name" ]]; then
+    if SOC="$(soc_name_to_kernel_dir "$soc_name")"; then
+      echo "[INFO] auto-detected SOC=${SOC} from chip ${soc_name}"
+    else
+      echo "[ERROR] could not map chip name '${soc_name}' to a kernel SOC dir." >&2
+      echo "        Pass --soc=<dir> explicitly (e.g. --soc=ascend910b)." >&2
+      exit 1
+    fi
+  else
+    echo "[ERROR] --soc not given and acl.get_soc_name() failed." >&2
+    echo "        Source CANN set_env.sh or pass --soc explicitly." >&2
+    exit 1
+  fi
+fi
 
 : "${ASCEND_OPP_PATH:?ASCEND_OPP_PATH not set}"
 KROOT="${ASCEND_OPP_PATH}/built-in/op_impl/ai_core/tbe/kernel/${SOC}"
