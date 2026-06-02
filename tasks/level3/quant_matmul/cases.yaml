@@ -18,7 +18,7 @@ cases:
   - [3584, 3584]
   - [3584]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -35,13 +35,15 @@ cases:
   - [3584, 4608]
   - [4608]
   - null
+  - null
   - [4608]
-  dtype: [int8, int8, float32, null, int32]
-  attrs: {pertoken_scale: null, output_dtype: float16}
+  dtype: [int8, int8, float32, null, null, int32]
+  attrs: {offset: null, pertoken_scale: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - null
   - [-100, 100]
   baseline_perf_us: 83.98
@@ -56,7 +58,7 @@ cases:
   - [4096, 4096]
   - [4096]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -73,13 +75,15 @@ cases:
   - [4096, 14336]
   - [14336]
   - null
+  - null
   - [14336]
-  dtype: [int8, int8, float32, null, int32]
-  attrs: {pertoken_scale: null, output_dtype: float16}
+  dtype: [int8, int8, float32, null, null, int32]
+  attrs: {offset: null, pertoken_scale: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - null
   - [-100, 100]
   baseline_perf_us: 281.65
@@ -93,13 +97,15 @@ cases:
   - [1024, 4096]
   - [4096, 11008]
   - [11008]
+  - null
   - [1024]
-  dtype: [int8, int8, float32, float32]
-  attrs: {bias: null, output_dtype: float16}
+  dtype: [int8, int8, float32, null, float32]
+  attrs: {offset: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - [0.001, 0.01]
   baseline_perf_us: 242.66
   t_hw_us: 130.43
@@ -112,14 +118,16 @@ cases:
   - [1024, 4096]
   - [4096, 14336]
   - [14336]
+  - null
   - [1024]
   - [14336]
-  dtype: [int8, int8, float32, float32, int32]
-  attrs: {output_dtype: float16}
+  dtype: [int8, int8, float32, null, float32, int32]
+  attrs: {offset: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - [0.001, 0.01]
   - [-100, 100]
   baseline_perf_us: 332.07
@@ -135,7 +143,7 @@ cases:
   - [3584, 3584]
   - [3584]
   dtype: [int8, int8, bfloat16]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: bfloat16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -151,13 +159,15 @@ cases:
   - [1024, 4096]
   - [4096, 14336]
   - [14336]
+  - null
   - [1024]
-  dtype: [int8, int8, float32, float32]
-  attrs: {bias: null, output_dtype: bfloat16}
+  dtype: [int8, int8, float32, null, float32]
+  attrs: {offset: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - [0.001, 0.01]
   baseline_perf_us: 329.53
   t_hw_us: 169.86
@@ -171,13 +181,15 @@ cases:
   - [4096, 4096]
   - [4096]
   - null
+  - null
   - [4096]
-  dtype: [int8, int8, float32, null, bfloat16]
-  attrs: {pertoken_scale: null, output_dtype: bfloat16}
+  dtype: [int8, int8, float32, null, null, bfloat16]
+  attrs: {offset: null, pertoken_scale: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
   - [0.001, 0.01]
+  - null
   - null
   - [-1, 1]
   baseline_perf_us: 117.06
@@ -192,7 +204,7 @@ cases:
   - [2048, 2048]
   - [2048]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -209,7 +221,7 @@ cases:
   - [2048, 2048]
   - [2048]
   dtype: [int8, int8, bfloat16]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: bfloat16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -226,7 +238,7 @@ cases:
   - [4096, 4096]
   - [4096]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -244,7 +256,7 @@ cases:
   - [8, 2048, 4096]
   - [4096]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -261,7 +273,7 @@ cases:
   - [4096, 4096]
   - [1]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -277,7 +289,7 @@ cases:
   - [7168, 7168]
   - [1]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: bfloat16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -295,7 +307,7 @@ cases:
   - [513, 1024]
   - [1024]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -312,7 +324,7 @@ cases:
   - [4096, 1025]
   - [1025]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: bfloat16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -330,7 +342,7 @@ cases:
   - [256, 512]
   - [512]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -347,7 +359,7 @@ cases:
   - [4096, 4096]
   - [4096]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: float16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: float16}
   value_range:
   - [-128, 127]
   - [-128, 127]
@@ -364,7 +376,7 @@ cases:
   - [4096, 4096]
   - [4096]
   dtype: [int8, int8, float32]
-  attrs: {pertoken_scale: null, bias: null, output_dtype: bfloat16}
+  attrs: {offset: null, pertoken_scale: null, bias: null, output_dtype: bfloat16}
   value_range:
   - [-128, 127]
   - [-128, 127]

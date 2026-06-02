@@ -17,6 +17,7 @@ operator:
     int32 bias (pre-scale): out = (x1 @ x2 + bias) * scale
     浮点 bias (post-scale): out = x1 @ x2 * scale + bias
     pertoken: out = (x1 @ x2 * scale) * pertoken_scale
+    offset (非对称量化): out = x1 @ x2 * scale + offset
   description: 量化矩阵乘法算子，int8 输入，float16/bfloat16 输出，支持 per-tensor/per-channel 量化
   shape_support: 'x1: [..., m, k]; x2: [..., k, n]; scale: [t]; 输出: [..., m, n]'
   attrs:
@@ -42,6 +43,12 @@ operator:
     - float32
     - bfloat16
     shape: '[t]'
+  - name: offset
+    description: 非对称量化偏移 (zero-point 校正)，反量化时 out += offset；per-tensor[t=1] 或 per-channel[t=n]
+    dtype:
+    - float32
+    shape: '[t]'
+    optional: true
   - name: pertoken_scale
     description: per-token 缩放因子，shape=[m]
     dtype:
@@ -64,4 +71,4 @@ operator:
     - float16
     - bfloat16
     shape: '[..., m, n]'
-  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype=None) -> Tensor out
+  schema: quant_matmul(Tensor x1, Tensor x2, Tensor scale, *, Tensor? offset=None, Tensor? pertoken_scale=None, Tensor? bias=None, str? output_dtype=None) -> Tensor out
