@@ -58,6 +58,7 @@ class SubprocessRunner:
         frag_path: str,
         source_dir: str,
         case_filter: Optional[Dict] = None,
+        task_dir: Optional[str] = None,
         unbuffered: bool = False,
     ) -> List[str]:
         """构造隔离子进程的 kernel_eval.cli eval 命令。
@@ -83,8 +84,29 @@ class SubprocessRunner:
         if case_filter and "case_id" in case_filter:
             cmd += ["--case-id", str(case_filter["case_id"])]
 
+        effective_task_dir = task_dir if task_dir is not None else self._task_dir_arg()
+        if effective_task_dir:
+            cmd += ["--task-dir", effective_task_dir]
+
         cmd += self._forward_config_flags()
         return cmd
+
+    def _task_dir_arg(self, rel_path: str = "") -> Optional[str]:
+        """Return the task directory that must be forwarded to child evals."""
+        cfg = self.config
+        if cfg is None:
+            return None
+
+        tasks_root = getattr(cfg, "tasks_root", "") or ""
+        if not tasks_root:
+            return None
+
+        root = Path(tasks_root)
+        if rel_path:
+            candidate = root / rel_path
+            if candidate.exists():
+                return str(candidate)
+        return str(root)
 
     def _forward_config_flags(self) -> List[str]:
         """把父进程的性能/profiler 相关配置透传给隔离子进程。
@@ -141,6 +163,7 @@ class SubprocessRunner:
             cmd = self._build_child_cmd(
                 operator_name, frag_path, source_dir=source_dir,
                 case_filter=case_filter,
+                task_dir=self._task_dir_arg(rel_path),
             )
 
             print(f"[INFO] {operator_name}: subprocess (timeout {timeout_sec}s)")
@@ -270,7 +293,9 @@ class SubprocessRunner:
             source_dir = getattr(self.config, "source_dir", "") or "tasks"
             cmd = self._build_child_cmd(
                 operator_name, frag_path, source_dir=source_dir,
-                case_filter=case_filter, unbuffered=True,
+                case_filter=case_filter,
+                task_dir=self._task_dir_arg(rel_path),
+                unbuffered=True,
             )
 
             # 设置 PYTHONPATH

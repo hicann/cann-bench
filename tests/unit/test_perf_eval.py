@@ -101,3 +101,44 @@ class TestMeasureSimple:
 
         assert result.elapsed_us >= 0
         assert result.error_msg is None
+
+
+def test_run_profiled_uses_trace_view_when_env_selected(monkeypatch):
+    monkeypatch.setenv("CANN_BENCH_PERF_SOURCE", "trace_view")
+    config = Config(enable_profiler=True)
+    evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
+
+    def dummy_func():
+        return "ok"
+
+    trace_result = {
+        "prof": {
+            "aicore_e2e": 12.345,
+            "aicpukernel_gap": 1.234,
+            "aicore_e2e_jitter": 0.045,
+        }
+    }
+    def run_stub(fn, prof_dir, warmup, repeat):
+        fn()
+
+    with patch.object(evaluator, "_profile", side_effect=run_stub), \
+         patch.object(evaluator, "_parse_case_id", return_value=("L1/Add", "0001")), \
+         patch.object(PerfEvaluator, "parse_trace_view_prof", return_value=trace_result) as mock_trace, \
+         patch.object(evaluator, "_parse_kernel_details_csv") as mock_kernel_details:
+        outputs, result = evaluator.run_profiled(
+            "L1/Add/0001", dummy_func, warmup=1, repeat=2,
+        )
+
+    assert outputs == "ok"
+    assert result.elapsed_us == 12.35
+    assert result.op_times == {
+        "trace_view": {
+            "aicore_e2e": 12.35,
+            "aicpukernel_gap": 1.23,
+            "aicore_e2e_jitter": 0.04,
+        }
+    }
+    assert result.metadata["perf_source"] == "trace_view"
+    assert result.metadata["elapsed_us_source"] == "trace_view.aicore_e2e"
+    mock_trace.assert_called_once()
+    mock_kernel_details.assert_not_called()

@@ -112,6 +112,21 @@ class TestCompareResult:
         assert result.passed is False
         assert result.error_msg == "MARE exceeded threshold"
 
+    def test_accuracy_type_check_preserves_diagnostic_context(self):
+        from kernel_eval.eval.accuracy_eval import AccuracyEvaluator
+
+        evaluator = AccuracyEvaluator()
+        result = evaluator.evaluate(
+            ai_output=None,
+            golden_output=torch.ones(1),
+            dtype="float32",
+            diagnostic_context="raw call failed: unexpected keyword x",
+        )
+
+        assert result.passed is False
+        assert "输出类型不支持: NoneType" in result.error_msg
+        assert "raw call failed: unexpected keyword x" in result.error_msg
+
     def test_default_values(self):
         result = CompareResult(passed=True, dtype="float32", threshold=0.0001)
         assert result.mere == 0.0

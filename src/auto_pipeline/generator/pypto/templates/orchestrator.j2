@@ -1,0 +1,50 @@
+请以 pypto-op-orchestrator 角色为算子 `{{ op_name }}` 跑完本次 benchmark 所需的 PyPTO 原生工作流。
+
+{% if device_mode == "pool" and pool_device_id is not none %}
+================================================================
+【设备约束 -- device_mode=pool, 外层 runner 已分配并独占设备】
+================================================================
+
+本阶段运行于 device_mode=pool：设备 {{ pool_device_id }} 已由外层 runner 分配。
+环境变量 TILE_FWK_DEVICE_ID={{ pool_device_id }} 为唯一权威设备号。
+禁止在 workflow 内部扫描、抢占或切换其它设备。
+
+================================================================
+
+{% endif %}
+工作目录: `{{ op_dir_rel }}/`
+算子需求文档 REQUIRE.md (已就绪, 请读取其内容作为 Stage 1 用户需求输入): `{{ op_dir_rel }}/REQUIRE.md`
+任务输入文件:
+{{ case_task_files_text }}
+
+注意: REQUIRE.md 是 benchmark 预生成的外部需求输入, 不是 PyPTO 标准工件。
+请按 pypto-op-orchestrator 自带规范正常推进 7 阶段流程。产物格式以 PyPTO
+原生 workflow 为准；不要为 cann-bench/Stanford submission 做输出格式对齐。
+后续格式归一由 auto_pipeline 的独立 convert 阶段负责。
+
+{{ case_detail_sections }}
+
+{% if bench_name == "cann" %}
+CANN selected-case 需求:
+- `{{ op_dir_rel }}/cases.yaml` 或 `{{ op_dir_rel }}/cases.csv` 是唯一权威 case 列表；不要只依据 prompt 里的用例预览。若 benchmark 已离线筛选 case，本次只需满足筛选后的 cases 文件。
+- cases 文件中每个 case_id 的 input_shape、dtype、attrs 和 value_range 都属于本次 benchmark 需求。
+- `proto.yaml`/`desc.md` 可能描述算子全集；离线筛选后，它们不扩大本次 benchmark 的 dtype、rank 或 shape 范围。若全集描述与当前 cases 的评测范围不同，以当前 cases 为准。
+- 生成结果应实现 schema 描述的算子语义，并在当前 cases 上输出与 golden/reference 一致的结果；输出 shape/dtype 应符合 schema 和 cases。
+- 本次 PyPTO 产物应已经满足上述算子语义；convert 阶段只做提交格式归一，不作为需求修正或 kernel 语义修复环节。
+- 为保证实验可复现，只使用当前任务输入材料和 PyPTO 自身知识；不要把历史 run、历史 submission、历史 eval 或其它 artifact 当作实现来源。
+
+{% endif %}
+
+性能调优轮次:
+- stage7 性能优化轮次严格控制在{{ perf_round }}轮.
+
+运行边界:
+- 所有产物落在 `{{ op_dir_rel }}/`, 不要写到其它目录.
+- 所有测试日志、临时文件和可再生产物也必须落在 `{{ op_dir_rel }}/` 或其子目录；不要写到 `/tmp`、`/var/tmp`、home 目录、仓库根目录或历史 run 目录.
+- 本 pipeline 是非交互执行环境；不要触发需要人工确认的 OpenCode permission ask. 若某个操作因目录权限需要确认，请改用 `{{ op_dir_rel }}/` 内路径或明确阻塞.
+- 验证/测试命令必须前台、有界执行并把日志写入 `{{ op_dir_rel }}/` 内；不要使用 `nohup`、`disown`、后台 `&` 或再通过全局日志文件 tail/cat 轮询结果.
+- 调度 subagent 时必须把上述运行边界传递给子任务；子任务不得把日志重定向到 `/tmp` 等外部目录.
+- 有可用 NPU 时，本次 workflow 应在真实 NPU 环境下验证.
+- 完成或阻塞状态以 PyPTO workflow 的 `.orchestrator_state.json` 表达.
+
+请立即开始, 不要再问我问题.

@@ -1,0 +1,13 @@
+agent:
+  type: akg-agent
+  backend: ascend
+  arch: ascend910b4
+  framework: torch
+  codegen_target: triton_ascend
+  workflow: kernelgen_only_workflow
+
+benchmark:
+  name: cann
+  tasks:
+    - tasks/level1/exp
+    - tasks/level1/sigmoid

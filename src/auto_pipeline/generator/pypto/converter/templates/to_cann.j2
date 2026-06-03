@@ -1,0 +1,44 @@
+将 {{ operator }} 的 PyPTO 智能体输出转换为标准 cann-bench source_dir 提交。
+
+{% include "_scope.j2" %}
+
+机械步骤：
+1. 读取列出的任务文件，理解算子 schema 和打包要求。
+2. 只读取 {{ raw_dir }} 下列出的实现文件。不要搜索未列出的文件。
+3. 如果列出的文件不足以完成转换，写入 CONVERSION_ERROR.txt 并停止。
+4. 创建 {{ submission_path }}。
+5. 将运行时需要的 PyPTO 实现文件从 input_dir 复制到提交目录。
+6. 写入任务 schema 需要的 cann_bench 包入口。
+7. 写入 source_dir 提交需要的 Python 包元数据和构建脚本。
+8. 只对生成的提交运行本地 import/打包检查。如果需要检查脚本，
+   把它写到 {{ output_dir }} 下，不要写到 /tmp 或任何全局目录。
+   不要调用 PyPTO wrapper、分配 tensor、运行 kernel_eval、精度评测、性能评测，
+   或触发 PyPTO/NPU 执行。
+9. 如果无法转换，在 output_dir 中写入 CONVERSION_ERROR.txt 说明原因，并以非零状态退出。
+
+转换边界：
+- 本阶段只能做提交格式归一和 Python 包装；不能修复 PyPTO kernel/wrapper 的算法、rank、tiling、dtype、attrs、精度或性能语义。
+- 不要在转换阶段加入 reshape/materialize/tile_b 限制等 workaround 来覆盖生成阶段缺失的 case 支持。
+- 不要在转换阶段修复或规避 PyPTO 的 UB/片上内存问题，例如 `TensorErr::TENSOR_MEMORY_ALLOCATION`、whole-tensor 中间量、tile-local/slice-local 写法缺失；这些必须由 PyPTO 生成阶段解决。
+- 原始 PyPTO 实现文件应作为运行时依赖复制到提交目录；如确需调整，只允许做 import 路径这类机械改写，不能改变计算路径。
+- `cann_bench` 包入口只能按 schema 转发输入和 attrs 到原始 PyPTO wrapper，并返回其结果。
+- 不要把原始 wrapper 直接 alias 成 `cann_bench.<schema_op>`，例如不要写 `from ... import xxx_wrapper as <schema_op>`；必须写一个无类型标注的 thin forwarder：函数名和参数/defaults 按 schema 暴露，函数体只做参数转发并 `return` 原始 wrapper 的结果。
+- 转发调用必须按原始 wrapper 的实际签名绑定，而不是假设 wrapper 参数名等于 schema 参数名。若 wrapper 参数名与 schema 名不完全一致但入参个数和顺序可一一对应，优先用 positional 转发；只有在原始 wrapper 明确接受对应 schema 参数名时才使用 keyword 转发。
+- 如果 schema 参数无法无歧义绑定到原始 wrapper 签名（数量不一致、必需参数缺失、额外 attrs 无法传入、或需要改变计算语义才能适配），写入 CONVERSION_ERROR.txt 并停止，不要生成会在运行时才 TypeError 的 submission。
+- `cann_bench.<op>` 入口函数不要带 Python return type annotation，也不要继承原始 wrapper 的 `__annotations__`；本地检查必须用 `inspect.signature(cann_bench.<op>).return_annotation is inspect.Signature.empty` 验证。这样避免 kernel_eval/Profiler 首次调用时把公开入口误识别为 PyPTO 返回值 kernel。
+- 本地检查必须覆盖 entry -> raw wrapper 的绑定关系：在不分配 tensor、不调用真实 PyPTO wrapper、不触发 NPU 的前提下，导入生成的 entry 模块，把 entry 模块中引用的原始 wrapper 替换成一个拥有相同 `inspect.signature(raw_wrapper)` 的 spy/stub，然后用 schema 参数对应的 sentinel object 调用 `cann_bench.<op>`；检查调用不会抛 `TypeError`，spy 收到的参数能被 raw wrapper 签名绑定，且 `cann_bench.<op>` 原样 return spy 的结果。
+- 本地检查若只验证 import、wheel、公开入口 signature 或 return annotation，不算通过；必须验证上述 spy/stub 调用路径。
+- 如果原始 PyPTO 产物不能按任务 schema 直接覆盖 cases 文件要求，应写入 CONVERSION_ERROR.txt 并停止，而不是在 converter 中补 kernel 逻辑。
+- 不要检查或搜索生成阶段 proof。auto_pipeline 调用本转换阶段前已经完成 artifact 接收判断；converter 只做格式归一。
+- 不要读取、glob 或复制 `.orchestrator_state.json`、`stage5_precision.log`、`[PRECISION_PASS]`、`benchmark_runs/`、`custom_auto_pipeline/`、历史 artifact、历史 submission 或历史 kernel_eval。除非这些 proof 文件被明确列在上面的隔离输入清单中，否则缺失不是转换失败理由，也不是向父目录/仓库根目录搜索的理由。
+- 不要使用历史 submission/build.sh/setup.py 作为模板；从当前隔离输入创建最小标准 Python wheel 提交。
+
+输出约定：
+- 将转换后的提交写到 {{ submission_path }}。
+- 将运行时需要的全部 PyPTO 实现文件复制到提交目录。
+- 提交必须包含 build.sh、setup.py 或 pyproject.toml、cann_bench 包。
+- build.sh 必须在提交目录下生成 `dist/cann_bench*.whl`；kernel_eval 只在该 wheel 存在时认为编译成功。
+- 只做 Python syntax/import 检查的 build.sh 是无效提交，即使脚本返回 0 也会被 kernel_eval 判为编译失败。
+- wheel 中必须包含 `cann_bench` 包和运行时需要的 PyPTO 实现文件；包名使用 `cann_bench` 前缀以匹配 `dist/cann_bench*.whl`。
+- 不要依赖或生成非标准桥接文件。
+- 不要运行精度或性能评测。

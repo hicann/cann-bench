@@ -1,0 +1,10 @@
+将 {{ operator }} 的 {{ source_generator }} 生成产物转换为 {{ target_benchmark }} benchmark submission。
+
+输入生成产物：
+- workdir: {{ raw_workdir }}
+{{ files }}
+
+输出约定：
+- 将转换后的提交写到 {{ submission_path }}。
+- 不要运行精度或性能评测。
+- 不要修改输入智能体输出目录。

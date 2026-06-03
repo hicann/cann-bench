@@ -89,7 +89,7 @@ class Evaluator:
         # 初始化精度评测器
         self.accuracy_evaluator = AccuracyEvaluator(
             custom_thresholds=self.config.precision_thresholds,
-            checker_name=self.bench_config.checker,
+            checker_name=self.config.checker_name,
         )
 
         # 初始化数据层组件（通过 Registry 获取）
@@ -217,7 +217,7 @@ class Evaluator:
                     case_num=case.case_id,
                     success=False,
                     golden_run_result=self._release_outputs(golden_result),
-                    error_msg=f"Golden执行失败: {golden_result.error}",
+                    error_msg=self._format_run_failure("Golden执行失败", golden_result),
                     baseline_perf_us=case.baseline_perf_us,
                     t_hw_us=case.t_hw_us,
                 )
@@ -256,7 +256,7 @@ class Evaluator:
                     success=False,
                     golden_run_result=self._release_outputs(golden_result),
                     ai_run_result=self._release_outputs(ai_result),
-                    error_msg=f"AI算子执行失败: {ai_result.error}",
+                    error_msg=self._format_run_failure("AI算子执行失败", ai_result),
                     baseline_perf_us=case.baseline_perf_us,
                     t_hw_us=case.t_hw_us,
                 )
@@ -294,6 +294,7 @@ class Evaluator:
                 custom_thresholds=merged_thresholds,
                 native_output=native_out,
                 ignore_output_indices=ignore_output_indices,
+                diagnostic_context=self._format_output_diagnostic(ai_result),
             )
 
             # 防作弊二次验证：用新鲜输入再跑一遍 golden + AI，两次都过才算 pass
@@ -334,12 +335,15 @@ class Evaluator:
                     mare = metadata.get('mare', 0.0)
                     mare_threshold = 10 * accuracy_result.threshold if accuracy_result.threshold and accuracy_result.threshold > 0 else 0
                     fail_reasons = []
-                    if mare >= mare_threshold:
+                    if accuracy_result.error_msg and accuracy_result.threshold == 0:
+                        fail_reasons.append(accuracy_result.error_msg)
+                    elif mare >= mare_threshold:
                         fail_reasons.append(f"MARE({mare:.6f}) >= mare_threshold({mare_threshold:.6f})")
                     if accuracy_result.threshold and mere >= accuracy_result.threshold:
                         fail_reasons.append(f"MERE({mere:.6f}) >= threshold({accuracy_result.threshold:.6f})")
                     if accuracy_result.error_msg:
-                        fail_reasons.append(accuracy_result.error_msg)
+                        if accuracy_result.error_msg not in fail_reasons:
+                            fail_reasons.append(accuracy_result.error_msg)
                     error_msg = f"精度不达标: {', '.join(fail_reasons)}"
 
             self._cleanup_memory()
@@ -368,7 +372,7 @@ class Evaluator:
                 operator=case.operator,
                 case_num=case.case_id,
                 success=False,
-                error_msg=f"评测异常: {e}",
+                error_msg=f"评测异常: {type(e).__name__}: {e}\n{tb_str.rstrip()}",
             )
 
     def evaluate_operator(self, operator: str, rel_path: str, case_filter: Dict = None) -> EvalOperatorResult:
@@ -649,6 +653,36 @@ class Evaluator:
         elif result.ai_run_result and result.ai_run_result.elapsed_us > 0:
             return f"{result.ai_run_result.elapsed_us:.2f}μs"
         return "N/A"
+
+    @staticmethod
+    def _format_run_failure(prefix: str, run_result: OpRunResult) -> str:
+        error = run_result.error or "未知错误"
+        message = f"{prefix}: {error}"
+        tb_str = (run_result.traceback or "").rstrip()
+        if tb_str and tb_str not in message:
+            message = f"{message}\n{tb_str}"
+        return message
+
+    @classmethod
+    def _format_output_diagnostic(cls, run_result: OpRunResult) -> str:
+        parts = [
+            f"AI算子输出类型: {type(run_result.outputs).__name__}",
+            f"AI算子输出repr: {cls._short_repr(run_result.outputs)}",
+        ]
+        if run_result.error:
+            parts.append(f"AI算子执行错误: {run_result.error}")
+        if run_result.traceback:
+            parts.append(f"AI算子执行 traceback:\n{run_result.traceback.rstrip()}")
+        elif run_result.outputs is None:
+            parts.append("AI算子未抛异常但返回 None；请检查是否漏写 return 或使用了不匹配的 out-param 接口。")
+        return "\n".join(parts)
+
+    @staticmethod
+    def _short_repr(value: Any, limit: int = 500) -> str:
+        text = repr(value)
+        if len(text) > limit:
+            return text[:limit] + "...<truncated>"
+        return text
 
     def _filter_cases(self, cases: List[CaseSpec], filter_dict: Dict) -> List[CaseSpec]:
         """筛选用例"""

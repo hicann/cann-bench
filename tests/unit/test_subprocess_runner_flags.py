@@ -91,9 +91,30 @@ def test_case_id_forwarded():
     assert _pairs(cmd, "--case-id") == ["5"]
 
 
+def test_task_dir_forwarded_from_config():
+    cfg = Config()
+    cfg.tasks_root = "/repo/bench_lab/pypto_cann_bench"
+
+    cmd = _runner(cfg)._build_child_cmd("Sigmoid", "/tmp/frag.json", source_dir="cand")
+
+    assert _pairs(cmd, "--task-dir") == ["/repo/bench_lab/pypto_cann_bench"]
+
+
+def test_task_dir_prefers_operator_dir_when_rel_path_exists(tmp_path):
+    bench_root = tmp_path / "bench_lab" / "pypto_cann_bench"
+    task_dir = bench_root / "sigmoid"
+    task_dir.mkdir(parents=True)
+    cfg = Config()
+    cfg.tasks_root = str(bench_root)
+    runner = _runner(cfg)
+
+    assert runner._task_dir_arg("sigmoid") == str(task_dir)
+
+
 def test_no_config_is_safe():
     """config 缺省时不应崩溃，也不应透传任何 perf flag。"""
     runner = SubprocessRunner(failure_synthesizer=MagicMock())
     cmd = runner._build_child_cmd("Cummin", "/tmp/frag.json", source_dir="cand")
     assert "--no-perf" not in cmd
     assert "--warmup" not in cmd
+    assert "--task-dir" not in cmd

@@ -1,0 +1,8 @@
+agent:
+  type: pypto
+
+benchmark:
+  name: cann
+  tasks:
+    - bench_lab/pypto_cann_bench/exp
+    - bench_lab/pypto_cann_bench/sigmoid

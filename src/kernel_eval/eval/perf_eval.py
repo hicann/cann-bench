@@ -17,8 +17,8 @@
 职责：
 1. NPU 模式下使用 torch_npu.profiler 采集性能数据
 2. 支持 NPU 升频 + L2 cache 清空，保证测量一致性
-3. CPU 模式下使用简单计时
-4. 解析 kernel_details.csv，使用精确形状匹配过滤 warmup kernel
+3. 非 profiler 路径不做墙钟计时，perf_result 由调用侧置空
+4. 按 CANN_BENCH_PERF_SOURCE 解析 kernel_details.csv 或 trace_view.json
 5. 归档 profiling 中间目录到 reports/prof_data/{rel_path}/{caseid}/
 
 参考evaluation/core/profiler_manager.py
@@ -32,6 +32,7 @@ import re
 import shutil
 import sys
 import tempfile
+import traceback
 from typing import Optional, Dict, Any, Tuple, List, Callable
 
 import torch
@@ -44,6 +45,10 @@ from ..config import Config, get_config
 from .input_pool import InputPool
 from ..base.result import PerfResult, compute_speedup
 
+
+PERF_SOURCE_ENV = "CANN_BENCH_PERF_SOURCE"
+PERF_SOURCE_KERNEL_DETAILS = "kernel_details"
+PERF_SOURCE_TRACE_VIEW = "trace_view"
 
 # Warmup kernel 精确形状特征（用于过滤）
 # F111: 硬编码形状会在 CANN / 驱动升级改 warmup 实现时静默失效（过滤命中率=0
@@ -75,6 +80,113 @@ def _maybe_warn_warmup_filter_inactive() -> None:
                 _WARMUP_FILTER_STATS["checked"], WARMUP_MATMUL_SHAPE, WARMUP_REDUCE_SHAPE,
             )
             _maybe_warn_warmup_filter_inactive._warned = True
+
+
+def _perf_source_from_env() -> str:
+    raw = os.environ.get(PERF_SOURCE_ENV, PERF_SOURCE_KERNEL_DETAILS)
+    value = str(raw).strip().lower().replace("-", "_")
+    if value in ("", "kernel", "kernel_detail", PERF_SOURCE_KERNEL_DETAILS, "csv"):
+        return PERF_SOURCE_KERNEL_DETAILS
+    if value in ("trace", PERF_SOURCE_TRACE_VIEW, "pypto"):
+        return PERF_SOURCE_TRACE_VIEW
+
+    _logger.warning(
+        "unsupported %s=%r; falling back to %s",
+        PERF_SOURCE_ENV,
+        raw,
+        PERF_SOURCE_KERNEL_DETAILS,
+    )
+    return PERF_SOURCE_KERNEL_DETAILS
+
+
+# ---------------------------------------------------------------------------
+# 独立 profiling 辅助（供 parse_trace_view_prof 运行算子 + 采集用）
+# ---------------------------------------------------------------------------
+
+def _profile_standalone(fn, prof_dir: str, warmup: int, repeat: int) -> None:
+    """Run *fn* with torch_npu.profiler, writing trace output to *prof_dir*.
+
+    This is a self-contained profiling helper that does NOT depend on
+    PerfEvaluator instance state (no freq_boost, no warmup tensors).
+    """
+    import logging
+    import torch_npu
+
+    # Suppress profiler parser logs
+    og_basicConfig = logging.basicConfig
+    logging.basicConfig = lambda **kw: og_basicConfig(**{**kw, "level": logging.ERROR, "force": True})
+    try:
+        for name in ['', 'torch', 'torch_npu', 'torch_npu.profiler', 'ascend', 'profiler']:
+            lg = logging.getLogger(name)
+            lg.setLevel(logging.ERROR)
+            lg.handlers = []
+            lg.addHandler(logging.NullHandler())
+
+        saved_stdout_fd = os.dup(1)
+        saved_stderr_fd = os.dup(2)
+        sink_file = tempfile.NamedTemporaryFile(
+            mode='w+', prefix='trace_profiler_', suffix='.log', delete=False
+        )
+        sink_fd = sink_file.fileno()
+
+        try:
+            os.dup2(sink_fd, 1)
+            os.dup2(sink_fd, 2)
+
+            experimental_config = torch_npu.profiler._ExperimentalConfig(
+                export_type=[torch_npu.profiler.ExportType.Text],
+                profiler_level=torch_npu.profiler.ProfilerLevel.Level1,
+                aic_metrics=torch_npu.profiler.AiCMetrics.AiCoreNone,
+            )
+
+            with torch_npu.profiler.profile(
+                activities=[
+                    torch_npu.profiler.ProfilerActivity.CPU,
+                    torch_npu.profiler.ProfilerActivity.NPU,
+                ],
+                schedule=torch_npu.profiler.schedule(
+                    wait=0, warmup=warmup, active=repeat, repeat=1
+                ),
+                on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(prof_dir),
+                record_shapes=False,
+                profile_memory=False,
+                with_stack=False,
+                experimental_config=experimental_config,
+            ) as prof:
+                fn_exc = None
+                for i in range(warmup + repeat):
+                    try:
+                        fn()
+                    except BaseException as e:
+                        fn_exc = e
+                        prof.step()
+                        break
+                    prof.step()
+                if fn_exc is not None:
+                    raise fn_exc
+
+            # Wait for profiler async parsing
+            try:
+                from torch_npu.profiler.analysis.prof_common_func._multi_process_pool import MultiProcessPool
+                pool = MultiProcessPool()
+                pool.close_pool(wait=True)
+            except Exception:
+                pass
+
+        finally:
+            os.dup2(saved_stdout_fd, 1)
+            os.dup2(saved_stderr_fd, 2)
+            os.close(saved_stdout_fd)
+            os.close(saved_stderr_fd)
+            logging.basicConfig = og_basicConfig
+            sink_file.close()
+            try:
+                os.unlink(sink_file.name)
+            except OSError:
+                pass
+
+    finally:
+        logging.basicConfig = og_basicConfig
 
 
 class PerfEvaluator:
@@ -374,10 +486,13 @@ class PerfEvaluator:
             prof_dir = os.path.join(self.prof_data_dir, rel_path, caseid)
             os.makedirs(prof_dir, exist_ok=True)
             # 清理上次评测遗留的时间戳子目录，避免读取到脏数据
-            for entry in os.listdir(prof_dir):
-                entry_path = os.path.join(prof_dir, entry)
-                if os.path.isdir(entry_path):
-                    shutil.rmtree(entry_path, ignore_errors=True)
+            try:
+                for entry in os.listdir(prof_dir):
+                    entry_path = os.path.join(prof_dir, entry)
+                    if os.path.isdir(entry_path):
+                        shutil.rmtree(entry_path, ignore_errors=True)
+            except OSError as e:
+                _logger.debug("profiler archive dir cleanup skipped for %s: %s", prof_dir, e)
         else:
             prof_dir = tempfile.mkdtemp(prefix="cann_prof_")
 
@@ -409,42 +524,52 @@ class PerfEvaluator:
                 pool.clear()
 
         except Exception as e:
-            result.error_msg = str(e)
+            result.error_msg = f"{type(e).__name__}: {e}"
+            result.metadata["profile_exception_type"] = type(e).__name__
+            result.metadata["profile_exception"] = str(e)
+            result.metadata["profile_exception_traceback"] = traceback.format_exc()
 
         try:
-            # Locate kernel_details.csv — check common locations first.
-            csv_file = None
+            perf_source = _perf_source_from_env()
+            result.metadata["perf_source"] = perf_source
 
-            # 1) Directly in prof_dir
-            direct = os.path.join(prof_dir, "kernel_details.csv")
-            if os.path.isfile(direct):
-                csv_file = direct
+            if perf_source == PERF_SOURCE_TRACE_VIEW:
+                if not self._normalize_trace_view_result(result, prof_dir) and not result.error_msg:
+                    result.error_msg = "no valid trace_view metrics produced"
             else:
-                # 2) One level down (torch_npu wraps in a timestamped subdir)
-                try:
-                    for entry in os.listdir(prof_dir):
-                        candidate = os.path.join(prof_dir, entry, "kernel_details.csv")
-                        if os.path.isfile(candidate):
-                            csv_file = candidate
-                            break
-                except OSError:
-                    pass
+                # Locate kernel_details.csv — check common locations first.
+                csv_file = None
 
-                # 3) Fallback: deeper walk (should rarely be needed)
-                if csv_file is None:
-                    for root, dirs, files in os.walk(prof_dir):
-                        for f in files:
-                            if f == "kernel_details.csv":
-                                csv_file = os.path.join(root, f)
+                # 1) Directly in prof_dir
+                direct = os.path.join(prof_dir, "kernel_details.csv")
+                if os.path.isfile(direct):
+                    csv_file = direct
+                else:
+                    # 2) One level down (torch_npu wraps in a timestamped subdir)
+                    try:
+                        for entry in os.listdir(prof_dir):
+                            candidate = os.path.join(prof_dir, entry, "kernel_details.csv")
+                            if os.path.isfile(candidate):
+                                csv_file = candidate
                                 break
-                        if csv_file:
-                            break
+                    except OSError:
+                        pass
 
-            if csv_file:
-                op_times, total_kernel_us = self._parse_kernel_details_csv(csv_file)
-                self._normalize_result(result, op_times, total_kernel_us)
-            elif not result.error_msg:
-                result.error_msg = "no kernel_details.csv produced"
+                    # 3) Fallback: deeper walk (should rarely be needed)
+                    if csv_file is None:
+                        for root, dirs, files in os.walk(prof_dir):
+                            for f in files:
+                                if f == "kernel_details.csv":
+                                    csv_file = os.path.join(root, f)
+                                    break
+                            if csv_file:
+                                break
+
+                if csv_file:
+                    op_times, total_kernel_us = self._parse_kernel_details_csv(csv_file)
+                    self._normalize_result(result, op_times, total_kernel_us)
+                elif not result.error_msg:
+                    result.error_msg = "no kernel_details.csv produced"
 
         finally:
             # Clean up temp dir (non-archive mode).
@@ -491,6 +616,32 @@ class PerfEvaluator:
         total_kernel_us = round(total_kernel_us, 2)
         result.op_times = op_times
         result.elapsed_us = total_kernel_us
+        result.metadata["elapsed_us_source"] = "kernel_details.total_kernel_us"
+
+    def _normalize_trace_view_result(self, result: PerfResult, prof_dir: str) -> bool:
+        trace_result = self.parse_trace_view_prof(prof_dir)
+        prof_metrics = trace_result.get("prof", {}) if isinstance(trace_result, dict) else {}
+        if not isinstance(prof_metrics, dict):
+            return False
+
+        try:
+            elapsed_us = float(prof_metrics.get("aicore_e2e", 0))
+        except (TypeError, ValueError):
+            return False
+        if elapsed_us <= 0:
+            return False
+
+        normalized_prof = {}
+        for name, value in prof_metrics.items():
+            if isinstance(value, (int, float)):
+                normalized_prof[name] = round(float(value), 2)
+            else:
+                normalized_prof[name] = value
+
+        result.op_times = {PERF_SOURCE_TRACE_VIEW: normalized_prof}
+        result.elapsed_us = round(elapsed_us, 2)
+        result.metadata["elapsed_us_source"] = "trace_view.aicore_e2e"
+        return True
 
     def wait_all(self):
         """兼容旧接口，当前为同步解析，无需等待。"""
@@ -644,3 +795,119 @@ class PerfEvaluator:
             return True
 
         return False
+
+    @staticmethod
+    def parse_trace_view_prof(log_path: str = None, op_func=None, *op_args,
+                              warmup: int = 3, repeat: int = 5,
+                              **op_kwargs) -> Dict[str, Dict[str, float]]:
+        """按 PyPTO trace_view.json 口径解析性能数据。
+
+        两种模式：
+        A) 仅解析已有数据（旧行为）:
+           PerfEvaluator.parse_trace_view_prof("/path/to/profiling")
+        B) 运行算子 + 采集 + 解析（新增）:
+           PerfEvaluator.parse_trace_view_prof(op_func=ReLU_wrapper, x=x_tensor)
+
+        输入目录要求与参考 parse_prof 保持一致：
+        ``log_path/<ascend*>/ASCEND_PROFILER_OUTPUT/trace_view.json``。
+        返回结构保持为 ``{"prof": {...}}``。
+        """
+        prof_dir = None
+
+        if op_func is not None:
+            # --- Mode B: 运行算子 + 采集性能 ---
+            prof_dir = tempfile.mkdtemp(prefix="trace_prof_")
+            try:
+                if op_args:
+                    def _fn():
+                        op_func(*op_args, **op_kwargs)
+                else:
+                    def _fn():
+                        op_func(**op_kwargs)
+
+                _profile_standalone(_fn, prof_dir, warmup, repeat)
+                log_path = prof_dir
+            except Exception as e:
+                _logger.warning("parse_trace_view_prof profiling failed: %s", e)
+                if prof_dir and os.path.isdir(prof_dir):
+                    shutil.rmtree(prof_dir, ignore_errors=True)
+                return {"prof": {}}
+
+        # --- Parse trace_view.json ---
+        if not log_path or not os.path.isdir(log_path):
+            return {"prof": {}}
+
+        profilingdir = ""
+        pathlisttemp = os.listdir(log_path)
+        for dirname in pathlisttemp:
+            if "ascend" in dirname:
+                profilingdir = dirname
+                break
+
+        trace_view_json = os.path.join(
+            log_path, profilingdir, "ASCEND_PROFILER_OUTPUT", "trace_view.json"
+        )
+        prof_per = {"prof": {}}
+        if not os.path.isfile(trace_view_json):
+            if prof_dir and os.path.isdir(prof_dir):
+                shutil.rmtree(prof_dir, ignore_errors=True)
+            return prof_per
+
+        with open(trace_view_json, "r") as f:
+            trace_view_data = json.load(f)
+
+        perf_data = {"aicore_e2e": [], "aicpu_kernel": []}
+        for data in trace_view_data:
+            name = data.get("name", "")
+            if name == "KERNEL_AICPU":
+                data["end_time"] = float(data["ts"]) + data["dur"]
+                perf_data["aicpu_kernel"].append(data)
+            if "tilefwk" in name or "PYPTO" in name:
+                data["end_time"] = float(data["ts"]) + data["dur"]
+                perf_data["aicore_e2e"].append(data)
+
+        # 过滤离群点，解析 aicore_e2e 时间
+        perf_data_filter = {"aicore_e2e": [], "aicpu_kernel": []}
+        if not perf_data["aicore_e2e"]:
+            if prof_dir and os.path.isdir(prof_dir):
+                shutil.rmtree(prof_dir, ignore_errors=True)
+            return prof_per
+        min_aicore_dur = min([data["dur"] for data in perf_data["aicore_e2e"]])
+        aicore_e2e_time_list = []
+        for sample in perf_data["aicore_e2e"]:
+            if (sample["dur"] - min_aicore_dur) < max(50, 1.5 * min_aicore_dur):
+                perf_data_filter["aicore_e2e"].append(sample)
+                aicore_e2e_time_list.append([float(sample["ts"]), sample["end_time"]])
+        aicore_e2e_list = [data["dur"] for data in perf_data_filter["aicore_e2e"]]
+        aicore_e2e_list.sort()
+        aicore_e2e = round(sum(aicore_e2e_list) / len(aicore_e2e_list), 2)
+
+        # 解析 aicore_e2e 抖动时间，取后 40 轮数据，(max(data) - min(data)) / min(data)
+        aicore_e2e_jitter_list = [
+            data["dur"] for data in perf_data["aicore_e2e"]
+        ][-40:]
+        aicore_e2e_jitter = (
+            (max(aicore_e2e_jitter_list) - min(aicore_e2e_jitter_list))
+            / min(aicore_e2e_jitter_list)
+        )
+
+        # 解析 aicpu_kernel 时间
+        for data in perf_data["aicpu_kernel"]:
+            s = float(data["ts"])
+            e = data["end_time"]
+            for aicore_e2e_time in aicore_e2e_time_list:
+                if s <= aicore_e2e_time[0] and e >= aicore_e2e_time[-1]:
+                    aicore_e2e_time.append(e)
+                    break
+        gap_list = []
+        for data in aicore_e2e_time_list:
+            gap = 0 if len(data) == 2 else max(data[-1] - data[-2], 0)
+            gap_list.append(gap)
+
+        prof_per["prof"]["aicore_e2e"] = aicore_e2e
+        prof_per["prof"]["aicpukernel_gap"] = round(sum(gap_list) / len(gap_list), 2)
+        prof_per["prof"]["aicore_e2e_jitter"] = round(aicore_e2e_jitter, 2)
+
+        if prof_dir and os.path.isdir(prof_dir):
+            shutil.rmtree(prof_dir, ignore_errors=True)
+        return prof_per

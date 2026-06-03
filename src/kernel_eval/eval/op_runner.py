@@ -78,6 +78,17 @@ class OpRunner:
                 outputs, perf_result = self.perf_evaluator.run_profiled(case_id, func, **updated_params)
                 self.perf_evaluator.wait_all()
                 elapsed_us = perf_result.elapsed_us
+                if perf_result.error_msg and outputs is None:
+                    tb_str = perf_result.metadata.get("profile_exception_traceback")
+                    return OpRunResult(
+                        success=False,
+                        outputs=outputs,
+                        error=self._format_perf_error(perf_result),
+                        elapsed_us=elapsed_us,
+                        perf_result=perf_result,
+                        device=self.device_manager.get_device(),
+                        traceback=tb_str,
+                    )
             else:
                 # 非 profiler 路径(--no-perf / CPU / golden):只跑出 outputs 供精度比对,
                 # 不再用墙钟计时(受环境影响大、与 profiler 设备时间不可比)。perf_result=None,
@@ -108,6 +119,14 @@ class OpRunner:
                 device="cpu" if not to_device else self.device_manager.get_device(),
                 traceback=tb_str
             )
+
+    @staticmethod
+    def _format_perf_error(perf_result: PerfResult) -> str:
+        error = perf_result.error_msg or "profiling failed"
+        tb_str = perf_result.metadata.get("profile_exception_traceback")
+        if tb_str and tb_str.strip() not in error:
+            return f"{error}\n{tb_str.rstrip()}"
+        return error
 
     def run_ai_op(self, ai_op_func: Callable, params: Dict, case_id: str, input_tensors: List,
                   enable_perf: bool = True) -> OpRunResult:

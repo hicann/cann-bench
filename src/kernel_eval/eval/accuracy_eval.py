@@ -73,6 +73,7 @@ class AccuracyEvaluator:
         native_output: Union[torch.Tensor, Tuple, List] = None,
         ignore_output_indices: List[int] = None,
         checker_name: Optional[str] = None,
+        diagnostic_context: Optional[str] = None,
     ) -> AccuracyResult:
         """
         评测AI算子输出的精度（采用MERE/MARE标准 + 小值域处理）
@@ -95,10 +96,13 @@ class AccuracyEvaluator:
             check_multi_output(ai_output)
             check_multi_output(golden_output)
         except RuntimeError as e:
+            error_msg = str(e)
+            if diagnostic_context:
+                error_msg = f"{error_msg}\n{diagnostic_context}"
             return AccuracyResult(
                 passed=False,
                 threshold=0,
-                error_msg=str(e),
+                error_msg=error_msg,
                 metadata={'trial': trial},
             )
 

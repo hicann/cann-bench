@@ -1,0 +1,30 @@
+将 {{ operator }} 的 PyPTO 智能体输出转换为标准 Stanford/KernelBench 提交。
+
+{% include "_scope.j2" %}
+
+机械步骤：
+1. 读取列出的任务文件，获取原始 Model.__init__ 和 Model.forward 签名。
+2. 只读取 {{ raw_dir }} 下列出的实现文件。不要搜索未列出的文件。
+   如果列出的实现文件位于 raw/modules 下，可以保留或拉平，
+   前提是最终导入能从提交 source_dir 中正常工作。
+3. 如果列出的文件不足以完成转换，写入 CONVERSION_ERROR.txt 并停止。
+4. 创建 {{ submission_path }}。
+5. 将运行时需要的 PyPTO 实现文件从 input_dir 复制到提交目录。
+6. 在提交目录中写入 ai_op.py。它必须定义 ModelNew，且 __init__ 和 forward 签名
+   必须与原始任务 Model 完全一致。ModelNew.__init__ 必须重建与任务 Model 相同的
+   module/parameter/buffer 注册路径，使 state_dict 键、shape 和 dtype 必须完全一致。
+   ModelNew.forward 只能打包 state/input 参数并调用 PyPTO wrapper。
+   导入实现文件时使用扁平或本地绝对导入，例如 `from Foo_impl import ...`
+   或 `from modules.Foo_module1_impl import ...`；不要使用 `from .Foo_impl` 这种相对导入。
+7. 只对生成的提交运行本地 import/signature 检查。如果需要检查脚本，
+   把它写到 {{ output_dir }} 下，不要写到 /tmp 或任何全局目录。
+   不要实例化 ModelNew，不要调用 ModelNew.forward，不要调用 PyPTO wrapper，不要分配 tensor，
+   不要运行 kernel_eval、精度评测、性能评测，或触发 PyPTO/NPU 执行。
+8. 如果无法转换，在 output_dir 中写入 CONVERSION_ERROR.txt 说明原因，并以非零状态退出。
+
+输出约定：
+- 将转换后的提交写到 {{ submission_path }}。
+- 将运行时需要的全部 PyPTO 实现文件复制到提交目录。
+- 提交必须包含 ai_op.py。
+- 不要依赖或生成非标准桥接文件。
+- 不要运行精度或性能评测。

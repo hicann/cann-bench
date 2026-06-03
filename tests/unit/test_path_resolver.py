@@ -145,6 +145,33 @@ class TestResolveTaskDir:
         assert bench_root == str(tasks)
         assert filter_prefix == "level2/scatter"
 
+    def test_bench_lab_suite_operator_dir(self, tmp_path):
+        """测试 bench_lab/<suite>/<op> 解析为 suite 根目录"""
+        pypto_root = tmp_path / "bench_lab" / "pypto_cann_bench"
+        exp_dir = pypto_root / "exp"
+        exp_dir.mkdir(parents=True)
+        for f in ['proto.yaml', 'cases.yaml', 'golden.py']:
+            (exp_dir / f).touch()
+
+        bench_root, filter_prefix = resolve_task_dir(
+            "bench_lab/pypto_cann_bench/exp", tmp_path
+        )
+
+        assert bench_root == str(pypto_root)
+        assert filter_prefix == "exp"
+
+    def test_bench_lab_suite_root(self, tmp_path):
+        """测试 bench_lab/<suite> 本身解析为 bench root"""
+        pypto_root = tmp_path / "bench_lab" / "pypto_cann_bench"
+        pypto_root.mkdir(parents=True)
+
+        bench_root, filter_prefix = resolve_task_dir(
+            "bench_lab/pypto_cann_bench", tmp_path
+        )
+
+        assert bench_root == str(pypto_root)
+        assert filter_prefix is None
+
 
 class TestIsOperatorDirectory:
     """is_operator_directory 函数测试"""
@@ -196,6 +223,14 @@ class TestFindBenchRoot:
 
         result = find_bench_root(tasks, tmp_path)
         assert result == tasks
+
+    def test_find_bench_lab_suite(self, tmp_path):
+        """测试 bench_lab 下按 suite 查找 bench root"""
+        roi_pooling = tmp_path / "bench_lab" / "kernel_bench" / "level3" / "roi_pooling"
+        roi_pooling.mkdir(parents=True)
+
+        result = find_bench_root(roi_pooling, tmp_path)
+        assert result == tmp_path / "bench_lab" / "kernel_bench"
 
 
 class TestResolveTaskDirIntegration:

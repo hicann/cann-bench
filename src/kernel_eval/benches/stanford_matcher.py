@@ -110,9 +110,11 @@ class StanfordMatcher(OperatorMatcherBase):
         if not model_cls:
             raise AttributeError(f"ai_op.py 缺少 Model/ModelNew 类: {ai_op_path}")
 
-        init_inputs = []
-        if hasattr(module, 'get_init_inputs'):
-            init_inputs = module.get_init_inputs()
+        init_inputs = self._load_task_init_inputs(operator_name)
+        if init_inputs is None:
+            init_inputs = []
+            if hasattr(module, 'get_init_inputs'):
+                init_inputs = module.get_init_inputs()
 
         if isinstance(init_inputs, list) and init_inputs:
             model = model_cls(*init_inputs)
@@ -120,6 +122,25 @@ class StanfordMatcher(OperatorMatcherBase):
             model = model_cls()
 
         return StanfordGoldenLoader._make_device_wrapper(model)
+
+    def _load_task_init_inputs(self, operator_name: str):
+        """从匹配到的 Stanford task 读取 Model 构造参数。
+
+        source_dir/ai_op.py 只描述提交实现；构造参数属于 benchmark task。
+        若当前 matcher 没有 task loader，保留 None 让旧的自包含 ai_op.py 路径兜底。
+        """
+        if not self.operator_loader:
+            return None
+
+        task_spec = self.operator_loader.get_operator_by_name(operator_name)
+        if not task_spec:
+            return None
+
+        golden_loader = StanfordGoldenLoader(
+            bench_root=str(self.operator_loader.bench_root),
+            random_seed=self._random_seed,
+        )
+        return golden_loader.get_init_inputs(task_spec.rel_path)
 
     def _load_from_kernelbench(self, operator_name: str) -> Callable:
         """从 KernelBench 原始 .py 文件加载 Model（自验证模式）

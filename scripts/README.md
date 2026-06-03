@@ -7,6 +7,7 @@
 ```
 scripts/
 ├── run_evaluation.sh        # AI算子源码评测（完整流程：编译→安装→评测）
+├── run_auto_pipeline.sh     # auto_pipeline 的 python -m 包装入口
 ├── run_test.sh              # Golden功能验证（CPU/NPU模式）
 ├── run_ut.sh                # 单元测试运行
 ├── utils/
@@ -14,6 +15,30 @@ scripts/
 │   └── yaml_block_to_flow.py  # YAML block → flow 格式转换
 └── README.md
 ```
+
+---
+
+## run_auto_pipeline.sh
+
+auto_pipeline 的 shell 包装，等价于在仓库根目录设置 `PYTHONPATH=src` 后执行
+`python -m auto_pipeline.cli`。
+
+### 用法
+
+```bash
+export PTO_TILE_LIB_CODE_PATH=/path/to/pto-isa
+./scripts/run_auto_pipeline.sh \
+  --config path/to/config.yaml \
+  --workspace /path/to/agent/repo \
+  --model deepseek/deepseek-v4-pro \
+  --devices 0 \
+  --parallel 1
+```
+
+`run_auto_pipeline.sh` 只设置 `PYTHONPATH=src` 并转发到 `python -m auto_pipeline.cli`。
+当前 `auto_pipeline` 的使用说明见
+[`docs/guide/auto_pipeline_usage.md`](../docs/guide/auto_pipeline_usage.md)，实现设计见
+[`docs/design/benchmark_orchestrator_architecture.md`](../docs/design/benchmark_orchestrator_architecture.md)。
 
 ---
 

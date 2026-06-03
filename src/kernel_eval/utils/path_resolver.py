@@ -59,6 +59,9 @@ def resolve_task_dir(
 
         >>> resolve_task_dir("/abs/path/tasks/level2/scatter", project_root)
         ("/abs/path/tasks", "level2/scatter")
+
+        >>> resolve_task_dir("bench_lab/pypto_cann_bench/exp", project_root)
+        ("/path/to/bench_lab/pypto_cann_bench", "exp")
     """
     # 默认值
     if dir_arg is None:
@@ -80,26 +83,19 @@ def resolve_task_dir(
     elif not dir_path.exists():
         raise ValueError(f"目录不存在: {dir_arg}")
 
-    # 检查是否为算子目录
-    is_operator_dir = False
+    dir_path = dir_path.resolve()
+    project_root = project_root.resolve()
+
+    # 保留参数语义：调用方可以显式跳过算子目录特征检查。
     if check_operator_dir:
-        is_operator_dir = is_operator_directory(dir_path)
+        is_operator_directory(dir_path)
 
-    # 向上查找 bench_root（tasks 目录）
-    bench_root = dir_path
-    while bench_root.name != 'tasks' and bench_root != project_root:
-        bench_root = bench_root.parent
+    bench_root = find_bench_root(dir_path, project_root)
 
-    # 计算筛选前缀
-    if bench_root == project_root:
-        # 未找到 tasks，使用原目录作为 bench_root
-        bench_root = dir_path
+    try:
+        filter_prefix = str(dir_path.relative_to(bench_root))
+    except ValueError:
         filter_prefix = None
-    else:
-        try:
-            filter_prefix = str(dir_path.relative_to(bench_root))
-        except ValueError:
-            filter_prefix = None
 
     # "." 表示 dir_path 即 bench_root 本身
     if filter_prefix == ".":
@@ -124,7 +120,7 @@ def is_operator_directory(dir_path: Path) -> bool:
 
 
 def find_bench_root(dir_path: Path, project_root: Path) -> Path:
-    """向上查找 bench_root（tasks 目录）
+    """向上查找 bench_root（tasks 或 bench_lab/<suite> 目录）
 
     Args:
         dir_path: 起始目录
@@ -133,10 +129,33 @@ def find_bench_root(dir_path: Path, project_root: Path) -> Path:
     Returns:
         bench_root 路径，若未找到则返回 dir_path
     """
-    bench_root = dir_path
-    while bench_root.name != 'tasks' and bench_root != project_root:
-        bench_root = bench_root.parent
+    dir_path = dir_path.resolve()
+    project_root = project_root.resolve()
 
-    if bench_root == project_root:
+    tasks_root = _find_named_ancestor(dir_path, project_root, "tasks")
+    if tasks_root is not None:
+        return tasks_root
+
+    bench_lab = project_root / "bench_lab"
+    try:
+        rel_to_bench_lab = dir_path.relative_to(bench_lab)
+    except ValueError:
         return dir_path
-    return bench_root
+
+    if not rel_to_bench_lab.parts:
+        return bench_lab
+    return bench_lab / rel_to_bench_lab.parts[0]
+
+
+def _find_named_ancestor(dir_path: Path, project_root: Path, name: str) -> Optional[Path]:
+    current = dir_path
+    while current != project_root:
+        if current.name == name:
+            return current
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+    if project_root.name == name:
+        return project_root
+    return None

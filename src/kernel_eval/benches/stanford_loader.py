@@ -309,10 +309,7 @@ class StanfordGoldenLoader(GoldenLoaderBase):
         if not model_cls:
             raise ImportError(f"{task_id} 缺少 Model/ModelNew 类")
 
-        # 处理 init_inputs
-        init_inputs = []
-        if hasattr(module, 'get_init_inputs'):
-            init_inputs = module.get_init_inputs()
+        init_inputs = self.get_init_inputs(task_id)
 
         if isinstance(init_inputs, list) and init_inputs:
             model = model_cls(*init_inputs)
@@ -320,6 +317,22 @@ class StanfordGoldenLoader(GoldenLoaderBase):
             model = model_cls()
 
         return self._make_device_wrapper(model)
+
+    def get_init_inputs(self, task_id: str) -> List[Any]:
+        """返回 task 定义的 Model 构造参数。"""
+        torch.manual_seed(self._random_seed)
+
+        module = self._load_module(task_id)
+        get_init_inputs_func = getattr(module, 'get_init_inputs', None)
+        if get_init_inputs_func is None:
+            return []
+
+        init_inputs = get_init_inputs_func()
+        if isinstance(init_inputs, tuple):
+            return list(init_inputs)
+        if isinstance(init_inputs, list):
+            return init_inputs
+        return []
 
     def get_input_function(self, task_id: str) -> Optional[Callable]:
         """返回 get_inputs wrapper，忽略所有参数

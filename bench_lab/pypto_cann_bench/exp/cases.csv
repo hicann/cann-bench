@@ -1,0 +1,4 @@
+operator,case_id,input_shape,dtype,attrs,value_range,baseline_perf_us,t_hw_us,note
+Exp,2,"[[2048, 2048]]","[""float32""]","{""base"": -1.0, ""scale"": 1.5, ""shift"": 0.0}","[-2, 2]",29.060,8.74,M-float32-4M-对齐-对称小值域-scale=1.5 | baseline_kernels: AutomaticBufferFusionOp×1
+Exp,8,"[[1537, 769]]","[""float32""]","{""base"": 10.0, ""scale"": 1.0, ""shift"": 0.0}","[-5, 10]",16.500,2.46,S-float32-1M-非对齐-非对称中值域-base=10 | baseline_kernels: AutomaticBufferFusionOp×1
+Exp,15,"[[512, 2049]]","[""float32""]","{""base"": -1.0, ""scale"": 1.0, ""shift"": 0.5}","[-0.5, 0.5]",21.361,2.19,S-float32-1M-非对齐-对称微小值域-shift=0.5 | baseline_kernels: Mul×1 + Add×1 + Exp×1

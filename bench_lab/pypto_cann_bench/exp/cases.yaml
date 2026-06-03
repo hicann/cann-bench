@@ -1,0 +1,40 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+cases:
+- operator: Exp
+  case_id: 2
+  input_shape:
+  - [2048, 2048]
+  dtype: [float32]
+  attrs: {base: -1.0, scale: 1.5, shift: 0.0}
+  value_range: [-2, 2]
+  baseline_perf_us: 29.06
+  t_hw_us: 8.74
+  note: "M-float32-4M-对齐-对称小值域-scale=1.5 | baseline_kernels: AutomaticBufferFusionOp×1"
+- operator: Exp
+  case_id: 8
+  input_shape:
+  - [1537, 769]
+  dtype: [float32]
+  attrs: {base: 10.0, scale: 1.0, shift: 0.0}
+  value_range: [-5, 10]
+  baseline_perf_us: 16.5
+  t_hw_us: 2.46
+  note: "S-float32-1M-非对齐-非对称中值域-base=10 | baseline_kernels: AutomaticBufferFusionOp×1"
+- operator: Exp
+  case_id: 15
+  input_shape:
+  - [512, 2049]
+  dtype: [float32]
+  attrs: {base: -1.0, scale: 1.0, shift: 0.5}
+  value_range: [-0.5, 0.5]
+  baseline_perf_us: 21.361
+  t_hw_us: 2.19
+  note: "S-float32-1M-非对齐-对称微小值域-shift=0.5 | baseline_kernels: Mul×1 + Add×1 + Exp×1"

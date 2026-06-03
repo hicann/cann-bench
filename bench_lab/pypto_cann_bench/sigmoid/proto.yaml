@@ -1,0 +1,29 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Sigmoid
+  category: Elementwise
+  difficulty: L1
+  formula: y = 1 / (1 + e^(-x))
+  description: PyPTO 专用 Sigmoid selected-case 任务，计算 float32 2D 输入张量的 Sigmoid 激活
+  shape_support: 本任务仅覆盖 2D 输入张量，输出与输入相同 shape
+  attrs: []
+  inputs:
+  - name: x
+    description: 输入张量；本任务仅覆盖 float32 2D selected cases
+    dtype:
+    - float32
+  outputs:
+  - name: y
+    description: Sigmoid 激活结果，输出 shape 与输入一致，dtype 为 float32
+    dtype:
+    - float32
+  schema: sigmoid(Tensor x) -> Tensor y

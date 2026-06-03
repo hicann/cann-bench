@@ -30,6 +30,7 @@
 | 文档 | 说明 |
 |------|------|
 | [evaluator_design.md](design/evaluator_design.md) | 评测工程设计：评测器架构、安全防护、报告生成 |
+| [benchmark_orchestrator_architecture.md](design/benchmark_orchestrator_architecture.md) | auto_pipeline 设计：core/prompt/generator/converter 边界与数据流 |
 | [perf_collection_design.md](design/perf_collection_design.md) | 性能采集设计：NPU Profiler、Trace 解析、升频清 Cache |
 
 ### 指南类文档 (guide/)
@@ -40,6 +41,8 @@
 |------|------|
 | [contributing.md](guide/contributing.md) | 算子贡献指南：如何提交新算子评测任务 |
 | [quick_start.md](guide/quick_start.md) | 快速入门：评测流程和命令行使用（待补充） |
+| [auto_pipeline_usage.md](guide/auto_pipeline_usage.md) | auto_pipeline 使用指南：CLI、配置、环境变量、输出目录 |
+| [auto_pipeline_agent_integration.md](guide/auto_pipeline_agent_integration.md) | auto_pipeline 新 agent 接入指南：通用 code agent + skills 与 LangGraph workflow 两类路径 |
 
 ### 版本记录
 
@@ -51,9 +54,9 @@
 
 **我是算子贡献者** → [contributing.md](guide/contributing.md) + [benchmark_spec.md](spec/benchmark_spec.md)
 
-**我是评测器开发者** → [evaluator_design.md](design/evaluator_design.md)
+**我是评测器开发者** → [evaluator_design.md](design/evaluator_design.md) + [benchmark_orchestrator_architecture.md](design/benchmark_orchestrator_architecture.md) + [auto_pipeline_agent_integration.md](guide/auto_pipeline_agent_integration.md)
 
-**我是使用者** → [quick_start.md](guide/quick_start.md)
+**我是使用者** → [quick_start.md](guide/quick_start.md) + [auto_pipeline_usage.md](guide/auto_pipeline_usage.md)
 
 ## 评测体系概述
 

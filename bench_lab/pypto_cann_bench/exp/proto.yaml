@@ -1,0 +1,42 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Exp
+  category: Elementwise
+  difficulty: L1
+  formula: y = e^((x * scale + shift) * ln(base))
+  description: PyPTO 专用 Exp selected-case 任务，计算 float32 2D 输入张量的指数函数
+  shape_support: 本任务仅覆盖 2D 输入张量，输出与输入相同 shape
+  attrs:
+  - name: base
+    type: float
+    default: -1.0
+    description: 指数底数，-1.0表示使用自然底数e，正值表示自定义底数
+  - name: scale
+    type: float
+    default: 1.0
+    description: 输入缩放因子
+  - name: shift
+    type: float
+    default: 0.0
+    description: 输入偏移量
+  note: 当base=-1时，公式简化为 y = e^(x * scale + shift)
+  inputs:
+  - name: x
+    description: 输入张量；本任务仅覆盖 float32 2D selected cases
+    dtype:
+    - float32
+  outputs:
+  - name: y
+    description: 指数计算结果，输出 shape 与输入一致，dtype 为 float32
+    dtype:
+    - float32
+  schema: exp(Tensor x, float base, float scale, float shift) -> Tensor y
