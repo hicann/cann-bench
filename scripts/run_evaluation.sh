@@ -419,7 +419,13 @@ main() {
     log_info "评测集: ${BENCH_NAME}"
 
     # 根据 bench_name 设置 reports_dir
-    REPORTS_DIR="${PROJECT_ROOT}/reports/${BENCH_NAME}"
+    # CANN（默认评测集）保持历史路径 reports/，与 Python 入口(config.py)默认值一致；
+    # 其它评测集（stanford 等）使用 reports/<bench_name>/ 子目录避免互相覆盖。
+    if [[ "${BENCH_NAME}" == "cann" ]]; then
+        REPORTS_DIR="${PROJECT_ROOT}/reports"
+    else
+        REPORTS_DIR="${PROJECT_ROOT}/reports/${BENCH_NAME}"
+    fi
 
     check_python
     uninstall_packages
