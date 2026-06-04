@@ -103,6 +103,10 @@ class Config:
     # None: 纯随机模式（不推荐，会导致 flaky 测试）。CLI中通过 --eval-seed -1 启用。
     eval_seed: Optional[int] = 0
 
+# 性能指标策略覆盖
+    # None（默认）: 使用 BenchConfig 中注册的策略（通常为 kernel_details）
+    # "trace_view": PYPTO 口径 — tilefwk/PYPTO aicore_e2e（由 CLI --perf-metric-strategy 设置）
+    perf_metric_strategy_override: Optional[str] = None
     def __post_init__(self):
         """初始化后自动设置默认路径"""
         if not self.tasks_root:

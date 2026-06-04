@@ -127,6 +127,23 @@ def _render_section2(setup: Dict) -> str:
 
 def _render_kpi(report: EvalReport) -> str:
     r = report.summary['pass_rate']
+    genuine_r = report.summary.get('genuine_pass_rate', r)
+    cascade = report.summary.get('cascade_cases', 0)
+
+    # 级联失败提示块（仅在有级联失败时显示）
+    cascade_note = ''
+    if cascade > 0:
+        cascade_note = f'''      <div class="kpi-item kpi-note">
+        <div class="kpi-value" style="color:var(--score-mid)">⚠️ {cascade}</div>
+        <div class="kpi-label">级联失败（设备异常）</div>
+        <div class="kpi-sub">不计入真实失败率</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-value">{genuine_r:.1%}</div>
+        <div class="kpi-label">Genuine Pass Rate / 真实通过率</div>
+        <div class="kpi-sub">排除级联失败后</div>
+      </div>'''
+
     return f'''      <div class="kpi-item">
         <div class="kpi-value">{r:.1%}</div>
         <div class="kpi-label">Pass Rate / 通过率</div>
@@ -146,7 +163,7 @@ def _render_kpi(report: EvalReport) -> str:
         <div class="kpi-value">{report.failed_cases}</div>
         <div class="kpi-label">Error Case Number / 失败用例数量</div>
       </div>
-      <div class="kpi-item">
+{cascade_note}      <div class="kpi-item">
         <div class="kpi-value">{report.overall_score:.0f}</div>
         <div class="kpi-label">Total Score / 总得分</div>
       </div>'''

@@ -75,14 +75,14 @@ class Evaluator:
         self.device_manager = DeviceManager(device_config)
 
         # 初始化性能评测器
-        perf_strategy = self.bench_config.get_perf_metric_strategy()
+        # PerfEvaluator 从 Config.perf_metric_strategy_override 自取策略，
+        # 无需外部传入策略实例
         self.perf_evaluator = PerfEvaluator(
             config=self.config,
             device_manager=self.device_manager,
             warmup=self.config.warmup,
             repeat=self.config.repeat,
             archive_prof=True,
-            perf_metric_strategy=perf_strategy,
         )
 
         # 初始化算子执行器
@@ -394,7 +394,15 @@ class Evaluator:
             )
 
     def evaluate_operator(self, operator: str, rel_path: str, case_filter: Dict = None) -> EvalOperatorResult:
-        """评测单个算子"""
+        """评测单个算子
+
+        包含渐进式设备恢复机制：
+        - 连续失败后检测 NPU 设备健康状态
+        - 轻量恢复（empty_cache + set_device）→ 重量恢复（aclrtResetDevice）
+        - 恢复无效时跳过剩余 case 并标记 failure_type="cascade_device"
+        """
+        import gc
+
         cases = self.case_loader.scan_by_operator(operator)
         if case_filter:
             cases = self._filter_cases(cases, case_filter)
@@ -408,13 +416,110 @@ class Evaluator:
 
         self.operator_matcher.clear_cache()
         results = []
+        consecutive_failures = 0
+        # 设备状态: healthy → recovering → unrecoverable
+        device_state = "healthy"
+        skipped_count = 0
         print(f"[INFO] 评测算子 {operator} ({rel_path}), 用例数: {len(cases)}")
 
         for i, case in enumerate(cases, 1):
             case_id_str = case.get_case_id_str()
+
+            if device_state == "unrecoverable":
+                # 设备不可恢复，剩余 case 直接标记跳过
+                result = EvalCaseResult(
+                    case_id=case_id_str, rel_path=case.rel_path,
+                    operator=case.operator, case_num=case.case_id,
+                    success=False,
+                    error_msg="设备不可恢复，用例跳过",
+                    failure_type="cascade_device",
+                )
+                results.append(result)
+                skipped_count += 1
+                print(f"[{i}/{len(cases)}] {case_id_str}: ⏭️ 设备不可恢复，跳过")
+                continue
+
             result = self.evaluate_case(case)
             results.append(result)
 
+            if not result.success:
+                consecutive_failures += 1
+
+                # 增强 cleanup：empty_cache + gc.collect
+                self._cleanup_memory()
+                gc.collect()
+
+                # 检查设备健康状态
+                if not self.device_manager.health_check():
+                    # 仅在连续 ≥3 失败且设备不健康时触发恢复尝试
+                    # 避免偶发的单个 case 失败触发不必要的设备 reset
+                    if consecutive_failures >= 3 and device_state == "healthy":
+                        print(f"[WARN] 连续 {consecutive_failures} 个 case 失败，"
+                              f"NPU 设备可能异常，尝试恢复...")
+
+                        # 渐进恢复：先 light，失败再 full
+                        # profiler 活跃时不尝试 recover_full（aclrtResetDevice
+                        # 会破坏 profiler 的 ACL profiling 资源）
+                        profiler_active = (
+                            self.perf_evaluator is not None
+                            and self.perf_evaluator.config.enable_profiler
+                            and self.device_manager.is_npu_mode()
+                        )
+
+                        if self.device_manager.recover_light():
+                            if self.device_manager.health_check():
+                                device_state = "recovering"
+                                print("[INFO] 轻量恢复成功，继续评测")
+                            else:
+                                # light 恢复了但设备仍不健康 → 尝试 full（仅 profiler 未活跃时）
+                                if not profiler_active and self.device_manager.recover_full():
+                                    if self.device_manager.health_check():
+                                        device_state = "recovering"
+                                        print("[INFO] 重量恢复成功（aclrtResetDevice），继续评测")
+                                    else:
+                                        device_state = "unrecoverable"
+                                else:
+                                    if profiler_active:
+                                        print("[WARN] profiler 活跃，跳过 aclrtResetDevice")
+                                    device_state = "unrecoverable"
+                        else:
+                            # light 恢复失败 → 尝试 full（仅 profiler 未活跃时）
+                            if not profiler_active and self.device_manager.recover_full():
+                                if self.device_manager.health_check():
+                                    device_state = "recovering"
+                                    print("[INFO] 重量恢复成功（aclrtResetDevice），继续评测")
+                                else:
+                                    device_state = "unrecoverable"
+                            else:
+                                device_state = "unrecoverable"
+
+                        if device_state == "unrecoverable":
+                            remaining = len(cases) - i
+                            print(f"[WARN] NPU 设备不可恢复，剩余 "
+                                  f"{remaining} 个用例跳过")
+                        else:
+                            # 恢复成功：重置 consecutive_failures，让下一个 case 有全新起点。
+                            # 不在本次迭代中检查 recovering 状态——本次 case 的失败
+                            # 是触发恢复的原因，不是恢复后仍失败的证据。
+                            consecutive_failures = 0
+
+                # recovering 状态下如果**下一个** case 继续失败 → 恢复无效
+                # 注意：此检查仅在 consecutive_failures > 0 时触发（即恢复后有新失败），
+                # 恢复成功时 consecutive_failures 已被重置为 0，所以不会在同一次迭代误判。
+                if device_state == "recovering" and consecutive_failures > 0:
+                    device_state = "unrecoverable"
+                    remaining = len(cases) - i
+                    print(f"[WARN] 恢复后仍失败，设备不可恢复，剩余 "
+                          f"{remaining} 个用例跳过")
+
+            else:
+                consecutive_failures = 0
+                if device_state == "recovering":
+                    # 恢复后第一个 case 成功 → 设备恢复正常
+                    device_state = "healthy"
+                    print("[INFO] 恢复后评测成功，设备状态恢复正常")
+
+            # 打印进度
             status_icon = "✅" if result.success else "❌"
             elapsed_str = self._format_elapsed(result)
             speedup_str = f"{result.get_speedup():.2f}x" if result.get_speedup() > 0 else "N/A"
@@ -441,17 +546,22 @@ class Evaluator:
             else:
                 # 错误信息可能包含多行，只显示第一行（通常包含关键错误原因）
                 error_hint = result.error_msg.split('\n')[0] if result.error_msg else ""
-                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon} {error_hint}")
+                failure_tag = ""
+                if result.failure_type == "cascade_device":
+                    failure_tag = " [级联失败]"
+                elif result.failure_type == "skipped":
+                    failure_tag = " [跳过]"
+                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon}{failure_tag} {error_hint}")
 
         passed = sum(1 for r in results if r.success)
-        failed = sum(1 for r in results if not r.success)
+        failed = sum(1 for r in results if not r.success and r.failure_type not in ("cascade_device", "skipped"))
         speedups = [r.get_speedup() for r in results if r.success and r.get_speedup() > 0]
         avg_speedup = sum(speedups) / len(speedups) if speedups else 0.0
 
         return EvalOperatorResult(
             rel_path=rel_path, operator=operator,
             total_cases=len(cases), passed_cases=passed, failed_cases=failed,
-            skipped_cases=0, results=results,
+            skipped_cases=skipped_count, results=results,
             pass_rate=passed / len(cases) if len(cases) > 0 else 0.0,
             avg_speedup=avg_speedup,
         )
@@ -804,7 +914,7 @@ class Evaluator:
             return first_result
 
     def _cleanup_memory(self):
-        """清理 NPU cache（不触发完整 GC，引用计数足以处理大多数情况）
+        """清理 NPU cache 并强制 GC 回收
 
         注意：当 NPU 设备因 AICPU 异常进入错误状态后，
         torch_npu.npu.empty_cache() 会因设备同步失败而抛出 RuntimeError。
@@ -816,6 +926,8 @@ class Evaluator:
                 torch_npu.npu.empty_cache()
         except Exception:
             pass
+        import gc
+        gc.collect()
 
     def _release_outputs(self, op_run_result: OpRunResult) -> OpRunResult:
         """释放 outputs tensor，保留元数据

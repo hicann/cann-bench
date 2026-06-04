@@ -28,6 +28,7 @@ import logging
 import os
 import shutil
 import tempfile
+import time
 import traceback
 from typing import Optional, Dict, Any, Tuple, List, Callable
 
@@ -41,14 +42,6 @@ from ..config import Config, get_config
 from .input_pool import InputPool
 from ..base.result import PerfResult, compute_speedup
 from ..base.perf_strategy import PerfMetricStrategy, ProfFileLocations
-
-# Deprecated: CANN_BENCH_PERF_SOURCE 环境变量已废弃。
-# 请改用 BenchConfig.perf_metric_strategy 配置策略。
-# 若检测到该环境变量，启动时打印一次 deprecation warn。
-# 注意：TraceViewStrategy 仅适用于使用 tilefwk/PYPTO 实现的算子，
-# tilefwk/PYPTO 事件的存在取决于算子实现方式，而非 profiler level。
-PERF_SOURCE_ENV = "CANN_BENCH_PERF_SOURCE"
-_deprecation_warned = False
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +154,7 @@ class PerfEvaluator:
                  freq_boost: bool = True, perf_metric_strategy: PerfMetricStrategy = None):
         """
         Args:
-            config: 配置对象（含 profiler_level）
+            config: 配置对象（含 profiler_level、perf_metric_strategy_override）
             device_manager: 设备管理器
             warmup: 预热次数
             repeat: 采集次数
@@ -177,22 +170,18 @@ class PerfEvaluator:
         self.freq_boost = freq_boost
         self.perf_metric_strategy = perf_metric_strategy
 
+        # 性能指标策略：从 Config 获取策略名，通过 registry 获取实例
+        # Config.perf_metric_strategy_override 由 CLI --perf-metric-strategy 设置；
+        # 若为 None 则使用默认 "kernel_details"。
+        strategy_name = self.config.perf_metric_strategy_override or "kernel_details"
+        from ..registry.perf_strategy_registry import get_perf_metric_strategy
+        self.perf_metric_strategy = get_perf_metric_strategy(strategy_name)
+
         # 性能数据归档目录
         self.prof_data_dir = os.path.join(self.config.reports_dir, "prof_data")
 
         # Warmup tensors（升频清cache）
         self._warmup_tensors: Optional[Tuple] = None
-
-        # Deprecation warn: CANN_BENCH_PERF_SOURCE 环境变量已废弃
-        global _deprecation_warned
-        if not _deprecation_warned and os.environ.get(PERF_SOURCE_ENV):
-            _logger.warning(
-                "perf_eval: CANN_BENCH_PERF_SOURCE=%r is DEPRECATED — "
-                "please use BenchConfig.perf_metric_strategy instead. "
-                "This env var will be ignored.",
-                os.environ.get(PERF_SOURCE_ENV),
-            )
-            _deprecation_warned = True
 
     def _prepare_warmup_tensors(self):
         """准备升频清cache的tensors
@@ -530,6 +519,14 @@ class PerfEvaluator:
             result.metadata["profile_exception_type"] = type(e).__name__
             result.metadata["profile_exception"] = str(e)
             result.metadata["profile_exception_traceback"] = traceback.format_exc()
+            # 算子执行已失败，无需再解析 perf 文件——直接返回，保留原始异常信息
+            # 清理临时目录后返回（确保非 archive 模式下 temp dir 不残留）
+            if not self.archive_prof and os.path.isdir(prof_dir):
+                try:
+                    shutil.rmtree(prof_dir, ignore_errors=True)
+                except OSError:
+                    pass
+            return last_outputs, result
 
         try:
             # 定位 profiler 产出文件（只返回路径，不做解析）

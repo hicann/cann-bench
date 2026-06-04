@@ -50,6 +50,11 @@ class EvalResult:
     t_hw_us: float = 0.0
     perf_score: Optional[float] = None  # bench.tex Eq. 3: per-case hardware-anchored score
     _perf_result: Any = None
+    # 失败类型标注：区分真实失败与级联失败
+    # None / "genuine"   — 真实的精度/执行失败
+    # "cascade_device"   — 因 NPU 设备损坏级联失败
+    # "skipped"          — 因设备不可恢复而跳过
+    failure_type: Optional[str] = None
 
     def resolve_profiling(self):
         if self._perf_result is not None:
@@ -65,11 +70,19 @@ class EvalResult:
     @classmethod
     def from_eval_case_result(cls, result: EvalCaseResult) -> "EvalResult":
         """从EvalCaseResult创建"""
+        # failure_type 影响状态标签：级联失败/跳过标注为 "cascade" / "skipped"
+        status = "success" if result.success else "failed"
+        if not result.success:
+            if result.failure_type == "cascade_device":
+                status = "cascade"
+            elif result.failure_type == "skipped":
+                status = "skipped"
+
         return cls(
             rel_path=result.rel_path,
             operator=result.operator,
             case_id=result.case_num,
-            status="success" if result.success else "failed",
+            status=status,
             elapsed_us=result.perf_result.elapsed_us if result.perf_result else None,
             op_times=result.perf_result.op_times if result.perf_result else {},
             error_msg=result.error_msg,
@@ -79,6 +92,7 @@ class EvalResult:
             t_hw_us=result.t_hw_us,
             perf_score=result.get_perf_score(),
             timestamp=datetime.now().isoformat(),
+            failure_type=result.failure_type,
         )
 
 
@@ -186,6 +200,7 @@ class ReportGenerator:
         total_cases = 0
         passed_cases = 0
         failed_cases = 0
+        cascade_cases = 0  # 级联失败（设备异常导致的失败）
 
         for op_result in self.operator_results:
             score_info = self.scoring_calculator.calculate_operator_score(op_result)
@@ -195,7 +210,17 @@ class ReportGenerator:
 
             total_cases += op_result.total_cases
             passed_cases += op_result.passed_cases
-            failed_cases += op_result.failed_cases
+            # 区分真实失败和级联失败
+            genuine_failed = sum(
+                1 for r in op_result.results
+                if not r.success and r.failure_type not in ("cascade_device", "skipped")
+            )
+            cascade_failed = sum(
+                1 for r in op_result.results
+                if not r.success and r.failure_type in ("cascade_device", "skipped")
+            )
+            failed_cases += genuine_failed
+            cascade_cases += cascade_failed
 
         # 计算综合得分
         overall_score = self.scoring_calculator.calculate_overall_score(score_infos)
@@ -206,7 +231,9 @@ class ReportGenerator:
             'total_cases': total_cases,
             'passed_cases': passed_cases,
             'failed_cases': failed_cases,
+            'cascade_cases': cascade_cases,
             'pass_rate': passed_cases / total_cases if total_cases > 0 else 0.0,
+            'genuine_pass_rate': passed_cases / (total_cases - cascade_cases) if (total_cases - cascade_cases) > 0 else 0.0,
             'overall_score': overall_score,
         }
 
@@ -296,7 +323,15 @@ class ReportGenerator:
                     f"|--------|------|----------|--------|----------|",
                 ])
                 for case in op_report.cases:
-                    status_icon = "✅" if case.status == "success" else "❌"
+                    # 区分真实失败、级联失败、跳过
+                    if case.status == "success":
+                        status_icon = "✅"
+                    elif case.status == "cascade":
+                        status_icon = "⚠️级联"
+                    elif case.status == "skipped":
+                        status_icon = "⏭️跳过"
+                    else:
+                        status_icon = "❌"
                     speedup_str = f"{case.speedup:.2f}x" if case.speedup > 0 else "N/A"
                     accuracy_str = ""
                     if case.accuracy:
@@ -345,6 +380,8 @@ class ReportGenerator:
 
     def print_summary(self, report: EvalReport):
         """打印摘要"""
+        cascade = report.summary.get('cascade_cases', 0)
+        genuine_rate = report.summary.get('genuine_pass_rate', report.summary['pass_rate'])
         print("\n" + "=" * 60)
         print("评测结果摘要")
         print("=" * 60)
@@ -353,6 +390,9 @@ class ReportGenerator:
         print(f"总用例数: {report.total_cases}")
         print(f"通过用例数: {report.passed_cases}")
         print(f"失败用例数: {report.failed_cases}")
+        if cascade > 0:
+            print(f"级联失败（设备异常）: {cascade}")
+            print(f"真实通过率（排除级联）: {genuine_rate:.2%}")
         print(f"通过率: {report.summary['pass_rate']:.2%}")
         print(f"综合得分: {report.overall_score:.2f}")
         print("=" * 60 + "\n")

@@ -105,7 +105,21 @@ class RelativeErrorOutputResult(OutputResult):
                 # 智能格式：小数值用科学计数法，大数值用定点
                 mere_str = f"{mere:.6e}" if mere != 0 and mere < 0.001 else f"{mere:.6f}"
                 mare_str = f"{mare:.6e}" if mare != 0 and mare < 0.001 else f"{mare:.6f}"
-                return f"{dtype_str}: ✅ MERE={mere_str}, MARE={mare_str}"
+                base = f"{dtype_str}: ✅ MERE={mere_str}, MARE={mare_str}"
+                # 小值域/相消有 NPU 错误但兜底判定通过时，追加对比信息
+                # 让用户理解"为什么 MARE 很低却存在大量小值域误差"
+                sv_err = self.metadata.get('small_value_error_count', 0)
+                sv_cpu_err = self.metadata.get('small_value_cpu_error_count', 0)
+                sv_total = self.metadata.get('small_value_total_count', 0)
+                cancel_err = self.metadata.get('cancel_error_count', 0)
+                cancel_cpu_err = self.metadata.get('cancel_cpu_error_count', 0)
+                cancel_total = self.metadata.get('cancel_total_count', 0)
+                # 有 NPU 错误才显示（全部精确匹配时不显示，避免噪声）
+                if sv_err > 0 or cancel_err > 0:
+                    sv_ratio = f"{sv_err}/{sv_cpu_err}" if sv_total > 0 else "0"
+                    cancel_ratio = f"{cancel_err}/{cancel_cpu_err}" if cancel_total > 0 else "0"
+                    base += f", 小值域NPU/CPU错误={sv_ratio}(总{sv_total}), 相消NPU/CPU错误={cancel_ratio}(总{cancel_total})"
+                return base
             else:
                 mare_threshold = 10 * threshold
                 mere_str = f"{mere:.6e}" if mere != 0 and mere < 0.001 else f"{mere:.6f}"

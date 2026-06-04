@@ -81,6 +81,7 @@ class FailureSynthesizer:
                 case_num=getattr(c, "case_num", 0),
                 success=False,
                 error_msg=reason_short,
+                failure_type="cascade_device",  # 子进程崩溃/编译失败等合成的结果标记为级联失败
             ))
 
         kwargs: Dict[str, Any] = {

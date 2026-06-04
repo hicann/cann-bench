@@ -1158,7 +1158,6 @@ def create_runner(runner_type: str, cfg: Mapping[str, Any]) -> Runner:
 DEFAULT_OUTPUT_ROOT = Path("benchmark_runs")
 DEFAULT_TIMEOUT_SEC = 7200
 DEFAULT_OP_TIMEOUT_SEC = 3600
-PERF_SOURCE_ENV = "CANN_BENCH_PERF_SOURCE"
 TILE_LIB_ENV = "PTO_TILE_LIB_CODE_PATH"
 
 
@@ -1317,6 +1316,8 @@ def _run_task_child(spec: SimpleConfig, task: ConfiguredTask, device_id: Optiona
 
 
 def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]) -> PipelineRunResult:
+    perf_strategy = "trace_view" if _is_pypto_cann_eval(
+        agent_type=spec.agent_type, bench_name=spec.bench_name) else None
     client = CannBenchClient(
         spec.bench_root,
         python_executable=sys.executable,
@@ -1345,7 +1346,8 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
         timeout_sec=DEFAULT_TIMEOUT_SEC,
         env=_agent_env(spec),
         device_id=device_id,
-        extra_eval_args=build_eval_args(_default_eval_config()),
+        extra_eval_args=build_eval_args(
+            _default_eval_config(perf_metric_strategy=perf_strategy)),
     )
 
 
@@ -1382,12 +1384,15 @@ def _converter_config(spec: SimpleConfig) -> dict[str, Any]:
     }
 
 
-def _default_eval_config() -> dict[str, Any]:
-    return {
+def _default_eval_config(*, perf_metric_strategy=None) -> dict[str, Any]:
+    cfg = {
         "no_subprocess_isolation": True,
         "op_timeout_sec": DEFAULT_OP_TIMEOUT_SEC,
         "verbose": True,
     }
+    if perf_metric_strategy:
+        cfg["perf_metric_strategy"] = perf_metric_strategy
+    return cfg
 
 
 def _agent_env(spec: SimpleConfig) -> Dict[str, str]:
@@ -1694,6 +1699,7 @@ def build_eval_args(eval_cfg: Mapping[str, Any]) -> list:
         "op_timeout_sec": "--op-timeout-sec",
         "eval_code": "--eval-code",
         "output": "--output",
+        "perf_metric_strategy": "--perf-metric-strategy",
     }
     for key, option in value_options.items():
         value = eval_cfg.get(key)
@@ -1785,10 +1791,10 @@ def _eval_env(
     agent_type: str,
     bench_name: str,
 ) -> Dict[str, str]:
-    env = {}
-        # PERF_SOURCE_ENV is deprecated — perf source is now controlled
-        # via BenchConfig.perf_metric_strategy, not via environment variable.
-        return env
+# PERF_SOURCE_ENV 已废弃 — perf 策略现在通过
+    # BenchConfig.perf_metric_strategy + CLI --perf-metric-strategy 控制，
+    # 不再通过环境变量传递。
+    return {}
 
 
 def _is_pypto_cann_eval(*, agent_type: str, bench_name: str) -> bool:

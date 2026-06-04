@@ -18,6 +18,7 @@ PerfEvaluator 单元测试
 核心功能：
 1. run_profiled 临时目录清理（finally 块）
 2. profiler 异常后资源不泄漏
+3. perf_metric_strategy 从 Config 自取
 """
 
 from unittest.mock import patch
@@ -30,8 +31,9 @@ class TestProfileOperatorTempDirCleanup:
     """测试 run_profiled 的临时目录清理"""
 
     def test_temp_dir_cleaned_on_profiler_exception(self):
-        """profiler 抛异常后 finally 块仍执行清理，且 error 信息不被覆盖"""
-        config = Config(enable_profiler=True)
+        """profiler 抛异常后 finally 块仍执行清理，异常信息保留在 metadata"""
+        # PerfEvaluator 从 Config.perf_metric_strategy_override 获取策略
+        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
 
         def dummy_func():
@@ -43,14 +45,14 @@ class TestProfileOperatorTempDirCleanup:
             outputs, result = evaluator.run_profiled(
                 "L1/Add/0001", dummy_func, warmup=1, repeat=2,
             )
-            # profiler 异常信息应被保留，不被 CSV 解析覆盖
-            assert "crash" in (result.error_msg or "")
+            # profiler 异常信息保留在 metadata 中，error_msg 由策略报告
+            assert result.metadata["profile_exception"] == "crash"
             # finally 块应执行了清理
             assert mock_rmtree.call_count >= 1
 
     def test_temp_dir_cleaned_even_when_csv_walk_throws(self):
         """CSV 遍历抛异常后 finally 块仍执行清理"""
-        config = Config(enable_profiler=True)
+        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
 
         def dummy_func():
@@ -68,7 +70,7 @@ class TestProfileOperatorTempDirCleanup:
 
     def test_archive_mode_does_not_cleanup(self):
         """archive_prof=True 时 finally 块不应清理目录"""
-        config = Config(enable_profiler=True)
+        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=True, freq_boost=False)
 
         def dummy_func():
@@ -103,28 +105,36 @@ class TestMeasureSimple:
         assert result.error_msg is None
 
 
-def test_run_profiled_uses_trace_view_when_env_selected(monkeypatch):
-    monkeypatch.setenv("CANN_BENCH_PERF_SOURCE", "trace_view")
-    config = Config(enable_profiler=True)
+def test_run_profiled_uses_trace_view_strategy():
+    """Config.perf_metric_strategy_override="trace_view" 时使用 trace_view 口径"""
+    # PerfEvaluator 从 Config.perf_metric_strategy_override 自取策略
+    config = Config(enable_profiler=True, perf_metric_strategy_override="trace_view")
     evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
+    trace_strategy = evaluator.perf_metric_strategy  # 从 registry 取到的 TraceViewStrategy 实例
 
     def dummy_func():
         return "ok"
 
-    trace_result = {
-        "prof": {
-            "aicore_e2e": 12.345,
-            "aicpukernel_gap": 1.234,
-            "aicore_e2e_jitter": 0.045,
-        }
-    }
     def run_stub(fn, prof_dir, warmup, repeat):
         fn()
 
+    # Mock TraceViewStrategy.parse to simulate successful trace_view parsing
     with patch.object(evaluator, "_profile", side_effect=run_stub), \
          patch.object(evaluator, "_parse_case_id", return_value=("L1/Add", "0001")), \
-         patch.object(PerfEvaluator, "parse_trace_view_prof", return_value=trace_result) as mock_trace, \
-         patch.object(evaluator, "_parse_kernel_details_csv") as mock_kernel_details:
+         patch.object(trace_strategy, "parse") as mock_parse:
+        # Simulate TraceViewStrategy.parse filling the result
+        def fake_parse(prof_files, result):
+            result.elapsed_us = 12.35
+            result.op_times = {"trace_view": {
+                "aicore_e2e": 12.35,
+                "aicpukernel_gap": 1.23,
+                "aicore_e2e_jitter": 0.04,
+            }}
+            result.metadata["perf_source"] = "trace_view"
+            result.metadata["elapsed_us_source"] = "trace_view.aicore_e2e"
+            return result
+        mock_parse.side_effect = fake_parse
+
         outputs, result = evaluator.run_profiled(
             "L1/Add/0001", dummy_func, warmup=1, repeat=2,
         )
@@ -140,5 +150,4 @@ def test_run_profiled_uses_trace_view_when_env_selected(monkeypatch):
     }
     assert result.metadata["perf_source"] == "trace_view"
     assert result.metadata["elapsed_us_source"] == "trace_view.aicore_e2e"
-    mock_trace.assert_called_once()
-    mock_kernel_details.assert_not_called()
+    mock_parse.assert_called_once()

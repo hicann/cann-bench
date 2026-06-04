@@ -90,6 +90,11 @@ class EvalCaseResult:
     error_msg: Optional[str] = None
     baseline_perf_us: float = 0.0
     t_hw_us: float = 0.0  # 硬件下界 T_HW
+    # 失败类型标注：区分真实失败与级联失败
+    # None / "genuine"   — 真实的精度/执行失败（case 本身有问题）
+    # "cascade_device"   — 因 NPU 设备损坏级联失败
+    # "skipped"          — 因设备不可恢复而跳过
+    failure_type: Optional[str] = None
 
     def get_speedup(self) -> float:
         """计算加速比（保留为诊断指标）
@@ -142,6 +147,7 @@ class EvalCaseResult:
             'error_msg': self.error_msg,
             'baseline_perf_us': self.baseline_perf_us,
             't_hw_us': self.t_hw_us,
+            'failure_type': self.failure_type,
         }
 
     @classmethod
@@ -228,6 +234,7 @@ class EvalCaseResult:
             error_msg=data.get('error_msg'),
             baseline_perf_us=data.get('baseline_perf_us', 0.0),
             t_hw_us=data.get('t_hw_us', 0.0),
+            failure_type=data.get('failure_type'),
         )
 
 

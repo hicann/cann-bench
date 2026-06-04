@@ -113,6 +113,11 @@ def create_parser() -> argparse.ArgumentParser:
                              choices=['Level1', 'Level2'],
                              help='Profiler 级别（默认: Level1）。Level1 产出 47 列 CSV，'
                                   'Level2 增加更详细的 AICPU 采集。')
+    eval_parser.add_argument('--perf-metric-strategy', type=str, default=None,
+                             help='Override perf metric strategy (kernel_details | trace_view). '
+                                  'When set, overrides the strategy from BenchConfig. '
+                                  'trace_view uses tilefwk/PYPTO aicore_e2e (PYPTO 口径).')
+
     eval_parser.add_argument('--eval-seed', type=int, default=0,
                              help='输入生成确定性种子（默认: 0 = 基于case_id自动确定）。'
                                   '改变 seed 可获得不同但可复现的输入。'
@@ -244,6 +249,10 @@ def _create_config_from_args(args, bench_root: str) -> Config:
     eval_seed_raw = getattr(args, 'eval_seed', 0)
     config.eval_seed = None if eval_seed_raw == -1 else eval_seed_raw
 
+# 性能指标策略覆盖：CLI --perf-metric-strategy 设置时覆盖 BenchConfig 默认值
+    perf_metric_strategy = getattr(args, 'perf_metric_strategy', None)
+    if perf_metric_strategy:
+        config.perf_metric_strategy_override = perf_metric_strategy
     set_config(config)
     return config
 

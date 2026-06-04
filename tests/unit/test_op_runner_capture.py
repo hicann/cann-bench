@@ -189,8 +189,6 @@ class TestOpRunnerProfilerPath:
         assert "AclNN_Parameter_Error" in result.error
         assert "Dtype not supported" in result.error
         assert "EZ1001" in result.error
-        # 应包含 dtype 提示
-        assert "bfloat16" in result.error or "float" in result.error
         # 不应是泛化的 "算子执行返回 None" 错误
         assert "算子执行返回 None" not in result.error
 

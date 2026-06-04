@@ -1412,11 +1412,13 @@ def test_stanford_matcher_uses_task_init_inputs_for_source_ai_op(tmp_path):
     assert ai_func.model.dim == 1
 
 
-def test_config_runner_pypto_cann_eval_env_defaults_to_trace_view():
-    assert config_runner._eval_env(agent_type="pypto", bench_name="cann") == {
-        "CANN_BENCH_PERF_SOURCE": "trace_view"
-    }
+def test_config_runner_pypto_eval_env_is_empty_perf_strategy_via_cli():
+    # perf 策略不再通过环境变量传递，改为 CLI --perf-metric-strategy
+    assert config_runner._eval_env(agent_type="pypto", bench_name="cann") == {}
     assert config_runner._eval_env(agent_type="akg-agent", bench_name="cann") == {}
+    # _is_pypto_cann_eval 仍用于判断是否传递 trace_view 策略
+    assert config_runner._is_pypto_cann_eval(agent_type="pypto", bench_name="cann") is True
+    assert config_runner._is_pypto_cann_eval(agent_type="akg-agent", bench_name="cann") is False
 
 
 def test_config_runner_requires_pypto_tile_lib_environment(monkeypatch):
@@ -1442,9 +1444,11 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
     runner_types = []
 
     def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
-        assert self.extra_env == {
-            "CANN_BENCH_PERF_SOURCE": "trace_view",
-        }
+        # perf 策略不再通过环境变量传递，改为通过 extra_args 里的
+        # --perf-metric-strategy CLI 参数
+        assert self.extra_env == {}
+        assert "--perf-metric-strategy" in list(extra_args)
+        assert "trace_view" in list(extra_args)
         assert device_id == 5
         assert Path(reports_dir) == tmp_path / "run" / "gelu" / "kernel_eval"
         assert "--no-subprocess-isolation" in list(extra_args)

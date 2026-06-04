@@ -108,3 +108,72 @@ class DeviceManager:
         elif hasattr(torch.cpu, 'synchronize'):
             torch.cpu.synchronize()
         # PyTorch < 2.1 不支持 torch.cpu.synchronize，跳过即可
+
+    # ---- 设备健康检查与恢复 ----
+
+    def health_check(self) -> bool:
+        """检测 NPU 设备是否健康
+
+        通过 torch.npu.synchronize() 检测：若设备处于 device error 状态
+        （如 AIC/AIV error），synchronize 会抛 RuntimeError。
+        CPU 模式下始终返回 True。
+        """
+        if not self.is_npu_mode():
+            return True
+        try:
+            torch.npu.synchronize()
+            return True
+        except RuntimeError:
+            return False
+
+    def recover_light(self) -> bool:
+        """轻量级设备恢复
+
+        尝试清理缓存 + 重新设置设备 + 验证同步。
+        对内存污染类错误有效，对 AIC/AIV error 导致的 device error 状态无效
+        （需要 aclrtResetDevice 才能重置）。
+
+        Returns:
+            True: 恢复成功且 synchronize 通过
+            False: 恢复失败
+        """
+        if not self.is_npu_mode():
+            return True
+        try:
+            import torch_npu
+            torch_npu.npu.empty_cache()
+            torch.npu.set_device(self.config.device_id)
+            torch.npu.synchronize()
+            return True
+        except Exception:
+            return False
+
+    def recover_full(self) -> bool:
+        """重量级设备恢复（last-resort）
+
+        通过 ctypes 调用 aclrtResetDevice() 彻底重置 NPU 设备，
+        然后重新初始化设备上下文并验证同步。
+        仅在 recover_light() 失败后才尝试。
+
+        注意：aclrtResetDevice 会释放当前进程在该设备上的所有 ACL 资源
+        （stream、event、内存等）。torch_npu 内部缓存（stream pool /
+        memory pool）可能指向已释放资源，因此恢复后需立即验证
+        synchronize。后续首个 case 若仍失败则不再尝试恢复。
+
+        Returns:
+            True: 恢复成功且 synchronize 通过
+            False: 恢复失败（包括 aclrtResetDevice 本身失败或同步验证失败）
+        """
+        if not self.is_npu_mode():
+            return True
+        try:
+            import ctypes
+            acl_lib = ctypes.CDLL("libascendcl.so")
+            ret = acl_lib.aclrtResetDevice(self.config.device_id)
+            if ret != 0:  # ACL_SUCCESS = 0
+                return False
+            torch.npu.set_device(self.config.device_id)
+            torch.npu.synchronize()
+            return True
+        except Exception:
+            return False

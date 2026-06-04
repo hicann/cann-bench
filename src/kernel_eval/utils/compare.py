@@ -543,6 +543,7 @@ def _compare_single_tensor(
     cpu_small_value_error_mask = cpu_small_value_mask & (cpu_diff > small_value_error)
     small_value_cpu_error_count = int(cpu_small_value_error_mask.sum())
 
+    # === 小值域兜底判定 ===
     # 小值域兜底判定：ErrorCount_npu / max(ErrorCount_cpu, 1) ≤ 2
     # 设计意图：如果 CPU 在同精度下也会在小值域犯错，NPU 犯错可以容忍（ratio ≤ 2）
     # 但当 CPU 参考是完美截断（native_output=None 时 cpu_diff=0）且 CPU 无错误时，
@@ -612,13 +613,33 @@ def _compare_single_tensor(
             display_mere = float(normal_relative_error.mean())
             display_mare = float(normal_relative_error.max())
         else:
-            display_mere = 0.0
-            display_mare = 0.0
+            # 正常值域完全为空（所有位置都在小值域/相消），
+            # 但 mismatch_in_normal > 0 说明有超标点不在小值域也不在相消范围——
+            # 这只在 mask 定义有交叉遗漏时出现。fallback 到 overall 值避免 0 误差显示。
+            display_mere = overall_mere
+            display_mare = overall_mare
     else:
         # 只有特殊位置（小值域/相消）误差超标，使用兜底判定
         passed = small_value_passed and cancel_passed
-        display_mere = overall_mere
-        display_mare = overall_mare
+        if passed:
+            # 兜底判定通过时，显示排除小值域/相消后的 MERE/MARE，
+            # 避免 overall 值被小值域的巨大相对误差拉高，造成"MARE=0.9 却通过"的误解
+            normal_mask = ~small_value_mask & ~cancel_mask & valid_mask
+            normal_relative_error = relative_error[normal_mask]
+            if len(normal_relative_error) > 0:
+                display_mere = float(normal_relative_error.mean())
+                display_mare = float(normal_relative_error.max())
+            else:
+                display_mere = 0.0
+                display_mare = 0.0
+        else:
+            # 兜底判定失败时，显示 overall MERE/MARE
+            # 此时失败原因是小值域/相消位置的误差，而非正常值域误差。
+            # 如果 normal 区域完全为空（所有位置都在小值域），normal 值会是 0，
+            # 与 passed=False 矛盾——用户看到"零误差但失败"。
+            # 使用 overall 值让用户看到实际误差大小，更符合直觉。
+            display_mere = overall_mere
+            display_mare = overall_mare
 
     return CompareResult(
         passed=passed,
