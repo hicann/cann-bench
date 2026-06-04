@@ -31,23 +31,23 @@
 |------|------|------|------|
 | 编译正确性 | Pass/Fail | w_c=0.2 | 是否编译通过（算子级一次） |
 | 功能正确性 | 精度用例通过 | w_f=0.3 | 单用例是否通过精度标准测试 |
-| 性能优化性 | 性能用例评分 | w_p=0.5 | 见下方公式 |
+| 性能优化性 | 性能用例评分（HAP） | w_p=0.5 | 见下方公式 |
 
-**单用例性能得分** ：
+**单用例性能得分 HAP（Hardware-Anchored Performance，硬件锚定性能）** ：HAP 以硬件理论性能上界 $T_{\text{HW}}$ 为锚点对候选 kernel 计分，因此得名“硬件锚定”。
 
 $$
-\text{score}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}
+\text{HAP}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}
 $$
 
-其中 `T_HW = t_hw_us` 为硬件理论性能上界，已在 cases.yaml 中提供；`T_baseline = baseline_perf_us` 为CANN基线性能，也已在 cases.yaml 中提供（由于torch接口功能限制，部分基线实现由算子拼接得到）；`T_cand` 为候选 kernel 实测时间。这个公式的设计保证了如果性能低于基线（T_cand > T_baseline），得分为0-0.5；如果性能优于基线（T_cand < T_baseline），得分0.5以上；如果性能达到硬件上界或更高（T_cand <= T_HW），得分为1以上。
-![性能得分示例曲线](docs/assets/perf_score.png)
+其中 `T_HW = t_hw_us` 为硬件理论性能上界，已在 cases.yaml 中提供；`T_baseline = baseline_perf_us` 为CANN基线性能，也已在 cases.yaml 中提供（由于torch接口功能限制，部分基线实现由算子拼接得到）；`T_cand` 为候选 kernel 实测时间。这个公式的设计保证了如果性能低于基线（T_cand > T_baseline），HAP 为 0-0.5；如果性能优于基线（T_cand < T_baseline），HAP 0.5 以上；如果性能达到硬件上界或更高（T_cand <= T_HW），HAP 为 1 以上。
+![HAP 示例曲线](docs/assets/perf_score.png)
 **单算子综合评分** ：
 
 $$
-\text{EachOperatorScore} = \left[ w_c \cdot \delta_{\text{pass}} + \sum_{i \in \text{cases}} \frac{\delta_{\text{accuracy},i} (w_f + w_p \cdot \text{score}_i)}{|\text{cases}|} \right] \cdot 100
+\text{EachOperatorScore} = \left[ w_c \cdot \delta_{\text{pass}} + \sum_{i \in \text{cases}} \frac{\delta_{\text{accuracy},i} (w_f + w_p \cdot \text{HAP}_i)}{|\text{cases}|} \right] \cdot 100
 $$
 
-- 单个算子满分 100，编译失败时 `δ_pass=0` ⇒ 整算子计 0， 某个用例精度不过则只扣除改用例得分（`δ_accuracy,i=0`），性能得分按用例总和计算。
+- 单个算子满分 100，编译失败时 `δ_pass=0` ⇒ 整算子计 0， 某个用例精度不过则只扣除改用例得分（`δ_accuracy,i=0`），HAP 按用例总和计算。
 - Level-N 得分 = 该 level 内算子 EachOperatorScore 总合
 - benchmark 总分 = 全部算子 EachOperatorScore（= Level1 + Level2 + Level3 + Level4）总和
 
