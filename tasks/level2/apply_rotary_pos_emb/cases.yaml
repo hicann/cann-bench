@@ -228,7 +228,7 @@ cases:
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 425.07
-  t_hw_us: null
+  t_hw_us: 100.0
   note: "M-float16-32M-质数非对齐-inf特殊值 | baseline_kernels: ConcatD×2 + ApplyRotaryPosEmb×1"
 - operator: ApplyRotaryPosEmb
   case_id: 14
@@ -245,7 +245,7 @@ cases:
   - [.nan, .nan]
   - [.nan, .nan]
   baseline_perf_us: 27.66
-  t_hw_us: 0.36
+  t_hw_us: 1.0
   note: "S-float32-85K-质数非对齐-nan特殊值 | baseline_kernels: ConcatD×2 + BroadcastTo×2 + ApplyRotaryPosEmb×1"
 - operator: ApplyRotaryPosEmb
   case_id: 15
@@ -330,7 +330,7 @@ cases:
   - [-1, 1]
   - [-1, 1]
   baseline_perf_us: 88.08
-  t_hw_us: 0.54
+  t_hw_us: 1.0
   note: "S-float16-260K-质数非对齐-layout=1-half-微小值域 | baseline_kernels: ConcatD×2 + BroadcastTo×2 + Transpose×4 + ApplyRotaryPosEmb×1"
 - operator: ApplyRotaryPosEmb
   case_id: 20

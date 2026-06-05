@@ -137,7 +137,7 @@ cases:
   attrs: {dim: 1}
   value_range: [-0.01, 0.01]
   baseline_perf_us: 19.82
-  t_hw_us: 0.94
+  t_hw_us: 1.0
   note: "S-bfloat16-900K-质数非对齐-4D-dim=1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1"
 - operator: ArgMax
   case_id: 14

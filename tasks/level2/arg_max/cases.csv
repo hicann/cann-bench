@@ -11,7 +11,7 @@ ArgMax,9,"[[1537, 769]]","[""bfloat16""]","{""dim"": -1}","[-5, 10]",24.36,1.23,
 ArgMax,10,"[[363, 367, 373]]","[""int32""]","{""dim"": 1}","[-50, 100]",1380.93,103.53,L-int32-50M-质数非对齐-3D-dim=1 | baseline_kernels: ArgMaxV2×1 + Cast×1
 ArgMax,11,"[[2049, 513]]","[""float16""]","{""dim"": -1}","[-65504, 65504]",26.26,1.1,S-float16-1M-非对齐-2D-dim=-1-float16边界值 | baseline_kernels: ArgMaxV2×1 + Cast×1
 ArgMax,12,"[[3, 7, 13, 4001]]","[""float32""]","{""dim"": -1}","[-88, 88]",13.92,2.28,S-float32-1M-质数非对齐-4D-dim=-1-float32边界值 | baseline_kernels: ArgMaxV2×1 + Cast×1
-ArgMax,13,"[[2, 7, 256, 251]]","[""bfloat16""]","{""dim"": 1}","[-0.01, 0.01]",19.82,0.94,S-bfloat16-900K-质数非对齐-4D-dim=1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1
+ArgMax,13,"[[2, 7, 256, 251]]","[""bfloat16""]","{""dim"": 1}","[-0.01, 0.01]",19.82,1.0,S-bfloat16-900K-质数非对齐-4D-dim=1-微小值域 | baseline_kernels: ArgMaxV2×1 + Cast×1
 ArgMax,14,[[1048583]],"[""float32""]","{""dim"": -1}","[""-inf"", ""inf""]",141.52,2.18,S-float32-1M-质数非对齐-1D-dim=-1-inf特殊值 | baseline_kernels: ArgMaxV2×1 + Cast×1
 ArgMax,15,"[[11, 13, 17, 67, 67]]","[""float16""]","{""dim"": 2}","[""nan"", ""nan""]",81.56,11.36,M-float16-10M-质数非对齐-5D-dim=2-nan特殊值 | baseline_kernels: ArgMaxV2×1 + Cast×1
 ArgMax,16,"[[3, 7, 11, 13, 1013]]","[""int64""]","{""dim"": -1}","[0, 0]",1333.97,12.68,M-int64-3M-质数非对齐-5D-dim=-1-零值 | baseline_kernels: ArgMaxV2×1 + Cast×1
