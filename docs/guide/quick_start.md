@@ -25,6 +25,22 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 
 ## 评测命令
 
+### 快速体验（评测任务样例）
+
+项目提供了 Add/Sqrt 两个轻量评测任务 fixture，可用于快速验证评测流水线是否正常工作：
+
+```bash
+# 评测 add 算子（CPU 模式 + 仅精度验证）
+./scripts/run_evaluation.sh --source-dir /path/to/ai_ops \
+    --task-dir examples/eval_task/add --device cpu --no-perf
+
+# 评测目录下所有 fixture 算子（add + sqrt）
+./scripts/run_evaluation.sh --source-dir /path/to/ai_ops \
+    --task-dir examples/eval_task --device cpu --no-perf
+```
+
+详见 [examples/eval_task/README.md](../../examples/eval_task/README.md)。
+
 ### 从源码目录评测（推荐）
 
 自动扫描、编译、安装 AI 生成的算子源码：

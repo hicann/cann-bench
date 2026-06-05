@@ -65,9 +65,11 @@ cann-bench/
 │   ├── level3/             # L3 高级算子（Conv / Pool / MoE）
 │   └── level4/             # L4 复杂算子（Attention / RNN）
 ├── bench_lab/              # 实验/孵化区，本地测试通过后转入 tasks
-├── examples/               # 算子工程样例
+├── examples/               # 算子工程样例 & 评测任务样例
 │   ├── aclnn_launch_example/    # ACLNN 自定义算子样例
-│   └── direct_launch_example/   # Direct launch (<<<>>>) 算子样例
+│   ├── direct_launch_example/   # Direct launch 算子样例
+│   ├── eval_task/               # 评测任务样例（add/sqrt fixture，验证评测流水线）
+│   └── stanfordbench_example/   # Stanford benchmark 样例
 ├── docs/                   # 规范 / 设计 / 指南文档
 ├── scripts/                # 评测/测试入口脚本
 │   ├── run_evaluation.sh   # AI 算子评测入口（编译→安装→评测）
@@ -145,14 +147,18 @@ pip install -r requirements.txt
 | `proto.yaml` | 算子原型定义 |
 | `desc.md` | 算子详细说明文档 |
 
-### 待评测算子工程样例
+### 待评测算子工程样例与评测任务样例
 
-项目提供了多种算子开发示例：
+项目提供了多种示例：
 
-1. **ACNN 算子启动示例**：[examples/aclnn_launch_example/](examples/aclnn_launch_example/)
+**算子实现样例**（教你"怎么写算子"）：
+
+1. **ACLNN 算子启动示例**：[examples/aclnn_launch_example/](examples/aclnn_launch_example/)
 2. **直调算子启动示例**：[examples/direct_launch_example/](examples/direct_launch_example/)
 
-这些示例演示如何使用 Ascend C 和 PyTorch Extension 开发自定义 NPU 算子。
+**评测任务样例**（教你"怎么评算子"）：
+
+3. **评测任务 fixture**：[examples/eval_task/](examples/eval_task/) — 提供 Add/Sqrt 两个轻量算子的评测定义（proto.yaml + golden.py + cases.yaml），用于验证评测流水线是否正常工作
 
 使用自定义算子：
 

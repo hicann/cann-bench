@@ -1,0 +1,51 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: Sqrt
+  case_id: 1
+  input_shape:
+  - [1024, 1024]
+  dtype: [float16]
+  attrs: {}
+  value_range: [0, 1]
+  baseline_perf_us: 0.0
+  t_hw_us: 0.0
+  note: "fixture-S-float16-1M-对齐-非负小值域 | pipeline_smoke_test"
+- operator: Sqrt
+  case_id: 2
+  input_shape:
+  - [2048, 2048]
+  dtype: [float32]
+  attrs: {}
+  value_range: [0, 4]
+  baseline_perf_us: 0.0
+  t_hw_us: 0.0
+  note: "fixture-M-float32-4M-对齐-非负中值域 | pipeline_smoke_test"
+- operator: Sqrt
+  case_id: 3
+  input_shape:
+  - [1023, 1023]
+  dtype: [bfloat16]
+  attrs: {}
+  value_range: [0, 2]
+  baseline_perf_us: 0.0
+  t_hw_us: 0.0
+  note: "fixture-S-bfloat16-1M-非对齐-非负小值域 | pipeline_smoke_test"
+- operator: Sqrt
+  case_id: 4
+  input_shape:
+  - [2049, 513]
+  dtype: [float16]
+  attrs: {}
+  value_range: [0, 100]
+  baseline_perf_us: 0.0
+  t_hw_us: 0.0
+  note: "fixture-S-float16-1M-非对齐-非负大值域 | pipeline_smoke_test"

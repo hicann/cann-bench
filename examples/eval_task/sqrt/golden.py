@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
+# coding=utf-8
+
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
 # This program is free software, you can redistribute it and/or modify it under the terms and conditions of
@@ -10,22 +11,26 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
-"""CANN Bench - ACLNN operator benchmarks"""
-__version__ = "1.0.0"
 import torch
 
-try:
-    from . import _C
-except ImportError as e:
-    raise ImportError(
-        "Cannot import _C. Please make sure the `cann_bench` package is properly installed. "
-    ) from e
+"""
+Sqrt算子Torch Golden参考实现（评测流水线 fixture）
 
-# Direct function calls: cann_bench.add(x, y)
-def add(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-    return torch.ops.cann_bench.add(x, y)
+逐元素平方根运算
+公式: y = sqrt(x)
+"""
+def sqrt(
+    x: torch.Tensor
+) -> torch.Tensor:
+    """
+    逐元素平方根运算
 
-def sqrt(x: torch.Tensor) -> torch.Tensor:
-    return torch.ops.cann_bench.sqrt(x)
+    公式: y = sqrt(x)
 
-# Also accessible via torch.ops.cann_bench.add(), torch.ops.cann_bench.sqrt()
+    Args:
+        x: 输入张量（值应非负以保证数值稳定）
+
+    Returns:
+        输出张量，逐元素平方根结果
+    """
+    return torch.sqrt(x)
