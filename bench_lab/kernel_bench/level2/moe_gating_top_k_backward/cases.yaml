@@ -1,0 +1,311 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: MoeGatingTopKBackward
+  case_id: 1
+  input_shape:
+  - [2048, 192]
+  - [2048, 10]
+  - [2048, 10]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 191]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-2048x192"
+- operator: MoeGatingTopKBackward
+  case_id: 2
+  input_shape:
+  - [4096, 192]
+  - [4096, 10]
+  - [4096, 10]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 191]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-4096x192"
+- operator: MoeGatingTopKBackward
+  case_id: 3
+  input_shape:
+  - [2048, 256]
+  - [2048, 8]
+  - [2048, 8]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 255]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-2048x256"
+- operator: MoeGatingTopKBackward
+  case_id: 4
+  input_shape:
+  - [4096, 256]
+  - [4096, 8]
+  - [4096, 8]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 255]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-4096x256"
+- operator: MoeGatingTopKBackward
+  case_id: 5
+  input_shape:
+  - [4096, 384]
+  - [4096, 8]
+  - [4096, 8]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 383]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-4096x384"
+- operator: MoeGatingTopKBackward
+  case_id: 6
+  input_shape:
+  - [2048, 384]
+  - [2048, 8]
+  - [2048, 8]
+  dtype: ['float32', 'float32', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 383]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float32-float32-2048x384"
+- operator: MoeGatingTopKBackward
+  case_id: 7
+  input_shape:
+  - [8192, 192]
+  - [8192, 10]
+  - [8192, 10]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 191]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-8192x192"
+- operator: MoeGatingTopKBackward
+  case_id: 8
+  input_shape:
+  - [8192, 192]
+  - [8192, 10]
+  - [8192, 10]
+  dtype: ['float32', 'float32', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 191]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float32-float32-8192x192"
+- operator: MoeGatingTopKBackward
+  case_id: 9
+  input_shape:
+  - [2048, 193]
+  - [2048, 10]
+  - [2048, 10]
+  dtype: ['float32', 'float16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 192]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float16-float16-2048x193"
+- operator: MoeGatingTopKBackward
+  case_id: 10
+  input_shape:
+  - [1023, 191]
+  - [1023, 9]
+  - [1023, 9]
+  dtype: ['float32', 'float16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 0.1, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 190]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float16-float16-1023x191"
+- operator: MoeGatingTopKBackward
+  case_id: 11
+  input_shape:
+  - [8193, 383]
+  - [8193, 9]
+  - [8193, 9]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 2.5, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 382]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "M-bfloat16-bfloat16-8193x383"
+- operator: MoeGatingTopKBackward
+  case_id: 12
+  input_shape:
+  - [1023, 2000]
+  - [1023, 9]
+  - [1023, 9]
+  dtype: ['float32', 'float32', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 0.1, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 1999]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "M-float32-float32-1023x2000"
+- operator: MoeGatingTopKBackward
+  case_id: 13
+  input_shape:
+  - [8193, 191]
+  - [8193, 9]
+  - [8193, 9]
+  dtype: ['float32', 'float16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 2.5, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 190]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float16-float16-8193x191"
+- operator: MoeGatingTopKBackward
+  case_id: 14
+  input_shape:
+  - [1023, 383]
+  - [1023, 9]
+  - [1023, 9]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 2.5, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 382]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-1023x383"
+- operator: MoeGatingTopKBackward
+  case_id: 15
+  input_shape:
+  - [8193, 191]
+  - [8193, 9]
+  - [8193, 9]
+  dtype: ['float32', 'float32', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 0.1, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 190]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float32-float32-8193x191"
+- operator: MoeGatingTopKBackward
+  case_id: 16
+  input_shape:
+  - [512000, 2]
+  - [512000, 1]
+  - [512000, 1]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 1]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-512000x2"
+- operator: MoeGatingTopKBackward
+  case_id: 17
+  input_shape:
+  - [1, 2048]
+  - [1, 2048]
+  - [1, 2048]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 2047]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-bfloat16-bfloat16-1x2048"
+- operator: MoeGatingTopKBackward
+  case_id: 18
+  input_shape:
+  - [1024, 1024]
+  - [1024, 10]
+  - [1024, 10]
+  dtype: ['float32', 'float16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 1023]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "S-float16-auto-generated"
+- operator: MoeGatingTopKBackward
+  case_id: 19
+  input_shape:
+  - [2048, 2048]
+  - [2048, 10]
+  - [2048, 10]
+  dtype: ['float32', 'float32', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 2047]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "M-float32-auto-generated"
+- operator: MoeGatingTopKBackward
+  case_id: 20
+  input_shape:
+  - [4096, 2048]
+  - [4096, 10]
+  - [4096, 10]
+  dtype: ['float32', 'bfloat16', 'int32']
+  attrs: {renorm: 0, norm_type: 1, routed_scaling_factor: 1.0, eps: 1.0e-20}
+  value_range:
+  - [0.01, 0.99]
+  - [-1.0, 1.0]
+  - [0, 2047]
+  baseline_perf_us: null
+  t_hw_us: null
+  note: "M-bfloat16-auto-generated"

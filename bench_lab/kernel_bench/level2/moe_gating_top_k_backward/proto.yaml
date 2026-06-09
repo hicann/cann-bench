@@ -1,0 +1,61 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: MoeGatingTopKBackward
+  category: MoE
+  difficulty: L2
+  formula: moe_gating_top_k_backward(...) -> Tensor grad_x
+  description: MoeGatingTopKBackward算子
+  shape_support: 输入ND格式
+  attrs:
+  - name: renorm
+    type: int64
+    default: 0
+    description: 'renorm属性'
+    required: false
+  - name: norm_type
+    type: int64
+    default: 0
+    description: 'norm_type属性'
+    required: false
+  - name: routed_scaling_factor
+    type: float
+    default: 1.0
+    description: 'routed_scaling_factor属性'
+    required: false
+  - name: eps
+    type: float
+    default: 1e-20f
+    description: 'eps属性'
+    required: false
+  inputs:
+  - name: x_norm
+    description: 输入张量x_norm
+    dtype:
+    - float32
+  - name: grad_y
+    description: 输入张量grad_y
+    dtype:
+    - float32
+    - bfloat16
+    - float16
+  - name: expert_idx
+    description: 输入张量expert_idx
+    dtype:
+    - int32
+  outputs:
+  - name: grad_x
+    description: 输出张量grad_x
+    dtype:
+    - float32
+    - bfloat16
+    - float16
+  schema: moe_gating_top_k_backward(Tensor x_norm, Tensor grad_y, Tensor expert_idx, int64 renorm=0, int64 norm_type=0, float routed_scaling_factor=1.0, float eps=1e-20f) -> Tensor grad_x
