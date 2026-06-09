@@ -18,17 +18,25 @@ cd "${SCRIPT_DIR}"
 
 # Auto-detect SoC version from npu-smi if not specified
 detect_soc_version() {
+    # 优先通过 torch_npu runtime 获取完整 SoC 名称（含子型号，如 Ascend910_9362）
+    # npu-smi info 只报告基类名（如 Ascend910），无法区分 910B 和 910_93 子型号
     local torch_soc=$(python3 -c "
 import torch, torch_npu
 print(torch.npu.get_device_name(0))
 " 2>/dev/null)
+
     if [ -n "${torch_soc}" ]; then
+        # 注意: Ascend910_93* 模式会误匹配 Ascend910_9361/9362（它们是 910B 而非 910_93）
+        # 必须将 910B 的产品 ID（936x 系列）放在 910_93 通配之前
         case "${torch_soc}" in
-            Ascend910B*)  echo "ascend910b" ; return ;;
-            Ascend910_93*) echo "ascend910_93" ; return ;;
-            Ascend950*)   echo "ascend950" ; return ;;
+            Ascend910B*)     echo "ascend910b" ; return ;;
+            Ascend910_936*)  echo "ascend910b" ; return ;;  # 9361=B1, 9362=B2, 等 910B 产品 ID
+            Ascend910_93*)   echo "ascend910_93" ; return ;;
+            Ascend950*)      echo "ascend950" ; return ;;
         esac
     fi
+
+    # 兜底: npu-smi info（仅基类名，无法区分子型号时返回空）
     local npu_name=$(npu-smi info 2>/dev/null | grep -oP 'Ascend\S+' | head -1)
     case "${npu_name}" in
         Ascend910B1|Ascend910B2|Ascend910B3|Ascend910B4) echo "ascend910b" ;;
