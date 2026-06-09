@@ -37,6 +37,8 @@ from src.kernel_eval.eval.process_pool import (
     ProcessConfig,
     ProcessWorker,
     ProcessPoolCoordinator,
+    OperatorScheduler,
+    OperatorTask,
 )
 from src.kernel_eval.eval.results import EvalOperatorResult, EvalCaseResult
 from src.kernel_eval.benches import CannCaseSpec
@@ -169,6 +171,61 @@ class TestProcessWorker(unittest.TestCase):
 
         self.assertFalse(os.path.exists(temp_file))
         self.assertIsNone(worker._output_file)
+
+
+class TestOperatorSchedulerFailureResults(unittest.TestCase):
+    """Scheduler should never turn child failures into empty operator shells."""
+
+    def setUp(self):
+        self.base_config = Config()
+        self.base_config.tasks_root = str(project_root / "tasks")
+        self.base_config.bench_name = "cann"
+        self.scheduler = OperatorScheduler(
+            process_config=ProcessConfig(processes_per_card=1, enable_profiler=False),
+            base_config=self.base_config,
+            card_count=1,
+        )
+        self.scheduler._cases_for_rel_path = Mock(
+            return_value=[make_case("Sigmoid", 1, rel_path="level1/sigmoid")]
+        )
+
+    def _task_with_output(self, content):
+        fd, temp_file = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        Path(temp_file).write_text(content)
+        process = MagicMock()
+        process.returncode = 0
+        return OperatorTask(
+            rel_path="level1/sigmoid",
+            card_id=0,
+            process=process,
+            output_file=temp_file,
+        ), temp_file
+
+    def test_parse_failure_synthesizes_all_fail_operator(self):
+        task, temp_file = self._task_with_output("{bad json")
+
+        result = self.scheduler._read_result(task)
+
+        self.assertFalse(os.path.exists(temp_file))
+        self.assertEqual(result["rel_path"], "level1/sigmoid")
+        self.assertEqual(result["operator"], "Sigmoid")
+        self.assertEqual(result["total_cases"], 1)
+        self.assertEqual(result["passed_cases"], 0)
+        self.assertEqual(result["failed_cases"], 1)
+        self.assertIn("parse child JSON", result["subprocess_failure_reason"])
+        self.assertIn("subprocess failed:", result["results"][0]["error_msg"])
+
+    def test_empty_results_synthesizes_all_fail_operator(self):
+        task, temp_file = self._task_with_output('{"results": []}')
+
+        result = self.scheduler._read_result(task)
+
+        self.assertFalse(os.path.exists(temp_file))
+        self.assertEqual(result["rel_path"], "level1/sigmoid")
+        self.assertEqual(result["operator"], "Sigmoid")
+        self.assertEqual(result["total_cases"], 1)
+        self.assertIn("no results", result["subprocess_failure_reason"])
 
 
 class TestProcessPoolCoordinator(unittest.TestCase):

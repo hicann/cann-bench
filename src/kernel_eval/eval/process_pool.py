@@ -101,6 +101,55 @@ class OperatorScheduler:
             self.pending_queue.put(rel_path)
         print(f"[INFO] 提交 {len(rel_paths)} 个算子到调度队列")
 
+    def _cases_for_rel_path(self, rel_path: str) -> List[CaseSpec]:
+        """Load benchmark cases for a scheduled operator rel_path."""
+        try:
+            from ..registry.loader_registry import get_case_loader
+
+            bench_name = getattr(self.base_config, "bench_name", None) or "cann"
+            loader = get_case_loader(bench_name, tasks_root=self.base_config.tasks_root)
+            return list(loader.scan_by_rel_path(rel_path))
+        except Exception as e:
+            print(f"[WARN] Card scheduler: 加载算子 {rel_path} 用例失败: {e}")
+            return []
+
+    def _synthesize_subprocess_failure(self, task: OperatorTask, reason: str) -> Dict:
+        """Build an all-fail operator result when a child result is unusable."""
+        cases = self._cases_for_rel_path(task.rel_path)
+        operator_name = cases[0].operator if cases else Path(task.rel_path).name
+        reason_short = (reason.strip().splitlines() or ["(no detail)"])[0][:180]
+        error_msg = f"subprocess failed: {reason_short}"
+
+        case_results: List[EvalCaseResult] = []
+        for case in cases:
+            case_id = case.get_case_id_str() if hasattr(case, "get_case_id_str") else getattr(case, "case_id", "")
+            t_hw_us = getattr(case, "t_hw_us", getattr(case, "hardware_limit_us", 0.0)) or 0.0
+            case_results.append(EvalCaseResult(
+                case_id=str(case_id),
+                rel_path=task.rel_path,
+                operator=operator_name,
+                case_num=getattr(case, "case_num", 0),
+                success=False,
+                error_msg=error_msg,
+                baseline_perf_us=getattr(case, "baseline_perf_us", 0.0) or 0.0,
+                t_hw_us=t_hw_us,
+                failure_type="cascade_device",
+            ))
+
+        result = EvalOperatorResult(
+            rel_path=task.rel_path,
+            operator=operator_name,
+            total_cases=len(case_results),
+            passed_cases=0,
+            failed_cases=len(case_results),
+            skipped_cases=0,
+            results=case_results,
+            pass_rate=0.0,
+            avg_speedup=0.0,
+            subprocess_failure_reason=reason,
+        )
+        return result.to_dict()
+
     def run(self) -> List[EvalOperatorResult]:
         """执行调度循环，返回所有结果"""
         total_operators = self.pending_queue.qsize()
@@ -268,6 +317,11 @@ class OperatorScheduler:
                     if elapsed > task.timeout:
                         print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 超时 ({task.timeout}s)")
                         task.completed = True
+                        task.result = self._synthesize_subprocess_failure(
+                            task,
+                            f"subprocess exceeded {task.timeout}s timeout",
+                        )
+                        self.completed_results.append(task.result)
                         timed_out_tasks.append(task)
                         completed_tasks.append(task)
                         continue
@@ -322,18 +376,49 @@ class OperatorScheduler:
         `cannbench_op_*.json` orphans. Use try/finally so cleanup runs
         on every exit path.
         """
+        rc = task.process.returncode if task.process is not None else None
         if not (task.output_file and os.path.exists(task.output_file)):
-            return {}
+            return self._synthesize_subprocess_failure(
+                task,
+                f"subprocess produced no output (rc={rc})",
+            )
         try:
             with open(task.output_file, 'r') as f:
                 data = json.load(f)
-            return data.get("results", [{}])[0] if data.get("results") else {}
-        except json.JSONDecodeError:
+            results = data.get("results") if isinstance(data, dict) else None
+            if not results:
+                return self._synthesize_subprocess_failure(
+                    task,
+                    f"subprocess output had no results (rc={rc})",
+                )
+            result = results[0]
+            if not isinstance(result, dict):
+                return self._synthesize_subprocess_failure(
+                    task,
+                    f"subprocess output first result is not an object (rc={rc})",
+                )
+            if not (
+                str(result.get("rel_path") or result.get("operator") or "").strip()
+                or result.get("results")
+                or result.get("cases")
+            ):
+                return self._synthesize_subprocess_failure(
+                    task,
+                    f"subprocess output had an empty operator result (rc={rc})",
+                )
+            return result
+        except json.JSONDecodeError as e:
             print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 结果文件解析失败")
-            return {}
+            return self._synthesize_subprocess_failure(
+                task,
+                f"parse child JSON: {e} (rc={rc})",
+            )
         except Exception as e:
             print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 读取结果失败: {e}")
-            return {}
+            return self._synthesize_subprocess_failure(
+                task,
+                f"read child result: {e} (rc={rc})",
+            )
         finally:
             try:
                 if task.output_file and os.path.exists(task.output_file):

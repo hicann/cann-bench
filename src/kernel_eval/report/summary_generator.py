@@ -115,8 +115,11 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
       - EvalCaseResult.to_dict（嵌套）：perf={'elapsed_us', 'perf_score', ...}
       - EvalResult.to_dict（扁平）：elapsed_us / perf_score 在 case 顶层
     """
-    compile_passed = op_result.get("compile_passed",
-                                   op_result.get("compilation_error") is None)
+    compile_passed = op_result.get(
+        "compile_passed",
+        op_result.get("compilation_error") is None
+        and op_result.get("subprocess_failure_reason") is None,
+    )
     # rel_path 用于 F058/F061 的 warn dedup key + 错误溯源
     rel_path = op_result.get("rel_path") or op_result.get("operator") or None
     # 同时识别两种 case 列表字段名：results (EvalOperatorResult) / cases (OperatorReport)
