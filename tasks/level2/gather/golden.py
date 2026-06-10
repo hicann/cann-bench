@@ -35,7 +35,11 @@ def gather(
         输出张量，shape 与 index 完全一致，dtype 与 x 一致
     """
 
-    # 不做 .long()：PyTorch 2.1+ 的 torch.gather 已接受任意整型 idx（int32/int64 均可），
-    # 在 NPU 上 .long() 会触发冗余 Cast (int32→int64) + 后端再 Cast 回 int32。
+    # torch.gather requires int64 index on CPU (PyTorch < 2.8);
+    # cast to int64 for CPU golden computation only.
+    # On NPU, torch.gather accepts int32/int64 directly,
+    # and the custom kernel also handles both — avoid redundant Cast.
+    if index.dtype != torch.int64 and index.device.type == 'cpu':
+        index = index.long()
     y = torch.gather(x, dim, index)
     return y

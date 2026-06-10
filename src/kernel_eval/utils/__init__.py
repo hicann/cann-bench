@@ -19,7 +19,7 @@
 2. 数据类型映射（字符串与torch.dtype转换）
 3. 参数构建（根据函数签名构建调用参数）
 4. 精度验证（MERE/MARE标准）
-5. Baseline解析（多硬件支持）
+5. Baseline硬件名称解析（平台别名映射）
 6. 命名转换（PascalCase→snake_case）
 7. 张量处理（精度转换、设备迁移）
 8. 目录解析（task-dir 参数处理）
@@ -31,9 +31,6 @@ from .param_builder import ParamBuilder
 from .compare import compare_tensors, CompareResult
 from .thresholds import PRECISION_THRESHOLDS
 from .baseline_resolver import (
-    BaselineResolver, BaselineInfo,
-    resolve_baseline_us, resolve_baseline_info,
-    calculate_speedup, geometric_mean_speedup,
     resolve_hardware, PLATFORM_ALIAS,
 )
 from .naming import camel_to_snake, snake_case_candidates
@@ -52,9 +49,6 @@ __all__ = [
     "str_to_torch_dtype", "torch_dtype_to_str", "is_float_dtype", "is_int_dtype",
     "ParamBuilder",
     "compare_tensors", "CompareResult", "PRECISION_THRESHOLDS",
-    "BaselineResolver", "BaselineInfo",
-    "resolve_baseline_us", "resolve_baseline_info",
-    "calculate_speedup", "geometric_mean_speedup",
     "resolve_hardware", "PLATFORM_ALIAS",
     "camel_to_snake", "snake_case_candidates",
     "tensor_to_fp64_cpu", "tensors_to_cpu",

@@ -49,28 +49,6 @@ logger = logging.getLogger(__name__)
 
 # === 辅助函数 ===
 
-def _coerce_baseline_us(value: Any) -> float:
-    """Normalize ``baseline_perf_us`` / ``t_hw_us`` into a float.
-
-    Some yaml files encode a missing baseline as the literal ``None`` —
-    unquoted, it parses as the string ``"None"``, which is truthy and
-    later breaks numeric comparisons.
-    """
-    if value is None:
-        return 0.0
-    if isinstance(value, (int, float)):
-        return float(value)
-    if isinstance(value, str):
-        s = value.strip()
-        if not s or s.lower() in ("none", "null", "nan"):
-            return 0.0
-        try:
-            return float(s)
-        except ValueError:
-            return 0.0
-    return 0.0
-
-
 # === CANN 任务加载器 ===
 
 class CannTaskLoader(OperatorDirMixin, TaskLoader):
@@ -244,7 +222,7 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
 
     baseline 性能数据从评测集根目录下的 metadata/<hardware>.json 加载（BaselineStore），
     不再内嵌在 cases.yaml 中。BaselineStore 从 bench_root 向上查找 metadata/ 目录，
-    确保子目录场景也能正确定位。若 JSON 文件不存在，fallback 到 raw YAML 数据。
+    确保子目录场景也能正确定位。
     """
 
     def __init__(self, bench_root: str = None, tasks_root: str = None):
@@ -411,24 +389,9 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
             except ValueError:
                 baseline_rel_path = op_dir_name
 
-        # 从 BaselineStore 查询 baseline 数据；fallback 到 raw YAML
-        if self._baseline_store._loaded and self._baseline_store.has_baseline(baseline_rel_path, case_id_int):
-            baseline_perf_us = self._baseline_store.get_perf(baseline_rel_path, case_id_int)
-            t_hw_us = self._baseline_store.get_t_hw(baseline_rel_path, case_id_int)
-        elif self._baseline_store._loaded:
-            # Store 已加载但无该用例数据 → 可能该用例本身就无 baseline
-            # 仍优先使用 Store（返回 0.0），但保留 fallback 以防 Store 不完整
-            store_perf = self._baseline_store.get_perf(baseline_rel_path, case_id_int)
-            store_thw = self._baseline_store.get_t_hw(baseline_rel_path, case_id_int)
-            # 若 Store 返回 0.0 但 raw 中有值 → 使用 raw（过渡期兼容）
-            raw_perf = _coerce_baseline_us(raw.get('baseline_perf_us'))
-            raw_thw = _coerce_baseline_us(raw.get('t_hw_us'))
-            baseline_perf_us = store_perf if store_perf > 0 else raw_perf
-            t_hw_us = store_thw if store_thw > 0 else raw_thw
-        else:
-            # Store 未加载 → 纯 YAML fallback
-            baseline_perf_us = _coerce_baseline_us(raw.get('baseline_perf_us'))
-            t_hw_us = _coerce_baseline_us(raw.get('t_hw_us'))
+        # 从 BaselineStore 查询 baseline 数据
+        baseline_perf_us = self._baseline_store.get_perf(baseline_rel_path, case_id_int)
+        t_hw_us = self._baseline_store.get_t_hw(baseline_rel_path, case_id_int)
 
         return CannCaseSpec(
             case_id=case_id_str,
