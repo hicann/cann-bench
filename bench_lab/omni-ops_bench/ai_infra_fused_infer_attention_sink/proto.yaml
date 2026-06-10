@@ -1,0 +1,167 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AiInfraFusedInferAttentionSink
+  category: FusedComposite
+  difficulty: L4
+  formula: attention_out = softmax((Q @ K^T) * softmax_scale + mask) @ V
+  description: 面向增量/全量推理的 Fused Infer Attention Sink 算子，支持 TND 输入、GQA、可选 sink token 和 softmax_lse 输出。
+  shape_support: 'TND: query [Tq,Nq,D], key/value [Tkv,Nkv,D]'
+  precision_thresholds:
+    float16: 0.004
+    bfloat16: 0.004
+  attrs:
+  - name: num_query_heads
+    type: int
+    default: 64
+    required: false
+  - name: num_key_value_heads
+    type: int
+    default: 64
+    required: false
+  - name: softmax_scale
+    type: float
+    default: 0.07216878364870323
+    required: false
+  - name: input_layout
+    type: string
+    default: TND
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: sink_number
+    type: int
+    default: 128
+    required: false
+  - name: actual_seq_qlen
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_kvlen
+    type: int[]
+    default: null
+    required: false
+  - name: block_size
+    type: int
+    default: 0
+    required: false
+  - name: pre_tokens
+    type: int
+    default: 2047
+    required: false
+  - name: next_tokens
+    type: int
+    default: 0
+    required: false
+  - name: inner_precise
+    type: int
+    default: 0
+    required: false
+  - name: return_softmax_lse
+    type: bool
+    default: false
+    required: false
+  inputs:
+  - name: query
+    description: Query 张量
+    dtype:
+    - float16
+    - bfloat16
+    - int8
+    shape: '[Tq,Nq,D]'
+  - name: key
+    description: Key 张量
+    dtype:
+    - float16
+    - bfloat16
+    - int8
+    shape: '[Tkv,Nkv,D]'
+  - name: value
+    description: Value 张量
+    dtype:
+    - float16
+    - bfloat16
+    - int8
+    shape: '[Tkv,Nkv,Dv]'
+  - name: query_rope
+    description: MLA query rope 部分
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: key_rope
+    description: MLA key rope 部分
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: atten_mask
+    description: Attention mask，True 表示屏蔽
+    dtype:
+    - bool
+    - uint8
+    optional: true
+  - name: key_sink
+    description: 可选 sink key token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: value_sink
+    description: 可选 sink value token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: key_rope_sink
+    description: 可选 sink key rope token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: actual_seq_qlen
+    description: query 实际长度，TND 时为前缀和
+    dtype:
+    - int64
+    - int32
+    optional: true
+  - name: actual_seq_kvlen
+    description: key/value 实际长度，TND 时为前缀和
+    dtype:
+    - int64
+    - int32
+    optional: true
+  - name: block_table
+    description: PA 场景的 block table
+    dtype:
+    - int32
+    optional: true
+  - name: meta_data
+    description: metadata 前置算子生成的 tiling 元数据
+    dtype:
+    - uint32
+    optional: true
+  outputs:
+  - name: attention_out
+    description: Attention 输出
+    dtype:
+    - float16
+    - bfloat16
+    - int8
+    shape: 与 query 的非 D 维一致，D 与 value 的 D 一致
+  - name: softmax_lse
+    description: 可选 softmax log-sum-exp 输出
+    dtype:
+    - float32
+    compare: false
+  schema: ai_infra_fused_infer_attention_sink(Tensor query, Tensor key, Tensor value, *, Tensor? query_rope=None, Tensor? key_rope=None, Tensor? pse_shift=None, Tensor? atten_mask=None, Tensor? actual_seq_qlen=None, Tensor? actual_seq_kvlen=None, Tensor? block_table=None, Tensor? dequant_scale_query=None, Tensor? dequant_scale_key=None, Tensor? dequant_offset_key=None, Tensor? dequant_scale_value=None, Tensor? dequant_offset_value=None, Tensor? dequant_scale_key_rope=None, Tensor? quant_scale_out=None, Tensor? quant_offset_out=None, Tensor? meta_data=None, int num_query_heads=1, int num_key_value_heads=0, float softmax_scale=1.0, int pre_tokens=2147483647, int next_tokens=2147483647, str input_layout="TND", int sparse_mode=0, int block_size=0, int query_quant_mode=0, int key_quant_mode=0, int value_quant_mode=0, int inner_precise=0, bool return_softmax_lse=False, int sink_number=0, Tensor? key_sink=None, Tensor? value_sink=None, Tensor? key_rope_sink=None) -> (Tensor attention_out, Tensor softmax_lse)

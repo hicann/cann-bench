@@ -1,0 +1,1243 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 1
+  input_shape:
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 64
+  - - 4096
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    actual_seq_kvlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 2
+  input_shape:
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 64
+  - - 8192
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    actual_seq_kvlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 3
+  input_shape:
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 64
+  - - 32768
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    actual_seq_kvlen:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 4
+  input_shape:
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 64
+  - - 131072
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 32768
+    - 32768
+    - 32768
+    - 32768
+    actual_seq_kvlen:
+    - 32768
+    - 32768
+    - 32768
+    - 32768
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 5
+  input_shape:
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 128
+  - - 32768
+    - 8
+    - 64
+  - - 32768
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    actual_seq_kvlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 6
+  input_shape:
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 128
+  - - 131072
+    - 8
+    - 64
+  - - 131072
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    actual_seq_qlen:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    actual_seq_kvlen:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 7
+  input_shape:
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 64
+  - - 4096
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 65536
+    next_tokens: 65536
+    actual_seq_qlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    actual_seq_kvlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    sparse_mode: 2
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse2-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 8
+  input_shape:
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 64
+  - - 8192
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 65536
+    next_tokens: 65536
+    actual_seq_qlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    actual_seq_kvlen:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    sparse_mode: 2
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse2-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 9
+  input_shape:
+  - - 1024
+    - 4
+    - 64
+  - - 1024
+    - 4
+    - 64
+  - - 1024
+    - 4
+    - 64
+  - - 1024
+    - 4
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 4
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 0
+    sink_num: 0
+    actual_seq_qlen:
+    - 256
+    - 256
+    - 256
+    - 256
+    actual_seq_kvlen:
+    - 256
+    - 256
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'S-float16-TND-Q1024x4x64-K1024x4x64-sparse0-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 10
+  input_shape:
+  - - 2048
+    - 4
+    - 128
+  - - 2048
+    - 4
+    - 128
+  - - 2048
+    - 4
+    - 128
+  - - 2048
+    - 4
+    - 128
+  - - 2048
+    - 4
+    - 64
+  - - 2048
+    - 4
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 4
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 3
+    sink_num: 0
+    actual_seq_qlen:
+    - 512
+    - 512
+    - 512
+    - 512
+    actual_seq_kvlen:
+    - 512
+    - 512
+    - 512
+    - 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q2048x4x128-K2048x4x128-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 11
+  input_shape:
+  - - 2
+    - 512
+    - 8
+    - 128
+  - - 2
+    - 512
+    - 8
+    - 128
+  - - 2
+    - 512
+    - 8
+    - 128
+  - - 2
+    - 512
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 0
+    sink_num: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-Q2x512x8x128-K2x512x8x128-sparse0 | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 12
+  input_shape:
+  - - 2
+    - 1024
+    - 8
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 128
+  - - 2
+    - 1024
+    - 8
+    - 64
+  - - 2
+    - 1024
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 3
+    sink_num: 1
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-Q2x1024x8x128-K2x1024x8x128-sparse3-sink1-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 13
+  input_shape:
+  - - 1536
+    - 8
+    - 64
+  - - 1536
+    - 8
+    - 64
+  - - 1536
+    - 8
+    - 64
+  - - 1536
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 3
+    sink_num: 0
+    actual_seq_qlen:
+    - 384
+    - 384
+    - 384
+    - 384
+    actual_seq_kvlen:
+    - 384
+    - 384
+    - 384
+    - 384
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q1536x8x64-K1536x8x64-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 14
+  input_shape:
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 128
+  - - 4096
+    - 8
+    - 64
+  - - 4096
+    - 8
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    sink_num: 2
+    actual_seq_qlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    actual_seq_kvlen:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 15
+  input_shape:
+  - - 4
+    - 512
+    - 4
+    - 128
+  - - 4
+    - 512
+    - 4
+    - 128
+  - - 4
+    - 512
+    - 4
+    - 128
+  - - 4
+    - 512
+    - 4
+    - 128
+  - - 4
+    - 512
+    - 4
+    - 64
+  - - 4
+    - 512
+    - 4
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 4
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    sink_num: 2
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-BSND-Q4x512x4x128-K4x512x4x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 16
+  input_shape:
+  - - 1
+    - 768
+    - 8
+    - 64
+  - - 1
+    - 768
+    - 8
+    - 64
+  - - 1
+    - 768
+    - 8
+    - 64
+  - - 1
+    - 768
+    - 8
+    - 64
+  - - 1
+    - 768
+    - 8
+    - 64
+  - - 1
+    - 768
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 0
+    sink_num: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-Q1x768x8x64-K1x768x8x64-sparse0-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 17
+  input_shape:
+  - - 3072
+    - 4
+    - 128
+  - - 3072
+    - 4
+    - 128
+  - - 3072
+    - 4
+    - 128
+  - - 3072
+    - 4
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 4
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 0
+    sink_num: 0
+    actual_seq_qlen:
+    - 1024
+    - 1024
+    - 1024
+    actual_seq_kvlen:
+    - 1024
+    - 1024
+    - 1024
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q3072x4x128-K3072x4x128-sparse0 | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 18
+  input_shape:
+  - - 1024
+    - 16
+    - 128
+  - - 1024
+    - 16
+    - 128
+  - - 1024
+    - 16
+    - 128
+  - - 1024
+    - 16
+    - 128
+  - - 1024
+    - 16
+    - 64
+  - - 1024
+    - 16
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 16
+    input_layout: TND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 3
+    sink_num: 0
+    actual_seq_qlen:
+    - 1024
+    actual_seq_kvlen:
+    - 1024
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q1024x16x128-K1024x16x128-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 19
+  input_shape:
+  - - 2
+    - 384
+    - 8
+    - 64
+  - - 2
+    - 384
+    - 8
+    - 64
+  - - 2
+    - 384
+    - 8
+    - 64
+  - - 2
+    - 384
+    - 8
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 2147483647
+    next_tokens: 2147483647
+    sparse_mode: 3
+    sink_num: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'S-float16-BSND-Q2x384x8x64-K2x384x8x64-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1'
+- operator: FlashAttentionScoreGradEnhance
+  case_id: 20
+  input_shape:
+  - - 2
+    - 256
+    - 16
+    - 128
+  - - 2
+    - 256
+    - 16
+    - 128
+  - - 2
+    - 256
+    - 16
+    - 128
+  - - 2
+    - 256
+    - 16
+    - 128
+  - - 2
+    - 256
+    - 16
+    - 64
+  - - 2
+    - 256
+    - 16
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 16
+    input_layout: BSND
+    scale: 0.07216878364870323
+    scale_value: 0.07216878364870323
+    keep_prob: 1.0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    sink_num: 1
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-Q2x256x16x128-K2x256x16x128-sparse4-sink1-rope | baseline_kernels: FlashAttentionScoreGrad×1'

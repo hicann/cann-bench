@@ -1,0 +1,1843 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 1
+  input_shape:
+  - - 1024
+    - 64
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 1024
+    - 1
+    - 2048
+  - - 32
+    - 8
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 32
+    - 64
+    - 96
+    - 128
+    - 160
+    - 192
+    - 224
+    - 256
+    - 288
+    - 320
+    - 352
+    - 384
+    - 416
+    - 448
+    - 480
+    - 512
+    - 544
+    - 576
+    - 608
+    - 640
+    - 672
+    - 704
+    - 736
+    - 768
+    - 800
+    - 832
+    - 864
+    - 896
+    - 928
+    - 960
+    - 992
+    - 1024
+    actual_seq_lengths_kv:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 1023
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 2
+  input_shape:
+  - - 2048
+    - 64
+    - 576
+  - - 481
+    - 128
+    - 1
+    - 656
+  - - 481
+    - 128
+    - 1
+    - 512
+  - - 2048
+    - 1
+    - 2048
+  - - 1
+    - 481
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2048
+    actual_seq_lengths_kv:
+    - 61446
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 61445
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 3
+  input_shape:
+  - - 2048
+    - 4
+    - 576
+  - - 481
+    - 128
+    - 1
+    - 656
+  - - 481
+    - 128
+    - 1
+    - 512
+  - - 2048
+    - 1
+    - 2048
+  - - 1
+    - 481
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2048
+    actual_seq_lengths_kv:
+    - 61446
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 4
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 61445
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 4
+  input_shape:
+  - - 16
+    - 32
+    - 576
+  - - 64
+    - 128
+    - 1
+    - 656
+  - - 64
+    - 128
+    - 1
+    - 512
+  - - 16
+    - 1
+    - 2048
+  - - 4
+    - 16
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 4
+    - 8
+    - 12
+    - 16
+    actual_seq_lengths_kv:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 32
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 2047
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 5
+  input_shape:
+  - - 60
+    - 2
+    - 576
+  - - 540
+    - 128
+    - 1
+    - 656
+  - - 540
+    - 128
+    - 1
+    - 512
+  - - 60
+    - 1
+    - 2048
+  - - 60
+    - 9
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    actual_seq_lengths_kv:
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 2
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 1091
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 6
+  input_shape:
+  - - 2
+    - 64
+    - 576
+  - - 128
+    - 128
+    - 1
+    - 656
+  - - 128
+    - 128
+    - 1
+    - 512
+  - - 2
+    - 1
+    - 2048
+  - - 1
+    - 128
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2
+    actual_seq_lengths_kv:
+    - 16384
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 16383
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 7
+  input_shape:
+  - - 3
+    - 64
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 3
+    - 1
+    - 2048
+  - - 1
+    - 256
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 3
+    actual_seq_lengths_kv:
+    - 32768
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 32767
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 8
+  input_shape:
+  - - 4
+    - 64
+    - 576
+  - - 128
+    - 128
+    - 1
+    - 656
+  - - 128
+    - 128
+    - 1
+    - 512
+  - - 4
+    - 1
+    - 2048
+  - - 1
+    - 128
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 4
+    actual_seq_lengths_kv:
+    - 16384
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 16383
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q4x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 9
+  input_shape:
+  - - 5
+    - 64
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 5
+    - 1
+    - 2048
+  - - 1
+    - 256
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 5
+    actual_seq_lengths_kv:
+    - 32768
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 32767
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q5x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 10
+  input_shape:
+  - - 4
+    - 8
+    - 576
+  - - 128
+    - 128
+    - 1
+    - 656
+  - - 128
+    - 128
+    - 1
+    - 512
+  - - 4
+    - 1
+    - 2048
+  - - 1
+    - 128
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 4
+    actual_seq_lengths_kv:
+    - 16384
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 8
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 16383
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q4x8x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 8
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 1
+    - 1
+    - 2048
+  - - 1
+    - 256
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 1
+    actual_seq_lengths_kv:
+    - 32768
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 8
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 32767
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q1x8x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 12
+  input_shape:
+  - - 4
+    - 4
+    - 576
+  - - 128
+    - 128
+    - 1
+    - 656
+  - - 128
+    - 128
+    - 1
+    - 512
+  - - 4
+    - 1
+    - 2048
+  - - 1
+    - 128
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 4
+    actual_seq_lengths_kv:
+    - 16384
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 4
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 16383
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q4x4x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 4
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 1
+    - 1
+    - 2048
+  - - 1
+    - 256
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 1
+    actual_seq_lengths_kv:
+    - 32768
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 4
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 32767
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q1x4x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 14
+  input_shape:
+  - - 1024
+    - 64
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 1024
+    - 1
+    - 2048
+  - - 32
+    - 8
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 32
+    - 64
+    - 96
+    - 128
+    - 160
+    - 192
+    - 224
+    - 256
+    - 288
+    - 320
+    - 352
+    - 384
+    - 416
+    - 448
+    - 480
+    - 512
+    - 544
+    - 576
+    - 608
+    - 640
+    - 672
+    - 704
+    - 736
+    - 768
+    - 800
+    - 832
+    - 864
+    - 896
+    - 928
+    - 960
+    - 992
+    - 1024
+    actual_seq_lengths_kv:
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    - 1024
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 1023
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 15
+  input_shape:
+  - - 2048
+    - 64
+    - 576
+  - - 481
+    - 128
+    - 1
+    - 656
+  - - 481
+    - 128
+    - 1
+    - 512
+  - - 2048
+    - 1
+    - 2048
+  - - 1
+    - 481
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2048
+    actual_seq_lengths_kv:
+    - 61446
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 61445
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 16
+  input_shape:
+  - - 2048
+    - 4
+    - 576
+  - - 481
+    - 128
+    - 1
+    - 656
+  - - 481
+    - 128
+    - 1
+    - 512
+  - - 2048
+    - 1
+    - 2048
+  - - 1
+    - 481
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2048
+    actual_seq_lengths_kv:
+    - 61446
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 4
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 61445
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 17
+  input_shape:
+  - - 16
+    - 32
+    - 576
+  - - 64
+    - 128
+    - 1
+    - 656
+  - - 64
+    - 128
+    - 1
+    - 512
+  - - 16
+    - 1
+    - 2048
+  - - 4
+    - 16
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 4
+    - 8
+    - 12
+    - 16
+    actual_seq_lengths_kv:
+    - 2048
+    - 2048
+    - 2048
+    - 2048
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 32
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 2047
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 18
+  input_shape:
+  - - 60
+    - 2
+    - 576
+  - - 540
+    - 128
+    - 1
+    - 656
+  - - 540
+    - 128
+    - 1
+    - 512
+  - - 60
+    - 1
+    - 2048
+  - - 60
+    - 9
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    actual_seq_lengths_kv:
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    - 1092
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 2
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 1091
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 19
+  input_shape:
+  - - 2
+    - 64
+    - 576
+  - - 128
+    - 128
+    - 1
+    - 656
+  - - 128
+    - 128
+    - 1
+    - 512
+  - - 2
+    - 1
+    - 2048
+  - - 1
+    - 128
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 2
+    actual_seq_lengths_kv:
+    - 16384
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 16383
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+- operator: AiInfraKvQuantSparseFlashAttention
+  case_id: 20
+  input_shape:
+  - - 3
+    - 64
+    - 576
+  - - 256
+    - 128
+    - 1
+    - 656
+  - - 256
+    - 128
+    - 1
+    - 512
+  - - 3
+    - 1
+    - 2048
+  - - 1
+    - 256
+  - - 128
+    - 1
+    - 576
+  - - 128
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - int8
+  - int8
+  - int32
+  - int32
+  - bfloat16
+  - bfloat16
+  attrs:
+    scale_value: 0.041666666666666664
+    sparse_block_size: 1
+    sparse_mode: 3
+    block_size: 128
+    sparse_block_count: 2048
+    actual_seq_lengths_query:
+    - 3
+    actual_seq_lengths_kv:
+    - 32768
+    return_softmax_lse: false
+    pre_tokens: 9223372036854775807
+    next_tokens: 9223372036854775807
+    num_query_heads: 64
+    num_key_value_heads: 1
+    layout_query: TND
+    layout_kv: PA_BSND
+    attention_mode: 2
+    key_quant_mode: 2
+    value_quant_mode: 2
+    quant_scale_repo_mode: 1
+    tile_size: 128
+    rope_head_dim: 64
+  value_range:
+  - - -1
+    - 1
+  - - -128
+    - 127
+  - - -128
+    - 127
+  - - 0
+    - 32767
+  - null
+  - - -3
+    - 3
+  - - -3
+    - 3
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'

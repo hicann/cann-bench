@@ -1,0 +1,156 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AiInfraKvQuantSparseFlashAttention
+  category: FusedComposite
+  difficulty: L4
+  formula: attention_out = softmax((Q @ Dequant(K_sparse)^T) * scale_value) @ Dequant(V_sparse)
+  description: 在 Sparse FlashAttention 基础上支持 KV per-tile 量化输入的推理算子。
+  shape_support: 'query: [B,S1,N1,D] 或 [T1,N1,D]; key: int8 combine 存放 nope、rope 和反量化 scale'
+  precision_thresholds:
+    float16: 0.005
+    bfloat16: 0.005
+  attrs:
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: key_quant_mode
+    type: int
+    default: 2
+    required: false
+  - name: value_quant_mode
+    type: int
+    default: 2
+    required: false
+  - name: quant_scale_repo_mode
+    type: int
+    default: 1
+    required: false
+  - name: tile_size
+    type: int
+    default: 128
+    required: false
+  - name: rope_head_dim
+    type: int
+    default: 64
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: block_size
+    type: int
+    default: 128
+    required: false
+  - name: sparse_block_count
+    type: int
+    default: 2048
+    required: false
+  - name: actual_seq_lengths_query
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_lengths_kv
+    type: int[]
+    default: null
+    required: false
+  - name: return_softmax_lse
+    type: bool
+    default: false
+    required: false
+  - name: pre_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  - name: next_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  - name: num_query_heads
+    type: int
+    default: 64
+    required: false
+  - name: num_key_value_heads
+    type: int
+    default: 1
+    required: false
+  - name: layout_query
+    type: string
+    default: BSND
+    required: false
+  - name: layout_kv
+    type: string
+    default: BSND
+    required: false
+  - name: attention_mode
+    type: int
+    default: 2
+    required: false
+  inputs:
+  - name: query
+    description: Query 张量，通常由 q_nope 和 q_rope 拼接
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B,S1,N1,D] 或 [T1,N1,D]'
+  - name: key
+    description: 量化 Key，combine 存放 int8 key、rope 和 float32 反量化 scale
+    dtype:
+    - int8
+    shape: '[B,S2,N2,D]、[T2,N2,D] 或 [block_num,block_size,N2,D]'
+  - name: value
+    description: 量化 Value
+    dtype:
+    - int8
+  - name: sparse_indices
+    description: 稀疏 KV block 索引
+    dtype:
+    - int32
+  - name: block_table
+    description: PageAttention block 映射表
+    dtype:
+    - int32
+    optional: true
+  - name: key_sink
+    description: 可学习 sink key token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: value_sink
+    description: 可学习 sink value token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: actual_seq_lengths_query
+    description: query 实际长度；TND 时为前缀和
+    dtype:
+    - int32
+    optional: true
+  - name: actual_seq_lengths_kv
+    description: key/value 实际长度
+    dtype:
+    - int32
+    optional: true
+  outputs:
+  - name: attention_out
+    description: Attention 输出
+    dtype:
+    - float16
+    - bfloat16
+    shape: 与 query 的非 D 维一致，D 与 value 的 D 一致
+  schema: ai_infra_kv_quant_sparse_flash_attention(Tensor query, Tensor key, Tensor value, Tensor sparse_indices, float scale_value, int key_quant_mode=2, int value_quant_mode=2, *, Tensor? key_dequant_scale=None, Tensor? value_dequant_scale=None, Tensor? block_table=None, Tensor? actual_seq_lengths_query=None, Tensor? actual_seq_lengths_kv=None, Tensor? key_sink=None, Tensor? value_sink=None, int sparse_block_size=1, str layout_query="BSND", str layout_kv="BSND", int sparse_mode=3, int pre_tokens=9223372036854775807, int next_tokens=9223372036854775807, int attention_mode=0, int quant_scale_repo_mode=1, int tile_size=128, int rope_head_dim=64) -> Tensor attention_out

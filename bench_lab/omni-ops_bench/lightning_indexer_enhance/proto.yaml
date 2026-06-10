@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: LightningIndexerEnhance
+  category: SortSelect
+  difficulty: L3
+  formula: Computes token-wise sparse indices from query/key importance scores.
+  description: Computes token-wise sparse indices from query/key importance scores.
+  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  attrs:
+  - name: actual_seq_lengths_query
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_lengths_key
+    type: int[]
+    default: null
+    required: false
+  - name: layout_query
+    type: string
+    default: BSND
+    required: false
+  - name: layout_key
+    type: string
+    default: BSND
+    required: false
+  - name: sparse_count
+    type: int
+    default: 2048
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: pre_tokens
+    type: int
+    default: null
+    required: false
+  - name: next_tokens
+    type: int
+    default: null
+    required: false
+  - name: return_value
+    type: int
+    default: false
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  - name: sparse_block_mode
+    type: int
+    default: 0
+    required: false
+  inputs:
+  - name: query
+    description: Query tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key
+    description: Key tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: weights
+    description: Per-token weights tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: block_table
+    description: Optional page-attention block table
+    dtype:
+    - int32
+    shape: case dependent
+    optional: true
+  outputs:
+  - name: sparse_indices
+    description: Sparse key index set selected for each query token
+    dtype:
+    - int32
+    shape: case dependent
+  - name: sparse_values
+    description: Optional sparse scores, only meaningful when return_value is true
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+    compare: false
+  schema: lightning_indexer_enhance(Tensor query, Tensor key, Tensor weights, *, SymInt[]?
+    actual_seq_lengths_query=None, SymInt[]? actual_seq_lengths_key=None, Tensor?
+    block_table=None, str layout_query="BSND", str layout_key="BSND", int sparse_count=2048,
+    int sparse_mode=3, int pre_tokens=9223372036854775807, int next_tokens=9223372036854775807,
+    bool return_value=False, int sparse_block_size=1, int sparse_block_mode=0) ->
+    (Tensor sparse_indices, Tensor sparse_values)

@@ -1,0 +1,1282 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: LightningIndexerEnhance
+  case_id: 1
+  input_shape:
+  - - 8
+    - 1
+    - 64
+    - 128
+  - - 8
+    - 65488
+    - 1
+    - 128
+  - - 8
+    - 1
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 1
+    - 1
+    - 0
+    - 1
+    - 1
+    - 0
+    - 0
+    - 0
+    actual_seq_lengths_key:
+    - 93
+    - 93
+    - 93
+    - 93
+    - 93
+    - 93
+    - 93
+    - 93
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-BSND-Q8x1x64x128-K8x65488x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 2
+  input_shape:
+  - - 1728
+    - 64
+    - 128
+  - - 1728
+    - 1
+    - 128
+  - - 1728
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 54
+    - 108
+    - 162
+    - 216
+    - 270
+    - 324
+    - 378
+    - 432
+    - 486
+    - 540
+    - 594
+    - 648
+    - 702
+    - 756
+    - 810
+    - 864
+    - 918
+    - 972
+    - 1026
+    - 1080
+    - 1134
+    - 1188
+    - 1242
+    - 1296
+    - 1350
+    - 1404
+    - 1458
+    - 1512
+    - 1566
+    - 1620
+    - 1674
+    - 1728
+    actual_seq_lengths_key:
+    - 54
+    - 108
+    - 162
+    - 216
+    - 270
+    - 324
+    - 378
+    - 432
+    - 486
+    - 540
+    - 594
+    - 648
+    - 702
+    - 756
+    - 810
+    - 864
+    - 918
+    - 972
+    - 1026
+    - 1080
+    - 1134
+    - 1188
+    - 1242
+    - 1296
+    - 1350
+    - 1404
+    - 1458
+    - 1512
+    - 1566
+    - 1620
+    - 1674
+    - 1728
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-TND-Q1728x64x128-K1728x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 3
+  input_shape:
+  - - 70096
+    - 64
+    - 128
+  - - 15920
+    - 1
+    - 128
+  - - 70096
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 4381
+    - 8762
+    - 13143
+    - 17524
+    - 21905
+    - 26286
+    - 30667
+    - 35048
+    - 39429
+    - 43810
+    - 48191
+    - 52572
+    - 56953
+    - 61334
+    - 65715
+    - 70096
+    actual_seq_lengths_key:
+    - 995
+    - 1990
+    - 2985
+    - 3980
+    - 4975
+    - 5970
+    - 6965
+    - 7960
+    - 8955
+    - 9950
+    - 10945
+    - 11940
+    - 12935
+    - 13930
+    - 14925
+    - 15920
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-TND-Q70096x64x128-K15920x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 4
+  input_shape:
+  - - 16
+    - 1020
+    - 64
+    - 128
+  - - 16
+    - 1020
+    - 1
+    - 128
+  - - 16
+    - 1020
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query: []
+    actual_seq_lengths_key: []
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-BSND-BSND-Q16x1020x64x128-K16x1020x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 5
+  input_shape:
+  - - 4
+    - 3
+    - 64
+    - 128
+  - - 4
+    - 1024
+    - 1
+    - 128
+  - - 4
+    - 3
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query: []
+    actual_seq_lengths_key: []
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'S-float16-BSND-BSND-Q4x3x64x128-K4x1024x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 6
+  input_shape:
+  - - 238992
+    - 64
+    - 128
+  - - 238992
+    - 1
+    - 128
+  - - 238992
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 9958
+    - 19916
+    - 29874
+    - 39832
+    - 49790
+    - 59748
+    - 69706
+    - 79664
+    - 89622
+    - 99580
+    - 109538
+    - 119496
+    - 129454
+    - 139412
+    - 149370
+    - 159328
+    - 169286
+    - 179244
+    - 189202
+    - 199160
+    - 209118
+    - 219076
+    - 229034
+    - 238992
+    actual_seq_lengths_key:
+    - 9958
+    - 19916
+    - 29874
+    - 39832
+    - 49790
+    - 59748
+    - 69706
+    - 79664
+    - 89622
+    - 99580
+    - 109538
+    - 119496
+    - 129454
+    - 139412
+    - 149370
+    - 159328
+    - 169286
+    - 179244
+    - 189202
+    - 199160
+    - 209118
+    - 219076
+    - 229034
+    - 238992
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-float16-TND-TND-Q238992x64x128-K238992x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 7
+  input_shape:
+  - - 5760
+    - 64
+    - 128
+  - - 288
+    - 1
+    - 128
+  - - 5760
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 120
+    - 240
+    - 360
+    - 480
+    - 600
+    - 720
+    - 840
+    - 960
+    - 1080
+    - 1200
+    - 1320
+    - 1440
+    - 1560
+    - 1680
+    - 1800
+    - 1920
+    - 2040
+    - 2160
+    - 2280
+    - 2400
+    - 2520
+    - 2640
+    - 2760
+    - 2880
+    - 3000
+    - 3120
+    - 3240
+    - 3360
+    - 3480
+    - 3600
+    - 3720
+    - 3840
+    - 3960
+    - 4080
+    - 4200
+    - 4320
+    - 4440
+    - 4560
+    - 4680
+    - 4800
+    - 4920
+    - 5040
+    - 5160
+    - 5280
+    - 5400
+    - 5520
+    - 5640
+    - 5760
+    actual_seq_lengths_key:
+    - 6
+    - 12
+    - 18
+    - 24
+    - 30
+    - 36
+    - 42
+    - 48
+    - 54
+    - 60
+    - 66
+    - 72
+    - 78
+    - 84
+    - 90
+    - 96
+    - 102
+    - 108
+    - 114
+    - 120
+    - 126
+    - 132
+    - 138
+    - 144
+    - 150
+    - 156
+    - 162
+    - 168
+    - 174
+    - 180
+    - 186
+    - 192
+    - 198
+    - 204
+    - 210
+    - 216
+    - 222
+    - 228
+    - 234
+    - 240
+    - 246
+    - 252
+    - 258
+    - 264
+    - 270
+    - 276
+    - 282
+    - 288
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-TND-Q5760x64x128-K288x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 8
+  input_shape:
+  - - 32
+    - 10561
+    - 64
+    - 128
+  - - 32
+    - 16484
+    - 1
+    - 128
+  - - 32
+    - 10561
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 65
+    - 47
+    - 44
+    - 87
+    - 28
+    - 8960
+    - 34
+    - 9472
+    - 10368
+    - 6144
+    - 4224
+    - 6272
+    - 8960
+    - 57
+    - 58
+    - 62
+    - 7680
+    - 50
+    - 4352
+    - 64
+    - 9984
+    - 1
+    - 50
+    - 5760
+    - 101
+    - 6784
+    - 7808
+    - 3
+    - 7680
+    - 8448
+    - 6528
+    - 512
+    actual_seq_lengths_key:
+    - 66
+    - 4992
+    - 13
+    - 12672
+    - 4224
+    - 2816
+    - 16128
+    - 256
+    - 48
+    - 98
+    - 11776
+    - 21
+    - 93
+    - 19
+    - 83
+    - 6
+    - 85
+    - 64
+    - 5632
+    - 9472
+    - 41
+    - 12672
+    - 5760
+    - 14
+    - 90
+    - 3584
+    - 6016
+    - 57
+    - 2816
+    - 14464
+    - 70
+    - 78
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-BSND-BSND-Q32x10561x64x128-K32x16484x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 9
+  input_shape:
+  - - 16
+    - 1025
+    - 64
+    - 128
+  - - 16
+    - 16348
+    - 1
+    - 128
+  - - 16
+    - 1025
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    - 256
+    actual_seq_lengths_key:
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    - 16108
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-float16-BSND-BSND-Q16x1025x64x128-K16x16348x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 10
+  input_shape:
+  - - 6198
+    - 64
+    - 128
+  - - 6198
+    - 1
+    - 128
+  - - 6198
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 6016
+    - 6019
+    - 6102
+    - 6198
+    actual_seq_lengths_key:
+    - 6016
+    - 6019
+    - 6102
+    - 6198
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-TND-Q6198x64x128-K6198x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 11
+  input_shape:
+  - - 8
+    - 512
+    - 64
+    - 128
+  - - 8
+    - 6144
+    - 1
+    - 128
+  - - 8
+    - 512
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 508
+    - 306
+    - 420
+    - 427
+    - 3
+    - 410
+    - 196
+    - 217
+    actual_seq_lengths_key:
+    - 976
+    - 5435
+    - 4469
+    - 5667
+    - 1222
+    - 540
+    - 1016
+    - 5535
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-BSND-Q8x512x64x128-K8x6144x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 12
+  input_shape:
+  - - 8
+    - 448
+    - 64
+    - 128
+  - - 8
+    - 448
+    - 1
+    - 128
+  - - 8
+    - 448
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 82
+    - 128
+    - 46
+    - 126
+    - 6
+    - 111
+    - 19
+    - 85
+    actual_seq_lengths_key:
+    - 302
+    - 302
+    - 302
+    - 302
+    - 302
+    - 302
+    - 302
+    - 302
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-BSND-BSND-Q8x448x64x128-K8x448x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 13
+  input_shape:
+  - - 20877
+    - 64
+    - 128
+  - - 20877
+    - 1
+    - 128
+  - - 20877
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 1134
+    - 4596
+    - 7648
+    - 11226
+    - 13696
+    - 14328
+    - 17420
+    - 20877
+    actual_seq_lengths_key:
+    - 1134
+    - 4596
+    - 7648
+    - 11226
+    - 13696
+    - 14328
+    - 17420
+    - 20877
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-TND-Q20877x64x128-K20877x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 14
+  input_shape:
+  - - 48
+    - 2
+    - 64
+    - 128
+  - - 48
+    - 1536
+    - 1
+    - 128
+  - - 48
+    - 2
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 0
+    - 0
+    - 2
+    - 2
+    - 2
+    - 0
+    - 0
+    - 2
+    - 1
+    - 1
+    - 2
+    - 2
+    - 1
+    - 1
+    - 2
+    - 0
+    - 1
+    - 2
+    - 1
+    - 1
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 1
+    - 1
+    - 1
+    - 0
+    - 2
+    - 1
+    - 1
+    - 2
+    - 1
+    - 1
+    - 1
+    - 0
+    - 2
+    - 2
+    - 2
+    - 0
+    - 0
+    actual_seq_lengths_key:
+    - 121
+    - 87
+    - 95
+    - 63
+    - 64
+    - 640
+    - 72
+    - 122
+    - 123
+    - 15
+    - 640
+    - 9
+    - 20
+    - 107
+    - 110
+    - 29
+    - 118
+    - 122
+    - 33
+    - 57
+    - 640
+    - 7
+    - 22
+    - 115
+    - 40
+    - 86
+    - 56
+    - 63
+    - 17
+    - 26
+    - 36
+    - 88
+    - 20
+    - 62
+    - 86
+    - 27
+    - 82
+    - 384
+    - 59
+    - 39
+    - 72
+    - 79
+    - 1024
+    - 31
+    - 71
+    - 13
+    - 127
+    - 640
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 3
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-BSND-BSND-Q48x2x64x128-K48x1536x1x128-sparse3 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 15
+  input_shape:
+  - - 4
+    - 3
+    - 64
+    - 128
+  - - 4
+    - 5824
+    - 1
+    - 128
+  - - 4
+    - 3
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 3
+    - 1
+    - 3
+    - 1
+    actual_seq_lengths_key: []
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-BSND-Q4x3x64x128-K4x5824x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 16
+  input_shape:
+  - - 537
+    - 64
+    - 128
+  - - 537
+    - 1
+    - 128
+  - - 537
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 109
+    - 196
+    - 199
+    - 247
+    - 341
+    - 417
+    - 534
+    - 537
+    actual_seq_lengths_key:
+    - 109
+    - 196
+    - 199
+    - 247
+    - 341
+    - 417
+    - 534
+    - 537
+    layout_query: TND
+    layout_key: TND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-TND-Q537x64x128-K537x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 17
+  input_shape:
+  - - 8
+    - 32768
+    - 64
+    - 128
+  - - 8
+    - 2176
+    - 1
+    - 128
+  - - 8
+    - 32768
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query: []
+    actual_seq_lengths_key:
+    - 35
+    - 43
+    - 17
+    - 1280
+    - 48
+    - 15
+    - 106
+    - 33
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-BSND-BSND-Q8x32768x64x128-K8x2176x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 18
+  input_shape:
+  - - 4
+    - 256
+    - 64
+    - 128
+  - - 4
+    - 1152
+    - 1
+    - 128
+  - - 4
+    - 256
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 40
+    - 40
+    - 40
+    - 40
+    actual_seq_lengths_key:
+    - 40
+    - 40
+    - 40
+    - 40
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-BSND-BSND-Q4x256x64x128-K4x1152x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 19
+  input_shape:
+  - - 4
+    - 1536
+    - 64
+    - 128
+  - - 4
+    - 1536
+    - 1
+    - 128
+  - - 4
+    - 1536
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    actual_seq_lengths_query:
+    - 1210
+    - 1210
+    - 1210
+    - 1210
+    actual_seq_lengths_key: []
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-BSND-BSND-Q4x1536x64x128-K4x1536x1x128-sparse0 | baseline_kernels: TopK×1'
+- operator: LightningIndexerEnhance
+  case_id: 20
+  input_shape:
+  - - 8
+    - 31680
+    - 64
+    - 128
+  - - 8
+    - 31680
+    - 1
+    - 128
+  - - 8
+    - 31680
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    actual_seq_lengths_query:
+    - 27392
+    - 47
+    - 6528
+    - 13824
+    - 28544
+    - 5
+    - 28544
+    - 1536
+    actual_seq_lengths_key: []
+    layout_query: BSND
+    layout_key: BSND
+    sparse_count: 2048
+    sparse_mode: 0
+    sparse_block_size: 1
+    sparse_block_mode: 0
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-float16-BSND-BSND-Q8x31680x64x128-K8x31680x1x128-sparse0 | baseline_kernels: TopK×1'

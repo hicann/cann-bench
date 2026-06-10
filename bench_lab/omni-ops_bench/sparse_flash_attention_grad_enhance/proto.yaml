@@ -1,0 +1,175 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SparseFlashAttentionGradEnhance
+  category: FusedComposite
+  difficulty: L4
+  formula: Computes gradients for sparse selected attention using top-k block indices.
+  description: Computes gradients for sparse selected attention using top-k block
+    indices.
+  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  attrs:
+  - name: actual_seq_qlen
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_kvlen
+    type: int[]
+    default: null
+    required: false
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  - name: layout
+    type: string
+    default: TND
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: pre_tokens
+    type: int
+    default: null
+    required: false
+  - name: next_tokens
+    type: int
+    default: null
+    required: false
+  - name: deterministic
+    type: bool
+    default: false
+    required: false
+  inputs:
+  - name: query
+    description: Query tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key
+    description: Key tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: value
+    description: Value tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: topk_indices
+    description: Sparse indices tensor
+    dtype:
+    - int32
+    shape: case dependent
+  - name: dy
+    description: Output gradient tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: attention_out
+    description: Forward attention output
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: softmax_max
+    description: Forward softmax max tensor
+    dtype:
+    - float32
+    shape: case dependent
+  - name: softmax_sum
+    description: Forward softmax sum tensor
+    dtype:
+    - float32
+    shape: case dependent
+  - name: actual_seq_qlen
+    description: Optional query sequence lengths
+    dtype:
+    - int32
+    optional: true
+    shape: case dependent
+  - name: actual_seq_kvlen
+    description: Optional key/value sequence lengths
+    dtype:
+    - int32
+    optional: true
+    shape: case dependent
+  - name: query_rope
+    description: Optional query rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  - name: key_rope
+    description: Optional key rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  outputs:
+  - name: dq
+    description: Query gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dk
+    description: Key gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dv
+    description: Value gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dq_rope
+    description: Query rope gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dk_rope
+    description: Key rope gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  schema: sparse_flash_attention_grad_enhance(Tensor query, Tensor key, Tensor value,
+    Tensor topk_indices, Tensor dy, Tensor attention_out, Tensor softmax_max, Tensor
+    softmax_sum, *, Tensor? query_rope=None, Tensor? key_rope=None, SymInt[]? actual_seq_qlen=None,
+    SymInt[]? actual_seq_kvlen=None, float scale_value=1.0, int sparse_block_size=1,
+    str layout="TND", int sparse_mode=3, int pre_tokens=2147483647, int next_tokens=2147483647,
+    bool deterministic=False) -> (Tensor dq, Tensor dk, Tensor dv, Tensor dq_rope,
+    Tensor dk_rope)

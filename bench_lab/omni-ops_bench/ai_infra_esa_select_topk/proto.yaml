@@ -1,0 +1,90 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AiInfraEsaSelectTopk
+  category: SortSelect
+  difficulty: L3
+  formula: Selects ESA top-k compressed key blocks for attention prefill/decode.
+  description: Selects ESA top-k compressed key blocks for attention prefill/decode.
+  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  attrs:
+  - name: blk_size
+    type: int
+    default: 64
+    required: false
+  - name: init_blk_num
+    type: int
+    default: 2
+    required: false
+  - name: local_blk_num
+    type: int
+    default: 4
+    required: false
+  - name: topk
+    type: int
+    default: 4
+    required: false
+  - name: input_layout
+    type: string
+    default: TND
+    required: false
+  - name: compress_blk_size
+    type: int
+    default: 16
+    required: false
+  - name: actual_seq_q_len_optional
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_k_len_optional
+    type: int[]
+    default: null
+    required: false
+  - name: chunk_size
+    type: int
+    default: 8192
+    required: false
+  - name: chunk_index
+    type: int
+    default: 2
+    required: false
+  - name: actual_cmp_seq_k_len_optional
+    type: int[]
+    default: null
+    required: false
+  inputs:
+  - name: query
+    description: Query tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key
+    description: Compressed key tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  outputs:
+  - name: output
+    description: Operator output tensors
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    - int32
+    shape: case dependent
+  schema: ai_infra_esa_select_topk(Tensor query, Tensor key, int blk_size=64, int
+    init_blk_num=2, int local_blk_num=4, int topk=4, str input_layout="TND", *, SymInt[]?
+    actual_seq_q_len_optional=None, SymInt[]? actual_seq_k_len_optional=None, SymInt[]?
+    actual_cmp_seq_k_len_optional=None, int compress_blk_size=16) -> Tensor

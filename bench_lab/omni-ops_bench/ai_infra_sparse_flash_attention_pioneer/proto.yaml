@@ -1,0 +1,169 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AiInfraSparseFlashAttentionPioneer
+  category: FusedComposite
+  difficulty: L4
+  formula: attention_out = softmax((Q @ K_sparse^T) * scale_value) @ V_sparse
+  description: 面向 Sparse Attention 离散访存优化的推理算子，支持 PageAttention、MLA rope 拼接和可选 sink
+    token。
+  shape_support: 'query: [B,S1,N1,D] 或 [T1,N1,D]; key/value: PA_BSND [block_num,block_size,N2,D]'
+  precision_thresholds:
+    float16: 0.004
+    bfloat16: 0.004
+  attrs:
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  - name: layout_query
+    type: string
+    default: BSND
+    required: false
+  - name: layout_kv
+    type: string
+    default: BSND
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: block_size
+    type: int
+    default: 128
+    required: false
+  - name: sparse_block_count
+    type: int
+    default: 2048
+    required: false
+  - name: actual_seq_lengths_query
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_lengths_kv
+    type: int[]
+    default: null
+    required: false
+  - name: return_softmax_lse
+    type: bool
+    default: false
+    required: false
+  - name: pre_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  - name: next_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  - name: num_query_heads
+    type: int
+    default: 32
+    required: false
+  - name: num_key_value_heads
+    type: int
+    default: 1
+    required: false
+  - name: attention_mode
+    type: int
+    default: 0
+    required: false
+  inputs:
+  - name: query
+    description: Query 张量，可为 nope+rope 合并传输
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B,S1,N1,D] 或 [T1,N1,D]'
+  - name: key
+    description: Key 张量，PA_BSND 布局
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[block_num,block_size,N2,D]'
+  - name: value
+    description: Value 张量，PA_BSND 布局
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[block_num,block_size,N2,Dv]'
+  - name: sparse_indices
+    description: 稀疏 KV block 索引
+    dtype:
+    - int32
+    shape: '[B,S1,N2,sparse_size] 或 [T1,N2,sparse_size]'
+  - name: block_table
+    description: PageAttention block 映射表
+    dtype:
+    - int32
+    optional: true
+  - name: actual_seq_lengths_query
+    description: query 实际长度；TND 时为前缀和
+    dtype:
+    - int32
+    optional: true
+  - name: actual_seq_lengths_kv
+    description: key/value 实际长度
+    dtype:
+    - int32
+    optional: true
+  - name: query_rope
+    description: MLA query rope 部分
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: key_rope
+    description: MLA key rope 部分
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: key_sink
+    description: 可学习 sink key token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  - name: value_sink
+    description: 可学习 sink value token
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  outputs:
+  - name: attention_out
+    description: Attention 输出
+    dtype:
+    - float16
+    - bfloat16
+  - name: softmax_max
+    description: 可选 softmax max 输出；ST 默认 return_softmax_lse=false 时不参与精度比较
+    dtype:
+    - float32
+    compare: false
+  - name: softmax_sum
+    description: 可选 softmax sum 输出；ST 默认 return_softmax_lse=false 时不参与精度比较
+    dtype:
+    - float32
+    compare: false
+  schema: ai_infra_sparse_flash_attention_pioneer(Tensor query, Tensor key, Tensor
+    value, Tensor sparse_indices, float scale_value, *, Tensor? block_table=None,
+    Tensor? actual_seq_lengths_query=None, Tensor? actual_seq_lengths_kv=None, Tensor?
+    query_rope=None, Tensor? key_rope=None, Tensor? key_sink=None, Tensor? value_sink=None,
+    int sparse_block_size=1, str layout_query="BSND", str layout_kv="PA_BSND", int
+    sparse_mode=3, int pre_tokens=9223372036854775807, int next_tokens=9223372036854775807,
+    int attention_mode=0, bool return_softmax_lse=False) -> (Tensor attention_out,
+    Tensor softmax_max, Tensor softmax_sum)

@@ -1,0 +1,148 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SparseLightningIndexerGradKLLossEnhance
+  category: FusedComposite
+  difficulty: L4
+  formula: Computes KL-loss gradients for sparse lightning indexer training.
+  description: Computes KL-loss gradients for sparse lightning indexer training.
+  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  attrs:
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: layout
+    type: string
+    default: TND
+    required: false
+  - name: actual_seq_lengths_query
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_lengths_key
+    type: int[]
+    default: null
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: deterministic
+    type: bool
+    default: false
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  inputs:
+  - name: query
+    description: Query tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key
+    description: Key tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: query_index
+    description: Query index tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key_index
+    description: Key index tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: weights
+    description: Weight tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: topk_index
+    description: Top-k block indices
+    dtype:
+    - int32
+    shape: case dependent
+  - name: softmax_max
+    description: Optional softmax max tensor
+    dtype:
+    - float32
+    optional: true
+    shape: case dependent
+  - name: softmax_sum
+    description: Optional softmax sum tensor
+    dtype:
+    - float32
+    optional: true
+    shape: case dependent
+  - name: query_rope
+    description: Optional query rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  - name: key_rope
+    description: Optional key rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  outputs:
+  - name: d_query_index
+    description: Query index gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: d_key_index
+    description: Key index gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: d_weights
+    description: Weights gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: loss
+    description: KL loss
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  schema: sparse_lightning_indexer_grad_klloss_enhance(Tensor query, Tensor key, Tensor
+    query_index, Tensor key_index, Tensor weights, Tensor topk_index, *, Tensor? softmax_max=None,
+    Tensor? softmax_sum=None, Tensor? query_rope=None, Tensor? key_rope=None, float
+    scale_value=1.0, str layout="TND", SymInt[]? actual_seq_lengths_query=None, SymInt[]?
+    actual_seq_lengths_key=None, int sparse_mode=3, bool deterministic=True, int sparse_block_size=1)
+    -> (Tensor d_query_index, Tensor d_key_index, Tensor d_weights, Tensor loss)

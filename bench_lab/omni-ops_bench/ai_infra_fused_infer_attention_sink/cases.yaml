@@ -1,0 +1,1679 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 1
+  input_shape:
+  - - 16384
+    - 64
+    - 192
+  - - 32768
+    - 64
+    - 192
+  - - 32768
+    - 64
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 64
+    - 192
+  - - 128
+    - 64
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 64
+    num_key_value_heads: 64
+    actual_seq_qlen:
+    - 8192
+    - 16384
+    actual_seq_kvlen:
+    - 16384
+    - 32768
+    block_size: 0
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q16384x64x192-K32768x64x192-sparse4-sink128-lse | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 2
+  input_shape:
+  - - 41177
+    - 4
+    - 192
+  - - 71568
+    - 4
+    - 192
+  - - 71568
+    - 4
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 4
+    - 192
+  - - 128
+    - 4
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 4
+    num_key_value_heads: 4
+    actual_seq_qlen:
+    - 1532
+    - 2172
+    - 5308
+    - 8636
+    - 12018
+    - 16114
+    - 19877
+    - 23525
+    - 27381
+    - 29301
+    - 31669
+    - 32489
+    - 33839
+    - 36657
+    - 38233
+    - 41177
+    actual_seq_kvlen:
+    - 5888
+    - 8709
+    - 13853
+    - 14237
+    - 19517
+    - 27709
+    - 28733
+    - 31168
+    - 32790
+    - 39446
+    - 44785
+    - 50609
+    - 53525
+    - 59733
+    - 65918
+    - 71568
+    block_size: 0
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q41177x4x192-K71568x4x192-sparse4-sink128 | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 3
+  input_shape:
+  - - 11794
+    - 8
+    - 128
+  - - 67300
+    - 8
+    - 128
+  - - 67300
+    - 8
+    - 128
+  - - 11794
+    - 8
+    - 64
+  - - 67300
+    - 8
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 8
+    - 128
+  - - 128
+    - 8
+    - 128
+  - - 128
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 8
+    num_key_value_heads: 8
+    actual_seq_qlen:
+    - 8192
+    - 9516
+    - 10961
+    - 11794
+    actual_seq_kvlen:
+    - 17695
+    - 50463
+    - 59000
+    - 67300
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q11794x8x128-K67300x8x128-sparse4-sink128-lse-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 4
+  input_shape:
+  - - 4096
+    - 4
+    - 128
+  - - 16384
+    - 4
+    - 128
+  - - 16384
+    - 4
+    - 128
+  - - 4096
+    - 4
+    - 64
+  - - 16384
+    - 4
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 4
+    - 128
+  - - 128
+    - 4
+    - 128
+  - - 128
+    - 4
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 4
+    num_key_value_heads: 4
+    actual_seq_qlen:
+    - 2048
+    - 4096
+    actual_seq_kvlen:
+    - 8192
+    - 16384
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4096x4x128-K16384x4x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 5
+  input_shape:
+  - - 2048
+    - 12
+    - 192
+  - - 8192
+    - 12
+    - 192
+  - - 8192
+    - 12
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 12
+    - 192
+  - - 128
+    - 12
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 12
+    num_key_value_heads: 12
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 8192
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q2048x12x192-K8192x12x192-sparse4-sink128-lse | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 6
+  input_shape:
+  - - 2048
+    - 24
+    - 128
+  - - 8192
+    - 24
+    - 128
+  - - 8192
+    - 24
+    - 128
+  - - 2048
+    - 24
+    - 64
+  - - 8192
+    - 24
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 24
+    - 128
+  - - 128
+    - 24
+    - 128
+  - - 128
+    - 24
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 24
+    num_key_value_heads: 24
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 8192
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q2048x24x128-K8192x24x128-sparse4-sink128-lse-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 7
+  input_shape:
+  - - 2048
+    - 1
+    - 128
+  - - 8192
+    - 1
+    - 128
+  - - 8192
+    - 1
+    - 128
+  - - 2048
+    - 1
+    - 64
+  - - 8192
+    - 1
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 1
+    - 128
+  - - 128
+    - 1
+    - 128
+  - - 128
+    - 1
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 1
+    num_key_value_heads: 1
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 8192
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q2048x1x128-K8192x1x128-sparse4-sink128-lse-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 8
+  input_shape:
+  - - 3363
+    - 3
+    - 128
+  - - 133760
+    - 3
+    - 128
+  - - 133760
+    - 3
+    - 128
+  - - 3363
+    - 3
+    - 64
+  - - 133760
+    - 3
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 3
+    - 128
+  - - 128
+    - 3
+    - 128
+  - - 128
+    - 3
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 3
+    num_key_value_heads: 3
+    actual_seq_qlen:
+    - 576
+    - 1152
+    - 3200
+    - 3363
+    actual_seq_kvlen:
+    - 65536
+    - 66496
+    - 78272
+    - 133760
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q3363x3x128-K133760x3x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 9
+  input_shape:
+  - - 8192
+    - 6
+    - 192
+  - - 16384
+    - 6
+    - 192
+  - - 16384
+    - 6
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 6
+    - 192
+  - - 128
+    - 6
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 6
+    num_key_value_heads: 6
+    actual_seq_qlen:
+    - 4096
+    - 8192
+    actual_seq_kvlen:
+    - 8192
+    - 16384
+    block_size: 0
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8192x6x192-K16384x6x192-sparse4-sink128 | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 10
+  input_shape:
+  - - 2048
+    - 2
+    - 128
+  - - 524288
+    - 2
+    - 128
+  - - 524288
+    - 2
+    - 128
+  - - 2048
+    - 2
+    - 64
+  - - 524288
+    - 2
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 2
+    num_key_value_heads: 2
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 524288
+    block_size: 0
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q2048x2x128-K524288x2x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 11
+  input_shape:
+  - - 9817
+    - 48
+    - 192
+  - - 1206619
+    - 48
+    - 192
+  - - 1206619
+    - 48
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 48
+    - 192
+  - - 128
+    - 48
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 48
+    num_key_value_heads: 48
+    actual_seq_qlen:
+    - 2048
+    - 3208
+    - 3336
+    - 5162
+    - 6929
+    - 8706
+    - 9282
+    - 9817
+    actual_seq_kvlen:
+    - 254784
+    - 516928
+    - 562944
+    - 731840
+    - 862720
+    - 923677
+    - 963611
+    - 1206619
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q9817x48x192-K1206619x48x192-sparse4-sink128 | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 12
+  input_shape:
+  - - 5563
+    - 2
+    - 128
+  - - 423569
+    - 2
+    - 128
+  - - 423569
+    - 2
+    - 128
+  - - 5563
+    - 2
+    - 64
+  - - 423569
+    - 2
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 2
+    num_key_value_heads: 2
+    actual_seq_qlen:
+    - 1267
+    - 2619
+    - 4667
+    - 5563
+    actual_seq_kvlen:
+    - 127744
+    - 202726
+    - 292497
+    - 423569
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q5563x2x128-K423569x2x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 13
+  input_shape:
+  - - 8192
+    - 8
+    - 192
+  - - 24756
+    - 8
+    - 192
+  - - 24756
+    - 8
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 8
+    - 192
+  - - 128
+    - 8
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 8
+    num_key_value_heads: 8
+    actual_seq_qlen:
+    - 2048
+    - 4096
+    - 6144
+    - 8192
+    actual_seq_kvlen:
+    - 8192
+    - 16384
+    - 24756
+    - 24756
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8192x8x192-K24756x8x192-sparse4-sink128 | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 14
+  input_shape:
+  - - 8192
+    - 8
+    - 128
+  - - 24756
+    - 8
+    - 128
+  - - 24756
+    - 8
+    - 128
+  - - 8192
+    - 8
+    - 64
+  - - 24756
+    - 8
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 8
+    - 128
+  - - 128
+    - 8
+    - 128
+  - - 128
+    - 8
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 8
+    num_key_value_heads: 8
+    actual_seq_qlen:
+    - 2048
+    - 4096
+    - 6144
+    - 8192
+    actual_seq_kvlen:
+    - 8192
+    - 16384
+    - 24756
+    - 24756
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8192x8x128-K24756x8x128-sparse4-sink128-lse-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 15
+  input_shape:
+  - - 4096
+    - 2
+    - 128
+  - - 256
+    - 128
+    - 256
+  - - 256
+    - 128
+    - 256
+  - - 4096
+    - 2
+    - 64
+  - - 256
+    - 128
+    - 128
+  - - 2048
+    - 2048
+  - - 2
+    - 128
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - int32
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 2
+    num_key_value_heads: 2
+    actual_seq_qlen:
+    - 2048
+    - 4096
+    actual_seq_kvlen:
+    - 16384
+    - 16384
+    block_size: 128
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4096x2x128-K256x128x256-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 16
+  input_shape:
+  - - 4094
+    - 2
+    - 128
+  - - 31692
+    - 2
+    - 128
+  - - 31692
+    - 2
+    - 128
+  - - 4094
+    - 2
+    - 64
+  - - 31692
+    - 2
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 128
+  - - 128
+    - 2
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 2
+    num_key_value_heads: 2
+    actual_seq_qlen:
+    - 2047
+    - 4094
+    actual_seq_kvlen:
+    - 15846
+    - 31692
+    block_size: 0
+    pre_tokens: 2047
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4094x2x128-K31692x2x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 17
+  input_shape:
+  - - 4096
+    - 4
+    - 128
+  - - 16384
+    - 4
+    - 128
+  - - 16384
+    - 4
+    - 128
+  - - 4096
+    - 4
+    - 64
+  - - 16384
+    - 4
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 4
+    - 128
+  - - 128
+    - 4
+    - 128
+  - - 128
+    - 4
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 4
+    num_key_value_heads: 4
+    actual_seq_qlen:
+    - 2048
+    - 4096
+    actual_seq_kvlen:
+    - 8192
+    - 16384
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - -10
+    - 10
+  - - -10
+    - 10
+  - - -10
+    - 10
+  - - -10
+    - 10
+  - - -10
+    - 10
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4096x4x128-K16384x4x128-sparse4-sink128-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 18
+  input_shape:
+  - - 2048
+    - 12
+    - 192
+  - - 8192
+    - 12
+    - 192
+  - - 8192
+    - 12
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 12
+    - 192
+  - - 128
+    - 12
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 12
+    num_key_value_heads: 12
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 8192
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - 1
+    - 2
+  - - 1
+    - 2
+  - - 1
+    - 2
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q2048x12x192-K8192x12x192-sparse4-sink128-lse | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 19
+  input_shape:
+  - - 2048
+    - 24
+    - 128
+  - - 8192
+    - 24
+    - 128
+  - - 8192
+    - 24
+    - 128
+  - - 2048
+    - 24
+    - 64
+  - - 8192
+    - 24
+    - 64
+  - - 2048
+    - 2048
+  - - 128
+    - 24
+    - 128
+  - - 128
+    - 24
+    - 128
+  - - 128
+    - 24
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.07216878364870323
+    num_query_heads: 24
+    num_key_value_heads: 24
+    actual_seq_qlen:
+    - 2048
+    actual_seq_kvlen:
+    - 8192
+    block_size: 0
+    pre_tokens: 511
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: true
+    sink_number: 128
+  value_range:
+  - - -10
+    - -1
+  - - -10
+    - -1
+  - - -10
+    - -1
+  - - -10
+    - -1
+  - - -10
+    - -1
+  - null
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q2048x24x128-K8192x24x128-sparse4-sink128-lse-rope | baseline_kernels: FusedInferAttentionScore×1'
+- operator: AiInfraFusedInferAttentionSink
+  case_id: 20
+  input_shape:
+  - - 196
+    - 16
+    - 192
+  - - 65535
+    - 16
+    - 192
+  - - 65535
+    - 16
+    - 128
+  - - 2048
+    - 2048
+  - - 128
+    - 16
+    - 192
+  - - 128
+    - 16
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bool
+  - bfloat16
+  - bfloat16
+  attrs:
+    input_layout: TND
+    softmax_scale: 0.0721687836487032
+    num_query_heads: 16
+    num_key_value_heads: 16
+    actual_seq_qlen:
+    - 1
+    - 3
+    - 5
+    - 7
+    - 9
+    - 11
+    - 12
+    - 14
+    - 15
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 23
+    - 25
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 33
+    - 34
+    - 36
+    - 37
+    - 38
+    - 39
+    - 41
+    - 43
+    - 44
+    - 46
+    - 47
+    - 49
+    - 50
+    - 51
+    - 52
+    - 54
+    - 56
+    - 58
+    - 59
+    - 61
+    - 63
+    - 65
+    - 66
+    - 68
+    - 70
+    - 71
+    - 73
+    - 75
+    - 76
+    - 78
+    - 80
+    - 82
+    - 84
+    - 86
+    - 87
+    - 89
+    - 91
+    - 92
+    - 94
+    - 95
+    - 96
+    - 98
+    - 100
+    - 101
+    - 103
+    - 104
+    - 106
+    - 107
+    - 108
+    - 109
+    - 110
+    - 112
+    - 114
+    - 116
+    - 117
+    - 118
+    - 119
+    - 121
+    - 122
+    - 123
+    - 125
+    - 127
+    - 129
+    - 130
+    - 131
+    - 132
+    - 133
+    - 135
+    - 137
+    - 139
+    - 140
+    - 141
+    - 143
+    - 145
+    - 146
+    - 147
+    - 149
+    - 151
+    - 153
+    - 155
+    - 156
+    - 158
+    - 159
+    - 160
+    - 161
+    - 163
+    - 164
+    - 166
+    - 167
+    - 168
+    - 170
+    - 171
+    - 173
+    - 175
+    - 177
+    - 178
+    - 180
+    - 181
+    - 183
+    - 185
+    - 186
+    - 188
+    - 189
+    - 190
+    - 192
+    - 194
+    - 196
+    actual_seq_kvlen:
+    - 88
+    - 213
+    - 220
+    - 330
+    - 343
+    - 7127
+    - 7154
+    - 7173
+    - 7252
+    - 15316
+    - 15320
+    - 15345
+    - 15458
+    - 15577
+    - 23513
+    - 24793
+    - 24841
+    - 29705
+    - 31753
+    - 32137
+    - 37257
+    - 37284
+    - 37310
+    - 37378
+    - 37466
+    - 37565
+    - 37624
+    - 37634
+    - 42626
+    - 48642
+    - 48695
+    - 48798
+    - 48818
+    - 48851
+    - 51667
+    - 52307
+    - 52339
+    - 52346
+    - 57978
+    - 57985
+    - 58044
+    - 58104
+    - 58113
+    - 58130
+    - 58130
+    - 58236
+    - 58320
+    - 58386
+    - 58499
+    - 58579
+    - 61395
+    - 63571
+    - 63571
+    - 63683
+    - 63683
+    - 63683
+    - 63782
+    - 63808
+    - 63808
+    - 63808
+    - 63908
+    - 64000
+    - 64000
+    - 64000
+    - 64012
+    - 64102
+    - 64156
+    - 64249
+    - 64362
+    - 64430
+    - 64513
+    - 64513
+    - 64623
+    - 64660
+    - 64660
+    - 64660
+    - 64784
+    - 64784
+    - 64784
+    - 64784
+    - 64894
+    - 64972
+    - 65093
+    - 65164
+    - 65218
+    - 65249
+    - 65319
+    - 65359
+    - 65462
+    - 65462
+    - 65462
+    - 65462
+    - 65462
+    - 65462
+    - 65519
+    - 65519
+    - 65519
+    - 65519
+    - 65519
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65523
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    - 65535
+    block_size: 0
+    pre_tokens: 1000000
+    next_tokens: 0
+    sparse_mode: 4
+    inner_precise: 0
+    return_softmax_lse: false
+    sink_number: 128
+  value_range:
+  - - 10
+    - 1000
+  - - -10
+    - 1000
+  - - -10
+    - 1000
+  - null
+  - null
+  - null
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-bfloat16-TND-Q196x16x192-K65535x16x192-sparse4-sink128 | baseline_kernels: FusedInferAttentionScore×1'

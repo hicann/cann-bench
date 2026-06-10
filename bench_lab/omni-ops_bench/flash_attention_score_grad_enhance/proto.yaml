@@ -1,0 +1,155 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: FlashAttentionScoreGradEnhance
+  category: FusedComposite
+  difficulty: L4
+  formula: Computes query, key, value and rope gradients for FlashAttentionScoreEnhance.
+  description: Computes query, key, value and rope gradients for FlashAttentionScoreEnhance.
+  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  attrs:
+  - name: head_num
+    type: int
+    default: 1
+    required: false
+  - name: input_layout
+    type: string
+    default: TND
+    required: false
+  - name: scale
+    type: float
+    default: 1.0
+    required: false
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: keep_prob
+    type: float
+    default: 1.0
+    required: false
+  - name: pre_tokens
+    type: int
+    default: 511
+    required: false
+  - name: next_tokens
+    type: int
+    default: 0
+    required: false
+  - name: inner_precise
+    type: int
+    default: null
+    required: false
+  - name: actual_seq_qlen
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_kvlen
+    type: int[]
+    default: null
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: sink_num
+    type: int
+    default: 2
+    required: false
+  - name: pse_type
+    type: int
+    default: null
+    required: false
+  - name: softmaxInLayout
+    type: string
+    default: ''
+    required: false
+  inputs:
+  - name: query
+    description: Query tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: key
+    description: Key tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: value
+    description: Value tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dy
+    description: Output gradient tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: query_rope
+    description: Optional query rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  - name: key_rope
+    description: Optional key rope
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+    shape: case dependent
+  - name: pse
+    description: Optional PSE tensor
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    optional: true
+    shape: case dependent
+  - name: atten_mask
+    description: Optional attention mask
+    dtype:
+    - bool
+    - uint8
+    optional: true
+    shape: case dependent
+  outputs:
+  - name: dq
+    description: Query gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dk
+    description: Key gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  - name: dv
+    description: Value gradient
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: case dependent
+  schema: flash_attention_score_grad_enhance(Tensor query, Tensor key, Tensor value, Tensor dy, int head_num, str input_layout="TND", *, Tensor? pse=None, Tensor? padding_mask=None, Tensor? atten_mask=None, Tensor? softmax_max=None, Tensor? softmax_sum=None, Tensor? softmax_in=None, Tensor? attention_in=None, Tensor? sink_tensor=None, Tensor? query_rope=None, Tensor? key_rope=None, float scale_value=1.0, float? scale=None, float keep_prob=1.0, int pre_tokens=2147483647, int next_tokens=2147483647, int inner_precise=0, Tensor? prefix=None, SymInt[]? actual_seq_qlen=None, SymInt[]? actual_seq_kvlen=None, int sparse_mode=0, int sink_num=0, int pse_type=1, str softmaxInLayout="", Tensor? q_start_idx=None, Tensor? kv_start_idx=None) -> (Tensor dq, Tensor dk, Tensor dv)

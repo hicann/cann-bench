@@ -1,0 +1,2210 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: AiInfraEsaSelectTopk
+  case_id: 1
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 4
+    topk: 4
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 8192
+    actual_seq_k_len_optional:
+    - 14234
+    chunk_size: 8192
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 890
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 2
+  input_shape:
+  - - 16
+    - 32
+    - 128
+  - - 16
+    - 8192
+    - 2
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 32
+    topk: 61
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    actual_seq_k_len_optional:
+    - 968
+    - 1612
+    - 5170
+    - 7216
+    - 7788
+    - 13521
+    - 14252
+    - 15044
+    - 15624
+    - 16875
+    - 17813
+    - 20324
+    - 21163
+    - 22067
+    - 27709
+    - 29118
+    actual_cmp_seq_k_len_optional:
+    - 61
+    - 41
+    - 223
+    - 128
+    - 36
+    - 359
+    - 46
+    - 50
+    - 37
+    - 79
+    - 59
+    - 157
+    - 53
+    - 57
+    - 353
+    - 89
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q16x32x128-K16x8192x2x128-topk61 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 3
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 4
+    topk: 4
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1000
+    - 2400
+    - 3000
+    - 8000
+    actual_seq_k_len_optional:
+    - 1000
+    - 2400
+    - 3000
+    - 8000
+    chunk_size: 8000
+    chunk_index: 1
+    actual_cmp_seq_k_len_optional:
+    - 63
+    - 88
+    - 38
+    - 313
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 4
+  input_shape:
+  - - 16
+    - 16
+    - 128
+  - - 16
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 16
+    topk: 30
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    actual_seq_k_len_optional:
+    - 14199
+    - 32866
+    - 156797
+    - 182381
+    - 197098
+    - 207595
+    - 265224
+    - 275322
+    - 301465
+    - 311077
+    - 365774
+    - 387981
+    - 420473
+    - 430408
+    - 449443
+    - 457544
+    actual_cmp_seq_k_len_optional:
+    - 888
+    - 1167
+    - 7746
+    - 1599
+    - 920
+    - 657
+    - 3602
+    - 632
+    - 1634
+    - 601
+    - 3419
+    - 1388
+    - 2031
+    - 621
+    - 1190
+    - 507
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q16x16x128-K16x8192x1x128-topk30 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 5
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 0
+    topk: 8
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 3072
+    actual_seq_k_len_optional:
+    - 3720
+    chunk_size: 3072
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 233
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk8 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 6
+  input_shape:
+  - - 64
+    - 16
+    - 128
+  - - 64
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 32
+    topk: 61
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    actual_seq_k_len_optional:
+    - 14355
+    - 15386
+    - 50195
+    - 55132
+    - 78311
+    - 79220
+    - 105212
+    - 105730
+    - 119966
+    - 121042
+    - 122085
+    - 145314
+    - 149088
+    - 153197
+    - 267763
+    - 383804
+    - 411409
+    - 531997
+    - 532662
+    - 533860
+    - 537695
+    - 554532
+    - 564334
+    - 624505
+    - 685578
+    - 686384
+    - 687167
+    - 732292
+    - 782545
+    - 783110
+    - 822661
+    - 830532
+    - 924181
+    - 939171
+    - 965270
+    - 1034969
+    - 1088316
+    - 1088879
+    - 1099462
+    - 1135600
+    - 1205242
+    - 1228912
+    - 1234129
+    - 1235019
+    - 1314351
+    - 1316917
+    - 1338670
+    - 1339881
+    - 1381558
+    - 1391977
+    - 1394408
+    - 1469388
+    - 1494437
+    - 1518680
+    - 1526932
+    - 1527630
+    - 1571458
+    - 1573039
+    - 1587849
+    - 1594994
+    - 1677205
+    - 1678314
+    - 1679520
+    - 1681964
+    actual_cmp_seq_k_len_optional:
+    - 898
+    - 65
+    - 2176
+    - 309
+    - 1449
+    - 57
+    - 1625
+    - 33
+    - 890
+    - 68
+    - 66
+    - 1452
+    - 236
+    - 257
+    - 7161
+    - 7253
+    - 1726
+    - 7537
+    - 42
+    - 75
+    - 240
+    - 1053
+    - 613
+    - 3761
+    - 3818
+    - 51
+    - 49
+    - 2821
+    - 3141
+    - 36
+    - 2472
+    - 492
+    - 5854
+    - 937
+    - 1632
+    - 4357
+    - 3335
+    - 36
+    - 662
+    - 2259
+    - 4353
+    - 1480
+    - 327
+    - 56
+    - 4959
+    - 161
+    - 1360
+    - 76
+    - 2605
+    - 652
+    - 152
+    - 4687
+    - 1566
+    - 1516
+    - 516
+    - 44
+    - 2740
+    - 99
+    - 926
+    - 447
+    - 5139
+    - 70
+    - 76
+    - 153
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q64x16x128-K64x8192x1x128-topk61 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 7
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 4
+    topk: 4
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1351
+    - 2062
+    - 4096
+    actual_seq_k_len_optional:
+    - 1351
+    - 2062
+    - 4096
+    chunk_size: 4096
+    chunk_index: 1
+    actual_cmp_seq_k_len_optional:
+    - 85
+    - 45
+    - 128
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 8
+  input_shape:
+  - - 8
+    - 16
+    - 128
+  - - 8
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 32
+    topk: 61
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    actual_seq_k_len_optional:
+    - 131072
+    - 262144
+    - 393216
+    - 524288
+    - 655360
+    - 786432
+    - 917504
+    - 1048576
+    actual_cmp_seq_k_len_optional:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q8x16x128-K8x8192x1x128-topk61 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 9
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 8
+    topk: 8
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 6384
+    actual_seq_k_len_optional:
+    - 14298
+    chunk_size: 10000
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 894
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk8 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 10
+  input_shape:
+  - - 4
+    - 16
+    - 128
+  - - 4
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 32
+    topk: 61
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    actual_seq_k_len_optional:
+    - 131072
+    - 262144
+    - 393216
+    - 524288
+    actual_cmp_seq_k_len_optional:
+    - 8192
+    - 8192
+    - 8192
+    - 8192
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q4x16x128-K4x8192x1x128-topk61 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 11
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 8
+    topk: 16
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 8100
+    actual_seq_k_len_optional:
+    - 14128
+    chunk_size: 8100
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 883
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 12
+  input_shape:
+  - - 1
+    - 16
+    - 128
+  - - 1
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 32
+    topk: 61
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    actual_seq_k_len_optional:
+    - 131072
+    actual_cmp_seq_k_len_optional:
+    - 8192
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'S-bfloat16-TND-Q1x16x128-K1x8192x1x128-topk61 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 13
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 0
+    local_blk_num: 8
+    topk: 16
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1000
+    - 2400
+    - 3000
+    - 4096
+    actual_seq_k_len_optional:
+    - 1000
+    - 2400
+    - 3000
+    - 4096
+    chunk_size: 5000
+    chunk_index: 1
+    actual_cmp_seq_k_len_optional:
+    - 63
+    - 88
+    - 38
+    - 69
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 14
+  input_shape:
+  - - 128
+    - 16
+    - 128
+  - - 128
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 0
+    local_blk_num: 5
+    topk: 5
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    - 65
+    - 66
+    - 67
+    - 68
+    - 69
+    - 70
+    - 71
+    - 72
+    - 73
+    - 74
+    - 75
+    - 76
+    - 77
+    - 78
+    - 79
+    - 80
+    - 81
+    - 82
+    - 83
+    - 84
+    - 85
+    - 86
+    - 87
+    - 88
+    - 89
+    - 90
+    - 91
+    - 92
+    - 93
+    - 94
+    - 95
+    - 96
+    - 97
+    - 98
+    - 99
+    - 100
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    - 106
+    - 107
+    - 108
+    - 109
+    - 110
+    - 111
+    - 112
+    - 113
+    - 114
+    - 115
+    - 116
+    - 117
+    - 118
+    - 119
+    - 120
+    - 121
+    - 122
+    - 123
+    - 124
+    - 125
+    - 126
+    - 127
+    - 128
+    actual_seq_k_len_optional:
+    - 1999
+    - 5321
+    - 6385
+    - 6904
+    - 7393
+    - 8642
+    - 10323
+    - 11983
+    - 12956
+    - 13524
+    - 14794
+    - 16836
+    - 20022
+    - 20404
+    - 21318
+    - 22817
+    - 23124
+    - 23625
+    - 24233
+    - 24732
+    - 25413
+    - 27900
+    - 29116
+    - 31496
+    - 32188
+    - 32584
+    - 34726
+    - 35054
+    - 37502
+    - 39107
+    - 40488
+    - 40800
+    - 44209
+    - 44468
+    - 45751
+    - 46553
+    - 48465
+    - 50969
+    - 51595
+    - 52481
+    - 56036
+    - 57311
+    - 59716
+    - 60977
+    - 61791
+    - 62238
+    - 64859
+    - 66152
+    - 67343
+    - 68285
+    - 71695
+    - 72071
+    - 73161
+    - 73935
+    - 74675
+    - 76164
+    - 78868
+    - 80140
+    - 80428
+    - 80799
+    - 82100
+    - 84271
+    - 85759
+    - 86822
+    - 87379
+    - 89223
+    - 92630
+    - 95470
+    - 96105
+    - 96370
+    - 96904
+    - 99176
+    - 99955
+    - 101614
+    - 102216
+    - 102771
+    - 105483
+    - 105803
+    - 106590
+    - 107130
+    - 107525
+    - 108713
+    - 111665
+    - 112857
+    - 113520
+    - 114202
+    - 115066
+    - 118417
+    - 120031
+    - 122193
+    - 123166
+    - 124526
+    - 125120
+    - 126185
+    - 128722
+    - 131859
+    - 132340
+    - 133956
+    - 134265
+    - 134788
+    - 136066
+    - 136774
+    - 139179
+    - 140299
+    - 143649
+    - 144309
+    - 144837
+    - 145865
+    - 147955
+    - 148946
+    - 149276
+    - 151029
+    - 151453
+    - 151806
+    - 154993
+    - 158123
+    - 159127
+    - 159417
+    - 159813
+    - 160170
+    - 161974
+    - 164084
+    - 165704
+    - 167239
+    - 167744
+    - 168042
+    - 168364
+    - 171911
+    actual_cmp_seq_k_len_optional:
+    - 125
+    - 208
+    - 67
+    - 33
+    - 31
+    - 79
+    - 106
+    - 104
+    - 61
+    - 36
+    - 80
+    - 128
+    - 200
+    - 24
+    - 58
+    - 94
+    - 20
+    - 32
+    - 38
+    - 32
+    - 43
+    - 156
+    - 76
+    - 149
+    - 44
+    - 25
+    - 134
+    - 21
+    - 153
+    - 101
+    - 87
+    - 20
+    - 214
+    - 17
+    - 81
+    - 51
+    - 120
+    - 157
+    - 40
+    - 56
+    - 223
+    - 80
+    - 151
+    - 79
+    - 51
+    - 28
+    - 164
+    - 81
+    - 75
+    - 59
+    - 214
+    - 24
+    - 69
+    - 49
+    - 47
+    - 94
+    - 169
+    - 80
+    - 18
+    - 24
+    - 82
+    - 136
+    - 93
+    - 67
+    - 35
+    - 116
+    - 213
+    - 178
+    - 40
+    - 17
+    - 34
+    - 142
+    - 49
+    - 104
+    - 38
+    - 35
+    - 170
+    - 20
+    - 50
+    - 34
+    - 25
+    - 75
+    - 185
+    - 75
+    - 42
+    - 43
+    - 54
+    - 210
+    - 101
+    - 136
+    - 61
+    - 85
+    - 38
+    - 67
+    - 159
+    - 197
+    - 31
+    - 101
+    - 20
+    - 33
+    - 80
+    - 45
+    - 151
+    - 70
+    - 210
+    - 42
+    - 33
+    - 65
+    - 131
+    - 62
+    - 21
+    - 110
+    - 27
+    - 23
+    - 200
+    - 196
+    - 63
+    - 19
+    - 25
+    - 23
+    - 113
+    - 132
+    - 102
+    - 96
+    - 32
+    - 19
+    - 21
+    - 222
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-float16-TND-Q128x16x128-K128x8192x1x128-topk5 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 15
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 0
+    local_blk_num: 0
+    topk: 16
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 4851
+    - 9100
+    actual_seq_k_len_optional:
+    - 4851
+    - 9100
+    chunk_size: 9100
+    chunk_index: 1
+    actual_cmp_seq_k_len_optional:
+    - 304
+    - 266
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 16
+  input_shape:
+  - - 256
+    - 16
+    - 128
+  - - 256
+    - 8192
+    - 1
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 0
+    local_blk_num: 0
+    topk: 8
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    - 65
+    - 66
+    - 67
+    - 68
+    - 69
+    - 70
+    - 71
+    - 72
+    - 73
+    - 74
+    - 75
+    - 76
+    - 77
+    - 78
+    - 79
+    - 80
+    - 81
+    - 82
+    - 83
+    - 84
+    - 85
+    - 86
+    - 87
+    - 88
+    - 89
+    - 90
+    - 91
+    - 92
+    - 93
+    - 94
+    - 95
+    - 96
+    - 97
+    - 98
+    - 99
+    - 100
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    - 106
+    - 107
+    - 108
+    - 109
+    - 110
+    - 111
+    - 112
+    - 113
+    - 114
+    - 115
+    - 116
+    - 117
+    - 118
+    - 119
+    - 120
+    - 121
+    - 122
+    - 123
+    - 124
+    - 125
+    - 126
+    - 127
+    - 128
+    - 129
+    - 130
+    - 131
+    - 132
+    - 133
+    - 134
+    - 135
+    - 136
+    - 137
+    - 138
+    - 139
+    - 140
+    - 141
+    - 142
+    - 143
+    - 144
+    - 145
+    - 146
+    - 147
+    - 148
+    - 149
+    - 150
+    - 151
+    - 152
+    - 153
+    - 154
+    - 155
+    - 156
+    - 157
+    - 158
+    - 159
+    - 160
+    - 161
+    - 162
+    - 163
+    - 164
+    - 165
+    - 166
+    - 167
+    - 168
+    - 169
+    - 170
+    - 171
+    - 172
+    - 173
+    - 174
+    - 175
+    - 176
+    - 177
+    - 178
+    - 179
+    - 180
+    - 181
+    - 182
+    - 183
+    - 184
+    - 185
+    - 186
+    - 187
+    - 188
+    - 189
+    - 190
+    - 191
+    - 192
+    - 193
+    - 194
+    - 195
+    - 196
+    - 197
+    - 198
+    - 199
+    - 200
+    - 201
+    - 202
+    - 203
+    - 204
+    - 205
+    - 206
+    - 207
+    - 208
+    - 209
+    - 210
+    - 211
+    - 212
+    - 213
+    - 214
+    - 215
+    - 216
+    - 217
+    - 218
+    - 219
+    - 220
+    - 221
+    - 222
+    - 223
+    - 224
+    - 225
+    - 226
+    - 227
+    - 228
+    - 229
+    - 230
+    - 231
+    - 232
+    - 233
+    - 234
+    - 235
+    - 236
+    - 237
+    - 238
+    - 239
+    - 240
+    - 241
+    - 242
+    - 243
+    - 244
+    - 245
+    - 246
+    - 247
+    - 248
+    - 249
+    - 250
+    - 251
+    - 252
+    - 253
+    - 254
+    - 255
+    - 256
+    actual_seq_k_len_optional:
+    - 203
+    - 361
+    - 605
+    - 1076
+    - 1249
+    - 1390
+    - 1647
+    - 1862
+    - 2309
+    - 2638
+    - 2804
+    - 2935
+    - 3823
+    - 4101
+    - 4699
+    - 5024
+    - 5668
+    - 6433
+    - 7084
+    - 7659
+    - 8246
+    - 8398
+    - 8557
+    - 8950
+    - 9288
+    - 9823
+    - 9957
+    - 10134
+    - 10285
+    - 10665
+    - 10793
+    - 11443
+    - 11581
+    - 12287
+    - 12464
+    - 12758
+    - 12937
+    - 13379
+    - 13548
+    - 13730
+    - 14128
+    - 14306
+    - 14511
+    - 14812
+    - 15099
+    - 15229
+    - 15432
+    - 15626
+    - 15928
+    - 16240
+    - 16887
+    - 17217
+    - 17471
+    - 18321
+    - 18635
+    - 18818
+    - 19657
+    - 19917
+    - 20703
+    - 20837
+    - 21021
+    - 21359
+    - 21508
+    - 21972
+    - 22155
+    - 22704
+    - 23063
+    - 23219
+    - 23885
+    - 24074
+    - 24964
+    - 25092
+    - 25512
+    - 25683
+    - 26127
+    - 26465
+    - 27142
+    - 27591
+    - 27887
+    - 28783
+    - 28955
+    - 29501
+    - 29719
+    - 29904
+    - 30112
+    - 30243
+    - 30486
+    - 30790
+    - 31390
+    - 31816
+    - 32687
+    - 32932
+    - 33256
+    - 33700
+    - 33936
+    - 34112
+    - 34587
+    - 34729
+    - 35295
+    - 35760
+    - 36504
+    - 37094
+    - 37330
+    - 37851
+    - 38033
+    - 38268
+    - 38421
+    - 38684
+    - 39362
+    - 39596
+    - 39784
+    - 40536
+    - 40686
+    - 41241
+    - 41806
+    - 41961
+    - 42334
+    - 42790
+    - 43017
+    - 43193
+    - 43470
+    - 44221
+    - 44622
+    - 44848
+    - 45234
+    - 45695
+    - 46231
+    - 46466
+    - 46618
+    - 46761
+    - 46941
+    - 47132
+    - 47962
+    - 48535
+    - 48978
+    - 49132
+    - 49263
+    - 49668
+    - 49827
+    - 50630
+    - 51557
+    - 51748
+    - 52075
+    - 52239
+    - 52377
+    - 52645
+    - 52877
+    - 53058
+    - 53629
+    - 54090
+    - 54887
+    - 55242
+    - 55739
+    - 56284
+    - 56639
+    - 57637
+    - 57787
+    - 57943
+    - 58514
+    - 59059
+    - 59554
+    - 60053
+    - 60669
+    - 61035
+    - 61204
+    - 61604
+    - 61763
+    - 62317
+    - 62941
+    - 63163
+    - 63377
+    - 63852
+    - 64290
+    - 64636
+    - 64835
+    - 65610
+    - 65832
+    - 66324
+    - 66488
+    - 66845
+    - 67741
+    - 68045
+    - 68605
+    - 69037
+    - 69178
+    - 69901
+    - 70061
+    - 70225
+    - 70402
+    - 70542
+    - 70956
+    - 71206
+    - 71402
+    - 71588
+    - 71766
+    - 71951
+    - 72575
+    - 73441
+    - 73764
+    - 74493
+    - 74823
+    - 75202
+    - 75409
+    - 76330
+    - 76495
+    - 76747
+    - 76999
+    - 77354
+    - 77495
+    - 78437
+    - 78657
+    - 79340
+    - 79611
+    - 79742
+    - 80369
+    - 80500
+    - 81157
+    - 81734
+    - 81881
+    - 82261
+    - 82420
+    - 82607
+    - 83243
+    - 83990
+    - 84840
+    - 85151
+    - 85795
+    - 86577
+    - 87240
+    - 87944
+    - 88186
+    - 88485
+    - 88888
+    - 89814
+    - 90632
+    - 90936
+    - 91065
+    - 92004
+    - 92314
+    - 93296
+    - 93427
+    - 93645
+    - 94292
+    - 94456
+    - 94605
+    - 94846
+    - 95040
+    - 95941
+    - 96445
+    - 96774
+    - 97430
+    - 97677
+    - 98485
+    - 99093
+    - 99571
+    - 99711
+    actual_cmp_seq_k_len_optional:
+    - 13
+    - 10
+    - 16
+    - 30
+    - 11
+    - 9
+    - 17
+    - 14
+    - 28
+    - 21
+    - 11
+    - 9
+    - 56
+    - 18
+    - 38
+    - 21
+    - 41
+    - 48
+    - 41
+    - 36
+    - 37
+    - 10
+    - 10
+    - 25
+    - 22
+    - 34
+    - 9
+    - 12
+    - 10
+    - 24
+    - 8
+    - 41
+    - 9
+    - 45
+    - 12
+    - 19
+    - 12
+    - 28
+    - 11
+    - 12
+    - 25
+    - 12
+    - 13
+    - 19
+    - 18
+    - 9
+    - 13
+    - 13
+    - 19
+    - 20
+    - 41
+    - 21
+    - 16
+    - 54
+    - 20
+    - 12
+    - 53
+    - 17
+    - 50
+    - 9
+    - 12
+    - 22
+    - 10
+    - 29
+    - 12
+    - 35
+    - 23
+    - 10
+    - 42
+    - 12
+    - 56
+    - 8
+    - 27
+    - 11
+    - 28
+    - 22
+    - 43
+    - 29
+    - 19
+    - 56
+    - 11
+    - 35
+    - 14
+    - 12
+    - 13
+    - 9
+    - 16
+    - 19
+    - 38
+    - 27
+    - 55
+    - 16
+    - 21
+    - 28
+    - 15
+    - 11
+    - 30
+    - 9
+    - 36
+    - 30
+    - 47
+    - 37
+    - 15
+    - 33
+    - 12
+    - 15
+    - 10
+    - 17
+    - 43
+    - 15
+    - 12
+    - 47
+    - 10
+    - 35
+    - 36
+    - 10
+    - 24
+    - 29
+    - 15
+    - 11
+    - 18
+    - 47
+    - 26
+    - 15
+    - 25
+    - 29
+    - 34
+    - 15
+    - 10
+    - 9
+    - 12
+    - 12
+    - 52
+    - 36
+    - 28
+    - 10
+    - 9
+    - 26
+    - 10
+    - 51
+    - 58
+    - 12
+    - 21
+    - 11
+    - 9
+    - 17
+    - 15
+    - 12
+    - 36
+    - 29
+    - 50
+    - 23
+    - 32
+    - 35
+    - 23
+    - 63
+    - 10
+    - 10
+    - 36
+    - 35
+    - 31
+    - 32
+    - 39
+    - 23
+    - 11
+    - 25
+    - 10
+    - 35
+    - 39
+    - 14
+    - 14
+    - 30
+    - 28
+    - 22
+    - 13
+    - 49
+    - 14
+    - 31
+    - 11
+    - 23
+    - 56
+    - 19
+    - 35
+    - 27
+    - 9
+    - 46
+    - 10
+    - 11
+    - 12
+    - 9
+    - 26
+    - 16
+    - 13
+    - 12
+    - 12
+    - 12
+    - 39
+    - 55
+    - 21
+    - 46
+    - 21
+    - 24
+    - 13
+    - 58
+    - 11
+    - 16
+    - 16
+    - 23
+    - 9
+    - 59
+    - 14
+    - 43
+    - 17
+    - 9
+    - 40
+    - 9
+    - 42
+    - 37
+    - 10
+    - 24
+    - 10
+    - 12
+    - 40
+    - 47
+    - 54
+    - 20
+    - 41
+    - 49
+    - 42
+    - 44
+    - 16
+    - 19
+    - 26
+    - 58
+    - 52
+    - 19
+    - 9
+    - 59
+    - 20
+    - 62
+    - 9
+    - 14
+    - 41
+    - 11
+    - 10
+    - 16
+    - 13
+    - 57
+    - 32
+    - 21
+    - 41
+    - 16
+    - 51
+    - 38
+    - 30
+    - 9
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'L-float16-TND-Q256x16x128-K256x8192x1x128-topk8 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 17
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 8
+    topk: 30
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 4384
+    actual_seq_k_len_optional:
+    - 12153
+    chunk_size: 12000
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 760
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-bfloat16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 18
+  input_shape:
+  - - 4
+    - 32
+    - 128
+  - - 4
+    - 8192
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 1000
+    local_blk_num: 1000
+    topk: 1000
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1
+    - 2
+    - 3
+    - 4
+    actual_seq_k_len_optional:
+    - 41259
+    - 102418
+    - 144762
+    - 267144
+    actual_cmp_seq_k_len_optional:
+    - 2579
+    - 3823
+    - 2647
+    - 7649
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q4x32x128-K4x8192x2x128-topk1000 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 19
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 16
+    topk: 30
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 8192
+    actual_seq_k_len_optional:
+    - 14234
+    chunk_size: 8192
+    chunk_index: 2
+    actual_cmp_seq_k_len_optional:
+    - 890
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'
+- operator: AiInfraEsaSelectTopk
+  case_id: 20
+  input_shape:
+  - - 16384
+    - 32
+    - 128
+  - - 2
+    - 16384
+    - 2
+    - 128
+  dtype:
+  - float16
+  - float16
+  attrs:
+    blk_size: 64
+    init_blk_num: 2
+    local_blk_num: 16
+    topk: 30
+    input_layout: TND
+    compress_blk_size: 16
+    actual_seq_q_len_optional:
+    - 1500
+    - 2424
+    - 8192
+    actual_seq_k_len_optional:
+    - 1500
+    - 2424
+    - 8192
+    chunk_size: 8192
+    chunk_index: 1
+    actual_cmp_seq_k_len_optional:
+    - 94
+    - 58
+    - 361
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  baseline_perf_us: null
+  t_hw_us: null
+  note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'

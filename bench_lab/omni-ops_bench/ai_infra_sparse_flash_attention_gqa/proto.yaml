@@ -1,0 +1,132 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AiInfraSparseFlashAttentionGqa
+  category: FusedComposite
+  difficulty: L4
+  formula: attention_out = softmax((Q @ K_sparse^T) * scale_value) @ V_sparse
+  description: 面向长序列推理的 Grouped-Query Sparse FlashAttention 算子，按 sparse_indices 选取稀疏
+    KV block 参与注意力计算。
+  shape_support: 'query: [B,S1,N1,D] 或 [T1,N1,D]; key/value: [B,S2,N2,D]、[T2,N2,D]
+    或 PA 布局'
+  attrs:
+  - name: scale_value
+    type: float
+    default: 1.0
+    required: false
+  - name: sparse_block_size
+    type: int
+    default: 1
+    required: false
+  - name: num_query_heads
+    type: int
+    default: 16
+    required: false
+  - name: num_key_value_heads
+    type: int
+    default: 1
+    required: false
+  - name: input_layout
+    type: string
+    default: TND
+    required: false
+  - name: input_layout_kv
+    type: string
+    default: BSND
+    required: false
+  - name: sparse_mode
+    type: int
+    default: 3
+    required: false
+  - name: block_size
+    type: int
+    default: 128
+    required: false
+  - name: sparse_block_count
+    type: int
+    default: 96
+    required: false
+  - name: actual_seq_lengths_query
+    type: int[]
+    default: null
+    required: false
+  - name: actual_seq_lengths_kv
+    type: int[]
+    default: null
+    required: false
+  - name: return_softmax_lse
+    type: bool
+    default: false
+    required: false
+  - name: pre_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  - name: next_tokens
+    type: int
+    default: 9223372036854775807
+    required: false
+  inputs:
+  - name: query
+    description: Query 张量
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B,S1,N1,D] 或 [T1,N1,D]'
+  - name: key
+    description: Key 张量
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B,S2,N2,D]、[T2,N2,D] 或 PA 布局'
+  - name: value
+    description: Value 张量
+    dtype:
+    - float16
+    - bfloat16
+    shape: 与 key 一致
+  - name: sparse_indices
+    description: 稀疏 KV block 索引，无效值为 -1
+    dtype:
+    - int32
+    shape: '[B,S1,N2,sparse_size] 或 [T1,N2,sparse_size]'
+  - name: block_table
+    description: PageAttention block 映射表
+    dtype:
+    - int32
+    optional: true
+  - name: actual_seq_lengths_query
+    description: query 实际长度；TND 时为前缀和
+    dtype:
+    - int32
+    optional: true
+  - name: actual_seq_lengths_kv
+    description: key/value 实际长度；TND/PA 布局时必选
+    dtype:
+    - int32
+    optional: true
+  outputs:
+  - name: attention_out
+    description: Attention 输出
+    dtype:
+    - float16
+    - bfloat16
+    shape: 与 query 形状对应
+  - name: softmax_lse
+    description: 可选 softmax log-sum-exp 输出
+    dtype:
+    - float32
+  schema: ai_infra_sparse_flash_attention_gqa(Tensor query, Tensor key, Tensor value,
+    Tensor sparse_indices, float scale_value, int sparse_block_size, *, Tensor? actual_seq_lengths_query=None,
+    Tensor? actual_seq_lengths_kv=None, Tensor? block_table=None, int num_query_heads=1,
+    int num_key_value_heads=0, str input_layout="BSH", str input_layout_kv="BSND",
+    int sparse_mode=0, int block_size=0, bool return_softmax_lse=False) -> (Tensor
+    attention_out, Tensor softmax_lse)
