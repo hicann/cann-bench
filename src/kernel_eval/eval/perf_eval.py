@@ -218,10 +218,13 @@ class PerfEvaluator:
             from ..security.torch_op_guard import TorchOpGuard
             with TorchOpGuard.pause():
                 mm1, mm2, reduce_input = self._warmup_tensors
-                torch.matmul(mm1, mm2)
-                torch.npu.synchronize(mm1.device)
-                torch.max(reduce_input)
-                torch.npu.synchronize(mm1.device)
+                try:
+                    torch.matmul(mm1, mm2)
+                    torch.npu.synchronize(mm1.device)
+                    torch.max(reduce_input)
+                    torch.npu.synchronize(mm1.device)
+                except RuntimeError:
+                    torch.npu.synchronize(mm1.device)
 
     def _clear_cache(self):
         """清空 L2 cache (在每次测量 step 前调用，保证测量间 cache 状态一致)
@@ -233,8 +236,11 @@ class PerfEvaluator:
             from ..security.torch_op_guard import TorchOpGuard
             with TorchOpGuard.pause():
                 _, _, reduce_input = self._warmup_tensors
-                torch.max(reduce_input)
-                torch.npu.synchronize(reduce_input.device)
+                try:
+                    torch.max(reduce_input)
+                    torch.npu.synchronize(reduce_input.device)
+                except RuntimeError:
+                    torch.npu.synchronize(reduce_input.device)
 
     def _profile(self, fn: Callable, prof_dir: str, warmup: int, repeat: int):
         """Execute warmup + repeat calls with NPU profiler.

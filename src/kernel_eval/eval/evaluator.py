@@ -791,7 +791,7 @@ class Evaluator:
     def _format_output_diagnostic(cls, run_result: OpRunResult) -> str:
         parts = [
             f"AI算子输出类型: {type(run_result.outputs).__name__}",
-            f"AI算子输出repr: {cls._short_repr(run_result.outputs)}",
+            f"AI算子输出结构: {cls._structure_summary(run_result.outputs)}",
         ]
         if run_result.error:
             parts.append(f"AI算子执行错误: {run_result.error}")
@@ -802,11 +802,16 @@ class Evaluator:
         return "\n".join(parts)
 
     @staticmethod
-    def _short_repr(value: Any, limit: int = 500) -> str:
-        text = repr(value)
-        if len(text) > limit:
-            return text[:limit] + "...<truncated>"
-        return text
+    def _structure_summary(value: Any) -> str:
+        if value is None:
+            return "None"
+        if isinstance(value, torch.Tensor):
+            return f"Tensor(shape={value.shape}, dtype={value.dtype}, device={value.device})"
+        if isinstance(value, (list, tuple)):
+            type_name = type(value).__name__
+            items = [Evaluator._structure_summary(v) for v in value]
+            return f"{type_name}({', '.join(items)})"
+        return f"{type(value).__name__}({value!r})"
 
     def _filter_cases(self, cases: List[CaseSpec], filter_dict: Dict) -> List[CaseSpec]:
         """筛选用例"""
