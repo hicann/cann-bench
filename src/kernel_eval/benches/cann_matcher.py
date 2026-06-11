@@ -64,6 +64,9 @@ class OperatorMatcher(OperatorMatcherBase):
             operator_name.lower(),
             operator_name,
         ]
+        schema_fn = self._get_schema_function_name(operator_name)
+        if schema_fn and schema_fn not in candidates:
+            candidates.append(schema_fn)
 
         # 1. 先尝试 torch.ops.cann_bench（golden whl）
         try:
@@ -122,6 +125,14 @@ class OperatorMatcher(OperatorMatcherBase):
         for op_info in operators:
             if target in snake_case_candidates(op_info.name):
                 return op_info
+        return None
+
+    def _get_schema_function_name(self, operator_name: str) -> Optional[str]:
+        op_info = self.find_operator_info(operator_name)
+        if op_info is not None:
+            fn = op_info.get_function_name()
+            if fn:
+                return fn
         return None
 
     def clear_cache(self):

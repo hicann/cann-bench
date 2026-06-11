@@ -2,7 +2,7 @@
 
 ## 1. 任务范围
 
-本任务是 PyPTO 专用的 Exp selected-case benchmark，路径为 `bench_lab/pypto_cann_bench/exp`。它只要求覆盖当前目录 `cases.yaml` / `cases.csv` 中列出的测试集。
+本任务是 PyPTO 专用的 Exp selected-case benchmark，路径为 `bench_lab/pypto_cann_bench/level1/exp`。它只要求覆盖当前目录 `cases.yaml` / `cases.csv` 中列出的测试集。
 
 覆盖范围：
 

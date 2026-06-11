@@ -44,6 +44,8 @@ extra-info/
 fusion_result.json
 
 # Project specific
+benchmark_runs/
+.auto_pipeline/
 skill/
 case_generate/
 .claude/

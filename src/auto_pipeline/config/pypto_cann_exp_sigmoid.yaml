@@ -4,5 +4,5 @@ agent:
 benchmark:
   name: cann
   tasks:
-    - bench_lab/pypto_cann_bench/exp
-    - bench_lab/pypto_cann_bench/sigmoid
+    - bench_lab/pypto_cann_bench/level1/exp
+    - bench_lab/pypto_cann_bench/level1/sigmoid

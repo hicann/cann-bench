@@ -146,19 +146,19 @@ class TestResolveTaskDir:
         assert filter_prefix == "level2/scatter"
 
     def test_bench_lab_suite_operator_dir(self, tmp_path):
-        """测试 bench_lab/<suite>/<op> 解析为 suite 根目录"""
+        """测试 bench_lab/<suite>/levelx/<op> 解析为 suite 根目录"""
         pypto_root = tmp_path / "bench_lab" / "pypto_cann_bench"
-        exp_dir = pypto_root / "exp"
+        exp_dir = pypto_root / "level1" / "exp"
         exp_dir.mkdir(parents=True)
         for f in ['proto.yaml', 'cases.yaml', 'golden.py']:
             (exp_dir / f).touch()
 
         bench_root, filter_prefix = resolve_task_dir(
-            "bench_lab/pypto_cann_bench/exp", tmp_path
+            "bench_lab/pypto_cann_bench/level1/exp", tmp_path
         )
 
         assert bench_root == str(pypto_root)
-        assert filter_prefix == "exp"
+        assert filter_prefix == "level1/exp"
 
     def test_bench_lab_suite_root(self, tmp_path):
         """测试 bench_lab/<suite> 本身解析为 bench root"""

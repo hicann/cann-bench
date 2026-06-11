@@ -8,8 +8,12 @@
 ## 快速入口
 
 ```bash
-./scripts/run_auto_pipeline.sh --config path/to/config.yaml --workspace /path/to/agent/repo
+./scripts/run_auto_pipeline.sh run --config path/to/config.yaml --workspace /path/to/agent/repo
 ```
+
+默认会在后台启动 run，将 run metadata 写入 repo-relative `.auto_pipeline/`，并在当前终端自动打开 monitor table。
+monitor watch 每次刷新会清屏重绘；run 到达终态后自动退出，已结束的 run 只渲染一次；`Ctrl-C` 只关闭 monitor，不会杀后台 run。
+如果需要在当前终端前台执行实际 pipeline，加 `--foreground`；如果只想纯后台启动不打开 monitor，加 `--no-monitor`。
 
 `scripts/run_auto_pipeline.sh` 只设置 `PYTHONPATH=src`，然后转发到：
 
@@ -49,8 +53,8 @@ agent:
 benchmark:
   name: cann
   tasks:
-    - bench_lab/pypto_cann_bench/exp
-    - bench_lab/pypto_cann_bench/sigmoid
+    - bench_lab/pypto_cann_bench/level1/exp
+    - bench_lab/pypto_cann_bench/level1/sigmoid
 ```
 
 当前保留的示例配置：
@@ -72,16 +76,50 @@ src/auto_pipeline/config/pypto_cann_exp_sigmoid.yaml
 --output <path>       runtime output root
 --devices <ids>       device ids, e.g. 0,1 or 1-7
 --parallel <n>        maximum number of benchmark tasks to run in parallel
+--foreground         run actual pipeline in current terminal instead of background mode
+--no-monitor         do not open monitor after default background start
+--monitor-interval   auto-monitor refresh interval seconds
 ```
 
 不要把 `repo_root`、卡号、`output`、model、临时输出路径写进提交的 YAML。
+
+## 运行管理
+
+默认后台运行会在仓库根目录写入 `.auto_pipeline/runs/<run_id>/run.json` 和
+`.auto_pipeline/runs/<run_id>/tasks/<task>.json`。这些文件只用于本地监控和恢复，
+可以在不需要历史记录时手动删除 `.auto_pipeline/`。
+
+常用命令：
+
+```bash
+# 列出历史 run
+./scripts/run_auto_pipeline.sh list
+
+# 查看最近一次 run；默认持续刷新，加 --once 只渲染一次
+./scripts/run_auto_pipeline.sh monitor --latest
+./scripts/run_auto_pipeline.sh monitor --run-id <run_id> --once
+
+# 停止整个 run
+./scripts/run_auto_pipeline.sh kill --run-id <run_id>
+
+# 手动重试单个 task
+./scripts/run_auto_pipeline.sh retry --run-id <run_id> --task <task_name>
+```
+
+`kill` 会先按 state 中记录的 `pid_start_time` 校验进程身份，校验失败时拒绝向该
+`pid`/`pgid` 发信号，避免 PID 复用导致误杀。当前只支持 run 级 kill；不支持
+task 级 kill。并行运行时每个 task 由独立子进程承载，单个 task 进程被外部停止后，
+其他 task 不会因为共享进程池失效而被连带停止。
+因此新 run 的状态记录会包含 `pid`、`pgid`、`pid_start_time` 和 `cleanup_env`。
+旧 run 如果缺少 `pid_start_time`，出于安全考虑可能无法按 pid 清理，只能清理可用的
+环境标记匹配进程。
 
 ## PyPTO 示例
 
 ```bash
 export PTO_TILE_LIB_CODE_PATH=/path/to/pto-isa
 export PYPTO_PERF_ROUND=0
-./scripts/run_auto_pipeline.sh \
+./scripts/run_auto_pipeline.sh run \
   --config src/auto_pipeline/config/pypto_cann_exp_sigmoid.yaml \
   --workspace /path/to/pypto_src \
   --model deepseek/deepseek-v4-pro \
@@ -93,6 +131,9 @@ export PYPTO_PERF_ROUND=0
 PyPTO 所需的 `PTO_TILE_LIB_CODE_PATH` 必须由外部环境提前设置，pipeline 只检查它非空，
 不负责配置。`--model` 用于 PyPTO generation 和 PyPTO conversion 的 OpenCode runner。
 PyPTO stage7 性能优化轮次默认是 3，可用环境变量 `PYPTO_PERF_ROUND` 覆盖。
+PyPTO 默认使用传入的 `--workspace` 作为运行仓库，并在该 workspace 的 `custom/<op>`
+下生成/复用中间产物；这是当前设计决策，不默认创建隔离 git worktree。需要隔离时，
+应通过 PyPTO agent 静态配置显式传入 `worktree_root` / `isolated_worktree_root`。
 
 对于 `agent.type: pypto` 和 `benchmark.name: cann`，pipeline 自动设置：
 
@@ -119,7 +160,7 @@ benchmark:
 ```
 
 ```bash
-./scripts/run_auto_pipeline.sh \
+./scripts/run_auto_pipeline.sh run \
   --config src/auto_pipeline/config/akg_cann_exp_sigmoid.yaml \
   --workspace /path/to/akg_repo \
   --output benchmark_runs/akg_cann_exp_sigmoid \

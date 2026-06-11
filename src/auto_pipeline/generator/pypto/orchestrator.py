@@ -144,7 +144,8 @@ class PyptoOrchestratorAgent:
         )
         state = _read_orchestrator_state(op_dir)
         missing = _missing_artifacts(artifacts)
-        if self.skip_if_done and not missing and _state_all_stages_completed(state):
+        required_stages = _required_stages(self.perf_round)
+        if self.skip_if_done and not missing and _state_all_stages_completed(state, required_stages):
             message = "PyPTO workflow already completed; skipped."
             _write_single_line_log(log_file, message)
             return Artifact(
@@ -156,6 +157,8 @@ class PyptoOrchestratorAgent:
                 metadata={
                     "pypto_status": "skipped",
                     "orchestrator_state": state or {},
+                    "pypto_perf_round": self.perf_round,
+                    "pypto_required_stages": list(required_stages),
                 },
             )
 
@@ -208,6 +211,8 @@ class PyptoOrchestratorAgent:
             "opencode_session": dict(opencode_result.session_export),
             "orchestrator_state": state or {},
             "missing_artifacts": missing,
+            "pypto_perf_round": self.perf_round,
+            "pypto_required_stages": list(required_stages),
             **workspace_metadata,
         }
 
@@ -250,8 +255,9 @@ class PyptoOrchestratorAgent:
                 metadata={**metadata, "pypto_status": "subprocess_error"},
             )
 
-        if not _state_all_stages_completed(state):
-            message = "PyPTO orchestrator state did not reach stages 1-7 completed"
+        if not _state_all_stages_completed(state, required_stages):
+            stage_display = ",".join(required_stages)
+            message = f"PyPTO orchestrator state did not reach required stages completed: {stage_display}"
             _append_log_footer(opencode_result.log_file, message)
             return Artifact(
                 status=AGENT_FAILED,
@@ -262,7 +268,7 @@ class PyptoOrchestratorAgent:
                 metadata={**metadata, "pypto_status": "blocked"},
             )
 
-        message = "PyPTO artifacts present and orchestrator stages 1-7 completed"
+        message = f"PyPTO artifacts present and orchestrator required stages completed: {','.join(required_stages)}"
         _append_log_footer(opencode_result.log_file, message)
         return Artifact(
             status=AGENT_SUCCESS,
@@ -400,13 +406,19 @@ def _read_orchestrator_state(op_dir: Path) -> Optional[dict]:
     return data if isinstance(data, dict) else None
 
 
-def _state_all_stages_completed(state: Optional[dict]) -> bool:
+def _required_stages(perf_round: int) -> tuple[str, ...]:
+    if int(perf_round) <= 0:
+        return tuple(str(index) for index in range(1, 7))
+    return _REQUIRED_STAGES
+
+
+def _state_all_stages_completed(state: Optional[dict], required_stages: tuple[str, ...]) -> bool:
     if not isinstance(state, dict):
         return False
     stage_status = state.get("stage_status")
     if not isinstance(stage_status, dict):
         return False
-    return all(str(stage_status.get(key)).lower() == "completed" for key in _REQUIRED_STAGES)
+    return all(str(stage_status.get(key)).lower() == "completed" for key in required_stages)
 
 
 def _worktree_name(prompt: RunnerPrompt, task_info: CaseMaterial) -> str:

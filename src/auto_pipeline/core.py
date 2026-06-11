@@ -5,17 +5,18 @@ from __future__ import annotations
 import contextlib
 import csv
 import json
+import multiprocessing
 import os
 import re
 import signal
+import shutil
 import subprocess
 import sys
 import threading
 import time
 import uuid
 from collections import deque
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from pathlib import Path
 from types import FrameType
@@ -23,6 +24,8 @@ from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Optio
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+from auto_pipeline import state as pipeline_state
 
 if TYPE_CHECKING:
     from auto_pipeline.prompt.base import CaseMaterial
@@ -317,7 +320,7 @@ def _safe_getpgid(pid: int) -> Optional[int]:
 def _pgid_has_members(pgid: Optional[int]) -> bool:
     if pgid is None:
         return False
-    for stat_path in Path("/proc").glob("[0-9]*/stat"):
+    for stat_path in _safe_proc_glob("[0-9]*/stat"):
         try:
             pid = int(stat_path.parent.name)
             if pid == os.getpid():
@@ -362,7 +365,7 @@ def _snapshot_has_live_pids(snapshot: dict[int, int]) -> bool:
 
 def _descendant_snapshot(root_pid: int) -> dict[int, int]:
     entries: dict[int, tuple[int, int, str]] = {}
-    for stat_path in Path("/proc").glob("[0-9]*/stat"):
+    for stat_path in _safe_proc_glob("[0-9]*/stat"):
         try:
             pid = int(stat_path.parent.name)
             stat = _read_proc_stat(pid)
@@ -393,7 +396,7 @@ def _environ_match_snapshot(match_environ: Mapping[str, str]) -> dict[int, int]:
         return {}
     out: dict[int, int] = {}
     current_pid = os.getpid()
-    for environ_path in Path("/proc").glob("[0-9]*/environ"):
+    for environ_path in _safe_proc_glob("[0-9]*/environ"):
         try:
             pid = int(environ_path.parent.name)
             if pid == current_pid:
@@ -408,6 +411,13 @@ def _environ_match_snapshot(match_environ: Mapping[str, str]) -> dict[int, int]:
         if stat is not None and stat[2] != "Z":
             out[pid] = stat[1]
     return out
+
+
+def _safe_proc_glob(pattern: str) -> Iterable[Path]:
+    try:
+        yield from Path("/proc").glob(pattern)
+    except OSError:
+        return
 
 
 def _parse_environ(content: bytes) -> dict[str, str]:
@@ -466,6 +476,73 @@ def render_case_preview_json(case_preview: object) -> str:
 DEFAULT_CANN_BENCH_ROOT = Path(__file__).resolve().parents[2]
 _REQUIRED_TASK_FILES = ("proto.yaml", "golden.py")
 _CASE_FILENAMES = ("cases.yaml", "cases.yml", "cases.csv")
+_PIP_SHIM_SOURCE = r'''from __future__ import annotations
+
+import os
+import subprocess
+import sys
+
+
+def _normalized(value: str) -> str:
+    return value.replace("_", "-").lower()
+
+
+def _is_isolated_cann_bench_uninstall(args: list[str]) -> bool:
+    if not args or args[0] != "uninstall":
+        return False
+    return any(not arg.startswith("-") and _normalized(arg) == "cann-bench" for arg in args[1:])
+
+
+def _pythonpath_without_shim() -> str:
+    shim_dir = os.environ.get("AUTO_PIPELINE_PIP_SHIM_DIR")
+    pythonpath = os.environ.get("PYTHONPATH") or ""
+    if not shim_dir or not pythonpath:
+        return pythonpath
+    shim_dir = os.path.abspath(shim_dir)
+    parts = []
+    for part in pythonpath.split(os.pathsep):
+        if part and os.path.abspath(part) == shim_dir:
+            continue
+        parts.append(part)
+    return os.pathsep.join(parts)
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    if _is_isolated_cann_bench_uninstall(args):
+        sys.stderr.write("[auto_pipeline] skip pip uninstall cann_bench in isolated eval\n")
+        return 0
+
+    env = os.environ.copy()
+    pythonpath = _pythonpath_without_shim()
+    if pythonpath:
+        env["PYTHONPATH"] = pythonpath
+    else:
+        env.pop("PYTHONPATH", None)
+    completed = subprocess.run([sys.executable, "-m", "pip", *args], env=env)
+    return int(completed.returncode)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
+
+
+def _prepend_path_values(existing: Optional[str], values: Iterable[Path]) -> str:
+    parts = [str(Path(value)) for value in values]
+    if existing:
+        parts.append(existing)
+    return os.pathsep.join(part for part in parts if part)
+
+
+def _pip_wrapper_source() -> str:
+    return "\n".join(
+        [
+            "#!/usr/bin/env sh",
+            'exec "${AUTO_PIPELINE_PYTHON_EXECUTABLE:-python}" -m pip "$@"',
+            "",
+        ]
+    )
 
 
 @dataclass(frozen=True)
@@ -643,12 +720,23 @@ class CannBenchClient:
             device_id=device_id,
             extra_args=extra_args,
         )
-        completed = _run_captured_process(
-            command,
-            cwd=str(self.cann_bench_root),
-            env=self._build_env(),
-            timeout=self.timeout_sec,
-        )
+        eval_env = self._build_eval_env(source_dir=source_dir, reports_dir=reports_dir)
+        try:
+            completed = _run_captured_process(
+                command,
+                cwd=str(self.cann_bench_root),
+                env=eval_env,
+                timeout=self.timeout_sec,
+            )
+        except subprocess.TimeoutExpired as exc:
+            return CannBenchEvalResult(
+                returncode=124,
+                command=command,
+                reports_dir=reports_dir,
+                stdout=str(exc.output or ""),
+                stderr=f"kernel_eval timed out after {exc.timeout}s\n{exc.stderr or ''}",
+                report_files=self._collect_report_files(reports_dir),
+            )
         return CannBenchEvalResult(
             returncode=completed.returncode,
             command=command,
@@ -657,6 +745,36 @@ class CannBenchClient:
             stderr=completed.stderr or "",
             report_files=self._collect_report_files(reports_dir),
         )
+
+    def _build_eval_env(self, *, source_dir: Path, reports_dir: Path) -> Dict[str, str]:
+        env = self._build_env()
+        isolation_dir = reports_dir / f"_eval_isolation_{uuid.uuid4().hex}"
+        pip_target = isolation_dir / "pip_target"
+        pip_shim_dir = isolation_dir / "pip_shim"
+        pip_bin_dir = isolation_dir / "bin"
+        pip_target.mkdir(parents=True, exist_ok=True)
+        self._write_pip_shim(pip_shim_dir=pip_shim_dir, pip_bin_dir=pip_bin_dir)
+
+        env["PIP_TARGET"] = str(pip_target)
+        env["AUTO_PIPELINE_PIP_SHIM_DIR"] = str(pip_shim_dir)
+        env["AUTO_PIPELINE_PYTHON_EXECUTABLE"] = self.python_executable
+        env["PYTHONPATH"] = _prepend_path_values(
+            env.get("PYTHONPATH"),
+            [pip_shim_dir, source_dir, pip_target],
+        )
+        env["PATH"] = _prepend_path_values(env.get("PATH"), [pip_bin_dir])
+        return env
+
+    def _write_pip_shim(self, *, pip_shim_dir: Path, pip_bin_dir: Path) -> None:
+        pip_package_dir = pip_shim_dir / "pip"
+        pip_package_dir.mkdir(parents=True, exist_ok=True)
+        pip_bin_dir.mkdir(parents=True, exist_ok=True)
+        pip_package_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
+        pip_package_dir.joinpath("__main__.py").write_text(_PIP_SHIM_SOURCE, encoding="utf-8")
+        for name in ("pip", "pip3"):
+            wrapper = pip_bin_dir / name
+            wrapper.write_text(_pip_wrapper_source(), encoding="utf-8")
+            wrapper.chmod(0o755)
 
     def _resolve_task_dir(self, task_selector: str) -> Path:
         selector = Path(task_selector).expanduser()
@@ -791,6 +909,7 @@ class CannBenchClient:
             path
             for path in reports_dir.rglob("*")
             if path.is_file() and path.suffix.lower() in {".json", ".md", ".csv"}
+            and not any(part.startswith("_eval_isolation_") for part in path.parts)
         )
 
 
@@ -910,6 +1029,7 @@ class PipelineRunResult:
     conversion_artifact: Optional[Artifact] = None
     status: str = "success"
     message: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def ok(self) -> bool:
@@ -966,8 +1086,12 @@ class BenchmarkPipeline:
         env: Optional[Mapping[str, str]] = None,
         device_id: Optional[int] = None,
         extra_eval_args: Optional[Iterable[str]] = None,
+        status_callback: Optional[Callable[..., None]] = None,
+        reuse_generated: bool = False,
     ) -> PipelineRunResult:
         case = self.client.load_case(self.bench_name, selector)
+        if status_callback is not None:
+            status_callback(stage="generation", status="running", operator=case.operator)
         generator_input = self._build_generator_input(
             case=case,
             generator=generator,
@@ -975,7 +1099,21 @@ class BenchmarkPipeline:
             timeout_sec=timeout_sec,
             env=env,
         )
-        generated_artifact = generator.generate(generator_input)
+        generated_artifact = None
+        if reuse_generated:
+            generated_artifact = _load_reusable_generated_artifact(
+                case,
+                generator_input,
+                generator_type=generator.type,
+            )
+        if generated_artifact is None:
+            generated_artifact = generator.generate(generator_input)
+        generated_artifact = _snapshot_pypto_custom_artifact(
+            case,
+            generated_artifact,
+            task_root=Path(workdir).expanduser().resolve().parent,
+            strict=generated_artifact.ok,
+        )
         generator_prompt_file = generator_input.output_dir / "PROMPT.md"
         if not generator_prompt_file.is_file():
             generator_prompt_file = None
@@ -1004,6 +1142,7 @@ class BenchmarkPipeline:
             device_id=device_id,
             extra_eval_args=extra_eval_args,
             generator_prompt_file=generator_prompt_file,
+            status_callback=status_callback,
         )
 
     def _convert_and_eval(
@@ -1019,7 +1158,10 @@ class BenchmarkPipeline:
         device_id: Optional[int],
         extra_eval_args: Optional[Iterable[str]],
         generator_prompt_file: Optional[Path] = None,
+        status_callback: Optional[Callable[..., None]] = None,
     ) -> PipelineRunResult:
+        if status_callback is not None:
+            status_callback(stage="conversion", status="running", operator=case.operator)
         conversion = converter.convert(
             self.bench_name,
             case,
@@ -1043,6 +1185,8 @@ class BenchmarkPipeline:
                 converter_prompt_file=conversion.prompt_file,
             )
 
+        if status_callback is not None:
+            status_callback(stage="eval", status="running", operator=case.operator)
         eval_result = self.client.eval_submission(
             bench_name=self.bench_name,
             source_dir=conversion.submission.source_dir,
@@ -1132,6 +1276,150 @@ class BenchmarkPipeline:
         )
 
 
+def _snapshot_pypto_custom_artifact(
+    case: CannBenchCase,
+    artifact: Artifact,
+    *,
+    task_root: Path,
+    strict: bool,
+) -> Artifact:
+    if "pypto_status" not in artifact.metadata:
+        return artifact
+    source_dir = artifact.files.get("source_dir")
+    if source_dir is None:
+        return artifact
+    source = Path(source_dir).expanduser().resolve()
+    if not source.is_dir():
+        return artifact
+
+    op_name = source.name or _safe_path_name(case.operator)
+    target = Path(task_root).expanduser().resolve() / "custom" / op_name
+    metadata = dict(artifact.metadata)
+    snapshot = {
+        "status": "success",
+        "workspace_custom_dir": str(source),
+        "output_custom_dir": str(target),
+        "copied_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    try:
+        if source != target:
+            if target.exists():
+                shutil.rmtree(target)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(
+                source,
+                target,
+                ignore=shutil.ignore_patterns(".tmp", "__pycache__", "*.pyc", "prof"),
+            )
+        snapshot["file_count"] = sum(1 for path in target.rglob("*") if path.is_file()) if target.is_dir() else 0
+    except OSError as exc:
+        snapshot.update({"status": "failed", "error": str(exc)})
+        metadata["custom_snapshot"] = snapshot
+        metadata["workspace_custom_dir"] = str(source)
+        metadata["output_custom_dir"] = str(target)
+        if strict:
+            return replace(
+                artifact,
+                status=AGENT_FAILED,
+                message=f"failed to copy PyPTO custom artifact snapshot: {exc}",
+                metadata=metadata,
+            )
+        return replace(artifact, metadata=metadata)
+
+    files = dict(artifact.files)
+    remapped: dict[str, Path] = {}
+    for key, raw_path in files.items():
+        path = Path(raw_path).expanduser().resolve()
+        try:
+            relative = path.relative_to(source)
+        except ValueError:
+            remapped[key] = path
+        else:
+            remapped[key] = target / relative
+    remapped["source_dir"] = target
+    metadata["custom_snapshot"] = snapshot
+    metadata["workspace_custom_dir"] = str(source)
+    metadata["output_custom_dir"] = str(target)
+    return replace(artifact, workdir=target, files=remapped, metadata=metadata)
+
+
+def _load_reusable_generated_artifact(
+    case: CannBenchCase,
+    task: GeneratorInput,
+    *,
+    generator_type: str,
+) -> Optional[Artifact]:
+    if generator_type != "akg-agent":
+        return None
+
+    task_root = Path(task.workdir).expanduser().resolve().parent
+    result_path = task_root / "benchmark_result.json"
+    artifact_dir = Path(task.output_dir).expanduser().resolve()
+    code_file = artifact_dir / "akg_model.py"
+
+    result = pipeline_state.read_json(result_path)
+    generated = result.get("generated_artifact") if isinstance(result, Mapping) else None
+    if isinstance(generated, Mapping) and str(generated.get("status") or "") == AGENT_SUCCESS:
+        code = str(generated.get("output_text") or "")
+        source = "benchmark_result.generated_artifact.output_text"
+        generated_files = generated.get("files")
+        existing_code_file = _generated_code_file_from_mapping(generated_files, generated.get("workdir"))
+        if not code and existing_code_file is not None:
+            code = existing_code_file.read_text(encoding="utf-8")
+            source = str(existing_code_file)
+        if code.strip():
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            if existing_code_file is not None and existing_code_file.is_file():
+                code_file = existing_code_file
+            else:
+                code_file.write_text(code, encoding="utf-8")
+            metadata = dict(generated.get("metadata") or {}) if isinstance(generated.get("metadata"), Mapping) else {}
+            metadata.update({"akg_reused": True, "akg_reuse_source": source, "akg_reuse_result": str(result_path)})
+            log_file = Path(str(generated.get("log_file") or artifact_dir / "akg-agent.log")).expanduser()
+            return Artifact(
+                status=AGENT_SUCCESS,
+                workdir=artifact_dir,
+                message="AKG generated artifact reused",
+                files={"generated_code": code_file},
+                log_file=log_file if log_file.is_file() else None,
+                metadata=metadata,
+                output_text=code,
+            )
+
+    if code_file.is_file():
+        code = code_file.read_text(encoding="utf-8")
+        if code.strip():
+            log_file = artifact_dir / "akg-agent.log"
+            return Artifact(
+                status=AGENT_SUCCESS,
+                workdir=artifact_dir,
+                message="AKG generated artifact reused",
+                files={"generated_code": code_file},
+                log_file=log_file if log_file.is_file() else None,
+                metadata={
+                    "akg_reused": True,
+                    "akg_reuse_source": str(code_file),
+                    "operator": case.operator,
+                    "rel_path": case.rel_path,
+                },
+                output_text=code,
+            )
+    return None
+
+
+def _generated_code_file_from_mapping(value: object, workdir: object) -> Optional[Path]:
+    if not isinstance(value, Mapping):
+        return None
+    raw_path = value.get("generated_code")
+    if raw_path in (None, ""):
+        return None
+    path = Path(str(raw_path)).expanduser()
+    if not path.is_absolute() and workdir not in (None, ""):
+        path = Path(str(workdir)).expanduser() / path
+    path = path.resolve()
+    return path if path.is_file() else None
+
+
 def build_case_material(case: CannBenchCase) -> CaseMaterial:
     from auto_pipeline.prompt.registry import build_case_material as _build_case_material
 
@@ -1155,10 +1443,11 @@ def create_runner(runner_type: str, cfg: Mapping[str, Any]) -> Runner:
 
     return _create_runner(runner_type, cfg)
 
-DEFAULT_OUTPUT_ROOT = Path("benchmark_runs")
-DEFAULT_TIMEOUT_SEC = 7200
+DEFAULT_OUTPUT_ROOT = DEFAULT_CANN_BENCH_ROOT / "benchmark_runs"
+DEFAULT_TIMEOUT_SEC = 10800
 DEFAULT_OP_TIMEOUT_SEC = 3600
 TILE_LIB_ENV = "PTO_TILE_LIB_CODE_PATH"
+_TIMED_TASK_STAGES = {"generation", "conversion", "eval"}
 
 
 @dataclass(frozen=True)
@@ -1200,6 +1489,12 @@ class SimpleConfig:
     devices: tuple[int, ...]
     parallel: int
     tasks: tuple[ConfiguredTask, ...]
+    gen_timeout: int
+    eval_timeout: int
+    run_id: str
+    config_path: Optional[Path] = None
+    launch_command: str = ""
+    reuse_generated: bool = False
 
     @property
     def batch_report_path(self) -> Path:
@@ -1226,14 +1521,20 @@ def run_cases_from_mapping(
     if spec.parallel > 1 and not spec.devices:
         raise ValueError("devices is required when parallel is greater than 1")
 
-    if len(spec.tasks) == 1 or spec.parallel <= 1:
-        entries = _run_cases_serial(spec, report_path=report)
-    else:
-        max_workers = min(len(spec.tasks), spec.parallel, len(spec.devices) or spec.parallel)
-        entries = _run_cases_with_device_pool(spec, max_workers=max_workers, report_path=report)
+    _register_run_start(spec)
+    try:
+        if len(spec.tasks) == 1 or spec.parallel <= 1:
+            entries = _run_cases_serial(spec, report_path=report)
+        else:
+            max_workers = min(len(spec.tasks), spec.parallel, len(spec.devices) or spec.parallel)
+            entries = _run_cases_with_device_pool(spec, max_workers=max_workers, report_path=report)
 
-    write_batch_report(entries, report, output=spec.output)
-    return entries
+        write_batch_report(entries, report, output=spec.output)
+        _update_run_from_entries(spec, entries, status="completed")
+        return entries
+    except BaseException as exc:
+        _mark_run_error(spec, exc)
+        raise
 
 
 def run_from_mapping(
@@ -1245,18 +1546,33 @@ def run_from_mapping(
     spec = _parse_config(cfg, config_path=config_path, runtime=runtime)
     if len(spec.tasks) != 1:
         raise ValueError("run_from_mapping requires exactly one benchmark task; use run_cases_from_mapping")
+    _register_run_start(spec)
     device_id = spec.devices[0] if spec.devices else None
-    result = _run_task(spec, spec.tasks[0], device_id=device_id)
-    write_pipeline_report(result, spec.tasks[0].result_path)
-    return result
+    try:
+        result = _run_task(spec, spec.tasks[0], device_id=device_id)
+        write_pipeline_report(result, spec.tasks[0].result_path)
+        entry = _result_entry(spec.tasks[0], result, device_id=device_id)
+        _write_task_state(spec, spec.tasks[0], entry=entry, device_id=device_id)
+        _update_run_from_entries(spec, [entry], status="completed")
+        return result
+    except BaseException as exc:
+        _mark_run_error(spec, exc)
+        raise
 
 
 def _run_cases_serial(spec: SimpleConfig, *, report_path: Path) -> list:
     entries = []
     for index, task in enumerate(spec.tasks):
         device_id = _device_for_index(index, spec.devices)
+        _write_task_state(
+            spec,
+            task,
+            payload={**pipeline_state.process_identity(), "status": "running", "stage": "queued"},
+            device_id=device_id,
+        )
         entries.append(_run_one_task_entry(spec, task, device_id=device_id))
         write_batch_report(entries, report_path, output=spec.output)
+        _update_run_from_entries(spec, entries, status="running")
     return entries
 
 
@@ -1265,36 +1581,76 @@ def _run_cases_with_device_pool(spec: SimpleConfig, *, max_workers: int, report_
         raise ValueError("parallel must be positive")
 
     entries = [_pending_entry(task) for task in spec.tasks]
+    for task in spec.tasks:
+        _write_task_state(spec, task, entry=_pending_entry(task), device_id=None)
     write_batch_report(entries, report_path, output=spec.output)
 
     pending = deque(range(len(spec.tasks)))
     available_devices = deque(spec.devices or tuple(range(max_workers)))
-    active: dict[Any, tuple[int, Optional[int]]] = {}
+    active: dict[int, tuple[multiprocessing.Process, Path, int, Optional[int]]] = {}
 
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        while pending or active:
-            while pending and available_devices and len(active) < max_workers:
-                index = pending.popleft()
-                device_id = available_devices.popleft()
-                task = spec.tasks[index]
-                entries[index] = _running_entry(task, device_id=device_id)
-                write_batch_report(entries, report_path, output=spec.output)
-                future = executor.submit(_run_task_child, spec, task, device_id)
-                active[future] = (index, device_id)
+    while pending or active:
+        while pending and available_devices and len(active) < max_workers:
+            index = pending.popleft()
+            device_id = available_devices.popleft()
+            task = spec.tasks[index]
+            entries[index] = _running_entry(task, device_id=device_id)
+            _write_task_state(spec, task, entry=entries[index], device_id=device_id)
+            write_batch_report(entries, report_path, output=spec.output)
+            entry_path = task.root_dir / ".auto_pipeline_entry.json"
+            process = multiprocessing.Process(target=_run_task_process, args=(spec, task, device_id, entry_path))
+            process.start()
+            active[process.pid or id(process)] = (process, entry_path, index, device_id)
 
-            done, _ = wait(active, return_when=FIRST_COMPLETED)
-            for future in done:
-                index, device_id = active.pop(future)
-                task = spec.tasks[index]
-                try:
-                    entry = future.result()
-                except BaseException as exc:
-                    entry = _exception_entry(task, exc, device_id=device_id)
-                entries[index] = entry
-                write_batch_report(entries, report_path, output=spec.output)
-                available_devices.append(device_id)
+        completed = [key for key, (process, _entry_path, _index, _device_id) in active.items() if not process.is_alive()]
+        if not completed:
+            time.sleep(0.1)
+            continue
+
+        for key in completed:
+            process, entry_path, index, device_id = active.pop(key)
+            task = spec.tasks[index]
+            process.join()
+            entry = _task_process_entry(task, entry_path, process.exitcode, device_id=device_id)
+            entries[index] = entry
+            _write_task_state(spec, task, entry=entry, device_id=device_id)
+            write_batch_report(entries, report_path, output=spec.output)
+            _update_run_from_entries(spec, entries, status="running")
+            available_devices.append(device_id)
 
     return entries
+
+
+def _run_task_process(
+    spec: SimpleConfig,
+    task: ConfiguredTask,
+    device_id: Optional[int],
+    entry_path: Path,
+) -> None:
+    try:
+        entry = _run_one_task_entry(spec, task, device_id=device_id)
+    except BaseException as exc:
+        entry = _exception_entry(task, exc, device_id=device_id)
+        _write_task_state(spec, task, entry=entry, device_id=device_id)
+    entry_path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_text(entry_path, json.dumps(entry, indent=2, ensure_ascii=False) + "\n")
+
+
+def _task_process_entry(
+    task: ConfiguredTask,
+    entry_path: Path,
+    exitcode: Optional[int],
+    *,
+    device_id: Optional[int],
+) -> dict[str, Any]:
+    entry = pipeline_state.read_json(entry_path)
+    if entry:
+        return dict(entry)
+    return _exception_entry(
+        task,
+        RuntimeError(f"task process exited without result: exitcode={exitcode}"),
+        device_id=device_id,
+    )
 
 
 def _run_one_task_entry(
@@ -1304,11 +1660,21 @@ def _run_one_task_entry(
     device_id: Optional[int],
 ) -> dict[str, Any]:
     try:
+        _write_task_state(
+            spec,
+            task,
+            payload={**pipeline_state.process_identity(), "status": "running", "stage": "start"},
+            device_id=device_id,
+        )
         result = _run_task(spec, task, device_id=device_id)
         write_pipeline_report(result, task.result_path)
-        return _result_entry(task, result, device_id=device_id)
+        entry = _result_entry(task, result, device_id=device_id)
+        _write_task_state(spec, task, entry=entry, device_id=device_id)
+        return entry
     except Exception as exc:
-        return _exception_entry(task, exc, device_id=device_id)
+        entry = _exception_entry(task, exc, device_id=device_id)
+        _write_task_state(spec, task, entry=entry, device_id=device_id)
+        return entry
 
 
 def _run_task_child(spec: SimpleConfig, task: ConfiguredTask, device_id: Optional[int]) -> dict[str, Any]:
@@ -1324,17 +1690,22 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
         env=_eval_env(
             agent_type=spec.agent_type,
             bench_name=spec.bench_name,
+            device_id=device_id,
+            task_env=_task_env(spec, task),
         ),
-        timeout_sec=DEFAULT_TIMEOUT_SEC,
+        timeout_sec=spec.eval_timeout,
     )
     pipeline = BenchmarkPipeline(bench_name=spec.bench_name, client=client)
 
-    converter = create_converter(spec.agent_type, spec.bench_name, _converter_config(spec))
+    converter = create_converter(spec.agent_type, spec.bench_name, _converter_config(spec, task))
     conversion_runner = _conversion_runner(spec)
     conversion_workdir = task.convert_dir if conversion_runner is not None else None
-    generator = create_generator(spec.agent_type, _generator_config(spec, device_id=device_id))
+    generator = create_generator(spec.agent_type, _generator_config(spec, task, device_id=device_id))
 
-    return pipeline.run_case(
+    def status_update(**payload: Any) -> None:
+        _write_task_state(spec, task, payload=payload, device_id=device_id)
+
+    result = pipeline.run_case(
         selector=task.selector,
         generator=generator,
         converter=converter,
@@ -1343,11 +1714,23 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
         reports_dir=task.reports_dir,
         conversion_runner=conversion_runner,
         conversion_workdir=conversion_workdir,
-        timeout_sec=DEFAULT_TIMEOUT_SEC,
-        env=_agent_env(spec),
+        timeout_sec=spec.gen_timeout,
+        env=_task_env(spec, task),
         device_id=device_id,
         extra_eval_args=build_eval_args(
             _default_eval_config(perf_metric_strategy=perf_strategy)),
+        status_callback=status_update,
+        reuse_generated=spec.reuse_generated,
+    )
+    return replace(
+        result,
+        metadata={
+            **dict(result.metadata),
+            "run_id": spec.run_id,
+            "task_id": task.name,
+            "gen_timeout_sec": spec.gen_timeout,
+            "eval_timeout_sec": spec.eval_timeout,
+        },
     )
 
 
@@ -1358,12 +1741,12 @@ def _conversion_runner(spec: SimpleConfig):
     return None
 
 
-def _generator_config(spec: SimpleConfig, *, device_id: Optional[int]) -> dict[str, Any]:
+def _generator_config(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]) -> dict[str, Any]:
     cfg: dict[str, Any] = {
         "repo_root": spec.workspace,
         **dict(spec.agent_options),
     }
-    env = _agent_env(spec)
+    env = _task_env(spec, task)
     if env:
         cfg["env"] = env
     if device_id is not None:
@@ -1371,16 +1754,15 @@ def _generator_config(spec: SimpleConfig, *, device_id: Optional[int]) -> dict[s
     if _normalize_name(spec.agent_type) == "pypto":
         if spec.model:
             cfg["model"] = spec.model
-        cfg["worktree_root"] = spec.output / "pypto_worktrees"
         if device_id is not None:
             cfg["device_mode"] = "pool"
     return cfg
 
 
-def _converter_config(spec: SimpleConfig) -> dict[str, Any]:
+def _converter_config(spec: SimpleConfig, task: ConfiguredTask) -> dict[str, Any]:
     return {
-        "timeout_sec": DEFAULT_TIMEOUT_SEC,
-        "env": _agent_env(spec),
+        "timeout_sec": spec.gen_timeout,
+        "env": _task_env(spec, task),
     }
 
 
@@ -1396,7 +1778,24 @@ def _default_eval_config(*, perf_metric_strategy=None) -> dict[str, Any]:
 
 
 def _agent_env(spec: SimpleConfig) -> Dict[str, str]:
-    return {}
+    return {
+        "AUTO_PIPELINE_RUN_ID": spec.run_id,
+    }
+
+
+def _task_env(spec: SimpleConfig, task: ConfiguredTask) -> Dict[str, str]:
+    return {
+        **_agent_env(spec),
+        "AUTO_PIPELINE_TASK_ID": task.name,
+    }
+
+
+def _task_cleanup_env(spec: SimpleConfig, task: ConfiguredTask) -> list[dict[str, str]]:
+    return [
+        _task_env(spec, task),
+        {"BENCHMARK_OUTPUT_DIR": str((task.workdir / "artifact").expanduser().resolve())},
+        {"BENCHMARK_OUTPUT_DIR": str((task.convert_dir / "artifact").expanduser().resolve())},
+    ]
 
 
 def _result_entry(
@@ -1409,7 +1808,7 @@ def _result_entry(
         "name": task.name,
         "selector": task.selector,
         "ok": result.ok,
-        "status": result.status,
+        "status": result.status if result.ok or result.status != AGENT_SUCCESS else "eval_failed",
         "result_file": str(task.result_path),
         "result": _pipeline_result_payload(result),
     }
@@ -1460,6 +1859,216 @@ def _exception_entry(
     return entry
 
 
+def _register_run_start(spec: SimpleConfig) -> None:
+    tasks = [
+        {
+            "task_id": task.name,
+            "task_index": index,
+            "name": task.name,
+            "selector": task.selector,
+            "root_dir": str(task.root_dir),
+            "result_file": str(task.result_path),
+        }
+        for index, task in enumerate(spec.tasks)
+    ]
+    pipeline_state.upsert_run(
+        spec.run_id,
+        {
+            **pipeline_state.process_identity(),
+            "status": "running",
+            "output": str(spec.output),
+            "workspace": str(spec.workspace),
+            "config_path": str(spec.config_path) if spec.config_path else "",
+            "bench_name": spec.bench_name,
+            "agent_type": spec.agent_type,
+            "model": spec.model,
+            "devices": list(spec.devices),
+            "parallel": spec.parallel,
+            "gen_timeout_sec": spec.gen_timeout,
+            "eval_timeout_sec": spec.eval_timeout,
+            "command": spec.launch_command,
+            "tasks_declared": tasks,
+        },
+    )
+    for index, task in enumerate(spec.tasks):
+        pipeline_state.update_task(
+            spec.run_id,
+            task.name,
+            {
+                "task_index": index,
+                "name": task.name,
+                "selector": task.selector,
+                "status": "pending",
+                "stage": "pending",
+                "output": str(task.root_dir),
+                "result_file": str(task.result_path),
+                "cleanup_env": _task_cleanup_env(spec, task),
+            },
+        )
+
+
+def _update_run_from_entries(spec: SimpleConfig, entries: list, *, status: str) -> None:
+    if _run_is_marked_killed(spec):
+        return
+    summary = _entries_summary(entries)
+    final_status = status
+    if status == "completed":
+        final_status = "success" if summary.get("failed", 0) == 0 and summary.get("running", 0) == 0 else "failed"
+    pipeline_state.update_run(
+        spec.run_id,
+        {
+            "status": final_status,
+            "summary": summary,
+            "token_usage": _batch_token_usage(entries),
+            "completed_at": pipeline_state.utc_ts() if status == "completed" else "",
+        },
+    )
+
+
+def _mark_run_error(spec: SimpleConfig, exc: BaseException) -> None:
+    if _run_is_marked_killed(spec):
+        return
+    pipeline_state.update_run(
+        spec.run_id,
+        {
+            "status": "error",
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+            "completed_at": pipeline_state.utc_ts(),
+        },
+    )
+
+
+def _task_index(spec: SimpleConfig, task: ConfiguredTask) -> Optional[int]:
+    for index, configured_task in enumerate(spec.tasks):
+        if configured_task.name == task.name:
+            return index
+    return None
+
+
+def _write_task_state(
+    spec: SimpleConfig,
+    task: ConfiguredTask,
+    *,
+    entry: Optional[Mapping[str, Any]] = None,
+    payload: Optional[Mapping[str, Any]] = None,
+    device_id: Optional[int],
+) -> None:
+    if _task_is_marked_killed(spec, task):
+        incoming_status = str((payload or entry or {}).get("status") or "")
+        if incoming_status != "killed":
+            return
+    merged: dict[str, Any] = {
+        "name": task.name,
+        "selector": task.selector,
+        "output": str(task.root_dir),
+        "workdir": str(task.workdir),
+        "result_file": str(task.result_path),
+        "gen_timeout_sec": spec.gen_timeout,
+        "eval_timeout_sec": spec.eval_timeout,
+        "cleanup_env": _task_cleanup_env(spec, task),
+    }
+    task_index = _task_index(spec, task)
+    if task_index is not None:
+        merged["task_index"] = task_index
+    if device_id is not None:
+        merged["device_id"] = device_id
+    if entry:
+        merged.update(dict(entry))
+        result = entry.get("result")
+        if isinstance(result, Mapping):
+            merged["token_usage"] = result.get("token_usage") or {}
+            generated = result.get("generated_artifact")
+            if isinstance(generated, Mapping):
+                if generated.get("log_file"):
+                    merged["log_file"] = generated.get("log_file")
+                meta = generated.get("metadata")
+                if isinstance(meta, Mapping):
+                    if meta.get("output_custom_dir"):
+                        merged["output_custom_dir"] = meta.get("output_custom_dir")
+                    if meta.get("workspace_custom_dir"):
+                        merged["workspace_custom_dir"] = meta.get("workspace_custom_dir")
+                    state = meta.get("orchestrator_state")
+                    if isinstance(state, Mapping):
+                        merged["orchestrator_state"] = state
+            kernel_eval = result.get("kernel_eval")
+            if isinstance(kernel_eval, Mapping) and kernel_eval.get("stderr"):
+                merged["last_error"] = str(kernel_eval.get("stderr"))[:1000]
+    timing_update = _task_stage_timing_update(spec.run_id, task.name, payload=payload, entry=entry)
+    if timing_update:
+        merged.update(timing_update)
+    if payload:
+        merged.update(dict(payload))
+    pipeline_state.update_task(spec.run_id, task.name, merged)
+
+
+def _run_is_marked_killed(spec: SimpleConfig) -> bool:
+    run = pipeline_state.read_json(pipeline_state.run_file(spec.run_id))
+    return str(run.get("status") or "") == "killed"
+
+
+def _task_is_marked_killed(spec: SimpleConfig, task: ConfiguredTask) -> bool:
+    task_state = pipeline_state.read_json(pipeline_state.task_file(spec.run_id, task.name))
+    return str(task_state.get("status") or "") == "killed"
+
+
+def _task_stage_timing_update(
+    run_id: str,
+    task_id: str,
+    *,
+    payload: Optional[Mapping[str, Any]],
+    entry: Optional[Mapping[str, Any]],
+) -> dict[str, Any]:
+    current = pipeline_state.read_json(pipeline_state.task_file(run_id, task_id))
+    current_stage = str(current.get("stage") or "")
+    next_stage = str(payload.get("stage") or "") if payload else ""
+    now = pipeline_state.utc_ts()
+    raw_stage_times = current.get("stage_times")
+    stage_times = dict(raw_stage_times) if isinstance(raw_stage_times, Mapping) else {}
+
+    def ensure_stage(stage: str) -> dict[str, str]:
+        raw = stage_times.get(stage)
+        value = dict(raw) if isinstance(raw, Mapping) else {}
+        stage_times[stage] = value
+        return value
+
+    if next_stage in _TIMED_TASK_STAGES:
+        if current_stage in _TIMED_TASK_STAGES and current_stage != next_stage:
+            previous = ensure_stage(current_stage)
+            previous.setdefault("ended_at", now)
+        current_stage_info = ensure_stage(next_stage)
+        current_stage_info.setdefault("started_at", now)
+
+    if entry is not None and current_stage in _TIMED_TASK_STAGES:
+        current_stage_info = ensure_stage(current_stage)
+        current_stage_info.setdefault("ended_at", now)
+
+    return {"stage_times": stage_times} if stage_times else {}
+
+
+def _entries_summary(entries: Iterable[Mapping[str, Any]]) -> dict[str, int]:
+    summary = {"total": 0, "pending": 0, "running": 0, "success": 0, "failed": 0, "timeout": 0, "killed": 0}
+    for entry in entries:
+        summary["total"] += 1
+        status = str(entry.get("status") or "")
+        ok = entry.get("ok")
+        if status == "pending":
+            summary["pending"] += 1
+        elif status == "running":
+            summary["running"] += 1
+        elif status == "timeout":
+            summary["timeout"] += 1
+            summary["failed"] += 1
+        elif status == "killed":
+            summary["killed"] += 1
+            summary["failed"] += 1
+        elif ok is True:
+            summary["success"] += 1
+        elif ok is False or status:
+            summary["failed"] += 1
+    return summary
+
+
 def _parse_config(
     cfg: Mapping[str, Any],
     *,
@@ -1490,8 +2099,15 @@ def _parse_config(
     tasks = _configured_tasks(selectors, output)
     devices = tuple(_int_list(runtime_cfg.get("devices")))
     parallel = _int_or_default(runtime_cfg.get("parallel"), len(devices) if devices else 1)
+    gen_timeout = _int_or_default(runtime_cfg.get("gen_timeout"), DEFAULT_TIMEOUT_SEC)
+    eval_timeout = _int_or_default(runtime_cfg.get("eval_timeout"), DEFAULT_TIMEOUT_SEC)
+    run_id = str(runtime_cfg.get("run_id") or pipeline_state.new_run_id())
     if parallel <= 0:
         raise ValueError("parallel must be positive")
+    if gen_timeout <= 0:
+        raise ValueError("gen-timeout must be positive")
+    if eval_timeout <= 0:
+        raise ValueError("eval-timeout must be positive")
 
     return SimpleConfig(
         output=output,
@@ -1504,6 +2120,12 @@ def _parse_config(
         devices=devices,
         parallel=parallel,
         tasks=tuple(tasks),
+        gen_timeout=gen_timeout,
+        eval_timeout=eval_timeout,
+        run_id=run_id,
+        config_path=Path(config_path).expanduser().resolve() if config_path is not None else None,
+        launch_command=str(runtime_cfg.get("command") or ""),
+        reuse_generated=_optional_bool(runtime_cfg.get("reuse_generated")) is True,
     )
 
 
@@ -1541,6 +2163,11 @@ def _runtime_options(runtime: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
             "model",
             "devices",
             "parallel",
+            "gen_timeout",
+            "eval_timeout",
+            "run_id",
+            "command",
+            "reuse_generated",
         },
         prefix="runtime",
     )
@@ -1672,6 +2299,7 @@ def write_batch_report(entries: list, output_path: Path, *, output: Optional[Pat
         "failed_cases": sum(1 for entry in entries if entry.get("ok") is False),
         "running_cases": sum(1 for entry in entries if entry.get("status") == "running"),
         "pending_cases": sum(1 for entry in entries if entry.get("status") == "pending"),
+        "token_usage": _batch_token_usage(entries),
         "cases": entries,
     }
     _atomic_write_text(output_path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
@@ -1790,11 +2418,16 @@ def _eval_env(
     *,
     agent_type: str,
     bench_name: str,
+    device_id: Optional[int] = None,
+    task_env: Optional[Mapping[str, str]] = None,
 ) -> Dict[str, str]:
-# PERF_SOURCE_ENV 已废弃 — perf 策略现在通过
+    # PERF_SOURCE_ENV 已废弃 — perf 策略现在通过
     # BenchConfig.perf_metric_strategy + CLI --perf-metric-strategy 控制，
     # 不再通过环境变量传递。
-    return {}
+    env: Dict[str, str] = {str(key): str(value) for key, value in dict(task_env or {}).items()}
+    if device_id is not None and _is_pypto_cann_eval(agent_type=agent_type, bench_name=bench_name):
+        env["TILE_FWK_DEVICE_ID"] = str(device_id)
+    return env
 
 
 def _is_pypto_cann_eval(*, agent_type: str, bench_name: str) -> bool:
@@ -1815,6 +2448,8 @@ def _pipeline_result_payload(result: PipelineRunResult) -> Dict[str, Any]:
         "status": result.status,
         "message": result.message,
         "ok": result.ok,
+        "metadata": result.metadata,
+        "token_usage": _pipeline_token_usage(result),
         "case": _task_to_dict(result.case),
         "generator_prompt_file": str(result.generator_prompt_file) if result.generator_prompt_file else "",
         "generated_artifact": _artifact_to_dict(result.generated_artifact),
@@ -1846,6 +2481,82 @@ def _task_to_dict(task: object) -> Dict[str, Any]:
         "files": {key: str(path) for key, path in getattr(task, "files", {}).items()},
         "metadata": getattr(task, "metadata", {}),
     }
+
+
+def _pipeline_token_usage(result: PipelineRunResult) -> Dict[str, Any]:
+    return _merge_token_usages(
+        [
+            _artifact_token_usage(result.generated_artifact),
+            _artifact_token_usage(result.conversion_artifact),
+        ]
+    )
+
+
+def _batch_token_usage(entries: Iterable[Mapping[str, Any]]) -> Dict[str, Any]:
+    usages: list[Mapping[str, Any]] = []
+    for entry in entries:
+        result = entry.get("result")
+        if isinstance(result, Mapping):
+            usage = result.get("token_usage")
+            if isinstance(usage, Mapping):
+                usages.append(usage)
+    return _merge_token_usages(usages)
+
+
+def _artifact_token_usage(artifact: Optional[Artifact]) -> Dict[str, Any]:
+    if artifact is None:
+        return _empty_token_usage()
+    metadata = artifact.metadata if isinstance(artifact.metadata, Mapping) else {}
+    direct = metadata.get("token_usage")
+    if isinstance(direct, Mapping):
+        return dict(direct)
+    session = metadata.get("opencode_session")
+    if isinstance(session, Mapping):
+        usage = session.get("token_usage")
+        if isinstance(usage, Mapping):
+            return dict(usage)
+    return _empty_token_usage()
+
+
+def _empty_token_usage() -> Dict[str, Any]:
+    try:
+        from auto_pipeline.generator.opencode.exporter import empty_token_usage
+
+        return empty_token_usage()
+    except Exception:
+        return {
+            "supported": False,
+            "message_count": 0,
+            "session_count": 0,
+            "total": 0,
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {"read": 0, "write": 0},
+            "cost": 0.0,
+            "by_model": {},
+        }
+
+
+def _merge_token_usages(usages: Iterable[Optional[Mapping[str, Any]]]) -> Dict[str, Any]:
+    try:
+        from auto_pipeline.generator.opencode.exporter import merge_token_usage
+
+        return merge_token_usage(list(usages))
+    except Exception:
+        merged = _empty_token_usage()
+        for usage in usages:
+            if not isinstance(usage, Mapping):
+                continue
+            if usage.get("supported"):
+                merged["supported"] = True
+            for key in ("message_count", "session_count", "total", "input", "output", "reasoning"):
+                merged[key] = int(merged.get(key, 0) or 0) + int(usage.get(key, 0) or 0)
+            cache = usage.get("cache") if isinstance(usage.get("cache"), Mapping) else {}
+            merged["cache"]["read"] += int(cache.get("read", 0) or 0)
+            merged["cache"]["write"] += int(cache.get("write", 0) or 0)
+            merged["cost"] = float(merged.get("cost", 0.0) or 0.0) + float(usage.get("cost", 0.0) or 0.0)
+        return merged
 
 
 def _artifact_to_dict(artifact: Optional[Artifact]) -> Dict[str, Any]:

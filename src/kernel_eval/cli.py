@@ -39,6 +39,7 @@ from .utils.path_resolver import resolve_task_dir
 # 导入 benches 模块，触发所有评测集组件注册（使用相对导入）
 from .benches import cann as _cann_bench
 
+
 # 尝试导入 cann_bench（用户提交的算子包），触发 torch.ops.cann_bench 注册
 try:
     import cann_bench

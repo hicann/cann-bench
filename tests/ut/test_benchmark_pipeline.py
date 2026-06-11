@@ -3,9 +3,10 @@
 
 import csv
 import json
+import os
+import signal
 import sqlite3
 import subprocess
-from concurrent.futures import Future
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,7 @@ from auto_pipeline.core import GeneratorInput, PromptGenerator
 from auto_pipeline.core import AGENT_SUCCESS, Artifact, RunnerPrompt, Submission
 from auto_pipeline.core import BenchmarkPipeline, PipelineRunResult
 from auto_pipeline.generator.pypto.converter import PyptoToCannConverter, PyptoToStanfordConverter
+from auto_pipeline.converter.base import ConversionResult
 from auto_pipeline.converter.registry import available_converters, create_converter
 from auto_pipeline.core import CannBenchCase
 from kernel_eval.benches.cann_loader import CannCaseLoader
@@ -79,7 +81,7 @@ def test_exp_general_case_remains_full_task():
 
 
 def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
-    selector = "bench_lab/pypto_cann_bench/exp"
+    selector = "bench_lab/pypto_cann_bench/level1/exp"
     task_dir = REPO_ROOT / selector
 
     client = CannBenchClient(REPO_ROOT)
@@ -89,7 +91,7 @@ def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
     assert case.metadata["schema"].startswith("exp(")
     bench_root, filter_prefix = resolve_task_dir(selector, REPO_ROOT)
     assert bench_root == str(REPO_ROOT / "bench_lab/pypto_cann_bench")
-    assert filter_prefix == "exp"
+    assert filter_prefix == "level1/exp"
 
     yaml_cases = config_runner.read_yaml_mapping(task_dir / "cases.yaml")["cases"]
     assert [case["case_id"] for case in yaml_cases] == [2, 8, 15]
@@ -123,17 +125,17 @@ def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
     assert "1D" not in scoped_text
     assert "5D" not in scoped_text
 
-    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("exp")
+    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("level1/exp")
     assert [case.case_id for case in loaded_cases] == [
-        "exp_2",
-        "exp_8",
-        "exp_15",
+        "level1/exp_2",
+        "level1/exp_8",
+        "level1/exp_15",
     ]
     assert not any("_pypto_" in case.case_id for case in loaded_cases)
 
 
 def test_pypto_cann_bench_sigmoid_task_is_static_2d_float32_subset():
-    selector = "bench_lab/pypto_cann_bench/sigmoid"
+    selector = "bench_lab/pypto_cann_bench/level1/sigmoid"
     task_dir = REPO_ROOT / selector
 
     client = CannBenchClient(REPO_ROOT)
@@ -143,7 +145,7 @@ def test_pypto_cann_bench_sigmoid_task_is_static_2d_float32_subset():
     assert case.metadata["schema"].startswith("sigmoid(")
     bench_root, filter_prefix = resolve_task_dir(selector, REPO_ROOT)
     assert bench_root == str(REPO_ROOT / "bench_lab/pypto_cann_bench")
-    assert filter_prefix == "sigmoid"
+    assert filter_prefix == "level1/sigmoid"
 
     yaml_cases = config_runner.read_yaml_mapping(task_dir / "cases.yaml")["cases"]
     assert [case["case_id"] for case in yaml_cases] == [8, 15]
@@ -176,10 +178,10 @@ def test_pypto_cann_bench_sigmoid_task_is_static_2d_float32_subset():
     assert "1D" not in scoped_text
     assert "5D" not in scoped_text
 
-    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("sigmoid")
+    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("level1/sigmoid")
     assert [case.case_id for case in loaded_cases] == [
-        "sigmoid_8",
-        "sigmoid_15",
+        "level1/sigmoid_8",
+        "level1/sigmoid_15",
     ]
 
 
@@ -289,7 +291,7 @@ def test_pypto_adapter_validates_backend_artifact(tmp_path):
     assert "schema: gelu" in material.require_text
     assert "golden.py 参考实现" in material.require_text
 
-    pypto_cann_bench_case = client.load_case("cann", "bench_lab/pypto_cann_bench/exp")
+    pypto_cann_bench_case = client.load_case("cann", "bench_lab/pypto_cann_bench/level1/exp")
     exp_material = build_case_material(pypto_cann_bench_case)
     assert exp_material.op_name == "exp"
 
@@ -776,6 +778,55 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
     assert "task_desc.py" not in pypto_prompt
     assert "ai_op.py" not in pypto_prompt
     assert "ModelNew" not in pypto_prompt
+
+
+def test_pypto_orchestrator_accepts_six_stages_when_perf_round_zero(monkeypatch, tmp_path):
+    monkeypatch.setenv("PYPTO_PERF_ROUND", "0")
+    repo_root = tmp_path / "pypto_repo"
+    repo_root.mkdir()
+    opencode = tmp_path / "fake_opencode.py"
+    opencode.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json\n"
+        "import pathlib\n"
+        "root = pathlib.Path.cwd()\n"
+        "op_dir = root / 'custom' / 'gelu'\n"
+        "op_dir.mkdir(parents=True, exist_ok=True)\n"
+        "for name in ['SPEC.md', 'gelu_impl.py', 'gelu_golden.py', 'test_gelu.py']:\n"
+        "    (op_dir / name).write_text('# pypto\\n', encoding='utf-8')\n"
+        "(op_dir / '.orchestrator_state.json').write_text(json.dumps({\n"
+        "    'stage_status': {str(i): 'completed' for i in range(1, 7)}\n"
+        "}), encoding='utf-8')\n",
+        encoding="utf-8",
+    )
+    opencode.chmod(0o755)
+
+    task_dir = tmp_path / "tasks" / "level1" / "gelu"
+    task_dir.mkdir(parents=True)
+    proto = task_dir / "proto.yaml"
+    proto.write_text("operator:\n  name: Gelu\n  schema: gelu(x) -> y\n", encoding="utf-8")
+    cases = task_dir / "cases.yaml"
+    cases.write_text("cases:\n  - shape: [16]\n", encoding="utf-8")
+    golden = task_dir / "golden.py"
+    golden.write_text("def golden(x):\n    return x\n", encoding="utf-8")
+
+    case = CannBenchCase(
+        bench_name="cann",
+        task_dir=task_dir,
+        operator="Gelu",
+        rel_path="tasks/level1/gelu",
+        files={"proto": proto, "cases": cases, "golden": golden},
+        metadata={"schema": "gelu(x) -> y"},
+    )
+    task = _generation_task(case, tmp_path / "work")
+    agent = PyptoOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+
+    output = agent.generate(task)
+
+    assert output.ok
+    assert output.metadata["pypto_perf_round"] == 0
+    assert output.metadata["pypto_required_stages"] == ["1", "2", "3", "4", "5", "6"]
+    assert output.metadata["pypto_status"] == "success"
 
 
 def test_opencode_exporter_rejects_truncated_cli_json(monkeypatch, tmp_path):
@@ -1271,7 +1322,7 @@ def test_generic_conversion_prompt_renders_fallback_contract(tmp_path):
         name = "generic"
         source_generator = "generic"
         target_benchmark = "cann"
-        timeout_sec = 7200
+        timeout_sec = 10800
         env = {}
 
     prompt = GenericConverter().build_conversion_prompt(
@@ -1446,7 +1497,10 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
     def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
         # perf 策略不再通过环境变量传递，改为通过 extra_args 里的
         # --perf-metric-strategy CLI 参数
-        assert self.extra_env == {}
+        assert self.extra_env["AUTO_PIPELINE_RUN_ID"]
+        assert self.extra_env["AUTO_PIPELINE_TASK_ID"] == "gelu"
+        assert self.extra_env["TILE_FWK_DEVICE_ID"] == "5"
+        assert self.timeout_sec == 222
         assert "--perf-metric-strategy" in list(extra_args)
         assert "trace_view" in list(extra_args)
         assert device_id == 5
@@ -1473,7 +1527,9 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
             raw_dir.mkdir(parents=True, exist_ok=True)
             raw_dir.joinpath("GeLU_impl.py").write_text("# pypto\n", encoding="utf-8")
             assert task.workdir == tmp_path / "run" / "gelu" / "work"
-            assert task.env == {}
+            assert task.timeout_sec == 111
+            assert task.env["AUTO_PIPELINE_RUN_ID"]
+            assert task.env["AUTO_PIPELINE_TASK_ID"] == "gelu"
             return Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
 
     class FakeConverterRunner:
@@ -1494,7 +1550,9 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
                 encoding="utf-8",
             )
             assert prompt.cwd == tmp_path / "run" / "gelu" / "convert"
-            assert prompt.env == {}
+            assert prompt.timeout_sec == 111
+            assert prompt.env["AUTO_PIPELINE_RUN_ID"]
+            assert prompt.env["AUTO_PIPELINE_TASK_ID"] == "gelu"
             return Artifact(status=AGENT_SUCCESS, workdir=prompt.output_dir, files={"source_dir": submission_dir})
 
     def fake_create_generator(generator_type, cfg):
@@ -1521,6 +1579,8 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
             "model": "deepseek/deepseek-v4-pro",
             "devices": [5],
             "parallel": 1,
+            "gen_timeout": 111,
+            "eval_timeout": 222,
         },
     )
 
@@ -1528,43 +1588,121 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
     assert result.submission.source_dir == tmp_path / "run" / "gelu" / "submission"
     assert result.eval_result.reports_dir == tmp_path / "run" / "gelu" / "kernel_eval"
     assert (tmp_path / "run" / "gelu" / "benchmark_result.json").is_file()
+    assert result.metadata["gen_timeout_sec"] == 111
+    assert result.metadata["eval_timeout_sec"] == 222
     assert generator_cfgs[0][0] == "pypto"
     assert generator_cfgs[0][1]["repo_root"] == pypto_repo.resolve()
     assert generator_cfgs[0][1]["model"] == "deepseek/deepseek-v4-pro"
     assert generator_cfgs[0][1]["device_id"] == 5
     assert generator_cfgs[0][1]["device_mode"] == "pool"
-    assert generator_cfgs[0][1]["worktree_root"] == tmp_path / "run" / "pypto_worktrees"
-    assert "env" not in generator_cfgs[0][1]
+    assert "worktree_root" not in generator_cfgs[0][1]
+    assert generator_cfgs[0][1]["env"]["AUTO_PIPELINE_RUN_ID"]
+    assert generator_cfgs[0][1]["env"]["AUTO_PIPELINE_TASK_ID"] == "gelu"
     assert runner_types == [("opencode", {"model": "deepseek/deepseek-v4-pro"})]
+
+
+def test_pipeline_snapshots_pypto_custom_and_summarizes_tokens(monkeypatch, tmp_path):
+    client = CannBenchClient(REPO_ROOT, timeout_sec=77)
+
+    def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
+        return CannBenchEvalResult(returncode=0, command=["eval"], reports_dir=Path(reports_dir))
+
+    monkeypatch.setattr(CannBenchClient, "eval_submission", fake_eval)
+
+    workspace_custom = tmp_path / "pypto" / "custom" / "gelu"
+    workspace_custom.mkdir(parents=True)
+    impl = workspace_custom / "gelu_impl.py"
+    impl.write_text("# pypto\n", encoding="utf-8")
+    (workspace_custom / "prof").mkdir()
+    (workspace_custom / "prof" / "trace.json").write_text("{}\n", encoding="utf-8")
+    for name in ["gelu_golden.py", "test_gelu.py", "SPEC.md"]:
+        workspace_custom.joinpath(name).write_text("# artifact\n", encoding="utf-8")
+
+    class FakeGenerator:
+        type = "pypto"
+
+        def generate(self, task: GeneratorInput) -> Artifact:
+            return Artifact(
+                status=AGENT_SUCCESS,
+                workdir=workspace_custom,
+                files={"source_dir": workspace_custom, "gelu_impl.py": impl},
+                metadata={
+                    "pypto_status": "success",
+                    "opencode_session": {
+                        "token_usage": {
+                            "supported": True,
+                            "message_count": 1,
+                            "session_count": 1,
+                            "total": 9,
+                            "input": 4,
+                            "output": 5,
+                            "reasoning": 0,
+                            "cache": {"read": 0, "write": 0},
+                            "cost": 0.0,
+                            "by_model": {},
+                        }
+                    },
+                },
+            )
+
+    class FakeConverter:
+        name = "fake"
+        source_generator = "pypto"
+        target_benchmark = "cann"
+
+        def convert(self, bench_name, case, artifact, *, output_dir, runner=None, workdir=None):
+            snapshot_dir = tmp_path / "run" / "gelu" / "custom" / "gelu"
+            assert artifact.workdir == snapshot_dir
+            assert artifact.files["source_dir"] == snapshot_dir
+            assert artifact.files["gelu_impl.py"] == snapshot_dir / "gelu_impl.py"
+            submission_dir = Path(output_dir)
+            package_dir = submission_dir / "cann_bench"
+            package_dir.mkdir(parents=True, exist_ok=True)
+            submission_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+            package_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
+            package_dir.joinpath("gelu.py").write_text("import pypto\n", encoding="utf-8")
+            submission = Submission("cann", case.operator, submission_dir, {})
+            return ConversionResult(artifact=Artifact(status=AGENT_SUCCESS, workdir=submission_dir), submission=submission)
+
+    pipeline = BenchmarkPipeline(bench_name="cann", client=client)
+    result = pipeline.run_case(
+        selector="tasks/level1/gelu",
+        generator=FakeGenerator(),
+        converter=FakeConverter(),
+        workdir=tmp_path / "run" / "gelu" / "work",
+        submission_dir=tmp_path / "run" / "gelu" / "submission",
+        reports_dir=tmp_path / "run" / "gelu" / "kernel_eval",
+        timeout_sec=30,
+    )
+
+    assert result.ok
+    snapshot_custom = tmp_path / "run" / "gelu" / "custom" / "gelu"
+    assert (snapshot_custom / "gelu_impl.py").is_file()
+    assert not (snapshot_custom / "prof").exists()
+    assert result.generated_artifact.metadata["workspace_custom_dir"] == str(workspace_custom.resolve())
+    assert result.generated_artifact.metadata["output_custom_dir"] == str((tmp_path / "run" / "gelu" / "custom" / "gelu").resolve())
+    payload = config_runner._pipeline_result_payload(result)
+    assert payload["token_usage"]["total"] == 9
 
 
 def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch, tmp_path):
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
-    calls = []
-    executor_instances = []
-
-    class ImmediateExecutor:
-        def __init__(self, *, max_workers):
-            self.max_workers = max_workers
-            executor_instances.append(self)
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-        def submit(self, fn, *args):
-            future = Future()
-            try:
-                future.set_result(fn(*args))
-            except BaseException as exc:
-                future.set_exception(exc)
-            return future
+    calls_dir = tmp_path / "calls"
+    calls_dir.mkdir()
 
     def fake_run_task(spec, task, *, device_id):
-        calls.append((spec, task, device_id))
-        task = CannBenchCase(
+        calls_dir.joinpath(f"{task.name}.json").write_text(
+            json.dumps(
+                {
+                    "selector": task.selector,
+                    "root_dir": str(task.root_dir),
+                    "device_id": device_id,
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        case = CannBenchCase(
             bench_name=spec.bench_name,
             task_dir=tmp_path,
             operator=task.selector,
@@ -1572,14 +1710,13 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
             files={},
         )
         return PipelineRunResult(
-            case=task,
-            submission=Submission("cann", task.operator, tmp_path / "submission"),
+            case=case,
+            submission=Submission("cann", case.operator, tmp_path / "submission"),
             eval_result=CannBenchEvalResult(
-                returncode=0, command=["eval", task.operator], reports_dir=tmp_path / "reports"
+                returncode=0, command=["eval", case.operator], reports_dir=tmp_path / "reports"
             ),
         )
 
-    monkeypatch.setattr(config_runner, "ProcessPoolExecutor", ImmediateExecutor)
     monkeypatch.setattr(config_runner, "_run_task", fake_run_task)
     report_path = tmp_path / "batch.json"
     cfg = {
@@ -1601,20 +1738,20 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
         },
     )
 
-    assert executor_instances[0].max_workers == 2
+    calls = {path.stem: json.loads(path.read_text(encoding="utf-8")) for path in calls_dir.glob("*.json")}
     assert [entry["name"] for entry in entries] == ["exp", "gelu", "mish"]
-    assert len(calls) == 3
-    assert {calls[0][2], calls[1][2]} == {0, 3}
-    assert calls[2][2] == 4
-    assert [call[1].selector for call in calls] == [
+    assert set(calls) == {"exp", "gelu", "mish"}
+    assert {calls["exp"]["device_id"], calls["gelu"]["device_id"]} == {0, 3}
+    assert calls["mish"]["device_id"] == 4
+    assert [calls[name]["selector"] for name in ("exp", "gelu", "mish")] == [
         "tasks/level1/exp",
         "tasks/level1/gelu",
         "tasks/level1/mish",
     ]
-    assert [call[1].root_dir for call in calls] == [
-        tmp_path / "run" / "exp",
-        tmp_path / "run" / "gelu",
-        tmp_path / "run" / "mish",
+    assert [calls[name]["root_dir"] for name in ("exp", "gelu", "mish")] == [
+        str(tmp_path / "run" / "exp"),
+        str(tmp_path / "run" / "gelu"),
+        str(tmp_path / "run" / "mish"),
     ]
     batch = json.loads(report_path.read_text(encoding="utf-8"))
     assert batch["total_cases"] == 3
@@ -1622,6 +1759,70 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
     assert batch["running_cases"] == 0
     assert batch["pending_cases"] == 0
     assert batch["output"] == str(tmp_path / "run")
+
+
+def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(monkeypatch, tmp_path):
+    monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
+    monkeypatch.setattr(config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
+
+    def fake_run_task(spec, task, *, device_id):
+        if task.name == "exp":
+            os.kill(os.getpid(), signal.SIGTERM)
+        case = CannBenchCase(
+            bench_name=spec.bench_name,
+            task_dir=tmp_path,
+            operator=task.selector,
+            rel_path=task.selector,
+            files={},
+        )
+        return PipelineRunResult(
+            case=case,
+            submission=Submission("cann", case.operator, tmp_path / "submission"),
+            eval_result=CannBenchEvalResult(
+                returncode=0, command=["eval", case.operator], reports_dir=tmp_path / "reports"
+            ),
+        )
+
+    monkeypatch.setattr(config_runner, "_run_task", fake_run_task)
+    report_path = tmp_path / "batch.json"
+    cfg = {
+        "agent": {"type": "pypto"},
+        "benchmark": {
+            "name": "cann",
+            "tasks": ["tasks/level1/exp", "tasks/level1/sigmoid"],
+        },
+    }
+
+    entries = config_runner.run_cases_from_mapping(
+        cfg,
+        report_path=report_path,
+        runtime={
+            "output": str(tmp_path / "run"),
+            "workspace": str(tmp_path / "pypto"),
+            "devices": "1,7",
+            "parallel": 2,
+            "run_id": "run-task-pid-kill",
+        },
+    )
+
+    assert [entry["status"] for entry in entries] == ["error", "success"]
+    assert entries[0]["error"] == "task process exited without result: exitcode=-15"
+    assert entries[1]["device_id"] == 7
+    batch = json.loads(report_path.read_text(encoding="utf-8"))
+    assert batch["completed_cases"] == 2
+    assert batch["failed_cases"] == 1
+    assert batch["passed_cases"] == 1
+    assert batch["running_cases"] == 0
+    assert batch["pending_cases"] == 0
+
+    run_state = config_runner.pipeline_state.read_json(
+        config_runner.pipeline_state.run_file("run-task-pid-kill", cann_bench_root=tmp_path)
+    )
+    assert run_state["status"] == "failed"
+    assert run_state["summary"]["success"] == 1
+    assert run_state["summary"]["failed"] == 1
+    assert run_state["summary"]["running"] == 0
+    assert run_state["summary"]["pending"] == 0
 
 
 def test_config_runner_preserves_akg_triton_ascend_options_and_device(tmp_path):
@@ -1648,7 +1849,7 @@ def test_config_runner_preserves_akg_triton_ascend_options_and_device(tmp_path):
             "parallel": 2,
         },
     )
-    generator_cfg = config_runner._generator_config(spec, device_id=2)
+    generator_cfg = config_runner._generator_config(spec, spec.tasks[0], device_id=2)
 
     assert spec.agent_type == "akg-agent"
     assert spec.workspace == (tmp_path / "akg").resolve()
@@ -1663,6 +1864,10 @@ def test_config_runner_preserves_akg_triton_ascend_options_and_device(tmp_path):
         "codegen_target": "triton_ascend",
         "workflow": "kernelgen_only_workflow",
         "verify_timeout": 1800,
+        "env": {
+            "AUTO_PIPELINE_RUN_ID": spec.run_id,
+            "AUTO_PIPELINE_TASK_ID": "exp",
+        },
         "device_id": 2,
     }
 
@@ -1753,3 +1958,65 @@ def test_eval_args_pass_through_kernel_eval_options():
         "--no-perf",
         "--no-subprocess-isolation",
     ]
+
+
+def test_task_registry_records_stage_timing(monkeypatch, tmp_path):
+    monkeypatch.setattr(config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
+    task = config_runner.ConfiguredTask(
+        name="exp",
+        selector="tasks/exp",
+        root_dir=tmp_path / "out" / "exp",
+    )
+    spec = config_runner.SimpleConfig(
+        output=tmp_path / "out",
+        bench_name="cann",
+        bench_root=tmp_path,
+        agent_type="pypto",
+        workspace=tmp_path / "pypto",
+        agent_options={},
+        model="",
+        devices=(),
+        parallel=1,
+        tasks=(task,),
+        gen_timeout=1,
+        eval_timeout=1,
+        run_id="run-stage-timing",
+    )
+
+    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "generation"}, device_id=None)
+    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "conversion"}, device_id=None)
+    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "eval"}, device_id=None)
+    config_runner._write_task_state(spec, task, entry={"ok": True, "status": "success"}, device_id=None)
+
+    task_state = config_runner.pipeline_state.read_json(
+        config_runner.pipeline_state.task_file("run-stage-timing", "exp", cann_bench_root=tmp_path)
+    )
+    stage_times = task_state["stage_times"]
+
+    assert set(stage_times) == {"generation", "conversion", "eval"}
+    for stage in ("generation", "conversion", "eval"):
+        assert stage_times[stage]["started_at"]
+        assert stage_times[stage]["ended_at"]
+
+
+def test_eval_env_sets_tile_device_for_pypto_cann_only():
+    assert config_runner._eval_env(
+        agent_type="pypto",
+        bench_name="cann",
+        device_id=3,
+    )["TILE_FWK_DEVICE_ID"] == "3"
+    assert config_runner._eval_env(
+        agent_type="pypto",
+        bench_name="cann",
+        task_env={"AUTO_PIPELINE_RUN_ID": "run-1", "AUTO_PIPELINE_TASK_ID": "exp"},
+    )["AUTO_PIPELINE_TASK_ID"] == "exp"
+    assert "TILE_FWK_DEVICE_ID" not in config_runner._eval_env(
+        agent_type="akg-agent",
+        bench_name="cann",
+        device_id=3,
+    )
+    assert "TILE_FWK_DEVICE_ID" not in config_runner._eval_env(
+        agent_type="pypto",
+        bench_name="stanford",
+        device_id=3,
+    )

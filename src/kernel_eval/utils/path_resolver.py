@@ -60,8 +60,8 @@ def resolve_task_dir(
         >>> resolve_task_dir("/abs/path/tasks/level2/scatter", project_root)
         ("/abs/path/tasks", "level2/scatter")
 
-        >>> resolve_task_dir("bench_lab/pypto_cann_bench/exp", project_root)
-        ("/path/to/bench_lab/pypto_cann_bench", "exp")
+        >>> resolve_task_dir("bench_lab/pypto_cann_bench/level1/exp", project_root)
+        ("/path/to/bench_lab/pypto_cann_bench", "level1/exp")
     """
     # 默认值
     if dir_arg is None:
