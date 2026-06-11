@@ -48,6 +48,9 @@ WEIGHT_COMPILATION = 0.2  # w_c
 WEIGHT_FUNCTION = 0.3     # w_f
 WEIGHT_PERFORMANCE = 0.5  # w_p
 
+NO_NPU_PERF_ERROR_CODE = "no_npu_kernel_detected"
+NO_NPU_PERF_ERROR = "未检测到 NPU 算子执行，疑似 CPU fallback，反作弊触发。"
+
 
 # === 算子级得分信息 ===
 
@@ -72,6 +75,9 @@ class OperatorScoreInfo:
     total_score: float = 0.0  # 单算子综合得分，[0, 100]
     # 调试用：每个用例的 hardware-anchored 分数，None 表示数据不全或未通过功能门
     per_case_scores: List[Optional[float]] = field(default_factory=list)
+    score_error_code: Optional[str] = None
+    score_error: Optional[str] = None
+    zeroed_by_no_npu_perf: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -87,6 +93,9 @@ class OperatorScoreInfo:
             'performance_score': self.performance_score,
             'total_score': self.total_score,
             'per_case_scores': self.per_case_scores,
+            'score_error_code': self.score_error_code,
+            'score_error': self.score_error,
+            'zeroed_by_no_npu_perf': self.zeroed_by_no_npu_perf,
         }
 
 
@@ -227,6 +236,25 @@ def _warn_perf_anchor_missing(
     )
 
 
+_NO_NPU_PERF_WARNED_RUN: set = set()
+
+
+def _warn_no_npu_perf(
+    n_func_pass: int, n_no_perf_pass: int, rel_path: Optional[str] = None
+) -> None:
+    """功能通过但 profiler 没有采到 NPU kernel 时间，整算子置 0 分。"""
+    key = (rel_path, n_func_pass, n_no_perf_pass)
+    if key in _NO_NPU_PERF_WARNED_RUN:
+        return
+    _NO_NPU_PERF_WARNED_RUN.add(key)
+    op_prefix = f"[{rel_path}] " if rel_path else ""
+    _logger.warning(
+        "%saggregate_eq4: %d / %d 个功能通过的 case 未检测到 NPU 算子性能数据，"
+        "疑似 CPU fallback 或未执行提交的 NPU kernel，整算子按 0 分处理。",
+        op_prefix, n_no_perf_pass, n_func_pass,
+    )
+
+
 # === 单算子综合分聚合 ===
 
 def aggregate_eq4(
@@ -237,6 +265,7 @@ def aggregate_eq4(
     wf: float = WEIGHT_FUNCTION,
     wp: float = WEIGHT_PERFORMANCE,
     rel_path: Optional[str] = None,
+    n_no_perf_pass: int = 0,
 ) -> Dict[str, Any]:
     """Eq.4 单算子综合分聚合——单一事实来源。
 
@@ -266,6 +295,21 @@ def aggregate_eq4(
     if n_perf_missing > 0:
         _warn_perf_anchor_missing(n_func_pass, n_perf_missing, rel_path)
 
+    if compile_passed and n_no_perf_pass > 0:
+        _warn_no_npu_perf(n_func_pass, n_no_perf_pass, rel_path)
+        return {
+            "compilation_score": 0.0,
+            "function_score": 0.0,
+            "performance_score": 0.0,
+            "total_score": 0.0,
+            "per_case_scores": per_case_scores,
+            "n_func_pass": n_func_pass,
+            "n_no_perf_pass": n_no_perf_pass,
+            "score_error_code": NO_NPU_PERF_ERROR_CODE,
+            "score_error": NO_NPU_PERF_ERROR,
+            "zeroed_by_no_npu_perf": True,
+        }
+
     compilation_score = wc * delta_pass * 100.0
     function_score = (n_func_pass * wf / total_cases) * 100.0
     performance_score = (perf_score_sum * wp / total_cases) * 100.0
@@ -278,6 +322,10 @@ def aggregate_eq4(
         "total_score": total_score,
         "per_case_scores": per_case_scores,
         "n_func_pass": n_func_pass,
+        "n_no_perf_pass": n_no_perf_pass,
+        "score_error_code": None,
+        "score_error": None,
+        "zeroed_by_no_npu_perf": False,
     }
 
 
@@ -322,9 +370,14 @@ class ScoringCalculator:
         total_cases = max(declared, run, 1)
 
         case_scores: List[Tuple[bool, Optional[float]]] = []
+        n_no_perf_pass = 0
         for case in result.results:
-            if not case.success or case.perf_result is None:
+            if not case.success:
                 case_scores.append((case.success, None))
+                continue
+            if case.perf_result is None or case.perf_result.elapsed_us <= 0:
+                n_no_perf_pass += 1
+                case_scores.append((True, None))
                 continue
             score_i = per_case_sol_score(
                 case.baseline_perf_us,
@@ -340,6 +393,7 @@ class ScoringCalculator:
             case_scores=case_scores,
             wc=self.wc, wf=self.wf, wp=self.wp,
             rel_path=result.rel_path,
+            n_no_perf_pass=n_no_perf_pass,
         )
 
         return OperatorScoreInfo(
@@ -355,6 +409,9 @@ class ScoringCalculator:
             performance_score=agg["performance_score"],
             total_score=agg["total_score"],
             per_case_scores=agg["per_case_scores"],
+            score_error_code=agg.get("score_error_code"),
+            score_error=agg.get("score_error"),
+            zeroed_by_no_npu_perf=bool(agg.get("zeroed_by_no_npu_perf")),
         )
 
     def calculate_overall_score(self, score_infos: List[OperatorScoreInfo]) -> float:

@@ -29,7 +29,7 @@ from dataclasses import dataclass, asdict, field
 from ..config import Config, get_config
 from .._version import FRAMEWORK_VERSION, TASKS_VERSION
 from ..eval.evaluator import EvalCaseResult, EvalOperatorResult
-from .scoring import ScoringCalculator, OperatorScoreInfo
+from .scoring import NO_NPU_PERF_ERROR, ScoringCalculator, OperatorScoreInfo
 from .setup_info import collect_setup_info
 
 
@@ -43,6 +43,7 @@ class EvalResult:
     elapsed_us: Optional[float] = 0  # None 表示未采集性能(--no-perf / 非 profiler 路径)
     op_times: Optional[Dict[str, Dict[str, float]]] = None
     error_msg: Optional[str] = None
+    performance_error_msg: Optional[str] = None
     device: str = ""
     timestamp: str = ""
     accuracy: Optional[Dict] = None
@@ -113,11 +114,22 @@ class OperatorReport:
     # 读这两个字段渲染"编译失败"和"子进程失败"的分组。
     compilation_error: Optional[str] = None
     subprocess_failure_reason: Optional[str] = None
+    score_error_code: Optional[str] = None
+    score_error: Optional[str] = None
 
     @classmethod
-    def from_eval_operator_result(cls, result: EvalOperatorResult, score: float) -> "OperatorReport":
+    def from_eval_operator_result(
+        cls,
+        result: EvalOperatorResult,
+        score: float,
+        score_info: Optional[OperatorScoreInfo] = None,
+    ) -> "OperatorReport":
         """从EvalOperatorResult创建"""
         cases = [EvalResult.from_eval_case_result(r) for r in result.results]
+        if score_info is not None and score_info.zeroed_by_no_npu_perf:
+            for case in cases:
+                if case.status == "success" and (case.elapsed_us is None or case.elapsed_us <= 0):
+                    case.performance_error_msg = NO_NPU_PERF_ERROR
         return cls(
             rel_path=result.rel_path,
             operator=result.operator,
@@ -130,6 +142,8 @@ class OperatorReport:
             cases=cases,
             compilation_error=getattr(result, 'compilation_error', None),
             subprocess_failure_reason=getattr(result, 'subprocess_failure_reason', None),
+            score_error_code=score_info.score_error_code if score_info else None,
+            score_error=score_info.score_error if score_info else None,
         )
 
 
@@ -206,7 +220,9 @@ class ReportGenerator:
         for op_result in self.operator_results:
             score_info = self.scoring_calculator.calculate_operator_score(op_result)
             score_infos.append(score_info)
-            op_report = OperatorReport.from_eval_operator_result(op_result, score_info.total_score)
+            op_report = OperatorReport.from_eval_operator_result(
+                op_result, score_info.total_score, score_info=score_info,
+            )
             operator_reports.append(op_report)
 
             total_cases += op_result.total_cases

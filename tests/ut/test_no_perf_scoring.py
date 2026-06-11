@@ -12,12 +12,13 @@
 # ----------------------------------------------------------------------------------------------------------
 
 """
-回归:perf_result 缺失(--no-perf / 非 profiler 路径,score_i=None)时,
-aggregate_eq4 仅把该 case 的 **perf 分按 0 计入**,而 function/compilation/total
-仍照常计算。钉死"墙钟弃用后,缺 perf 不破坏总分"的不变量。
+回归:
+- score_i=None 只表示缺 baseline/T_HW 锚点时,仅把该 case 的 perf 分按 0 计入。
+- 精度通过但没有 NPU 性能数据时,调用方显式传入 n_no_perf_pass,整算子按 0 分处理。
 """
 
 from kernel_eval.report.scoring import (
+    NO_NPU_PERF_ERROR_CODE,
     aggregate_eq4,
     WEIGHT_COMPILATION,
     WEIGHT_FUNCTION,
@@ -26,7 +27,7 @@ from kernel_eval.report.scoring import (
 
 
 def test_missing_perf_zeros_only_perf_keeps_function_and_total():
-    # 两个精度通过的 case:一个有 perf 分 0.8,一个无 perf(None)
+    # 两个精度通过的 case:一个有 perf 分 0.8,一个 score_i=None(缺锚点而非无 NPU perf)
     agg = aggregate_eq4(
         compile_passed=True,
         total_cases=2,
@@ -45,10 +46,11 @@ def test_missing_perf_zeros_only_perf_keeps_function_and_total():
     ) < 1e-9
     # 缺 perf 的 case 在 per_case_scores 里记为 None(不污染为 0/NaN)
     assert agg["per_case_scores"] == [0.8, None]
+    assert not agg["zeroed_by_no_npu_perf"]
 
 
-def test_all_missing_perf_still_scores_function_and_total():
-    # 全部精度通过但都无 perf:perf 分整体 0,function/compilation/total 仍算
+def test_all_missing_anchors_still_scores_function_and_total():
+    # 全部精度通过但都缺锚点:perf 分整体 0,function/compilation/total 仍算
     agg = aggregate_eq4(
         compile_passed=True,
         total_cases=2,
@@ -58,10 +60,27 @@ def test_all_missing_perf_still_scores_function_and_total():
     assert agg["function_score"] == WEIGHT_FUNCTION * (2 / 2) * 100
     assert agg["compilation_score"] == WEIGHT_COMPILATION * 100
     assert agg["total_score"] == agg["compilation_score"] + agg["function_score"]
+    assert not agg["zeroed_by_no_npu_perf"]
 
 
-def test_missing_perf_does_not_penalize_a_failed_case_differently():
-    # 一个通过(无 perf)+ 一个未通过:function 只按通过数,perf 全 0,total 仍算
+def test_no_npu_perf_zeroes_whole_operator():
+    # 一个精度通过的 case 没有有效 NPU 性能数据:整算子 0 分
+    agg = aggregate_eq4(
+        compile_passed=True,
+        total_cases=2,
+        case_scores=[(True, 0.8), (True, None)],
+        n_no_perf_pass=1,
+    )
+    assert agg["compilation_score"] == 0.0
+    assert agg["function_score"] == 0.0
+    assert agg["performance_score"] == 0.0
+    assert agg["total_score"] == 0.0
+    assert agg["score_error_code"] == NO_NPU_PERF_ERROR_CODE
+    assert agg["zeroed_by_no_npu_perf"] is True
+
+
+def test_missing_anchor_on_failed_case_does_not_trigger_no_npu_rule():
+    # 失败 case 无 perf 不触发反作弊; function 只按通过数,perf 全 0,total 仍算
     agg = aggregate_eq4(
         compile_passed=True,
         total_cases=2,
@@ -70,3 +89,4 @@ def test_missing_perf_does_not_penalize_a_failed_case_differently():
     assert agg["function_score"] == WEIGHT_FUNCTION * (1 / 2) * 100
     assert agg["performance_score"] == 0.0
     assert agg["per_case_scores"] == [None, None]
+    assert not agg["zeroed_by_no_npu_perf"]

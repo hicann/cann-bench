@@ -23,7 +23,10 @@ import pytest
 
 from kernel_eval.eval.results import EvalCaseResult, EvalOperatorResult
 from kernel_eval.eval.perf_eval import PerfResult
+from kernel_eval.report.report_generator import OperatorReport
 from kernel_eval.report.scoring import (
+    NO_NPU_PERF_ERROR,
+    NO_NPU_PERF_ERROR_CODE,
     WEIGHT_COMPILATION,
     WEIGHT_FUNCTION,
     WEIGHT_PERFORMANCE,
@@ -190,6 +193,32 @@ class TestScoringCalculator:
         info = ScoringCalculator().calculate_operator_score(op)
         assert info.total_cases == 10
         assert info.function_score == pytest.approx(2 * WEIGHT_FUNCTION / 10 * 100)
+
+    def test_accuracy_pass_without_perf_zeroes_operator(self):
+        cases = [
+            self._make_case(True, 100, 50, 50),
+            self._make_case(True, 100, 50, 0),
+        ]
+        op = EvalOperatorResult(
+            rel_path="level1/exp", operator="Exp",
+            total_cases=2, passed_cases=2, failed_cases=0, skipped_cases=0,
+            results=cases, pass_rate=1.0, avg_speedup=1.0,
+        )
+        info = ScoringCalculator().calculate_operator_score(op)
+        assert info.compilation_score == 0.0
+        assert info.function_score == 0.0
+        assert info.performance_score == 0.0
+        assert info.total_score == 0.0
+        assert info.score_error_code == NO_NPU_PERF_ERROR_CODE
+        assert info.zeroed_by_no_npu_perf is True
+
+        report = OperatorReport.from_eval_operator_result(
+            op, info.total_score, score_info=info,
+        )
+        assert report.score_error_code == NO_NPU_PERF_ERROR_CODE
+        assert report.score_error == NO_NPU_PERF_ERROR
+        assert report.cases[0].performance_error_msg is None
+        assert report.cases[1].performance_error_msg == NO_NPU_PERF_ERROR
 
     def test_empty_operator_returns_zero(self):
         # F062: 空壳算子（0 声明 + 0 实测）直接 0 分，不适用 max(..., 1) floor

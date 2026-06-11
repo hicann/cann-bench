@@ -59,6 +59,8 @@ class OperatorSummary:
     # 为 None 时渲染普通的 case 表；非空时在小节头下方优先渲染原因块。
     compilation_error: Optional[str] = None
     subprocess_failure_reason: Optional[str] = None
+    score_error_code: Optional[str] = None
+    score_error: Optional[str] = None
 
 
 @dataclass
@@ -127,6 +129,7 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
     total_cases = max(op_result.get("total_cases", 0), len(cases), 1)
 
     case_scores: List = []
+    n_no_perf_pass = 0
     for case in cases:
         success = case.get("success", case.get("status") == "success")
         if not success:
@@ -136,6 +139,8 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
         score_i = perf.get("perf_score", case.get("perf_score"))
         if score_i is None:
             t_cand = perf.get("elapsed_us") or case.get("elapsed_us") or 0
+            if t_cand <= 0:
+                n_no_perf_pass += 1
             t_base = case.get("baseline_perf_us") or 0
             t_hw = case.get("t_hw_us") or 0
             score_i = per_case_sol_score(t_base, t_cand, t_hw, rel_path=rel_path)
@@ -146,6 +151,7 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
         total_cases=total_cases,
         case_scores=case_scores,
         rel_path=rel_path,
+        n_no_perf_pass=n_no_perf_pass,
     )
     return {
         "compile_passed": compile_passed,
@@ -153,6 +159,8 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
         "function_score": agg["function_score"],
         "performance_score": agg["performance_score"],
         "composite_score": agg["total_score"],
+        "score_error_code": agg.get("score_error_code"),
+        "score_error": agg.get("score_error"),
     }
 
 
@@ -221,6 +229,8 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
         composite_score=scores["composite_score"],
         compilation_error=op_result.get("compilation_error"),
         subprocess_failure_reason=op_result.get("subprocess_failure_reason"),
+        score_error_code=scores.get("score_error_code"),
+        score_error=scores.get("score_error"),
     )
 
 
