@@ -4,7 +4,7 @@ version = "0.3.0"  # 跟随 VERSION;package=false 故用静态版本(dynamic 在
 description = "CANN operator benchmark — kernel_eval framework + tasks (deps managed via uv; run with PYTHONPATH=src)"
 license = {text = "CANN Open Software License v2.0"}
 requires-python = ">=3.10"
-# 对齐 tests/st/docker CI 镜像;torch/torch_npu 钉 2.9.0,其余精确版本交 uv.lock。
+# torch/torch_npu 钉 2.9.0,其余精确版本交 uv.lock 锁定。
 dependencies = [
     "torch==2.9.0",
     "numpy>=1.21.0",
