@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 1
@@ -85,9 +75,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-Q1024x64x512-K1024x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
+  note: 'M-bfloat16-TND-Q1024x64x512-K1024x1x512-sparse3-rope | baseline_kernels:
+    SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 2
   input_shape:
@@ -162,8 +151,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'L-float16-TND-Q8192x48x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 3
@@ -239,8 +226,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x64x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 4
@@ -316,8 +301,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x64x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 5
@@ -393,8 +376,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x64x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 6
@@ -470,8 +451,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x64x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 7
@@ -547,8 +526,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x64x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 8
@@ -630,8 +607,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'S-bfloat16-TND-Q10x128x512-K1024x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 9
@@ -709,8 +684,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q64x96x512-K24576x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 10
@@ -792,8 +765,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q17x48x512-K31344x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 11
@@ -869,8 +840,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q128x32x512-K8192x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 12
@@ -948,8 +917,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q3x96x512-K66561x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 13
@@ -1025,8 +992,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q128x64x512-K32768x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 14
@@ -1132,8 +1097,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q136x48x512-K65536x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 15
@@ -1271,9 +1234,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-float16-TND-Q528x64x512-K362931x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
+  note: 'L-float16-TND-Q528x64x512-K362931x1x512-sparse3-rope | baseline_kernels:
+    SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 16
   input_shape:
@@ -1474,9 +1436,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-float16-TND-Q2080x96x512-K145408x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
+  note: 'L-float16-TND-Q2080x96x512-K145408x1x512-sparse3-rope | baseline_kernels:
+    SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 17
   input_shape:
@@ -1551,8 +1512,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'L-bfloat16-TND-Q1x32x512-K524288x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 18
@@ -1668,9 +1627,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-float16-TND-Q32768x48x512-K32768x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
+  note: 'L-float16-TND-Q32768x48x512-K32768x1x512-sparse3-rope | baseline_kernels:
+    SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 19
   input_shape:
@@ -1785,8 +1743,6 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q231x48x512-K11617x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'
 - operator: SparseLightningIndexerGradKLLossEnhance
   case_id: 20
@@ -1862,6 +1818,4 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1x32x512-K65536x1x512-sparse3-rope | baseline_kernels: SparseLightningIndexerGradKLLoss×1'

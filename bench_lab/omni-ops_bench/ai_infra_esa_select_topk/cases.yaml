@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: AiInfraEsaSelectTopk
   case_id: 1
@@ -42,8 +32,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 2
@@ -121,8 +109,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q16x32x128-K16x8192x2x128-topk61 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 3
@@ -166,8 +152,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 4
@@ -245,8 +229,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q16x16x128-K16x8192x1x128-topk30 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 5
@@ -281,8 +263,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk8 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 6
@@ -504,8 +484,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q64x16x128-K64x8192x1x128-topk61 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 7
@@ -546,8 +524,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk4 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 8
@@ -601,8 +577,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q8x16x128-K8x8192x1x128-topk61 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 9
@@ -637,8 +611,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk8 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 10
@@ -680,8 +652,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q4x16x128-K4x8192x1x128-topk61 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 11
@@ -716,8 +686,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 12
@@ -750,8 +718,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'S-bfloat16-TND-Q1x16x128-K1x8192x1x128-topk61 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 13
@@ -795,8 +761,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 14
@@ -1210,8 +1174,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'L-float16-TND-Q128x16x128-K128x8192x1x128-topk5 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 15
@@ -1249,8 +1211,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk16 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 16
@@ -2048,8 +2008,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'L-float16-TND-Q256x16x128-K256x8192x1x128-topk8 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 17
@@ -2084,8 +2042,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 18
@@ -2127,8 +2083,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q4x32x128-K4x8192x2x128-topk1000 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 19
@@ -2163,8 +2117,6 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'
 - operator: AiInfraEsaSelectTopk
   case_id: 20
@@ -2205,6 +2157,4 @@ cases:
     - 1
   - - 0
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q16384x32x128-K2x16384x2x128-topk30 | baseline_kernels: TopK×1'

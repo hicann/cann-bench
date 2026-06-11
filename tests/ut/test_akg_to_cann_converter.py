@@ -140,6 +140,7 @@ def test_akg_to_cann_converter_packages_exp_modelnew_output(tmp_path):
     assert submission.metadata["function_name"] == "exp"
 
 
+@pytest.mark.skipif(not importlib.util.find_spec("triton"), reason="triton 未安装")
 def test_akg_to_stanford_converter_packages_relu_modelnew_output(tmp_path):
     case = _stanford_relu_case(tmp_path)
     adapter = create_converter("akg-agent", "stanford", {})

@@ -80,7 +80,7 @@ class TestPlatformAlias:
     def test_all_values_are_logical_names(self):
         """所有值是逻辑名"""
         for key, value in PLATFORM_ALIAS.items():
-            assert value in ("910b2", "910b1", "310p")
+            assert value in ("910b2", "910b1", "310p", "950pr")
 
 
 class TestDefaultHardware:

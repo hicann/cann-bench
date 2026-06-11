@@ -157,3 +157,52 @@ class FailureSynthesizer:
             case_filter=case_filter,
             filter_func=filter_func,
         )
+
+    def synthesize_oom_failure(
+        self,
+        operator_name: str,
+        rel_path: str = "",
+        case_filter: Optional[Dict] = None,
+        filter_func: Optional[callable] = None,
+    ) -> EvalOperatorResult:
+        """子进程被 OOM Killer 杀死时合成 all-FAIL 的 EvalOperatorResult。
+
+        与 synthesize_subprocess_failure 不同：
+        - failure_type 使用 "oom_killed" 标记，便于统计和报告区分
+        - error_msg 明确标注是 OOM Killer 导致的进程死亡
+        """
+        try:
+            cases = self.case_loader.scan_by_operator(operator_name)
+            if case_filter and filter_func:
+                cases = filter_func(cases, case_filter)
+        except Exception:
+            cases = []
+
+        error_msg = "子进程被 OOM Killer 杀死 (SIGKILL/-9)，内存不足"
+
+        case_results: List[EvalCaseResult] = []
+        for c in cases:
+            case_results.append(EvalCaseResult(
+                case_id=str(getattr(c, "case_id", "")),
+                rel_path=rel_path,
+                operator=operator_name,
+                case_num=getattr(c, "case_num", 0),
+                success=False,
+                error_msg=error_msg,
+                baseline_perf_us=getattr(c, "baseline_perf_us", 0.0) or 0.0,
+                t_hw_us=getattr(c, "t_hw_us", 0.0) or 0.0,
+                failure_type="oom_killed",
+            ))
+
+        return EvalOperatorResult(
+            rel_path=rel_path,
+            operator=operator_name,
+            total_cases=len(case_results),
+            passed_cases=0,
+            failed_cases=len(case_results),
+            skipped_cases=0,
+            results=case_results,
+            pass_rate=0.0,
+            avg_speedup=0.0,
+            subprocess_failure_reason=error_msg,
+        )

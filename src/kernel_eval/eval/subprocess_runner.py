@@ -18,12 +18,16 @@
 1. Fork 子进程运行单个算子评测
 2. 处理超时（SIGTERM → SIGKILL）
 3. 解析子进程输出 JSON
+4. 保护主进程不被 OOM Killer 杀死：
+   - 子进程设置 oom_score_adj=1000（最大牺牲优先级，OOM Killer 优先杀子进程）
+   - 子进程被 SIGKILL(-9) 时识别为 OOM Kill
 
 从 evaluator.py 拆分出来，简化职责。
 """
 
 import json
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -34,6 +38,41 @@ from typing import Dict, List, Optional
 from ..config import get_project_root
 from .results import EvalCaseResult, EvalOperatorResult
 from .failure_synthesizer import FailureSynthesizer
+
+
+# ---------------------------------------------------------------------------
+# OOM Killer 保护
+# ---------------------------------------------------------------------------
+
+def _write_oom_score_adj(pid: int, value: int) -> bool:
+    """写入 /proc/<pid>/oom_score_adj，返回是否成功。
+
+    value 范围 [-1000, 1000]：
+      - -1000: 该进程几乎不会被 OOM Killer 选为牺牲者
+      - 0:      默认值
+      + 1000:  该进程最优先被 OOM Killer 杀死
+    """
+    path = f"/proc/{pid}/oom_score_adj"
+    try:
+        with open(path, "w") as f:
+            f.write(str(value))
+        return True
+    except (PermissionError, FileNotFoundError, OSError):
+        return False
+
+
+def _is_oom_killed(proc: subprocess.Popen, rc: int) -> bool:
+    """判断子进程是否疑似被 OOM Killer 杀死。
+
+    检测条件：退出码为 -9 (Python Popen) 或 137 (bash)，即 SIGKILL。
+
+    注意：任何 SIGKILL（OOM Killer、手动 kill -9、cgroup 杀进程等）都产生
+    相同退出码，此函数无法区分来源。超时路径的 SIGKILL 由调用方通过
+    try/except TimeoutExpired 分支排除，不会进入此函数。
+    """
+    if rc not in (-9, 137):
+        return False
+    return True
 
 
 class SubprocessRunner:
@@ -199,9 +238,21 @@ class SubprocessRunner:
 
             proc = subprocess.Popen(cmd, start_new_session=True, env=env)
 
+            # OOM 保护：提高子进程 oom_score_adj 到最大值，使 OOM Killer 优先杀子进程而非主进程
+            child_oom_ok = _write_oom_score_adj(proc.pid, 1000)
+            if child_oom_ok:
+                print(f"[INFO] {operator_name}: 子进程 OOM 优先级 oom_score_adj=1000 (pid={proc.pid})")
+
             try:
                 rc = proc.wait(timeout=timeout_sec)
                 if rc != 0:
+                    # 检测 OOM Kill：退出码 -9 (SIGKILL) 且非超时手动 kill
+                    if _is_oom_killed(proc, rc):
+                        print(f"[WARN] {operator_name}: 子进程被 OOM Killer 杀死 (rc={rc}, pid={proc.pid})")
+                        return self.failure_synthesizer.synthesize_oom_failure(
+                            operator_name, rel_path=rel_path,
+                            case_filter=case_filter, filter_func=filter_func,
+                        )
                     return self.failure_synthesizer.synthesize_subprocess_failure(
                         operator_name, rel_path=rel_path,
                         reason=f"subprocess exited rc={rc}",
@@ -336,6 +387,9 @@ class SubprocessRunner:
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  # 合并stderr到stdout
                                     bufsize=1, text=True)  # 行缓冲，文本模式
 
+            # OOM 保护：提高子进程 oom_score_adj 到最大值，使 OOM Killer 优先杀子进程而非主进程
+            _write_oom_score_adj(proc.pid, 1000)
+
             # 实时输出子进程日志
             # F020: was an unbounded list — verbose / profiler-Level2 children
             # can dump tens of thousands of lines, and only the last 10 are
@@ -348,6 +402,13 @@ class SubprocessRunner:
                 proc.wait(timeout=timeout_sec)
                 rc = proc.returncode
                 if rc != 0:
+                    # 检测 OOM Kill：退出码 -9 (SIGKILL) 且非超时手动 kill
+                    if _is_oom_killed(proc, rc):
+                        print(f"[WARN] {operator_name}: 子进程被 OOM Killer 杀死 (rc={rc}, pid={proc.pid})")
+                        return self.failure_synthesizer.synthesize_oom_failure(
+                            operator_name, rel_path=rel_path,
+                            case_filter=case_filter, filter_func=filter_func,
+                        )
                     return self.failure_synthesizer.synthesize_subprocess_failure(
                         operator_name, rel_path=rel_path,
                         reason=f"subprocess exited rc={rc}, output: {''.join(list(stdout_lines)[-10:])}",

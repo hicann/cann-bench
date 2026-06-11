@@ -448,6 +448,9 @@ def _cmd_eval_skip_install(args, config: Config, report_generator: ReportGenerat
 
 def cmd_eval(args):
     """执行评测命令"""
+    # OOM 保护：子进程会在 SubprocessRunner 中设置 oom_score_adj=1000，
+    # 使 OOM Killer 优先杀子进程而非主进程。主进程无需额外操作。
+
     project_root = get_project_root()
     bench_name = getattr(args, 'bench_name', 'cann')
 

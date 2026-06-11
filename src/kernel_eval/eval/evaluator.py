@@ -547,7 +547,9 @@ class Evaluator:
                 error_hint = result.error_msg.split('\n')[0] if result.error_msg else ""
                 failure_tag = ""
                 if result.failure_type == "cascade_device":
-                    failure_tag = " [级联失败]"
+                    failure_tag = " [级联失败-设备]"
+                elif result.failure_type == "oom_killed":
+                    failure_tag = " [OOM Kill]"
                 elif result.failure_type == "skipped":
                     failure_tag = " [跳过]"
                 print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon}{failure_tag} {error_hint}")

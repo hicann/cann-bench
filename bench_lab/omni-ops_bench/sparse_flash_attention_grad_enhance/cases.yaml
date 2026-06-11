@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: SparseFlashAttentionGradEnhance
   case_id: 1
@@ -101,9 +91,8 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-Q1x245x1x512-K1x2806x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
+  note: 'M-float16-BSND-Q1x245x1x512-K1x2806x1x512-sparse3-rope | baseline_kernels:
+    SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 2
   input_shape:
@@ -186,8 +175,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q123x1x512-K3319x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 3
@@ -271,8 +258,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q195x48x512-K5335x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 4
@@ -356,8 +341,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q217x12x512-K4529x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 5
@@ -441,8 +424,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q58x96x512-K2447x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 6
@@ -536,9 +517,8 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-Q1x90x32x512-K1x2786x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
+  note: 'M-bfloat16-BSND-Q1x90x32x512-K1x2786x1x512-sparse0-rope | baseline_kernels:
+    SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 7
   input_shape:
@@ -621,8 +601,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q70x2x512-K5000x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 8
@@ -716,9 +694,8 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-Q1x25x128x512-K1x1169x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
+  note: 'M-bfloat16-BSND-Q1x25x128x512-K1x1169x1x512-sparse3-rope | baseline_kernels:
+    SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 9
   input_shape:
@@ -811,9 +788,8 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-Q1x183x24x512-K1x921x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
+  note: 'M-float16-BSND-Q1x183x24x512-K1x921x1x512-sparse3-rope | baseline_kernels:
+    SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 10
   input_shape:
@@ -896,8 +872,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q11x4x512-K4728x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 11
@@ -981,8 +955,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q24x4x512-K5727x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 12
@@ -1076,9 +1048,8 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-Q1x211x64x512-K1x6099x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
+  note: 'M-float16-BSND-Q1x211x64x512-K1x6099x1x512-sparse0-rope | baseline_kernels:
+    SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 13
   input_shape:
@@ -1161,8 +1132,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q135x96x512-K3762x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 14
@@ -1246,8 +1215,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q242x16x512-K626x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 15
@@ -1331,8 +1298,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q14x8x512-K3120x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 16
@@ -1416,8 +1381,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q186x2x512-K3011x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 17
@@ -1501,8 +1464,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q245x16x512-K3523x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 18
@@ -1586,8 +1547,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q70x16x512-K5425x1x512-sparse0-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 19
@@ -1671,8 +1630,6 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'S-float16-TND-Q38x24x512-K299x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'
 - operator: SparseFlashAttentionGradEnhance
   case_id: 20
@@ -1756,6 +1713,4 @@ cases:
     - 2
   - - -2
     - 2
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q183x8x512-K5139x1x512-sparse3-rope | baseline_kernels: SparseFlashAttentionGrad×1'

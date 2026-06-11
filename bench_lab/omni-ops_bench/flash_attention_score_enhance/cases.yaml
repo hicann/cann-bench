@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: FlashAttentionScoreEnhance
   case_id: 1
@@ -64,9 +54,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 2
   input_shape:
@@ -122,9 +111,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 3
   input_shape:
@@ -180,9 +168,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 4
   input_shape:
@@ -238,9 +225,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 5
   input_shape:
@@ -320,9 +306,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'L-bfloat16-TND-Q32768x8x128-K32768x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 6
   input_shape:
@@ -402,9 +387,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'L-bfloat16-TND-Q131072x8x128-K131072x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 7
   input_shape:
@@ -460,9 +444,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse2-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-TND-Q4096x8x128-K4096x8x128-sparse2-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 8
   input_shape:
@@ -518,9 +501,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse2-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-TND-Q8192x8x128-K8192x8x128-sparse2-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 9
   input_shape:
@@ -564,8 +546,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'S-float16-TND-Q1024x4x64-K1024x4x64-sparse0 | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 10
@@ -622,8 +602,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-float16-TND-Q2048x4x128-K2048x4x128-sparse3-rope | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 11
@@ -661,8 +639,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-BSND-Q2x512x8x128-K2x512x8x128-sparse0 | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 12
@@ -714,9 +690,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-Q2x1024x8x128-K2x1024x8x128-sparse3-sink1-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-BSND-Q2x1024x8x128-K2x1024x8x128-sparse3-sink1-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 13
   input_shape:
@@ -760,8 +735,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q1536x8x64-K1536x8x64-sparse3 | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 14
@@ -818,9 +791,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-float16-TND-Q4096x8x128-K4096x8x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 15
   input_shape:
@@ -871,9 +843,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-Q4x512x4x128-K4x512x4x128-sparse4-sink2-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-float16-BSND-Q4x512x4x128-K4x512x4x128-sparse4-sink2-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 16
   input_shape:
@@ -924,9 +895,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'S-bfloat16-BSND-Q1x768x8x64-K1x768x8x64-sparse0-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'S-bfloat16-BSND-Q1x768x8x64-K1x768x8x64-sparse0-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 17
   input_shape:
@@ -968,8 +938,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'M-bfloat16-TND-Q3072x4x128-K3072x4x128-sparse0 | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 18
@@ -1020,9 +988,8 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-TND-Q1024x16x128-K1024x16x128-sparse3-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-float16-TND-Q1024x16x128-K1024x16x128-sparse3-rope | baseline_kernels:
+    FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 19
   input_shape:
@@ -1059,8 +1026,6 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
   note: 'S-float16-BSND-Q2x384x8x64-K2x384x8x64-sparse3 | baseline_kernels: FlashAttentionScore×1'
 - operator: FlashAttentionScoreEnhance
   case_id: 20
@@ -1112,6 +1077,5 @@ cases:
     - 1
   - - -1
     - 1
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-Q2x256x16x128-K2x256x16x128-sparse4-sink1-rope | baseline_kernels: FlashAttentionScore×1'
+  note: 'M-bfloat16-BSND-Q2x256x16x128-K2x256x16x128-sparse4-sink1-rope | baseline_kernels:
+    FlashAttentionScore×1'

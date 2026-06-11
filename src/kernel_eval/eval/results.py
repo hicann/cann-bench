@@ -93,6 +93,7 @@ class EvalCaseResult:
     # 失败类型标注：区分真实失败与级联失败
     # None / "genuine"   — 真实的精度/执行失败（case 本身有问题）
     # "cascade_device"   — 因 NPU 设备损坏级联失败
+    # "oom_killed"       — 子进程被 OOM Killer 杀死（SIGKILL/-9）
     # "skipped"          — 因设备不可恢复而跳过
     failure_type: Optional[str] = None
 

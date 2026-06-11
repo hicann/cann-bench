@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: SparseFlashAttentionEnhance
   case_id: 1
@@ -85,9 +75,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-PA_BSND-Q1x1x1x512-K64x128x1x512-top2048-sparse3-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-BSND-PA_BSND-Q1x1x1x512-K64x128x1x512-top2048-sparse3-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 2
   input_shape:
@@ -163,9 +152,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-TND-TND-Q4x3x512-K32768x1x512-top4096-sparse0-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-TND-TND-Q4x3x512-K32768x1x512-top4096-sparse0-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 3
   input_shape:
@@ -237,9 +225,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-TND-Q2x6x512-K8192x1x512-top256-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-TND-Q2x6x512-K8192x1x512-top256-sparse3-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 4
   input_shape:
@@ -322,9 +309,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-BSND-PA_BSND-Q4x1024x128x512-K1024x128x1x512-top2048-sparse3-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-BSND-PA_BSND-Q4x1024x128x512-K1024x128x1x512-top2048-sparse3-rope
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 5
   input_shape:
@@ -401,9 +387,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-PA_BSND-Q1x4x128x512-K256x128x1x512-top512-sparse0-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-BSND-PA_BSND-Q1x4x128x512-K256x128x1x512-top512-sparse0-rope |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 6
   input_shape:
@@ -477,9 +462,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q4x12x512-K32x128x1x512-top128-sparse0-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q4x12x512-K32x128x1x512-top128-sparse0-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 7
   input_shape:
@@ -553,9 +537,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-TND-PA_BSND-Q128x24x512-K128x128x1x512-top128-sparse3-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-TND-PA_BSND-Q128x24x512-K128x128x1x512-top128-sparse3-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 8
   input_shape:
@@ -638,9 +621,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-PA_BSND-Q4x1x24x512-K256x128x1x512-top64-sparse3-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-BSND-PA_BSND-Q4x1x24x512-K256x128x1x512-top64-sparse3-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 9
   input_shape:
@@ -724,9 +706,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-TND-Q8x48x512-K65536x1x512-top3072-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-TND-Q8x48x512-K65536x1x512-top3072-sparse3-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 10
   input_shape:
@@ -809,9 +790,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-PA_BSND-Q4x16x64x512-K256x128x1x512-top5120-sparse0-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-BSND-PA_BSND-Q4x16x64x512-K256x128x1x512-top5120-sparse0-rope |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 11
   input_shape:
@@ -915,9 +895,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-TND-PA_BSND-Q64x96x512-K512x128x1x512-top96-sparse3-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-TND-PA_BSND-Q64x96x512-K512x128x1x512-top96-sparse3-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 12
   input_shape:
@@ -993,9 +972,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-TND-Q4x64x512-K63768x1x512-top256-sparse0-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-TND-Q4x64x512-K63768x1x512-top256-sparse0-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 13
   input_shape:
@@ -1067,9 +1045,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-BSND-Q6x1x128x512-K6x8192x1x512-top6144-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-BSND-BSND-Q6x1x128x512-K6x8192x1x512-top6144-sparse3-lse-rope |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 14
   input_shape:
@@ -1141,9 +1118,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-BSND-BSND-Q1x16384x8x512-K1x131072x1x512-top256-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-BSND-BSND-Q1x16384x8x512-K1x131072x1x512-top256-sparse3-lse-rope
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 15
   input_shape:
@@ -1215,9 +1191,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-BSND-BSND-Q4x1x16x512-K4x8192x1x512-top128-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-BSND-BSND-Q4x1x16x512-K4x8192x1x512-top128-sparse3-lse-rope |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 16
   input_shape:
@@ -1300,9 +1275,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-float16-BSND-PA_BSND-Q4x1x2x512-K256x128x1x512-top512-sparse0-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-float16-BSND-PA_BSND-Q4x1x2x512-K256x128x1x512-top512-sparse0-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 17
   input_shape:
@@ -1378,9 +1352,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-TND-Q32x16x512-K32768x1x512-top7168-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-TND-Q32x16x512-K32768x1x512-top7168-sparse3-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 18
   input_shape:
@@ -1967,9 +1940,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-BSND-PA_BSND-Q256x1x4x512-K16384x128x1x512-top8192-sparse0-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-BSND-PA_BSND-Q256x1x4x512-K16384x128x1x512-top8192-sparse0-rope
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 19
   input_shape:
@@ -2041,9 +2013,8 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-float16-BSND-BSND-Q2x32768x32x512-K2x262144x1x512-top256-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-float16-BSND-BSND-Q2x32768x32x512-K2x262144x1x512-top256-sparse3-lse-rope
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: SparseFlashAttentionEnhance
   case_id: 20
   input_shape:
@@ -2623,6 +2594,5 @@ cases:
     - 10
   - - -10
     - 10
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-TND-Q256x1x512-K2097152x1x512-top512-sparse3-lse-rope | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-TND-TND-Q256x1x512-K2097152x1x512-top512-sparse3-lse-rope | baseline_kernels:
+    SparseFlashAttention×1'

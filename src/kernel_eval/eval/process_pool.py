@@ -86,10 +86,12 @@ class OperatorScheduler:
         process_config: ProcessConfig,
         base_config: Config,
         card_count: int,
+        failure_synthesizer: "FailureSynthesizer" = None,
     ):
         self.process_config = process_config
         self.base_config = base_config
         self.card_count = card_count
+        self.failure_synthesizer = failure_synthesizer
 
         self.max_concurrent_per_card = process_config.processes_per_card
         self.timeout_per_operator = process_config.timeout_per_operator
@@ -152,6 +154,53 @@ class OperatorScheduler:
             pass_rate=0.0,
             avg_speedup=0.0,
             subprocess_failure_reason=reason,
+        )
+        return result.to_dict()
+
+    def _synthesize_oom_failure(self, task: OperatorTask) -> Dict:
+        """Build an all-fail operator result when child was OOM Killed.
+
+        委托给 FailureSynthesizer.synthesize_oom_failure，避免与
+        failure_synthesizer.py 的实现重复。
+        """
+        if self.failure_synthesizer is not None:
+            result = self.failure_synthesizer.synthesize_oom_failure(
+                operator_name=Path(task.rel_path).name,
+                rel_path=task.rel_path,
+            )
+            return result.to_dict()
+
+        # Fallback: 无 FailureSynthesizer 时自行构造
+        cases = self._cases_for_rel_path(task.rel_path)
+        operator_name = cases[0].operator if cases else Path(task.rel_path).name
+        error_msg = "子进程被 OOM Killer 杀死 (SIGKILL/-9)，内存不足"
+
+        case_results: List[EvalCaseResult] = []
+        for case in cases:
+            case_id = case.get_case_id_str() if hasattr(case, "get_case_id_str") else getattr(case, "case_id", "")
+            case_results.append(EvalCaseResult(
+                case_id=str(case_id),
+                rel_path=task.rel_path,
+                operator=operator_name,
+                case_num=getattr(case, "case_num", 0),
+                success=False,
+                error_msg=error_msg,
+                baseline_perf_us=getattr(case, "baseline_perf_us", 0.0) or 0.0,
+                t_hw_us=getattr(case, "t_hw_us", getattr(case, "hardware_limit_us", 0.0)) or 0.0,
+                failure_type="oom_killed",
+            ))
+
+        result = EvalOperatorResult(
+            rel_path=task.rel_path,
+            operator=operator_name,
+            total_cases=len(case_results),
+            passed_cases=0,
+            failed_cases=len(case_results),
+            skipped_cases=0,
+            results=case_results,
+            pass_rate=0.0,
+            avg_speedup=0.0,
+            subprocess_failure_reason=error_msg,
         )
         return result.to_dict()
 
@@ -290,6 +339,10 @@ class OperatorScheduler:
             start_new_session=True,  # 创建新进程组
         )
 
+        # OOM 保护：提高子进程 oom_score_adj 到最大值，使 OOM Killer 优先杀子进程
+        from .subprocess_runner import _write_oom_score_adj
+        _write_oom_score_adj(process.pid, 1000)
+
         return OperatorTask(
             rel_path=rel_path,
             card_id=card_id,
@@ -335,7 +388,16 @@ class OperatorScheduler:
                     # 检查进程状态
                     poll_result = task.process.poll()
                     if poll_result is not None:
-                        # 进程已退出，读取结果
+                        # 进程已退出
+                        # 检测 OOM Kill：退出码 -9 (Python) 或 137 (shell) = SIGKILL
+                        if poll_result in (-9, 137):
+                            print(f"[WARN] Card {task.card_id}: 算子 {task.rel_path} 被 OOM Killer 杀死 "
+                                  f"(rc={poll_result}, pid={task.process.pid})")
+                            task.completed = True
+                            task.result = self._synthesize_oom_failure(task)
+                            self.completed_results.append(task.result)
+                            completed_tasks.append(task)
+                            continue
                         task.completed = True
                         task.result = self._read_result(task)
                         self.completed_results.append(task.result)
@@ -554,6 +616,11 @@ class ProcessWorker:
             text=True,
             bufsize=1,  # 行缓冲，实时输出
         )
+
+        # OOM 保护：提高子进程 oom_score_adj 到最大值，使 OOM Killer 优先杀子进程
+        from .subprocess_runner import _write_oom_score_adj
+        _write_oom_score_adj(self._process.pid, 1000)
+
         self._started = True
 
     def _serialize_cases(self, cases: List[CaseSpec]) -> List[Dict]:
@@ -902,10 +969,18 @@ class ProcessPoolCoordinator:
         rel_paths: List[str],
     ) -> List[EvalOperatorResult]:
         """使用 OperatorScheduler 动态调度多算子"""
+        from .failure_synthesizer import FailureSynthesizer
+        from ..registry.loader_registry import get_case_loader
+
+        bench_name = getattr(self.base_config, "bench_name", None) or "cann"
+        case_loader = get_case_loader(bench_name, tasks_root=self.base_config.tasks_root)
+        failure_synthesizer = FailureSynthesizer(case_loader)
+
         scheduler = OperatorScheduler(
             process_config=self.process_config,
             base_config=self.base_config,
             card_count=self.card_count,
+            failure_synthesizer=failure_synthesizer,
         )
         scheduler.submit_operators(rel_paths)
         return scheduler.run()

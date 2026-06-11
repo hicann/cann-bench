@@ -1,13 +1,3 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 1
@@ -141,9 +131,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 2
   input_shape:
@@ -214,9 +203,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 3
   input_shape:
@@ -287,9 +275,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 4
   input_shape:
@@ -366,9 +353,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 5
   input_shape:
@@ -557,9 +543,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 6
   input_shape:
@@ -630,9 +615,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 7
   input_shape:
@@ -703,9 +687,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 8
   input_shape:
@@ -776,9 +759,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q4x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q4x64x576-K128x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 9
   input_shape:
@@ -849,9 +831,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q5x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q5x64x576-K256x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 10
   input_shape:
@@ -922,9 +903,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q4x8x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q4x8x576-K128x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 11
   input_shape:
@@ -995,9 +975,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q1x8x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q1x8x576-K256x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 12
   input_shape:
@@ -1068,9 +1047,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q4x4x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q4x4x576-K128x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 13
   input_shape:
@@ -1141,9 +1119,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q1x4x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q1x4x576-K256x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 14
   input_shape:
@@ -1276,9 +1253,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q1024x64x576-K256x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 15
   input_shape:
@@ -1349,9 +1325,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'L-bfloat16-TND-PA_BSND-Q2048x64x576-K481x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 16
   input_shape:
@@ -1422,9 +1397,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q2048x4x576-K481x128x1x656-top2048-sparse3-kvquant
+    | baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 17
   input_shape:
@@ -1501,9 +1475,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q16x32x576-K64x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 18
   input_shape:
@@ -1692,9 +1665,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q60x2x576-K540x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 19
   input_shape:
@@ -1765,9 +1737,8 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q2x64x576-K128x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'
 - operator: AiInfraKvQuantSparseFlashAttention
   case_id: 20
   input_shape:
@@ -1838,6 +1809,5 @@ cases:
     - 3
   - - -3
     - 3
-  baseline_perf_us: null
-  t_hw_us: null
-  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant | baseline_kernels: SparseFlashAttention×1'
+  note: 'M-bfloat16-TND-PA_BSND-Q3x64x576-K256x128x1x656-top2048-sparse3-kvquant |
+    baseline_kernels: SparseFlashAttention×1'

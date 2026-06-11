@@ -48,6 +48,7 @@ DEFAULT_HARDWARE: str = os.environ.get("CANN_BENCH_HARDWARE", "910b2")
 #   Ascend 910B 系列 (A2 / Atlas A2 / 910B2 / 910_9362 等) → "910b2"
 #   Ascend 910B1 系列 → "910b1"
 #   Ascend 310P 系列 → "310p"
+#   Ascend 950PR 系列 → "950pr"
 #   未来新增平台只需在此处加一行映射 + 在 metadata/ 下加对应 JSON 文件。
 #
 # 产品型号对照（华为官方命名）：
@@ -55,6 +56,7 @@ DEFAULT_HARDWARE: str = os.environ.get("CANN_BENCH_HARDWARE", "910b2")
 #   Ascend910_9362B = Ascend 910B2 变体
 #   Ascend910_9361  = Ascend 910B1 (Atlas A2 推理卡)
 #   Ascend310P_???  = Ascend 310P (Atlas 推理卡)
+#   Ascend950PR_??? = Ascend 950PR (Atlas 推理加速卡)
 # ---------------------------------------------------------------------------
 PLATFORM_ALIAS: Dict[str, str] = {
     # 910B2 (Atlas A2 训练卡)
@@ -70,6 +72,9 @@ PLATFORM_ALIAS: Dict[str, str] = {
     # 310P (Atlas 推理卡) — key 是前缀，子型号由 resolve_hardware 前缀匹配
     "Ascend310P": "310p",
     "310p": "310p",
+    # 950PR (Atlas 推理加速卡) — key 是前缀，子型号由 resolve_hardware 前缀匹配
+    "Ascend950PR": "950pr",
+    "950pr": "950pr",
 }
 
 
