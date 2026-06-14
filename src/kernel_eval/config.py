@@ -64,6 +64,7 @@ class Config:
     # 评测配置
     warmup: int = 3              # 性能评测预热次数
     repeat: int = 5              # 性能评测采集次数
+    timeout_per_operator: int = 300  # 单算子超时（秒）
 
     # 多进程并行配置（统一架构）
     processes_per_card: int = 2  # 每卡进程数

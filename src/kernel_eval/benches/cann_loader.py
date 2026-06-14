@@ -237,11 +237,24 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
 
         # 初始化 BaselineStore（从 bench_root 向上查找 metadata/<hardware>.json）
         from ..config import get_project_root as _get_root
-        from ..utils.baseline_store import BaselineStore, DEFAULT_HARDWARE
+        from ..utils.baseline_store import BaselineStore
+        from ..utils.baseline_resolver import DEFAULT_HARDWARE, resolve_hardware
+
+        # 自动检测当前 NPU 硬件，检测失败（如 CPU 模式）fallback 到默认值
+        detected_hw = DEFAULT_HARDWARE
+        try:
+            from ..utils.device_manager import DeviceManager, DeviceConfig
+            dm = DeviceManager(DeviceConfig(type="npu", device_id=0))
+            device_name = dm.get_device_name()
+            if device_name != "unknown":
+                detected_hw = resolve_hardware(device_name)
+        except Exception:
+            pass
+
         self._baseline_store = BaselineStore(
             bench_root=self.bench_root,
             project_root=_get_root(),
-            hardware=DEFAULT_HARDWARE
+            hardware=detected_hw
         )
         self._baseline_store.load()
 

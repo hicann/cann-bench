@@ -41,7 +41,6 @@ from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult, summ
 from .failure_synthesizer import FailureSynthesizer
 from ..base.matcher import OperatorMatcherBase
 from ..registry.matcher_registry import OperatorMatcherRegistry, get_operator_matcher
-from .subprocess_runner import SubprocessRunner
 from .evaluator import Evaluator
 
 # 注册接口（从 registry 导入）
@@ -61,7 +60,6 @@ __all__ = [
     "OperatorMatcherBase",
     "OperatorMatcherRegistry",
     "get_operator_matcher",
-    "SubprocessRunner",
     "Evaluator",
     # 注册接口
     "get_correctness_checker",

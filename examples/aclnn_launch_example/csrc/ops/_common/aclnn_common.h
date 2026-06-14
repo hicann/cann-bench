@@ -201,14 +201,7 @@ inline aclTensor *ConvertType(const at::Tensor &at_tensor)
     if (acl_data_type != ACL_STRING) {
         storageDims.push_back(at_tensor.storage().nbytes() / itemsize);
     }
-    const auto dimNum = at_tensor.sizes().size();
     aclFormat format = ACL_FORMAT_ND;
-    switch (dimNum) {
-        case 3: format = ACL_FORMAT_NCL; break;
-        case 4: format = ACL_FORMAT_NCHW; break;
-        case 5: format = ACL_FORMAT_NCDHW; break;
-        default: format = ACL_FORMAT_ND;
-    }
     if (at_tensor.unsafeGetTensorImpl()->is_wrapped_number()) {
         c10::Scalar expScalar = ConvertTensorToScalar(at_tensor);
         at::Tensor aclInput = CopyScalarToDevice(expScalar, scalar_data_type);

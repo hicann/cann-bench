@@ -48,6 +48,18 @@ import yaml
 os.environ["ASCEND_LAUNCH_MODE"] = "ACL"
 
 # ---------------------------------------------------------------------------
+# torchair alias — torch_npu 内嵌了 torchair 子模块，
+# refs 中使用 `import torchair`，但顶层 torchair 包在 pip 上不可独立安装。
+# 将 torch_npu.dynamo.torchair 注册到 sys.modules 使得 `import torchair` 能找到。
+# ---------------------------------------------------------------------------
+try:
+    import torch_npu
+    from torch_npu.dynamo import torchair as _torchair_inner
+    sys.modules.setdefault("torchair", _torchair_inner)
+except ImportError:
+    pass  # 没有 torch_npu 就没有 torchair，refs 中会自然 skip
+
+# ---------------------------------------------------------------------------
 # 路径设置
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -185,6 +197,10 @@ class BaselineCollector:
             device_id=config.device_id,
         ))
 
+        # 自动检测当前硬件
+        device_name = self.device_manager.get_device_name()
+        self.hardware = resolve_hardware(device_name) if device_name != "unknown" else DEFAULT_HARDWARE
+
         # 初始化性能评测器
         self.perf_evaluator = PerfEvaluator(
             config=config,
@@ -203,7 +219,7 @@ class BaselineCollector:
         self.baseline_store = BaselineStore(
             bench_root=self.bench_root,
             project_root=project_root,
-            hardware=DEFAULT_HARDWARE,
+            hardware=self.hardware,
         )
         self.baseline_store.load()
 
@@ -428,7 +444,7 @@ class BaselineCollector:
         metadata = {
             "_metadata": {
                 "description": "CANN baseline 性能数据（collect_baseline.py 采集）",
-                "hardware": DEFAULT_HARDWARE,
+                "hardware": self.hardware,
                 "generated_at": datetime.now().isoformat(),
                 "source": "collect_baseline.py (PerfEvaluator + KernelDetailsStrategy + refs)",
                 "warmup": self.warmup,
@@ -657,7 +673,7 @@ def main():
         collector.collect_op(op_path, cases_filter=cases_filter)
 
     # 输出 metadata JSON（写入独立目录，不污染 tasks/metadata/ 的 BaselineStore 数据）
-    hardware = DEFAULT_HARDWARE
+    hardware = collector.hardware
     if args.output:
         output_path = Path(args.output)
     else:

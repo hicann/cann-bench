@@ -1768,7 +1768,6 @@ def _converter_config(spec: SimpleConfig, task: ConfiguredTask) -> dict[str, Any
 
 def _default_eval_config(*, perf_metric_strategy=None) -> dict[str, Any]:
     cfg = {
-        "no_subprocess_isolation": True,
         "op_timeout_sec": DEFAULT_OP_TIMEOUT_SEC,
         "verbose": True,
     }
@@ -2336,7 +2335,6 @@ def build_eval_args(eval_cfg: Mapping[str, Any]) -> list:
 
     flag_options = {
         "no_perf": "--no-perf",
-        "no_subprocess_isolation": "--no-subprocess-isolation",
         "no_iterative_compile": "--no-iterative-compile",
         "verbose": "--verbose",
     }

@@ -11,7 +11,7 @@ import yaml
 
 # ── report parsing ────────────────────────────────────────────────────────────
 def latest_report_json(reports_dir) -> Path:
-    files = sorted(Path(reports_dir).glob("eval_*.json"))  # 只认 eval_<code>.json
+    files = sorted(Path(reports_dir).glob("*eval_*.json"))  # 匹配 eval_<code>.json 或 <prefix>_eval_<code>.json
     if not files:
         raise FileNotFoundError(f"no eval report json under {reports_dir}")
     return files[-1]  # eval_code 'eval_YYYYMMDD_HHMMSS' → 字典序即时间序
@@ -195,7 +195,7 @@ def collect_artifacts(tmp_root, out_dir) -> int:
     tmp_root, out_dir = Path(tmp_root), Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     n = 0
-    for jf in sorted(tmp_root.rglob("eval_*.json")):
+    for jf in sorted(tmp_root.rglob("*eval_*.json")):
         try:
             report = json.loads(jf.read_text(encoding="utf-8"))
         except Exception:

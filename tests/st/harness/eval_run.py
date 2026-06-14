@@ -7,8 +7,7 @@ later) is passed to the cli as --source-dir + exposed via PYTHONPATH.
 **集成口径(single-run)**:不按 op 拆成 N 次 cli 调用,而是给 cli 一个**已按 -k/-m 修剪到
 选中算子**的 --task-dir,**一次** `kernel_eval.cli eval`(不带 --operator)跑完整个子集 →
 **单一报告**。让 cli 自己 discover+schedule,与真实 benchmark(scripts/run_evaluation.sh)
-同一条编排路径。默认保留 cli 的 **op 级子进程隔离**(不传 --no-subprocess-isolation):
-每个算子仍在独立子进程跑(RoPE OOM 不拖垮其余、profiler 逐 op),父进程聚合成一份报告。
+同一条编排路径。所有算子在独立子进程评测(OOM 保护、超时保护、进程隔离)。
 --skip-install 进程内候选(PYTHONPATH 暴露 cann_bench),--task-dir/--reports-dir 被 respect。
 """
 from __future__ import annotations
@@ -51,18 +50,15 @@ def kernel_eval_env(candidate_dir) -> dict:
     return env
 
 
-def build_eval_cmd(*, source_dir, task_dir, reports_dir, operator=None, case_id=None,
-                   subprocess_isolation=True) -> list[str]:
+def build_eval_cmd(*, source_dir, task_dir, reports_dir, operator=None, case_id=None) -> list[str]:
     """kernel_eval.cli eval 命令。operator=None → 不过滤,跑遍 --task-dir 里所有算子(集成口径)。
-    subprocess_isolation=True(默认)→ 不传 --no-subprocess-isolation,cli 逐 op fork 子进程。"""
+    所有算子在独立子进程评测(OOM 保护、超时保护、进程隔离)。"""
     cmd = [
         sys.executable, "-m", "kernel_eval.cli", "eval",
         "--bench-name", "cann", "--device", "npu",
         "--source-dir", str(source_dir), "--skip-install",
         "--task-dir", str(task_dir), "--reports-dir", str(reports_dir),
     ]
-    if not subprocess_isolation:
-        cmd.append("--no-subprocess-isolation")
     if operator is not None:
         cmd += ["--operator", str(operator)]
     if case_id is not None:
@@ -71,13 +67,12 @@ def build_eval_cmd(*, source_dir, task_dir, reports_dir, operator=None, case_id=
 
 
 def run_eval_cli(*, source_dir, task_dir, reports_dir, operator=None, case_id=None,
-                 subprocess_isolation=True, timeout=14400):
+                 timeout=14400):
     """Run ONE kernel_eval.cli eval over --task-dir; returns CompletedProcess (capture_output).
     operator=None 跑遍整棵(已修剪的)task 树 → 单一报告。候选包经 PYTHONPATH 暴露(=source_dir)。
     timeout 默认放宽到 4h:single-run 覆盖整个选中子集(逐 op 子进程串行)。"""
     return subprocess.run(
         build_eval_cmd(source_dir=source_dir, task_dir=task_dir, reports_dir=reports_dir,
-                       operator=operator, case_id=case_id,
-                       subprocess_isolation=subprocess_isolation),
+                       operator=operator, case_id=case_id),
         env=kernel_eval_env(source_dir), capture_output=True, text=True, timeout=timeout,
     )

@@ -1505,7 +1505,6 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
         assert "trace_view" in list(extra_args)
         assert device_id == 5
         assert Path(reports_dir) == tmp_path / "run" / "gelu" / "kernel_eval"
-        assert "--no-subprocess-isolation" in list(extra_args)
         assert "--op-timeout-sec" in list(extra_args)
         command = self.build_eval_command(
             bench_name=bench_name,
@@ -1762,6 +1761,11 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
 
 
 def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(monkeypatch, tmp_path):
+    # torchair.core._backend 在导入时安装 SIGTERM handler，
+    # 会被 fork 子进程继承，导致子进程中 os.kill(SIGTERM) 被拦截而非杀死进程。
+    # 在此测试前恢复 SIGTERM 为 SIG_DFL，确保子进程中 SIGTERM 能正常杀死进程。
+    import signal
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
     monkeypatch.setattr(config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
 
@@ -1942,7 +1946,6 @@ def test_eval_args_pass_through_kernel_eval_options():
             "no_perf": True,
             "warmup": 0,
             "repeat": 1,
-            "extra_args": ["--no-subprocess-isolation"],
         }
     )
 
@@ -1956,7 +1959,6 @@ def test_eval_args_pass_through_kernel_eval_options():
         "--repeat",
         "1",
         "--no-perf",
-        "--no-subprocess-isolation",
     ]
 
 

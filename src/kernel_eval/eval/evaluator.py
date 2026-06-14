@@ -24,7 +24,6 @@
 - 数据类移至 results.py
 - 失败结果合成移至 failure_synthesizer.py
 - 算子匹配移至 operator_matcher.py
-- 子进程执行移至 subprocess_runner.py
 """
 
 import os
@@ -52,7 +51,6 @@ from .perf_eval import PerfEvaluator, PerfResult
 from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult
 from .failure_synthesizer import FailureSynthesizer
 from ..registry.matcher_registry import get_operator_matcher
-from .subprocess_runner import SubprocessRunner
 
 # 导入 benches 模块，确保 Registry 已注册
 from .. import benches as _benches
@@ -61,10 +59,14 @@ from .. import benches as _benches
 class Evaluator:
     """综合评测调度器"""
 
-    def __init__(self, config: Config = None, bench_name: str = 'cann'):
+    def __init__(self, config: Config = None, bench_name: str = 'cann',
+                 incremental_output_path: str = None):
         self.config = config or get_config()
         self.bench_name = bench_name
         self.bench_config = get_bench_config(self.bench_name)
+        # 增量输出路径：子进程模式下，每个用例完成后写入部分结果，
+        # 使 OOM Kill 时已完成的用例结果可被主进程恢复
+        self.incremental_output_path = incremental_output_path
 
         # 初始化设备管理器
         device_config = DeviceConfig(
@@ -112,13 +114,6 @@ class Evaluator:
             operator_loader=self.operator_loader,
         )
         self.failure_synthesizer = FailureSynthesizer(self.case_loader)
-        kernel_eval_root = str(get_project_root() / "src")
-        self.subprocess_runner = SubprocessRunner(
-            failure_synthesizer=self.failure_synthesizer,
-            device_id=self.config.device_id,
-            kernel_eval_root=kernel_eval_root,
-            config=self.config,
-        )
 
     def load_ai_operator(self, operator_name: str) -> Callable:
         """加载AI生成的算子函数（委托给 OperatorMatcher）"""
@@ -395,13 +390,8 @@ class Evaluator:
     def evaluate_operator(self, operator: str, rel_path: str, case_filter: Dict = None) -> EvalOperatorResult:
         """评测单个算子
 
-        包含渐进式设备恢复机制：
-        - 连续失败后检测 NPU 设备健康状态
-        - 轻量恢复（empty_cache + set_device）→ 重量恢复（aclrtResetDevice）
-        - 恢复无效时跳过剩余 case 并标记 failure_type="cascade_device"
+        从磁盘扫描加载用例，然后委托给 run_cases() 执行评测循环。
         """
-        import gc
-
         cases = self.case_loader.scan_by_operator(operator)
         if case_filter:
             cases = self._filter_cases(cases, case_filter)
@@ -412,6 +402,20 @@ class Evaluator:
                 passed_cases=0, failed_cases=0, skipped_cases=0,
                 results=[], pass_rate=0.0, avg_speedup=0.0,
             )
+
+        return self.run_cases(cases, operator, rel_path)
+
+    def run_cases(self, cases: list, operator: str, rel_path: str) -> EvalOperatorResult:
+        """评测一组已加载的用例
+
+        包含渐进式设备恢复机制：
+        - 连续失败后检测 NPU 设备健康状态
+        - 轻量恢复（empty_cache + set_device）→ 重量恢复（aclrtResetDevice）
+        - 恢复无效时跳过剩余 case 并标记 failure_type="cascade_device"
+
+        供 evaluate_operator()（磁盘加载）和 eval-child（JSON 加载）共用。
+        """
+        import gc
 
         self.operator_matcher.clear_cache()
         results = []
@@ -440,6 +444,11 @@ class Evaluator:
 
             result = self.evaluate_case(case)
             results.append(result)
+
+            # 增量输出：子进程模式下，每个用例完成后刷新写入部分结果
+            # 使 OOM Kill 时已完成的用例结果可被主进程恢复
+            if self.incremental_output_path:
+                self._write_incremental_output(operator, rel_path, results, len(cases))
 
             if not result.success:
                 consecutive_failures += 1
@@ -567,16 +576,39 @@ class Evaluator:
             avg_speedup=avg_speedup,
         )
 
+    def _write_incremental_output(
+        self,
+        operator: str,
+        rel_path: str,
+        results: list,
+        total_cases: int,
+    ) -> None:
+        """增量写入部分结果到 incremental_output_path。
+
+        eval-child 子进程模式下，每个用例完成后调用此方法刷新写入当前已完成的结果。
+        当子进程被 OOM Kill (SIGKILL) 时，已完成用例的结果已写入文件，
+        主进程 (ProcessPoolCoordinator) 可从中恢复部分结果，而非全部标记为失败。
+
+        输出格式为 {"case_results": [...]} — 与 ProcessPoolCoordinator 的
+        eval-child 结果读取格式一致，便于 OOM 恢复时直接解析。
+        """
+        if not self.incremental_output_path:
+            return
+
+        import json
+        payload = {"case_results": [r.to_dict() for r in results]}
+        Path(self.incremental_output_path).write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2)
+        )
+
     def evaluate_from_source(
         self,
         source_dir: str,
         operator_filter: List[str] = None,
         case_filter: Dict = None,
         verbose: bool = False,
-        subprocess_isolation: bool = True,
         op_timeout_sec: int = 240,
         case_timeout_sec: int = None,
-        case_subprocess_isolation: bool = True,
         iterative_compile: bool = True,
     ) -> EvalSessionResult:
         """从源码目录执行完整评测"""
@@ -645,11 +677,10 @@ class Evaluator:
             matched_operators = [op for op in matched_operators if op in operator_filter]
             print(f"[INFO] 筛选后算子: {matched_operators}")
 
-        # 5. 逐个评测算子
+        # 5. 逐个评测算子（in-process 执行，不再 fork 子进程）
         results: List[EvalOperatorResult] = list(compile_failed_results)
         print(f"[INFO] 编译失败: {len(compile_failed_results)} 个算子 | 可运行: "
-              f"{len(matched_operators)} 个算子 "
-              f"({'subprocess-per-op' if subprocess_isolation else 'in-process'})")
+              f"{len(matched_operators)} 个算子")
 
         for operator_name in matched_operators:
             op_info = self.operator_matcher.find_operator_info(operator_name)
@@ -657,16 +688,9 @@ class Evaluator:
                 print(f"[WARN] 算子 {operator_name} 未找到定义，跳过")
                 continue
 
-            if subprocess_isolation:
-                result = self.subprocess_runner.run_operator_subprocess(
-                    operator_name, rel_path=op_info.rel_path,
-                    source_dir=source_dir, case_filter=case_filter,
-                    timeout_sec=op_timeout_sec, filter_func=self._filter_cases,
-                )
-                results.append(result)
-                continue
-
-            result = self.evaluate_operator(operator=operator_name, rel_path=op_info.rel_path, case_filter=case_filter)
+            result = self.evaluate_operator(
+                operator=operator_name, rel_path=op_info.rel_path,
+            )
             results.append(result)
 
         print("")
@@ -680,9 +704,8 @@ class Evaluator:
         self,
         operator_filter: List[str] = None,
         case_filter: Dict = None,
-        operator_subprocess_isolation: bool = True,
     ) -> EvalSessionResult:
-        """跳过编译安装，直接评测已安装的cann_bench"""
+        """跳过编译安装，直接评测已安装的cann_bench（in-process 执行）"""
         print("")
         print("=" * 60)
         print("开始评测（跳过编译安装）")
@@ -697,8 +720,7 @@ class Evaluator:
             print(f"[INFO] 筛选后算子: {matched_operators}")
 
         results = []
-        print(f"[INFO] 可运行算子: {len(matched_operators)} "
-              f"({'subprocess-per-op' if operator_subprocess_isolation else 'in-process'})")
+        print(f"[INFO] 可运行算子: {len(matched_operators)}")
 
         for operator_name in matched_operators:
             op_info = self.operator_matcher.find_operator_info(operator_name)
@@ -706,16 +728,10 @@ class Evaluator:
                 print(f"[WARN] 算子 {operator_name} 未找到定义，跳过")
                 continue
 
-            if operator_subprocess_isolation:
-                result = self.subprocess_runner.run_operator_subprocess_simple(
-                    operator_name, rel_path=op_info.rel_path,
-                    case_filter=case_filter, timeout_sec=240,
-                    filter_func=self._filter_cases,
-                )
-                results.append(result)
-                continue
-
-            result = self.evaluate_operator(operator=operator_name, rel_path=op_info.rel_path, case_filter=case_filter)
+            result = self.evaluate_operator(
+                operator=operator_name, rel_path=op_info.rel_path,
+                case_filter=case_filter,
+            )
             results.append(result)
 
         print("")

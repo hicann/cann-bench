@@ -185,17 +185,27 @@ class EvalReport:
 class ReportGenerator:
     """报告生成器"""
 
-    def __init__(self, output_dir: str = None, eval_code: str = None, config: Config = None):
+    def __init__(self, output_dir: str = None, eval_code: str = None,
+                 semantic_prefix: str = "", config: Config = None):
         self.config = config or get_config()
         self.output_dir = Path(output_dir or self.config.reports_dir)
+        self.semantic_prefix = semantic_prefix
         self.eval_code = eval_code or self._generate_eval_code()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.scoring_calculator = ScoringCalculator()
         self.operator_results: List[EvalOperatorResult] = []
 
     def _generate_eval_code(self) -> str:
-        """生成评测代号"""
-        return datetime.now().strftime("eval_%Y%m%d_%H%M%S")
+        """生成评测代号
+
+        语义前缀优先级:
+        - semantic_prefix 非空时: {prefix}_eval_{timestamp}
+        - 否则: eval_{timestamp}（旧格式，向后兼容）
+        """
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if self.semantic_prefix:
+            return f"{self.semantic_prefix}_eval_{ts}"
+        return f"eval_{ts}"
 
     def _get_device_info(self) -> str:
         """获取设备信息"""

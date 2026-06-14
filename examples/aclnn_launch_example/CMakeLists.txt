@@ -127,6 +127,21 @@ npu_op_package_add(${package_name}
     LIBRARY cust_optiling cust_opapi cust_op_proto all_kernels
 )
 
+# 将 libopapi.so 声明为 libcust_opapi.so 的 NEEDED 依赖。
+# 自定义算子的 L2 API（如 aclnn_add.cpp）调用内置 L0 算子
+# l0op::Contiguous / l0op::ViewCopy 等，这些符号定义在 libopapi.so。
+# CANN 构建系统默认不把 opapi 加入 NEEDED 链，导致 .run 包的
+# install.sh 验证步骤（dlopen libcust_opapi.so + RTLD_NOW）
+# 无法解析这些符号而失败。显式声明依赖后，动态链接器在加载
+# libcust_opapi.so 时会自动加载 libopapi.so，验证可正常通过。
+if(TARGET ${package_name}_ascendc_cust_opapi)
+    target_link_directories(${package_name}_ascendc_cust_opapi PRIVATE
+        $ENV{ASCEND_HOME_PATH}/${SYSTEM_PREFIX}/lib64
+    )
+    target_link_libraries(${package_name}_ascendc_cust_opapi PRIVATE opapi)
+    message(STATUS "Added libopapi.so as NEEDED dependency of libcust_opapi.so")
+endif()
+
 # ================================== Python Extension Build ==================================
 option(BUILD_PYTHON_EXT "Build Python extension module" OFF)
 

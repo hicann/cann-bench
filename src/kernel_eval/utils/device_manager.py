@@ -81,6 +81,23 @@ class DeviceManager:
     def is_cpu_mode(self) -> bool:
         return self._device == "cpu"
 
+    def get_device_name(self) -> str:
+        """获取 NPU 设备原始名称（如 "Ascend950PR_xxx"）。
+
+        返回 torch.npu.get_device_name() 的原始字符串，供上层
+        （如 baseline_resolver.resolve_hardware）映射为逻辑名。
+        DeviceManager 自身不做任何映射。
+
+        Returns:
+            设备名称字符串；NPU 不可用或检测失败时返回 "unknown"
+        """
+        if not self._npu_available:
+            return "unknown"
+        try:
+            return torch.npu.get_device_name(self.config.device_id)
+        except Exception:
+            return "unknown"
+
     def to_device(self, tensor):
         return tensor.to(self._device)
 

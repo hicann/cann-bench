@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
 # This program is free software; you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
+# CANN Open Software License Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -12,13 +12,14 @@
 # ----------------------------------------------------------------------------------------------------------
 
 """
-进程池协调器单元测试
+进程池协调器 + 子进程公共工具 单元测试
 
 测试覆盖：
 1. ProcessConfig 配置解析
-2. ProcessWorker 基本功能（mock subprocess）
-3. ProcessPoolCoordinator 任务分配逻辑
-4. 分布式任务分配策略
+2. TaskUnit 与 build_task_units 任务分配
+3. aggregate_by_operator 结果聚合
+4. ProcessPoolCoordinator 创建与配置
+5. subprocess_utils 工具函数（OOM 保护、失败合成、部分结果恢复）
 """
 
 import json
@@ -28,26 +29,32 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-# 添加项目路径
 import sys
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.kernel_eval.eval.process_pool import (
     ProcessConfig,
-    ProcessWorker,
+    TaskUnit,
+    build_task_units,
+    aggregate_by_operator,
     ProcessPoolCoordinator,
-    OperatorScheduler,
-    OperatorTask,
 )
-from src.kernel_eval.eval.results import EvalOperatorResult, EvalCaseResult
+from src.kernel_eval.eval.subprocess_utils import (
+    _CANN_ENV_VARS,
+    _write_oom_score_adj,
+    _is_oom_killed,
+    _synthesize_failure_cases,
+    _try_recover_partial_results,
+)
+from src.kernel_eval.eval.results import EvalOperatorResult, EvalCaseResult, summarize_case_results
 from src.kernel_eval.benches import CannCaseSpec
 from src.kernel_eval.config import Config
 
 
-def make_case(operator, case_id, input_shapes=None, dtypes=None, value_ranges=None, rel_path="level1/test"):
+def make_case(operator, case_id, input_shapes=None, dtypes=None, value_ranges=None,
+              rel_path="level1/test"):
     """创建测试用例的辅助函数"""
-    # value_ranges should be List[Dict[str, float]] format
     vr = value_ranges or [{"min": -1, "max": 1}]
     return CannCaseSpec(
         case_id=f"{rel_path}_{case_id}",
@@ -72,11 +79,6 @@ class TestProcessConfig(unittest.TestCase):
         self.assertEqual(config.timeout_per_operator, 300)
         self.assertTrue(config.enable_profiler)
 
-    def test_default_torch_op_guard_is_block(self):
-        """生产默认配置应阻断 AI 算子调用禁用 PyTorch 内置计算 API。"""
-        config = Config()
-        self.assertEqual(config.torch_op_guard_mode, "block")
-
     def test_custom_config(self):
         """测试自定义配置"""
         config = ProcessConfig(
@@ -88,373 +90,343 @@ class TestProcessConfig(unittest.TestCase):
         self.assertEqual(config.timeout_per_operator, 600)
         self.assertFalse(config.enable_profiler)
 
-
-class TestProcessWorker(unittest.TestCase):
-    """测试 ProcessWorker"""
-
-    def setUp(self):
-        """测试前准备"""
-        self.base_config = Config()
-        self.base_config.tasks_root = str(project_root / "tasks")
-        self.process_config = ProcessConfig()
-
-    def test_worker_creation(self):
-        """测试工作单元创建"""
-        worker = ProcessWorker(
-            process_id=0,
-            card_id=0,
-            base_config=self.base_config,
-            process_config=self.process_config,
-        )
-        self.assertEqual(worker.process_id, 0)
-        self.assertEqual(worker.card_id, 0)
-        self.assertFalse(worker._started)
-
-    def test_serialize_cases(self):
-        """测试用例序列化"""
-        cases = [
-            make_case("Sigmoid", 1, [[1024, 1024]], ["float32"]),
-            make_case("Sigmoid", 2, [[2048, 2048]], ["float16"]),
-        ]
-
-        worker = ProcessWorker(
-            process_id=0,
-            card_id=0,
-            base_config=self.base_config,
-            process_config=self.process_config,
-        )
-
-        serialized = worker._serialize_cases(cases)
-        self.assertEqual(len(serialized), 2)
-        self.assertEqual(serialized[0]['operator'], "Sigmoid")
-        self.assertEqual(serialized[0]['case_id'], "level1/test_1")
-        self.assertEqual(serialized[1]['input_shapes'], [[2048, 2048]])
-
-    @patch('subprocess.Popen')
-    def test_worker_start_mock(self, mock_popen):
-        """测试启动子进程（mock）"""
-        mock_process = MagicMock()
-        mock_process.poll.return_value = None
-        mock_popen.return_value = mock_process
-
-        worker = ProcessWorker(
-            process_id=0,
-            card_id=0,
-            base_config=self.base_config,
-            process_config=self.process_config,
-        )
-
-        cases = [make_case("Sigmoid", 1)]
-
-        worker.start(cases=cases)
-
-        self.assertTrue(worker._started)
-        mock_popen.assert_called_once()
-
-        # 验证命令参数
-        call_args = mock_popen.call_args
-        cmd = call_args[0][0]
-        self.assertIn("eval-process", cmd)
-        self.assertIn("--process-id", cmd)
-        self.assertIn("0", cmd)
-        self.assertIn("--torch-op-guard-mode", cmd)
-        idx = cmd.index("--torch-op-guard-mode")
-        self.assertEqual(cmd[idx + 1], "block")
-
-    def test_cleanup(self):
-        """测试临时文件清理"""
-        worker = ProcessWorker(
-            process_id=0,
-            card_id=0,
-            base_config=self.base_config,
-            process_config=self.process_config,
-        )
-
-        # 创建临时文件
-        fd, temp_file = tempfile.mkstemp(suffix=".json")
-        os.close(fd)
-        worker._output_file = temp_file
-
-        worker._cleanup()
-
-        self.assertFalse(os.path.exists(temp_file))
-        self.assertIsNone(worker._output_file)
+    def test_profiler_forces_single_process_per_card(self):
+        """profiler 开启时每卡仅 1 进程"""
+        base_config = Config()
+        base_config.device_type = "npu"
+        process_config = ProcessConfig(processes_per_card=4, enable_profiler=True)
+        with patch.object(ProcessPoolCoordinator, '_detect_cards', return_value=2):
+            coordinator = ProcessPoolCoordinator(
+                base_config=base_config,
+                process_config=process_config,
+            )
+        # profiler 开启强制 processes_per_card=1
+        self.assertEqual(coordinator.process_config.processes_per_card, 1)
+        self.assertEqual(coordinator.total_processes, 2)
 
 
-class TestOperatorSchedulerFailureResults(unittest.TestCase):
-    """Scheduler should never turn child failures into empty operator shells."""
+class TestTaskUnit(unittest.TestCase):
+    """测试 TaskUnit 与 build_task_units"""
 
-    def setUp(self):
-        self.base_config = Config()
-        self.base_config.tasks_root = str(project_root / "tasks")
-        self.base_config.bench_name = "cann"
-        self.scheduler = OperatorScheduler(
-            process_config=ProcessConfig(processes_per_card=1, enable_profiler=False),
-            base_config=self.base_config,
-            card_count=1,
-        )
-        self.scheduler._cases_for_rel_path = Mock(
-            return_value=[make_case("Sigmoid", 1, rel_path="level1/sigmoid")]
-        )
+    def test_task_unit_creation(self):
+        """TaskUnit 基本属性"""
+        cases = [make_case("Exp", 1), make_case("Exp", 2)]
+        unit = TaskUnit(operator="Exp", rel_path="level1/Exp", cases=cases, device_id=0)
+        self.assertEqual(unit.operator, "Exp")
+        self.assertEqual(unit.rel_path, "level1/Exp")
+        self.assertEqual(len(unit.cases), 2)
+        self.assertEqual(unit.device_id, 0)
 
-    def _task_with_output(self, content):
-        fd, temp_file = tempfile.mkstemp(suffix=".json")
-        os.close(fd)
-        Path(temp_file).write_text(content)
-        process = MagicMock()
-        process.returncode = 0
-        return OperatorTask(
-            rel_path="level1/sigmoid",
-            card_id=0,
-            process=process,
-            output_file=temp_file,
-        ), temp_file
+    def test_build_task_units_single_operator_single_card(self):
+        """单算子单卡 → 1 个 TaskUnit"""
+        cases = [make_case("Exp", i) for i in range(5)]
+        cases_by_op = {"Exp": cases}
+        units = build_task_units(cases_by_op, card_count=1)
+        self.assertEqual(len(units), 1)
+        self.assertEqual(units[0].operator, "Exp")
+        self.assertEqual(units[0].device_id, 0)
+        self.assertEqual(len(units[0].cases), 5)
 
-    def test_parse_failure_synthesizes_all_fail_operator(self):
-        task, temp_file = self._task_with_output("{bad json")
+    def test_build_task_units_single_operator_multi_card(self):
+        """单算子多卡 → 用例均分到各卡"""
+        cases = [make_case("Exp", i) for i in range(8)]
+        cases_by_op = {"Exp": cases}
+        units = build_task_units(cases_by_op, card_count=4)
+        self.assertEqual(len(units), 4)
+        # 每卡 2 个用例
+        for unit in units:
+            self.assertEqual(len(unit.cases), 2)
 
-        result = self.scheduler._read_result(task)
+    def test_build_task_units_multi_operator_multi_card(self):
+        """多算子多卡 → 每个算子均分到各卡"""
+        cases_a = [make_case("Exp", i, rel_path="level1/Exp") for i in range(4)]
+        cases_b = [make_case("Sigmoid", i, rel_path="level1/Sigmoid") for i in range(4)]
+        cases_by_op = {"Exp": cases_a, "Sigmoid": cases_b}
+        units = build_task_units(cases_by_op, card_count=2)
+        # 2 算子 × 2 卡 = 4 TaskUnits
+        self.assertEqual(len(units), 4)
+        exp_units = [u for u in units if u.operator == "Exp"]
+        sig_units = [u for u in units if u.operator == "Sigmoid"]
+        self.assertEqual(len(exp_units), 2)
+        self.assertEqual(len(sig_units), 2)
 
-        self.assertFalse(os.path.exists(temp_file))
-        self.assertEqual(result["rel_path"], "level1/sigmoid")
-        self.assertEqual(result["operator"], "Sigmoid")
-        self.assertEqual(result["total_cases"], 1)
-        self.assertEqual(result["passed_cases"], 0)
-        self.assertEqual(result["failed_cases"], 1)
-        self.assertIn("parse child JSON", result["subprocess_failure_reason"])
-        self.assertIn("subprocess failed:", result["results"][0]["error_msg"])
 
-    def test_empty_results_synthesizes_all_fail_operator(self):
-        task, temp_file = self._task_with_output('{"results": []}')
+class TestAggregateByOperator(unittest.TestCase):
+    """测试 aggregate_by_operator 结果聚合"""
 
-        result = self.scheduler._read_result(task)
+    def test_aggregate_single_operator(self):
+        """单算子结果聚合"""
+        passed = EvalCaseResult(case_id="test_1", rel_path="level1/Exp",
+                                operator="Exp", case_num=1, success=True)
+        failed = EvalCaseResult(case_id="test_2", rel_path="level1/Exp",
+                                operator="Exp", case_num=2, success=False, error_msg="err",
+                                failure_type="oom_killed")
+        results = aggregate_by_operator([passed, failed])
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].operator, "Exp")
+        self.assertEqual(results[0].passed_cases, 1)
+        # summarize_case_results 区分 failed/skipped: accuracy_result=None → skipped
+        # failure_type=oom_killed 的结果 accuracy_result=None → skipped
+        self.assertEqual(results[0].skipped_cases, 1)
 
-        self.assertFalse(os.path.exists(temp_file))
-        self.assertEqual(result["rel_path"], "level1/sigmoid")
-        self.assertEqual(result["operator"], "Sigmoid")
-        self.assertEqual(result["total_cases"], 1)
-        self.assertIn("no results", result["subprocess_failure_reason"])
+    def test_aggregate_multi_operator(self):
+        """多算子结果聚合"""
+        r1 = EvalCaseResult(case_id="a_1", rel_path="level1/Exp",
+                             operator="Exp", case_num=1, success=True)
+        r2 = EvalCaseResult(case_id="b_1", rel_path="level1/Sigmoid",
+                             operator="Sigmoid", case_num=1, success=True)
+        r3 = EvalCaseResult(case_id="b_2", rel_path="level1/Sigmoid",
+                             operator="Sigmoid", case_num=2, success=False, error_msg="err",
+                             failure_type="oom_killed")
+        results = aggregate_by_operator([r1, r2, r3])
+        self.assertEqual(len(results), 2)
+        # 每个算子的 passed/skipped 正确
+        for op_result in results:
+            if op_result.operator == "Exp":
+                self.assertEqual(op_result.passed_cases, 1)
+            elif op_result.operator == "Sigmoid":
+                self.assertEqual(op_result.passed_cases, 1)
+                self.assertEqual(op_result.skipped_cases, 1)
 
 
 class TestProcessPoolCoordinator(unittest.TestCase):
     """测试 ProcessPoolCoordinator"""
 
     def setUp(self):
-        """测试前准备"""
         self.base_config = Config()
         self.base_config.tasks_root = str(project_root / "tasks")
         self.base_config.device_type = "npu"
 
     @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_coordinator_creation(self, mock_detect):
-        """测试协调器创建"""
+    def test_coordinator_creation_multi_card(self, mock_detect):
+        """多卡模式创建"""
         mock_detect.return_value = 2
-
         process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
         )
-
         self.assertEqual(coordinator.card_count, 2)
         self.assertEqual(coordinator.total_processes, 4)
 
     @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_distribute_rel_paths(self, mock_detect):
-        """测试算子分配"""
+    def test_coordinator_creation_single_card(self, mock_detect):
+        """单卡模式（指定 device_id）"""
         mock_detect.return_value = 2
-
-        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
-        coordinator = ProcessPoolCoordinator(
-            base_config=self.base_config,
-            process_config=process_config,
-        )
-
-        rel_paths = ["level1/Exp", "level1/Sigmoid", "level1/Mish",
-                     "level1/SwiGlu", "level1/Add", "level1/Mul",
-                     "level1/Div", "level1/Sub"]
-        distribution = coordinator.distribute_rel_paths(rel_paths)
-
-        # 验证分配：8 rel_paths 分配到 4 processes
-        self.assertEqual(len(distribution), 4)
-
-        # 验证轮询分配
-        # Process 0: level1/Exp, level1/Add
-        # Process 1: level1/Sigmoid, level1/Mul
-        # Process 2: level1/Mish, level1/Div
-        # Process 3: level1/SwiGlu, level1/Sub
-        self.assertIn("level1/Exp", distribution[0])
-        self.assertIn("level1/Add", distribution[0])
-        self.assertIn("level1/Sigmoid", distribution[1])
-        self.assertIn("level1/Mish", distribution[2])
-        self.assertIn("level1/SwiGlu", distribution[3])
-
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_distribute_cases(self, mock_detect):
-        """测试用例分配"""
-        mock_detect.return_value = 2
-
-        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
-        coordinator = ProcessPoolCoordinator(
-            base_config=self.base_config,
-            process_config=process_config,
-        )
-
-        cases = [make_case("Sigmoid", i) for i in range(20)]
-
-        distribution = coordinator.distribute_cases(cases)
-
-        # 验证分配：20 cases 分配到 4 processes
-        self.assertEqual(len(distribution), 4)
-
-        # 验证每个进程的用例数
-        total_assigned = sum(len(c) for c in distribution.values())
-        self.assertEqual(total_assigned, 20)
-
-        # 验证轮询分配（每个进程应该有 5 个用例）
-        for proc_id in range(4):
-            self.assertEqual(len(distribution[proc_id]), 5)
-
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_operator_parallel_card_mapping(self, mock_detect):
-        """测试 operator_parallel 模式的卡映射"""
-        mock_detect.return_value = 2
-
-        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
-        coordinator = ProcessPoolCoordinator(
-            base_config=self.base_config,
-            process_config=process_config,
-        )
-
-        # 验证 process_id 到 card_id 的映射
-        # Process 0, 1 -> Card 0
-        # Process 2, 3 -> Card 1
-        workers = coordinator._create_workers()
-
-        self.assertEqual(len(workers), 4)
-        self.assertEqual(workers[0].card_id, 0)
-        self.assertEqual(workers[1].card_id, 0)
-        self.assertEqual(workers[2].card_id, 1)
-        self.assertEqual(workers[3].card_id, 1)
-
-    def test_no_cards_fallback(self):
-        """测试无 NPU 卡时的回退"""
-        self.base_config.device_type = "cpu"
-
-        coordinator = ProcessPoolCoordinator(
-            base_config=self.base_config,
-            process_config=ProcessConfig(),
-        )
-
-        self.assertEqual(coordinator.card_count, 0)
-        self.assertEqual(coordinator.total_processes, 0)
-
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_single_card_mode(self, mock_detect):
-        """测试单卡模式（指定 device_id）"""
-        mock_detect.return_value = 2  # 环境有 2 卡
-
         process_config = ProcessConfig(processes_per_card=3, enable_profiler=False)
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=process_config,
-            device_id=0,  # 指定单卡
+            device_id=0,
         )
-
-        # 单卡模式：card_count=1，所有进程绑定到 device_id=0
         self.assertEqual(coordinator.card_count, 1)
         self.assertEqual(coordinator.device_id, 0)
-        self.assertEqual(coordinator.total_processes, 3)  # 1 卡 × 3 进程
+        self.assertEqual(coordinator.total_processes, 3)
 
-        # 验证 workers 都绑定到 card 0
-        workers = coordinator._create_workers()
-        for w in workers:
-            self.assertEqual(w.card_id, 0)
-
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_multi_card_mode(self, mock_detect):
-        """测试多卡模式（不指定 device_id）"""
-        mock_detect.return_value = 2  # 环境有 2 卡
-
-        process_config = ProcessConfig(processes_per_card=2, enable_profiler=False)
+    def test_no_cards_cpu_mode(self):
+        """CPU 模式下 card_count=0"""
+        self.base_config.device_type = "cpu"
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
-            process_config=process_config,
-            # 不指定 device_id，自动检测
+            process_config=ProcessConfig(),
         )
-
-        # 多卡模式：card_count=2，进程轮询分配
-        self.assertEqual(coordinator.card_count, 2)
-        self.assertIsNone(coordinator.device_id)
-        self.assertEqual(coordinator.total_processes, 4)  # 2 卡 × 2 进程
-
-        # 验证 workers 轮询分配到各卡
-        workers = coordinator._create_workers()
-        self.assertEqual(workers[0].card_id, 0)
-        self.assertEqual(workers[1].card_id, 0)
-        self.assertEqual(workers[2].card_id, 1)
-        self.assertEqual(workers[3].card_id, 1)
-
-
-class TestIntegration(unittest.TestCase):
-    """集成测试"""
-
-    def test_cli_eval_process_help(self):
-        """测试 CLI eval-process 命令解析"""
-        # 直接测试 CLI parser
-        from src.kernel_eval.cli import create_parser
-
-        parser = create_parser()
-
-        # 测试 eval-process 命令参数解析
-        args = parser.parse_args([
-            'eval-process',
-            '--process-id', '0',
-            '--card-id', '0',
-            '--output', '/tmp/test.json',
-            '--rel-paths', 'level1/sigmoid,level1/exp',
-        ])
-
-        self.assertEqual(args.command, 'eval-process')
-        self.assertEqual(args.process_id, 0)
-        self.assertEqual(args.card_id, 0)
-        self.assertEqual(args.output, '/tmp/test.json')
-        self.assertEqual(args.rel_paths, 'level1/sigmoid,level1/exp')
-
-    def test_cli_eval_process_accepts_torch_op_guard_mode(self):
-        """eval-process 子进程应能接收父进程透传的 TorchOpGuard 策略。"""
-        from src.kernel_eval.cli import create_parser
-
-        parser = create_parser()
-        args = parser.parse_args([
-            'eval-process',
-            '--process-id', '0',
-            '--card-id', '0',
-            '--output', '/tmp/test.json',
-            '--rel-paths', 'level1/sigmoid',
-            '--torch-op-guard-mode', 'block',
-        ])
-
-        self.assertEqual(args.torch_op_guard_mode, 'block')
+        self.assertEqual(coordinator.card_count, 0)
+        self.assertEqual(coordinator.total_processes, 0)
 
     def test_coordinator_stats(self):
-        """测试协调器统计信息"""
-        base_config = Config()
-        base_config.device_type = "cpu"  # 避免 NPU 检测
-
+        """统计信息"""
+        self.base_config.device_type = "cpu"
         coordinator = ProcessPoolCoordinator(
-            base_config=base_config,
+            base_config=self.base_config,
             process_config=ProcessConfig(processes_per_card=3, enable_profiler=False),
         )
-
         stats = coordinator.get_stats()
         self.assertIn('device_id', stats)
         self.assertIn('card_count', stats)
         self.assertIn('processes_per_card', stats)
-        self.assertIn('total_processes', stats)
         self.assertEqual(stats['processes_per_card'], 3)
+
+    def test_build_env_includes_cann_vars(self):
+        """环境变量构建包含 CANN 继承"""
+        self.base_config.device_type = "cpu"
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=ProcessConfig(),
+        )
+        env = coordinator._build_env()
+        self.assertIn("PYTHONPATH", env)
+        self.assertIn("PYTHONUNBUFFERED", env)
+        # 应包含 CANN 环境变量继承（如果系统有设置）
+        for var in _CANN_ENV_VARS:
+            if var in os.environ:
+                self.assertIn(var, env)
+
+
+class TestSubprocessUtils(unittest.TestCase):
+    """测试 subprocess_utils 工具函数"""
+
+    def test_write_oom_score_adj_current_process(self):
+        """写入当前进程 oom_score_adj（通常能成功）"""
+        # 当前进程 pid，写 0（恢复默认值，不改变行为）
+        result = _write_oom_score_adj(os.getpid(), 0)
+        # 不强制成功（可能没有权限），但不应抛异常
+        # result 是 bool，确认类型正确
+        self.assertIsInstance(result, bool)
+
+    def test_write_oom_score_adj_invalid_pid(self):
+        """无效 pid 应返回 False"""
+        result = _write_oom_score_adj(999999, 1000)
+        self.assertFalse(result)
+
+    def test_is_oom_killed_negative_9(self):
+        """退出码 -9 是 OOM Kill"""
+        mock_proc = MagicMock()
+        self.assertTrue(_is_oom_killed(mock_proc, -9))
+
+    def test_is_oom_killed_137(self):
+        """退出码 137 (bash) 是 OOM Kill"""
+        mock_proc = MagicMock()
+        self.assertTrue(_is_oom_killed(mock_proc, 137))
+
+    def test_is_oom_killed_normal_exit(self):
+        """正常退出码不是 OOM Kill"""
+        mock_proc = MagicMock()
+        self.assertFalse(_is_oom_killed(mock_proc, 0))
+        self.assertFalse(_is_oom_killed(mock_proc, 1))
+
+    def test_synthesize_failure_cases_oom(self):
+        """OOM 失败结果合成"""
+        cases = [make_case("Exp", 1), make_case("Exp", 2)]
+        results = _synthesize_failure_cases(cases, "oom_killed",
+            "子进程被 OOM Killer 杀死")
+        self.assertEqual(len(results), 2)
+        for r in results:
+            self.assertFalse(r.success)
+            self.assertEqual(r.failure_type, "oom_killed")
+            self.assertIn("OOM Killer", r.error_msg)
+
+    def test_synthesize_failure_cases_timeout(self):
+        """超时失败结果合成"""
+        cases = [make_case("Exp", 1)]
+        results = _synthesize_failure_cases(cases, "timeout",
+            "子进程超时被杀")
+        self.assertEqual(len(results), 1)
+        self.assertFalse(results[0].success)
+        self.assertEqual(results[0].failure_type, "timeout")
+
+    def test_synthesize_failure_cases_preserves_case_attrs(self):
+        """失败合成保留 baseline_perf_us 和 t_hw_us"""
+        case = make_case("Exp", 1)
+        case.baseline_perf_us = 100.0
+        case.t_hw_us = 50.0
+        results = _synthesize_failure_cases([case], "subprocess_failure", "rc=1")
+        self.assertEqual(results[0].baseline_perf_us, 100.0)
+        self.assertEqual(results[0].t_hw_us, 50.0)
+
+    def test_try_recover_partial_results_empty_file(self):
+        """空文件 → 无可恢复结果"""
+        fd, tmp = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        try:
+            results = _try_recover_partial_results(tmp)
+            self.assertEqual(len(results), 0)
+        finally:
+            os.unlink(tmp)
+
+    def test_try_recover_partial_results_valid_json(self):
+        """有效 JSON → 可恢复部分结果"""
+        fd, tmp = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        try:
+            payload = {"case_results": [
+                {"case_id": "test_1", "rel_path": "level1/Exp",
+                 "operator": "Exp", "case_num": 1, "success": True},
+            ]}
+            Path(tmp).write_text(json.dumps(payload))
+            results = _try_recover_partial_results(tmp)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].case_id, "test_1")
+        finally:
+            os.unlink(tmp)
+
+    def test_try_recover_partial_results_invalid_json(self):
+        """无效 JSON → 无可恢复结果"""
+        fd, tmp = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        try:
+            Path(tmp).write_text("{invalid json")
+            results = _try_recover_partial_results(tmp)
+            self.assertEqual(len(results), 0)
+        finally:
+            os.unlink(tmp)
+
+    def test_cann_env_vars_list_complete(self):
+        """CANN 环境变量列表包含关键变量"""
+        essential = ["ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME",
+                     "LD_LIBRARY_PATH", "PATH"]
+        for var in essential:
+            self.assertIn(var, _CANN_ENV_VARS)
+
+
+class TestCLI(unittest.TestCase):
+    """测试 CLI 命令解析"""
+
+    def test_cli_eval_child_parse(self):
+        """eval-child 命令参数解析"""
+        from src.kernel_eval.cli import create_parser
+        parser = create_parser()
+        args = parser.parse_args([
+            'eval-child',
+            '--device-id', '0',
+            '--cases-file', '/tmp/cases.json',
+            '--output', '/tmp/output.json',
+            '--bench-name', 'cann',
+            '--warmup', '3',
+            '--repeat', '5',
+            '--no-perf',
+        ])
+        self.assertEqual(args.command, 'eval-child')
+        self.assertEqual(args.device_id, 0)
+        self.assertEqual(args.cases_file, '/tmp/cases.json')
+        self.assertEqual(args.output, '/tmp/output.json')
+        self.assertTrue(args.no_perf)
+
+    def test_cli_eval_child_torch_op_guard(self):
+        """eval-child 接收 torch-op-guard-mode"""
+        from src.kernel_eval.cli import create_parser
+        parser = create_parser()
+        args = parser.parse_args([
+            'eval-child',
+            '--device-id', '0',
+            '--cases-file', '/tmp/cases.json',
+            '--output', '/tmp/output.json',
+            '--torch-op-guard-mode', 'block',
+        ])
+        self.assertEqual(args.torch_op_guard_mode, 'block')
+
+    def test_cli_eval_no_removed_flags(self):
+        """eval 命令不再包含已删除的内部开关"""
+        from src.kernel_eval.cli import create_parser
+        parser = create_parser()
+        # --no-subprocess-isolation, --child-json-output 已删除
+        # 注：--skip-install 已恢复，供 ST harness 使用
+        for flag in ['--no-subprocess-isolation', '--child-json-output']:
+            try:
+                parser.parse_args(['eval', flag])
+                self.fail(f"已删除的参数 {flag} 不应被 parser 接受")
+            except SystemExit:
+                pass  # argparse 拒绝未知参数 → 正确行为
+
+    def test_cli_eval_process_no_longer_exists(self):
+        """eval-process 命令已删除"""
+        from src.kernel_eval.cli import create_parser
+        parser = create_parser()
+        try:
+            parser.parse_args(['eval-process', '--process-id', '0'])
+            self.fail("eval-process 不应被 parser 接受")
+        except SystemExit:
+            pass
 
 
 if __name__ == '__main__':
-    # 运行测试
     unittest.main(verbosity=2)

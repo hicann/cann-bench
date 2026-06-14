@@ -49,9 +49,10 @@ def test_kernel_eval_cpu_no_perf_smoke_with_source_dir(tmp_path):
             "--device",
             "cpu",
             "--no-perf",
+            "--torch-op-guard-mode",
+            "warn",  # 冒烟测试的 submission 直接调用 torch.nn.functional.gelu，block 模式会阻断执行
             "--case-id",
             "1",
-            "--no-subprocess-isolation",
             "--warmup",
             "0",
             "--repeat",
