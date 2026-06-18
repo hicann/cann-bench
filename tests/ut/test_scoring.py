@@ -64,14 +64,14 @@ class TestPerCaseSolScore:
         assert per_case_sol_score(100, 80, -1) is None
 
     def test_baseline_missing_uses_fallback(self):
-        # baseline ≤ 0 时：fallback = max(t_hw*3, 10)
-        # t_hw=50 → fallback=max(150,10)=150；t_cand=100
-        # score = (150-50) / ((100-50) + (150-50)) = 100/150 = 2/3
-        assert per_case_sol_score(t_baseline=0, t_cand=100, t_hw=50) == pytest.approx(2.0 / 3.0)
+        # baseline ≤ 0 时：fallback = max(t_hw*10, 10)
+        # t_hw=50 → fallback=max(500,10)=500；t_cand=100
+        # score = (500-50) / ((100-50) + (500-50)) = 450/500 = 0.9
+        assert per_case_sol_score(t_baseline=0, t_cand=100, t_hw=50) == pytest.approx(0.9)
 
     def test_baseline_missing_fallback_uses_10us_floor(self):
         # t_hw 很小时 fallback 退到 10 us 地板
-        # t_hw=1 → fallback=max(3,10)=10；t_cand=5
+        # t_hw=1 → fallback=max(10,10)=10（10us 地板）；t_cand=5
         # score = (10-1) / ((5-1) + (10-1)) = 9/13
         assert per_case_sol_score(t_baseline=0, t_cand=5, t_hw=1) == pytest.approx(9.0 / 13.0)
 

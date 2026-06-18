@@ -100,7 +100,7 @@ class EvalCaseResult:
     def get_speedup(self) -> float:
         """计算加速比（保留为诊断指标）
 
-        baseline_perf_us 缺失时走 fallback 代理基线 max(t_hw*3, 10)，
+        baseline_perf_us 缺失时走 fallback 代理基线 max(t_hw*10, 10)，
         与 per_case_sol_score 的 fallback 规则一致。
         """
         if not self.perf_result or self.perf_result.elapsed_us <= 0:

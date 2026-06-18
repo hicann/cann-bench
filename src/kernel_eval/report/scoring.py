@@ -100,7 +100,7 @@ def per_case_sol_score(
     - T_baseline < T_HW 视为基线/T_HW 标定可疑（应在用例侧人工核查），
       但仍计算分数继续输出，仅 warn 一次（per rel_path × 数值组合）。
     - **T_baseline 缺失（≤ 0）但 T_HW 已知时**，按 fallback 规则取
-      ``max(T_HW * 3, 10)`` 作为代理基线继续打分（F054：fallback 路径也 warn）；
+      ``max(T_HW * 10, 10)`` 作为代理基线继续打分（F054：fallback 路径也 warn）；
       fallback 不回写到 cases，仅在运行时使用（约定：让缺基线的 case 也能拿到一个
       合理的相对分数，不会因为基线漏填整体被静默置 0）。
 
@@ -137,8 +137,8 @@ def per_case_sol_score(
 
 
 def _fallback_baseline_from_hw(t_hw: float) -> float:
-    """缺基线时的代理 baseline：max(T_HW * 3, 10 us)。"""
-    return max(t_hw * 3.0, 10.0)
+    """缺基线时的代理 baseline：max(T_HW * 10, 10 us)。"""
+    return max(t_hw * 10.0, 10.0)
 
 
 # 同一 (rel_path, T_baseline, T_HW) 组合只提示一次，避免成批用例时刷屏。
@@ -175,7 +175,7 @@ def _warn_fallback_baseline(rel_path: Optional[str], t_hw: float) -> None:
     op_prefix = f"[{rel_path}] " if rel_path else ""
     _logger.warning(
         "%sper_case_sol_score: baseline_perf_us 缺失/≤0，使用代理基线 "
-        "max(T_HW*3, 10) = %.2f us（T_HW=%.4f）。该用例的分数基于代理基线计算，"
+        "max(T_HW*10, 10) = %.2f us（T_HW=%.4f）。该用例的分数基于代理基线计算，"
         "精度可能降低；请补 cases.yaml 的 baseline_perf_us。",
         op_prefix, proxy, t_hw,
     )
