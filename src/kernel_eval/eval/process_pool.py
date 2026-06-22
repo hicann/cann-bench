@@ -52,6 +52,12 @@ from ..config import Config, get_config, get_project_root
 from ..base.models import CaseSpec
 
 
+_DEVICE_VISIBILITY_ENV_VARS = (
+    "ASCEND_RT_VISIBLE_DEVICES",
+    "ASCEND_VISIBLE_DEVICES",
+    "NPU_VISIBLE_DEVICES",
+)
+
 
 
 # ---------------------------------------------------------------------------
@@ -257,11 +263,53 @@ class ProcessPoolCoordinator:
 
         return env
 
+    @staticmethod
+    def _visible_device_tokens_from_env(env: Dict[str, str]) -> List[str]:
+        """Return parent-visible physical device tokens in logical order."""
+        for var in _DEVICE_VISIBILITY_ENV_VARS:
+            raw = env.get(var, "")
+            if not raw:
+                continue
+            tokens = [token.strip() for token in raw.split(",") if token.strip()]
+            if tokens and not any(token.lower() in {"all", "none"} for token in tokens):
+                return tokens
+        return []
+
+    def _physical_device_token_for_task(self, task: TaskUnit, env: Dict[str, str]) -> str:
+        visible_tokens = self._visible_device_tokens_from_env(env)
+        if len(visible_tokens) >= self.card_count and 0 <= task.device_id < len(visible_tokens):
+            return visible_tokens[task.device_id]
+        return str(task.device_id)
+
+    def _should_narrow_child_visibility(self) -> bool:
+        return (
+            self.base_config.device_type == "npu"
+            and self.device_id is None
+            and self.card_count > 1
+        )
+
+    def _child_device_id(self, task: TaskUnit) -> int:
+        # Once the child process sees exactly one physical NPU, torch_npu
+        # remaps that card to logical device 0.
+        return 0 if self._should_narrow_child_visibility() else task.device_id
+
+    def _build_env_for_task(self, base_env: Dict[str, str], task: TaskUnit) -> Dict[str, str]:
+        env = base_env.copy()
+        if not self._should_narrow_child_visibility():
+            return env
+
+        physical_device = self._physical_device_token_for_task(task, base_env)
+        for var in _DEVICE_VISIBILITY_ENV_VARS:
+            env[var] = physical_device
+        env["KERNEL_EVAL_PHYSICAL_DEVICE_ID"] = physical_device
+        env["KERNEL_EVAL_LOGICAL_DEVICE_ID"] = "0"
+        return env
+
     def _build_child_cmd(self, task: TaskUnit, cases_file: str, output_file: str) -> List[str]:
         """构建 eval-child 子进程命令"""
         cmd = [sys.executable, "-u", "-m", "kernel_eval.cli", "eval-child",
                "--bench-name", self.base_config.bench_name,
-               "--device-id", str(task.device_id),
+               "--device-id", str(self._child_device_id(task)),
                "--cases-file", cases_file,
                "--output", output_file,
                "--warmup", str(self.base_config.warmup),
@@ -331,7 +379,7 @@ class ProcessPoolCoordinator:
         print(f"[INFO] 单算子超时: {self.process_config.timeout_per_operator}s")
         print(f"[INFO] 最大并发: {max_workers}")
 
-        env = self._build_env()
+        base_env = self._build_env()
         all_case_results: List[EvalCaseResult] = []
         completed_count = 0
 
@@ -349,6 +397,7 @@ class ProcessPoolCoordinator:
                 os.close(fd)
 
                 cmd = self._build_child_cmd(task, cases_file, output_file)
+                env = self._build_env_for_task(base_env, task)
                 timeout = len(task.cases) * self.process_config.timeout_per_operator
 
                 proc = subprocess.Popen(cmd, start_new_session=True, env=env)

@@ -280,6 +280,72 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         idx = cmd.index("--reports-dir")
         self.assertEqual(cmd[idx + 1], "/tmp/cann-bench-reports")
 
+    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    def test_multi_card_child_visibility_is_narrowed(self, mock_detect):
+        """多卡 child 只暴露分配到的单张物理卡"""
+        mock_detect.return_value = 4
+        process_config = ProcessConfig(processes_per_card=1, enable_profiler=False)
+        with patch.dict(os.environ, {
+            "ASCEND_RT_VISIBLE_DEVICES": "4,5,6,7",
+            "ASCEND_VISIBLE_DEVICES": "4,5,6,7",
+            "NPU_VISIBLE_DEVICES": "4,5,6,7",
+        }, clear=False):
+            coordinator = ProcessPoolCoordinator(
+                base_config=self.base_config,
+                process_config=process_config,
+            )
+            task = TaskUnit(
+                operator="Exp",
+                rel_path="level1/Exp",
+                cases=[make_case("Exp", 1)],
+                device_id=2,
+            )
+            env = coordinator._build_env_for_task(coordinator._build_env(), task)
+            self.assertEqual(env["ASCEND_RT_VISIBLE_DEVICES"], "6")
+            self.assertEqual(env["ASCEND_VISIBLE_DEVICES"], "6")
+            self.assertEqual(env["NPU_VISIBLE_DEVICES"], "6")
+            self.assertEqual(env["KERNEL_EVAL_PHYSICAL_DEVICE_ID"], "6")
+            self.assertEqual(env["KERNEL_EVAL_LOGICAL_DEVICE_ID"], "0")
+
+    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    def test_multi_card_child_uses_logical_device_zero(self, mock_detect):
+        """多卡 child 收窄 visibility 后使用逻辑 device 0"""
+        mock_detect.return_value = 2
+        process_config = ProcessConfig(processes_per_card=1, enable_profiler=False)
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=process_config,
+        )
+        task = TaskUnit(
+            operator="Exp",
+            rel_path="level1/Exp",
+            cases=[make_case("Exp", 1)],
+            device_id=1,
+        )
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
+        device_idx = cmd.index("--device-id") + 1
+        self.assertEqual(cmd[device_idx], "0")
+
+    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    def test_single_card_child_keeps_requested_device(self, mock_detect):
+        """单卡显式 device_id 模式保持原有 device-id 语义"""
+        mock_detect.return_value = 4
+        process_config = ProcessConfig(processes_per_card=1, enable_profiler=False)
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=process_config,
+            device_id=3,
+        )
+        task = TaskUnit(
+            operator="Exp",
+            rel_path="level1/Exp",
+            cases=[make_case("Exp", 1)],
+            device_id=3,
+        )
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
+        device_idx = cmd.index("--device-id") + 1
+        self.assertEqual(cmd[device_idx], "3")
+
 
 class TestSubprocessUtils(unittest.TestCase):
     """测试 subprocess_utils 工具函数"""
