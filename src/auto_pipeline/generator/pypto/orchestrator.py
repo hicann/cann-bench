@@ -17,10 +17,14 @@ import shutil
 import subprocess
 import time
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from pathlib import Path
 from typing import Mapping, Optional
 
 from auto_pipeline.generator.opencode import OpenCodeAgent
+from auto_pipeline.generator.pypto.case_classifier import CaseClass, classify_cases, write_class_cases
+from auto_pipeline.generator.pypto.dispatcher import write_dispatcher
 from auto_pipeline.generator.opencode.exporter import make_session_title
 from auto_pipeline.prompt.base import CaseMaterial
 from auto_pipeline.prompt.builders import case_material_prompt_context
@@ -38,8 +42,11 @@ from auto_pipeline.core import render_prompt_file
 DEFAULT_PYPTO_AGENT = "pypto-op-orchestrator"
 DEFAULT_PERF_ROUND = 3
 PERF_ROUND_ENV = "PYPTO_PERF_ROUND"
+CLASS_CONCURRENCY_ENV = "PYPTO_CLASS_CONCURRENCY"
+DEFAULT_CLASS_CONCURRENCY = 4
 _REQUIRED_STAGES = tuple(str(index) for index in range(1, 8))
 _WORKTREE_MARKER = ".auto_pipeline_pypto_worktree.json"
+_CLASSES_MANIFEST = "classes_manifest.json"
 _ORCHESTRATOR_TEMPLATE = Path(__file__).with_name("templates") / "orchestrator.j2"
 
 
@@ -121,16 +128,95 @@ class PyptoOrchestratorAgent:
         except OSError as exc:
             message = f"failed to prepare PyPTO workspace root: {exc}"
             _write_single_line_log(log_file, message)
+            return Artifact(status=AGENT_FAILED, workdir=prompt.output_dir, message=message, log_file=log_file)
+
+        parent_op_dir = run_repo_root / self.workdir_root / task_info.op_name
+        classes = classify_cases(_case_files_path(task_info))
+        required_stages = _required_stages(self.perf_round)
+
+        if self.skip_if_done and self._all_classes_done(task_info, parent_op_dir, classes, required_stages):
+            message = "PyPTO workflow already completed; skipped."
+            _write_single_line_log(log_file, message)
             return Artifact(
-                status=AGENT_FAILED,
-                workdir=prompt.output_dir,
+                status=AGENT_SUCCESS,
+                workdir=parent_op_dir,
                 message=message,
+                files=self._aggregate_files(parent_op_dir, classes),
                 log_file=log_file,
+                metadata={
+                    "pypto_status": "skipped",
+                    "pypto_classes": _classes_manifest(task_info, classes),
+                    "pypto_perf_round": self.perf_round,
+                    "pypto_required_stages": list(required_stages),
+                },
             )
 
-        op_dir = run_repo_root / self.workdir_root / task_info.op_name
+        first, rest = classes[0], classes[1:]
+        first_result = self._run_one_class(task_info, prompt, run_repo_root, parent_op_dir, first, reference=None)
+        terminal = self._class_failure_artifact(prompt, first, first_result, workspace_metadata, required_stages)
+        if terminal is not None:
+            return terminal
+
+        rest_results = self._run_rest_classes(task_info, prompt, run_repo_root, parent_op_dir, first, rest)
+        results = [first_result, *rest_results]
+        manifest = _classes_manifest(task_info, classes)
+        if len(classes) > 1:
+            _write_manifest(parent_op_dir, manifest)
+            write_dispatcher(parent_op_dir, manifest)
+
+        first_opencode = first_result["opencode_result"]
+        metadata = {
+            "pypto_status": "",
+            "returncode": first_opencode.returncode,
+            "timed_out": first_opencode.timed_out,
+            "opencode_permission_external_directory": "deny",
+            "op_name": task_info.op_name,
+            "prompt_file": str(first_opencode.prompt_file),
+            "opencode_live_bridge": dict(first_opencode.live_bridge),
+            "opencode_session": dict(first_opencode.session_export),
+            "orchestrator_state": first_result["state"] or {},
+            "pypto_perf_round": self.perf_round,
+            "pypto_required_stages": list(required_stages),
+            "pypto_classes": manifest,
+            **workspace_metadata,
+        }
+        for failed in results[1:]:
+            terminal = self._class_failure_artifact(prompt, failed["case_class"], failed, workspace_metadata, required_stages)
+            if terminal is not None:
+                return terminal
+
+        message = f"PyPTO {len(classes)} class(es) completed; required stages: {','.join(required_stages)}"
+        _append_log_footer(first_result["log_file"], message)
+        return Artifact(
+            status=AGENT_SUCCESS,
+            workdir=parent_op_dir,
+            message=message,
+            files=self._aggregate_files(parent_op_dir, classes),
+            log_file=first_result["log_file"],
+            metadata={**metadata, "pypto_status": "success"},
+        )
+
+    def _run_rest_classes(self, task_info, prompt, run_repo_root, parent_op_dir, first, rest) -> list:
+        if not rest:
+            return []
+        reference = parent_op_dir / first.subdir / f"{task_info.op_name}_impl.py"
+        concurrency = max(1, min(len(rest), _class_concurrency()))
+        with ThreadPoolExecutor(max_workers=concurrency) as pool:
+            return list(
+                pool.map(
+                    lambda case_class: self._run_one_class(
+                        task_info, prompt, run_repo_root, parent_op_dir, case_class, reference=reference
+                    ),
+                    rest,
+                )
+            )
+
+    def _run_one_class(self, task_info, prompt, run_repo_root, parent_op_dir, case_class: CaseClass, *, reference) -> dict:
+        op_dir = parent_op_dir if case_class.subdir == "." else parent_op_dir / case_class.subdir
+        op_dir_rel = f"{self.workdir_root}/{task_info.op_name}" if case_class.subdir == "." else f"{self.workdir_root}/{task_info.op_name}/{case_class.subdir}"
         artifacts = _expected_artifact_paths(task_info.op_name, op_dir)
-        op_dir_rel = f"{self.workdir_root}/{task_info.op_name}"
+        self._prepare_pypto_workspace(task_info, op_dir, case_class)
+        reference_text = _reference_impl_text(reference, parent_op_dir) if reference else ""
         benchmark_context = case_material_prompt_context(task_info, op_dir_rel)
         pypto_prompt = _render_pypto_prompt(
             op_name=task_info.op_name,
@@ -141,148 +227,91 @@ class PyptoOrchestratorAgent:
             device_mode=self.device_mode,
             pool_device_id=self.device_id,
             perf_round=self.perf_round,
+            reference_impl_text=reference_text,
         )
-        state = _read_orchestrator_state(op_dir)
-        missing = _missing_artifacts(artifacts)
-        required_stages = _required_stages(self.perf_round)
-        if self.skip_if_done and not missing and _state_all_stages_completed(state, required_stages):
-            message = "PyPTO workflow already completed; skipped."
-            _write_single_line_log(log_file, message)
-            return Artifact(
-                status=AGENT_SUCCESS,
-                workdir=op_dir,
-                message=message,
-                files={"source_dir": op_dir, **artifacts},
-                log_file=log_file,
-                metadata={
-                    "pypto_status": "skipped",
-                    "orchestrator_state": state or {},
-                    "pypto_perf_round": self.perf_round,
-                    "pypto_required_stages": list(required_stages),
-                },
-            )
-
-        try:
-            self._prepare_pypto_workspace(task_info, op_dir)
-        except OSError as exc:
-            message = f"failed to prepare PyPTO workspace: {exc}"
-            _write_single_line_log(log_file, message)
-            return Artifact(status=AGENT_FAILED, workdir=op_dir, message=message, log_file=log_file)
-
-        session_title = make_session_title(task_info.op_name, phase="pypto")
         extra_env = dict(self.extra_env)
         if self.device_id is not None:
             extra_env["TILE_FWK_DEVICE_ID"] = str(self.device_id)
-        tmpdir = op_dir / ".tmp"
-        opencode_result = self.opencode_runner.run_opencode(
-            prompt,
+        class_prompt = prompt if case_class.subdir == "." else replace(prompt, output_dir=op_dir)
+        result = self.opencode_runner.run_opencode(
+            class_prompt,
             cwd=run_repo_root,
             prompt_text=pypto_prompt,
             log_name=f"{self.type}.log",
-            session_title=session_title,
+            session_title=make_session_title(task_info.op_name if case_class.subdir == "." else f"{task_info.op_name}-{case_class.subdir}", phase="pypto"),
             extra_env=extra_env,
-            tmpdir=tmpdir,
+            tmpdir=op_dir / ".tmp",
             live_bridge=True,
             export_session=True,
         )
+        return {
+            "case_class": case_class,
+            "op_dir": op_dir,
+            "artifacts": artifacts,
+            "opencode_result": result,
+            "log_file": result.log_file,
+            "missing": _missing_artifacts(artifacts),
+            "state": _read_orchestrator_state(op_dir),
+        }
 
-        if not opencode_result.started:
-            return Artifact(
-                status=opencode_result.status,
-                workdir=op_dir,
-                message=opencode_result.message,
-                log_file=opencode_result.log_file,
-                metadata={
-                    "opencode_live_bridge": dict(opencode_result.live_bridge),
-                    "opencode_session": dict(opencode_result.session_export),
-                },
-            )
-
-        state = _read_orchestrator_state(op_dir)
-        missing = _missing_artifacts(artifacts)
-        metadata = {
+    def _class_failure_artifact(self, prompt, case_class, result, workspace_metadata, required_stages) -> Optional[Artifact]:
+        opencode_result = result["opencode_result"]
+        op_dir = result["op_dir"]
+        missing = result["missing"]
+        state = result["state"]
+        meta = {
             "pypto_status": "",
             "returncode": opencode_result.returncode,
             "timed_out": opencode_result.timed_out,
-            "opencode_permission_external_directory": "deny",
-            "op_name": task_info.op_name,
-            "prompt_file": str(opencode_result.prompt_file),
-            "opencode_live_bridge": dict(opencode_result.live_bridge),
-            "opencode_session": dict(opencode_result.session_export),
-            "orchestrator_state": state or {},
+            "pypto_class": case_class.subdir,
             "missing_artifacts": missing,
-            "pypto_perf_round": self.perf_round,
             "pypto_required_stages": list(required_stages),
             **workspace_metadata,
         }
-
+        if not opencode_result.started:
+            return Artifact(status=opencode_result.status, workdir=op_dir, message=opencode_result.message, log_file=opencode_result.log_file, metadata=meta)
         if opencode_result.timed_out:
-            message = (
-                f"PyPTO orchestrator timed out after {prompt.timeout_sec}s; "
-                f"missing artifacts: {missing or '(none)'}"
-            )
+            message = f"PyPTO class {case_class.subdir} timed out after {prompt.timeout_sec}s; missing: {missing or '(none)'}"
             _append_log_footer(opencode_result.log_file, message)
-            return Artifact(
-                status=AGENT_TIMEOUT,
-                workdir=op_dir,
-                message=message,
-                files=_existing_files({"source_dir": op_dir, **artifacts}),
-                log_file=opencode_result.log_file,
-                metadata={**metadata, "pypto_status": "timeout"},
-            )
-
+            return Artifact(status=AGENT_TIMEOUT, workdir=op_dir, message=message, files=_existing_files(result["artifacts"]), log_file=opencode_result.log_file, metadata={**meta, "pypto_status": "timeout"})
         if missing:
-            message = f"PyPTO orchestrator exited code={opencode_result.returncode}; missing artifacts: {missing}"
+            message = f"PyPTO class {case_class.subdir} exited code={opencode_result.returncode}; missing: {missing}"
             _append_log_footer(opencode_result.log_file, message)
-            return Artifact(
-                status=AGENT_FAILED,
-                workdir=op_dir,
-                message=message,
-                files=_existing_files({"source_dir": op_dir, **artifacts}),
-                log_file=opencode_result.log_file,
-                metadata={**metadata, "pypto_status": "artifact_missing"},
-            )
-
+            return Artifact(status=AGENT_FAILED, workdir=op_dir, message=message, files=_existing_files(result["artifacts"]), log_file=opencode_result.log_file, metadata={**meta, "pypto_status": "artifact_missing"})
         if opencode_result.returncode != 0:
-            message = f"PyPTO orchestrator exited code={opencode_result.returncode}, although artifacts are present"
+            message = f"PyPTO class {case_class.subdir} exited code={opencode_result.returncode}, although artifacts present"
             _append_log_footer(opencode_result.log_file, message)
-            return Artifact(
-                status=AGENT_FAILED,
-                workdir=op_dir,
-                message=message,
-                files={"source_dir": op_dir, **artifacts},
-                log_file=opencode_result.log_file,
-                metadata={**metadata, "pypto_status": "subprocess_error"},
-            )
-
+            return Artifact(status=AGENT_FAILED, workdir=op_dir, message=message, files=result["artifacts"], log_file=opencode_result.log_file, metadata={**meta, "pypto_status": "subprocess_error"})
         if not _state_all_stages_completed(state, required_stages):
-            stage_display = ",".join(required_stages)
-            message = f"PyPTO orchestrator state did not reach required stages completed: {stage_display}"
+            message = f"PyPTO class {case_class.subdir} state did not reach required stages: {','.join(required_stages)}"
             _append_log_footer(opencode_result.log_file, message)
-            return Artifact(
-                status=AGENT_FAILED,
-                workdir=op_dir,
-                message=message,
-                files={"source_dir": op_dir, **artifacts},
-                log_file=opencode_result.log_file,
-                metadata={**metadata, "pypto_status": "blocked"},
-            )
+            return Artifact(status=AGENT_FAILED, workdir=op_dir, message=message, files=result["artifacts"], log_file=opencode_result.log_file, metadata={**meta, "pypto_status": "blocked"})
+        return None
 
-        message = f"PyPTO artifacts present and orchestrator required stages completed: {','.join(required_stages)}"
-        _append_log_footer(opencode_result.log_file, message)
-        return Artifact(
-            status=AGENT_SUCCESS,
-            workdir=op_dir,
-            message=message,
-            files={"source_dir": op_dir, **artifacts},
-            log_file=opencode_result.log_file,
-            metadata={**metadata, "pypto_status": "success"},
-        )
+    def _all_classes_done(self, task_info, parent_op_dir: Path, classes, required_stages) -> bool:
+        for case_class in classes:
+            op_dir = parent_op_dir if case_class.subdir == "." else parent_op_dir / case_class.subdir
+            artifacts = _expected_artifact_paths(task_info.op_name, op_dir)
+            if _missing_artifacts(artifacts) or not _state_all_stages_completed(_read_orchestrator_state(op_dir), required_stages):
+                return False
+        return True
 
-    def _prepare_pypto_workspace(self, task_info: CaseMaterial, op_dir: Path) -> None:
+    def _aggregate_files(self, parent_op_dir: Path, classes) -> dict[str, Path]:
+        files: dict[str, Path] = {"source_dir": parent_op_dir}
+        for case_class in classes:
+            op_dir = parent_op_dir if case_class.subdir == "." else parent_op_dir / case_class.subdir
+            files.update(_expected_artifact_paths_for_class(case_class, op_dir, parent_op_dir))
+        if len(classes) > 1:
+            files["dispatch_entry"] = parent_op_dir / f"{parent_op_dir.name}.py"
+        return files
+
+    def _prepare_pypto_workspace(self, task_info: CaseMaterial, op_dir: Path, case_class: Optional[CaseClass] = None) -> None:
         op_dir.mkdir(parents=True, exist_ok=True)
         for task_file in task_info.task_files:
-            shutil.copy2(task_file.source_path, op_dir / task_file.target_name)
+            target = op_dir / task_file.target_name
+            if case_class is not None and "cases" in task_file.key.lower() and write_class_cases(task_file.source_path, case_class, target):
+                continue
+            shutil.copy2(task_file.source_path, target)
         require_target = op_dir / "REQUIRE.md"
         if task_info.require_path and task_info.require_path.is_file():
             shutil.copy2(task_info.require_path, require_target)
@@ -358,6 +387,7 @@ def _render_pypto_prompt(
     device_mode: str,
     pool_device_id: Optional[int],
     perf_round: int,
+    reference_impl_text: str = "",
 ) -> str:
     return render_prompt_file(
         _ORCHESTRATOR_TEMPLATE,
@@ -369,7 +399,60 @@ def _render_pypto_prompt(
         device_mode=device_mode,
         pool_device_id=pool_device_id,
         perf_round=perf_round,
+        reference_impl_text=reference_impl_text,
     )
+
+
+def _case_files_path(task_info: CaseMaterial) -> Path:
+    for task_file in task_info.task_files:
+        if "cases" in task_file.key.lower():
+            return Path(task_file.source_path)
+    return Path("/nonexistent")
+
+
+def _class_concurrency() -> int:
+    raw = os.environ.get(CLASS_CONCURRENCY_ENV)
+    if raw is None or str(raw).strip() == "":
+        return DEFAULT_CLASS_CONCURRENCY
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return DEFAULT_CLASS_CONCURRENCY
+
+
+def _reference_impl_text(reference: Optional[Path], parent_op_dir: Path) -> str:
+    if reference is None or not Path(reference).is_file():
+        return ""
+    try:
+        rel = Path(reference).relative_to(parent_op_dir)
+    except ValueError:
+        rel = Path(reference).name
+    return f"已完成的首类实现可作为参考（同算子不同 dim/dtype 切分）: `{rel}`"
+
+
+def _classes_manifest(task_info: CaseMaterial, classes) -> dict:
+    return {
+        "op_name": task_info.op_name,
+        "classes": [
+            {
+                "class_id": case_class.class_id,
+                "subdir": case_class.subdir,
+                "signature": [list(sig) for sig in case_class.signature],
+                "impl": f"{case_class.subdir}/{task_info.op_name}_impl.py" if case_class.subdir != "." else f"{task_info.op_name}_impl.py",
+            }
+            for case_class in classes
+        ],
+    }
+
+
+def _write_manifest(parent_op_dir: Path, manifest: dict) -> None:
+    parent_op_dir.mkdir(parents=True, exist_ok=True)
+    (parent_op_dir / _CLASSES_MANIFEST).write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def _expected_artifact_paths_for_class(case_class: CaseClass, op_dir: Path, parent_op_dir: Path) -> dict[str, Path]:
+    prefix = "" if case_class.subdir == "." else f"{case_class.subdir}/"
+    return {f"{prefix}{name}": path for name, path in _expected_artifact_paths(parent_op_dir.name, op_dir).items()}
 
 
 def _expected_artifact_paths(op_name: str, op_dir: Path) -> dict[str, Path]:

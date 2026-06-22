@@ -21,6 +21,10 @@
 请按 pypto-op-orchestrator 自带规范正常推进 7 阶段流程。产物格式以 PyPTO
 原生 workflow 为准；不要为 cann-bench/Stanford submission 做输出格式对齐。
 后续格式归一由 auto_pipeline 的独立 convert 阶段负责。
+{% if reference_impl_text %}
+{{ reference_impl_text }}
+本类只需覆盖 `{{ op_dir_rel }}/cases.yaml` 中的用例；可参考首类实现思路, 但产物必须落在本类工作目录。
+{% endif %}
 
 {{ case_detail_sections }}
 

@@ -23,11 +23,12 @@
 - 原始 PyPTO 实现文件应作为运行时依赖复制到提交目录；如确需调整，只允许做 import 路径这类机械改写，不能改变计算路径。
 - `cann_bench` 包入口只能按 schema 转发输入和 attrs 到原始 PyPTO wrapper，并返回其结果。
 - 不要把原始 wrapper 直接 alias 成 `cann_bench.<schema_op>`，例如不要写 `from ... import xxx_wrapper as <schema_op>`；必须写一个无类型标注的 thin forwarder：函数名和参数/defaults 按 schema 暴露，函数体只做参数转发并 `return` 原始 wrapper 的结果。
+- 多实现分发：若 raw_dir 含确定性 dispatcher `<op>.py`（按 dim×dtype 切分时存在），直接原样复制 `<op>.py` 和全部 class 子目录 impl 到 cann_bench 包，`cann_bench.<op>` 转发到该 `<op>.py` 的同名函数；禁止自行实现/改写分发逻辑。仅一份 impl（无 dispatcher）时退化为普通 thin forwarder。
 - 转发调用必须按原始 wrapper 的实际签名绑定，而不是假设 wrapper 参数名等于 schema 参数名。若 wrapper 参数名与 schema 名不完全一致但入参个数和顺序可一一对应，优先用 positional 转发；只有在原始 wrapper 明确接受对应 schema 参数名时才使用 keyword 转发。
 - 如果 schema 参数无法无歧义绑定到原始 wrapper 签名（数量不一致、必需参数缺失、额外 attrs 无法传入、或需要改变计算语义才能适配），写入 CONVERSION_ERROR.txt 并停止，不要生成会在运行时才 TypeError 的 submission。
 - `cann_bench.<op>` 入口函数不要带 Python return type annotation，也不要继承原始 wrapper 的 `__annotations__`；本地检查必须用 `inspect.signature(cann_bench.<op>).return_annotation is inspect.Signature.empty` 验证。这样避免 kernel_eval/Profiler 首次调用时把公开入口误识别为 PyPTO 返回值 kernel。
 - 本地检查必须覆盖 entry -> raw wrapper 的绑定关系：在不分配 tensor、不调用真实 PyPTO wrapper、不触发 NPU 的前提下，导入生成的 entry 模块，把 entry 模块中引用的原始 wrapper 替换成一个拥有相同 `inspect.signature(raw_wrapper)` 的 spy/stub，然后用 schema 参数对应的 sentinel object 调用 `cann_bench.<op>`；检查调用不会抛 `TypeError`，spy 收到的参数能被 raw wrapper 签名绑定，且 `cann_bench.<op>` 原样 return spy 的结果。
-- 本地检查若只验证 import、wheel、公开入口 signature 或 return annotation，不算通过；必须验证上述 spy/stub 调用路径。
+- 本地检查若只验证 import、wheel、公开入口 signature 或 return annotation，不算通过；必须验证上述 spy/stub 调用路径。多实现分发时，要对每个 class 各构造一组命中其 signature 的 dim/dtype sentinel，确认 dispatcher 转发到对应 class 的 wrapper，且不匹配的 dim/dtype 会 raise。
 - 如果原始 PyPTO 产物不能按任务 schema 直接覆盖 cases 文件要求，应写入 CONVERSION_ERROR.txt 并停止，而不是在 converter 中补 kernel 逻辑。
 - 不要检查或搜索生成阶段 proof。auto_pipeline 调用本转换阶段前已经完成 artifact 接收判断；converter 只做格式归一。
 - 不要读取、glob 或复制 `.orchestrator_state.json`、`stage5_precision.log`、`[PRECISION_PASS]`、`benchmark_runs/`、`custom_auto_pipeline/`、历史 artifact、历史 submission 或历史 kernel_eval。除非这些 proof 文件被明确列在上面的隔离输入清单中，否则缺失不是转换失败理由，也不是向父目录/仓库根目录搜索的理由。

@@ -180,6 +180,12 @@ def _prepare_conversion_input(case: CannBenchCase, output: Artifact, output_dir:
         target = _copy_raw_impl_file(source, raw_dir, source_root=source_root)
         files[f"raw:{target.relative_to(raw_dir).as_posix()}"] = target
 
+    entry = _dispatch_entry_source(output)
+    if entry is not None:
+        entry_target = raw_dir / entry.name
+        shutil.copy2(entry, entry_target)
+        files["raw:" + entry.name] = entry_target
+
     files["input_dir"] = input_dir
     files["raw_dir"] = raw_dir
     files["submission_dir"] = output_dir / "submission"
@@ -197,6 +203,21 @@ def _iter_conversion_task_files(case_files: Mapping[str, Path]) -> Iterable[tupl
         if any(token in lower_key or token in lower_name for token in skip_tokens):
             continue
         yield key, path
+
+
+def _dispatch_entry_source(output: Artifact) -> Optional[Path]:
+    """The generated `<op>.py` dispatcher embeds the class table; the manifest
+    stays out of the submission. None when single-class (no dispatcher)."""
+    for base in (output.files.get("source_dir"), output.workdir):
+        if base is None:
+            continue
+        root = Path(base).expanduser().resolve()
+        if not (root / "classes_manifest.json").is_file():
+            continue
+        entry = root / f"{root.name}.py"
+        if entry.is_file():
+            return entry
+    return None
 
 
 def _iter_raw_impl_files(output: Artifact) -> list[tuple[Path, Optional[Path]]]:

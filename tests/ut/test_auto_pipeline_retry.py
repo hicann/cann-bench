@@ -7,6 +7,8 @@ from auto_pipeline.converter.base import ConversionResult
 from auto_pipeline.core import AGENT_SUCCESS, Artifact, CannBenchEvalResult, Submission
 from auto_pipeline.generator.opencode.runner import OpenCodeAgent, OpenCodeRunResult
 from auto_pipeline.generator.pypto import PyptoOrchestratorAgent
+from auto_pipeline.generator.pypto.case_classifier import classify_cases
+from auto_pipeline.generator.pypto.dispatcher import write_dispatcher
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -261,10 +263,10 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
     source_output = tmp_path / "source"
     workspace = tmp_path / "pypto-workspace"
     retry_output = tmp_path / "retry-pypto-skip"
-    _write_config(config_path, agent_type="pypto", selectors=["tasks/level1/gelu"])
-    _write_completed_pypto_custom(workspace / "custom" / "gelu")
-    (workspace / "custom" / "gelu" / "prof").mkdir()
-    (workspace / "custom" / "gelu" / "prof" / "trace.json").write_text("{}\n", encoding="utf-8")
+    _write_config(config_path, agent_type="pypto", selectors=["bench_lab/pypto_cann_bench/level1/exp"])
+    _write_completed_pypto_custom(workspace / "custom" / "exp", op_name="exp")
+    (workspace / "custom" / "exp" / "prof").mkdir()
+    (workspace / "custom" / "exp" / "prof" / "trace.json").write_text("{}\n", encoding="utf-8")
     (source_output / "gelu").mkdir(parents=True)
     (source_output / "gelu" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
     _register_source_run(
@@ -272,7 +274,7 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
         config_path=config_path,
         source_output=source_output,
         workspace=workspace,
-        tasks=[("gelu", "tasks/level1/gelu")],
+        tasks=[("gelu", "bench_lab/pypto_cann_bench/level1/exp")],
     )
 
     opencode_calls = {"count": 0}
@@ -301,14 +303,14 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
         str(retry_output),
     ]) == 0
 
-    snapshot = retry_output / "gelu" / "custom" / "gelu"
+    snapshot = retry_output / "exp" / "custom" / "exp"
     assert opencode_calls["count"] == 0
     assert converted_artifacts[0].metadata["pypto_status"] == "skipped"
     assert converted_artifacts[0].files["source_dir"] == snapshot.resolve()
-    assert (snapshot / "gelu_impl.py").is_file()
+    assert (snapshot / "exp_impl.py").is_file()
     assert not (snapshot / "prof").exists()
-    task_state = cli.pipeline_state.read_json(cli.pipeline_state.task_file("retry-pypto-skip", "gelu"))
-    assert task_state["workspace_custom_dir"] == str((workspace / "custom" / "gelu").resolve())
+    task_state = cli.pipeline_state.read_json(cli.pipeline_state.task_file("retry-pypto-skip", "exp"))
+    assert task_state["workspace_custom_dir"] == str((workspace / "custom" / "exp").resolve())
     assert task_state["output_custom_dir"] == str(snapshot.resolve())
 
 
@@ -319,8 +321,8 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
     source_output = tmp_path / "source"
     workspace = tmp_path / "pypto-workspace"
     retry_output = tmp_path / "retry-pypto-resume"
-    _write_config(config_path, agent_type="pypto", selectors=["tasks/level1/gelu"])
-    op_dir = workspace / "custom" / "gelu"
+    _write_config(config_path, agent_type="pypto", selectors=["bench_lab/pypto_cann_bench/level1/exp"])
+    op_dir = workspace / "custom" / "exp"
     op_dir.mkdir(parents=True)
     (op_dir / "KEEP.txt").write_text("keep me\n", encoding="utf-8")
     (source_output / "gelu").mkdir(parents=True)
@@ -330,7 +332,7 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
         config_path=config_path,
         source_output=source_output,
         workspace=workspace,
-        tasks=[("gelu", "tasks/level1/gelu")],
+        tasks=[("gelu", "bench_lab/pypto_cann_bench/level1/exp")],
     )
 
     opencode_calls = {"count": 0}
@@ -338,7 +340,7 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
     def fake_run_opencode(self, prompt, *, cwd=None, prompt_text=None, log_name=None, **kwargs):
         opencode_calls["count"] += 1
         assert Path(cwd).resolve() == workspace.resolve()
-        _write_completed_pypto_custom(Path(cwd) / "custom" / "gelu")
+        _write_completed_pypto_custom(Path(cwd) / "custom" / "exp", op_name="exp")
         prompt.output_dir.mkdir(parents=True, exist_ok=True)
         prompt_file = prompt.output_dir / "PROMPT.md"
         prompt_file.write_text(prompt_text or prompt.text, encoding="utf-8")
@@ -376,10 +378,72 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
         str(retry_output),
     ]) == 0
 
-    snapshot = retry_output / "gelu" / "custom" / "gelu"
+    snapshot = retry_output / "exp" / "custom" / "exp"
     assert opencode_calls["count"] == 1
     assert (op_dir / "KEEP.txt").read_text(encoding="utf-8") == "keep me\n"
     assert converted_artifacts[0].metadata["pypto_status"] == "success"
     assert converted_artifacts[0].files["source_dir"] == snapshot.resolve()
     assert (snapshot / "KEEP.txt").is_file()
     assert (snapshot / "SPEC.md").is_file()
+
+
+def _write_completed_multiclass_custom(parent: Path, op_name: str, classes: list) -> None:
+    for case_class in classes:
+        _write_completed_pypto_custom(parent / case_class.subdir, op_name=op_name)
+        (parent / case_class.subdir / f"{op_name}_impl.py").write_text(
+            f"def {op_name}(x, *a, **k):\n    return ({case_class.subdir!r}, x.dim())\n", encoding="utf-8"
+        )
+    manifest = {
+        "op_name": op_name,
+        "classes": [
+            {"class_id": c.class_id, "subdir": c.subdir, "signature": [list(s) for s in c.signature],
+             "impl": f"{c.subdir}/{op_name}_impl.py"}
+            for c in classes
+        ],
+    }
+    (parent / "classes_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    write_dispatcher(parent, manifest)
+
+
+def test_retry_pypto_skips_completed_multiclass_workspace_custom(monkeypatch, tmp_path):
+    monkeypatch.setattr(cli.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
+    monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", str(tmp_path / "pto-isa"))
+    config_path = tmp_path / "pypto.yaml"
+    source_output = tmp_path / "source"
+    workspace = tmp_path / "pypto-workspace"
+    retry_output = tmp_path / "retry-pypto-multi"
+    _write_config(config_path, agent_type="pypto", selectors=["tasks/level1/gelu"])
+    classes = classify_cases(REPO_ROOT / "tasks" / "level1" / "gelu" / "cases.yaml")
+    assert len(classes) > 1  # gelu is genuinely multi-class
+    _write_completed_multiclass_custom(workspace / "custom" / "gelu", "gelu", classes)
+    (source_output / "gelu").mkdir(parents=True)
+    (source_output / "gelu" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    _register_source_run(
+        run_id="source-pypto-multi",
+        config_path=config_path,
+        source_output=source_output,
+        workspace=workspace,
+        tasks=[("gelu", "tasks/level1/gelu")],
+    )
+
+    def fail_run_opencode(self, *args, **kwargs):
+        raise AssertionError("completed multi-class PyPTO custom should skip opencode")
+
+    converted_artifacts: list[Artifact] = []
+    monkeypatch.setattr(OpenCodeAgent, "run_opencode", fail_run_opencode)
+    _patch_pypto_generator(monkeypatch)
+    _patch_fake_runner(monkeypatch)
+    _patch_recording_converter(monkeypatch, converted_artifacts)
+    _patch_success_eval(monkeypatch)
+
+    assert cli.main([
+        "retry", "--run-id", "source-pypto-multi", "--task", "gelu", "--foreground",
+        "--retry-run-id", "retry-pypto-multi", "--retry-output", str(retry_output),
+    ]) == 0
+
+    snapshot = retry_output / "gelu" / "custom" / "gelu"
+    assert converted_artifacts[0].metadata["pypto_status"] == "skipped"
+    assert converted_artifacts[0].files["source_dir"] == snapshot.resolve()
+    assert (snapshot / "c1" / "gelu_impl.py").is_file()
+    assert (snapshot / "classes_manifest.json").is_file()
+    assert (snapshot / "gelu.py").is_file()
