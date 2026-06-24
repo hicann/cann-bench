@@ -1,0 +1,60 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AscendAntiQuantV2
+  category: Quantization
+  difficulty: L2
+  platform: Ascend 950PR / 950DT
+  formula: |
+    y = cast_to_dst_type(x * scale)                         if sqrt_mode=false, offset=None
+    y = cast_to_dst_type((x + offset) * scale)              if sqrt_mode=false, offset!=None
+    y = cast_to_dst_type(x * scale * scale)                 if sqrt_mode=true,  offset=None
+    y = cast_to_dst_type((x + offset) * scale * scale)      if sqrt_mode=true,  offset!=None
+  description: 根据输入的 scale 和 offset 对量化输入 x 进行反量化，输出浮点张量 y
+  shape_support: 输入 x 支持 1-8D 张量；y 与 x 同 shape；scale/offset 需满足广播约束
+  attrs:
+  - name: dst_type
+    type: int
+    default: 1
+    description: 输出数据类型，1=FLOAT16, 27=BFLOAT16
+    required: false
+  - name: sqrt_mode
+    type: bool
+    default: false
+    description: scale 参与计算逻辑，为 true 时 scale 乘两次
+    required: false
+  inputs:
+  - name: x
+    description: 待反量化输入，支持 INT4（打包在 INT32 尾轴）、INT8、HIFLOAT8、FLOAT8_E4M3、FLOAT8_E5M2；不支持空 Tensor
+    dtype:
+    - int8
+    - int4
+    - float8_e4m3fn
+    - float8_e5m2
+    - hifloat8
+  - name: scale
+    description: 反量化 scale；维度数与 x 相同或为 1 维；最多只有一个非 1 维度且位于 -1 或 -2 轴；INT4 输入时一维 scale 长度须为 x 尾轴大小的 8 倍
+    dtype:
+    - float32
+    - bfloat16
+  - name: offset
+    description: 反量化 offset；可选输入；数据类型和 shape 须与 scale 保持一致
+    dtype:
+    - float32
+    - bfloat16
+    optional: true
+  outputs:
+  - name: y
+    description: 反量化输出张量，与输入 x 同 shape
+    dtype:
+    - float16
+    - bfloat16
+  schema: ascend_anti_quant_v2(Tensor x, Tensor scale, Tensor? offset=None, int dst_type=1, bool sqrt_mode=False) -> Tensor y

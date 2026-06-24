@@ -1,0 +1,283 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+# ============================================================
+# 1D / 2D 基础对齐 case
+# ============================================================
+- operator: NLLLoss
+  case_id: 1
+  input_shape:
+  - [1024, 2048]
+  - [1024]
+  - [2048]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-1, 0]
+  - [0, 2047]
+  - [0.5, 1.5]
+  note: "S-float16-2M-对齐-对称logprob-mean"
+- operator: NLLLoss
+  case_id: 2
+  input_shape:
+  - [2048, 4096]
+  - [2048]
+  - [4096]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-2, 0]
+  - [0, 4095]
+  - [0.5, 1.5]
+  note: "M-float32-8M-对齐-对称logprob-mean"
+- operator: NLLLoss
+  case_id: 3
+  input_shape:
+  - [4096, 8192]
+  - [4096]
+  - [8192]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-3, 0]
+  - [0, 8191]
+  - [0.5, 1.5]
+  note: "M-bfloat16-33M-对齐-对称logprob-mean"
+- operator: NLLLoss
+  case_id: 4
+  input_shape:
+  - [8192, 16384]
+  - [8192]
+  - [16384]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: sum, ignore_index: -100}
+  value_range:
+  - [-10, 0]
+  - [0, 16383]
+  - [0.5, 1.5]
+  note: "L-float16-134M-对齐-中值域-sum"
+- operator: NLLLoss
+  case_id: 5
+  input_shape:
+  - [4096, 16384]
+  - [4096]
+  - [16384]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: none, ignore_index: -100}
+  value_range:
+  - [-100, 0]
+  - [0, 16383]
+  - [0.5, 1.5]
+  note: "L-float32-536M-对齐-大值域-none"
+# ============================================================
+# 非对齐 / 边界 ignore_index
+# ============================================================
+- operator: NLLLoss
+  case_id: 6
+  input_shape:
+  - [1023, 2047]
+  - [1023]
+  - [2047]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -1}
+  value_range:
+  - [-0.1, 0]
+  - [0, 2046]
+  - [0.5, 1.5]
+  note: "S-bfloat16-2M-非对齐-微小logprob-ignore_index=-1"
+- operator: NLLLoss
+  case_id: 7
+  input_shape:
+  - [1009, 1021]
+  - [1009]
+  - [1021]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: mean, ignore_index: 0}
+  value_range:
+  - [-1, 0]
+  - [0, 1020]
+  - [0.5, 1.5]
+  note: "S-float16-1M-质数非对齐-ignore_index=0"
+- operator: NLLLoss
+  case_id: 8
+  input_shape:
+  - [1537, 769]
+  - [1537]
+  - [769]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: mean, ignore_index: 100}
+  value_range:
+  - [-5, 0]
+  - [0, 768]
+  - [0.5, 1.5]
+  note: "S-float32-1M-非对齐-ignore_index=100"
+# ============================================================
+# 高维 (3D / 4D / 5D)
+# ============================================================
+- operator: NLLLoss
+  case_id: 9
+  input_shape:
+  - [363, 373, 367]
+  - [363, 367]
+  - [373]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-50, 0]
+  - [0, 372]
+  - [0.5, 1.5]
+  note: "M-bfloat16-50M-质数非对齐-3D"
+- operator: NLLLoss
+  case_id: 10
+  input_shape:
+  - [2049, 513]
+  - [2049]
+  - [513]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-400, 0]
+  - [0, 512]
+  - [0.5, 1.5]
+  note: "S-float16-1M-非对齐-float16边界值"
+- operator: NLLLoss
+  case_id: 11
+  input_shape:
+  - [3, 4001, 7, 13]
+  - [3, 7, 13]
+  - [4001]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-88, 0]
+  - [0, 4000]
+  - [0.5, 1.5]
+  note: "S-float32-1M-质数非对齐-float32边界值-4D"
+- operator: NLLLoss
+  case_id: 12
+  input_shape:
+  - [1000003, 2]
+  - [1000003]
+  - [2]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-1000, 0]
+  - [0, 1]
+  - [0.5, 1.5]
+  note: "M-bfloat16-2M-质数非对齐-大值域-二分类"
+- operator: NLLLoss
+  case_id: 13
+  input_shape:
+  - [11, 67, 13, 17, 67]
+  - [11, 13, 17, 67]
+  - [67]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-10, 0]
+  - [0, 66]
+  - [0.5, 1.5]
+  note: "M-float16-10M-质数非对齐-常规值域-5D"
+- operator: NLLLoss
+  case_id: 14
+  input_shape:
+  - [3, 1013, 7, 11, 13]
+  - [3, 7, 11, 13]
+  - [1013]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [0, 0]
+  - [0, 1012]
+  - [0.5, 1.5]
+  note: "M-float32-3M-质数非对齐-logprob=0特殊值-5D"
+# ============================================================
+# 更多 reduction / dtype / 维度组合
+# ============================================================
+- operator: NLLLoss
+  case_id: 15
+  input_shape:
+  - [512, 2049]
+  - [512]
+  - [2049]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-0.5, 0]
+  - [0, 2048]
+  - [0.5, 1.5]
+  note: "S-bfloat16-1M-非对齐-微小logprob"
+- operator: NLLLoss
+  case_id: 16
+  input_shape:
+  - [255, 8193]
+  - [255]
+  - [8193]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: sum, ignore_index: 50}
+  value_range:
+  - [-1, 0]
+  - [0, 8192]
+  - [0.5, 1.5]
+  note: "S-float16-2M-非对齐-ignore_index=50-sum"
+- operator: NLLLoss
+  case_id: 17
+  input_shape:
+  - [4097, 511]
+  - [4097]
+  - [511]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: none, ignore_index: -1}
+  value_range:
+  - [-1000, 0]
+  - [0, 510]
+  - [0.5, 1.5]
+  note: "S-float32-2M-非对齐-大值域-none"
+- operator: NLLLoss
+  case_id: 18
+  input_shape:
+  - [2, 2049, 511]
+  - [2, 511]
+  - [2049]
+  dtype: [bfloat16, int64, bfloat16]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-0.2, 0]
+  - [0, 2048]
+  - [0.5, 1.5]
+  note: "S-bfloat16-2M-非对齐-微小logprob-3D"
+- operator: NLLLoss
+  case_id: 19
+  input_shape:
+  - [4, 2049, 255]
+  - [4, 255]
+  - [2049]
+  dtype: [float16, int64, float16]
+  attrs: {reduction: mean, ignore_index: 10}
+  value_range:
+  - [-3, 0]
+  - [0, 2048]
+  - [0.5, 1.5]
+  note: "S-float16-2M-非对齐-ignore_index=10-3D"
+- operator: NLLLoss
+  case_id: 20
+  input_shape:
+  - [2, 101, 3, 17, 1024]
+  - [2, 3, 17, 1024]
+  - [101]
+  dtype: [float32, int64, float32]
+  attrs: {reduction: mean, ignore_index: -100}
+  value_range:
+  - [-20, 0]
+  - [0, 100]
+  - [0.5, 1.5]
+  note: "M-float32-10M-非对齐-非对称大值域-5D"

@@ -1,0 +1,21 @@
+case_id,operator,input_shape,dtype,attrs,value_range,note
+1,DynamicMxQuantWithDualAxis,"[[1024, 1024]]",['float16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 0, 'dst_type_max': 0.0}","[-1, 1]",alg0-FP4E2M1-fp16-2D-1M-对齐-小值域
+2,DynamicMxQuantWithDualAxis,"[[4, 509, 2048]]",['bfloat16'],"{'round_mode': 'floor', 'dst_type': 40, 'scale_alg': 0, 'dst_type_max': 0.0}","[-6, 6]",alg0-FP4E2M1-bf16-3D-4M-质数前维509-floor
+3,DynamicMxQuantWithDualAxis,"[[3, 7, 127, 1022]]",['float16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 0, 'dst_type_max': 0.0}","[-2, 2]",alg0-FP4E2M1-fp16-4D-2.7M-非对齐(127x1022)
+4,DynamicMxQuantWithDualAxis,"[[16, 64, 16384]]",['float16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 0, 'dst_type_max': 0.0}","[-3, 3]",alg0-FP4E2M1-fp16-3D-16M-大尾维16384
+5,DynamicMxQuantWithDualAxis,"[[64, 8192]]",['float16'],"{'round_mode': 'rint', 'dst_type': 41, 'scale_alg': 0, 'dst_type_max': 0.0}","[-1.5, 1.5]",alg0-FP4E1M2-fp16-2D-512K-大尾维8192
+6,DynamicMxQuantWithDualAxis,"[[2, 3, 7, 11, 512]]",['bfloat16'],"{'round_mode': 'round', 'dst_type': 41, 'scale_alg': 0, 'dst_type_max': 0.0}","[-1.5, 1.5]",alg0-FP4E1M2-bf16-5D-236K-质数前维(3x7x11)-round
+7,DynamicMxQuantWithDualAxis,"[[32, 16384]]",['float16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 0, 'dst_type_max': 0.0}","[-100, 100]",alg0-FP8E4M3-fp16-2D-512K-大尾维16384-对齐
+8,DynamicMxQuantWithDualAxis,"[[2, 7, 13, 4097]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 0, 'dst_type_max': 0.0}","[-200, 200]",alg0-FP8E4M3-bf16-4D-745K-非对齐尾维4097
+9,DynamicMxQuantWithDualAxis,"[[2, 4, 8, 16, 2049]]",['float16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 0, 'dst_type_max': 0.0}","[-50, 50]",alg0-FP8E4M3-fp16-5D-2M-非对齐尾维2049
+10,DynamicMxQuantWithDualAxis,"[[256, 8193]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 35, 'scale_alg': 0, 'dst_type_max': 0.0}","[-500, 500]",alg0-FP8E5M2-bf16-2D-2M-尾维8193非对齐
+11,DynamicMxQuantWithDualAxis,"[[3, 11, 509, 128]]",['float16'],"{'round_mode': 'rint', 'dst_type': 35, 'scale_alg': 0, 'dst_type_max': 0.0}","[-1000, 1000]",alg0-FP8E5M2-fp16-4D-2.1M-质数非对齐
+12,DynamicMxQuantWithDualAxis,"[[128, 16384]]",['float16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 1, 'dst_type_max': 0.0}","[-100, 100]",alg1-FP8E4M3-fp16-2D-2M-大尾维16384-对齐
+13,DynamicMxQuantWithDualAxis,"[[4, 513, 4097]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 35, 'scale_alg': 1, 'dst_type_max': 0.0}","[-500, 500]",alg1-FP8E5M2-bf16-3D-8.4M-非对齐(513x4097)
+14,DynamicMxQuantWithDualAxis,"[[1024, 2048]]",['float16'],"{'round_mode': 'rint', 'dst_type': 35, 'scale_alg': 1, 'dst_type_max': 0.0}","[-1000, 1000]",alg1-FP8E5M2-fp16-2D-2M-极大值域
+15,DynamicMxQuantWithDualAxis,"[[2, 3, 7, 64, 1024]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 1, 'dst_type_max': 0.0}","[-200, 200]",alg1-FP8E4M3-bf16-5D-2.7M
+16,DynamicMxQuantWithDualAxis,"[[512, 2048]]",['float16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 2, 'dst_type_max': 0.0}","[-5, 5]",alg2-FP4E2M1-fp16-2D-1M-dstTypeMax=0.0
+17,DynamicMxQuantWithDualAxis,"[[3, 7, 11, 1022]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 2, 'dst_type_max': 0.0}","[-6, 6]",alg2-FP4E2M1-bf16-4D-236K-非对齐尾维1022
+18,DynamicMxQuantWithDualAxis,"[[64, 128, 1024]]",['float16'],"{'round_mode': 'floor', 'dst_type': 40, 'scale_alg': 2, 'dst_type_max': 0.0}","[-8, 8]",alg2-FP4E2M1-fp16-3D-8M-floor
+19,DynamicMxQuantWithDualAxis,"[[2, 3, 7, 11, 512]]",['bfloat16'],"{'round_mode': 'rint', 'dst_type': 40, 'scale_alg': 0, 'dst_type_max': 0.0}","[0, 0]",边界-全零输入-5D-236K-FP4E2M1
+20,DynamicMxQuantWithDualAxis,"[[1537, 769]]",['float16'],"{'round_mode': 'rint', 'dst_type': 36, 'scale_alg': 0, 'dst_type_max': 0.0}","[-0.001, 0.001]",边界-极小值域-2D-1.2M-非对齐-FP8E4M3

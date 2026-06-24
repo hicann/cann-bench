@@ -1,0 +1,455 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+# ============================================================
+# 4D NCHW - training
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 1
+  input_shape:
+  - [2, 8, 32, 32]
+  - [2, 8, 32, 32]
+  - [8]
+  - [8]
+  - [8]
+  - [8]
+  - [8]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float16-4D-512K-训练-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 2
+  input_shape:
+  - [4, 16, 64, 64]
+  - [4, 16, 64, 64]
+  - [16]
+  - [16]
+  - [16]
+  - [16]
+  - [16]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-2, 2]
+  - [-2, 2]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float32-4D-16M-训练-对齐-对称小值域"
+- operator: BatchNormGradV3
+  case_id: 3
+  input_shape:
+  - [1, 23, 127, 127]
+  - [1, 23, 127, 127]
+  - [23]
+  - [23]
+  - [23]
+  - [23]
+  - [23]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {is_training: false, epsilon: 1.0e-3}
+  value_range:
+  - [-3, 3]
+  - [-3, 3]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-bfloat16-4D-3.7M-推理-质数非对齐-大epsilon"
+# ============================================================
+# 4D NCHW - inference
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 4
+  input_shape:
+  - [8, 32, 128, 128]
+  - [8, 32, 128, 128]
+  - [32]
+  - [32]
+  - [32]
+  - [32]
+  - [32]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float16-4D-128M-推理-对齐-对称中值域"
+- operator: BatchNormGradV3
+  case_id: 5
+  input_shape:
+  - [2, 64, 256, 256]
+  - [2, 64, 256, 256]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: false, epsilon: 1.0e-7}
+  value_range:
+  - [-100, 100]
+  - [-100, 100]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float32-4D-64M-推理-小epsilon-对称大值域"
+# ============================================================
+# 2D NC
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 6
+  input_shape:
+  - [1024, 512]
+  - [1024, 512]
+  - [512]
+  - [512]
+  - [512]
+  - [512]
+  - [512]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NC-float16-2D-1M-训练-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 7
+  input_shape:
+  - [2048, 1023]
+  - [2048, 1023]
+  - [1023]
+  - [1023]
+  - [1023]
+  - [1023]
+  - [1023]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NC-float32-2D-4M-推理-质数非对齐1023"
+# ============================================================
+# 3D NCL
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 8
+  input_shape:
+  - [16, 64, 128]
+  - [16, 64, 128]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCL-float16-3D-2M-训练-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 9
+  input_shape:
+  - [32, 128, 509]
+  - [32, 128, 509]
+  - [128]
+  - [128]
+  - [128]
+  - [128]
+  - [128]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-2, 2]
+  - [-2, 2]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCL-float16-3D-8M-推理-质数非对齐509"
+# ============================================================
+# 5D NCDHW
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 10
+  input_shape:
+  - [2, 8, 16, 16, 16]
+  - [2, 8, 16, 16, 16]
+  - [8]
+  - [8]
+  - [8]
+  - [8]
+  - [8]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCDHW-float16-5D-2M-训练-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 11
+  input_shape:
+  - [1, 16, 32, 32, 32]
+  - [1, 16, 32, 32, 32]
+  - [16]
+  - [16]
+  - [16]
+  - [16]
+  - [16]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCDHW-float32-5D-16M-训练-对齐-小值域"
+# ============================================================
+# 高维 ND (6D/7D/8D)
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 12
+  input_shape:
+  - [2, 4, 8, 8, 8, 8]
+  - [2, 4, 8, 8, 8, 8]
+  - [4]
+  - [4]
+  - [4]
+  - [4]
+  - [4]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "ND-float16-6D-2M-训练-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 13
+  input_shape:
+  - [2, 3, 4, 5, 6, 7, 8]
+  - [2, 3, 4, 5, 6, 7, 8]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "ND-float32-7D-80K-推理-非对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 14
+  input_shape:
+  - [2, 3, 4, 5, 6, 7, 8, 9]
+  - [2, 3, 4, 5, 6, 7, 8, 9]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "ND-float16-8D-360K-训练-非对齐-小值域"
+# ============================================================
+# 边界与特殊 case
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 15
+  input_shape:
+  - [1, 1, 1024, 1024]
+  - [1, 1, 1024, 1024]
+  - [1]
+  - [1]
+  - [1]
+  - [1]
+  - [1]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float16-4D-1M-训练-channel=1"
+- operator: BatchNormGradV3
+  case_id: 16
+  input_shape:
+  - [127, 3, 17, 67]
+  - [127, 3, 17, 67]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  - [3]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-float32-4D-430K-训练-质数维度-小值域"
+- operator: BatchNormGradV3
+  case_id: 17
+  input_shape:
+  - [16, 256, 7, 7]
+  - [16, 256, 7, 7]
+  - [256]
+  - [256]
+  - [256]
+  - [256]
+  - [256]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCHW-bfloat16-4D-1M-推理-小空间维度-大channel"
+- operator: BatchNormGradV3
+  case_id: 18
+  input_shape:
+  - [4, 1024, 2048]
+  - [4, 1024, 2048]
+  - [1024]
+  - [1024]
+  - [1024]
+  - [1024]
+  - [1024]
+  dtype: [float16, float16, float16, float16, float16, float16, float16]
+  attrs: {is_training: true, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCL-float16-3D-32M-训练-大channel-长序列"
+# ============================================================
+# 新增 case：补充未覆盖的 dtype×维度组合
+# ============================================================
+- operator: BatchNormGradV3
+  case_id: 19
+  input_shape:
+  - [2, 64, 16, 16, 16]
+  - [2, 64, 16, 16, 16]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  - [64]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {is_training: false, epsilon: 1.0e-5}
+  value_range:
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCDHW-bfloat16-5D-512K-推理-大channel-对齐-小值域"
+- operator: BatchNormGradV3
+  case_id: 20
+  input_shape:
+  - [8, 256, 512]
+  - [8, 256, 512]
+  - [256]
+  - [256]
+  - [256]
+  - [256]
+  - [256]
+  dtype: [float32, float32, float32, float32, float32, float32, float32]
+  attrs: {is_training: true, epsilon: 1.0e-7}
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-1, 1]
+  - [-1, 1]
+  - [0, 1]
+  - [-1, 1]
+  - [0, 1]
+  note: "NCL-float32-3D-1M-训练-大值域-小epsilon"

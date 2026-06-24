@@ -1,0 +1,75 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: NLLLoss
+  category: Loss
+  difficulty: L2
+  platform: Ascend 950PR / 950DT
+  formula: |
+    When reduction='none':
+      l_n = -w_{y_n} * x_{n, y_n}
+      w_c = weight[c] * 1{c != ignore_index}
+      out = {l_1, ..., l_N}
+    When reduction='mean':
+      out = sum(l_n) / sum(w_{y_n})
+    When reduction='sum':
+      out = sum(l_n)
+    total_weight = sum(w_{y_n}) (valid when reduction != 'none')
+  description: 计算负对数似然损失，输入为 log-probabilities
+  shape_support: |
+    input: (C) or (N, C) or (N, C, d1, d2, ...) - channel_first, C is class dimension
+    target: () or (N) or (N, d1, d2, ...) - class indices in [0, C)
+    weight: (C,)
+  attrs:
+  - name: reduction
+    type: string
+    default: mean
+    description: 损失聚合方式 ('none' | 'mean' | 'sum')
+    required: false
+  - name: ignore_index
+    type: int
+    default: -100
+    description: 忽略的目标标签索引
+    required: false
+  inputs:
+  - name: input
+    description: 输入 log-probabilities 张量
+    dtype:
+    - float32
+    - float16
+    - bfloat16
+  - name: target
+    description: 目标类别索引（hard labels）
+    dtype:
+    - int64
+    - int32
+  - name: weight
+    description: 每个类别的缩放权重
+    dtype:
+    - float32
+    - float16
+    - bfloat16
+  outputs:
+  - name: out
+    description: 损失值（reduction='none' 时 shape 同 target，否则为标量）
+    dtype:
+    - float32
+    - float16
+    - bfloat16
+    compare: true
+  - name: total_weight
+    description: 有效权重之和（reduction='none' 时无意义）
+    dtype:
+    - float32
+    - float16
+    - bfloat16
+    compare: false
+  schema: nll_loss(Tensor input, Tensor target, Tensor weight, str reduction="mean", int ignore_index=-100) -> (Tensor out, Tensor total_weight)

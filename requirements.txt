@@ -11,6 +11,10 @@ numpy>=1.21.0
 
 pyyaml>=6.0
 
+# Mx系列算子 需要 en_dtypes 和 ml_dtypes
+en_dtypes>=0.0.4
+ml_dtypes>=0.5.4
+
 # ==================== 测试框架 ====================
 pytest>=7.0.0
 pytest-timeout>=2.1.0

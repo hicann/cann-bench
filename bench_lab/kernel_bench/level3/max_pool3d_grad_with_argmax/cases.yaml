@@ -1,0 +1,144 @@
+cases:
+- operator: MaxPool3dGradWithArgmax
+  case_id: 1
+  input_shape: [[1, 3, 4, 4, 4], [1, 3, 2, 2, 2], [1, 3, 2, 2, 2]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "basic-fp16-k2s2p0"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 2
+  input_shape: [[2, 8, 8, 8, 8], [2, 8, 4, 4, 4], [2, 8, 4, 4, 4]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "basic-fp32-k2s2p0"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 3
+  input_shape: [[1, 16, 16, 16, 16], [1, 16, 8, 8, 8], [1, 16, 8, 8, 8]]
+  dtype: ['bfloat16', 'bfloat16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "basic-bf16-k2s2p0"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 4
+  input_shape: [[4, 32, 7, 7, 7], [4, 32, 4, 4, 4], [4, 32, 4, 4, 4]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [2, 2, 2], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "k3s2p1-fp16"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 5
+  input_shape: [[1, 64, 14, 14, 14], [1, 64, 7, 7, 7], [1, 64, 7, 7, 7]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [2, 2, 2], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "k3s2p1-fp32"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 6
+  input_shape: [[2, 3, 5, 5, 5], [2, 3, 3, 3, 3], [2, 3, 3, 3, 3]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': True}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "ceil-fp16-k2s2p0"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 7
+  input_shape: [[1, 8, 9, 9, 9], [1, 8, 5, 5, 5], [1, 8, 5, 5, 5]]
+  dtype: ['bfloat16', 'bfloat16', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [2, 2, 2], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': True}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "ceil-bf16-k3s2p1"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 8
+  input_shape: [[2, 4, 6, 6, 6], [2, 4, 5, 5, 5], [2, 4, 5, 5, 5]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [1, 1, 1], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "stride1-fp16"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 9
+  input_shape: [[1, 16, 10, 10, 10], [1, 16, 9, 9, 9], [1, 16, 9, 9, 9]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [1, 1, 1], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': True}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "stride1-fp32-ceil"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 10
+  input_shape: [[3, 32, 8, 8, 8], [3, 32, 8, 8, 8], [3, 32, 8, 8, 8]]
+  dtype: ['bfloat16', 'bfloat16', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [1, 1, 1], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "stride1-bf16-k3"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 11
+  input_shape: [[1, 4, 12, 12, 12], [1, 4, 7, 7, 7], [1, 4, 7, 7, 7]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "p1-fp16-k2s2"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 12
+  input_shape: [[2, 8, 15, 15, 15], [2, 8, 6, 6, 6], [2, 8, 6, 6, 6]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [3, 3, 3], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': True}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "ceil-fp32-k3s3p1"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 13
+  input_shape: [[1, 32, 20, 20, 20], [1, 32, 10, 10, 10], [1, 32, 10, 10, 10]]
+  dtype: ['bfloat16', 'bfloat16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "large-bf16"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 14
+  input_shape: [[4, 16, 5, 5, 5], [4, 16, 5, 5, 5], [4, 16, 5, 5, 5]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [1, 1, 1], 'strides': [1, 1, 1], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "k1-fp16"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 15
+  input_shape: [[1, 3, 32, 32, 32], [1, 3, 16, 16, 16], [1, 3, 16, 16, 16]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "large-fp32"
+# ============================================================
+# 新增 case：补充 dilation、非对称 kernel、k1、大图、小图
+# ============================================================
+- operator: MaxPool3dGradWithArgmax
+  case_id: 16
+  input_shape: [[1, 4, 10, 10, 10], [1, 4, 6, 6, 6], [1, 4, 6, 6, 6]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [1, 1, 1], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "dilation1-fp16-k3s1"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 17
+  input_shape: [[1, 4, 16, 24, 32], [1, 4, 8, 8, 9], [1, 4, 8, 8, 9]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [2, 3, 4], 'strides': [2, 3, 4], 'pads': [0, 1, 2], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "asymmetric-fp32-k234"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 18
+  input_shape: [[2, 8, 8, 8, 8], [2, 8, 8, 8, 8], [2, 8, 8, 8, 8]]
+  dtype: ['bfloat16', 'bfloat16', 'int64']
+  attrs: {'ksize': [1, 1, 1], 'strides': [1, 1, 1], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "k1-bf16-identity"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 19
+  input_shape: [[2, 16, 32, 32, 32], [2, 16, 16, 16, 16], [2, 16, 16, 16, 16]]
+  dtype: ['float16', 'float16', 'int64']
+  attrs: {'ksize': [2, 2, 2], 'strides': [2, 2, 2], 'pads': [0, 0, 0], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "large-fp16-k2s2"
+- operator: MaxPool3dGradWithArgmax
+  case_id: 20
+  input_shape: [[1, 3, 5, 5, 5], [1, 3, 5, 5, 5], [1, 3, 5, 5, 5]]
+  dtype: ['float32', 'float32', 'int64']
+  attrs: {'ksize': [3, 3, 3], 'strides': [1, 1, 1], 'pads': [1, 1, 1], 'dilation': [1, 1, 1], 'ceil_mode': False}
+  value_range: [[-1, 1], [-1, 1], [0, 0]]
+  note: "small-fp32-k3s1p1"

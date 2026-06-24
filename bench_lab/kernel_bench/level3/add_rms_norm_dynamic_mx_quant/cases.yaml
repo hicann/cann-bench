@@ -1,0 +1,169 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+# ============================================================
+# 2D 基础 case
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 1
+  input_shape: [[1024, 1024], [1024, 1024], [1024], [1024]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 36, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-e4m3-2D-1M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 2
+  input_shape: [[2048, 2048], [2048, 2048], [2048], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 35, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e5m2-2D-4M-对齐-无beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 3
+  input_shape: [[512, 512], [512, 512], [512], [512]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 40, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-fp4e2m1-2D-0.25M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 4
+  input_shape: [[1024, 510], [1024, 510], [510], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 41, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "bf16-fp4e1m2-2D-0.5M-非对齐-无beta"
+# ============================================================
+# 3D 基础 case
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 5
+  input_shape: [[4, 512, 1024], [4, 512, 1024], [1024], [1024]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 36, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-e4m3-3D-2M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 6
+  input_shape: [[2, 1024, 2048], [2, 1024, 2048], [2048], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 35, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e5m2-3D-4M-对齐-无beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 7
+  input_shape: [[8, 256, 512], [8, 256, 512], [512], [512]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 40, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-fp4e2m1-3D-1M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 8
+  input_shape: [[2, 1024, 770], [2, 1024, 770], [770], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 41, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "bf16-fp4e1m2-3D-1.5M-非对齐-无beta"
+# ============================================================
+# 参数组合 / scale_alg / round_mode
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 9
+  input_shape: [[256, 128], [256, 128], [128], [128]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 1, round_mode: rint, dst_type: 36, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-e4m3-2D-32K-对齐-有beta-cuBLAS"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 10
+  input_shape: [[4096, 4096], [4096, 4096], [4096], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 35, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e5m2-2D-16M-对齐-无beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 11
+  input_shape: [[1024, 256], [1024, 256], [256], [256]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: floor, dst_type: 40, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-fp4e2m1-2D-0.25M-对齐-有beta-floor"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 12
+  input_shape: [[1024, 766], [1024, 766], [766], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: round, dst_type: 41, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "bf16-fp4e1m2-2D-0.75M-非对齐-无beta-round"
+# ============================================================
+# 更多 3D / 参数组合
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 13
+  input_shape: [[16, 128, 1024], [16, 128, 1024], [1024], [1024]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 36, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-e4m3-3D-2M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 14
+  input_shape: [[4, 1024, 1024], [4, 1024, 1024], [1024], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 1, round_mode: rint, dst_type: 35, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e5m2-3D-4M-对齐-无beta-cuBLAS"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 15
+  input_shape: [[2, 512, 2048], [2, 512, 2048], [2048], [2048]]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 40, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-fp4e2m1-3D-2M-对齐-有beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 16
+  input_shape: [[4, 256, 1024], [4, 256, 1024], [1024], null]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: round, dst_type: 41, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "bf16-fp4e1m2-3D-1M-对齐-无beta-round"
+# ============================================================
+# epsilon / 边界
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 17
+  input_shape: [[2048, 512], [2048, 512], [512], null]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-5, scale_alg: 0, round_mode: rint, dst_type: 36, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-e4m3-2D-1M-对齐-无beta-eps1e-5"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 18
+  input_shape: [[1024, 1024], [1024, 1024], [1024], [1024]]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-4, scale_alg: 0, round_mode: rint, dst_type: 35, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e5m2-2D-1M-对齐-有beta-eps1e-4"
+# ============================================================
+# 大尺寸 / 混合
+# ============================================================
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 19
+  input_shape: [[4096, 2048], [4096, 2048], [2048], null]
+  dtype: [float16, float16, float16, float16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 40, x1_dtype: float16, output_rstd: true}
+  value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1]]
+  note: "fp16-fp4e2m1-2D-8M-对齐-无beta"
+- operator: AddRmsNormDynamicMxQuant
+  case_id: 20
+  input_shape: [[4, 1024, 2048], [4, 1024, 2048], [2048], [2048]]
+  dtype: [bfloat16, bfloat16, bfloat16, bfloat16]
+  attrs: {epsilon: 1.0e-6, scale_alg: 0, round_mode: rint, dst_type: 36, x1_dtype: bfloat16, output_rstd: true}
+  value_range: [[-2, 2], [-2, 2], [-1, 1], [-1, 1]]
+  note: "bf16-e4m3-3D-8M-对齐-有beta"

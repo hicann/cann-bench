@@ -1,0 +1,249 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+# ============================================================
+# 2D 基础对齐 case
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 1
+  input_shape:
+  - [1024, 2048]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-1, 0]
+  - [0, 1024]
+  note: "S-fp16-e5m2-2D-2M-对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 2
+  input_shape:
+  - [2048, 4096]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-2, 0]
+  - [0, 2048]
+  note: "M-bf16-e4m3-2D-8M-对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 3
+  input_shape:
+  - [4096, 4096]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 128, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-3, 0]
+  - [0, 4096]
+  note: "L-fp16-e5m2-2D-16M-对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 4
+  input_shape:
+  - [8192, 4096]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 256, col_block_size: 256, group_list_type: 0}
+  value_range:
+  - [-10, 0]
+  - [0, 8192]
+  note: "L-bf16-e4m3-2D-33M-对齐"
+# ============================================================
+# 3D 基础 case
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 5
+  input_shape:
+  - [4, 1024, 1024]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-50, 0]
+  - [0, 1024]
+  note: "M-fp16-e5m2-3D-4M-对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 6
+  input_shape:
+  - [8, 2048, 1024]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 128, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-100, 0]
+  - [0, 2048]
+  note: "L-bf16-e4m3-3D-16M-对齐"
+# ============================================================
+# 非对齐 / 边界
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 7
+  input_shape:
+  - [1023, 2047]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-0.1, 0]
+  - [0, 1023]
+  note: "S-bf16-e5m2-2D-2M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 8
+  input_shape:
+  - [1009, 1021]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 128, col_block_size: 64, group_list_type: 0}
+  value_range:
+  - [-1, 0]
+  - [0, 1009]
+  note: "S-fp16-e4m3-2D-1M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 9
+  input_shape:
+  - [1537, 768]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 64, group_list_type: 0}
+  value_range:
+  - [-5, 0]
+  - [0, 1537]
+  note: "S-bf16-e5m2-2D-1M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 10
+  input_shape:
+  - [64, 373, 384]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 128, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-50, 0]
+  - [0, 373]
+  note: "M-bf16-e4m3-3D-9M-非对齐"
+# ============================================================
+# 更多 2D/3D 非对齐与 block size 组合
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 11
+  input_shape:
+  - [2049, 512]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 64, group_list_type: 0}
+  value_range:
+  - [-400, 0]
+  - [0, 2049]
+  note: "S-fp16-e5m2-2D-1M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 12
+  input_shape:
+  - [3, 4001, 128]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [-88, 0]
+  - [0, 4001]
+  note: "S-bf16-e4m3-3D-1.5M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 13
+  input_shape:
+  - [11, 67, 128]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 1, col_block_size: 64, group_list_type: 0}
+  value_range:
+  - [-10, 0]
+  - [0, 67]
+  note: "S-fp16-e5m2-3D-0.1M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 14
+  input_shape:
+  - [3, 1013, 128]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 1, col_block_size: 128, group_list_type: 0}
+  value_range:
+  - [0, 0]
+  - [0, 1013]
+  note: "S-bf16-e4m3-3D-0.4M-全零"
+# ============================================================
+# 多 group / min_scale
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 15
+  input_shape:
+  - [4096, 1024]
+  - [3]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.001, round_mode: rint, dst_type: 35, row_block_size: 128, col_block_size: 128, group_list_type: 0, group_list: [1024, 2048, 4096]}
+  value_range:
+  - [-0.5, 0]
+  - [0, 4096]
+  note: "M-fp16-e5m2-2D-4M-多组-min_scale"
+- operator: GroupedDynamicBlockQuant
+  case_id: 16
+  input_shape:
+  - [4097, 1024]
+  - [2]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.5, round_mode: rint, dst_type: 36, row_block_size: 128, col_block_size: 128, group_list_type: 0, group_list: [1000, 4097]}
+  value_range:
+  - [-1000, 0]
+  - [0, 4097]
+  note: "M-bf16-e4m3-2D-4M-多组-非对齐-min_scale"
+- operator: GroupedDynamicBlockQuant
+  case_id: 17
+  input_shape:
+  - [4, 2048, 1024]
+  - [3]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 256, col_block_size: 192, group_list_type: 0, group_list: [512, 1024, 2048]}
+  value_range:
+  - [-20, 0]
+  - [0, 2048]
+  note: "L-fp16-e5m2-3D-8M-多组"
+# ============================================================
+# 额外 block size / dtype 组合
+# ============================================================
+- operator: GroupedDynamicBlockQuant
+  case_id: 18
+  input_shape:
+  - [255, 8192]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 1, col_block_size: 256, group_list_type: 0}
+  value_range:
+  - [-1, 0]
+  - [0, 255]
+  note: "S-bf16-e4m3-2D-2M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 19
+  input_shape:
+  - [4097, 512]
+  - [1]
+  dtype: [float16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 35, row_block_size: 512, col_block_size: 64, group_list_type: 0}
+  value_range:
+  - [-1000, 0]
+  - [0, 4097]
+  note: "S-fp16-e5m2-2D-2M-非对齐"
+- operator: GroupedDynamicBlockQuant
+  case_id: 20
+  input_shape:
+  - [2, 101, 1024]
+  - [1]
+  dtype: [bfloat16, int32]
+  attrs: {min_scale: 0.0, round_mode: rint, dst_type: 36, row_block_size: 1, col_block_size: 256, group_list_type: 0}
+  value_range:
+  - [-20, 0]
+  - [0, 101]
+  note: "S-bf16-e4m3-3D-0.2M-非对齐"

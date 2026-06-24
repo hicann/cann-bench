@@ -1,0 +1,172 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+# ============================================================
+# scale_alg=0 基础共享指数 - FP4_E2M1
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 1
+  input_shape: [[1024, 1024]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-1, 1]
+  note: "alg0-FP4E2M1-fp16-2D-1M-对齐-小值域"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 2
+  input_shape: [[4, 509, 2048]]
+  dtype: [bfloat16]
+  attrs: {round_mode: floor, dst_type: 40, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-6, 6]
+  note: "alg0-FP4E2M1-bf16-3D-4M-质数前维509-floor"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 3
+  input_shape: [[3, 7, 127, 1022]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-2, 2]
+  note: "alg0-FP4E2M1-fp16-4D-2.7M-非对齐(127x1022)"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 4
+  input_shape: [[16, 64, 16384]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-3, 3]
+  note: "alg0-FP4E2M1-fp16-3D-16M-大尾维16384"
+# ============================================================
+# scale_alg=0 基础共享指数 - FP4_E1M2
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 5
+  input_shape: [[64, 8192]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 41, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-1.5, 1.5]
+  note: "alg0-FP4E1M2-fp16-2D-512K-大尾维8192"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 6
+  input_shape: [[2, 3, 7, 11, 512]]
+  dtype: [bfloat16]
+  attrs: {round_mode: round, dst_type: 41, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-1.5, 1.5]
+  note: "alg0-FP4E1M2-bf16-5D-236K-质数前维(3x7x11)-round"
+# ============================================================
+# scale_alg=0 基础共享指数 - FP8_E4M3FN
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 7
+  input_shape: [[32, 16384]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-100, 100]
+  note: "alg0-FP8E4M3-fp16-2D-512K-大尾维16384-对齐"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 8
+  input_shape: [[2, 7, 13, 4097]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-200, 200]
+  note: "alg0-FP8E4M3-bf16-4D-745K-非对齐尾维4097"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 9
+  input_shape: [[2, 4, 8, 16, 2049]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-50, 50]
+  note: "alg0-FP8E4M3-fp16-5D-2M-非对齐尾维2049"
+# ============================================================
+# scale_alg=0 基础共享指数 - FP8_E5M2
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 10
+  input_shape: [[256, 8193]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 35, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-500, 500]
+  note: "alg0-FP8E5M2-bf16-2D-2M-尾维8193非对齐"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 11
+  input_shape: [[3, 11, 509, 128]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 35, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-1000, 1000]
+  note: "alg0-FP8E5M2-fp16-4D-2.1M-质数非对齐"
+# ============================================================
+# scale_alg=1 FP8块缩放
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 12
+  input_shape: [[128, 16384]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 1, dst_type_max: 0.0}
+  value_range: [-100, 100]
+  note: "alg1-FP8E4M3-fp16-2D-2M-大尾维16384-对齐"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 13
+  input_shape: [[4, 513, 4097]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 35, scale_alg: 1, dst_type_max: 0.0}
+  value_range: [-500, 500]
+  note: "alg1-FP8E5M2-bf16-3D-8.4M-非对齐(513x4097)"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 14
+  input_shape: [[1024, 2048]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 35, scale_alg: 1, dst_type_max: 0.0}
+  value_range: [-1000, 1000]
+  note: "alg1-FP8E5M2-fp16-2D-2M-极大值域"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 15
+  input_shape: [[2, 3, 7, 64, 1024]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 1, dst_type_max: 0.0}
+  value_range: [-200, 200]
+  note: "alg1-FP8E4M3-bf16-5D-2.7M"
+# ============================================================
+# scale_alg=2 FP4自定义max（dst_type_max=0.0，使用默认上限）
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 16
+  input_shape: [[512, 2048]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 2, dst_type_max: 0.0}
+  value_range: [-5, 5]
+  note: "alg2-FP4E2M1-fp16-2D-1M-dstTypeMax=0.0"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 17
+  input_shape: [[3, 7, 11, 1022]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 2, dst_type_max: 0.0}
+  value_range: [-6, 6]
+  note: "alg2-FP4E2M1-bf16-4D-236K-非对齐尾维1022"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 18
+  input_shape: [[64, 128, 1024]]
+  dtype: [float16]
+  attrs: {round_mode: floor, dst_type: 40, scale_alg: 2, dst_type_max: 0.0}
+  value_range: [-8, 8]
+  note: "alg2-FP4E2M1-fp16-3D-8M-floor"
+# ============================================================
+# 边界/特殊 case
+# ============================================================
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 19
+  input_shape: [[2, 3, 7, 11, 512]]
+  dtype: [bfloat16]
+  attrs: {round_mode: rint, dst_type: 40, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [0, 0]
+  note: "边界-全零输入-5D-236K-FP4E2M1"
+- operator: DynamicMxQuantWithDualAxis
+  case_id: 20
+  input_shape: [[1537, 769]]
+  dtype: [float16]
+  attrs: {round_mode: rint, dst_type: 36, scale_alg: 0, dst_type_max: 0.0}
+  value_range: [-0.001, 0.001]
+  note: "边界-极小值域-2D-1.2M-非对齐-FP8E4M3"

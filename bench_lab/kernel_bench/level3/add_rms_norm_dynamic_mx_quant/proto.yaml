@@ -1,0 +1,106 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AddRmsNormDynamicMxQuant
+  category: Normalization
+  difficulty: L3
+  platform: Ascend 950PR / 950DT
+  formula: |
+    x = x1 + x2
+    rstd = rsqrt(mean(x^2, axis=-1, keepdim=True) + epsilon)
+    y = x * rstd * gamma + beta
+    y_quant, mxscale = dynamic_mx_quant(y, dst_type, block_size=32)
+  description: 融合 Add、RmsNorm 与 Dynamic MX Quantization，输出量化后的 y、残差 x、mxscale 与 rstd。
+  shape_support: |
+    x1/x2: 2D [M, N] 或 3D [B, M, N]
+    gamma/beta: [N]（对最后一维做 RMS normalization）
+    y: 与 x1 相同 shape（FP8 按 float8_e4m3fn/float8_e5m2 返回；FP4 按 uint8 bit-pattern 返回，每字节存一个 4-bit 量化值）
+    x: 与 x1 相同 shape、相同 dtype
+    mxscale: rank(x1)+1，最后两维为 [ceil(ceil(N/32)/2), 2]
+    rstd: [..., 1]；算子层面由 output_rstd 属性控制是否输出；上层 NPU PTA 接口没有 output_rstd 参数，相应通过将输入 x1/x2 的 requires_grad 置为 True 来对应 output_rstd=true 的训练场景输出
+  attrs:
+  - name: epsilon
+    type: float
+    default: 1e-6
+    description: RMS normalization 稳定系数
+    required: false
+  - name: scale_alg
+    type: int
+    default: 0
+    description: MX scale 计算算法，0=OCP 标准，1=cuBLAS（仅 FP8 有效）
+    required: false
+  - name: round_mode
+    type: str
+    default: "rint"
+    description: 量化舍入模式，支持 rint/floor/round
+    required: false
+  - name: dst_type
+    type: int
+    default: 40
+    description: 量化目标类型，35=FLOAT8_E5M2, 36=FLOAT8_E4M3FN, 40=FLOAT4_E2M1, 41=FLOAT4_E1M2
+    required: false
+  - name: x1_dtype
+    type: str
+    default: "float16"
+    description: x1/x2/gamma 的原始计算 dtype，用于 golden 在 FP64 输入下恢复 NPU 计算精度
+    required: false
+  - name: output_rstd
+    type: bool
+    default: true
+    description: 算子层面控制是否输出 rstd；true 时上层 NPU PTA 接口通过将输入 x1/x2 的 requires_grad 置为 True 来对应输出 rstd，false 时不输出
+    required: false
+  inputs:
+  - name: x1
+    description: 第一个输入张量
+    dtype:
+    - float16
+    - bfloat16
+  - name: x2
+    description: 第二个输入张量，shape 与 x1 相同
+    dtype:
+    - float16
+    - bfloat16
+  - name: gamma
+    description: RMS normalization 缩放系数，shape 为 [N]
+    dtype:
+    - float16
+    - bfloat16
+  - name: beta
+    description: RMS normalization 偏置，shape 与 gamma 相同，可选
+    dtype:
+    - float16
+    - bfloat16
+    optional: true
+  precision_thresholds:
+    uint8: 1
+  outputs:
+  - name: y
+    description: 量化后的输出张量；FP8 按 float8 返回，框架做 bit-exact 对比；FP4 按 uint8 bit-pattern 返回
+    dtype:
+    - float8_e4m3fn
+    - float8_e5m2
+    - float4_e2m1
+    - float4_e1m2
+  - name: x
+    description: 残差 x = x1 + x2，dtype 与 x1 相同
+    dtype:
+    - float16
+    - bfloat16
+  - name: mxscale
+    description: MX 共享 scale，以 FP8_E8M0 bit-pattern 存储，shape 为 rank(x1)+1
+    dtype:
+    - uint8
+  - name: rstd
+    description: RMS 的倒数标准差；算子层面受 output_rstd 属性控制；上层 NPU PTA 接口没有 output_rstd 参数，通过输入 x1/x2 的 requires_grad 来对应，output_rstd=true 时返回有效值，false 时返回空张量
+    dtype:
+    - float32
+    compare: true
+  schema: add_rms_norm_dynamic_mx_quant(Tensor x1, Tensor x2, Tensor gamma, Tensor? beta, float epsilon, int scale_alg, str round_mode, int dst_type, str x1_dtype, bool output_rstd) -> (Tensor y, Tensor x, Tensor mxscale, Tensor rstd)

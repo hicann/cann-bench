@@ -1,0 +1,61 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: ResizeNearestNeighborV2Grad
+  category: Image
+  difficulty: L2
+  platform: Ascend 950PR / 950DT
+  formula: |
+    Given output gradient grads(N, C, H_out, W_out) and original spatial size [H_in, W_in],
+    compute input gradient y(N, C, H_in, W_in) by scattering each output pixel back to its nearest
+    neighbor source pixel:
+      scaleH = H_in / H_out, scaleW = W_in / W_out
+    When half_pixel_centers=false (default):
+      h_src = min(floor(h_out * scaleH), H_in - 1)
+      w_src = min(floor(w_out * scaleW), W_in - 1)
+      y[:, :, h_src, w_src] += grads[:, :, h_out, w_out]
+    When half_pixel_centers=true:
+      h_src = min(floor((h_out + 0.5) * scaleH), H_in - 1)
+      w_src = min(floor((w_out + 0.5) * scaleW), W_in - 1)
+  description: ResizeNearestNeighborV2Grad 算子用于计算最近邻插值上/下采样正向算子的反向传播梯度，将输出空间梯度按最近邻映射关系散射回输入空间并累加。本评测集仅支持 align_corners=false（PyTorch aten 最近邻反向接口无 align_corners 语义）。
+  shape_support: |
+    输入 grads 与输出 y 均为 4D 张量，支持 NCHW 与 NHWC 格式。
+    输入 size 为 1D INT32 张量，长度为 2，表示原始输入图像的高和宽 [H, W]。
+  attrs:
+  - name: half_pixel_centers
+    type: bool
+    default: false
+    description: 是否将像素中心置于半像素坐标，为 true 时映射坐标加 0.5 后再缩放。
+    required: false
+  - name: scales
+    type: list_float
+    default: [0.0, 0.0]
+    description: 空间尺寸乘数 [scaleH, scaleW]，为 [0.0, 0.0] 时由 size 与 grads 尺寸自动推导。
+    required: false
+  inputs:
+  - name: grads
+    description: 正向 ResizeNearestNeighborV2 输出端的梯度 Tensor，shape 为 (N, C, H_out, W_out)。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: size
+    description: 原始输入图像的空间尺寸，INT32 1D Tensor，值为 [H_in, W_in]。
+    dtype:
+    - int32
+  outputs:
+  - name: y
+    description: 正向输入端的梯度 Tensor，shape 为 (N, C, H_in, W_in)。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: resize_nearest_neighbor_v2_grad(Tensor grads, Tensor size, bool half_pixel_centers=false, float[] scales=[0.0, 0.0]) -> Tensor y

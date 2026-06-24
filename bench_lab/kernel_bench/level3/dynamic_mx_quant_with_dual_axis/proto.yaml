@@ -1,0 +1,75 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: DynamicMxQuantWithDualAxis
+  category: Quantization
+  difficulty: L3
+  platform: Ascend 950PR / 950DT
+  formula: |
+    shared_exp1 = floor(log2(max(|V_i|))) - emax;
+    mxscale1 = 2^shared_exp1;
+    P_i = cast(V_i / mxscale1, round_mode)
+    shared_exp2 = floor(log2(max(|V_j|))) - emax;
+    mxscale2 = 2^shared_exp2;
+    P_j = cast(V_j / mxscale2, round_mode)
+  description: 在输入张量的 -1 轴和 -2 轴上同时进行 Microscaling (MX) 动态量化，分别输出两路量化结果及对应的 scale
+  shape_support: 输入支持 2-7D 张量；y1/y2 与输入同 shape；mxscale1/mxscale2 为 rank(x)+1 维张量
+  attrs:
+  - name: round_mode
+    type: str
+    default: rint
+    description: 舍入模式，支持 rint/floor/round；FP8 仅支持 rint
+    required: false
+  - name: dst_type
+    type: int
+    default: 40
+    description: 输出量化类型编码，35=FP8_E5M2, 36=FP8_E4M3FN, 40=FP4_E2M1, 41=FP4_E1M2
+    required: false
+  - name: scale_alg
+    type: int
+    default: 0
+    description: Scale 计算算法，0=基础共享指数(OCP), 1=FP8块缩放(CuBALS), 2=FP4自定义max(当前torch_npu接口未暴露dst_type_max，仅支持默认值0.0)
+    required: false
+  - name: dst_type_max
+    type: float
+    default: 0.0
+    description: 自定义量化范围上限，仅 scale_alg=2 时有效；当前 NPU Python 接口未透传该参数，默认 0.0
+    required: false
+  inputs:
+  - name: x
+    description: 输入张量，2-7 维；FP4 输出时最后一维必须为偶数
+    dtype:
+    - float16
+    - bfloat16
+  outputs:
+  - name: y1
+    description: -1 轴量化后的输出张量，与输入同 shape（FP4 时最后一维打包为 uint8）
+    dtype:
+    - float8_e5m2
+    - float8_e4m3fn
+    - float4_e2m1
+    - float4_e1m2
+  - name: mxscale1
+    description: -1 轴量化 scale 张量，dtype 为 FP8_E8M0，shape 为 rank(x)+1 维
+    dtype:
+    - float8_e8m0
+  - name: y2
+    description: -2 轴量化后的输出张量，与输入同 shape（FP4 时最后一维打包为 uint8）
+    dtype:
+    - float8_e5m2
+    - float8_e4m3fn
+    - float4_e2m1
+    - float4_e1m2
+  - name: mxscale2
+    description: -2 轴量化 scale 张量，dtype 为 FP8_E8M0，shape 为 rank(x)+1 维
+    dtype:
+    - float8_e8m0
+  schema: dynamic_mx_quant_with_dual_axis(Tensor x, str round_mode="rint", int dst_type=40, int scale_alg=0, float dst_type_max=0.0) -> (Tensor y1, Tensor mxscale1, Tensor y2, Tensor mxscale2)

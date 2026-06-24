@@ -16,6 +16,7 @@
 - 支持 ND 格式输入，1-7 维
 - 支持 3 种 scale 计算算法（scaleAlg=0/1/2），4 种目标量化格式，3 种舍入模式
 - 分组量化：按 blocksize 将指定轴切分为若干 block，每个 block 独立计算 scale
+- 支持硬件：Ascend 950PR / 950DT
 
 ## 2. 算子定义
 

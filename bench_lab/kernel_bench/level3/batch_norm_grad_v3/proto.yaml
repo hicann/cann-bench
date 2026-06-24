@@ -1,0 +1,102 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: BatchNormGradV3
+  category: Normalization
+  difficulty: L3
+  platform: Ascend 950PR / 950DT
+  formula: |
+    When is_training=true:
+      gradInput = weight / (n * sqrt(saveVar + eps)) * (n * gradOut - sum(gradOut) - (x - saveMean) / sqrt(saveVar + eps) * sum(gradOut * (x - saveMean) / sqrt(saveVar + eps)))
+      gradWeight = sum(gradOut * (x - saveMean)) / sqrt(saveVar + eps)
+      gradBias = sum(gradOut)
+    When is_training=false:
+      gradInput = gradOut * weight / sqrt(runningVar + eps)
+      gradWeight = sum(gradOut * (x - runningMean)) / sqrt(runningVar + eps)
+      gradBias = sum(gradOut)
+  description: BatchNormGradV3 算子用于计算 BatchNorm 前向的反向传播梯度，包括输入梯度、缩放参数梯度和偏置参数梯度。
+  shape_support: |
+    输入 grad_out / x / dx 支持 2-8D 张量（NC / NCL / NCHW / NCDHW / ND 等），
+    weight / running_mean / running_var / save_mean / save_invstd / dweight / dbias 为 1D，长度等于 channel 轴大小。
+  attrs:
+  - name: is_training
+    type: bool
+    default: true
+    description: 是否训练场景，true 使用 saveMean/saveInvstd 计算，false 使用 runningMean/runningVar 计算。
+    required: false
+  - name: epsilon
+    type: float
+    default: 1.0e-5
+    description: 添加到方差中的极小值，防止除零。
+    required: false
+  inputs:
+  - name: grad_out
+    description: 正向输出的梯度 Tensor，对应公式中的 gradOut。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: x
+    description: 正向输入 Tensor，对应公式中的 x。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: weight
+    description: 缩放权重 Tensor，对应公式中的 weight。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: running_mean
+    description: 训练期间累积的均值 Tensor，推理场景使用。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: running_var
+    description: 训练期间累积的方差 Tensor，推理场景使用。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: save_mean
+    description: 前向保存的均值 Tensor，训练场景使用。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: save_invstd
+    description: 前向保存的标准差倒数 Tensor，训练场景使用。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  outputs:
+  - name: dx
+    description: 输入 x 的梯度 Tensor，对应公式中的 gradInput。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: dweight
+    description: 权重 weight 的梯度 Tensor，对应公式中的 gradWeight。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: dbias
+    description: 偏置的梯度 Tensor，对应公式中的 gradBias。
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  schema: batch_norm_grad_v3(Tensor grad_out, Tensor x, Tensor weight, Tensor running_mean, Tensor running_var, Tensor save_mean, Tensor save_invstd, bool is_training=True, float epsilon=1e-5) -> (Tensor dx, Tensor dweight, Tensor dbias)

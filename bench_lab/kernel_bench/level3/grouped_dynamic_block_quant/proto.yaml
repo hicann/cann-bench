@@ -1,0 +1,81 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: GroupedDynamicBlockQuant
+  category: Quantization
+  difficulty: L3
+  platform: Ascend 950PR / 950DT
+  formula: |
+    input_max = block_reduce_max(abs(input))
+    scale = min(input_max / FP8_MAX, 1 / min_scale)
+    y = cast_to_[HiF8/FP8](input / scale)
+  description: 根据 group_list 对输入按 block 粒度进行分组动态量化，输出量化张量 y 与反量化系数 scale。
+  shape_support: |
+    x: 2D [M, N] 或 3D [B, M, N]
+    group_list: 1D  cumsum 数组，最后一个元素等于 x 的 -2 轴大小
+    scaleOut: [M // row_block_size + groupNum, ceil(N / col_block_size)]（2D 时）或 [B, M // row_block_size + groupNum, ceil(N / col_block_size)]（3D 时）
+  attrs:
+  - name: min_scale
+    type: float
+    default: 0.0
+    description: 参与 scale 计算的最小 scale 值，要求大于等于 0
+    required: false
+  - name: round_mode
+    type: str
+    default: "rint"
+    description: 目标类型的近似模式；FP8 仅支持 rint，HIFLOAT8 支持 round/hybrid
+    required: false
+  - name: dst_type
+    type: int
+    default: 35
+    description: 输出 y 的数据类型，34=HIFLOAT8, 35=FLOAT8_E5M2, 36=FLOAT8_E4M3FN
+    required: false
+  - name: row_block_size
+    type: int
+    default: 1
+    description: M 轴量化粒度，当前支持 1/128/256/512
+    required: false
+  - name: col_block_size
+    type: int
+    default: 128
+    description: N 轴量化粒度，当前支持 64/128/192/256
+    required: false
+  - name: group_list_type
+    type: int
+    default: 0
+    description: group_list 格式，当前仅支持 0（cumsum）
+    required: false
+  inputs:
+  - name: x
+    description: 待量化输入张量
+    dtype:
+    - float16
+    - bfloat16
+  - name: group_list
+    description: M 轴上每个 group 的结束偏移（cumsum 模式）
+    dtype:
+    - int32
+  precision_thresholds:
+    float8_e5m2: 2.5e-1
+    float8_e4m3fn: 1.25e-1
+    hifloat8: 1.0
+  outputs:
+  - name: y
+    description: 量化后的输出张量，shape 与 x 相同
+    dtype:
+    - hifloat8
+    - float8_e4m3fn
+    - float8_e5m2
+  - name: scale
+    description: 每个分组的量化尺度（FP32）
+    dtype:
+    - float32
+  schema: grouped_dynamic_block_quant(Tensor x, Tensor group_list, float min_scale, str round_mode, int dst_type, int row_block_size, int col_block_size, int group_list_type) -> (Tensor y, Tensor scale)

@@ -2,6 +2,7 @@ operator:
   name: DynamicMxQuant
   category: Quantization
   difficulty: L3
+  platform: Ascend 950PR / 950DT
   formula: |
     shared_exp = floor(log2(max(|V_i|))) - emax;
     mxscale = 2^shared_exp;
