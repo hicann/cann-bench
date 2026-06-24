@@ -350,15 +350,10 @@ class PackageManager:
 
             # 执行安装：
             #   --quiet        静默安装
-            #   --force        跳过共享库验证（兜底措施：当 libcust_opapi.so 的 ELF NEEDED
-            #                  链缺少 libopapi.so 时，验证器单独加载 libcust_opapi.so 无法
-            #                  解析 l0op::Contiguous 等内置符号。正常情况下 CMakeLists.txt
-            #                  应显式声明 opapi 为 NEEDED 依赖，使验证可通过；此 --force
-            #                  仅作兜底，覆盖不含该修复的第三方包）
             #   --install-path OPP 根目录，触发生成 set_env.bash（含 LD_LIBRARY_PATH 等环境变量）
             abs_run_path = str(run_file.resolve())
             result = subprocess.run(
-                [abs_run_path, "--quiet", "--force",
+                [abs_run_path, "--quiet",
                  f"--install-path={opp_path}"],
                 cwd=str(run_file.parent),
                 capture_output=True,

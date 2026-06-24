@@ -47,7 +47,7 @@ from src.kernel_eval.eval.subprocess_utils import (
     _synthesize_failure_cases,
     _try_recover_partial_results,
 )
-from src.kernel_eval.eval.results import EvalOperatorResult, EvalCaseResult, summarize_case_results
+from src.kernel_eval.eval.results import EvalCaseResult, summarize_case_results
 from src.kernel_eval.benches import CannCaseSpec
 from src.kernel_eval.config import Config
 
@@ -345,6 +345,26 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
         device_idx = cmd.index("--device-id") + 1
         self.assertEqual(cmd[device_idx], "3")
+
+    def test_build_child_cmd_passes_tasks_root(self):
+        """eval-child 应接收 tasks_root，避免 full rel_path 被重复拼接"""
+        self.base_config.tasks_root = "/tmp/tasks"
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=ProcessConfig(enable_profiler=False),
+            device_id=0,
+        )
+        task = TaskUnit(
+            operator="Exp",
+            rel_path="level1/exp",
+            cases=[make_case("Exp", 1, rel_path="level1/exp")],
+            device_id=0,
+        )
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
+
+        task_dir_idx = cmd.index("--task-dir")
+        self.assertEqual(cmd[task_dir_idx + 1], "/tmp/tasks")
+        self.assertNotIn("/tmp/tasks/level1/exp", cmd)
 
 
 class TestSubprocessUtils(unittest.TestCase):

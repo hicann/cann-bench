@@ -323,11 +323,7 @@ class ProcessPoolCoordinator:
         # task-dir 透传
         tasks_root = getattr(self.base_config, "tasks_root", "")
         if tasks_root:
-            candidate = Path(tasks_root) / task.rel_path
-            if candidate.exists():
-                cmd += ["--task-dir", str(candidate)]
-            else:
-                cmd += ["--task-dir", str(tasks_root)]
+            cmd += ["--task-dir", str(tasks_root)]
 
         # source-dir 透传（Stanford bench 等需要在子进程中加载 ai_op.py）
         source_dir = getattr(self.base_config, "source_dir", "") or ""

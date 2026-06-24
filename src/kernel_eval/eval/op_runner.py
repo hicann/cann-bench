@@ -173,7 +173,13 @@ class OpRunner:
             guard_mode = getattr(self.perf_evaluator.config, 'torch_op_guard_mode', 'block')
 
         from ..security.torch_op_guard import TorchOpGuard
-        with TorchOpGuard(mode=guard_mode):
+        from ..security.device_residency_guard import DeviceResidencyGuard
+        # 设备驻留守卫：拦"在 CPU 上算完、再把结果拷回 NPU"的作弊（成块 NPU→CPU 外流）。
+        # H2D（搬输入/权重上卡）方向相反、天然忽略，不会误伤正常加载。
+        drg_mode = guard_mode
+        if self.perf_evaluator is not None:
+            drg_mode = getattr(self.perf_evaluator.config, 'device_residency_guard_mode', guard_mode)
+        with TorchOpGuard(mode=guard_mode), DeviceResidencyGuard(mode=drg_mode):
             # 如果需要性能采集且evaluator可用，临时启用
             if enable_perf and self.perf_evaluator:
                 return self.run(ai_op_func, params, case_id, input_tensors,

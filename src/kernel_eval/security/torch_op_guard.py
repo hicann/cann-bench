@@ -122,6 +122,71 @@ _LEAF_TO_CANONICAL: dict = {
 }
 
 
+# ── Dispatch 层（ATen）计算算子黑名单 ────────────────────────────────────────
+# 上面的 ``BUILTIN_COMPUTE_OPS`` 经 ``TorchFunctionMode`` 拦截，**只能看到 Python 侧**
+# 发起的调用。被测算子的 C++ 插件直接调 ``torch::matmul`` / ``torch::topk`` /
+# ``torch::softmax`` 走 ATen C++ dispatcher，**不经过 __torch_function__**，因此 Python
+# 黑名单对其完全无效（见 issue #47 / #48 的「漏洞 B」）。
+#
+# ``DeviceResidencyGuard`` 用 ``TorchDispatchMode`` 在 **ATen 派发层** 拦截——无论调用
+# 从 Python 还是 C++ 发起，都会经过这里。下表收录的是各被测算子「核心计算」对应的
+# aten 叶子；候选算子若直接命中其一，等价于把计算甩给内置算子。
+#
+# 设计取舍（重要）：只收「明显承担核心计算」的算子——matmul/卷积/softmax/attention/
+# norm/激活/topk-sort。**刻意不收** gather/where/max/min/abs/pow/mean/sqrt/arange 等
+# 通用原语：它们是合法 AscendC kernel 的 host 侧 glue、golden 参考实现、以及 harness
+# 自身（如 ReduceMax 清 L2 cache）都会大量使用，在派发层无差别拉黑会造成严重误伤。
+ATEN_COMPUTE_LEAVES: Set[str] = {
+    # matmul 家族（torch::matmul 视输入维度分解为 mm/bmm/addmm/baddbmm）
+    "mm", "bmm", "addmm", "baddbmm", "addbmm", "matmul", "mv", "addmv", "dot",
+    "einsum", "tensordot", "linear",
+    # 卷积
+    "convolution", "_convolution", "conv1d", "conv2d", "conv3d",
+    "conv_transpose1d", "conv_transpose2d", "conv_transpose3d",
+    "_conv_depthwise2d", "slow_conv_transpose2d", "slow_conv_transpose3d",
+    # softmax / attention
+    "softmax", "_softmax", "log_softmax", "_log_softmax",
+    "scaled_dot_product_attention",
+    "_scaled_dot_product_flash_attention", "_scaled_dot_product_efficient_attention",
+    "_scaled_dot_product_attention_math",
+    # norm
+    "layer_norm", "native_layer_norm", "group_norm", "native_group_norm",
+    "batch_norm", "native_batch_norm", "rms_norm", "_fused_rms_norm",
+    # 激活（与上面 Python 黑名单的 silu/gelu/relu 对齐）
+    "silu", "gelu", "glu", "relu",
+    # 排序/选择（#47/#48 实证：TopK split 模式用 torch::topk + torch::gather 做合并；
+    # topk/sort 是 TopK/Sort 算子的核心计算，候选不应直接调内置 aten 版本）
+    "topk", "sort",
+}
+
+
+def aten_compute_leaf(func) -> Optional[str]:
+    """若 ``func`` 是 **ATen 命名空间** 下的内置计算算子，返回其规约叶子名；否则 None。
+
+    用于 ``TorchDispatchMode`` 派发层：``func`` 是 ``OpOverload``，``func._schema.name``
+    形如 ``"aten::mm"`` / ``"aten::topk"``（overload 后缀在 ``__name__`` 上，如
+    ``"mm.default"``）。C++ 发起的 ``torch::matmul`` 同样在此可见。
+
+    **只对 ``aten::`` 命名空间生效**——提交的自定义 AscendC kernel 注册在自有命名空间
+    （如 ``cann_bench::`` / PrivateUse1），其 ``_schema.name`` 不以 ``aten::`` 开头，
+    绝不会被误判为作弊。
+    """
+    schema = getattr(func, "_schema", None)
+    name = getattr(schema, "name", "") if schema is not None else ""
+    if name:
+        if "::" in name:
+            ns, leaf = name.split("::", 1)
+        else:
+            ns, leaf = "aten", name
+    else:
+        # 无 schema 的兜底：用 __name__（形如 "mm.default"），保守按 aten 处理。
+        ns, leaf = "aten", (getattr(func, "__name__", "") or "")
+    leaf = leaf.split(".", 1)[0]
+    if ns != "aten" or not leaf:
+        return None
+    return leaf if leaf in ATEN_COMPUTE_LEAVES else None
+
+
 def _should_normalize_leaf(mod: str, qualname: str) -> bool:
     """Return whether a leaf op name belongs to PyTorch builtin dispatch.
 

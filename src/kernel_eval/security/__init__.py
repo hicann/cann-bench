@@ -32,6 +32,9 @@
 
 from .api_guard import APIGuard, snapshot_timing_apis, verify_timing_apis, restore_timing_apis
 from .type_checker import check_output_type, check_tensor_validity
+from .device_residency_guard import (
+    DeviceResidencyGuard, DeviceEgressError, BuiltinComputeError,
+)
 
 __all__ = [
     "APIGuard",
@@ -40,4 +43,7 @@ __all__ = [
     "restore_timing_apis",
     "check_output_type",
     "check_tensor_validity",
+    "DeviceResidencyGuard",
+    "DeviceEgressError",
+    "BuiltinComputeError",
 ]
