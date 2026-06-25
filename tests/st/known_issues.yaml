@@ -12,3 +12,14 @@
 - {op: StridedSlice, case: 14, action: xfail-perf, target: golden, reason: "shrink+小输出,物化走 DMA(非 AiCore),profiler 采不到"}
 - {op: StridedSlice, case: 18, action: xfail-perf, target: golden, reason: "shrink+小输出,物化走 DMA(非 AiCore),profiler 采不到"}
 - {op: StridedSlice, case: 19, action: xfail-perf, target: golden, reason: "shrink+小输出,物化走 DMA(非 AiCore),profiler 采不到"}
+
+# GRU:NPU 的 DynamicGRUV2 算子只支持 fp16(weight 需 DT_FLOAT16)。fp32(case 1/4)与
+# bfloat16(case 3/9/13/17)在 NPU 上 Unsupported_Operator(EZ3002)直接崩,无法作为候选评测
+# (任何真实 npu_gru 候选同样跑不了)。golden 本身正确(14 个 fp16 case q7 实测误差 ~5e-4 ≪ 0.05)。
+# 故 skip 这 6 个 fp32/bf16 case;14 个 fp16 case 正常计量。
+- {op: GRU, case: 1, action: skip-hang, target: golden, reason: "fp32:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
+- {op: GRU, case: 4, action: skip-hang, target: golden, reason: "fp32:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
+- {op: GRU, case: 3, action: skip-hang, target: golden, reason: "bf16:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
+- {op: GRU, case: 9, action: skip-hang, target: golden, reason: "bf16:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
+- {op: GRU, case: 13, action: skip-hang, target: golden, reason: "bf16:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
+- {op: GRU, case: 17, action: skip-hang, target: golden, reason: "bf16:NPU DynamicGRUV2 仅支持 fp16,EZ3002 不支持"}
