@@ -221,11 +221,12 @@ def moe_finalize_routing(
 
             value = expanded_src_to_dst_row[index_pos].item()
 
-            # drop pad 模式：索引为 -1 时贡献为 0
+            # drop pad 模式：索引为 -1 表示该 token 被丢弃，该位置整项贡献为 0（含 bias，
+            # 见上文“处理流程”第 2 步）。被丢弃的 token 未经过该专家的 FFN，故 bias 也不计入。
             if value == -1:
-                dst_row = torch.zeros(H, dtype=expanded_permuted_rows.dtype, device=expanded_permuted_rows.device)
-            else:
-                dst_row = expanded_permuted_rows[value, :]
+                continue
+
+            dst_row = expanded_permuted_rows[value, :]
 
             # 获取缩放因子
             scale_val = 1.0

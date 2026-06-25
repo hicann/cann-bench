@@ -149,6 +149,14 @@ def moe_finalize_routing(
                 bias_row[~valid_e] = 0
             term = dst_row + bias_row
 
+        # A dropped (-1) token must contribute NOTHING — not even bias. The real
+        # MoeFinalizeRoutingV2 kernel skips the whole term for a -1 row; the previous
+        # golden zeroed only dst_row but still added scale*bias here, so every
+        # drop_pad case with an occasional -1 index diverged from the kernel (q7
+        # probe: golden with this line == V2 kernel bit-exact, max_diff=0). valid is
+        # (num_rows,), so this also zeros the bias part for dropped rows.
+        term[~valid] = 0
+
         if scales is not None:
             out = out + scales[:, k][:, None] * term
         else:
