@@ -115,3 +115,55 @@ def sparse_flash_attention(
         return out.permute(0, 2, 1, 3)   # [B, S1, N1, Dv]
     else:
         return out                        # [B, N1, S1, Dv]
+
+
+def get_input(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    sparseIndices: torch.Tensor,
+    scaleValue: float = 1.0,
+    inputLayout: str = "BSND",
+    is_causal: bool = False,
+    **kwargs,
+):
+    """重建两个结构化输入，满足本算子的契约（同时替换 golden 与候选输入，比较公平）。
+
+    单区间 value_range 无法表达两条契约：
+      1. sparseIndices 在同一 (b, n2, s1) 下必须是 [0, S2) 内**无重复**的 topK 个索引
+         （golden 用 scatter 建 mask，重复会塌缩成更少的 True；见 golden 注释 L32/L95）。
+         通用生成器按 value_range 填随机 int，既越界又大量重复 -> mask 与 kernel 的
+         gather 语义不一致 -> 整体发散。
+      2. value 与 key 数值同源：value == key[..., :Dv]（同一份 latent KV cache 的前缀
+         视图，proto L? 明示；Dk==Dv 时退化为 value==key）。通用生成器给的是无关随机张量。
+
+    这里据 key/value/sparseIndices 的实际形状（不写死，覆盖 BSND/BNSD、GQA、Dk!=Dv）
+    重生成这两者；query、key 原样保留。索引不做排序（保持与 golden 的 scatter 语义一致，
+    无序无重复即可）。
+
+    Returns:
+        [query, key, value, sparseIndices]，顺序与 sparse_flash_attention 签名一致。
+    """
+    # S2 sits on a different axis per layout (BSND key dim1, BNSD key dim2)
+    S2 = int(key.shape[1] if inputLayout == "BSND" else key.shape[2])
+    Dv = int(value.shape[-1])
+
+    # contract 2: value must be key's [:Dv] prefix view (same latent KV cache, not independent)
+    new_value = key[..., :Dv].clone().to(dtype=value.dtype, device=value.device)
+
+    # contract 1: golden's scatter mask collapses duplicate indices -> they must be distinct
+    lead = list(sparseIndices.shape[:-1])
+    topK = int(sparseIndices.shape[-1])
+    num_groups = 1
+    for d in lead:
+        num_groups *= int(d)
+    k = min(topK, S2)
+    g = torch.Generator().manual_seed(0)  # fixed seed: must be reproducible across eval runs
+    # argsort of random == permutation; first k are distinct (order irrelevant to scatter)
+    perm = torch.rand(num_groups, S2, generator=g).argsort(dim=1)
+    sel = perm[:, :k]
+    if k < topK:  # topK > S2 (degenerate): can't draw enough distinct -> pad with last col
+        sel = torch.cat([sel, sel[:, -1:].expand(num_groups, topK - k)], dim=1)
+    new_si = sel.reshape(*lead, topK).to(dtype=sparseIndices.dtype, device=sparseIndices.device)
+
+    return [query, key, new_value, new_si]
