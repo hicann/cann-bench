@@ -45,6 +45,10 @@ from ..base.models import TaskSpec, CaseSpec
 from ..utils.device_manager import DeviceManager, DeviceConfig
 from ..utils.param_builder import ParamBuilder
 from ..utils.tensor_utils import tensors_to_cpu, tensors_to_fp64_cpu
+from ..base.result import (
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    get_accuracy_failure_type,
+)
 from .op_runner import OpRunner, OpRunResult
 from .accuracy_eval import AccuracyEvaluator, AccuracyResult
 from .perf_eval import PerfEvaluator, PerfResult
@@ -239,6 +243,7 @@ class Evaluator:
                     error_msg=self._format_run_failure("Golden执行失败", golden_result),
                     baseline_perf_us=case.baseline_perf_us,
                     t_hw_us=case.t_hw_us,
+                    failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                 )
 
             # 5. 确定使用的 AI 算子函数
@@ -258,6 +263,7 @@ class Evaluator:
                         error_msg=f"AI算子加载失败: {load_err}",
                         baseline_perf_us=case.baseline_perf_us,
                         t_hw_us=case.t_hw_us,
+                        failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                     )
 
             # 6. 执行AI算子（profiler 一次运行同时提供输出和性能数据，避免跑两遍）
@@ -278,6 +284,7 @@ class Evaluator:
                     error_msg=self._format_run_failure("AI算子执行失败", ai_result),
                     baseline_perf_us=case.baseline_perf_us,
                     t_hw_us=case.t_hw_us,
+                    failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                 )
 
             # 7. 精度对比（使用与性能采集同一次运行的输出）
@@ -381,6 +388,7 @@ class Evaluator:
                 error_msg=error_msg,
                 baseline_perf_us=case.baseline_perf_us,
                 t_hw_us=case.t_hw_us,
+                failure_type=get_accuracy_failure_type(accuracy_result),
             )
 
         except Exception as e:
@@ -393,6 +401,7 @@ class Evaluator:
                 case_num=case.case_id,
                 success=False,
                 error_msg=f"评测异常: {type(e).__name__}: {e}\n{tb_str.rstrip()}",
+                failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
             )
 
     def evaluate_operator(self, operator: str, rel_path: str, case_filter: Dict = None) -> EvalOperatorResult:

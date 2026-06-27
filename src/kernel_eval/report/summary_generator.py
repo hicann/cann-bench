@@ -28,6 +28,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
+from ..base.result import is_compile_runtime_case_failure
 from .scoring import (
     WEIGHT_COMPILATION,
     WEIGHT_FUNCTION,
@@ -52,6 +53,7 @@ class OperatorSummary:
     # bench.tex 三轴得分（0-100 量纲）
     compile_passed: bool = False
     compilation_score: float = 0.0
+    compile_runtime_fail_cases: int = 0
     function_score: float = 0.0
     performance_score: float = 0.0
     composite_score: float = 0.0  # EachOperatorScore，常规区间 [0, 100]；T_cand<T_HW 时可 >100（不截断）
@@ -130,9 +132,12 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
 
     case_scores: List = []
     n_no_perf_pass = 0
+    n_compile_runtime_fail = 0
     for case in cases:
         success = case.get("success", case.get("status") == "success")
         if not success:
+            if is_compile_runtime_case_failure(case):
+                n_compile_runtime_fail += 1
             case_scores.append((False, None))
             continue
         perf = case.get("perf") or {}
@@ -152,10 +157,12 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
         case_scores=case_scores,
         rel_path=rel_path,
         n_no_perf_pass=n_no_perf_pass,
+        n_compile_runtime_fail=n_compile_runtime_fail,
     )
     return {
         "compile_passed": compile_passed,
         "compilation_score": agg["compilation_score"],
+        "compile_runtime_fail_cases": agg.get("n_compile_runtime_fail", 0),
         "function_score": agg["function_score"],
         "performance_score": agg["performance_score"],
         "composite_score": agg["total_score"],
@@ -224,6 +231,7 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
         mare_avg=mare_avg,
         compile_passed=scores["compile_passed"],
         compilation_score=scores["compilation_score"],
+        compile_runtime_fail_cases=scores["compile_runtime_fail_cases"],
         function_score=scores["function_score"],
         performance_score=scores["performance_score"],
         composite_score=scores["composite_score"],
@@ -344,7 +352,7 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
     # 各算子结果
     lines.append("## 算子详情")
     lines.append("")
-    lines.append("| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 综合得分 | 编译 | 功能 | 性能 | 几何加速比 |")
+    lines.append("| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 综合得分 | 编译/运行 | 精度 | 性能 | 几何加速比 |")
     lines.append("|------|------|--------|------|------|--------|----------|------|------|------|-----------|")
 
     for op in summary.operators:

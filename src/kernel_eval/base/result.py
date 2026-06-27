@@ -29,6 +29,39 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type
 
 
+FAILURE_TYPE_PRECISION_MISMATCH = "precision_mismatch"
+FAILURE_TYPE_COMPILE_RUNTIME_ERROR = "compile_runtime_error"
+
+PRECISION_FAILURE_TYPES = {
+    FAILURE_TYPE_PRECISION_MISMATCH,
+    "precision",
+}
+
+COMPILE_RUNTIME_FAILURE_TYPES = {
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    "runtime_error",
+    "interface_error",
+    "golden_error",
+    "timeout",
+    "subprocess_failure",
+    "oom_killed",
+    "cascade_device",
+    "skipped",
+}
+
+STRUCTURAL_FAILURE_MARKERS = (
+    "输出数量不匹配",
+    "同精度输出数量不匹配",
+    "形状不匹配",
+    "shape mismatch",
+    "is None",
+    "AI算子执行失败",
+    "TypeError:",
+    "RuntimeError:",
+    "ValueError:",
+)
+
+
 # === 输出结果注册表 ===
 
 _OUTPUT_RESULT_REGISTRY: Dict[str, Type[OutputResult]] = {}
@@ -166,6 +199,94 @@ class AccuracyResult:
         for r in self.output_results:
             lines.append(f"  - {r.format_summary()}")
         return "\n".join(lines)
+
+
+def get_accuracy_failure_type(accuracy_result: Optional[AccuracyResult]) -> Optional[str]:
+    """Classify a failed accuracy result for scoring.
+
+    Only true numerical precision mismatches keep the compile/runtime component.
+    Structural/interface failures during the precision stage, such as wrong
+    output count or shape, are scored as compile/runtime errors.
+    """
+    if accuracy_result is None or accuracy_result.passed:
+        return None
+
+    metadata = accuracy_result.metadata or {}
+    explicit = metadata.get("failure_type")
+    if explicit:
+        return str(explicit)
+
+    messages = []
+    if accuracy_result.error_msg:
+        messages.append(str(accuracy_result.error_msg))
+    for output in accuracy_result.output_results or []:
+        if getattr(output, "error_msg", None):
+            messages.append(str(output.error_msg))
+        output_metadata = getattr(output, "metadata", None) or {}
+        output_failure_type = output_metadata.get("failure_type")
+        if output_failure_type:
+            return str(output_failure_type)
+
+    joined = "\n".join(messages)
+    if any(marker in joined for marker in STRUCTURAL_FAILURE_MARKERS):
+        return FAILURE_TYPE_COMPILE_RUNTIME_ERROR
+
+    return FAILURE_TYPE_PRECISION_MISMATCH
+
+
+def is_precision_failure_type(failure_type: Optional[str]) -> bool:
+    return str(failure_type or "") in PRECISION_FAILURE_TYPES
+
+
+def is_compile_runtime_failure_type(failure_type: Optional[str]) -> bool:
+    return str(failure_type or "") in COMPILE_RUNTIME_FAILURE_TYPES
+
+
+def is_compile_runtime_case_failure(case_result: Any) -> bool:
+    """Return True when a failed case should deduct compile/runtime score."""
+    if getattr(case_result, "success", False):
+        return False
+
+    failure_type = getattr(case_result, "failure_type", None)
+    if failure_type:
+        return not is_precision_failure_type(failure_type)
+
+    accuracy_result = getattr(case_result, "accuracy_result", None)
+    if accuracy_result is None and isinstance(case_result, dict):
+        accuracy_result = case_result.get("accuracy")
+        failure_type = case_result.get("failure_type")
+        if failure_type:
+            return not is_precision_failure_type(failure_type)
+
+    if isinstance(accuracy_result, dict):
+        if accuracy_result.get("passed"):
+            return False
+        metadata = accuracy_result.get("metadata") or {}
+        explicit = metadata.get("failure_type") or accuracy_result.get("failure_type")
+        if explicit:
+            return not is_precision_failure_type(str(explicit))
+        messages = [
+            str(accuracy_result.get("error_msg") or ""),
+            str(case_result.get("error_msg") or ""),
+        ]
+        for output in accuracy_result.get("output_results") or []:
+            if isinstance(output, dict):
+                if output.get("failure_type"):
+                    return not is_precision_failure_type(str(output.get("failure_type")))
+                metadata = output.get("metadata")
+                if isinstance(metadata, dict) and metadata.get("failure_type"):
+                    return not is_precision_failure_type(str(metadata.get("failure_type")))
+                messages.append(str(output.get("error_msg") or ""))
+        joined = "\n".join(messages)
+        if any(marker in joined for marker in STRUCTURAL_FAILURE_MARKERS):
+            return True
+        return False
+
+    classified = get_accuracy_failure_type(accuracy_result)
+    if classified:
+        return not is_precision_failure_type(classified)
+
+    return True
 
 
 # === 性能结果 ===

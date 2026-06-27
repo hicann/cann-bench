@@ -13,7 +13,11 @@ from typing import Any, Callable, Dict, List, Optional
 import torch
 
 from ..base.models import CaseSpec
-from ..base.result import AccuracyResult
+from ..base.result import (
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    get_accuracy_failure_type,
+    AccuracyResult,
+)
 from ..registry.golden_registry import get_golden_loader
 from ..utils import str_to_torch_dtype
 from ..utils.compare import compare_tensors
@@ -121,6 +125,7 @@ class MC2DistributedEvaluator:
                 error_msg=f"MC2 distributed evaluation failed: {error_msg}",
                 baseline_perf_us=case.baseline_perf_us,
                 t_hw_us=case.t_hw_us,
+                failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
             )
 
         rank_results.sort(key=lambda item: int(item.get("rank", 0)))
@@ -210,6 +215,7 @@ class MC2DistributedEvaluator:
             error_msg=None if passed else accuracy_result.error_msg,
             baseline_perf_us=baseline_perf_us,
             t_hw_us=case.t_hw_us,
+            failure_type=get_accuracy_failure_type(accuracy_result),
         )
 
 

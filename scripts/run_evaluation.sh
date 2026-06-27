@@ -38,6 +38,7 @@ CASE_ID=""
 DEVICE_ID=""  # 空表示多卡模式，指定值表示单卡模式
 VERBOSE=false
 ACTION="eval"
+STAGED_EVAL=true
 
 # 多进程并行配置（统一架构）
 PROCESSES_PER_CARD=2
@@ -100,6 +101,7 @@ print_help() {
     echo "  --profiler-level <level>  Profiler 级别: Level1, Level2（默认: Level1）"
     echo "  --eval-seed <n>           输入生成确定性种子（默认: 0 = 自动确定性）。"
     echo "                            改变种子可获得不同但可复现的输入。-1 表示纯随机。"
+    echo "  --single-pass             使用旧的一体化 eval 流程（默认使用编译/精度/性能三阶段）"
     echo ""
     echo "其他选项:"
     echo "  -v, --verbose             详细输出"
@@ -228,6 +230,14 @@ while [[ $# -gt 0 ]]; do
             EVAL_SEED="$2"
             shift 2
             ;;
+        --single-pass)
+            STAGED_EVAL=false
+            shift
+            ;;
+        --staged)
+            STAGED_EVAL=true
+            shift
+            ;;
         -v|--verbose)
             VERBOSE=true
             shift
@@ -310,7 +320,11 @@ build_cmd_args() {
 
     case "${ACTION}" in
         eval)
-            CMD_ARGS="eval"
+            if [[ "${STAGED_EVAL}" == true && "${BENCH_NAME}" == "cann" && "${DEVICE_TYPE:-npu}" == "npu" ]]; then
+                CMD_ARGS="staged-eval"
+            else
+                CMD_ARGS="eval"
+            fi
             # 评测集名称（必须传递）
             CMD_ARGS="${CMD_ARGS} --bench-name ${BENCH_NAME}"
             # 报告目录（按 bench_name 分目录）
@@ -341,6 +355,8 @@ build_cmd_args() {
             fi
 
             # 性能配置
+            CMD_ARGS="${CMD_ARGS} --processes-per-card ${PROCESSES_PER_CARD}"
+            CMD_ARGS="${CMD_ARGS} --timeout-per-operator ${TIMEOUT_PER_PROCESS}"
             CMD_ARGS="${CMD_ARGS} --warmup ${WARMUP}"
             CMD_ARGS="${CMD_ARGS} --repeat ${REPEAT}"
             CMD_ARGS="${CMD_ARGS} --profiler-level ${PROFILER_LEVEL}"
@@ -359,7 +375,9 @@ build_cmd_args() {
             export TASKS_TIMEOUT_PER_PROCESS="${TIMEOUT_PER_PROCESS}"
 
             if [[ "${VERBOSE}" == true ]]; then
-                CMD_ARGS="${CMD_ARGS} -v"
+                if [[ "${CMD_ARGS}" == eval* ]]; then
+                    CMD_ARGS="${CMD_ARGS} -v"
+                fi
             fi
             ;;
         list)
@@ -394,7 +412,11 @@ build_cmd_args() {
 # 执行命令
 run_cmd() {
     CMD_ARGS="$1"
-    PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.cli ${CMD_ARGS}
+    if [[ "${CMD_ARGS}" == staged-eval* ]]; then
+        PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.staged_eval ${CMD_ARGS#staged-eval}
+    else
+        PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.cli ${CMD_ARGS}
+    fi
 }
 
 # 主函数
@@ -473,11 +495,20 @@ main() {
         if [[ "${NO_PERF}" == true ]]; then
             log_info "性能采集: 关闭（仅精度验证）"
         fi
+        if [[ "${STAGED_EVAL}" == true && "${BENCH_NAME}" == "cann" && "${DEVICE_TYPE:-npu}" == "npu" ]]; then
+            log_info "评测模式: 编译/精度/性能三阶段"
+        else
+            log_info "评测模式: 单次 eval"
+        fi
     fi
 
     log_info "开始执行..."
     CMD_ARGS=$(build_cmd_args)
-    log_info "命令: python -m kernel_eval.cli ${CMD_ARGS}"
+    if [[ "${CMD_ARGS}" == staged-eval* ]]; then
+        log_info "命令: python -m kernel_eval.staged_eval ${CMD_ARGS#staged-eval}"
+    else
+        log_info "命令: python -m kernel_eval.cli ${CMD_ARGS}"
+    fi
 
     if run_cmd "${CMD_ARGS}"; then
         log_success "执行完成"

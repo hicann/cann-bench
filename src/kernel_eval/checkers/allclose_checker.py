@@ -26,7 +26,13 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..base.checker import CorrectnessChecker
-from ..base.result import OutputResult, AccuracyResult, register_output_result
+from ..base.result import (
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    FAILURE_TYPE_PRECISION_MISMATCH,
+    OutputResult,
+    AccuracyResult,
+    register_output_result,
+)
 
 
 @dataclass
@@ -124,7 +130,11 @@ class AllCloseChecker(CorrectnessChecker):
         if len(ai_list) != len(golden_list):
             return AccuracyResult(
                 passed=False,
-                error_msg=f"输出数量不匹配: ai={len(ai_list)}, golden={len(golden_list)}"
+                error_msg=f"输出数量不匹配: ai={len(ai_list)}, golden={len(golden_list)}",
+                metadata={
+                    'checker_name': 'allclose',
+                    'failure_type': FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+                },
             )
 
         # 获取阈值
@@ -133,6 +143,7 @@ class AllCloseChecker(CorrectnessChecker):
 
         results: List[AllCloseOutputResult] = []
         all_passed = True
+        structural_failure = False
 
         for i, (ai, golden) in enumerate(zip(ai_list, golden_list)):
             # 检查是否需要忽略
@@ -158,9 +169,14 @@ class AllCloseChecker(CorrectnessChecker):
                     dtype=dtype,
                     passed=False,
                     error_msg=f"形状不匹配: ai={ai_cpu.shape}, golden={golden_cpu.shape}",
-                    metadata={'atol': atol, 'rtol': rtol},
+                    metadata={
+                        'atol': atol,
+                        'rtol': rtol,
+                        'failure_type': FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+                    },
                 ))
                 all_passed = False
+                structural_failure = True
                 continue
 
             # 使用 allclose
@@ -201,6 +217,11 @@ class AllCloseChecker(CorrectnessChecker):
                 'mismatch_count': agg_mismatch_count,
                 'total_count': agg_total_count,
                 'mismatch_ratio': agg_mismatch_ratio,
+                'failure_type': (
+                    None if all_passed else
+                    FAILURE_TYPE_COMPILE_RUNTIME_ERROR if structural_failure else
+                    FAILURE_TYPE_PRECISION_MISMATCH
+                ),
             },
         )
 

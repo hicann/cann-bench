@@ -109,6 +109,11 @@ class OperatorReport:
     pass_rate: float = 0.0
     avg_speedup: float = 0.0
     score: float = 0.0
+    compilation_score: float = 0.0
+    compile_runtime_score: float = 0.0
+    compile_runtime_fail_cases: int = 0
+    function_score: float = 0.0
+    performance_score: float = 0.0
     cases: List[EvalResult] = field(default_factory=list)
     # 透传 EvalOperatorResult 上的诊断字段到最终报告；summary_generator
     # 读这两个字段渲染"编译失败"和"子进程失败"的分组。
@@ -139,6 +144,11 @@ class OperatorReport:
             pass_rate=result.pass_rate,
             avg_speedup=result.avg_speedup,
             score=score,
+            compilation_score=score_info.compilation_score if score_info else 0.0,
+            compile_runtime_score=score_info.compilation_score if score_info else 0.0,
+            compile_runtime_fail_cases=score_info.compile_runtime_fail_cases if score_info else 0,
+            function_score=score_info.function_score if score_info else 0.0,
+            performance_score=score_info.performance_score if score_info else 0.0,
             cases=cases,
             compilation_error=getattr(result, 'compilation_error', None),
             subprocess_failure_reason=getattr(result, 'subprocess_failure_reason', None),
@@ -341,6 +351,9 @@ class ReportGenerator:
                 f"| 失败数 | {op_report.failed_cases} |",
                 f"| 通过率 | {op_report.pass_rate:.2%} |",
                 f"| 平均加速比 | {op_report.avg_speedup:.2f}x |",
+                f"| 编译/运行得分 | {op_report.compile_runtime_score:.2f} |",
+                f"| 精度得分 | {op_report.function_score:.2f} |",
+                f"| 性能得分 | {op_report.performance_score:.2f} |",
                 f"| 得分 | {op_report.score:.2f} |",
                 f"",
             ])

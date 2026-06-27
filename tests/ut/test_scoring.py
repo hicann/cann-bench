@@ -21,6 +21,10 @@ Eq.5 (calculate_overall_score / calculate_level_score)。
 
 import pytest
 
+from kernel_eval.base.result import (
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    FAILURE_TYPE_PRECISION_MISMATCH,
+)
 from kernel_eval.eval.results import EvalCaseResult, EvalOperatorResult
 from kernel_eval.eval.perf_eval import PerfResult
 from kernel_eval.report.report_generator import OperatorReport
@@ -35,6 +39,7 @@ from kernel_eval.report.scoring import (
     aggregate_eq4,
     per_case_sol_score,
 )
+from kernel_eval.report.summary_generator import calculate_operator_summary
 
 
 class TestPerCaseSolScore:
@@ -143,6 +148,27 @@ class TestAggregateEq4:
         assert agg["function_score"] == pytest.approx(2 * WEIGHT_FUNCTION / 5 * 100)
         assert agg["performance_score"] == pytest.approx(2 * WEIGHT_PERFORMANCE / 5 * 100)
 
+    def test_compile_runtime_failures_deduct_compile_runtime_per_case(self):
+        agg = aggregate_eq4(
+            compile_passed=True,
+            total_cases=5,
+            case_scores=[(True, 1.0), (False, None), (False, None),
+                         (False, None), (False, None)],
+            n_compile_runtime_fail=2,
+        )
+        assert agg["compilation_score"] == pytest.approx(3 * WEIGHT_COMPILATION / 5 * 100)
+        assert agg["n_compile_runtime_fail"] == 2
+
+    def test_precision_failures_do_not_deduct_compile_runtime_score(self):
+        agg = aggregate_eq4(
+            compile_passed=True,
+            total_cases=5,
+            case_scores=[(True, 1.0), (False, None), (False, None),
+                         (False, None), (False, None)],
+            n_compile_runtime_fail=0,
+        )
+        assert agg["compilation_score"] == pytest.approx(WEIGHT_COMPILATION * 100)
+
     def test_cand_below_hw_inflates_score_above_100(self):
         # T_cand < T_HW 时 score_i > 1，总分可超过 100
         agg = aggregate_eq4(
@@ -157,12 +183,13 @@ class TestScoringCalculator:
     """ScoringCalculator.calculate_operator_score 与 dict 路径一致性"""
 
     @staticmethod
-    def _make_case(success, baseline_us, t_hw, elapsed_us):
+    def _make_case(success, baseline_us, t_hw, elapsed_us, failure_type=None):
         perf = PerfResult(elapsed_us=elapsed_us, metadata={'baseline_us': baseline_us, 't_hw_us': t_hw}) if elapsed_us else None
         return EvalCaseResult(
             case_id="c", rel_path="level1/exp", operator="Exp",
             case_num=0, success=success, perf_result=perf,
             baseline_perf_us=baseline_us, t_hw_us=t_hw,
+            failure_type=failure_type,
         )
 
     def test_all_pass(self):
@@ -245,6 +272,34 @@ class TestScoringCalculator:
         assert info.function_score == 0.0
         assert info.performance_score == 0.0
 
+    def test_runtime_case_failure_deducts_compile_runtime_component(self):
+        cases = [
+            self._make_case(True, 100, 50, 50),
+            self._make_case(False, 100, 50, 0, FAILURE_TYPE_COMPILE_RUNTIME_ERROR),
+        ]
+        op = EvalOperatorResult(
+            rel_path="level1/exp", operator="Exp",
+            total_cases=2, passed_cases=1, failed_cases=1, skipped_cases=0,
+            results=cases, pass_rate=0.5, avg_speedup=1.0,
+        )
+        info = ScoringCalculator().calculate_operator_score(op)
+        assert info.compile_runtime_fail_cases == 1
+        assert info.compilation_score == pytest.approx(WEIGHT_COMPILATION / 2 * 100)
+
+    def test_precision_case_failure_keeps_compile_runtime_component(self):
+        cases = [
+            self._make_case(True, 100, 50, 50),
+            self._make_case(False, 100, 50, 0, FAILURE_TYPE_PRECISION_MISMATCH),
+        ]
+        op = EvalOperatorResult(
+            rel_path="level1/exp", operator="Exp",
+            total_cases=2, passed_cases=1, failed_cases=1, skipped_cases=0,
+            results=cases, pass_rate=0.5, avg_speedup=1.0,
+        )
+        info = ScoringCalculator().calculate_operator_score(op)
+        assert info.compile_runtime_fail_cases == 0
+        assert info.compilation_score == pytest.approx(WEIGHT_COMPILATION * 100)
+
     def test_subprocess_failed_zeroes_compilation_score(self):
         """子进程失败的算子不应获得编译分"""
         cases = [self._make_case(True, 100, 50, 50)]
@@ -260,6 +315,132 @@ class TestScoringCalculator:
         assert info.function_score == 0.0
         assert info.performance_score == 0.0
         assert info.total_score == 0.0
+
+
+class TestSummaryDictScoring:
+    def test_json_summary_counts_compile_runtime_failures(self):
+        summary = calculate_operator_summary({
+            "operator": "Exp",
+            "rel_path": "level1/exp",
+            "total_cases": 2,
+            "passed_cases": 1,
+            "cases": [
+                {
+                    "status": "success",
+                    "baseline_perf_us": 100,
+                    "t_hw_us": 50,
+                    "elapsed_us": 50,
+                },
+                {
+                    "status": "failed",
+                    "failure_type": FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+                    "accuracy": None,
+                },
+            ],
+        })
+        assert summary.compile_runtime_fail_cases == 1
+        assert summary.compilation_score == pytest.approx(WEIGHT_COMPILATION / 2 * 100)
+
+    def test_json_summary_classifies_runtime_error_without_explicit_failure_type(self):
+        summary = calculate_operator_summary({
+            "operator": "Exp",
+            "rel_path": "level1/exp",
+            "total_cases": 2,
+            "passed_cases": 1,
+            "cases": [
+                {
+                    "status": "success",
+                    "baseline_perf_us": 100,
+                    "t_hw_us": 50,
+                    "elapsed_us": 50,
+                },
+                {
+                    "status": "failed",
+                    "accuracy": {
+                        "passed": False,
+                        "error_msg": "RuntimeError: dtype unsupported",
+                    },
+                },
+            ],
+        })
+        assert summary.compile_runtime_fail_cases == 1
+        assert summary.compilation_score == pytest.approx(WEIGHT_COMPILATION / 2 * 100)
+
+    def test_json_summary_classifies_ai_execution_failure_without_explicit_failure_type(self):
+        summary = calculate_operator_summary({
+            "operator": "Exp",
+            "rel_path": "level1/exp",
+            "total_cases": 2,
+            "passed_cases": 1,
+            "cases": [
+                {
+                    "status": "success",
+                    "baseline_perf_us": 100,
+                    "t_hw_us": 50,
+                    "elapsed_us": 50,
+                },
+                {
+                    "status": "failed",
+                    "error_msg": "AI算子执行失败: npuSynchronizeDevice failed",
+                    "accuracy": {"passed": False},
+                },
+            ],
+        })
+        assert summary.compile_runtime_fail_cases == 1
+        assert summary.compilation_score == pytest.approx(WEIGHT_COMPILATION / 2 * 100)
+
+    def test_json_summary_classifies_shape_mismatch_without_explicit_failure_type(self):
+        summary = calculate_operator_summary({
+            "operator": "DynamicQuant",
+            "rel_path": "level2/dynamic_quant",
+            "total_cases": 2,
+            "passed_cases": 1,
+            "cases": [
+                {
+                    "status": "success",
+                    "baseline_perf_us": 100,
+                    "t_hw_us": 50,
+                    "elapsed_us": 50,
+                },
+                {
+                    "status": "failed",
+                    "accuracy": {
+                        "passed": False,
+                        "output_results": [
+                            {"passed": False, "error_msg": "形状不匹配: output=torch.Size([1022]), golden=torch.Size([2, 511])"}
+                        ],
+                    },
+                },
+            ],
+        })
+        assert summary.compile_runtime_fail_cases == 1
+        assert summary.compilation_score == pytest.approx(WEIGHT_COMPILATION / 2 * 100)
+
+    def test_json_summary_keeps_compile_runtime_for_precision_failures(self):
+        summary = calculate_operator_summary({
+            "operator": "Exp",
+            "rel_path": "level1/exp",
+            "total_cases": 2,
+            "passed_cases": 1,
+            "cases": [
+                {
+                    "status": "success",
+                    "baseline_perf_us": 100,
+                    "t_hw_us": 50,
+                    "elapsed_us": 50,
+                },
+                {
+                    "status": "failed",
+                    "failure_type": FAILURE_TYPE_PRECISION_MISMATCH,
+                    "accuracy": {
+                        "passed": False,
+                        "metadata": {"failure_type": FAILURE_TYPE_PRECISION_MISMATCH},
+                    },
+                },
+            ],
+        })
+        assert summary.compile_runtime_fail_cases == 0
+        assert summary.compilation_score == pytest.approx(WEIGHT_COMPILATION * 100)
 
 
 class TestLevelAndOverallScores:

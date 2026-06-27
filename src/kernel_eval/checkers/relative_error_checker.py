@@ -37,7 +37,14 @@ from typing import Any, Dict, List, Optional, Union
 import torch
 
 from ..base.checker import CorrectnessChecker
-from ..base.result import OutputResult, AccuracyResult, register_output_result
+from ..base.result import (
+    FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    FAILURE_TYPE_PRECISION_MISMATCH,
+    STRUCTURAL_FAILURE_MARKERS,
+    OutputResult,
+    AccuracyResult,
+    register_output_result,
+)
 from ..utils.compare import compare_tensors, SingleOutputResult
 
 
@@ -161,6 +168,20 @@ def _convert_to_output_result(sr: SingleOutputResult) -> RelativeErrorOutputResu
     )
 
 
+def _classify_compare_failure(error_msg: Optional[str], output_results: List[RelativeErrorOutputResult]) -> str:
+    messages = [error_msg or ""]
+    for output in output_results:
+        messages.append(output.error_msg or "")
+        failure_type = (output.metadata or {}).get("failure_type")
+        if failure_type:
+            return str(failure_type)
+
+    joined = "\n".join(messages)
+    if any(marker in joined for marker in STRUCTURAL_FAILURE_MARKERS):
+        return FAILURE_TYPE_COMPILE_RUNTIME_ERROR
+    return FAILURE_TYPE_PRECISION_MISMATCH
+
+
 class RelativeErrorChecker(CorrectnessChecker):
     """相对误差精度判断器
 
@@ -219,7 +240,12 @@ class RelativeErrorChecker(CorrectnessChecker):
             output_results.append(RelativeErrorOutputResult(
                 index=0, dtype=dtype, passed=False,
                 error_msg=compare_result.error_msg,
+                metadata={'failure_type': FAILURE_TYPE_COMPILE_RUNTIME_ERROR},
             ))
+
+        failure_type = None
+        if not compare_result.passed:
+            failure_type = _classify_compare_failure(compare_result.error_msg, output_results)
 
         # 聚合指标存入 metadata
         metadata = {
@@ -239,6 +265,7 @@ class RelativeErrorChecker(CorrectnessChecker):
             'cancel_total_count': compare_result.cancel_total_count,
             'small_value_passed': compare_result.small_value_passed,
             'cancel_passed': compare_result.cancel_passed,
+            'failure_type': failure_type,
         }
 
         return AccuracyResult(

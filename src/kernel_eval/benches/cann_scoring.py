@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..base.scoring import ScoringScheme, CaseScoreInfo
-from ..base.result import PerfResult
+from ..base.result import PerfResult, is_compile_runtime_case_failure
 from ..eval.results import EvalOperatorResult  # 直接导入模块，避免循环导入
 
 
@@ -58,7 +58,7 @@ NO_NPU_PERF_ERROR = "未检测到 NPU 算子执行，疑似 CPU fallback，反�
 class OperatorScoreInfo:
     """算子级得分信息（per operator）
 
-    包含编译/功能/性能三轴得分，以及 per-case 调试用分数列表。
+    包含编译/运行、精度、性能三轴得分，以及 per-case 调试用分数列表。
     """
 
     operator: str = ""
@@ -70,10 +70,11 @@ class OperatorScoreInfo:
     total_cases: int = 0
     # bench.tex 三轴得分（已按 w_c/w_f/w_p 加权后的贡献，并已归一化到 0-100 量纲）
     compilation_score: float = 0.0
+    compile_runtime_fail_cases: int = 0
     function_score: float = 0.0
     performance_score: float = 0.0
     total_score: float = 0.0  # 单算子综合得分，[0, 100]
-    # 调试用：每个用例的 hardware-anchored 分数，None 表示数据不全或未通过功能门
+    # 调试用：每个用例的 hardware-anchored 分数，None 表示数据不全或未通过精度门
     per_case_scores: List[Optional[float]] = field(default_factory=list)
     score_error_code: Optional[str] = None
     score_error: Optional[str] = None
@@ -89,6 +90,8 @@ class OperatorScoreInfo:
             'passed_cases': self.passed_cases,
             'total_cases': self.total_cases,
             'compilation_score': self.compilation_score,
+            'compile_runtime_score': self.compilation_score,
+            'compile_runtime_fail_cases': self.compile_runtime_fail_cases,
             'function_score': self.function_score,
             'performance_score': self.performance_score,
             'total_score': self.total_score,
@@ -223,14 +226,14 @@ def _warn_denom_nonpositive(
 def _warn_perf_anchor_missing(
     n_func_pass: int, n_perf_missing: int, rel_path: Optional[str] = None
 ) -> None:
-    """通知调用者：功能通过的 case 中有 N 个缺基线/T_HW 锚点，按 §3.3 计为 0 性能分。"""
+    """通知调用者：精度通过的 case 中有 N 个缺基线/T_HW 锚点，按 §3.3 计为 0 性能分。"""
     key = (rel_path, n_func_pass, n_perf_missing)
     if key in _PERF_MISSING_WARNED_RUN:
         return
     _PERF_MISSING_WARNED_RUN.add(key)
     op_prefix = f"[{rel_path}] " if rel_path else ""
     _logger.warning(
-        "%saggregate_eq4: %d / %d 个功能通过的 case 缺 baseline_perf_us / t_hw_us 锚点，"
+        "%saggregate_eq4: %d / %d 个精度通过的 case 缺 baseline_perf_us / t_hw_us 锚点，"
         "按 spec §3.3 按 0 计入性能项。若分数偏低，请先核查这些 case 的基线是否已填充。",
         op_prefix, n_perf_missing, n_func_pass,
     )
@@ -242,14 +245,14 @@ _NO_NPU_PERF_WARNED_RUN: set = set()
 def _warn_no_npu_perf(
     n_func_pass: int, n_no_perf_pass: int, rel_path: Optional[str] = None
 ) -> None:
-    """功能通过但 profiler 没有采到 NPU kernel 时间，整算子置 0 分。"""
+    """精度通过但 profiler 没有采到 NPU kernel 时间，整算子置 0 分。"""
     key = (rel_path, n_func_pass, n_no_perf_pass)
     if key in _NO_NPU_PERF_WARNED_RUN:
         return
     _NO_NPU_PERF_WARNED_RUN.add(key)
     op_prefix = f"[{rel_path}] " if rel_path else ""
     _logger.warning(
-        "%saggregate_eq4: %d / %d 个功能通过的 case 未检测到 NPU 算子性能数据，"
+        "%saggregate_eq4: %d / %d 个精度通过的 case 未检测到 NPU 算子性能数据，"
         "疑似 CPU fallback 或未执行提交的 NPU kernel，整算子按 0 分处理。",
         op_prefix, n_no_perf_pass, n_func_pass,
     )
@@ -266,10 +269,12 @@ def aggregate_eq4(
     wp: float = WEIGHT_PERFORMANCE,
     rel_path: Optional[str] = None,
     n_no_perf_pass: int = 0,
+    n_compile_runtime_fail: int = 0,
 ) -> Dict[str, Any]:
     """Eq.4 单算子综合分聚合——单一事实来源。
 
-    EachOperatorScore = [ w_c·δ_pass + Σ_i δ_acc,i (w_f + w_p·score_i) / N ] · 100
+    EachOperatorScore =
+        [ w_c·δ_compile_runtime + Σ_i δ_acc,i (w_f + w_p·score_i) / N ] · 100
     """
     delta_pass = 1 if compile_passed else 0
     n_func_pass = 0
@@ -305,12 +310,16 @@ def aggregate_eq4(
             "per_case_scores": per_case_scores,
             "n_func_pass": n_func_pass,
             "n_no_perf_pass": n_no_perf_pass,
+            "n_compile_runtime_fail": n_compile_runtime_fail,
             "score_error_code": NO_NPU_PERF_ERROR_CODE,
             "score_error": NO_NPU_PERF_ERROR,
             "zeroed_by_no_npu_perf": True,
         }
 
-    compilation_score = wc * delta_pass * 100.0
+    compile_runtime_pass_cases = 0
+    if compile_passed and total_cases > 0:
+        compile_runtime_pass_cases = max(total_cases - n_compile_runtime_fail, 0)
+    compilation_score = (compile_runtime_pass_cases * wc / total_cases) * 100.0 if total_cases > 0 else 0.0
     function_score = (n_func_pass * wf / total_cases) * 100.0
     performance_score = (perf_score_sum * wp / total_cases) * 100.0
     total_score = compilation_score + function_score + performance_score
@@ -323,6 +332,7 @@ def aggregate_eq4(
         "per_case_scores": per_case_scores,
         "n_func_pass": n_func_pass,
         "n_no_perf_pass": n_no_perf_pass,
+        "n_compile_runtime_fail": n_compile_runtime_fail,
         "score_error_code": None,
         "score_error": None,
         "zeroed_by_no_npu_perf": False,
@@ -371,8 +381,11 @@ class ScoringCalculator:
 
         case_scores: List[Tuple[bool, Optional[float]]] = []
         n_no_perf_pass = 0
+        n_compile_runtime_fail = 0
         for case in result.results:
             if not case.success:
+                if is_compile_runtime_case_failure(case):
+                    n_compile_runtime_fail += 1
                 case_scores.append((case.success, None))
                 continue
             if case.perf_result is None or case.perf_result.elapsed_us <= 0:
@@ -394,6 +407,7 @@ class ScoringCalculator:
             wc=self.wc, wf=self.wf, wp=self.wp,
             rel_path=result.rel_path,
             n_no_perf_pass=n_no_perf_pass,
+            n_compile_runtime_fail=n_compile_runtime_fail,
         )
 
         return OperatorScoreInfo(
@@ -405,6 +419,7 @@ class ScoringCalculator:
             passed_cases=result.passed_cases,
             total_cases=total_cases,
             compilation_score=agg["compilation_score"],
+            compile_runtime_fail_cases=agg.get("n_compile_runtime_fail", 0),
             function_score=agg["function_score"],
             performance_score=agg["performance_score"],
             total_score=agg["total_score"],
@@ -468,9 +483,10 @@ class ScoringCalculator:
             'pass_rate': score_info.pass_rate,
             'avg_speedup': score_info.avg_speedup,
             'compilation_score': {
-                'formula': 'w_c · δ_pass · 100',
+                'formula': 'w_c · (N - compile_runtime_fail_cases) / N · 100',
                 'weight': self.wc,
                 'delta_pass': 1 if score_info.compile_passed else 0,
+                'compile_runtime_fail_cases': score_info.compile_runtime_fail_cases,
                 'score': score_info.compilation_score,
             },
             'function_score': {

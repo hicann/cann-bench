@@ -63,8 +63,8 @@
 
 本评测体系用于量化评估 AI 生成的 Ascend C 算子代码质量，涵盖三个核心维度：
 
-- **编译正确性**：算子代码能否成功编译链接
-- **功能正确性**：算子输出与 Golden 结果的精度偏差
+- **编译/运行正确性**：算子代码能否成功编译链接，并在用例上按接口约定运行
+- **精度正确性**：算子输出与 Golden 结果的数值精度偏差
 - **性能优化性**：生成算子与基准性能的比例
 
 详细设计请参阅 [benchmark_spec.md](spec/benchmark_spec.md) 和 [evaluator_design.md](design/evaluator_design.md)。
