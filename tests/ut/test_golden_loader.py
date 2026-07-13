@@ -183,3 +183,47 @@ class TestGoldenLoaderGetByOperatorName:
             loader = GoldenLoader(bench_root=str(td))
             with pytest.raises(ImportError):
                 loader.get_golden_by_operator_name("NonExistent")
+
+
+class TestGoldenLoaderOracleBenchHooks:
+    """get_oracle_function / get_bench_function 可选钩子（<op>_oracle / <op>_bench）"""
+
+    def _make_loader(self, td, golden_src):
+        root = Path(td)
+        level_dir = root / "level1" / "myop"
+        level_dir.mkdir(parents=True)
+        (level_dir / "proto.yaml").write_text(
+            "operator:\n  name: MyOp\n  schema: my_op(Tensor a) -> Tensor\n",
+            encoding="utf-8",
+        )
+        (level_dir / "golden.py").write_text(golden_src, encoding="utf-8")
+        return GoldenLoader(bench_root=str(root))
+
+    def test_oracle_and_bench_present(self):
+        src = (
+            "def my_op(a):\n    return a\n"
+            "def my_op_oracle(a):\n    return a + 1\n"
+            "def my_op_bench(a):\n    return a + 2\n"
+        )
+        with tempfile.TemporaryDirectory() as td:
+            loader = self._make_loader(td, src)
+            oracle = loader.get_oracle_function("level1/myop")
+            bench = loader.get_bench_function("level1/myop")
+            assert oracle is not None and oracle(0) == 1
+            assert bench is not None and bench(0) == 2
+
+    def test_absent_returns_none(self):
+        src = "def my_op(a):\n    return a\n"  # no _oracle / _bench
+        with tempfile.TemporaryDirectory() as td:
+            loader = self._make_loader(td, src)
+            assert loader.get_oracle_function("level1/myop") is None
+            assert loader.get_bench_function("level1/myop") is None
+
+    def test_required_raises_when_absent(self):
+        src = "def my_op(a):\n    return a\n"
+        with tempfile.TemporaryDirectory() as td:
+            loader = self._make_loader(td, src)
+            with pytest.raises(AttributeError):
+                loader.get_oracle_function("level1/myop", required=True)
+            with pytest.raises(AttributeError):
+                loader.get_bench_function("level1/myop", required=True)

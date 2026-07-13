@@ -229,12 +229,14 @@ class Evaluator:
                 params = self.param_builder.build_call_params(golden_func, case, input_tensors)
 
             # 4. 执行Golden函数获取参考结果（精度策略由 golden_precision 控制）
+            # oracle (g)：优先 op 的 <op>_oracle 钩子（dtype-agnostic 真值），否则回退 golden。
+            oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
             golden_inputs = self._apply_golden_precision(input_tensors)
             if get_input_func is not None:
                 golden_params = params
             else:
-                golden_params = self.param_builder.build_call_params(golden_func, case, golden_inputs)
-            golden_result = self.op_runner.run(golden_func, golden_params, case_id_str,
+                golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
+            golden_result = self.op_runner.run(oracle_func, golden_params, case_id_str,
                                                golden_inputs, to_device=self._get_golden_to_device(),
                                                enable_profiler=False)  # Golden 不启用 profiler
             if not golden_result.success:
@@ -302,12 +304,14 @@ class Evaluator:
             if golden_strategy in ('native_cpu', 'native_npu'):
                 native_out = golden_result.outputs
             else:
+                # 同精度参考 (b)：优先 <op>_bench（硬件忠实），否则回退 golden（现状行为）。
+                bench_func = self._bench_reference_func(case.rel_path, golden_func)
                 native_inputs = tensors_to_cpu(input_tensors)
                 if get_input_func is not None:
                     native_params = params
                 else:
-                    native_params = self.param_builder.build_call_params(golden_func, case, native_inputs)
-                native_result = self.op_runner.run(golden_func, native_params, case_id_str,
+                    native_params = self.param_builder.build_call_params(bench_func, case, native_inputs)
+                native_result = self.op_runner.run(bench_func, native_params, case_id_str,
                                                    native_inputs, to_device=False,
                                                    enable_profiler=False)  # 同精度参考不启用 profiler
                 native_out = native_result.outputs if native_result.success else None
@@ -790,6 +794,16 @@ class Evaluator:
 
     # ---- 辅助方法 ----
 
+    def _oracle_reference_func(self, rel_path: str, golden_func):
+        """fp64 oracle (g) 用的函数:优先 op 的 <op>_oracle 钩子(dtype-agnostic 真值),
+        否则回退 golden。回退分支与历史行为一致。"""
+        return self.golden_loader.get_oracle_function(rel_path) or golden_func
+
+    def _bench_reference_func(self, rel_path: str, golden_func):
+        """同精度参考 (b) 用的函数:优先 op 的 <op>_bench 钩子(硬件忠实精度),否则回退 golden。
+        回退分支与历史行为一致 —— 未提供 bench 的算子 b 仍 = golden(case dtype)。"""
+        return self.golden_loader.get_bench_function(rel_path) or golden_func
+
     def _apply_golden_precision(self, input_tensors: List) -> List:
         """根据 bench 配置的 golden_precision 策略转换输入张量。
 
@@ -960,9 +974,10 @@ class Evaluator:
             # 重建 params + 跑 golden + 跑 AI
             case_id_str = case.get_case_id_str()
             params = self.param_builder.build_call_params(golden_func, case, fresh_inputs)
+            oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
             golden_inputs = self._apply_golden_precision(fresh_inputs)
-            golden_params = self.param_builder.build_call_params(golden_func, case, golden_inputs)
-            golden_result2 = self.op_runner.run(golden_func, golden_params, case_id_str,
+            golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
+            golden_result2 = self.op_runner.run(oracle_func, golden_params, case_id_str,
                                                 golden_inputs, to_device=self._get_golden_to_device(),
                                                 enable_profiler=False)  # 二次验证 Golden 不启用 profiler
             if not golden_result2.success:

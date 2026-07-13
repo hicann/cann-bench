@@ -489,6 +489,50 @@ class GoldenLoader(GoldenLoaderBase):
                 f"mc2_distributed_golden")
         return hook
 
+    def get_oracle_function(self, rel_path: str, required: bool = False) -> Optional[Callable]:
+        """获取可选的 oracle 钩子(dtype-agnostic 的 fp64 真值实现)。
+
+        golden.py 可提供一个名为 ``<golden_func_name>_oracle`` 的顶层函数,签名与 golden 一致,
+        且不在体内硬编码 .float()/.double() —— 计算精度随 evaluator 喂入的输入精度走。
+        在 golden_precision=fp64_cpu 下即为真 fp64 oracle(g)。缺失时返回 None,evaluator 回退
+        到用 golden 本身(与现状一致,不影响未接入的算子)。
+
+        Args:
+            rel_path: 算子相对路径,如 ``level3/weight_quant_batch_matmul``
+            required: 为 True 时缺失则抛 AttributeError;否则返回 None
+        """
+        module = self._load_module(rel_path)
+        func_name = self._get_function_name(rel_path)
+        hook = getattr(module, f"{func_name}_oracle", None)
+        if hook is None and required:
+            raise AttributeError(
+                f"模块 tasks.{rel_path.replace('/', '.')} 中找不到 oracle 钩子: "
+                f"{func_name}_oracle")
+        return hook
+
+    def get_bench_function(self, rel_path: str, required: bool = False) -> Optional[Callable]:
+        """获取可选的 bench 钩子(同精度参考实现,即 checker 的 b)。
+
+        golden.py 可提供一个名为 ``<golden_func_name>_bench`` 的顶层函数,签名与 golden 一致。
+        它按该算子的**同精度约定**计算(如 weight-only A16W8:反量化到输出精度 + fp32 累加,
+        与 torchao / Marlin 等库一致),作为"正确实现应有的误差下限"供 evaluator 作同精度参考
+        (b) —— 使 |b−oracle| 不再恒为 0。**非对某颗硬件的复刻**(硬件可更高精度实现,会
+        meet-or-exceed 此下限、照常通过)。缺失时返回 None,evaluator 回退到用 golden 本身作
+        参考(与现状一致,不影响未接入的算子)。
+
+        Args:
+            rel_path: 算子相对路径
+            required: 为 True 时缺失则抛 AttributeError;否则返回 None
+        """
+        module = self._load_module(rel_path)
+        func_name = self._get_function_name(rel_path)
+        hook = getattr(module, f"{func_name}_bench", None)
+        if hook is None and required:
+            raise AttributeError(
+                f"模块 tasks.{rel_path.replace('/', '.')} 中找不到 bench 钩子: "
+                f"{func_name}_bench")
+        return hook
+
     def _get_operator_name(self, rel_path: str) -> str:
         """从 proto.yaml 获取算子名称"""
         proto_path = self.bench_root / rel_path / "proto.yaml"
