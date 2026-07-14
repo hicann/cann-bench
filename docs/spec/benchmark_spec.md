@@ -576,7 +576,7 @@ $$
 | warmup | 3 | 预热次数，消除缓存影响 |
 | repeat | 5 | 正式采集次数 |
 | freq_boost | True | 启用 NPU 升频清 cache |
-| ProfilerLevel | Level0 | 采集详细程度（kernel-only） |
+| ProfilerLevel | Level1 | 采集详细程度（默认 Level1，可选 Level2；见 `--profiler-level`） |
 
 **性能指标计算**：
 

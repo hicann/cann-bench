@@ -374,8 +374,8 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
     def _parse_case(self, raw: Dict, rel_path: str, yaml_path: str, op_dir_name: str = "") -> CannCaseSpec:
         """解析单个用例
 
-        baseline 性能数据优先从 BaselineStore 查询（集中式 JSON 文件）；
-        若 JSON 文件不存在或查询不到，fallback 到 raw YAML 数据（向后兼容）。
+        baseline 性能数据从 BaselineStore（集中式 metadata/<hardware>.json）查询；
+        cases.yaml / cases.csv 不再内嵌 baseline_perf_us / t_hw_us。
         """
         input_shapes = raw.get('input_shape', [])
         if isinstance(input_shapes, list) and input_shapes and not isinstance(input_shapes[0], list):

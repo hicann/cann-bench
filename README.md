@@ -71,6 +71,7 @@ cann-bench/
 │   ├── aclnn_launch_example/    # ACLNN 自定义算子样例
 │   ├── direct_launch_example/   # Direct launch 算子样例
 │   ├── tasks/                    # 评测任务样例（add/sqrt fixture，验证评测流水线）
+│   ├── tilelang_cann_example/   # TileLang → CANN 算子样例
 │   └── stanfordbench_example/   # Stanford benchmark 样例
 ├── docs/                   # 规范 / 设计 / 指南文档
 ├── scripts/                # 评测/测试入口脚本
@@ -79,7 +80,8 @@ cann-bench/
 │   └── utils/              # 工具脚本
 │       ├── gen_report.sh   # 从 JSON 生成评测报告
 ├── src/                    # 源代码
-│   └── kernel_eval/        # 算子评测模块（CLI / 数据 / 评测 / 报告 / 安全）
+│   ├── kernel_eval/        # 算子评测模块（CLI / 数据 / 评测 / 报告 / 安全）
+│   └── auto_pipeline/      # 算子自动生成流水线（core / prompt / generator / converter）
 ├── tests/                  # 测试代码（含 docs/test_report.md）
 ├── requirements.txt        # Python 依赖
 ├── LICENSE                 # 许可证
