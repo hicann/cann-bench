@@ -92,3 +92,63 @@ def grouped_matmul(
     if split_item in (0, 1):
         return [y[starts[g]:ends[g]] for g in range(E)]
     return [y]
+
+
+def grouped_matmul_oracle(
+    x: torch.Tensor,
+    weight: torch.Tensor,
+    bias: Optional[torch.Tensor] = None,
+    group_list=None,
+    split_item: int = 0,
+    transpose_weight: bool = False,
+) -> List[torch.Tensor]:
+    """Oracle: A16W16 分组矩阵乘的数学真值 (g)。dtype-agnostic —— 不硬编码 .float()
+    (=float32,会把 fp64 下采成 fp32),整条 matmul 跟随输入精度;在 golden_precision=fp64_cpu
+    下即真 fp64 oracle。
+
+    注:本算子权重是 fp16/bf16(**非量化**),plain ``grouped_matmul`` 的 .float()(= fp16/bf16
+    操作数无损升 fp32 + fp32 累加,再舍回 T)**本身就是标准 A16W16 tensor-core 的同精度参考 (b)**
+    —— evaluator 的 bench 路径(``get_bench_function(rel_path) or golden_func``)缺 _bench 时回退到
+    plain golden 即正确,故本算子**默认让 plain golden 兼任 bench,只补 oracle**(仅当 bench 与
+    plain golden 不同时才需显式 _bench,如 weight_quant 的 bf16-dequant)。唯一病理是 plain golden
+    的 .float()(=float32)也把 fp64 oracle 封成 fp32,导致 |b−oracle|=0、相消/小值域严格分支误杀;
+    修正 oracle 为真 fp64 后,plain-golden bench 的 fp32 累加在相消 cell 相对 fp64 有非零误差,
+    严格分支放松。
+    """
+    assert x.dim() == 2, "x must be 2D [M, K]"
+    assert weight.dim() == 3, "weight must be 3D [E, K, N] or [E, N, K]"
+
+    M, K = x.shape
+    E = weight.shape[0]
+    if transpose_weight:
+        assert weight.shape[2] == K, f"K mismatch: x has {K}, weight (transposed) has {weight.shape[2]}"
+        N = weight.shape[1]
+    else:
+        assert weight.shape[1] == K, f"K mismatch: x has {K}, weight has {weight.shape[1]}"
+        N = weight.shape[2]
+
+    if isinstance(group_list, torch.Tensor):
+        ends = group_list.to(torch.int64).tolist()
+    else:
+        ends = list(group_list)
+    assert len(ends) == E, f"group_list length {len(ends)} != E {E}"
+    assert ends[-1] == M, f"group_list last value {ends[-1]} must equal M {M}"
+    starts = [0] + ends[:-1]
+
+    y = torch.zeros((M, N), dtype=x.dtype, device=x.device)
+    for g in range(E):
+        s, e = starts[g], ends[g]
+        if s == e:
+            continue
+        w_g = weight[g]  # dtype-agnostic:不 .float(),跟随输入精度(oracle 下为 fp64)
+        if transpose_weight:
+            mm = torch.matmul(x[s:e], w_g.transpose(-2, -1))
+        else:
+            mm = torch.matmul(x[s:e], w_g)
+        if bias is not None:
+            mm = mm + bias[g].to(mm.dtype).unsqueeze(0)
+        y[s:e] = mm.to(x.dtype)
+
+    if split_item in (0, 1):
+        return [y[starts[g]:ends[g]] for g in range(E)]
+    return [y]
