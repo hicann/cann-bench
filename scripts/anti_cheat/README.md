@@ -67,10 +67,14 @@ kernel），因此**本机制结构性地无法防护**，需依赖 host 侧 `To
 | `tasks/level4/gru` | `torch_npu.npu_gru` / `at::gru` | NPU 上 GRU **分解为 matmul + 逐元素**，无单一 GRU kernel；matmul kernel 属 PROTECTED 不可禁 |
 | `tasks/level3/strided_slice` | 原生 `x[b:e:s]` 索引 + DMA | 原生切片**不经过任何算子 kernel**（纯 view + DMA 物化），禁 `strided_slice` 目录只挡显式 op 路径 |
 
-> 注意：`TorchOpGuard` 是 Python `TorchFunctionMode`，**无法拦截 C++ 自定义算子
-> （PrivateUse1 plugin）内部直接发起的 `at::xxx` 调用**——已实证的 TopK 作弊正是 C++
-> `at::topk`。要根治这一类，需在 C++/dispatch 层（如 `TorchDispatchMode` 或 aclnn 拦截）
-> 增加防护。上表算子在补全 host 侧 guard 前应视为**未完全防护**。
+> 说明：`TorchOpGuard` 是 Python `TorchFunctionMode`，无法拦截 C++ 自定义算子
+> （PrivateUse1 plugin）内部直接发起的 `at::xxx` 调用。**该缺口现已由 dispatch 层守卫
+> `DeviceResidencyGuard`（`TorchDispatchMode`，`src/kernel_eval/security/device_residency_guard.py`）
+> 补上**：`topk` / `sort` / `matmul` / `addmm` 等已纳入 `ATEN_COMPUTE_LEAVES` 并默认 block
+> （此前实证的 C++ `at::topk` 作弊、以及 GRU 经 matmul/addmm 分解的绕过均已覆盖，见
+> `tests/ut/test_dispatch_compute_guard.py`）。上表中 `unique`（走 AICPU）与 `strided_slice`
+> （纯 view + DMA、不经任何 compute kernel）仍为真实残留——dispatch 层亦无对应 compute leaf 可拦，
+> 需依赖人工审查。
 
 > `tasks/level3/engram_gate_fusion` **不在**残留清单：它是全新融合算子（DeepSeek Engram
 > 7 步），OPP 无对应内置实现，无法通过单一内置算子绕过，故其缺少 `baseline_kernels` 标注是**正确**的。

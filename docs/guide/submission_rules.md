@@ -42,6 +42,8 @@ def grouped_matmul(x, weight):
 
 输入预处理、输出后处理和中间 tensor 变换也是目标算子实现的一部分。不能用 PyTorch / torch_npu 的 tensor API 先完成 transpose、permute、contiguous、reshape-copy、cast、slice、gather、scatter 等实质性数据搬运或布局变换，再把处理后的 tensor 交给提交 kernel。
 
+> 注：此类 I/O 搬运 / 布局变换（transpose/permute/gather/scatter 等）属**人工审查**判定为无效的范畴——为避免误伤 Gather / Transpose 等以其为核心语义的算子，框架**不对这些算子自动拦截**；而 matmul / conv / softmax 等计算类算子的绕过，则由 `TorchOpGuard` / `DeviceResidencyGuard` **自动拦截**（默认 block）。
+
 反例：
 
 ```python

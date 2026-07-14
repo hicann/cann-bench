@@ -41,7 +41,7 @@ $$
 
 ### 2.2 精度阈值表
 
-`mare_threshold = 10 * threshold`（精确 10 倍，非量化到 2 的幂；见 `src/kernel_eval/utils/precision.py:639`）。
+`mare_threshold = 10 * threshold`（精确 10 倍，非量化到 2 的幂；见 `src/kernel_eval/utils/compare.py`）。
 
 | 数据类型 | 精度阈值 Threshold (MERE) | MARE 阈值 (10 × Threshold) |
 |----------|--------------------------|----------------------------|
@@ -49,7 +49,7 @@ $$
 | bfloat16 | $2^{-7}$  ≈ 7.81e-3 | $10 \cdot 2^{-7}$  ≈ 7.81e-2 |
 | float32  | $2^{-13}$ ≈ 1.22e-4 | $10 \cdot 2^{-13}$ ≈ 1.22e-3 |
 
-> 实际实现还覆盖 `hifloat32` ($2^{-11}$)、`float8_e4m3` ($2^{-3}$)、`float8_e5m2` ($2^{-2}$)，见 `PRECISION_THRESHOLDS`。
+> 实际实现还覆盖 `hifloat32` ($2^{-11}$)、`float8_e4m3fn` ($2^{-3}$)、`float8_e5m2` ($2^{-2}$)，见 `utils/thresholds.py` 的 `PRECISION_THRESHOLDS`。
 
 ### 2.3 基础通过标准
 
@@ -219,7 +219,8 @@ passed = normal_passed && small_value_passed && cancel_passed
 ```
 src/kernel_eval/
 ├── utils/
-│   └── precision.py          # 精度对比核心实现
+│   ├── compare.py            # 精度对比核心实现
+│   └── thresholds.py         # 阈值表（PRECISION_THRESHOLDS 等）
 └── eval/
     ├── accuracy_eval.py      # 精度评测器
     └── evaluator.py          # 评测流程（计算CPU输出）
@@ -227,7 +228,7 @@ src/kernel_eval/
 
 ### 6.2 核心函数
 
-**compare_tensors**（precision.py）：
+**compare_tensors**（compare.py）：
 - 输入：NPU output、FP64 golden、dtype、threshold、CPU output
 - 输出：CompareResult（含三个维度的判断结果）
 
@@ -263,7 +264,7 @@ accuracy_result = evaluate(
 
 对于多输出算子（如 ApplyRotaryPosEmb 输出 query_out 和 key_out）：
 - CPU 输出保留完整的 tuple/list 格式
-- precision.py 的 `_normalize_outputs` 函数将多输出标准化为张量列表
+- compare.py 的 `_normalize_outputs` 函数将多输出标准化为张量列表
 - 逐个张量对比，汇总结果
 
 ---
@@ -292,7 +293,7 @@ accuracy_result = evaluate(
 
 ### 8.1 全局阈值配置
 
-在 `precision.py` 中定义：
+在 `utils/thresholds.py` 中定义：
 
 ```python
 # 精度阈值

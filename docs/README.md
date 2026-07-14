@@ -21,7 +21,9 @@
 | 文档 | 说明 |
 |------|------|
 | [benchmark_spec.md](spec/benchmark_spec.md) | 评测基准规范：算子定义、用例设计、精度标准、评分规则 |
-| [api_spec.md](spec/api_spec.md) | 算子接口规范：proto.yaml schema 说明（待补充） |
+| [cases_yaml_spec.md](spec/cases_yaml_spec.md) | cases.yaml 字段与顺序约定（占位/空值规则） |
+
+> proto.yaml 的 schema 说明见 [contributing.md §1](guide/contributing.md)（暂无独立 `api_spec.md`）。
 
 ### 设计类文档 (design/)
 
@@ -29,9 +31,16 @@
 
 | 文档 | 说明 |
 |------|------|
+| [kernel_eval_architecture.md](design/kernel_eval_architecture.md) | kernel_eval 整体架构：分层（base/benches/checkers/data/eval/registry/report/security/utils）与数据流 |
+| [module_panorama.md](design/module_panorama.md) | 模块全景：各子包职责与依赖关系 |
 | [evaluator_design.md](design/evaluator_design.md) | 评测工程设计：评测器架构、安全防护、报告生成 |
-| [benchmark_orchestrator_architecture.md](design/benchmark_orchestrator_architecture.md) | auto_pipeline 设计：core/prompt/generator/converter 边界与数据流 |
+| [precision_comparison_design.md](design/precision_comparison_design.md) | 精度对比设计：MERE/MARE、小值域/相消判定、阈值表 |
+| [report_design.md](design/report_design.md) | 报告系统设计：评分计算、summary/HTML 生成 |
 | [perf_collection_design.md](design/perf_collection_design.md) | 性能采集设计：NPU Profiler、Trace 解析、升频清 Cache |
+| [baseline_collection_design.md](design/baseline_collection_design.md) | baseline 采集设计：collect_baseline 脚本与 metadata 产物 |
+| [multi_card_parallel_analysis.md](design/multi_card_parallel_analysis.md) | 多卡并行评测分析 |
+| [micro_benchmark_selection.md](design/micro_benchmark_selection.md) | 微基准/算子选型分析 |
+| [benchmark_orchestrator_architecture.md](design/benchmark_orchestrator_architecture.md) | auto_pipeline 设计：core/prompt/generator/converter 边界与数据流 |
 
 ### 指南类文档 (guide/)
 
@@ -39,9 +48,11 @@
 
 | 文档 | 说明 |
 |------|------|
-| [contributing.md](guide/contributing.md) | 算子贡献指南：如何提交新算子评测任务 |
-| [quick_start.md](guide/quick_start.md) | 快速入门：评测流程和命令行使用（待补充） |
+| [contributing.md](guide/contributing.md) | 算子贡献指南：如何提交新算子评测任务（含 proto.yaml schema） |
+| [quick_start.md](guide/quick_start.md) | 快速入门：评测流程和命令行使用 |
 | [submission_rules.md](guide/submission_rules.md) | 算子提交原则与禁止行为：说明哪些实现方式会被视为无效或作弊 |
+| [version_policy.md](guide/version_policy.md) | 版本策略：VERSION / tasks 版本与兼容性 |
+| [custom_benchmark_integration.md](guide/custom_benchmark_integration.md) | 自定义评测集接入指南 |
 | [auto_pipeline_usage.md](guide/auto_pipeline_usage.md) | auto_pipeline 使用指南：CLI、配置、环境变量、输出目录 |
 | [auto_pipeline_agent_integration.md](guide/auto_pipeline_agent_integration.md) | auto_pipeline 新 agent 接入指南：通用 code agent + skills 与 LangGraph workflow 两类路径 |
 

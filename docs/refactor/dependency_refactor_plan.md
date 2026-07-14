@@ -1,5 +1,7 @@
 # 依赖重构方案
 
+> **状态说明（归档）**：本文为早期重构规划，最终落地与此处“目标结构”有出入，阅读时以实际代码树为准。已知差异：未创建 `core/` 包（`evaluator.py` / `perf_eval.py` / `process_pool.py` 在 `eval/`，`data_generator.py` / `package_manager.py` 在 `data/`）；`GoldenLoaderBase` 在 `base/loaders.py` 而非 `base/golden.py`；`benches/cann.py` 已拆为多个 `cann_*.py`（`cann_loader.py` / `cann_matcher.py` / `cann_scoring.py` / …）。
+
 ## 一、当前依赖问题分析
 
 ### 1.1 依赖方向错误
