@@ -1,40 +1,42 @@
-# ==================== 核心依赖 ====================
-# PyTorch 2.4+ 提供 torch.nn.functional.rms_norm（RmsNorm golden 直接复用）
-# 2.3+ 支持 numpy 2.x 和 uint16/uint32/uint64 类型
-torch>=2.4.0
+# 依赖以 pyproject.toml + uv.lock 为权威。本文件为便捷 pip 安装清单，须与
+# pyproject.toml 的 [project].dependencies 保持一致。推荐用 uv 管理：
+#   uv sync                     # 核心 + 开发依赖
+#   uv sync --extra vision      # 追加 torchvision（roi_align / nms golden）
 
-# TorchVision 用于 ROI 相关算子
-torchvision>=0.18.0
+# torch / torch_npu==2.10.0 仅由华为云镜像提供，默认 PyPI 无此版本；pip 不读取
+# pyproject.toml 的 [[tool.uv.index]] 配置，故在此显式指定同一镜像，令
+# `pip install -r requirements.txt` 可直接安装（对齐 pyproject default index）。
+# 区域外可用 PIP_INDEX_URL 环境变量覆盖（对应 pyproject 的 UV_INDEX_URL）。
+--index-url https://mirrors.huaweicloud.com/repository/pypi/simple
 
-# NumPy 2.x 需要 PyTorch 2.3+
+# ==================== 核心依赖（对齐 pyproject.toml [project].dependencies）====================
+# torch / torch_npu 精确钉 2.10.0，版本须严格匹配，详见 https://www.hiascend.com/document
+# torch_npu 是 NPU 评测路径的硬依赖（cli.py / evaluator.py 等无条件 import）；仅 CPU-only 单测可省略。
+torch==2.10.0
+torch_npu==2.10.0
 numpy>=1.21.0
-
 pyyaml>=6.0
-
-# Mx系列算子 需要 en_dtypes 和 ml_dtypes
-en_dtypes>=0.0.4
-ml_dtypes>=0.5.4
-
-# ==================== 测试框架 ====================
-pytest>=7.0.0
-pytest-timeout>=2.1.0
-
-# ==================== NPU 核心依赖 ====================
-# torch_npu 是 NPU 评测路径的硬依赖（cli.py / evaluator.py 等无条件 import）。
-# 仅 CPU-only 单测可省略。
-# 版本须与 PyTorch 严格匹配，详见 https://www.hiascend.com/document
-torch_npu>=2.4.0
+scipy
+pandas
+decorator
+attrs
+cloudpickle
+ml-dtypes
+psutil
+tornado
+expecttest
+protobuf
+ruamel.yaml>=0.18
 
 # ==================== 可选依赖 ====================
+# 视觉算子 golden（roi_align / nms）——对应 pyproject 的 [project.optional-dependencies].vision
+torchvision>=0.18.0
+# MX 量化 golden（bench_lab add_rms_norm_dynamic_mx_quant）延迟导入，缺失时报清晰错误
+en_dtypes>=0.0.4
 
-# 性能分析报告生成
-# pytest-html>=3.1.0
-# pytest-json-report>=1.5.0
-
-# 并行执行
-# pytest-xdist>=3.0.0
-
-# ==================== 开发依赖 ====================
+# ==================== 开发依赖（对齐 pyproject [dependency-groups].dev）====================
+pytest>=7.0.0
+pytest-timeout>=2.1.0
 black>=23.0.0
 flake8>=6.0.0
 isort>=5.12.0
