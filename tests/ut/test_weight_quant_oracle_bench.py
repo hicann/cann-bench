@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # coding=utf-8
 import torch
+# plain golden IS the same-precision bench b (bf16/fp16-dequant): no separate _bench.
 from tasks.level3.weight_quant_batch_matmul.golden import (
+    weight_quant_batch_matmul as bench,
     weight_quant_batch_matmul_oracle as oracle,
-    weight_quant_batch_matmul_bench as bench,
 )
 
 

@@ -550,6 +550,15 @@ $$
 \frac{\text{ErrorCount}_{\text{npu}}}{\max(\text{ErrorCount}_{\text{cpu}}, 1)} \leq 2
 $$
 
+##### golden 的 oracle / bench 变体
+
+上文的 $golden_{truncated}$（fp64 理论真值）与 CPU 同精度参考（$\text{ErrorCount}_{\text{cpu标准精度}}$）默认都由同一份 plain golden 提供。但当 golden 对浮点/量化操作数硬编码 `.float()`/`.double()` 时，fp64 真值会被下采成 fp32，使同精度参考与真值在相消/小值域 cell 上 $|bench - oracle| \equiv 0$、$\text{ErrorCount}_{\text{cpu}}$ 恒为 0，令上面的 $\leq 2$ 判据在合法舍入误差下误杀（任何 NPU 算子都无法通过）。为此 golden 可选地拆成两个角色：
+
+- **oracle**（`<op>_oracle`）：dtype-agnostic 的 fp64 数学真值，提供 $golden_{truncated}$（不硬编码 `.float()`/`.double()`）；
+- **bench**（plain golden，或 `<op>_bench` 覆盖）：按 case dtype 的同精度参考，提供 $\text{ErrorCount}_{\text{cpu标准精度}}$。
+
+evaluator 缺任一钩子时回退到 plain golden，未拆分的算子行为不变。golden 侧编写规范见 [contributing.md](../guide/contributing.md) §2.4。
+
 ### 4.5 性能评测规范
 
 **评测原则**：性能评测需保证测量一致性、防止作弊攻击、准确反映算子真实性能。

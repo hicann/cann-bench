@@ -27,56 +27,40 @@ def weight_quant_batch_matmul(
     antiquantOffset: torch.Tensor = None,
     bias: torch.Tensor = None
 ) -> torch.Tensor:
-    """
-    权重量化批量矩阵乘法算子
+    """权重量化批量矩阵乘法算子 —— 同时充当同精度参考 (bench b) 与 golden-npu-mock ST 候选。
 
-    公式: y = x @ ANTIQUANT(weight) + bias
-          ANTIQUANT(weight) = (weight + antiquantOffset) * antiquantScale
+    公式: y = x @ ANTIQUANT(weight) + bias，ANTIQUANT(weight) = (weight + antiquantOffset) * antiquantScale。
+
+    A16W8 weight-only 量化的标准约定 (与 torchao / Marlin 等 GPU 库一致): int8 权重反量化到
+    **输出精度 T = x.dtype** (fp16/bf16)，再在 **fp32 累加器** 上做 matmul，输出舍回 T。这是一个
+    正确 A16W8 kernel 在该输出精度下应有的误差下限 (库算子 meet-or-exceed 它)，供 checker 的
+    小值域/相消同精度对照，使 |b - oracle| 不再恒为 0。数学真值 (fp64) 见 `_oracle`；oracle/bench
+    golden 拆分的约定见 docs/guide/contributing.md。
 
     Args:
         x: 左输入矩阵，shape 为 [M, K]，dtype 为 float16/bfloat16
-        weight: 右输入矩阵（量化权重），shape 为 [K, N]，dtype 为 int8
-        antiquantScale: 反量化scale参数，shape 为 [N] 或 [1, N]
-        antiquantOffset: 反量化offset参数（可选），shape 与 antiquantScale 相同
-        bias: 偏置张量（可选），shape 为 [N] 或 [1, N]
+        weight: 右输入矩阵 (量化权重)，shape 为 [K, N]，dtype 为 int8
+        antiquantScale: 反量化 scale 参数，shape 为 [N] 或 [1, N]
+        antiquantOffset: 反量化 offset 参数 (可选)，shape 与 antiquantScale 相同
+        bias: 偏置张量 (可选)，shape 为 [N] 或 [1, N]
 
     Returns:
         输出张量，shape 为 [M, N]，dtype 与 x 相同
     """
-
-    # 反量化 weight: (weight + antiquantOffset) * antiquantScale
-    # weight 是 int8，需要转换为浮点类型进行计算
-    weight_float = weight.float()  # [K, N]
-
-    # antiquantScale shape: [N] 或 [1, N]，需要 broadcast 到 [K, N]
-    scale_float = antiquantScale.float()  # [N] 或 [1, N]
-
-    # 计算 ANTIQUANT(weight)
+    # 反量化跟随输出精度 T：int8 权重升到 T 后 (weight + offset) * scale 在 T 上算，保留硬件同款舍入
+    T = x.dtype
+    weight_dequant = weight.to(T)
+    scale = antiquantScale.to(T)
     if antiquantOffset is not None:
-        offset_float = antiquantOffset.float()  # [N] 或 [1, N]
-        weight_dequant = (weight_float + offset_float) * scale_float
+        weight_dequant = (weight_dequant + antiquantOffset.to(T)) * scale
     else:
-        weight_dequant = weight_float * scale_float
+        weight_dequant = weight_dequant * scale
 
-    # weight_dequant shape: [K, N]
-    # x shape: [M, K]
-    # matmul: [M, K] @ [K, N] = [M, N]
-
-    # x 转换为浮点类型
-    x_float = x.float()  # [M, K]
-
-    # 矩阵乘法
-    y_float = torch.matmul(x_float, weight_dequant)  # [M, N]
-
-    # 加偏置（可选）
+    # fp32 累加器 (tensor-core 约定)：T 操作数升 fp32 相乘累加，不改变操作数已有的 T 舍入
+    y = torch.matmul(x.float(), weight_dequant.float())
     if bias is not None:
-        bias_float = bias.float()  # [N] 或 [1, N]
-        y_float = y_float + bias_float
-
-    # 转换回输入类型
-    y = y_float.to(x.dtype)
-
-    return y
+        y = y + bias.float()
+    return y.to(T)
 
 
 def weight_quant_batch_matmul_oracle(
@@ -86,9 +70,9 @@ def weight_quant_batch_matmul_oracle(
     antiquantOffset: torch.Tensor = None,
     bias: torch.Tensor = None,
 ) -> torch.Tensor:
-    """Oracle: A16W8 的数学真值(g)。唯一的近似是 int8 权重量化本身;反量化
-    (weight+offset)*scale 与 matmul 全程跟随输入精度、不硬编码 .float()/.double() —— 在
-    golden_precision=fp64_cpu 下 x 为 fp64,故整条在 fp64 计算,是精确反量化的 fp64 真值上界
+    """Oracle: A16W8 的数学真值 (g)。唯一的近似是 int8 权重量化本身；反量化
+    (weight + offset) * scale 与 matmul 全程跟随输入精度、不硬编码 .float()/.double() —— 在
+    golden_precision=fp64_cpu 下 x 为 fp64，故整条在 fp64 计算，是精确反量化的 fp64 真值上界
     (不再把 fp64 下采成 fp32)。int8 weight 用 .to(x.dtype) 反量化跟随计算精度。
     """
     cdt = x.dtype
@@ -102,31 +86,3 @@ def weight_quant_batch_matmul_oracle(
     if bias is not None:
         y = y + bias.to(cdt)
     return y.to(x.dtype)
-
-
-def weight_quant_batch_matmul_bench(
-    x: torch.Tensor,
-    weight: torch.Tensor,
-    antiquantScale: torch.Tensor,
-    antiquantOffset: torch.Tensor = None,
-    bias: torch.Tensor = None,
-) -> torch.Tensor:
-    """Bench: 同精度参考 (b),采标准 weight-only A16W8 约定(与 torchao / Marlin 等 GPU 库一致):
-    int8 权重反量化到 **输出精度 T = x.dtype**(fp16/bf16),再在 **fp32 累加器**上做 matmul,
-    输出舍回 T。这是"一个正确 A16W8 kernel 在该输出精度下应有的误差下限"(库算子 meet-or-exceed
-    它),供 checker 的小值域/相消同精度对照,使 |b−oracle| 不再恒为 0。**非对某颗硬件的复刻**
-    —— 硬件可用更高精度实现(如激活分解),会 meet-or-exceed 此下限、照常通过。x 由 evaluator 以
-    case dtype(T)喂入。
-    """
-    T = x.dtype  # fp16 / bf16
-    weight_dq_T = weight.to(T)
-    scale_T = antiquantScale.to(T)
-    if antiquantOffset is not None:
-        weight_dq_T = (weight_dq_T + antiquantOffset.to(T)) * scale_T
-    else:
-        weight_dq_T = weight_dq_T * scale_T
-    # fp32 累加器(tensor-core 约定):T 操作数升 fp32 相乘累加,不改变操作数已有的 T 舍入
-    y = torch.matmul(x.float(), weight_dq_T.float())
-    if bias is not None:
-        y = y + bias.float()
-    return y.to(T)

@@ -247,6 +247,31 @@ y = torch.nn.functional.conv2d(x, weight, bias,
 y = torch.topk(x, k, dim=-1, largest=True, sorted=True)
 ```
 
+### 2.4 oracle / bench 拆分（可选，用于消除小值域/相消退化）
+
+归约类算子（matmul、attention 等）的 golden 若对**浮点或量化操作数**硬编码 `.float()`/`.double()`，会把精度评测用的 fp64 参考也一并下采成 fp32，导致小值域/相消判定中同精度参考与真值 `|bench − oracle| ≡ 0`、CPU 侧 ErrorCount 恒为 0（判定细节见 [benchmark_spec.md](../spec/benchmark_spec.md) §4.4）。此时可为该 golden 额外提供两个带后缀的同签名函数，evaluator 自动优先使用（缺省则回退到 plain golden，未拆分的算子完全不受影响）：
+
+| 函数 | 角色 | 精度 | 用途 |
+|------|------|------|------|
+| `<op_name>`（plain） | **bench (b)**，默认 | 同精度：操作数按 case dtype、累加按硬件约定（如 fp32 累加器） | 小值域/相消的 CPU 同精度对照 + golden-npu-mock ST 候选 |
+| `<op_name>_oracle` | **oracle (g)** | fp64 数学真值：dtype-agnostic，不硬编码 `.float()`/`.double()` | MERE/MARE 参考 + `golden_truncated` 基准 |
+| `<op_name>_bench` | **bench (b)** 覆盖 | 同精度，但精度约定与 plain 不同 | 仅当 plain golden 不是忠实同精度 bench 时才写 |
+
+**核心约定：**
+
+1. **plain golden 默认兼任 bench。** evaluator 的 bench 路径是 `get_bench_function() or <plain golden>`，缺 `_bench` 时回退 plain golden。因此 plain golden 应写成**忠实的同精度参考**（操作数按 case dtype 舍入、fp32 累加器），它同时是 golden-npu-mock ST 的候选。
+
+2. **`_oracle` 用于消除退化。** 把 plain golden 里的硬 `.float()`/`.double()` 去掉、全程跟随输入精度（在 `golden_precision=fp64_cpu` 下即在 fp64 计算），使 oracle 成为真正的 fp64 真值，`|b − oracle|` 不再恒为 0。
+
+3. **`_bench` 仅在其精度与 plain golden 不同时才写。** 判据是 golden 里的 `.float()` 落在什么操作数上：
+   - **浮点操作数**（fp16/bf16）的 `.float()` = **无损升精**（值不变）→ 操作数精度仍等于硬件语义 → **plain 就是 bench**，只补 `_oracle`（如 grouped_matmul：A16W16 权重非量化）。
+   - **整型操作数**（int8/int4 量化权重）的 `.float()` = **反量化到 fp32**，而硬件反量化到 bf16/fp16 → 精度不符 → plain 应直接写成硬件精度的反量化（= bench），`_oracle` 保留 fp64 反量化真值（如 weight_quant_batch_matmul：A16W8）。
+
+**示例：**
+
+- `tasks/level3/grouped_matmul/`：plain（fp16/bf16 操作数升 fp32 累加，即 A16W16 bench）+ `_oracle`（fp64），无 `_bench`。
+- `tasks/level3/weight_quant_batch_matmul/`：plain（int8 反量化到输出精度 T + fp32 累加，即 A16W8 bench）+ `_oracle`（fp64 反量化真值），无 `_bench`。
+
 ---
 
 ## 3. desc.md
