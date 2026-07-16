@@ -95,7 +95,17 @@ class PerfMetricStrategy(ABC):
 # Warmup kernel 过滤（共享逻辑）
 # ---------------------------------------------------------------------------
 
-# Warmup kernel 精确形状特征（与原 perf_eval 一致）
+# V3 Anti-Cheat: Warmup kernel 专用命名，无需 Shape 匹配
+# cann_bench_utils 将 kernel 函数命名为 CannBenchWarmup / CannBenchCacheClean。
+# Profiler 采集到的 Type 是 C++ mangled 符号（如 _Z19CannBenchCacheCleanIDhEvPhS0_llj），
+# 其中嵌入了保留名 CannBenchWarmup / CannBenchCacheClean。
+#
+# 安全性：这两个 token 是框架保留名，提交算子不会（也不应）用这些名字命名 kernel。
+# 与旧版模糊匹配（cache_clean_kernel/warmup_kernel 这类通用词）不同，此处匹配的是
+# 专属保留标识，提交方无法在不刻意冒充框架内部算子的前提下命中。
+WARMUP_KERNEL_TOKENS = ('CannBenchWarmup', 'CannBenchCacheClean')
+
+# 向后兼容：保留环境变量支持（在未使用 v3 的环境中回退）
 WARMUP_MATMUL_SHAPE = os.environ.get(
     "CANN_BENCH_WARMUP_MATMUL_SHAPE", '"10240,10240;10240,10240"'
 )
@@ -107,8 +117,8 @@ WARMUP_REDUCE_SHAPE = os.environ.get(
 def extract_warmup_names_from_csv(csv_path: Optional[str]) -> Set[str]:
     """从 kernel_details.csv 提取 warmup kernel 名称列表。
 
-    使用 Input Shapes 精确匹配 MatMulV3/ReduceMax 升频清 cache kernel。
-    CSV 是唯一包含 Input Shapes 的数据源，warmup 过滤依赖此函数。
+    V3: 优先使用专用 Type 名称匹配（CannBenchWarmup/CannBenchCacheClean）
+    Fallback: 使用 Input Shapes 精确匹配 MatMulV3/ReduceMax（兼容旧环境）
 
     Args:
         csv_path: kernel_details.csv 文件路径。为 None 时返回空集合。
@@ -135,17 +145,32 @@ def extract_warmup_names_from_csv(csv_path: Optional[str]) -> Set[str]:
     return warmup_names
 
 
-def _is_warmup_kernel(op_type: str, input_shapes: str) -> bool:
-    """判断是否为 warmup kernel（通过精确形状匹配）。
+def _is_warmup_kernel(op_type: str, input_shapes: str = '') -> bool:
+    """判断是否为 warmup kernel。
 
-    与原 perf_eval._is_warmup_kernel 逻辑一致。
+    V3: 优先匹配专用 Type (CannBenchWarmup/CannBenchCacheClean)
+    Fallback: 通过精确形状匹配 MatMulV3/ReduceMax（兼容旧环境）
+
+    注意: 旧版 Workaround 的模糊匹配已移除（存在作弊风险）
     """
-    if not op_type or not input_shapes:
+    if not op_type:
+        return False
+
+    # V3: 专用保留名匹配（无需 Shape）
+    # profiler 的 Type 可能是干净名（CannBenchWarmup）或 C++ mangled 符号
+    # （_Z19CannBenchCacheCleanIDhEvPhS0_llj），后者内嵌保留 token，故用子串匹配。
+    for token in WARMUP_KERNEL_TOKENS:
+        if token in op_type:
+            return True
+
+    # Fallback: 旧版 Shape 匹配（向后兼容）
+    if not input_shapes:
         return False
     if op_type == 'MatMulV3' and WARMUP_MATMUL_SHAPE in input_shapes:
         return True
     if op_type == 'ReduceMax' and WARMUP_REDUCE_SHAPE in input_shapes:
         return True
+
     return False
 
 

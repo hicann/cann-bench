@@ -75,11 +75,16 @@ def _make_config(args: argparse.Namespace, bench_root: str, *, enable_profiler: 
     return cfg
 
 
-def _operator_rel_paths(matched_operators: Iterable[str], bench_root: str) -> List[str]:
+def _operator_rel_paths(
+    matched_operators: Iterable[str],
+    bench_root: str,
+    selected: Optional[Iterable[str]] = None,
+) -> List[str]:
     from .benches import cann as _cann_bench  # noqa: F401
     from .registry.loader_registry import get_task_loader
 
     matched = {str(op).lower() for op in matched_operators}
+    selected_set = {str(op).lower() for op in selected} if selected else None
     loader = get_task_loader("cann", tasks_root=bench_root)
     rel_paths = []
     for spec in loader.list_tasks():
@@ -87,8 +92,16 @@ def _operator_rel_paths(matched_operators: Iterable[str], bench_root: str) -> Li
             str(getattr(spec, "name", "")).lower(),
             str(spec.get_function_name()).lower(),
         }
-        if names & matched:
-            rel_paths.append(spec.rel_path)
+        if not (names & matched):
+            continue
+        if selected_set is not None:
+            all_names = names | {
+                str(spec.rel_path).lower(),
+                Path(spec.rel_path).name.lower(),
+            }
+            if not (all_names & selected_set):
+                continue
+        rel_paths.append(spec.rel_path)
     return sorted(set(rel_paths))
 
 
@@ -379,7 +392,7 @@ def run(args: argparse.Namespace) -> int:
     print("[staged_eval] stage 2/3: correctness")
     correctness_cfg = _make_config(args, bench_root, enable_profiler=False)
     matched = _install_or_scan(args, correctness_cfg)
-    rel_paths = _operator_rel_paths(matched, bench_root)
+    rel_paths = _operator_rel_paths(matched, bench_root, selected=args.selected_operators)
     correctness_cases = _load_cases(args, bench_root, rel_paths, filter_prefix=filter_prefix)
     correctness_ops = _evaluate_cases(args, correctness_cfg, correctness_cases, enable_profiler=False)
     correctness_payload, _ = _save_report(
@@ -394,7 +407,7 @@ def run(args: argparse.Namespace) -> int:
     print(f"[staged_eval] stage 3/3: performance ({len(allowlist)} correctness-passed cases)")
     performance_cfg = _make_config(args, bench_root, enable_profiler=True)
     matched = _install_or_scan(args, performance_cfg)
-    rel_paths = _operator_rel_paths(matched, bench_root)
+    rel_paths = _operator_rel_paths(matched, bench_root, selected=args.selected_operators)
     performance_cases = _load_cases(
         args,
         bench_root,
@@ -420,6 +433,8 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument("--task-dir", default="tasks")
     parser.add_argument("--operator", default=None)
     parser.add_argument("--case-id", type=int, default=None)
+    parser.add_argument("--selected-operators", nargs="*", default=None,
+                        help="仅评测指定算子（匹配 name / function_name / rel_path / 目录名，大小写不敏感）")
     parser.add_argument("--device", choices=["npu"], default="npu")
     parser.add_argument("--device-id", type=int, default=None)
     parser.add_argument("--processes-per-card", type=int, default=2)

@@ -35,7 +35,6 @@ from typing import Optional, Dict, Any, Tuple, List, Callable
 
 import torch
 
-
 _logger = logging.getLogger(__name__)
 
 from ..utils.device_manager import DeviceManager
@@ -213,38 +212,47 @@ class PerfEvaluator:
     def _boost_freq_and_clear_cache(self):
         """NPU升频 + 清L2 cache (仅在测量窗口前调用一次)
 
-        执行 MatMul + ReduceMax 以：
-        1. 提升 NPU 频率到稳定状态
-        2. 清空 L2 cache，保证测量一致性
+        V3 Anti-Cheat: 强制使用自定义算子 cann_bench_warmup / cann_bench_cache_clean
+        替代内置 torch.matmul / torch.max，支持完全禁用内置 kernel 树。
+
+        执行：
+        1. cann_bench_warmup - 提升 NPU 频率到稳定状态
+        2. cann_bench_cache_clean - 清空 L2 cache，保证测量一致性
+
+        Profiling Type: CannBenchWarmup / CannBenchCacheClean (用于过滤)
 
         Sync targets the warmup tensor's actual device — ``torch.npu.synchronize()``
         with no arg syncs the current device, which can disagree with the
         device the warmup tensors live on.
 
-        Wrapped in ``TorchOpGuard.pause()`` so warmup matmul does not trip
+        Wrapped in ``TorchOpGuard.pause()`` so warmup ops do not trip
         the guard's forbidden-API counter (the entire run_ai_op is wrapped
         in a guard upstream; warmup is not candidate computation).
         """
         if self._warmup_tensors is not None:
             from ..security.torch_op_guard import TorchOpGuard
+            from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean
             with TorchOpGuard.pause():
                 mm1, mm2, reduce_input = self._warmup_tensors
-                torch.matmul(mm1, mm2)
+                cann_bench_warmup(mm1, mm2)
                 torch.npu.synchronize(mm1.device)
-                torch.max(reduce_input)
+                cann_bench_cache_clean(reduce_input)
                 torch.npu.synchronize(mm1.device)
 
     def _clear_cache(self):
         """清空 L2 cache (在每次测量 step 前调用，保证测量间 cache 状态一致)
+
+        V3 Anti-Cheat: 强制使用 cann_bench_cache_clean 替代 torch.max
 
         Wrapped in ``TorchOpGuard.pause()`` for the same reason as
         ``_boost_freq_and_clear_cache``.
         """
         if self._warmup_tensors is not None:
             from ..security.torch_op_guard import TorchOpGuard
+            from cann_bench_utils import cann_bench_cache_clean
             with TorchOpGuard.pause():
                 _, _, reduce_input = self._warmup_tensors
-                torch.max(reduce_input)
+                cann_bench_cache_clean(reduce_input)
                 torch.npu.synchronize(reduce_input.device)
 
     def _synchronize_profile_step(self) -> None:

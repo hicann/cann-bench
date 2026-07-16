@@ -281,7 +281,56 @@ check_python() {
     log_info "Python版本: $(python --version)"
 }
 
+# V3 Anti-Cheat: 检测并安装 cann_bench_utils（强制依赖）
+ensure_cann_bench_utils() {
+    if python -c "from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean" 2>/dev/null; then
+        log_info "cann_bench_utils 已安装"
+        return 0
+    fi
+
+    log_info "cann_bench_utils 未安装，开始自动编译安装..."
+
+    local UTILS_DIR="${PROJECT_ROOT}/src/cann_bench_utils"
+    if [[ ! -d "${UTILS_DIR}" ]]; then
+        log_error "cann_bench_utils 源码目录不存在: ${UTILS_DIR}"
+        log_error "V3 Anti-Cheat 需要 cann_bench_utils，请检查代码库完整性"
+        exit 1
+    fi
+
+    # 编译
+    log_info "编译 cann_bench_utils..."
+    cd "${UTILS_DIR}"
+    if ! bash build.sh &> /tmp/cann_bench_utils_build.log; then
+        log_error "cann_bench_utils 编译失败，查看日志: /tmp/cann_bench_utils_build.log"
+        exit 1
+    fi
+
+    # 安装
+    log_info "安装 cann_bench_utils..."
+    local WHEEL=$(ls -t dist/cann_bench_utils-*.whl 2>/dev/null | head -1)
+    if [[ -z "${WHEEL}" ]]; then
+        log_error "未找到编译的 wheel 包"
+        exit 1
+    fi
+
+    if ! pip install "${WHEEL}" --force-reinstall &> /tmp/cann_bench_utils_install.log; then
+        log_error "cann_bench_utils 安装失败，查看日志: /tmp/cann_bench_utils_install.log"
+        exit 1
+    fi
+
+    cd "${PROJECT_ROOT}"
+
+    # 验证安装
+    if python -c "from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean" 2>/dev/null; then
+        log_info "cann_bench_utils 安装成功"
+    else
+        log_error "cann_bench_utils 安装验证失败"
+        exit 1
+    fi
+}
+
 # 卸载已安装的cann_bench包（避免算子重复注册冲突）
+# V3 Anti-Cheat: 排除 cann_bench_utils（强制依赖，不能卸载）
 uninstall_packages() {
     for pkg in cann_bench cann_bench_golden; do
         if pip show "${pkg}" &> /dev/null; then
@@ -289,6 +338,8 @@ uninstall_packages() {
             pip uninstall "${pkg}" -y &> /dev/null || true
         fi
     done
+
+    # 注意: cann_bench_utils 不在此卸载列表中（V3 Anti-Cheat 强制依赖）
 }
 
 # 检查tasks 数据目录
@@ -461,8 +512,12 @@ main() {
 
     check_python
 
+    # V3 Anti-Cheat: 确保 cann_bench_utils 已安装（强制依赖）
+    ensure_cann_bench_utils
+
     # 仅在有 source-dir 时卸载 cann_bench（避免与即将编译安装的包冲突）
     # 无 source-dir 时保留已安装的包（golden whl 或 submission whl）
+    # 注意: cann_bench_utils 永远不会被卸载（V3 Anti-Cheat 强制依赖）
     if [[ -n "${SOURCE_DIR}" ]]; then
         uninstall_packages
     fi
