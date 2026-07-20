@@ -1,0 +1,34 @@
+# Python env spec for the cann-toolkit-base image (uv project mode).
+# `uv lock` -> uv.lock (committed, hash-verified); Dockerfile does `uv sync --frozen`.
+# package = false: this is a dependency set, not a buildable package.
+# pip/setuptools/wheel/build are listed on purpose -- the Toolkit ge-compiler sub-installer shells out
+# to pip3; the submitted torch extension builds via setuptools (setup.py) OR `python -m build`, and the
+# latter needs the `build` frontend package (some submission build_wheel.sh use it, not setup.py).
+
+[project]
+name = "cann-toolkit-base"
+version = "0"
+requires-python = "==3.13.*"
+dependencies = [
+    "torch==2.10.0",
+    "torch-npu==2.10.0.post2",
+    "numpy", "pyyaml", "decorator", "attrs", "scipy", "cloudpickle", "ml-dtypes", "psutil",
+    "filelock", "typing-extensions", "sympy", "networkx", "jinja2", "fsspec", "mpmath", "markupsafe",
+    "pip", "setuptools", "wheel", "build",
+]
+
+# Default index = canonical PyPI (uv's implicit default). On network-restricted hosts, mirror at lock time
+# (`uv lock --default-index <mirror>`) or sed the lock for --frozen builds (files.pythonhosted.org/packages
+# -> <mirror>/packages, e.g. mirrors.huaweicloud.com/repository/pypi). torch (+cpu) has its own explicit index.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[tool.uv]
+package = false
+# torch_npu is linux-only (no mac/win wheels); scope the lock so resolution never fails off-linux.
+environments = ["sys_platform == 'linux'"]
