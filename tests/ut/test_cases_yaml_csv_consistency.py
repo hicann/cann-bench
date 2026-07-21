@@ -41,10 +41,15 @@ from kernel_eval.config import get_project_root
 
 
 def _scan_dirs() -> list[Path]:
-    """扫描 tasks/ 和 bench_lab/ 下含 cases.yaml 或 cases.csv 的所有目录"""
+    """扫描 tasks/ 下含 cases.yaml 或 cases.csv 的所有目录。
+
+    只扫 tasks/,不扫 bench_lab/:bench_lab 是"实验/孵化区,不纳入版本管理"(README/changelog),
+    其 cases.csv 又是 cases.yaml 经 scripts/utils/yaml_to_csv.py 的派生导出(评测只读 cases.yaml),
+    对孵化区强制 yaml/csv 一致只会平添漂移噪声而无实益。见 issue #91。
+    """
     root = get_project_root()
     dirs: list[Path] = []
-    for bench_dir in [root / "tasks", root / "bench_lab"]:
+    for bench_dir in [root / "tasks"]:
         if not bench_dir.is_dir():
             continue
         for yaml_path in bench_dir.rglob("cases.yaml"):
@@ -469,6 +474,13 @@ class TestCasesYamlCsvConsistency:
                 if field in ("operator", "note"):
                     # 纯字符串字段
                     csv_val = csv_raw
+                    if field == "note":
+                        # note 尾部可带 " | baseline_kernels: <Kernel>xN" —— 该标注是派生元数据
+                        # (曾为 scripts/anti_cheat/benchmarked_kernels.txt 的来源),不属手写规格,
+                        # 且运行期无任何消费方(V3 反作弊禁用整棵 kernel 树,不读该清单),故只比较
+                        # baseline_kernels 之前的正文,允许 YAML/CSV 任一侧带或不带该后缀。
+                        yaml_norm = _strip_baseline_kernels_note(yaml_norm)
+                        csv_val = _strip_baseline_kernels_note(csv_val)
                 elif field == "case_id":
                     # int 字段
                     try:
@@ -486,6 +498,17 @@ class TestCasesYamlCsvConsistency:
                     )
 
         assert not mismatches, f"{rel}:\n" + "\n".join(mismatches)
+
+
+def _strip_baseline_kernels_note(v):
+    """去掉 note 尾部派生的 " | baseline_kernels: ..." 标注,只保留正文。
+
+    该后缀是派生元数据(非手写规格),运行期无消费方,只是 CSV/YAML 一侧可能带、另一侧不带,
+    故比较时统一剥离。非字符串原样返回。
+    """
+    if isinstance(v, str):
+        return v.split(" | baseline_kernels:", 1)[0]
+    return v
 
 
 def _repr_val(v: object) -> str:
