@@ -106,6 +106,10 @@ class CompareResult:
     cancel_total_count: int = 0  # 相消位置总计数
     small_value_passed: bool = True  # 小值域兜底判定是否通过
     cancel_passed: bool = True       # 相消兜底判定是否通过
+    normal_error_count: int = 0       # 正常值域 NPU 错误计数
+    normal_cpu_error_count: int = 0   # 正常值域 CPU(同精度参考) 错误计数
+    normal_total_count: int = 0       # 正常值域总计数
+    normal_passed: bool = True        # 正常值域同精度兜底判定是否通过
     error_msg: Optional[str] = None
     output_results: List[SingleOutputResult] = field(default_factory=list)  # 各输出独立结果
 
@@ -129,6 +133,10 @@ class CompareResult:
             'cancel_total_count': self.cancel_total_count,
             'small_value_passed': self.small_value_passed,
             'cancel_passed': self.cancel_passed,
+            'normal_error_count': self.normal_error_count,
+            'normal_cpu_error_count': self.normal_cpu_error_count,
+            'normal_total_count': self.normal_total_count,
+            'normal_passed': self.normal_passed,
             'error_msg': self.error_msg,
             'output_results': [r.to_dict() for r in self.output_results],
         }
@@ -596,46 +604,52 @@ def _compare_single_tensor(
 
     normal_mismatch_count = int(mismatch_in_normal.sum())
 
-    # 最终判定逻辑：
-    # 1. 如果正常值域位置有相对误差超标的点 → 直接失败（不是特殊情况）
-    # 2. 如果只有小值域/相消位置超标 → 使用兜底判定
-    if normal_mismatch_count > 0:
-        # 正常值域位置有误差超标，直接失败
-        passed = False
-        # 计算排除小值域/相消后的 MERE/MARE 用于显示
-        normal_mask = ~small_value_mask & ~cancel_mask & valid_mask
-        normal_relative_error = relative_error[normal_mask]
+    # === 正常值域兜底判定（issue #92）===
+    # 与小值域/相消对齐，正常值域也做同精度对照，但更保守：仅当同精度参考(native)
+    # 自身在正常值域也超标时才放宽（深归约/病态 fp32 场景，如 conv K=9216 的固有舍入）；
+    # 参考干净时维持"任一正常值域超标即失败"的现状严格判定——故对非病态场景零改动。
+    # 缺 native_output 时 cpu_relative_error≡0 → normal_cpu_error_count=0 → 走严格分支，不放宽。
+    normal_region_mask = ~small_value_mask & ~cancel_mask & valid_mask
+    normal_total_count = int(normal_region_mask.sum())
+    normal_error_count = normal_mismatch_count  # NPU 在正常值域的超标点数
+    normal_cpu_error_count = int(
+        (normal_region_mask & (cpu_relative_error > mare_threshold)).sum())
+    if normal_error_count == 0:
+        normal_passed = True
+    elif normal_cpu_error_count == 0:
+        # 同精度参考干净、候选却超标 → 失败（与现状一致，不放宽）
+        normal_passed = False
+    else:
+        # 同精度参考自身也超标（fp32 固有深归约误差）→ 允许候选不差于 2× 参考
+        normal_passed = (normal_error_count / normal_cpu_error_count) <= 2
+
+    # 最终判定：三个值域各自兜底判定，全部通过才算通过。
+    passed = normal_passed and small_value_passed and cancel_passed
+
+    # 显示用 MERE/MARE
+    normal_relative_error = relative_error[normal_region_mask]
+    if not normal_passed:
+        # 正常值域导致失败：显示排除小值域/相消后的 MERE/MARE
         if len(normal_relative_error) > 0:
             display_mere = float(normal_relative_error.mean())
             display_mare = float(normal_relative_error.max())
         else:
-            # 正常值域完全为空（所有位置都在小值域/相消），
-            # 但 mismatch_in_normal > 0 说明有超标点不在小值域也不在相消范围——
-            # 这只在 mask 定义有交叉遗漏时出现。fallback 到 overall 值避免 0 误差显示。
             display_mere = overall_mere
             display_mare = overall_mare
-    else:
-        # 只有特殊位置（小值域/相消）误差超标，使用兜底判定
-        passed = small_value_passed and cancel_passed
-        if passed:
-            # 兜底判定通过时，显示排除小值域/相消后的 MERE/MARE，
-            # 避免 overall 值被小值域的巨大相对误差拉高，造成"MARE=0.9 却通过"的误解
-            normal_mask = ~small_value_mask & ~cancel_mask & valid_mask
-            normal_relative_error = relative_error[normal_mask]
-            if len(normal_relative_error) > 0:
-                display_mere = float(normal_relative_error.mean())
-                display_mare = float(normal_relative_error.max())
-            else:
-                display_mere = 0.0
-                display_mare = 0.0
+    elif passed:
+        # 全部通过：显示排除小值域/相消后的 MERE/MARE，
+        # 避免 overall 值被小值域的巨大相对误差拉高，造成"MARE=0.9 却通过"的误解
+        if len(normal_relative_error) > 0:
+            display_mere = float(normal_relative_error.mean())
+            display_mare = float(normal_relative_error.max())
         else:
-            # 兜底判定失败时，显示 overall MERE/MARE
-            # 此时失败原因是小值域/相消位置的误差，而非正常值域误差。
-            # 如果 normal 区域完全为空（所有位置都在小值域），normal 值会是 0，
-            # 与 passed=False 矛盾——用户看到"零误差但失败"。
-            # 使用 overall 值让用户看到实际误差大小，更符合直觉。
-            display_mere = overall_mere
-            display_mare = overall_mare
+            display_mere = 0.0
+            display_mare = 0.0
+    else:
+        # 正常值域通过、但小值域/相消兜底失败：显示 overall MERE/MARE，
+        # 让用户看到实际误差大小（失败源于小值域/相消而非正常值域）。
+        display_mere = overall_mere
+        display_mare = overall_mare
 
     return CompareResult(
         passed=passed,
@@ -656,6 +670,10 @@ def _compare_single_tensor(
         cancel_total_count=cancel_total_count,
         small_value_passed=small_value_passed,
         cancel_passed=cancel_passed,
+        normal_error_count=normal_error_count,
+        normal_cpu_error_count=normal_cpu_error_count,
+        normal_total_count=normal_total_count,
+        normal_passed=normal_passed,
     )
 
 
@@ -740,6 +758,10 @@ def compare_tensors(
         cancel_total_count = 0
         all_small_value_passed = True
         all_cancel_passed = True
+        normal_error_count = 0
+        normal_cpu_error_count = 0
+        normal_total_count = 0
+        all_normal_passed = True
 
         # 记录每个输出的独立判定结果
         single_output_results: List[SingleOutputResult] = []
@@ -804,6 +826,10 @@ def compare_tensors(
                     'cancel_total_count': result.cancel_total_count,
                     'small_value_passed': result.small_value_passed,
                     'cancel_passed': result.cancel_passed,
+                    'normal_error_count': result.normal_error_count,
+                    'normal_cpu_error_count': result.normal_cpu_error_count,
+                    'normal_total_count': result.normal_total_count,
+                    'normal_passed': result.normal_passed,
                 },
             )
             single_output_results.append(single_result)
@@ -824,6 +850,10 @@ def compare_tensors(
             cancel_total_count += result.cancel_total_count
             all_small_value_passed = all_small_value_passed and result.small_value_passed
             all_cancel_passed = all_cancel_passed and result.cancel_passed
+            normal_error_count += result.normal_error_count
+            normal_cpu_error_count += result.normal_cpu_error_count
+            normal_total_count += result.normal_total_count
+            all_normal_passed = all_normal_passed and result.normal_passed
 
         if total_count > 0:
             mere = mere_sum / total_count
@@ -864,6 +894,10 @@ def compare_tensors(
             cancel_total_count=cancel_total_count,
             small_value_passed=all_small_value_passed,
             cancel_passed=all_cancel_passed,
+            normal_error_count=normal_error_count,
+            normal_cpu_error_count=normal_cpu_error_count,
+            normal_total_count=normal_total_count,
+            normal_passed=all_normal_passed,
             output_results=single_output_results,  # 新增：各输出独立结果
         )
 

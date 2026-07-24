@@ -556,3 +556,52 @@ class TestCompareResultFallbackFlags:
         assert '相消兜底❌' not in summary
         # 只显示 MERE/MARE
         assert 'MERE=' in summary
+
+
+class TestNormalRegionSamePrecisionGate:
+    """issue #92：正常值域同精度兜底门（深归约 fp32 固有误差场景）。
+
+    fp32 阈值：mare_threshold = 10*2^-13 ≈ 1.22e-3；|golden|=1.0 远高于
+    small_value_threshold(6.1e-5)/cancel_boundary(3.9e-3)，注入点均落在正常值域。
+    """
+
+    @staticmethod
+    def _mk(n=1000, k=0, err=3e-3):
+        """fp32 张量：全 1.0，前 k 个点相对误差 err（> mare_threshold）。"""
+        t = torch.ones(n, dtype=torch.float32)
+        if k > 0:
+            t[:k] = float(1.0 + err)
+        return t
+
+    def _cmp(self, output, native, n=1000):
+        golden = torch.ones(n, dtype=torch.float64)  # fp64 oracle
+        return compare_tensors(output, golden, dtype="float32", native_output=native)
+
+    def test_candidate_equals_native_passes(self):
+        """候选 == 同精度参考（issue #92 复现）→ npu==cpu → ratio 1 → 通过。"""
+        ref = self._mk(k=100)
+        r = self._cmp(ref, ref)
+        assert r.normal_error_count == 100 and r.normal_cpu_error_count == 100
+        assert r.normal_passed is True and r.passed is True
+
+    def test_candidate_within_2x_reference_passes(self):
+        r = self._cmp(self._mk(k=150), self._mk(k=100))  # 1.5x 参考
+        assert r.normal_error_count == 150 and r.normal_cpu_error_count == 100
+        assert r.normal_passed is True and r.passed is True
+
+    def test_candidate_worse_than_2x_reference_fails(self):
+        r = self._cmp(self._mk(k=300), self._mk(k=100))  # 3x 参考
+        assert r.normal_error_count == 300 and r.normal_cpu_error_count == 100
+        assert r.normal_passed is False and r.passed is False
+
+    def test_clean_reference_keeps_strict(self):
+        """守卫：参考干净(0 错点)、候选却超标 → 仍失败（非病态场景零放宽）。"""
+        r = self._cmp(self._mk(k=5), self._mk(k=0))
+        assert r.normal_cpu_error_count == 0 and r.normal_error_count == 5
+        assert r.normal_passed is False and r.passed is False
+
+    def test_candidate_better_than_reference_passes(self):
+        """候选比参考还好(0 错点) → 通过。"""
+        r = self._cmp(self._mk(k=0), self._mk(k=100))
+        assert r.normal_error_count == 0
+        assert r.normal_passed is True and r.passed is True

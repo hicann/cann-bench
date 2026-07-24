@@ -448,7 +448,7 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 所有位置 → 计算整体相对误差 →
   若 MERE < threshold 且 MARE < mare_threshold → 通过 ✓
   若不通过 → 分析失败位置所属场景 →
-    ├─ 正常值域位置失败 → 直接失败 ✗
+    ├─ 正常值域位置失败 → 同精度参考(native)在这些点也超标? → 是: 用 ErrorCount 比值标准; 否: 直接失败 ✗
     ├─ 小值域位置失败 → 使用小值域标准判定
     └─ 相消位置失败 → 使用相消标准判定
 ```
@@ -482,6 +482,14 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 | **MARE阈值(10×Threshold)** | 2^-7 | 2^-4 | 2^-10 | 2^-8 | 2^-0 | 2^-1 |
 
 **通过标准：** MERE < Threshold 且 MARE < 10 × Threshold
+
+**同精度兜底（issue #92，深归约 fp32 场景）：** 当 MARE 超标点均在正常值域，但**同精度参考（native）自身**在这些点也超过 MARE 阈值时（大 reduce 深度的固有 fp32 舍入，如 conv K = C·kH·kW = 9216——此时连正确的 fp32 参考实现都无法满足固定阈值），采用与小值域/相消一致的 ErrorCount 比值标准：
+
+$$
+\frac{\text{ErrorCount}_{\text{npu, normal}}}{\max(\text{ErrorCount}_{\text{cpu, normal}}, 1)} \leq 2
+$$
+
+其中 ErrorCount 为该值域内相对误差超过 MARE 阈值的点数。**仅当同精度参考自身也超标时才启用此兜底**；参考在正常值域干净（$\text{ErrorCount}_{\text{cpu, normal}} = 0$）时维持"任一正常值域超标即失败"的固定阈值判定——因此对非病态（非深归约）场景无任何放宽。缺同精度参考（native）时同样退化为固定阈值判定。
 
 ##### 小值域判定
 
