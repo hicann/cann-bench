@@ -54,6 +54,7 @@ from .subprocess_utils import (
 )
 from ..config import Config, get_config, get_project_root
 from ..base.models import CaseSpec
+from ..base.result import is_precision_failure_type
 
 
 # ---------------------------------------------------------------------------
@@ -587,6 +588,8 @@ class ProcessPoolCoordinator:
         batch_cases = task.perf_batch_cases
         if batch_cases is None:
             batch_cases = getattr(self.base_config, "perf_batch_cases", True)
+        if outer_isolation:
+            batch_cases = False
         if batch_cases:
             cmd.append("--perf-batch-cases")
         else:
@@ -638,6 +641,153 @@ class ProcessPoolCoordinator:
             batch_cases
             and self.process_config.enable_profiler
             and len(task.cases) > 1
+            and not getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
+        )
+
+    def _task_uses_pypto_batch(self, task: TaskUnit) -> bool:
+        return bool(
+            getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
+            and len(task.cases) > 1
+        )
+
+    def _needs_process_group_cleanup(self) -> bool:
+        return bool(
+            self.process_config.enable_profiler
+            or getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
+        )
+
+    @staticmethod
+    def _is_unexecuted_pro_case(result: EvalCaseResult) -> bool:
+        return bool(
+            not result.success and result.failure_type == "cascade_device"
+            and result.skipped_before_execution is True
+            and result.accuracy_result is None and result.perf_result is None
+            and result.ai_run_result is None and result.golden_run_result is None
+        )
+
+    @classmethod
+    def _is_terminal_pro_verdict(cls, result: EvalCaseResult) -> bool:
+        """Never discard a recorded failure to rerun until a candidate passes.
+
+        Even perf_collection_failed can include candidate execution errors;
+        it is not sufficient evidence of a retryable infrastructure failure.
+        """
+        if cls._is_unexecuted_pro_case(result):
+            return False
+        if not result.success or (result.accuracy_result is not None
+                                  and not result.accuracy_result.passed):
+            return True
+        perf = result.perf_result
+        if perf is None:
+            return False
+        if perf.metadata.get("cpu_fallback_detected"):
+            return True
+        return not perf.is_success()
+
+    @staticmethod
+    def _pro_failure_priority(result: EvalCaseResult) -> int:
+        """Duplicate rows must not downgrade a definitive rejection."""
+        if is_precision_failure_type(result.failure_type):
+            return 4
+        perf = result.perf_result
+        if perf is not None:
+            if perf.metadata.get("cpu_fallback_detected"):
+                return 3
+            if not perf.is_success() and perf.metadata.get("perf_collection_failed") is False:
+                return 2
+        return 1
+
+    @staticmethod
+    def _read_pro_results(output_file: str, strict: bool = False) -> List[EvalCaseResult]:
+        """Recover valid rows independently so a bad row cannot erase a verdict."""
+        try:
+            rows = json.loads(Path(output_file).read_text()).get("case_results", [])
+        except (OSError, ValueError, AttributeError):
+            return []
+        if not isinstance(rows, list):
+            return []
+        results = []
+        for row in rows:
+            try:
+                if not isinstance(row.get("case_id"), str) or not isinstance(row.get("success"), bool):
+                    raise ValueError("invalid Pro result identity or success flag")
+                result = EvalCaseResult.from_dict(row)
+                perf = result.perf_result
+                if perf is not None and perf.metadata.get("cpu_fallback_detected"):
+                    perf.metadata["perf_collection_failed"] = False
+                if perf is not None and (not perf.is_success()
+                                         or perf.metadata.get("cpu_fallback_detected")):
+                    perf.elapsed_us = 0.0
+                results.append(result)
+            except (ValueError, TypeError, KeyError, AttributeError):
+                if strict:
+                    return []
+                continue
+        return results
+
+    def _communicate_task(self, proc, task: TaskUnit, output_file: str):
+        """Bound a reused worker by both progress and total elapsed time.
+
+        Completed IDs are a liveness signal, not a security boundary. Only
+        strict monotonic progress within this task renews the per-case budget.
+        """
+        budget = self.process_config.timeout_per_operator
+        if not self._task_uses_pypto_batch(task):
+            return proc.communicate(timeout=len(task.cases) * budget)
+        expected = {case.get_case_id_str() for case in task.cases}
+        completed = set()
+        now = time.monotonic()
+        absolute_deadline = now + len(task.cases) * budget
+        progress_deadline = now + budget
+        while True:
+            remaining = min(absolute_deadline, progress_deadline) - time.monotonic()
+            if remaining <= 0:
+                reason = "total deadline" if time.monotonic() >= absolute_deadline else "no case progress"
+                raise subprocess.TimeoutExpired([*proc.args, f"({reason})"], budget)
+            try:
+                return proc.communicate(timeout=min(5.0, remaining))
+            except subprocess.TimeoutExpired:
+                rows = self._read_pro_results(output_file, strict=True)
+                ids = {row.case_id for row in rows}
+                if len(ids) == len(rows) and completed < ids <= expected:
+                    completed = ids
+                    progress_deadline = time.monotonic() + budget
+
+    def _pypto_batch_failure(self, task: TaskUnit, reason: str, retry_allowed: bool,
+                             observed_results=None):
+        """Retry infrastructure failures without erasing already observed failures."""
+        expected = {case.get_case_id_str() for case in task.cases}
+        terminal = {}
+        for result in observed_results or []:
+            if result.case_id not in expected or not self._is_terminal_pro_verdict(result):
+                continue
+            previous = terminal.get(result.case_id)
+            if previous is None or self._pro_failure_priority(result) > self._pro_failure_priority(previous):
+                terminal[result.case_id] = result
+        retry_cases = [case for case in task.cases if case.get_case_id_str() not in terminal]
+        should_retry = bool(
+            retry_cases and retry_allowed
+            and task.retry_count < self.process_config.max_retries
+        )
+        action = (
+            f"{len(retry_cases)} 个 case 将在独立进程重试，保留 {len(terminal)} 个失败结论"
+            if should_retry
+            else "批次已丢弃，重试已关闭或耗尽"
+        )
+        print(
+            f"[WARN] {task.operator}@Card{task.device_id}: PyPTO Pro worker 批量失败"
+            f" ({reason})，{action}",
+            flush=True,
+        )
+        return (
+            task,
+            list(terminal.values()) + _synthesize_failure_cases(
+                retry_cases, "subprocess_failure",
+                f"PyPTO Pro batch discarded; isolated retry required: {reason}",
+            ),
+            should_retry,
+            "pypto_pro_batch_failure",
+            retry_cases,
         )
 
     def _terminate_timed_out_process(
@@ -648,11 +798,7 @@ class ProcessPoolCoordinator:
         Profiler 或 PyPTO Pro worker 可能派生 msprof/parser/Runtime 后代，
         必须清理整个进程组；纯 correctness worker 保持只终止直接子进程。
         """
-        if (
-            getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
-            or self.process_config.enable_profiler
-            or (task is not None and self._task_uses_perf_batch(task))
-        ):
+        if self._needs_process_group_cleanup():
             _terminate_process_group(proc)
             return
 
@@ -662,6 +808,28 @@ class ProcessPoolCoordinator:
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait()
+
+    def _group_pro_tasks(self, task_units: List[TaskUnit]) -> List[TaskUnit]:
+        """Reuse the common per-card grouping policy for initial Pro tasks."""
+        if not getattr(self.base_config, "pypto_pro_outer_case_isolation", False):
+            return task_units
+        if any(len(t.cases) != 1 or t.retry_count or t.perf_batch_cases is not None
+               for t in task_units):
+            return task_units
+        cap = self.base_config.max_cases_per_task_unit
+        if cap == 1:
+            return task_units
+        grouped = {}
+        for task in task_units:
+            key = (task.operator, task.rel_path)
+            grouped.setdefault(key, []).extend(task.cases)
+        return [
+            unit
+            for (operator, _), cases in grouped.items()
+            for unit in build_task_units(
+                {operator: cases}, self.card_count, max_cases_per_task_unit=cap,
+            )
+        ]
 
     def evaluate_task_units(self, task_units: List[TaskUnit]) -> List[EvalCaseResult]:
         """按 TaskUnit 并行评测
@@ -682,6 +850,7 @@ class ProcessPoolCoordinator:
         if not task_units:
             return []
 
+        task_units = self._group_pro_tasks(task_units)
         max_workers = self.card_count * self.process_config.processes_per_card
         total_cases = sum(len(t.cases) for t in task_units)
 
@@ -737,7 +906,7 @@ class ProcessPoolCoordinator:
                           f"（OOM Kill 时主进程也可能被杀）", flush=True)
 
                 try:
-                    child_stdout, child_stderr = proc.communicate(timeout=timeout)
+                    child_stdout, child_stderr = self._communicate_task(proc, task, output_file)
                     rc = proc.returncode
                 except subprocess.TimeoutExpired:
                     # 从活跃列表移除已完成的子进程
@@ -746,15 +915,27 @@ class ProcessPoolCoordinator:
                     except ValueError:
                         pass
 
-                    # 终止前读取已有输出用于诊断
+                    deadline_info = (
+                        f"无 case 进展上限 {self.process_config.timeout_per_operator}s，整组上限 {timeout}s"
+                        if self._task_uses_pypto_batch(task) else f"{timeout}s"
+                    )
+                    print(f"[WARN] TaskUnit {task.operator}@Card{task.device_id} 超时 ({deadline_info})")
+                    pro_worker = getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
+                    if pro_worker:
+                        self._terminate_timed_out_process(proc, task)
                     try:
-                        child_stdout, child_stderr = proc.communicate(timeout=5)
+                        child_stdout, child_stderr = proc.communicate(timeout=1 if pro_worker else 5)
                     except Exception:
                         child_stdout, child_stderr = "", ""
-
-                    print(f"[WARN] TaskUnit {task.operator}@Card{task.device_id} 超时 ({timeout}s)")
-                    self._terminate_timed_out_process(proc, task)
+                    if not pro_worker:
+                        self._terminate_timed_out_process(proc, task)
                     _forward_child_output(child_stdout, child_stderr)
+                    if self._task_uses_pypto_batch(task):
+                        return self._pypto_batch_failure(
+                            task, f"timeout ({deadline_info})",
+                            self.process_config.retry_on_timeout,
+                            self._read_pro_results(output_file),
+                        )
                     # 超时：尝试恢复部分结果，失败则合成全量 timeout 失败
                     partial = _try_recover_partial_results(output_file)
                     if partial:
@@ -789,11 +970,19 @@ class ProcessPoolCoordinator:
 
                 if rc != 0:
                     batch_task = self._task_uses_perf_batch(task)
-                    if self.process_config.enable_profiler or batch_task:
+                    if self._needs_process_group_cleanup():
                         _terminate_process_group(proc, grace_sec=1.0)
                     crash_diag = _extract_crash_diag(rc, child_stdout, child_stderr)
                     if crash_diag:
                         print(f"[WARN] {task.operator}@Card{task.device_id}:{crash_diag}", flush=True)
+                    if self._task_uses_pypto_batch(task):
+                        oom = _is_oom_killed(proc, rc)
+                        return self._pypto_batch_failure(
+                            task, f"worker exit {rc}{crash_diag}",
+                            self.process_config.retry_on_oom if oom
+                            else self.process_config.retry_on_failure,
+                            self._read_pro_results(output_file),
+                        )
                     if _is_oom_killed(proc, rc):
                         if batch_task:
                             should_retry = (
@@ -888,6 +1077,13 @@ class ProcessPoolCoordinator:
                     data = json.loads(Path(output_file).read_text())
                 except (json.JSONDecodeError, OSError) as e:
                     print(f"[WARN] TaskUnit {task.operator}@Card{task.device_id} 结果解析失败: {e}")
+                    if self._task_uses_pypto_batch(task):
+                        _terminate_process_group(proc, grace_sec=1.0)
+                        return self._pypto_batch_failure(
+                            task, f"invalid result JSON: {e}",
+                            self.process_config.retry_on_failure,
+                            self._read_pro_results(output_file),
+                        )
                     should_retry = (
                         self.process_config.retry_on_failure and
                         task.retry_count < self.process_config.max_retries
@@ -895,7 +1091,52 @@ class ProcessPoolCoordinator:
                     return (task, _synthesize_failure_cases(task.cases, "subprocess_failure",
                         f"子进程结果 JSON 解析失败: {e}"), should_retry, "subprocess_failure", task.cases)
 
-                case_results = [EvalCaseResult.from_dict(r) for r in data.get("case_results", [])]
+                if self._task_uses_pypto_batch(task):
+                    case_results = self._read_pro_results(output_file)
+                    expected = {case.get_case_id_str() for case in task.cases}
+                    actual = [result.case_id for result in case_results]
+                    raw_results = data.get("case_results") if isinstance(data, dict) else None
+                    valid = (isinstance(raw_results, list)
+                             and len(raw_results) == len(actual) == len(expected)
+                             and set(actual) == expected)
+                    if self.process_config.enable_profiler:
+                        valid = valid and all(
+                            self._is_unexecuted_pro_case(result)
+                            or self._is_terminal_pro_verdict(result)
+                            or (result.perf_result is not None and result.perf_result.is_success())
+                            for result in case_results
+                        )
+                    if not valid:
+                        _terminate_process_group(proc, grace_sec=1.0)
+                        return self._pypto_batch_failure(
+                            task, "incomplete or collection-failed case results",
+                            self.process_config.retry_on_failure,
+                            case_results,
+                        )
+                    unexecuted = {
+                        result.case_id for result in case_results
+                        if self._is_unexecuted_pro_case(result)
+                    }
+                    if unexecuted:
+                        # A clean exit completed the child API guard and result
+                        # validation. Keep its completed cases and retry only
+                        # cases skipped after the worker context became unhealthy.
+                        _terminate_process_group(proc, grace_sec=1.0)
+                        retry_cases = [case for case in task.cases
+                                       if case.get_case_id_str() in unexecuted]
+                        should_retry = (
+                            self.process_config.retry_on_failure
+                            and task.retry_count < self.process_config.max_retries
+                        )
+                        print(
+                            f"[WARN] {task.operator}@Card{task.device_id}: Pro worker "
+                            f"设备异常，保留已执行结果，{len(retry_cases)} 个未执行 case "
+                            f"需要独立进程恢复 (retry={should_retry})", flush=True,
+                        )
+                        return (task, case_results, should_retry,
+                                "pypto_pro_batch_failure", retry_cases)
+                else:
+                    case_results = [EvalCaseResult.from_dict(row) for row in data.get("case_results", [])]
                 return (task, case_results, False, None, [])  # 成功，不需要重试
 
             finally:
@@ -974,9 +1215,12 @@ class ProcessPoolCoordinator:
                             # 只有还有需要重试的case时才创建重试任务
                             if cases_to_retry:
                                 # 创建重试任务（device_id 占位，_process_retry_queue 中由设备池动态分配）
+                                isolated_retry = failure_type in (
+                                    "perf_batch_oom", "pypto_pro_batch_failure",
+                                )
                                 retry_groups = (
                                     [[case] for case in cases_to_retry]
-                                    if failure_type == "perf_batch_oom"
+                                    if isolated_retry
                                     else [cases_to_retry]
                                 )
                                 for retry_cases in retry_groups:
@@ -989,18 +1233,18 @@ class ProcessPoolCoordinator:
                                         excluded_devices=task.excluded_devices | {task.device_id},
                                         parent_task_id=f"{task.operator}@Card{task.device_id}",
                                         perf_batch_cases=(
-                                            False if failure_type == "perf_batch_oom"
-                                            else task.perf_batch_cases
+                                            False if isolated_retry else task.perf_batch_cases
                                         ),
                                     )
                                     retry_queue.append(retry_task)
                                 excluded_count = len(failed_cases) - len(cases_to_retry)
                                 excluded_msg = f", 排除 {excluded_count} 个多次失败的用例" if excluded_count > 0 else ""
-                                retry_mode = (
-                                    "逐 case profiler"
-                                    if failure_type == "perf_batch_oom"
-                                    else "普通重试"
-                                )
+                                if failure_type == "pypto_pro_batch_failure":
+                                    retry_mode = "独立单 case worker"
+                                elif isolated_retry:
+                                    retry_mode = "逐 case profiler"
+                                else:
+                                    retry_mode = "普通重试"
                                 print(f"[INFO] 重试任务已加入队列: {task.operator} "
                                       f"(retry {task.retry_count + 1}/{self.process_config.max_retries}, "
                                       f"{len(cases_to_retry)} 个用例{excluded_msg}, {retry_mode}, "
@@ -1095,12 +1339,16 @@ class ProcessPoolCoordinator:
                         self._active_processes.remove(proc)
                     except ValueError:
                         pass
+                    print(f"[WARN] 重试任务 {task.operator}@Card{task.device_id} 仍然超时")
+                    pro_worker = getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
+                    if pro_worker:
+                        self._terminate_timed_out_process(proc, task)
                     try:
-                        child_stdout, child_stderr = proc.communicate(timeout=5)
+                        child_stdout, child_stderr = proc.communicate(timeout=1 if pro_worker else 5)
                     except Exception:
                         child_stdout, child_stderr = "", ""
-                    print(f"[WARN] 重试任务 {task.operator}@Card{task.device_id} 仍然超时")
-                    self._terminate_timed_out_process(proc, task)
+                    if not pro_worker:
+                        self._terminate_timed_out_process(proc, task)
                     _forward_child_output(child_stdout, child_stderr)
                     partial = _try_recover_partial_results(output_file)
                     if partial:
@@ -1120,10 +1368,7 @@ class ProcessPoolCoordinator:
                 _forward_child_output(child_stdout, child_stderr)
 
                 if rc != 0:
-                    if (
-                        self.process_config.enable_profiler
-                        or self._task_uses_perf_batch(task)
-                    ):
+                    if self._needs_process_group_cleanup():
                         _terminate_process_group(proc, grace_sec=1.0)
                     crash_diag = _extract_crash_diag(rc, child_stdout, child_stderr)
                     if crash_diag:
@@ -1161,7 +1406,13 @@ class ProcessPoolCoordinator:
                 try:
                     data = json.loads(Path(output_file).read_text())
                     case_results = [EvalCaseResult.from_dict(r) for r in data.get("case_results", [])]
-                    if task.perf_batch_cases is False and task.parent_task_id:
+                    if getattr(self.base_config, "pypto_pro_outer_case_isolation", False):
+                        expected = {case.get_case_id_str() for case in task.cases}
+                        actual = [result.case_id for result in case_results]
+                        if len(actual) != len(expected) or set(actual) != expected:
+                            raise ValueError("Pro retry returned incomplete or mismatched case IDs")
+                    if (task.perf_batch_cases is False and task.parent_task_id
+                            and not getattr(self.base_config, "pypto_pro_outer_case_isolation", False)):
                         for result in case_results:
                             if result.perf_result is None:
                                 continue
@@ -1175,7 +1426,11 @@ class ProcessPoolCoordinator:
                                 ),
                             })
                     return (task, case_results)
-                except (json.JSONDecodeError, OSError) as e:
+                except (OSError, ValueError, TypeError, KeyError, AttributeError) as e:
+                    if getattr(self.base_config, "pypto_pro_outer_case_isolation", False):
+                        _terminate_process_group(proc, grace_sec=1.0)
+                    elif not isinstance(e, (json.JSONDecodeError, OSError)):
+                        raise
                     return (task, _synthesize_failure_cases(task.cases, "subprocess_failure",
                         f"重试后结果解析失败: {e}"))
 
@@ -1269,9 +1524,7 @@ class ProcessPoolCoordinator:
         Popen 终止行为。
         """
         grace_sec = 5
-        outer_isolation = bool(getattr(
-            self.base_config, "pypto_pro_outer_case_isolation", False))
-        terminate_groups = outer_isolation or self.process_config.enable_profiler
+        terminate_groups = self._needs_process_group_cleanup()
         for proc in self._active_processes:
             if terminate_groups:
                 # 组长可能已经被 OOM killer 回收；仍需按原 pgid 清理后代。

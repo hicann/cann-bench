@@ -134,6 +134,9 @@ class EvalCaseResult:
     # profiler；None 表示平台不支持或本次未启用采样。
     memory_peak_mb: Optional[float] = None
     memory_baseline_mb: Optional[float] = None
+    # Explicit child-to-parent evidence that this case was skipped before any
+    # evaluation. Older results without this marker must not be assumed unrun.
+    skipped_before_execution: bool = False
 
     def get_speedup(self) -> float:
         """计算加速比（保留为诊断指标）
@@ -168,7 +171,7 @@ class EvalCaseResult:
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             'case_id': self.case_id,
             'rel_path': self.rel_path,
             'operator': self.operator,
@@ -193,6 +196,12 @@ class EvalCaseResult:
             'memory_peak_mb': self.memory_peak_mb,
             'memory_baseline_mb': self.memory_baseline_mb,
         }
+        if (self.skipped_before_execution is True
+                and self.golden_run_result is None and self.ai_run_result is None
+                and self.accuracy_result is None and self.perf_result is None
+                and not self.success and self.failure_type == 'cascade_device'):
+            result['skipped_before_execution'] = True
+        return result
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'EvalCaseResult':
@@ -281,6 +290,7 @@ class EvalCaseResult:
             baseline_perf_us=data.get('baseline_perf_us', 0.0),
             t_hw_us=data.get('t_hw_us', 0.0),
             failure_type=data.get('failure_type'),
+            skipped_before_execution=data.get('skipped_before_execution') is True,
             perf_recheck=data.get('perf_recheck'),
             memory_peak_mb=data.get('memory_peak_mb'),
             memory_baseline_mb=data.get('memory_baseline_mb'),

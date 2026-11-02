@@ -649,6 +649,11 @@ class Evaluator:
     def _should_batch_perf(self, cases: list) -> bool:
         if not getattr(self.config, 'perf_batch_cases', False):
             return False
+        # Pro worker reuse is experimental process/JIT reuse only. The shared
+        # profiler currently discards sampled outputs and changes conditioning
+        # boundaries; its unprofiled precheck cannot certify measured results.
+        if getattr(self.config, 'pypto_pro_outer_case_isolation', False):
+            return False
         if len(cases) < 2 or self._pypto_pro_jit_isolation:
             return False
         if self.perf_evaluator is None or not self.config.enable_profiler:
@@ -680,6 +685,10 @@ class Evaluator:
         batch_perf = self._should_batch_perf(cases)
         if batch_perf:
             self.op_runner.begin_perf_batch()
+        reused_pro_worker = (
+            getattr(self.config, 'pypto_pro_outer_case_isolation', False)
+            and len(cases) > 1
+        )
         consecutive_failures = 0
         # 设备状态: healthy → recovering → unrecoverable
         device_state = "healthy"
@@ -697,6 +706,7 @@ class Evaluator:
                     success=False,
                     error_msg="设备不可恢复，用例跳过",
                     failure_type="cascade_device",
+                    skipped_before_execution=reused_pro_worker,
                 )
                 results.append(result)
                 skipped_count += 1
@@ -718,7 +728,11 @@ class Evaluator:
             if self.incremental_output_path:
                 self._write_incremental_output(operator, rel_path, results, len(cases))
 
-            if not result.success:
+            perf_failed_in_pro = (
+                reused_pro_worker and result.perf_result is not None
+                and not result.perf_result.is_success()
+            )
+            if not result.success or perf_failed_in_pro:
                 consecutive_failures += 1
 
                 # 增强 cleanup：empty_cache + gc.collect
@@ -727,9 +741,15 @@ class Evaluator:
 
                 # 检查设备健康状态
                 if not self.device_manager.health_check():
+                    if reused_pro_worker:
+                        # A poisoned Pro context must not produce verdicts for
+                        # later cases. The parent retries unexecuted cases in
+                        # fresh workers while retaining the actual failure.
+                        device_state = "unrecoverable"
+                        print("[WARN] Pro worker 设备不健康，停止后续执行并交给父进程隔离恢复")
                     # 仅在连续 ≥3 失败且设备不健康时触发恢复尝试
                     # 避免偶发的单个 case 失败触发不必要的设备 reset
-                    if consecutive_failures >= 3 and device_state == "healthy":
+                    elif consecutive_failures >= 3 and device_state == "healthy":
                         print(f"[WARN] 连续 {consecutive_failures} 个 case 失败，"
                               f"NPU 设备可能异常，尝试恢复...")
 

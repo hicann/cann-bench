@@ -534,14 +534,13 @@ def _cmd_eval_npu(args, bench_root: str, filter_prefix: str, config: Config,
         cases_by_operator[c.operator].append(c)
 
     # ---- 多卡并行调度 ----
-    # PyPTO Pro 需要每 case 一个全新进程来隔离 runtime 全局状态。
     # 每卡并发度继续遵循 --processes-per-card（默认 2）；独立工作目录
-    # 避免并发 case 共享 JIT 编译产物。
+    # 避免并发 worker 共享运行时产物。
     from .eval.subprocess_utils import detect_pypto_pro_submission
     pypto_outer_isolation = detect_pypto_pro_submission()
     config.pypto_pro_outer_case_isolation = pypto_outer_isolation
     if pypto_outer_isolation:
-        print("[INFO] PyPTO Pro 提交: 启用单 case worker 隔离"
+        print("[INFO] PyPTO Pro 提交: 启用独立 worker 隔离"
               f"（{processes_per_card} 并发/卡）", flush=True)
 
     process_config = ProcessConfig(
