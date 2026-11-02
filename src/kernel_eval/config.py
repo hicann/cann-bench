@@ -141,6 +141,11 @@ class Config:
     # 覆盖整个维度）。CLI 通过 --input-dist 设置。
     input_dist: str = "uniform"
 
+    # Read-only, explicitly selected task fixtures; build with kernel_eval.cache_cli.
+    tensor_cache_dir: str = ""
+    tensor_cache_mode: str = "off"  # off / prefer (compute on miss) / require
+    tensor_cache_tasks: list[str] = field(default_factory=list)
+
 # 性能指标策略覆盖
     # None（默认）: 使用 BenchConfig 中注册的策略（通常为 kernel_details）
     # "trace_view": PYPTO 口径 — tilefwk/PYPTO aicore_e2e（由 CLI --perf-metric-strategy 设置）

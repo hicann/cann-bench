@@ -91,8 +91,10 @@ class TestExistingRegistriesInheritBase:
         assert hasattr(BenchRegistry, '_items')
         assert not hasattr(BenchRegistry, '_configs')
 
-    def test_bench_registry_base_methods(self):
+    def test_bench_registry_base_methods(self, monkeypatch):
         from kernel_eval.registry.bench_registry import BenchRegistry, BenchConfig
+        # Exercise clear() without removing plugins needed by later test modules.
+        monkeypatch.setattr(BenchRegistry, "_items", {})
         BenchRegistry.clear()
         cfg = BenchConfig(name="__test", description="test")
         BenchRegistry.register("__test", cfg)
@@ -107,8 +109,9 @@ class TestExistingRegistriesInheritBase:
         assert hasattr(ScoringSchemeRegistry, '_items')
         assert not hasattr(ScoringSchemeRegistry, '_schemes')
 
-    def test_scoring_scheme_registry_base_methods(self):
+    def test_scoring_scheme_registry_base_methods(self, monkeypatch):
         from kernel_eval.registry.scoring_registry import ScoringSchemeRegistry
+        monkeypatch.setattr(ScoringSchemeRegistry, "_items", {})
         ScoringSchemeRegistry.clear()
         assert not ScoringSchemeRegistry.is_registered("__test_nonexistent__")
         ScoringSchemeRegistry.register("__test", None)
@@ -121,9 +124,10 @@ class TestExistingRegistriesInheritBase:
         assert hasattr(GoldenLoaderRegistry, '_items')
         assert not hasattr(GoldenLoaderRegistry, '_loaders')
 
-    def test_golden_loader_registry_base_methods(self):
+    def test_golden_loader_registry_base_methods(self, monkeypatch):
         from kernel_eval.registry.golden_registry import GoldenLoaderRegistry
         from kernel_eval.base.loaders import GoldenLoaderBase
+        monkeypatch.setattr(GoldenLoaderRegistry, "_items", {})
         GoldenLoaderRegistry.clear()
         assert not GoldenLoaderRegistry.is_registered("__test")
         GoldenLoaderRegistry.register("__test", GoldenLoaderBase)

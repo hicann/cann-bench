@@ -43,12 +43,15 @@ protobuf
 ruamel.yaml>=0.18
 
 # ==================== 可选依赖 ====================
+# Tensor cache: install separately with `pip install 'safetensors>=0.6.2,<1'`
+# or `uv sync --extra tensor-cache`; disabled evaluations do not import it.
 # 视觉算子 golden（roi_align / nms）——对应 pyproject 的 [project.optional-dependencies].vision
 torchvision>=0.18.0
 # MX 量化 golden（bench_lab add_rms_norm_dynamic_mx_quant）延迟导入，缺失时报清晰错误
 en_dtypes>=0.0.4
 
 # ==================== 开发依赖（对齐 pyproject [dependency-groups].dev）====================
+safetensors>=0.6.2,<1
 pytest>=7.0.0
 pytest-timeout>=2.1.0
 black>=23.0.0

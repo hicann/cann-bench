@@ -33,6 +33,7 @@ from typing import Dict, List, Optional
 
 from .config import Config, get_config, get_project_root, set_config
 from .data.data_generator import INPUT_DIST_CHOICES
+from .data.tensor_cache import add_cache_arguments, configure_cache
 from .base.enums import DifficultyLevel
 from .benches.cann import CannTaskLoader, CannCaseLoader
 from .eval.evaluator import Evaluator, _write_json_atomic
@@ -274,6 +275,8 @@ def create_parser() -> argparse.ArgumentParser:
                               help=argparse.SUPPRESS)
 
     
+    add_cache_arguments(eval_parser)
+    add_cache_arguments(child_parser)
     return parser
 
 
@@ -372,6 +375,7 @@ def _create_config_from_args(args, bench_root: str) -> Config:
     eval_seed_raw = getattr(args, 'eval_seed', 0)
     config.eval_seed = None if eval_seed_raw == -1 else eval_seed_raw
     config.input_dist = getattr(args, 'input_dist', 'uniform')
+    configure_cache(config, args)
 
 # 性能指标策略覆盖：CLI --perf-metric-strategy 设置时覆盖 BenchConfig 默认值
     perf_metric_strategy = getattr(args, 'perf_metric_strategy', None)
@@ -749,6 +753,7 @@ def _create_config_from_args_for_child(args, bench_root: str) -> Config:
         args, 'pypto_pro_outer_case_isolation', False)
     config.timeout_per_operator = getattr(args, 'timeout_per_operator', 300)
     config.input_dist = getattr(args, 'input_dist', 'uniform')
+    configure_cache(config, args)
 
     torch_op_guard_mode = getattr(args, 'torch_op_guard_mode', None)
     if torch_op_guard_mode:

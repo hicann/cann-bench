@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from .config import Config, get_project_root, set_config
+from .data.tensor_cache import add_cache_arguments, configure_cache
 from .data.data_generator import INPUT_DIST_CHOICES
 
 
@@ -183,6 +184,7 @@ def _make_config(args: argparse.Namespace, bench_root: str, *, enable_profiler: 
     cfg.max_cases_per_task_unit = getattr(args, "max_cases_per_task_unit", 64)
     cfg.eval_seed = None if args.eval_seed == -1 else args.eval_seed
     cfg.input_dist = getattr(args, "input_dist", "uniform")
+    configure_cache(cfg, args)
     if args.source_dir:
         cfg.source_dir = args.source_dir
     cfg.agent_skill = getattr(args, 'agent_skill', '') or ''
@@ -697,6 +699,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument("--agent-skill", default="", help="评测对象 Agent/Skill 标签，写入报告元信息")
     parser.add_argument("--base-model", default="", help="评测对象 BaseModel 标签，写入报告元信息")
     parser.add_argument("--harness", default="", help="评测对象 Harness 标签，写入报告元信息")
+    add_cache_arguments(parser)
     return parser
 
 

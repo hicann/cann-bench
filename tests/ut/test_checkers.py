@@ -88,8 +88,11 @@ class TestRegistry:
         CheckerRegistry.unregister("custom_test")
         assert not is_checker_registered("custom_test")
 
-    def test_clear_registry(self):
+    def test_clear_registry(self, monkeypatch):
         """测试清空注册表"""
+        from kernel_eval.registry import checker_registry
+        # Keep the registered checkers available to subsequent evaluator tests.
+        monkeypatch.setattr(checker_registry, "_CHECKER_REGISTRY", CheckerRegistry.get_all())
         # 记录原始注册数量
         original_count = len(list_correctness_checkers())
         assert original_count >= 2  # 至少有 relative_error 和 allclose

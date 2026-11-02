@@ -173,6 +173,10 @@ pip install -r requirements.txt
 
     更多用法见 [docs/guide/quick_start.md](docs/guide/quick_start.md)。
 
+    对 LCE 等 CPU reference 开销较大的任务，可显式选择预构建的输入/参考输出缓存；
+    默认关闭，精度检查规则不变。容器格式、dtype 策略、构建和使用命令见
+    [可选 tensor cache](docs/design/tensor_cache.md)。
+
 3. **生成评测报告**（从已有 JSON 重新生成）
    ```bash
    # 使用默认模板 (tasks/description.html)

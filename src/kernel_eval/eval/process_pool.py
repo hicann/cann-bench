@@ -616,6 +616,13 @@ class ProcessPoolCoordinator:
         if eval_seed is not None:
             cmd += ["--eval-seed", str(eval_seed)]
 
+        cache_mode = getattr(self.base_config, "tensor_cache_mode", "off")
+        if cache_mode != "off":
+            cmd += ["--tensor-cache-mode", cache_mode,
+                    "--tensor-cache-dir", str(Path(self.base_config.tensor_cache_dir).expanduser().resolve())]
+            for task_path in self.base_config.tensor_cache_tasks:
+                cmd += ["--tensor-cache-task", task_path]
+
         # 输入分布：非默认值才透传，保持默认命令行不变
         input_dist = getattr(self.base_config, "input_dist", "uniform") or "uniform"
         if input_dist != "uniform":

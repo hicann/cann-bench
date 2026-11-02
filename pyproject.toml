@@ -26,9 +26,11 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = ["torchvision>=0.18.0"]  # 仅 roi_align/nms 的 golden 用到 → uv sync --extra vision
+tensor-cache = ["safetensors>=0.6.2,<1"]  # 可选的输入/参考输出 fixture 存储
 
 [dependency-groups]
 dev = [
+    "safetensors>=0.6.2,<1",  # exercise optional cache paths in CPU unit tests
     "pytest>=7.0.0",
     "pytest-timeout>=2.1.0",
     "black>=23.0.0",

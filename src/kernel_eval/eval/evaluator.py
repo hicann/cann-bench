@@ -47,6 +47,10 @@ from ..registry.loader_registry import get_task_loader, get_case_loader
 from ..registry.golden_registry import get_golden_loader
 from ..registry.bench_registry import get_bench_config
 from ..data.data_generator import DataGenerator
+from ..data.tensor_cache import (
+    TensorCache, TensorCacheError, TensorCacheUnsupportedError, case_seed as cache_case_seed,
+    identity_for, input_hashes, selected, validate_inputs,
+)
 from ..data.package_manager import PackageManager, PackageInfo
 from ..base.models import TaskSpec, CaseSpec
 from ..utils.device_manager import DeviceManager, DeviceConfig
@@ -275,6 +279,47 @@ class Evaluator:
         """加载AI生成的算子函数（委托给 OperatorMatcher）"""
         return self.operator_matcher.load_ai_operator(operator_name)
 
+    def build_tensor_cache(self, case: CaseSpec):
+        """Build trusted fixtures without importing/running a submitted candidate.
+
+        V1 excludes get_input hooks, non-contiguous/aliased input layouts and
+        device/distributed references. Raw outputs are saved before get_output.
+        """
+        identity = identity_for(self, case)
+        cache = TensorCache(self.config.tensor_cache_dir)
+        if not self.config.tensor_cache_dir:
+            raise TensorCacheError("Cache build requires a directory")
+        existing = cache.load(identity, case)
+        if existing is not None:
+            return cache.root / existing.key
+        inputs = self.data_generator.generate_input_tensors_from_case(
+            input_shapes=case.input_shapes, dtypes=case.dtypes,
+            value_ranges=case.value_ranges, seed=cache_case_seed(case, self.config.eval_seed))
+        validate_inputs(inputs, case)
+        original_hashes = input_hashes(inputs)
+        golden_func = self.golden_loader.get_golden_function(case.rel_path)
+        oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
+        golden_inputs = self._apply_golden_precision(inputs)
+        golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
+        oracle = self.op_runner.run(oracle_func, golden_params, case.get_case_id_str(),
+                                    golden_inputs, to_device=False, enable_profiler=False)
+        if not oracle.success:
+            raise TensorCacheError(self._format_run_failure("Cache oracle failed", oracle))
+        del golden_params, golden_inputs
+        if identity["golden_precision"] == "native_cpu":
+            native = oracle
+        else:
+            bench_func = self._bench_reference_func(case.rel_path, golden_func)
+            native_inputs = tensors_to_cpu(inputs)
+            native_params = self.param_builder.build_call_params(bench_func, case, native_inputs)
+            native = self.op_runner.run(bench_func, native_params, case.get_case_id_str(),
+                                        native_inputs, to_device=False, enable_profiler=False)
+            if not native.success:
+                raise TensorCacheError(self._format_run_failure("Cache native reference failed", native))
+        if input_hashes(inputs) != original_hashes:
+            raise TensorCacheError("Cache v1 does not support reference functions that mutate inputs")
+        return cache.write(identity, case, inputs, oracle.outputs, native.outputs)
+
     def evaluate_case(self, case: CaseSpec, *, ai_op_func: Callable = None) -> EvalCaseResult:
         """评测单个用例。
 
@@ -293,6 +338,16 @@ class Evaluator:
         # MC2 多卡通信类算子（如 MatmulReduceScatter / AllGatherMatmul 等）需要
         # 多 rank HCCL 进程组，无法走单进程 golden 路径，转交专用分布式 runner。
         if (case.attrs or {}).get("mc2_distributed", False):
+            if selected(self.config, case):
+                reason = "Tensor cache v1 does not support distributed cases"
+                if self.config.tensor_cache_mode == "require":
+                    return EvalCaseResult(
+                        case_id=case_id_str, rel_path=case.rel_path, operator=case.operator,
+                        case_num=case.case_num, success=False,
+                        error_msg=reason,
+                        failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+                    )
+                print(f"[tensor-cache] WARNING {case_id_str}: {reason}; computing without cache", flush=True)
             from .mc2_distributed_runner import MC2DistributedEvaluator
             merged_thresholds = self._get_merged_thresholds(case.rel_path)
             return MC2DistributedEvaluator(self.config).evaluate_case(
@@ -304,6 +359,7 @@ class Evaluator:
         golden_inputs = golden_params = golden_result = golden_outs = None
         native_inputs = native_params = native_result = native_out = None
         ai_result = ai_outs = None
+        cached = None
 
         try:
             # 1. 获取golden函数
@@ -323,13 +379,30 @@ class Evaluator:
             else:
                 case_seed = None  # 纯随机模式
 
-            # 2. 生成输入数据（使用确定性种子确保可复现）
-            input_tensors = self.data_generator.generate_input_tensors_from_case(
-                input_shapes=case.input_shapes,
-                dtypes=case.dtypes,
-                value_ranges=case.value_ranges,
-                seed=case_seed,
-            )
+            # Selected cache hits bypass generation and both CPU references.
+            # Missing/unsupported fixtures can fall back; corrupt fixtures and
+            # invalid configuration/source identities always fail.
+            if selected(self.config, case):
+                try:
+                    identity = identity_for(self, case)
+                except TensorCacheUnsupportedError as exc:
+                    if self.config.tensor_cache_mode == "require":
+                        raise
+                    print(f"[tensor-cache] WARNING {case_id_str}: {exc}; computing without cache", flush=True)
+                else:
+                    cached = TensorCache(self.config.tensor_cache_dir).load(identity, case)
+                    if cached is None and self.config.tensor_cache_mode == "require":
+                        raise TensorCacheError(f"Required tensor cache missing for {case_id_str}")
+                    print(f"[tensor-cache] {case_id_str}: {'hit ' + cached.key if cached else 'miss; computing'}", flush=True)
+            if cached is not None:
+                input_tensors = cached.inputs
+            else:
+                input_tensors = self.data_generator.generate_input_tensors_from_case(
+                    input_shapes=case.input_shapes,
+                    dtypes=case.dtypes,
+                    value_ranges=case.value_ranges,
+                    seed=case_seed,
+                )
 
             # case attrs 无条件先定义，供后续 get_input / 索引校验等多处使用
             # （避免无 get_input 的算子在后续引用 case_attrs 时 NameError）
@@ -387,15 +460,18 @@ class Evaluator:
 
             # 4. 执行Golden函数获取参考结果（精度策略由 golden_precision 控制）
             # oracle (g)：优先 op 的 <op>_oracle 钩子（dtype-agnostic 真值），否则回退 golden。
-            oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
-            golden_inputs = self._apply_golden_precision(input_tensors)
-            if get_input_func is not None:
-                golden_params = params
+            if cached is not None:
+                golden_result = OpRunResult(success=True, outputs=cached.oracle, device="cpu")
             else:
-                golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
-            golden_result = self.op_runner.run(oracle_func, golden_params, case_id_str,
-                                               golden_inputs, to_device=self._get_golden_to_device(),
-                                               enable_profiler=False)  # Golden 不启用 profiler
+                oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
+                golden_inputs = self._apply_golden_precision(input_tensors)
+                if get_input_func is not None:
+                    golden_params = params
+                else:
+                    golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
+                golden_result = self.op_runner.run(oracle_func, golden_params, case_id_str,
+                                                   golden_inputs, to_device=self._get_golden_to_device(),
+                                                   enable_profiler=False)  # Golden 不启用 profiler
             if not golden_result.success:
                 return EvalCaseResult(
                     case_id=case_id_str,
@@ -459,7 +535,9 @@ class Evaluator:
             # 同精度参考输出（用于 checker 小值域判断）
             # native_cpu/native_npu 时 golden 已是同精度，直接复用以避免重复计算
             golden_strategy = getattr(self.bench_config, 'golden_precision', 'fp64_cpu')
-            if golden_strategy in ('native_cpu', 'native_npu'):
+            if cached is not None:
+                native_out = cached.native
+            elif golden_strategy in ('native_cpu', 'native_npu'):
                 native_out = golden_result.outputs
             else:
                 # 同精度参考 (b)：优先 <op>_bench（硬件忠实），否则回退 golden（现状行为）。
@@ -621,6 +699,7 @@ class Evaluator:
             # 引用，这里置空的只是局部名。
             self._release_outputs(golden_result)
             self._release_outputs(ai_result)
+            cached = None
             input_tensors = params = None
             golden_inputs = golden_params = golden_result = golden_outs = None
             native_inputs = native_params = native_result = native_out = None
