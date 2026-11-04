@@ -106,7 +106,10 @@ inner/tests/baseline/results/*.json
 /tests/st/_artifacts.*/
 # baseline 采集产出（collect_baseline.py 输出，不入主仓）
 scripts/baseline/output/
-pre-commit_reports/
+codespell_reports/
 
 # 评测日志（run_evaluation 产出）
 _compile.log
+
+# OAT 远程 hook 报告目录
+oat_reports/
