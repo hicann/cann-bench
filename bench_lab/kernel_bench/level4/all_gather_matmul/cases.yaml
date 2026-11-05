@@ -329,3 +329,323 @@ cases:
   - [0, 1]
   - null
   note: '2048_10240_8000_fp16_allgather_Z1_ID039'
+- operator: AllGatherMatmul
+  case_id: 21
+  input_shape:
+  - [2048, 5120]
+  - [3416, 5120]
+  - null
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 1, 'weight_same': 0, 'case_name': '4096_5120_3416_fp16_allgather_x1_gpt3_ID002_bias0_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '4096_5120_3416_fp16_allgather_x1_gpt3_ID002_bias0_gather0'
+- operator: AllGatherMatmul
+  case_id: 22
+  input_shape:
+  - [2048, 5120]
+  - [1708, 5120]
+  - null
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 2, 'weight_same': 0, 'case_name': '4096_5120_1708_bf16_allgather_x1_gpt3_ID004_bias0_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '4096_5120_1708_bf16_allgather_x1_gpt3_ID004_bias0_gather0'
+- operator: AllGatherMatmul
+  case_id: 23
+  input_shape:
+  - [2048, 5120]
+  - [5120, 640]
+  - [640]
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 3, 'weight_same': 0, 'case_name': '4096_5120_640_fp16_allgather_x1_gpt3_ID006_bias1_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '4096_5120_640_fp16_allgather_x1_gpt3_ID006_bias1_gather0'
+- operator: AllGatherMatmul
+  case_id: 24
+  input_shape:
+  - [1024, 12288]
+  - [1792, 12288]
+  - [1792]
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': True, 'seed': 4, 'weight_same': 0, 'case_name': '2048_12288_1792_bf16_allgather_jyxc_llama2_ID008_bias1_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_12288_1792_bf16_allgather_jyxc_llama2_ID008_bias1_gather0'
+- operator: AllGatherMatmul
+  case_id: 25
+  input_shape:
+  - [1024, 12288]
+  - [7808, 12288]
+  - null
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 5, 'weight_same': 0, 'case_name': '2048_12288_7808_fp16_allgather_jyxc_llama2_ID010_bias0_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '2048_12288_7808_fp16_allgather_jyxc_llama2_ID010_bias0_gather1'
+- operator: AllGatherMatmul
+  case_id: 26
+  input_shape:
+  - [1024, 12288]
+  - [12288, 8192]
+  - null
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': False, 'seed': 6, 'weight_same': 0, 'case_name': '2048_12288_8192_bf16_allgather_jyxc_llama2_ID012_bias0_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '2048_12288_8192_bf16_allgather_jyxc_llama2_ID012_bias0_gather1'
+- operator: AllGatherMatmul
+  case_id: 27
+  input_shape:
+  - [1024, 12288]
+  - [12288, 3904]
+  - [3904]
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 7, 'weight_same': 0, 'case_name': '2048_12288_3904_fp16_allgather_jyxc_llama2_ID014_bias1_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_12288_3904_fp16_allgather_jyxc_llama2_ID014_bias1_gather1'
+- operator: AllGatherMatmul
+  case_id: 28
+  input_shape:
+  - [1024, 12288]
+  - [12288, 1536]
+  - [1536]
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 8, 'weight_same': 0, 'case_name': '2048_12288_1536_bf16_allgather_jyxc_llama2_ID016_bias1_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_12288_1536_bf16_allgather_jyxc_llama2_ID016_bias1_gather1'
+- operator: AllGatherMatmul
+  case_id: 29
+  input_shape:
+  - [2048, 4096]
+  - [1536, 4096]
+  - null
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 9, 'weight_same': 0, 'case_name': '4096_4096_1536_fp16_allgather_Baichuan2_7B_MT_llama2_ID018_bias0_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '4096_4096_1536_fp16_allgather_Baichuan2_7B_MT_llama2_ID018_bias0_gather0'
+- operator: AllGatherMatmul
+  case_id: 30
+  input_shape:
+  - [2048, 4096]
+  - [2752, 4096]
+  - null
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 10, 'weight_same': 0, 'case_name': '4096_4096_2752_bf16_allgather_Baichuan2_7B_MT_llama2_ID019_bias0_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '4096_4096_2752_bf16_allgather_Baichuan2_7B_MT_llama2_ID019_bias0_gather0'
+- operator: AllGatherMatmul
+  case_id: 31
+  input_shape:
+  - [2048, 4096]
+  - [4096, 4096]
+  - [4096]
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 11, 'weight_same': 0, 'case_name': '4096_4096_4096_fp16_allgather_Baichuan2_7B_MT_llama2_ID020_bias1_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '4096_4096_4096_fp16_allgather_Baichuan2_7B_MT_llama2_ID020_bias1_gather0'
+- operator: AllGatherMatmul
+  case_id: 32
+  input_shape:
+  - [2048, 4096]
+  - [4096, 1376]
+  - [1376]
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 12, 'weight_same': 0, 'case_name': '4096_4096_1376_bf16_allgather_Baichuan2_7B_MT_llama2_ID021_bias1_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '4096_4096_1376_bf16_allgather_Baichuan2_7B_MT_llama2_ID021_bias1_gather0'
+- operator: AllGatherMatmul
+  case_id: 33
+  input_shape:
+  - [2048, 4096]
+  - [15744, 4096]
+  - null
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 13, 'weight_same': 0, 'case_name': '4096_4096_15744_fp16_allgather_Baichuan2_7B_ID026_bias0_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [0, 1]
+  - [0, 1]
+  - null
+  note: '4096_4096_15744_fp16_allgather_Baichuan2_7B_ID026_bias0_gather1'
+- operator: AllGatherMatmul
+  case_id: 34
+  input_shape:
+  - [1024, 8192]
+  - [3072, 8192]
+  - null
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 14, 'weight_same': 0, 'case_name': '2048_8192_3072_bf16_allgather_BC_llama_ID028_bias0_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '2048_8192_3072_bf16_allgather_BC_llama_ID028_bias0_gather1'
+- operator: AllGatherMatmul
+  case_id: 35
+  input_shape:
+  - [1024, 8192]
+  - [5504, 8192]
+  - [5504]
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': True, 'seed': 15, 'weight_same': 0, 'case_name': '2048_8192_5504_fp16_allgather_BC_llama_ID029_bias1_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_8192_5504_fp16_allgather_BC_llama_ID029_bias1_gather1'
+- operator: AllGatherMatmul
+  case_id: 36
+  input_shape:
+  - [1024, 8192]
+  - [8192, 2752]
+  - [2752]
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': True, 'seed': 16, 'weight_same': 0, 'case_name': '2048_8192_2752_bf16_allgather_BC_llama_ID030_bias1_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_8192_2752_bf16_allgather_BC_llama_ID030_bias1_gather1'
+- operator: AllGatherMatmul
+  case_id: 37
+  input_shape:
+  - [1024, 8192]
+  - [8192, 1024]
+  - null
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': False, 'is_bias': False, 'seed': 17, 'weight_same': 0, 'case_name': '2048_8192_1024_fp16_allgather_BC_llama_ID031_bias0_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - null
+  note: '2048_8192_1024_fp16_allgather_BC_llama_ID031_bias0_gather0'
+- operator: AllGatherMatmul
+  case_id: 38
+  input_shape:
+  - [1024, 8192]
+  - [4096, 8192]
+  - [4096]
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': True, 'seed': 18, 'weight_same': 0, 'case_name': '2048_8192_4096_bf16_allgather_BC_llama_ID032_bias1_gather0', 'source_sheet': 'level0', 'gather_output': False, 'graph_type': 0}
+  value_range:
+  - [-5, 5]
+  - [-5, 5]
+  - [-5, 5]
+  note: '2048_8192_4096_bf16_allgather_BC_llama_ID032_bias1_gather0'
+- operator: AllGatherMatmul
+  case_id: 39
+  input_shape:
+  - [256, 10240]
+  - [3840, 10240]
+  - [3840]
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': True, 'seed': 19, 'weight_same': 0, 'case_name': '512_10240_3840_fp16_allgather_Z1_ID038_bias1_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [0, 1]
+  - [0, 1]
+  - [-5, 5]
+  note: '512_10240_3840_fp16_allgather_Z1_ID038_bias1_gather1'
+- operator: AllGatherMatmul
+  case_id: 40
+  input_shape:
+  - [256, 10240]
+  - [8000, 10240]
+  - null
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {'mc2_distributed': True, 'mc2_accuracy_mode': 'three_way', 'platform': 'Ascend 950PR/950DT (A5)', 'world_size': 2, 'is_trans_b': True, 'is_bias': False, 'seed': 20, 'weight_same': 0, 'case_name': '512_10240_8000_bf16_allgather_Z1_ID039_bias0_gather1', 'source_sheet': 'level0', 'gather_output': True, 'graph_type': 0}
+  value_range:
+  - [0, 1]
+  - [0, 1]
+  - null
+  note: '512_10240_8000_bf16_allgather_Z1_ID039_bias0_gather1'

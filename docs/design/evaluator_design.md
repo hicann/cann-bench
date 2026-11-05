@@ -387,7 +387,7 @@ src/kernel_eval/
 | `device_manager.py` | 设备管理：CPU/NPU 切换；渐进恢复机制（recover_light=empty_cache → recover_full=aclrtResetDevice → unrecoverable） |
 | `compare.py` | 张量对比引擎：compare_tensors 主入口；MERE/MARE 计算；小值域兜底判定（ErrorCount 比值）；相消处理（CPU 同精度对照）；整数精确匹配；多输出支持 |
 | `thresholds.py` | 精度阈值表：单一事实来源（PRECISION_THRESHOLDS dict）；Config 拷贝后可通过 op_info.precision_thresholds 覆盖单 dtype |
-| `baseline_resolver.py` | Baseline 解析：多硬件 dict 格式（{910b2: 40.2, 910b1: 45.1}）；平台别名映射（Ascend910_9362→910b2） |
+| `baseline_resolver.py` | Baseline 解析：多硬件 dict 格式（{910b2: 40.2, 910b1: 45.1}）；平台别名映射（Ascend910B2→910b2、Ascend910_93 系列→910c） |
 | `baseline_store.py` | BaselineStore：从 metadata/<hardware>.json 集中加载；逐级向上查找 metadata/ 目录；多平台 fallback（910b1→910b2）；三级嵌套 JSON 格式（level→op→case_id） |
 | `naming.py` | PascalCase→snake_case：camel_to_snake + snake_case_candidates（多候选模糊匹配，处理 3D/ROI/NMS 等特殊情况） |
 | `param_builder.py` | 参数构建：合并后的统一方法，根据 golden 签名 + case attrs 构建调用参数 |
@@ -754,10 +754,10 @@ def verify_accuracy(actual, golden, dtype):
     mere = compute_mere(actual, golden)
     mare = compute_mare(actual, golden)
     threshold = get_threshold(dtype)
-    
+
     if mere < threshold and mare < 10 * threshold:
         return True
-    
+
     # 小值域检查（当 golden 接近 0 时）
     # 相消处理（当 output ≈ 0 且 golden 在精度边界附近时）
     return check_small_value_region(actual, golden, native_out, dtype) \
@@ -852,8 +852,8 @@ CSV 是唯一包含 Input Shapes 的数据源，warmup 过滤先从 CSV 提取 w
 **BaselineResolver 平台别名**：
 ```python
 PLATFORM_ALIAS = {
-    "Ascend910_9362": "910b2",  # 产品型号 → 逻辑名
-    "Ascend910B2": "910b2",
+    "Ascend910B2": "910b2",  # 产品型号 → 逻辑名
+    "Ascend910_93": "910c",  # Atlas A3 系列前缀
     "Ascend910B1": "910b1",
 }
 ```

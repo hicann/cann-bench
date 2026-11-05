@@ -24,6 +24,7 @@
 
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -54,23 +55,54 @@ _OP_ERROR_LINE_RE = re.compile(
     r")"
 )
 
-# SIGTERM 宽限时间
-_BUILD_TIMEOUT_SEC = 600
+# submission 构建超时。run_evaluation.sh 会显式透传，直接调用 Python
+# 入口时仍保留 600 秒默认值。
+_DEFAULT_BUILD_TIMEOUT_SEC = 600
+
+
+def resolve_build_timeout_sec(value=None) -> int:
+    """Resolve positive seconds with explicit value > environment > default."""
+    source = "--build-timeout" if value is not None else "CANN_BENCH_BUILD_TIMEOUT_SEC"
+    raw = (
+        value
+        if value is not None
+        else os.environ.get(
+            "CANN_BENCH_BUILD_TIMEOUT_SEC", str(_DEFAULT_BUILD_TIMEOUT_SEC)
+        )
+    )
+    try:
+        if isinstance(raw, bool) or not isinstance(raw, (str, int)):
+            raise ValueError("not an integer")
+        timeout = int(raw)
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"{source} must be an integer") from exc
+    if timeout <= 0:
+        raise ValueError(f"{source} must be positive")
+    return timeout
+
 
 # CANN OPP 安装路径探测。
-# install.sh 中 --install-path 接收 OPP 根目录（如 /home/.../cann-9.0.0/opp），
-# 安装脚本会在其下创建 vendors/custom_ops/ 子目录。
-_CANN_OPP_VENDOR_SUBDIR = "vendors/custom_ops"
+# install.sh 中 --install-path 接收 OPP 根目录（如 /home/.../cann-9.0.0/opp）。
+# 常规 submission 使用 custom_ops；大型算子仓可生成其他 vendor，例如
+# ops-transformer 的 custom_transformer，因此安装后必须探测本次实际写入的目录。
+_CANN_OPP_DEFAULT_VENDOR_SUBDIR = "vendors/custom_ops"
 
 
 def _detect_opp_path() -> str:
     """动态探测 CANN OPP 根目录路径（传给 install.sh --install-path）。
 
-    优先级：
-    1. ASCEND_OPP_PATH 环境变量（CANN 安装后 source set_env.sh 会设置）
-    2. $ASCEND_HOME_PATH/opp（Toolkit 内嵌 OPP）
-    3. /usr/local/Ascend/opp（OPP 独立安装默认路径）
+    MC2_OPP_INSTALL_ROOT 仅改变本次生成 .run 包的安装目标，不改变
+    ASCEND_OPP_PATH（编译期仍须使用系统 CANN 的头文件和基础算子）。
+    未设置时保留原有的系统 OPP 探测行为。
     """
+    private_root = os.environ.get("MC2_OPP_INSTALL_ROOT", "")
+    if private_root:
+        private_path = Path(private_root).expanduser()
+        if not private_path.is_absolute():
+            raise ValueError("MC2_OPP_INSTALL_ROOT must be an absolute path")
+        private_path.mkdir(parents=True, exist_ok=True)
+        return str(private_path.resolve())
+
     home = os.environ.get("ASCEND_HOME_PATH", "")
     for base in (
         os.environ.get("ASCEND_OPP_PATH", ""),
@@ -93,6 +125,69 @@ def _get_arch_str() -> str:
 
     machine = platform.machine().lower()
     return "aarch64" if machine in ("aarch64", "arm64") else "x86_64"
+
+
+def _snapshot_vendor_env_scripts(opp_path: str) -> Dict[Path, int]:
+    """记录已安装 vendor 的环境脚本及修改时间。"""
+    vendors_root = Path(opp_path) / "vendors"
+    if not vendors_root.is_dir():
+        return {}
+    snapshot: Dict[Path, int] = {}
+    for set_env_path in vendors_root.glob("*/bin/set_env.bash"):
+        try:
+            snapshot[set_env_path] = set_env_path.stat().st_mtime_ns
+        except OSError:
+            continue
+    return snapshot
+
+
+def _detect_installed_vendor_path(
+    opp_path: str,
+    before: Dict[Path, int],
+) -> Path:
+    """定位本次 run 安装实际创建或更新的 custom vendor 目录。"""
+    vendors_root = Path(opp_path) / "vendors"
+    after = _snapshot_vendor_env_scripts(opp_path)
+    changed = [path for path, mtime in after.items() if before.get(path) != mtime]
+    if changed:
+        # 正常安装会重写 set_env.bash；修改时间最新的脚本对应本次 run 包。
+        return max(changed, key=lambda path: (after[path], str(path))).parent.parent
+
+    # 某些文件系统的时间戳粒度较粗，或安装器未重写已有脚本。此时优先采用
+    # vendors/config.ini 的 load_priority，再回退到默认 vendor 和现有环境脚本。
+    priority_paths: List[Path] = []
+    config_path = vendors_root / "config.ini"
+    if config_path.is_file():
+        try:
+            match = re.search(
+                r"^\s*load_priority\s*=\s*([^#\r\n]+)",
+                config_path.read_text(),
+                flags=re.MULTILINE,
+            )
+            if match:
+                priority_paths = [
+                    vendors_root / name.strip()
+                    for name in match.group(1).split(",")
+                    if name.strip()
+                ]
+        except OSError:
+            pass
+
+    default_path = Path(opp_path) / _CANN_OPP_DEFAULT_VENDOR_SUBDIR
+    candidates = priority_paths + [default_path]
+    candidates.extend(path.parent.parent for path in after)
+    seen = set()
+    for candidate in candidates:
+        candidate_str = str(candidate)
+        if candidate_str in seen:
+            continue
+        seen.add(candidate_str)
+        if (candidate / "bin" / "set_env.bash").is_file():
+            return candidate
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    return default_path
 
 
 def _add_vendor_lib_dirs(vendor_path: Path) -> None:
@@ -254,7 +349,9 @@ class PackageManager:
 
         self._clean_build_artifacts(source_path)
         log_path = source_path / "_compile.log"
-        print(f"[INFO] 编译: bash build.sh → {log_path.name}")
+        build_args = list(getattr(self.config, "source_build_args", []) or [])
+        build_cmd = shlex.join(["bash", "build.sh", *build_args])
+        print(f"[INFO] 编译: {build_cmd} → {log_path.name}")
         rc, log_text = self._run_build(source_path, log_path)
 
         if rc == 0 and self._wheel_exists(source_path):
@@ -301,17 +398,24 @@ class PackageManager:
         """跑 bash build.sh，把 stdout+stderr 同步写日志文件。
         返回 (returncode, 日志文本)。超时视作编译失败。"""
         try:
+            build_timeout_sec = resolve_build_timeout_sec(
+                getattr(self.config, "build_timeout_sec", None)
+            )
+            build_args = list(getattr(self.config, "source_build_args", []) or [])
+            print(f"[INFO] submission 编译超时: {build_timeout_sec}s")
             with log_path.open("w") as logf:
                 proc = subprocess.run(
-                    ["bash", "build.sh"],
+                    ["bash", "build.sh", *build_args],
                     cwd=str(source_path),
                     stdout=logf,
                     stderr=subprocess.STDOUT,
-                    timeout=_BUILD_TIMEOUT_SEC,
+                    timeout=build_timeout_sec,
                 )
             rc = proc.returncode
         except subprocess.TimeoutExpired:
             rc = 124  # 约定的 timeout 退出码
+            with log_path.open("a") as logf:
+                logf.write(f"\n[ERROR] build.sh timed out after {build_timeout_sec}s\n")
         except Exception as e:
             log_path.write_text(f"[build_submission] 启动失败: {e}\n")
             rc = 1
@@ -363,6 +467,7 @@ class PackageManager:
         # 动态探测 OPP 根目录，传给 --install-path
         opp_path = _detect_opp_path()
         print(f"[INFO] OPP 根目录: {opp_path}")
+        vendor_env_before = _snapshot_vendor_env_scripts(opp_path)
 
         try:
             # 设置可执行权限
@@ -412,12 +517,13 @@ class PackageManager:
 
             # source set_env.bash 将 LD_LIBRARY_PATH / ASCEND_CUSTOM_OPP_PATH
             # 设到当前进程，确保 dlopen 能找到 libcust_opapi.so
-            self._source_set_env_bash(opp_path)
+            vendor_path = _detect_installed_vendor_path(opp_path, vendor_env_before)
+            print(f"[INFO] 本次安装的 OPP vendor 目录: {vendor_path}")
+            self._source_set_env_bash(vendor_path)
 
             # 校验：ASCEND_CUSTOM_OPP_PATH 必须包含当前 vendor 路径。
             # CANN framework 依赖此变量定位 custom vendor 目录中的 tiling 库；
             # 若缺失，dlopen libcust_opapi.so (BIND_NOW) 会因 tiling 符号未解析而失败。
-            vendor_path = Path(opp_path) / _CANN_OPP_VENDOR_SUBDIR
             vendor_str = str(vendor_path)
             cur_opp = os.environ.get("ASCEND_CUSTOM_OPP_PATH", "")
             if vendor_str not in cur_opp:
@@ -451,14 +557,13 @@ class PackageManager:
             return False
 
     @staticmethod
-    def _source_set_env_bash(opp_path: str) -> None:
+    def _source_set_env_bash(vendor_path: Path) -> None:
         """Source set_env.bash 并将导出变量应用到当前进程。
 
-        install.sh 在传入 --install-path 时会在
-        <opp_path>/vendors/custom_ops/bin/set_env.bash 中写入 export 语句。
+        install.sh 在传入 --install-path 时会在实际 vendor 的 bin 目录中
+        写入 set_env.bash；vendor 名称不要求固定为 custom_ops。
         此方法解析该文件并将变量设到 os.environ，使后续的 dlopen 能正确找到自定义算子库。
         """
-        vendor_path = Path(opp_path) / _CANN_OPP_VENDOR_SUBDIR
         set_env_path = vendor_path / "bin" / "set_env.bash"
 
         if not set_env_path.exists():

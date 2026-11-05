@@ -28,11 +28,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
-from ..base.result import is_compile_runtime_case_failure
+from ..base.result import (
+    FAILURE_TYPE_REFERENCE_INVALID,
+    is_compile_runtime_case_failure,
+)
 from .scoring import (
-    WEIGHT_COMPILATION,
-    WEIGHT_FUNCTION,
-    WEIGHT_PERFORMANCE,
     aggregate_eq4,
     per_case_sol_score,
 )
@@ -41,6 +41,7 @@ from .scoring import (
 @dataclass
 class OperatorSummary:
     """算子评测摘要"""
+
     operator: str = ""
     rel_path: str = ""
     total_cases: int = 0
@@ -52,23 +53,29 @@ class OperatorSummary:
     mare_avg: float = 0.0
     # bench.tex 三轴得分（0-100 量纲）
     compile_passed: bool = False
-    compilation_score: float = 0.0
+    compilation_score: Optional[float] = 0.0
     compile_runtime_fail_cases: int = 0
-    function_score: float = 0.0
-    bonus_score: float = 0.0  # 全用例精度通过 bonus（w_b·δ_all·100；1 档 w_b=0 恒为 0）
-    performance_score: float = 0.0
-    composite_score: float = 0.0  # EachOperatorScore，常规区间 [0, 100]；T_cand<T_HW 的 HAP 奖励可 >100，受 OPERATOR_SCORE_CAP 封顶
+    function_score: Optional[float] = 0.0
+    bonus_score: Optional[float] = (
+        0.0  # 全用例精度通过 bonus（w_b·δ_all·100；1 档 w_b=0 恒为 0）
+    )
+    performance_score: Optional[float] = 0.0
+    composite_score: Optional[float] = (
+        0.0  # EachOperatorScore，常规区间 [0, 100]；T_cand<T_HW 的 HAP 奖励可 >100，受 OPERATOR_SCORE_CAP 封顶
+    )
     # 可选字段：当算子跑不起来时的原因（编译失败 / 子进程超时或崩溃）。
     # 为 None 时渲染普通的 case 表；非空时在小节头下方优先渲染原因块。
     compilation_error: Optional[str] = None
     subprocess_failure_reason: Optional[str] = None
     score_error_code: Optional[str] = None
     score_error: Optional[str] = None
+    reference_invalid_cases: int = 0
 
 
 @dataclass
 class EvaluationSummary:
     """评测总摘要"""
+
     eval_code: str
     hardware: str
     total_operators: int
@@ -79,13 +86,13 @@ class EvaluationSummary:
     operators: List[OperatorSummary]
     timestamp: str
     # bench.tex Eq. 5: Σ EachOperatorScore (跨算子求和) 与各 Level 的小计
-    benchmark_total_score: float = 0.0
-    level_scores: Dict[str, float] = None  # type: ignore[assignment]
+    benchmark_total_score: Optional[float] = 0.0
+    level_scores: Dict[str, Optional[float]] = None  # type: ignore[assignment]
     # F023: 归一化总分——每算子满分约 100（T_cand<T_HW 时可 >100），total / num_operators 跨算子集可比。
     # Σ 总分会随算子数线性膨胀，跨 benchmark 版本/不同 Level 子集不可比；
     # 平均分作为额外维度让"系统变好" vs "系统变大"能被区分。
-    benchmark_avg_score: float = 0.0
-    level_avg_scores: Dict[str, float] = None  # type: ignore[assignment]
+    benchmark_avg_score: Optional[float] = 0.0
+    level_avg_scores: Dict[str, Optional[float]] = None  # type: ignore[assignment]
 
 
 def calculate_geometric_mean(values: List[float]) -> float:
@@ -110,7 +117,7 @@ def calculate_geometric_mean(values: List[float]) -> float:
     return math.exp(sum(math.log(max(v, 1e-9)) for v in valid) / len(valid))
 
 
-def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
+def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, Any]:
     """从 op_result 字典计算 Eq.4 三轴得分与综合得分。
 
     本函数仅负责把 dict 解析成 (success, score_i) 元组列表，实际 Eq.4 聚合
@@ -168,6 +175,9 @@ def _composite_score_from_dict(op_result: Dict[str, Any]) -> Dict[str, float]:
         rel_path=rel_path,
         n_no_perf_pass=n_no_perf_pass,
         n_compile_runtime_fail=n_compile_runtime_fail,
+        n_reference_invalid=sum(
+            case.get("failure_type") == FAILURE_TYPE_REFERENCE_INVALID for case in cases
+        ),
     )
     return {
         "compile_passed": compile_passed,
@@ -197,12 +207,18 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
     cases = op_result.get("results") or op_result.get("cases") or []
     total_cases = op_result.get("total_cases", len(cases))
     passed_cases = op_result.get("passed_cases", 0)
+    reference_invalid_cases = op_result.get("reference_invalid_cases")
+    if reference_invalid_cases is None:
+        reference_invalid_cases = sum(
+            case.get("failure_type") == FAILURE_TYPE_REFERENCE_INVALID for case in cases
+        )
     # 优先使用上游统计字段（与 results.py summarize_case_results 口径一致），
     # 缺失时再退化为 total - passed（仅当 skipped/failed 字段都不可用时）。
     failed_cases = op_result.get("failed_cases")
     if failed_cases is None:
         failed_cases = max(total_cases - passed_cases, 0)
-    pass_rate = passed_cases / total_cases if total_cases > 0 else 0.0
+    valid_cases = total_cases - reference_invalid_cases
+    pass_rate = passed_cases / valid_cases if valid_cases > 0 else 0.0
 
     # 计算几何平均加速比 / MERE / MARE。
     # mere/mare 存在 accuracy.metadata 中（RelativeErrorChecker 产生），
@@ -236,6 +252,7 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
         total_cases=total_cases,
         passed_cases=passed_cases,
         failed_cases=failed_cases,
+        reference_invalid_cases=reference_invalid_cases,
         pass_rate=pass_rate,
         geometric_mean_speedup=geometric_mean_speedup,
         mere_avg=mere_avg,
@@ -255,9 +272,7 @@ def calculate_operator_summary(op_result: Dict[str, Any]) -> OperatorSummary:
 
 
 def generate_summary(
-    evaluation_results: Dict[str, Any],
-    eval_code: str = None,
-    hardware: str = "unknown"
+    evaluation_results: Dict[str, Any], eval_code: str = None, hardware: str = "unknown"
 ) -> EvaluationSummary:
     """
     生成评测总摘要
@@ -280,30 +295,46 @@ def generate_summary(
     total_operators = len(operators)
     total_cases = sum(op.total_cases for op in operators)
     total_passed = sum(op.passed_cases for op in operators)
-    overall_pass_rate = total_passed / total_cases if total_cases > 0 else 0.0
+    valid_cases = total_cases - sum(op.reference_invalid_cases for op in operators)
+    overall_pass_rate = total_passed / valid_cases if valid_cases > 0 else 0.0
 
     # 计算整体几何平均加速比
-    all_speedups = [op.geometric_mean_speedup for op in operators if op.geometric_mean_speedup > 0]
+    all_speedups = [
+        op.geometric_mean_speedup for op in operators if op.geometric_mean_speedup > 0
+    ]
     overall_geometric_mean_speedup = calculate_geometric_mean(all_speedups)
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # bench.tex Eq. 5: benchmark / level 总分 = Σ EachOperatorScore
-    benchmark_total_score = sum(op.composite_score for op in operators)
-    level_scores: Dict[str, float] = {}
+    benchmark_total_score = (
+        None
+        if any(op.composite_score is None for op in operators)
+        else sum(op.composite_score for op in operators)
+    )
+    level_scores: Dict[str, Optional[float]] = {}
     level_op_count: Dict[str, int] = {}
     for op in operators:
         # 取 rel_path 第一段作为 level 标签 (e.g. "level1/exp" -> "level1")
-        level_key = op.rel_path.split('/', 1)[0] if op.rel_path else "unknown"
-        level_scores[level_key] = level_scores.get(level_key, 0.0) + op.composite_score
+        level_key = op.rel_path.split("/", 1)[0] if op.rel_path else "unknown"
+        previous = level_scores.get(level_key, 0.0)
+        level_scores[level_key] = (
+            None
+            if previous is None or op.composite_score is None
+            else previous + op.composite_score
+        )
         level_op_count[level_key] = level_op_count.get(level_key, 0) + 1
 
     # F023: 归一化分——按算子数除回到 [0, 100] 量纲，让跨算子集可比
     benchmark_avg_score = (
-        benchmark_total_score / total_operators if total_operators > 0 else 0.0
+        benchmark_total_score / total_operators
+        if total_operators > 0 and benchmark_total_score is not None
+        else (None if benchmark_total_score is None else 0.0)
     )
-    level_avg_scores: Dict[str, float] = {
-        lvl: (level_scores[lvl] / level_op_count[lvl]) if level_op_count[lvl] > 0 else 0.0
+    level_avg_scores: Dict[str, Optional[float]] = {
+        lvl: (level_scores[lvl] / level_op_count[lvl])
+        if level_scores[lvl] is not None
+        else None
         for lvl in level_scores
     }
 
@@ -334,6 +365,24 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
     Returns:
         Markdown文本
     """
+    if summary.benchmark_total_score is None:
+        lines = [
+            "# 算子评测报告",
+            "",
+            "参考失效：本次综合评分不可判定，不能据此判定候选不合格。",
+            "",
+            "| 算子 | 综合得分 | 原因 |",
+            "|---|---|---|",
+        ]
+        for op in summary.operators:
+            score = (
+                "不可判定"
+                if op.composite_score is None
+                else f"{op.composite_score:.2f}"
+            )
+            reason = (op.score_error or "").replace("|", "&#124;").replace("\n", " ")
+            lines.append(f"| {op.operator} | {score} | {reason} |")
+        return "\n".join(lines)
     lines = []
 
     # 标题
@@ -351,21 +400,35 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
     lines.append(f"- **总用例数**: {summary.total_cases}")
     lines.append(f"- **通过用例**: {summary.total_passed}")
     lines.append(f"- **通过率**: {summary.overall_pass_rate:.2%}")
-    lines.append(f"- **几何平均加速比 (诊断)**: {summary.overall_geometric_mean_speedup:.3f}x")
-    lines.append(f"- **Benchmark 总分** (Σ EachOperatorScore，随算子数线性膨胀): {summary.benchmark_total_score:.2f}")
-    lines.append(f"- **Benchmark 归一化分** (avg，每算子满分 100，跨算子集可比): {summary.benchmark_avg_score:.2f} / 100")
+    lines.append(
+        f"- **几何平均加速比 (诊断)**: {summary.overall_geometric_mean_speedup:.3f}x"
+    )
+    lines.append(
+        f"- **Benchmark 总分** (Σ EachOperatorScore，随算子数线性膨胀): {summary.benchmark_total_score:.2f}"
+    )
+    lines.append(
+        f"- **Benchmark 归一化分** (avg，每算子满分 100，跨算子集可比): {summary.benchmark_avg_score:.2f} / 100"
+    )
     if summary.level_scores:
         for level in sorted(summary.level_scores.keys()):
             total = summary.level_scores[level]
-            avg = summary.level_avg_scores.get(level, 0.0) if summary.level_avg_scores else 0.0
+            avg = (
+                summary.level_avg_scores.get(level, 0.0)
+                if summary.level_avg_scores
+                else 0.0
+            )
             lines.append(f"  - {level}: total={total:.2f}, avg={avg:.2f}/100")
     lines.append("")
 
     # 各算子结果
     lines.append("## 算子详情")
     lines.append("")
-    lines.append("| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 综合得分 | 编译/运行 | 精度 | 性能 | 几何加速比 |")
-    lines.append("|------|------|--------|------|------|--------|----------|------|------|------|-----------|")
+    lines.append(
+        "| 算子 | 路径 | 用例数 | 通过 | 失败 | 通过率 | 综合得分 | 编译/运行 | 精度 | 性能 | 几何加速比 |"
+    )
+    lines.append(
+        "|------|------|--------|------|------|--------|----------|------|------|------|-----------|"
+    )
 
     for op in summary.operators:
         lines.append(
@@ -386,8 +449,12 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
     if compile_failed:
         lines.append("## 编译失败的算子")
         lines.append("")
-        lines.append(f"共 {len(compile_failed)} 个算子在 `build.sh` 阶段失败，未进入评测。")
-        lines.append("错误摘要（完整日志见 `logs/compile_round_*.log` 或 `build_errors.json`）：")
+        lines.append(
+            f"共 {len(compile_failed)} 个算子在 `build.sh` 阶段失败，未进入评测。"
+        )
+        lines.append(
+            "错误摘要（完整日志见 `logs/compile_round_*.log` 或 `build_errors.json`）："
+        )
         lines.append("")
         for op in compile_failed:
             lines.append(f"### {op.operator}（{op.rel_path}）")
@@ -403,14 +470,17 @@ def render_summary_markdown(summary: EvaluationSummary) -> str:
         lines.append(f"共 {len(subprocess_failed)} 个算子在子进程隔离评测下异常：")
         lines.append("")
         for op in subprocess_failed:
-            lines.append(f"- **{op.operator}** ({op.rel_path}): {op.subprocess_failure_reason}")
+            lines.append(
+                f"- **{op.operator}** ({op.rel_path}): {op.subprocess_failure_reason}"
+            )
         lines.append("")
 
     # 结论：综合考量通过率与综合得分（pass_rate 高但性能 0 不应被评为"良好"）。
     # 每算子满分=100，故 avg_composite >= 70 视为整体性能也达标。
     avg_composite = (
         summary.benchmark_total_score / summary.total_operators
-        if summary.total_operators > 0 else 0.0
+        if summary.total_operators > 0
+        else 0.0
     )
     lines.append("## 结论")
     lines.append("")
@@ -445,5 +515,5 @@ def save_summary(summary: EvaluationSummary, output_path: str) -> None:
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     markdown = render_summary_markdown(summary)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(markdown)

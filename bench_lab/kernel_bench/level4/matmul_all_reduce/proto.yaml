@@ -13,9 +13,11 @@ operator:
   category: FusedComposite
   difficulty: L4
   formula: |
-    mm = x1 @ x2 (+ bias)
-    y = AllReduce(mm, op=sum)
-  description: MC2 matmul and all-reduce fused operator. Cases are converted from mc2_test/david_excel/aclnnMatmulAllReduce.xlsx and require one HCCL process per rank.
+    nonquantized: local = x1 @ x2_eff (+ bias)
+    A5_INT8: local = (INT32(x1) @ INT32(x2_eff) + optional_bias)
+    A5_INT8: local = local * pertoken_scale[..., None] * dequant_scale + optional_x3
+    y = AllReduce(local, op=sum)
+  description: 'Local nonquantized or INT8 per-token/per-channel matmul followed by sum AllReduce; no communication quantization.'
   shape_support: 'x1: [..., M, K], x2: [K, N] or [N, K] when is_trans_b=true, bias: [N]; y: [..., M, N]'
   precision_thresholds:
     float16: 0.05
@@ -48,23 +50,105 @@ operator:
     type: int
     default: 0
     description: mc2_test-compatible weight seed mode.
+  - name: graph_type
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: case_name
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_sheet
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_excel_row
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: platform
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: mc2_accuracy_mode
+    type: str
+    required: false
+    description: 'A5: CPU FP32 + device cascade + candidate; both nonquantized and INT8 cases use three-way comparison.'
+  - name: out_dtype
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_graph_type
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: quantized
+    type: bool
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: is_x3
+    type: bool
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: quant_type
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: comm_quant_mode
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
   inputs:
   - name: x1
     description: Matmul input tensor.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
+    - int8
     shape: '[..., M, K]'
   - name: x2
     description: Matmul weight tensor.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
+    - int8
     shape: '[K, N] or [N, K]'
   - name: bias
     description: Optional matmul bias.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
+    - int32
     shape: '[N]'
     optional: true
+  - name: dequant_scale
+    dtype:
+    - float32
+    - bfloat16
+    shape: '[N]'
+    optional: true
+    description: A5 quantized path only; omitted for nonquantized cases.
+  - name: pertoken_scale
+    dtype:
+    - float32
+    shape: '[prod(x1.shape[:-1])]'
+    optional: true
+    description: A5 quantized path only; omitted for nonquantized cases.
+  - name: x3
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[..., M, N]'
+    optional: true
+    description: A5 quantized path only; omitted for nonquantized cases.
   outputs:
   - name: y
     description: All-reduced matmul result.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[..., M, N]'
-  schema: matmul_all_reduce(Tensor x1, Tensor x2, str hcomm_info, int world_size, str reduce_op="sum", Tensor? bias=None, bool is_trans_b=False) -> Tensor y
+  schema: matmul_all_reduce(Tensor x1, Tensor x2, str hcomm_info, int world_size, str reduce_op="sum", Tensor? bias=None,
+    bool is_trans_b=False, Tensor? dequant_scale=None, Tensor? pertoken_scale=None, Tensor? x3=None, str out_dtype="float16")
+    -> Tensor y
+  platform: Ascend 950PR / 950DT (A5)

@@ -1,0 +1,147 @@
+operator:
+  name: MatmulAlltoAll
+  category: FusedComposite
+  difficulty: L4
+  platform: Ascend 950PR / 950DT
+  formula: 'mm = Dequant(x1) @ Dequant(x2) (+ bias); non-quant uses identity Dequant
+
+    y = AllToAll(mm, split_axis=-1, concat_axis=-2)
+
+    '
+  description: 支持非量化和 MXFP8 量化，先执行矩阵乘再执行 AllToAll 的 A5 MC2 通算融合算子。
+  shape_support: 'x1: [M, K], x2: [K, N] or [N, K] when is_trans_x2=true; N % world_size == 0; y: [M*world_size,
+    N/world_size]'
+  precision_thresholds:
+    float16: 0.05
+    bfloat16: 0.05
+  attrs:
+  - name: mc2_distributed
+    type: bool
+    default: 'true'
+    description: Route through the distributed MC2 runner.
+    required: false
+  - name: world_size
+    type: int
+    description: Number of HCCL ranks.
+    required: true
+  - name: is_trans_x2
+    type: bool
+    default: 'false'
+    description: x2 is stored as [N, K].
+    required: false
+  - name: is_bias
+    type: bool
+    default: 'false'
+    description: Whether a rank-local bias [N] is supplied.
+    required: false
+  - name: seed
+    type: int
+    default: 1
+    description: mc2_test-compatible deterministic input seed.
+    required: false
+  - name: platform
+    type: str
+    default: Ascend 950PR/950DT (A5)
+    description: This suite is A5 only.
+    required: false
+  - name: source_sheet
+    type: str
+    description: 规格来源工作表。
+    required: false
+  - name: source_excel_row
+    type: int
+    description: 规格来源 Excel 行号。
+    required: false
+  - name: mc2_accuracy_mode
+    type: str
+    required: false
+    description: A5 three-way accuracy setting; see docs/guide/mc2_accuracy.md.
+  - name: mc2_compare_dtype
+    type: str
+    required: false
+    description: A5 three-way accuracy setting; see docs/guide/mc2_accuracy.md.
+  - name: is_quant
+    type: bool
+    default: 'false'
+    description: 是否使用 MXFP8 量化输入。
+    required: false
+  - name: supported_devices
+    type: list
+    description: 受支持的平台名称。
+    required: false
+  - name: x1_quant_mode
+    type: int
+    default: 0
+    description: 左矩阵量化模式，0 为非量化，6 为 MX。
+    required: false
+  - name: x2_quant_mode
+    type: int
+    default: 0
+    description: 右矩阵量化模式，0 为非量化，6 为 MX。
+    required: false
+  - name: group_size
+    type: int
+    default: 0
+    description: MX 分组大小的打包值4295032864，表示[1,1,32]。
+    required: false
+  - name: scale_dtype
+    type: int
+    default: 293
+    description: MX 尺度以uint8存储E8M0指数编码，ACL类型值293。
+    required: false
+  - name: out_dtype
+    type: str
+    default: None
+    description: MX 输出类型float16或bfloat16；非量化时沿用输入类型。
+    required: false
+  inputs:
+  - name: x1
+    description: 矩阵乘左输入。
+    dtype:
+    - float16
+    - bfloat16
+    - float8_e4m3fn
+    - float8_e5m2
+    shape: '[M, K]'
+    required: true
+  - name: x2
+    description: 矩阵乘右输入。
+    dtype:
+    - float16
+    - bfloat16
+    - float8_e4m3fn
+    - float8_e5m2
+    shape: '[K, N] or [N, K]'
+    required: true
+  - name: bias
+    description: 可选本地偏置。
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[N]'
+    optional: true
+    required: false
+  - name: x1_scale
+    description: 可选 MX 左矩阵尺度，uint8存储E8M0原始指数码。
+    dtype: [uint8]
+    shape: '[M, ceil(K/64), 2]'
+    optional: true
+    required: false
+  - name: x2_scale
+    description: 可选 MX 转置权重尺度，uint8存储E8M0原始指数码。
+    dtype: [uint8]
+    shape: '[N, ceil(K/64), 2]'
+    optional: true
+    required: false
+  outputs:
+  - name: y
+    description: 当前 rank 的输出。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[M*world_size, N/world_size]'
+    required: true
+  schema: matmul_all_to_all(Tensor x1, Tensor x2, str hcomm_info, int world_size, Tensor? bias=None, bool is_trans_x2=False,
+    Tensor? x1_scale=None, Tensor? x2_scale=None, int x1_quant_mode=0, int x2_quant_mode=0, int group_size=0,
+    int scale_dtype=293, str? out_dtype=None) -> Tensor y

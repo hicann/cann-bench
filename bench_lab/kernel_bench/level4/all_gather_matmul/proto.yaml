@@ -12,16 +12,34 @@ operator:
   name: AllGatherMatmul
   category: FusedComposite
   difficulty: L4
+  platform: Ascend 950PR/950DT (A5)
   formula: |
     gather_x = AllGather(x1) along dim 0
     y = gather_x @ x2 (+ bias)
     gather_out = gather_x when gather_output=True
-  description: MC2 all-gather and matmul fused operator. Cases are converted from mc2_test/aclnnAllGatherMatmul.xlsx and require one HCCL process per rank.
+  description: AllGather followed by local matmul, with optional bias, weight transpose and gathered-input output.
   shape_support: 'x1: [M_local, K], x2: [K, N] or [N, K] when is_trans_b=true, bias: [N]; y: [M_local * world_size, N]'
   precision_thresholds:
+    # Legacy generic-checker metadata; these A5 cases explicitly select three_way.
     float16: 0.005
     bfloat16: 0.005
   attrs:
+  - name: mc2_accuracy_mode
+    type: str
+    description: CPU FP32/Gloo, NPU cascade and candidate three-way comparison.
+  - name: platform
+    type: str
+    description: Target hardware for this case.
+  - name: case_name
+    type: str
+    description: Case name using the two-rank global shape.
+  - name: source_sheet
+    type: str
+    description: Original mc2_test source sheet; per-rank shapes reused.
+  - name: graph_type
+    type: int
+    default: 0
+    description: Single-operator evaluation mode.
   - name: mc2_distributed
     type: bool
     default: true
@@ -70,6 +88,7 @@ operator:
     shape: '[M_local * world_size, N]'
   - name: gather_out
     description: Optional gathered x1 tensor.
+    optional: true
     dtype: [float16, bfloat16]
     shape: '[M_local * world_size, K]'
   schema: all_gather_matmul(Tensor x1, Tensor x2, str hcomm_info, int world_size, Tensor? bias=None, bool gather_output=True, bool is_trans_b=False) -> (Tensor y, Tensor gather_out)

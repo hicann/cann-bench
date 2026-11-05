@@ -1,24 +1,20 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 operator:
   name: GroupedMatMulAlltoAllv
   category: FusedComposite
   difficulty: L4
-  formula: |
-    gmmY = GroupedMatMul(gmmX, gmmWeight)
+  formula: 'gmmY = GroupedMatMul(gmmX, gmmWeight)
+
     unpermuteOut = Unpermute(gmmY)
+
     y = AllToAllv(unpermuteOut)
+
     mmY = mmX @ mmWeight (optional shared expert)
-  description: MC2 grouped matmul and all-to-allv fused operator (GMM → Unpermute → AlltoAllv). Supports optional shared expert MatMul in parallel. Cases are converted from mc2_test/excel/aclnnGroupedMatMulAlltoAllv.xlsx level0 sheet.
-  shape_support: 'gmm_x: [A, H1], gmm_weight: [e, H1, N1] or [e, N1, H1] when trans_gmm_weight=true, mm_x: [BS, H2], mm_weight: [H2, N2] or [N2, H2] when trans_mm_weight=true; y: [BSK, N1], mm_y: [BS, N2]'
+
+    '
+  description: Grouped MatMul, Unpermute and AlltoAllv fusion with optional shared MatMul. Existing legacy cases
+    are preserved; A5 cases use deterministic two-rank FP16/BF16 communication.
+  shape_support: 'gmm_x: [A, H1], gmm_weight: [e, H1, N1] or [e, N1, H1] when trans_gmm_weight=true, mm_x: [BS,
+    H2], mm_weight: [H2, N2] or [N2, H2] when trans_mm_weight=true; y: [BSK, N1], mm_y: [BS, N2]'
   precision_thresholds:
     float16: 0.005
     bfloat16: 0.005
@@ -53,41 +49,94 @@ operator:
     type: int
     default: 0
     description: Graph execution mode (0=single op, 1=static graph, 2=dynamic graph).
+  - name: case_name
+    type: str
+    description: Original mc2_test legacy case name.
+    required: false
+  - name: mc2_accuracy_mode
+    type: str
+    description: A5 uses three_way.
+    required: false
+  - name: mc2_compare_dtype
+    type: str
+    description: A5 precision error statistics use float32.
+    required: false
+  - name: platform
+    type: str
+    description: A5 rows are restricted to Ascend 950DT.
+    required: false
+  - name: supported_devices
+    type: list
+    description: Accepted device tags for platform filtering.
+    required: false
+  - name: source
+    type: str
+    description: Operator source documenting platform and input constraints.
+    required: false
+  - name: token_counts
+    type: list
+    description: A5 C[source][destination][expert]; nonnegative counts with matching send/receive edges.
+    required: false
   inputs:
   - name: gmm_x
     description: Input tensor for grouped matmul and all-to-allv communication.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[A, H1]'
+    required: true
   - name: gmm_weight
     description: Weight tensor for grouped matmul.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[e, H1, N1] or [e, N1, H1]'
+    required: true
   - name: send_counts
     description: Send counts for all-to-allv (int list of length world_size * e, derived from token distribution).
-    dtype: [int64]
+    dtype:
+    - int32
+    - int64
     shape: '[world_size * e]'
+    required: true
   - name: recv_counts
     description: Receive counts for all-to-allv (int list of length world_size * e, derived from token distribution).
-    dtype: [int64]
+    dtype:
+    - int32
+    - int64
     shape: '[world_size * e]'
+    required: true
   - name: mm_x
     description: Optional input for shared expert matmul.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[BS, H2]'
     optional: true
+    required: false
   - name: mm_weight
     description: Optional weight for shared expert matmul.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[H2, N2] or [N2, H2]'
     optional: true
+    required: false
   outputs:
   - name: y
     description: Final output after GMM, unpermute, and all-to-allv.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[BSK, N1]'
   - name: mm_y
     description: Optional shared expert matmul output.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[BS, N2]'
     optional: true
-  schema: grouped_mat_mul_allto_allv(Tensor gmm_x, Tensor gmm_weight, int[] send_counts, int[] recv_counts, Tensor? mm_x=None, Tensor? mm_weight=None, str hcomm_info, int world_size, bool trans_gmm_weight=False, bool trans_mm_weight=False) -> (Tensor y, Tensor? mm_y)
+  schema: grouped_mat_mul_allto_allv(Tensor gmm_x, Tensor gmm_weight, str hcomm_info, int world_size, int[] send_counts,
+    int[] recv_counts, Tensor? mm_x=None, Tensor? mm_weight=None, bool trans_gmm_weight=False, bool trans_mm_weight=False)
+    -> (Tensor y, Tensor? mm_y)
+  platform: Atlas A3 / Ascend 950DT (A5)

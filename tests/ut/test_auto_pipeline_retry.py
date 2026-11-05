@@ -1,5 +1,17 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 import json
 from pathlib import Path
+
+import pytest
 
 import auto_pipeline.cli as cli
 import auto_pipeline.core as config_runner
@@ -12,6 +24,14 @@ from auto_pipeline.generator.pypto.dispatcher import write_dispatcher
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@pytest.fixture(autouse=True)
+def _mock_process_identity(monkeypatch):
+    # Retry/artifact decisions do not depend on host POSIX process metadata.
+    monkeypatch.setattr(
+        cli.pipeline_state, "process_identity", lambda pid=None: {"pid": 12345}
+    )
 
 
 def _write_config(path: Path, *, agent_type: str, selectors: list[str]) -> None:
@@ -79,7 +99,16 @@ def _register_source_run(
 
 
 def _patch_success_eval(monkeypatch) -> None:
-    def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
+    def fake_eval(
+        self,
+        *,
+        bench_name,
+        source_dir,
+        task_selector,
+        reports_dir,
+        device_id=None,
+        extra_args=None,
+    ):
         return CannBenchEvalResult(
             returncode=0,
             command=["fake-eval", bench_name, task_selector],
@@ -97,22 +126,36 @@ class RecordingConverter:
     def __init__(self, artifacts: list[Artifact]) -> None:
         self.artifacts = artifacts
 
-    def convert(self, bench_name, case, artifact, *, output_dir, runner=None, workdir=None):
+    def convert(
+        self, bench_name, case, artifact, *, output_dir, runner=None, workdir=None
+    ):
         self.artifacts.append(artifact)
         submission_dir = Path(output_dir)
         package_dir = submission_dir / "cann_bench"
         package_dir.mkdir(parents=True, exist_ok=True)
-        (submission_dir / "build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
+        (submission_dir / "build.sh").write_text(
+            "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+        )
         (package_dir / "__init__.py").write_text("", encoding="utf-8")
-        (package_dir / f"{case.operator.lower()}.py").write_text("def op(*args):\n    return args\n", encoding="utf-8")
+        (package_dir / f"{case.operator.lower()}.py").write_text(
+            "def op(*args):\n    return args\n", encoding="utf-8"
+        )
         return ConversionResult(
-            artifact=Artifact(status=AGENT_SUCCESS, workdir=submission_dir, files={"source_dir": submission_dir}),
+            artifact=Artifact(
+                status=AGENT_SUCCESS,
+                workdir=submission_dir,
+                files={"source_dir": submission_dir},
+            ),
             submission=Submission(bench_name, case.operator, submission_dir),
         )
 
 
 def _patch_recording_converter(monkeypatch, artifacts: list[Artifact]) -> None:
-    monkeypatch.setattr(config_runner, "create_converter", lambda *_args, **_kwargs: RecordingConverter(artifacts))
+    monkeypatch.setattr(
+        config_runner,
+        "create_converter",
+        lambda *_args, **_kwargs: RecordingConverter(artifacts),
+    )
 
 
 def test_retry_akg_stages_and_reuses_existing_model(monkeypatch, tmp_path):
@@ -121,13 +164,19 @@ def test_retry_akg_stages_and_reuses_existing_model(monkeypatch, tmp_path):
     source_output = tmp_path / "source"
     workspace = tmp_path / "akg-workspace"
     retry_output = tmp_path / "retry-akg"
-    _write_config(config_path, agent_type="akg-agent", selectors=["tasks/level1/exp", "tasks/level1/sigmoid"])
+    _write_config(
+        config_path,
+        agent_type="akg-agent",
+        selectors=["tasks/level1/exp", "tasks/level1/sigmoid"],
+    )
 
     artifact_dir = source_output / "exp" / "work" / "artifact"
     artifact_dir.mkdir(parents=True)
     (artifact_dir / "akg_model.py").write_text("# reused akg code\n", encoding="utf-8")
     (artifact_dir / "akg-agent.log").write_text("old log\n", encoding="utf-8")
-    (source_output / "exp" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    (source_output / "exp" / "benchmark_result.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     _register_source_run(
         run_id="source-akg",
         config_path=config_path,
@@ -143,32 +192,45 @@ def test_retry_akg_stages_and_reuses_existing_model(monkeypatch, tmp_path):
             raise AssertionError("retry should reuse staged akg_model.py")
 
     converted_artifacts: list[Artifact] = []
-    monkeypatch.setattr(config_runner, "create_generator", lambda *_args, **_kwargs: FailingAkgGenerator())
+    monkeypatch.setattr(
+        config_runner,
+        "create_generator",
+        lambda *_args, **_kwargs: FailingAkgGenerator(),
+    )
     _patch_recording_converter(monkeypatch, converted_artifacts)
     _patch_success_eval(monkeypatch)
 
-    assert cli.main([
-        "retry",
-        "--run-id",
-        "source-akg",
-        "--task",
-        "exp",
-        "--foreground",
-        "--retry-run-id",
-        "retry-akg",
-        "--retry-output",
-        str(retry_output),
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "retry",
+                "--run-id",
+                "source-akg",
+                "--task",
+                "exp",
+                "--foreground",
+                "--retry-run-id",
+                "retry-akg",
+                "--retry-output",
+                str(retry_output),
+            ]
+        )
+        == 0
+    )
 
     staged_model = retry_output / "exp" / "work" / "artifact" / "akg_model.py"
     assert staged_model.read_text(encoding="utf-8") == "# reused akg code\n"
     assert converted_artifacts[0].metadata["akg_reused"] is True
     assert converted_artifacts[0].metadata["akg_reuse_source"] == str(staged_model)
-    task_state = cli.pipeline_state.read_json(cli.pipeline_state.task_file("retry-akg", "exp"))
+    task_state = cli.pipeline_state.read_json(
+        cli.pipeline_state.task_file("retry-akg", "exp")
+    )
     run_state = cli.pipeline_state.read_json(cli.pipeline_state.run_file("retry-akg"))
     assert task_state["status"] == "success"
     assert run_state["status"] == "success"
-    assert [task["selector"] for task in run_state["tasks_declared"]] == ["tasks/level1/exp"]
+    assert [task["selector"] for task in run_state["tasks_declared"]] == [
+        "tasks/level1/exp"
+    ]
 
 
 def test_retry_akg_generates_when_no_reusable_model_exists(monkeypatch, tmp_path):
@@ -179,7 +241,9 @@ def test_retry_akg_generates_when_no_reusable_model_exists(monkeypatch, tmp_path
     retry_output = tmp_path / "retry-akg-fallback"
     _write_config(config_path, agent_type="akg-agent", selectors=["tasks/level1/exp"])
     (source_output / "exp").mkdir(parents=True)
-    (source_output / "exp" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    (source_output / "exp" / "benchmark_result.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     _register_source_run(
         run_id="source-akg-fallback",
         config_path=config_path,
@@ -206,22 +270,29 @@ def test_retry_akg_generates_when_no_reusable_model_exists(monkeypatch, tmp_path
             )
 
     converted_artifacts: list[Artifact] = []
-    monkeypatch.setattr(config_runner, "create_generator", lambda *_args, **_kwargs: FakeAkgGenerator())
+    monkeypatch.setattr(
+        config_runner, "create_generator", lambda *_args, **_kwargs: FakeAkgGenerator()
+    )
     _patch_recording_converter(monkeypatch, converted_artifacts)
     _patch_success_eval(monkeypatch)
 
-    assert cli.main([
-        "retry",
-        "--run-id",
-        "source-akg-fallback",
-        "--task",
-        "exp",
-        "--foreground",
-        "--retry-run-id",
-        "retry-akg-fallback",
-        "--retry-output",
-        str(retry_output),
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "retry",
+                "--run-id",
+                "source-akg-fallback",
+                "--task",
+                "exp",
+                "--foreground",
+                "--retry-run-id",
+                "retry-akg-fallback",
+                "--retry-output",
+                str(retry_output),
+            ]
+        )
+        == 0
+    )
 
     assert calls["generate"] == 1
     assert converted_artifacts[0].output_text == "# freshly generated\n"
@@ -230,10 +301,17 @@ def test_retry_akg_generates_when_no_reusable_model_exists(monkeypatch, tmp_path
 
 def _write_completed_pypto_custom(op_dir: Path, *, op_name: str = "gelu") -> None:
     op_dir.mkdir(parents=True, exist_ok=True)
-    for name in [f"{op_name}_impl.py", f"{op_name}_golden.py", f"test_{op_name}.py", "SPEC.md"]:
+    for name in [
+        f"{op_name}_impl.py",
+        f"{op_name}_golden.py",
+        f"test_{op_name}.py",
+        "SPEC.md",
+    ]:
         (op_dir / name).write_text("# pypto artifact\n", encoding="utf-8")
     (op_dir / ".orchestrator_state.json").write_text(
-        json.dumps({"stage_status": {str(index): "completed" for index in range(1, 8)}}),
+        json.dumps(
+            {"stage_status": {str(index): "completed" for index in range(1, 8)}}
+        ),
         encoding="utf-8",
     )
 
@@ -253,7 +331,9 @@ def _patch_fake_runner(monkeypatch) -> None:
         def run(self, prompt):
             raise AssertionError("recording converter should ignore conversion runner")
 
-    monkeypatch.setattr(config_runner, "create_runner", lambda *_args, **_kwargs: FakeRunner())
+    monkeypatch.setattr(
+        config_runner, "create_runner", lambda *_args, **_kwargs: FakeRunner()
+    )
 
 
 def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
@@ -263,12 +343,20 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
     source_output = tmp_path / "source"
     workspace = tmp_path / "pypto-workspace"
     retry_output = tmp_path / "retry-pypto-skip"
-    _write_config(config_path, agent_type="pypto", selectors=["bench_lab/pypto_cann_bench/level1/exp"])
+    _write_config(
+        config_path,
+        agent_type="pypto",
+        selectors=["bench_lab/pypto_cann_bench/level1/exp"],
+    )
     _write_completed_pypto_custom(workspace / "custom" / "exp", op_name="exp")
     (workspace / "custom" / "exp" / "prof").mkdir()
-    (workspace / "custom" / "exp" / "prof" / "trace.json").write_text("{}\n", encoding="utf-8")
+    (workspace / "custom" / "exp" / "prof" / "trace.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     (source_output / "gelu").mkdir(parents=True)
-    (source_output / "gelu" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    (source_output / "gelu" / "benchmark_result.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     _register_source_run(
         run_id="source-pypto-skip",
         config_path=config_path,
@@ -290,18 +378,23 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
     _patch_recording_converter(monkeypatch, converted_artifacts)
     _patch_success_eval(monkeypatch)
 
-    assert cli.main([
-        "retry",
-        "--run-id",
-        "source-pypto-skip",
-        "--task",
-        "gelu",
-        "--foreground",
-        "--retry-run-id",
-        "retry-pypto-skip",
-        "--retry-output",
-        str(retry_output),
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "retry",
+                "--run-id",
+                "source-pypto-skip",
+                "--task",
+                "gelu",
+                "--foreground",
+                "--retry-run-id",
+                "retry-pypto-skip",
+                "--retry-output",
+                str(retry_output),
+            ]
+        )
+        == 0
+    )
 
     snapshot = retry_output / "exp" / "custom" / "exp"
     assert opencode_calls["count"] == 0
@@ -309,8 +402,12 @@ def test_retry_pypto_skips_completed_workspace_custom(monkeypatch, tmp_path):
     assert converted_artifacts[0].files["source_dir"] == snapshot.resolve()
     assert (snapshot / "exp_impl.py").is_file()
     assert not (snapshot / "prof").exists()
-    task_state = cli.pipeline_state.read_json(cli.pipeline_state.task_file("retry-pypto-skip", "exp"))
-    assert task_state["workspace_custom_dir"] == str((workspace / "custom" / "exp").resolve())
+    task_state = cli.pipeline_state.read_json(
+        cli.pipeline_state.task_file("retry-pypto-skip", "exp")
+    )
+    assert task_state["workspace_custom_dir"] == str(
+        (workspace / "custom" / "exp").resolve()
+    )
     assert task_state["output_custom_dir"] == str(snapshot.resolve())
 
 
@@ -321,12 +418,18 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
     source_output = tmp_path / "source"
     workspace = tmp_path / "pypto-workspace"
     retry_output = tmp_path / "retry-pypto-resume"
-    _write_config(config_path, agent_type="pypto", selectors=["bench_lab/pypto_cann_bench/level1/exp"])
+    _write_config(
+        config_path,
+        agent_type="pypto",
+        selectors=["bench_lab/pypto_cann_bench/level1/exp"],
+    )
     op_dir = workspace / "custom" / "exp"
     op_dir.mkdir(parents=True)
     (op_dir / "KEEP.txt").write_text("keep me\n", encoding="utf-8")
     (source_output / "gelu").mkdir(parents=True)
-    (source_output / "gelu" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    (source_output / "gelu" / "benchmark_result.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     _register_source_run(
         run_id="source-pypto-resume",
         config_path=config_path,
@@ -337,7 +440,9 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
 
     opencode_calls = {"count": 0}
 
-    def fake_run_opencode(self, prompt, *, cwd=None, prompt_text=None, log_name=None, **kwargs):
+    def fake_run_opencode(
+        self, prompt, *, cwd=None, prompt_text=None, log_name=None, **kwargs
+    ):
         opencode_calls["count"] += 1
         assert Path(cwd).resolve() == workspace.resolve()
         _write_completed_pypto_custom(Path(cwd) / "custom" / "exp", op_name="exp")
@@ -365,18 +470,23 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
     _patch_recording_converter(monkeypatch, converted_artifacts)
     _patch_success_eval(monkeypatch)
 
-    assert cli.main([
-        "retry",
-        "--run-id",
-        "source-pypto-resume",
-        "--task",
-        "gelu",
-        "--foreground",
-        "--retry-run-id",
-        "retry-pypto-resume",
-        "--retry-output",
-        str(retry_output),
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "retry",
+                "--run-id",
+                "source-pypto-resume",
+                "--task",
+                "gelu",
+                "--foreground",
+                "--retry-run-id",
+                "retry-pypto-resume",
+                "--retry-output",
+                str(retry_output),
+            ]
+        )
+        == 0
+    )
 
     snapshot = retry_output / "exp" / "custom" / "exp"
     assert opencode_calls["count"] == 1
@@ -387,21 +497,30 @@ def test_retry_pypto_resumes_incomplete_workspace_custom(monkeypatch, tmp_path):
     assert (snapshot / "SPEC.md").is_file()
 
 
-def _write_completed_multiclass_custom(parent: Path, op_name: str, classes: list) -> None:
+def _write_completed_multiclass_custom(
+    parent: Path, op_name: str, classes: list
+) -> None:
     for case_class in classes:
         _write_completed_pypto_custom(parent / case_class.subdir, op_name=op_name)
         (parent / case_class.subdir / f"{op_name}_impl.py").write_text(
-            f"def {op_name}(x, *a, **k):\n    return ({case_class.subdir!r}, x.dim())\n", encoding="utf-8"
+            f"def {op_name}(x, *a, **k):\n    return ({case_class.subdir!r}, x.dim())\n",
+            encoding="utf-8",
         )
     manifest = {
         "op_name": op_name,
         "classes": [
-            {"class_id": c.class_id, "subdir": c.subdir, "signature": [list(s) for s in c.signature],
-             "impl": f"{c.subdir}/{op_name}_impl.py"}
+            {
+                "class_id": c.class_id,
+                "subdir": c.subdir,
+                "signature": [list(s) for s in c.signature],
+                "impl": f"{c.subdir}/{op_name}_impl.py",
+            }
             for c in classes
         ],
     }
-    (parent / "classes_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (parent / "classes_manifest.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
     write_dispatcher(parent, manifest)
 
 
@@ -418,7 +537,9 @@ def test_retry_pypto_skips_completed_multiclass_workspace_custom(monkeypatch, tm
     assert len(classes) > 1  # gelu is genuinely multi-class
     _write_completed_multiclass_custom(workspace / "custom" / "gelu", "gelu", classes)
     (source_output / "gelu").mkdir(parents=True)
-    (source_output / "gelu" / "benchmark_result.json").write_text("{}\n", encoding="utf-8")
+    (source_output / "gelu" / "benchmark_result.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     _register_source_run(
         run_id="source-pypto-multi",
         config_path=config_path,
@@ -437,10 +558,23 @@ def test_retry_pypto_skips_completed_multiclass_workspace_custom(monkeypatch, tm
     _patch_recording_converter(monkeypatch, converted_artifacts)
     _patch_success_eval(monkeypatch)
 
-    assert cli.main([
-        "retry", "--run-id", "source-pypto-multi", "--task", "gelu", "--foreground",
-        "--retry-run-id", "retry-pypto-multi", "--retry-output", str(retry_output),
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "retry",
+                "--run-id",
+                "source-pypto-multi",
+                "--task",
+                "gelu",
+                "--foreground",
+                "--retry-run-id",
+                "retry-pypto-multi",
+                "--retry-output",
+                str(retry_output),
+            ]
+        )
+        == 0
+    )
 
     snapshot = retry_output / "gelu" / "custom" / "gelu"
     assert converted_artifacts[0].metadata["pypto_status"] == "skipped"

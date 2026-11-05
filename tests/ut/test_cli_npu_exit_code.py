@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 from types import SimpleNamespace
 
 import pytest
@@ -29,7 +39,9 @@ class _ReportGenerator:
 
 
 @pytest.mark.parametrize(("card_count", "expected_exit_code"), [(0, 1), (1, 0)])
-def test_eval_propagates_npu_setup_failure(monkeypatch, tmp_path, card_count, expected_exit_code):
+def test_eval_propagates_npu_setup_failure(
+    monkeypatch, tmp_path, card_count, expected_exit_code
+):
     (tmp_path / "metadata").mkdir()
     (tmp_path / "metadata" / "VERSION").write_text("2.0.0\n")
     args = cli.create_parser().parse_args(["eval", "--device", "npu", "--no-perf"])
@@ -46,7 +58,9 @@ def test_eval_propagates_npu_setup_failure(monkeypatch, tmp_path, card_count, ex
     monkeypatch.setattr(
         cli,
         "_create_config_from_args",
-        lambda unused_args, unused_root: SimpleNamespace(reports_dir=str(tmp_path)),
+        lambda unused_args, unused_root: SimpleNamespace(
+            reports_dir=str(tmp_path), device_type="npu"
+        ),
     )
     monkeypatch.setattr(cli, "ReportGenerator", _ReportGenerator)
 
@@ -56,7 +70,10 @@ def test_eval_propagates_npu_setup_failure(monkeypatch, tmp_path, card_count, ex
 
     monkeypatch.setattr(
         "kernel_eval.registry.get_case_loader",
-        lambda bench_name, tasks_root: _Loader(),
+        lambda bench_name, tasks_root, target_hardware: _Loader(),
+    )
+    monkeypatch.setattr(
+        cli, "detect_execution_hardware", lambda device_type, device_id: "950dt"
     )
     monkeypatch.setattr(
         "kernel_eval.eval.subprocess_utils.detect_pypto_pro_submission",
@@ -89,8 +106,12 @@ def test_eval_propagates_npu_setup_failure(monkeypatch, tmp_path, card_count, ex
             )
         ]
 
-    monkeypatch.setattr("kernel_eval.eval.process_pool.ProcessPoolCoordinator", _Coordinator)
-    monkeypatch.setattr("kernel_eval.eval.process_pool.aggregate_by_operator", aggregate)
+    monkeypatch.setattr(
+        "kernel_eval.eval.process_pool.ProcessPoolCoordinator", _Coordinator
+    )
+    monkeypatch.setattr(
+        "kernel_eval.eval.process_pool.aggregate_by_operator", aggregate
+    )
 
     assert cli.cmd_eval(args) == expected_exit_code
 
@@ -109,6 +130,8 @@ def test_eval_propagates_cpu_simulation_failure(monkeypatch, tmp_path):
         lambda unused_args, unused_root: SimpleNamespace(reports_dir=str(tmp_path)),
     )
     monkeypatch.setattr(cli, "ReportGenerator", _ReportGenerator)
-    monkeypatch.setattr("kernel_eval.simulation.simulate", lambda *unused, **unused_kwargs: 1)
+    monkeypatch.setattr(
+        "kernel_eval.simulation.simulate", lambda *unused, **unused_kwargs: 1
+    )
 
     assert cli.cmd_eval(args) == 1

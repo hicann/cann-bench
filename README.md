@@ -49,6 +49,8 @@ $$
 
 其中 `T_HW = t_hw_us` 为硬件理论性能上界，`T_baseline = baseline_perf_us` 为CANN基线性能（由于torch接口功能限制，部分基线实现由算子拼接得到）——二者均由 `<bench>/metadata/<hardware>.json` 按硬件提供（不再内嵌于 cases.yaml/csv）；`T_cand` 为候选 kernel 实测时间。这个公式的设计保证了如果性能低于基线（T_cand > T_baseline），HAP 为 0-0.5；如果性能优于基线（T_cand < T_baseline），HAP 0.5 以上；如果性能达到硬件上界或更高（T_cand <= T_HW），HAP 为 1 以上。
 
+基线来源以对应 metadata 的来源字段为准。MC2 A5 的 950DT 有 300 条固定实测基线，950PR 有 180 条固定实测基线；理论下界 `t_hw_us` 与实测耗时分别维护。来源、适用范围及无 NPU 自检命令见 [MC2 A5 模型说明](docs/hap_thw_model/mc2_a5.md)。
+
 > **HAP 是饱和型指标，不是加速比（speedup）。** 它衡量的是“候选 kernel 逼近硬件理论上界的程度”，而非“比 baseline 快多少倍”。当 baseline 本身很慢（$T_{\text{baseline}} \gg T_{\text{HW}}$）时，即使候选相对 baseline 有巨大的 speedup，HAP 也只会趋近于 1 附近而不会线性放大；只有 $T_{\text{cand}} < T_{\text{HW}}$（快于硬件理论上界）时 HAP 才会 > 1。
 >
 > **边界与异常取值。** 当锚点非法（$T_{\text{cand}} \le 0$ 或 $T_{\text{HW}} \le 0$），或分母 $(T_{\text{cand}}-T_{\text{HW}}) + (T_{\text{baseline}}-T_{\text{HW}}) \le 0$（罕见，例如 $T_{\text{baseline}} \approx T_{\text{HW}}$ 且 $T_{\text{cand}} < T_{\text{HW}}$）时，当前实现对该用例的 HAP 返回 `None`（该用例不计入性能项），**不会输出 $\pm\infty$ 或负分**。

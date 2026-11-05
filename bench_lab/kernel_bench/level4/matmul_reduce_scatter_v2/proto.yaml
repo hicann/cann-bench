@@ -12,11 +12,15 @@ operator:
   name: MatmulReduceScatterV2
   category: FusedComposite
   difficulty: L4
-  formula: |
-    mm = QuantMatmul(x1, x2, x1_scale, x2_scale, bias)
+  platform: Atlas A3; Ascend 950PR / 950DT
+  formula: 'mm = Matmul(x1, x2) for FP16/BF16; QuantMatmul(x1, x2, x1_scale, x2_scale, bias) for INT8
+
     y = ReduceScatter(mm, op=sum) along dim 0
-  description: MC2 quantized matmul and reduce-scatter fused operator. INT8 cases require one HCCL process per rank and target Atlas A3.
-  shape_support: 'x1: [M, K], x2: [K, N], x1_scale: [M], x2_scale: [N]; y: [M / world_size, N]'
+
+    '
+  description: 矩阵乘与 ReduceScatter 融合算子，支持 FP16/BF16 非量化及 INT8 per-token/per-channel 形式。
+  shape_support: 'x1: [M, K], x2: [K, N] or [N, K] when is_trans_b=true; optional INT8 scales x1_scale: [M], x2_scale:
+    [N]; y: [M / world_size, N]'
   precision_thresholds:
     float16: 0.01
     bfloat16: 0.01
@@ -48,26 +52,91 @@ operator:
     type: int
     default: 128
     description: Quant-mm block size passed through to torch_npu.
+  - name: is_trans_b
+    type: bool
+    description: 是否转置 x2。
+    default: 'false'
+    required: false
+  - name: is_bias
+    type: bool
+    description: 是否提供 bias，当前用例均为 false。
+    default: 'false'
+    required: false
+  - name: x1_scale_dtype
+    type: str
+    description: x1_scale 的逻辑 dtype，非量化时忽略。
+    default: float32
+    required: false
+  - name: x2_scale_dtype
+    type: str
+    description: x2_scale 的逻辑 dtype，非量化时忽略。
+    default: float32
+    required: false
+  - name: group_sizes
+    type: ListInt
+    description: 分组量化配置，当前为空列表。
+    default: []
+    required: false
+  - name: seed
+    type: int
+    description: 用例输入随机种子。
+    required: false
+  - name: weight_same
+    type: int
+    description: 保留现有 A3 输入生成策略。
+    default: 1
+    required: false
+  - name: platform
+    type: str
+    description: 该用例适用的平台说明，不参与自动筛选。
+    required: false
+  - name: source_sheet
+    type: str
+    description: A5 规格来源工作表。
+    required: false
+  - name: source_excel_row
+    type: int
+    description: A5 规格来源 Excel 行号。
+    required: false
+  - name: mc2_accuracy_mode
+    type: str
+    required: false
+    description: A5 three-way accuracy setting; see docs/guide/mc2_accuracy.md.
   inputs:
   - name: x1
-    description: Quantized matmul input tensor.
-    dtype: [int8]
+    description: 矩阵乘左输入（A3 INT8 或 A5 FP16/BF16）。
+    dtype:
+    - int8
+    - float16
+    - bfloat16
     shape: '[M, K]'
   - name: x2
-    description: Quantized matmul weight tensor.
-    dtype: [int8]
+    description: 矩阵乘右输入（A3 INT8 或 A5 FP16/BF16）。
+    dtype:
+    - int8
+    - float16
+    - bfloat16
     shape: '[K, N]'
   - name: x1_scale
     description: Per-token scale for x1.
-    dtype: [float32]
+    dtype:
+    - float32
     shape: '[M]'
+    optional: true
   - name: x2_scale
     description: Per-channel scale for x2.
-    dtype: [float32]
+    dtype:
+    - float32
     shape: '[N]'
+    optional: true
   outputs:
   - name: y
     description: Reduce-scattered quantized matmul result.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
     shape: '[M / world_size, N]'
-  schema: matmul_reduce_scatter_v2(Tensor x1, Tensor x2, str hcomm_info, int world_size, str reduce_op="sum", Tensor? bias=None, Tensor? x1_scale=None, Tensor? x2_scale=None, bool is_trans_b=False, str out_dtype="float16", str x1_dtype="int8", str x2_dtype="int8", str x1_scale_dtype="float32", str x2_scale_dtype="float32", int block_size=128, int[] group_sizes=[]) -> Tensor y
+  schema: matmul_reduce_scatter_v2(Tensor x1, Tensor x2, str hcomm_info, int world_size, str reduce_op="sum", Tensor?
+    bias=None, Tensor? x1_scale=None, Tensor? x2_scale=None, bool is_trans_b=False, str out_dtype="float16", str
+    x1_dtype="int8", str x2_dtype="int8", str x1_scale_dtype="float32", str x2_scale_dtype="float32", int block_size=128,
+    int[] group_sizes=[]) -> Tensor y

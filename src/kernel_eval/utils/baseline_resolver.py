@@ -5,7 +5,7 @@
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
 # This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You can not use this file except in compliance with the License.
+# Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
@@ -41,36 +41,39 @@ DEFAULT_HARDWARE: str = "910b2"
 # 平台别名映射
 # ---------------------------------------------------------------------------
 # torch.npu.get_device_name() 返回的是产品型号名（如 "Ascend910_9362"），
-# 而 baseline 文件使用的是简短的逻辑名（如 "910b2"）。
+# 而 baseline 平台使用的是简短的逻辑名（如 "910c"）。
 # 此映射将产品名 → 逻辑名，确保自动检测的硬件名能找到对应的 baseline 数据。
 #
 # 映射关系：
-#   Ascend 910B 系列 (A2 / Atlas A2 / 910B2 / 910_9362 等) → "910b2"
+#   Ascend 910B2 / Atlas A2 → "910b2"
 #   Ascend 910B1 系列 → "910b1"
+#   Ascend 910_93 系列 / Ascend 910C / Atlas A3 → "910c"
 #   Ascend 310P 系列 → "310p"
 #   Ascend 950PR 系列 → "950pr"
-#   Ascend 950DT 系列 → "950dt"（与 950PR 同构，仅 HBM 读带宽更高）
+#   Ascend 950DT 系列 → "950dt"（使用独立的 DT 系列平台配置）
 #   未来新增平台只需在此处加一行映射 + 在 metadata/ 下加对应 JSON 文件。
 #
 # 产品型号对照（华为官方命名）：
-#   Ascend910_9362  = Ascend 910B2 (Atlas A2 训练卡)
-#   Ascend910_9362B = Ascend 910B2 变体
-#   Ascend910_9361  = Ascend 910B1 (Atlas A2 推理卡)
+#   ops-transformer/docs/QUICKSTART.md: Atlas A3 对应 ascend910_93 系列。
+#   该项目 cmake/scripts/util/opdesc_parser.py 将 9391/9381/9372/9392/9382/9362
+#   归入 ascend910_93；产品名后缀 B 不改变该系列归属，不能误用 910B2 基线。
 #   Ascend310P_???  = Ascend 310P (Atlas 推理卡)
 #   Ascend950PR_??? = Ascend 950PR (Atlas 推理加速卡)
 #   Ascend950DT_??? = Ascend 950DT (Atlas 推理加速卡，高带宽变体)
 # ---------------------------------------------------------------------------
 PLATFORM_ALIAS: Dict[str, str] = {
     # 910B2 (Atlas A2 训练卡)
-    "Ascend910_9362": "910b2",
-    "Ascend910_9362B": "910b2",
     "Ascend910B2": "910b2",
     "910b2": "910b2",
     "Atlas-A2": "910b2",
     # 910B1 (Atlas A2 推理卡)
-    "Ascend910_9361": "910b1",
     "Ascend910B1": "910b1",
     "910b1": "910b1",
+    # Atlas A3 — 93 系列使用前缀匹配，包含产品子型号及其后缀。
+    "Ascend910_93": "910c",
+    "Ascend910C": "910c",
+    "Atlas-A3": "910c",
+    "910c": "910c",
     # 310P (Atlas 推理卡) — key 是前缀，子型号由 resolve_hardware 前缀匹配
     "Ascend310P": "310p",
     "310p": "310p",
@@ -114,8 +117,12 @@ def resolve_hardware(hardware: str) -> str:
             best_value = alias_value
 
     if best_value is not None:
-        _logger.debug("resolve_hardware: %r 前缀匹配 → %r (prefix=%r)",
-                      hardware, best_value, best_prefix)
+        _logger.debug(
+            "resolve_hardware: %r 前缀匹配 → %r (prefix=%r)",
+            hardware,
+            best_value,
+            best_prefix,
+        )
         return best_value
 
     # 3. 无匹配 → 返回原值

@@ -31,6 +31,9 @@ from typing import Any, Dict, List, Optional, Type
 
 FAILURE_TYPE_PRECISION_MISMATCH = "precision_mismatch"
 FAILURE_TYPE_COMPILE_RUNTIME_ERROR = "compile_runtime_error"
+FAILURE_TYPE_CASCADE_DEVICE = "cascade_device"
+FAILURE_TYPE_SKIPPED = "skipped"
+FAILURE_TYPE_REFERENCE_INVALID = "reference_invalid"
 
 PRECISION_FAILURE_TYPES = {
     FAILURE_TYPE_PRECISION_MISMATCH,
@@ -45,8 +48,8 @@ COMPILE_RUNTIME_FAILURE_TYPES = {
     "timeout",
     "subprocess_failure",
     "oom_killed",
-    "cascade_device",
-    "skipped",
+    FAILURE_TYPE_CASCADE_DEVICE,
+    FAILURE_TYPE_SKIPPED,
 }
 
 STRUCTURAL_FAILURE_MARKERS = (
@@ -81,6 +84,7 @@ def get_output_result_cls(name: str) -> Optional[Type[OutputResult]]:
 
 
 # === 输出结果基类 ===
+
 
 class OutputResult(ABC):
     """单个输出的判断结果抽象基类
@@ -129,12 +133,14 @@ class OutputResult(ABC):
 
 # === 精度结果 ===
 
+
 @dataclass
 class AccuracyResult:
     """统一的精度判断结果
 
     包含必要字段 + metadata 扩展字段。
     """
+
     passed: bool
     threshold: Optional[float] = None
     error_msg: Optional[str] = None
@@ -177,18 +183,22 @@ class AccuracyResult:
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
         d = {
-            'passed': self.passed,
-            'error_msg': self.error_msg,
-            'output_results': [r.to_dict() for r in self.output_results],
-            'metadata': self.metadata,
+            "passed": self.passed,
+            "error_msg": self.error_msg,
+            "output_results": [r.to_dict() for r in self.output_results],
+            "metadata": self.metadata,
         }
         if self.threshold is not None:
-            d['threshold'] = self.threshold
+            d["threshold"] = self.threshold
         return d
 
     def format_summary(self) -> str:
         """格式化摘要"""
         dtype = self.get_failed_dtype() or self.get_first_dtype()
+        if self.metadata.get("checker_name") == "mc2_three_way":
+            status = "PASS" if self.passed else "FAIL"
+            detail = f": {self.error_msg}" if self.error_msg else ""
+            return f"[{dtype}] {status} MC2 three-way (per-output limits){detail}"
         if self.passed:
             return f"[{dtype}] ✅ threshold={self.threshold:.6f}"
         else:
@@ -204,7 +214,9 @@ class AccuracyResult:
         return "\n".join(lines)
 
 
-def get_accuracy_failure_type(accuracy_result: Optional[AccuracyResult]) -> Optional[str]:
+def get_accuracy_failure_type(
+    accuracy_result: Optional[AccuracyResult],
+) -> Optional[str]:
     """Classify a failed accuracy result for scoring.
 
     Only true numerical precision mismatches keep the compile/runtime component.
@@ -248,13 +260,19 @@ def is_compile_runtime_failure_type(failure_type: Optional[str]) -> bool:
 def is_compile_runtime_case_failure(case_result: Any) -> bool:
     """Return True when a failed case should deduct compile/runtime score."""
     if isinstance(case_result, dict):
-        success = case_result.get("success", False)
+        success = case_result.get("success", case_result.get("status") == "success")
     else:
         success = getattr(case_result, "success", False)
     if success:
         return False
 
-    failure_type = getattr(case_result, "failure_type", None)
+    failure_type = (
+        case_result.get("failure_type")
+        if isinstance(case_result, dict)
+        else getattr(case_result, "failure_type", None)
+    )
+    if failure_type == FAILURE_TYPE_REFERENCE_INVALID:
+        return False
     if failure_type:
         return not is_precision_failure_type(failure_type)
 
@@ -271,7 +289,9 @@ def is_compile_runtime_case_failure(case_result: Any) -> bool:
         case_error_msg = str(case_result.get("error_msg") or "")
     else:
         case_error_msg = str(getattr(case_result, "error_msg", None) or "")
-    if case_error_msg and any(marker in case_error_msg for marker in STRUCTURAL_FAILURE_MARKERS):
+    if case_error_msg and any(
+        marker in case_error_msg for marker in STRUCTURAL_FAILURE_MARKERS
+    ):
         return True
 
     accuracy_result = getattr(case_result, "accuracy_result", None)
@@ -279,7 +299,10 @@ def is_compile_runtime_case_failure(case_result: Any) -> bool:
         accuracy_result = case_result.get("accuracy")
         failure_type = case_result.get("failure_type")
         if failure_type:
-            return not is_precision_failure_type(failure_type)
+            return (
+                failure_type != FAILURE_TYPE_REFERENCE_INVALID
+                and not is_precision_failure_type(failure_type)
+            )
 
     if isinstance(accuracy_result, dict):
         if accuracy_result.get("passed"):
@@ -287,7 +310,10 @@ def is_compile_runtime_case_failure(case_result: Any) -> bool:
         metadata = accuracy_result.get("metadata") or {}
         explicit = metadata.get("failure_type") or accuracy_result.get("failure_type")
         if explicit:
-            return not is_precision_failure_type(str(explicit))
+            return (
+                explicit != FAILURE_TYPE_REFERENCE_INVALID
+                and not is_precision_failure_type(str(explicit))
+            )
         messages = [
             str(accuracy_result.get("error_msg") or ""),
             str(case_result.get("error_msg") or ""),
@@ -295,10 +321,16 @@ def is_compile_runtime_case_failure(case_result: Any) -> bool:
         for output in accuracy_result.get("output_results") or []:
             if isinstance(output, dict):
                 if output.get("failure_type"):
-                    return not is_precision_failure_type(str(output.get("failure_type")))
+                    return (
+                        output["failure_type"] != FAILURE_TYPE_REFERENCE_INVALID
+                        and not is_precision_failure_type(str(output["failure_type"]))
+                    )
                 metadata = output.get("metadata")
                 if isinstance(metadata, dict) and metadata.get("failure_type"):
-                    return not is_precision_failure_type(str(metadata.get("failure_type")))
+                    return (
+                        metadata["failure_type"] != FAILURE_TYPE_REFERENCE_INVALID
+                        and not is_precision_failure_type(str(metadata["failure_type"]))
+                    )
                 messages.append(str(output.get("error_msg") or ""))
         joined = "\n".join(messages)
         if any(marker in joined for marker in STRUCTURAL_FAILURE_MARKERS):
@@ -307,12 +339,16 @@ def is_compile_runtime_case_failure(case_result: Any) -> bool:
 
     classified = get_accuracy_failure_type(accuracy_result)
     if classified:
-        return not is_precision_failure_type(classified)
+        return (
+            classified != FAILURE_TYPE_REFERENCE_INVALID
+            and not is_precision_failure_type(classified)
+        )
 
     return True
 
 
 # === 性能结果 ===
+
 
 @dataclass
 class PerfResult:
@@ -320,6 +356,7 @@ class PerfResult:
 
     包含必要字段 + metadata 扩展字段。
     """
+
     elapsed_us: float = 0.0
     op_times: Dict[str, Any] = field(default_factory=dict)
     error_msg: Optional[str] = None
@@ -347,11 +384,11 @@ class PerfResult:
 
     def get_baseline_us(self) -> float:
         """获取基线时间（从 metadata）"""
-        return self.metadata.get('baseline_us', 0.0)
+        return self.metadata.get("baseline_us", 0.0)
 
     def get_t_hw_us(self) -> float:
         """获取理论硬件下界（从 metadata）"""
-        return self.metadata.get('t_hw_us', 0.0)
+        return self.metadata.get("t_hw_us", 0.0)
 
     def get_speedup(self) -> float:
         """计算加速比"""
@@ -363,17 +400,19 @@ class PerfResult:
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
         return {
-            'elapsed_us': self.elapsed_us,
-            'op_times': self.op_times,
-            'error_msg': self.error_msg,
-            'metadata': self.metadata,
-            'speedup': self.get_speedup(),
+            "elapsed_us": self.elapsed_us,
+            "op_times": self.op_times,
+            "error_msg": self.error_msg,
+            "metadata": self.metadata,
+            "speedup": self.get_speedup(),
         }
 
     def format_summary(self) -> str:
         """格式化摘要"""
         if self.is_success():
-            speedup_str = f", speedup={self.get_speedup():.2f}x" if self.get_speedup() > 0 else ""
+            speedup_str = (
+                f", speedup={self.get_speedup():.2f}x" if self.get_speedup() > 0 else ""
+            )
             return f"elapsed={self.elapsed_us:.2f}us{speedup_str}"
         else:
             if self.error_msg:

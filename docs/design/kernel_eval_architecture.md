@@ -799,7 +799,7 @@ src/kernel_eval/
 │   │  - 解析 task-dir  │              │  - 解析 baseline  │                │
 │   │  - 检测算子目录   │              │  - 多硬件 dict    │                │
 │   │  - 处理相对路径   │              │  - 平台别名映射   │                │
-│   │                   │              │   (Ascend910_9362→910b2)           │
+│   │                   │              │   (Ascend910B2→910b2)              │
 │   │                   │              │                   │                │
 │   │  API:             │              │  API:             │                │
 │   │  resolve_task_dir │              │  resolve_baseline │                │

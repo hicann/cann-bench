@@ -42,27 +42,38 @@ from inspect import Parameter, signature
 
 import torch
 
-from ..config import Config, get_config, get_project_root
+from ..config import Config, get_config
 from ..registry.loader_registry import get_task_loader, get_case_loader
+from ..utils.case_eligibility import (
+    detect_execution_hardware,
+    filter_cases_for_hardware,
+)
 from ..registry.golden_registry import get_golden_loader
 from ..registry.bench_registry import get_bench_config
 from ..data.data_generator import DataGenerator
 from ..data.tensor_cache import (
-    TensorCache, TensorCacheError, TensorCacheUnsupportedError, case_seed as cache_case_seed,
-    identity_for, input_hashes, selected, validate_inputs,
+    TensorCache,
+    TensorCacheError,
+    TensorCacheUnsupportedError,
+    case_seed as cache_case_seed,
+    identity_for,
+    input_hashes,
+    selected,
+    validate_inputs,
 )
-from ..data.package_manager import PackageManager, PackageInfo
-from ..base.models import TaskSpec, CaseSpec
+from ..data.package_manager import PackageManager
+from ..base.models import CaseSpec
 from ..utils.device_manager import DeviceManager, DeviceConfig
 from ..utils.param_builder import ParamBuilder
 from ..utils.tensor_utils import tensors_to_cpu, tensors_to_fp64_cpu
 from ..base.result import (
     FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+    FAILURE_TYPE_REFERENCE_INVALID,
     get_accuracy_failure_type,
 )
 from .op_runner import OpRunner, OpRunResult
-from .accuracy_eval import AccuracyEvaluator, AccuracyResult
-from .perf_eval import PerfEvaluator, PerfResult
+from .accuracy_eval import AccuracyEvaluator
+from .perf_eval import PerfEvaluator
 from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult
 from .failure_synthesizer import FailureSynthesizer
 from .index_check import validate_index_gather_outputs
@@ -70,7 +81,7 @@ from .subprocess_utils import detect_pypto_pro_submission, _terminate_process_gr
 from ..registry.matcher_registry import get_operator_matcher
 
 # 导入 benches 模块，确保 Registry 已注册
-from .. import benches as _benches
+from .. import benches as _benches  # noqa: F401 -- register benchmark components
 
 
 # RSS 主动清理阈值环境变量（单位 MB）；<=0 表示禁用
@@ -211,8 +222,12 @@ def _malloc_trim() -> bool:
 class Evaluator:
     """综合评测调度器"""
 
-    def __init__(self, config: Config = None, bench_name: str = 'cann',
-                 incremental_output_path: str = None):
+    def __init__(
+        self,
+        config: Config = None,
+        bench_name: str = "cann",
+        incremental_output_path: str = None,
+    ):
         self.config = config or get_config()
         self.bench_name = bench_name
         self.bench_config = get_bench_config(self.bench_name)
@@ -226,6 +241,9 @@ class Evaluator:
             device_id=self.config.device_id,
         )
         self.device_manager = DeviceManager(device_config)
+        self.target_hardware = detect_execution_hardware(
+            self.config.device_type, self.config.device_id
+        )
 
         # 初始化性能评测器
         # PerfEvaluator 从 Config.perf_metric_strategy_override 自取策略，
@@ -236,7 +254,7 @@ class Evaluator:
             warmup=self.config.warmup,
             repeat=self.config.repeat,
             archive_prof=True,
-            freq_boost=getattr(self.config, 'perf_freq_boost', True),
+            freq_boost=getattr(self.config, "perf_freq_boost", True),
         )
 
         # 初始化算子执行器
@@ -249,12 +267,21 @@ class Evaluator:
         )
 
         # 初始化数据层组件（通过 Registry 获取）
-        self.case_loader = get_case_loader(self.bench_name, tasks_root=self.config.tasks_root)
+        loader_kwargs = (
+            {"target_hardware": self.target_hardware}
+            if self.bench_name == "cann"
+            else {}
+        )
+        self.case_loader = get_case_loader(
+            self.bench_name, tasks_root=self.config.tasks_root, **loader_kwargs
+        )
         self.golden_loader = get_golden_loader(
             eval_system=self.bench_name,
             bench_root=self.config.tasks_root,
         )
-        self.operator_loader = get_task_loader(self.bench_name, tasks_root=self.config.tasks_root)
+        self.operator_loader = get_task_loader(
+            self.bench_name, tasks_root=self.config.tasks_root
+        )
         self.data_generator = DataGenerator(
             input_dist=getattr(self.config, "input_dist", "uniform")
         )
@@ -293,34 +320,61 @@ class Evaluator:
         if existing is not None:
             return cache.root / existing.key
         inputs = self.data_generator.generate_input_tensors_from_case(
-            input_shapes=case.input_shapes, dtypes=case.dtypes,
-            value_ranges=case.value_ranges, seed=cache_case_seed(case, self.config.eval_seed))
+            input_shapes=case.input_shapes,
+            dtypes=case.dtypes,
+            value_ranges=case.value_ranges,
+            seed=cache_case_seed(case, self.config.eval_seed),
+        )
         validate_inputs(inputs, case)
         original_hashes = input_hashes(inputs)
         golden_func = self.golden_loader.get_golden_function(case.rel_path)
         oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
         golden_inputs = self._apply_golden_precision(inputs)
-        golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
-        oracle = self.op_runner.run(oracle_func, golden_params, case.get_case_id_str(),
-                                    golden_inputs, to_device=False, enable_profiler=False)
+        golden_params = self.param_builder.build_call_params(
+            oracle_func, case, golden_inputs
+        )
+        oracle = self.op_runner.run(
+            oracle_func,
+            golden_params,
+            case.get_case_id_str(),
+            golden_inputs,
+            to_device=False,
+            enable_profiler=False,
+        )
         if not oracle.success:
-            raise TensorCacheError(self._format_run_failure("Cache oracle failed", oracle))
+            raise TensorCacheError(
+                self._format_run_failure("Cache oracle failed", oracle)
+            )
         del golden_params, golden_inputs
         if identity["golden_precision"] == "native_cpu":
             native = oracle
         else:
             bench_func = self._bench_reference_func(case.rel_path, golden_func)
             native_inputs = tensors_to_cpu(inputs)
-            native_params = self.param_builder.build_call_params(bench_func, case, native_inputs)
-            native = self.op_runner.run(bench_func, native_params, case.get_case_id_str(),
-                                        native_inputs, to_device=False, enable_profiler=False)
+            native_params = self.param_builder.build_call_params(
+                bench_func, case, native_inputs
+            )
+            native = self.op_runner.run(
+                bench_func,
+                native_params,
+                case.get_case_id_str(),
+                native_inputs,
+                to_device=False,
+                enable_profiler=False,
+            )
             if not native.success:
-                raise TensorCacheError(self._format_run_failure("Cache native reference failed", native))
+                raise TensorCacheError(
+                    self._format_run_failure("Cache native reference failed", native)
+                )
         if input_hashes(inputs) != original_hashes:
-            raise TensorCacheError("Cache v1 does not support reference functions that mutate inputs")
+            raise TensorCacheError(
+                "Cache v1 does not support reference functions that mutate inputs"
+            )
         return cache.write(identity, case, inputs, oracle.outputs, native.outputs)
 
-    def evaluate_case(self, case: CaseSpec, *, ai_op_func: Callable = None) -> EvalCaseResult:
+    def evaluate_case(
+        self, case: CaseSpec, *, ai_op_func: Callable = None
+    ) -> EvalCaseResult:
         """评测单个用例。
 
         评测流程：
@@ -342,16 +396,24 @@ class Evaluator:
                 reason = "Tensor cache v1 does not support distributed cases"
                 if self.config.tensor_cache_mode == "require":
                     return EvalCaseResult(
-                        case_id=case_id_str, rel_path=case.rel_path, operator=case.operator,
-                        case_num=case.case_num, success=False,
+                        case_id=case_id_str,
+                        rel_path=case.rel_path,
+                        operator=case.operator,
+                        case_num=case.case_num,
+                        success=False,
                         error_msg=reason,
                         failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                     )
-                print(f"[tensor-cache] WARNING {case_id_str}: {reason}; computing without cache", flush=True)
+                print(
+                    f"[tensor-cache] WARNING {case_id_str}: {reason}; computing without cache",
+                    flush=True,
+                )
             from .mc2_distributed_runner import MC2DistributedEvaluator
+
             merged_thresholds = self._get_merged_thresholds(case.rel_path)
             return MC2DistributedEvaluator(self.config).evaluate_case(
-                case, custom_thresholds=merged_thresholds)
+                case, custom_thresholds=merged_thresholds
+            )
 
         # 本 case 的大对象局部名先声明：下方 finally 统一释放它们，而异常可能发生在
         # 任何一次赋值之前，未声明的名字会让 finally 自己抛 UnboundLocalError。
@@ -372,9 +434,12 @@ class Evaluator:
             # 在跨进程时不可复现（PYTHONHASHSEED 随机化）。
             if self.config.eval_seed is not None:
                 import hashlib
+
                 # SHA256 hash of case_id_str, 取前 8 字节作为 int，确保跨进程可复现
-                digest = hashlib.sha256(case_id_str.encode('utf-8')).digest()
-                deterministic_hash = int.from_bytes(digest[:8], byteorder='big') % (2**31)
+                digest = hashlib.sha256(case_id_str.encode("utf-8")).digest()
+                deterministic_hash = int.from_bytes(digest[:8], byteorder="big") % (
+                    2**31
+                )
                 case_seed = (self.config.eval_seed + deterministic_hash) % (2**31)
             else:
                 case_seed = None  # 纯随机模式
@@ -388,12 +453,22 @@ class Evaluator:
                 except TensorCacheUnsupportedError as exc:
                     if self.config.tensor_cache_mode == "require":
                         raise
-                    print(f"[tensor-cache] WARNING {case_id_str}: {exc}; computing without cache", flush=True)
+                    print(
+                        f"[tensor-cache] WARNING {case_id_str}: {exc}; computing without cache",
+                        flush=True,
+                    )
                 else:
-                    cached = TensorCache(self.config.tensor_cache_dir).load(identity, case)
+                    cached = TensorCache(self.config.tensor_cache_dir).load(
+                        identity, case
+                    )
                     if cached is None and self.config.tensor_cache_mode == "require":
-                        raise TensorCacheError(f"Required tensor cache missing for {case_id_str}")
-                    print(f"[tensor-cache] {case_id_str}: {'hit ' + cached.key if cached else 'miss; computing'}", flush=True)
+                        raise TensorCacheError(
+                            f"Required tensor cache missing for {case_id_str}"
+                        )
+                    print(
+                        f"[tensor-cache] {case_id_str}: {'hit ' + cached.key if cached else 'miss; computing'}",
+                        flush=True,
+                    )
             if cached is not None:
                 input_tensors = cached.inputs
             else:
@@ -406,7 +481,7 @@ class Evaluator:
 
             # case attrs 无条件先定义，供后续 get_input / 索引校验等多处使用
             # （避免无 get_input 的算子在后续引用 case_attrs 时 NameError）
-            case_attrs = getattr(case, 'attrs', None) or {}
+            case_attrs = getattr(case, "attrs", None) or {}
 
             # 2.5 调用 get_input 预处理（如果存在）
             get_input_func = self.golden_loader.get_input_function(case.rel_path)
@@ -426,8 +501,10 @@ class Evaluator:
                 for attr_key, attr_val in case_attrs.items():
                     if attr_key not in params_for_get_input:
                         params_for_get_input[attr_key] = attr_val
-                if 'skip2_exist' not in params_for_get_input:
-                    params_for_get_input['skip2_exist'] = case_attrs.get('skip2_exist', True)
+                if "skip2_exist" not in params_for_get_input:
+                    params_for_get_input["skip2_exist"] = case_attrs.get(
+                        "skip2_exist", True
+                    )
 
                 input_tensors = get_input_func(**params_for_get_input)
                 if isinstance(input_tensors, tuple):
@@ -441,9 +518,13 @@ class Evaluator:
                 params = {}
                 tensor_idx = 0
                 for param_name, param in golden_sig.parameters.items():
-                    annotation = str(param.annotation) if param.annotation != Parameter.empty else ""
+                    annotation = (
+                        str(param.annotation)
+                        if param.annotation != Parameter.empty
+                        else ""
+                    )
                     # 检查是否是 tensor 参数
-                    if 'Tensor' in annotation:
+                    if "Tensor" in annotation:
                         if tensor_idx < len(input_tensors):
                             val = input_tensors[tensor_idx]
                             params[param_name] = val
@@ -456,22 +537,33 @@ class Evaluator:
                     elif param.default != Parameter.empty:
                         params[param_name] = param.default
             else:
-                params = self.param_builder.build_call_params(golden_func, case, input_tensors)
+                params = self.param_builder.build_call_params(
+                    golden_func, case, input_tensors
+                )
 
             # 4. 执行Golden函数获取参考结果（精度策略由 golden_precision 控制）
             # oracle (g)：优先 op 的 <op>_oracle 钩子（dtype-agnostic 真值），否则回退 golden。
             if cached is not None:
-                golden_result = OpRunResult(success=True, outputs=cached.oracle, device="cpu")
+                golden_result = OpRunResult(
+                    success=True, outputs=cached.oracle, device="cpu"
+                )
             else:
                 oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
                 golden_inputs = self._apply_golden_precision(input_tensors)
                 if get_input_func is not None:
                     golden_params = params
                 else:
-                    golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
-                golden_result = self.op_runner.run(oracle_func, golden_params, case_id_str,
-                                                   golden_inputs, to_device=self._get_golden_to_device(),
-                                                   enable_profiler=False)  # Golden 不启用 profiler
+                    golden_params = self.param_builder.build_call_params(
+                        oracle_func, case, golden_inputs
+                    )
+                golden_result = self.op_runner.run(
+                    oracle_func,
+                    golden_params,
+                    case_id_str,
+                    golden_inputs,
+                    to_device=self._get_golden_to_device(),
+                    enable_profiler=False,
+                )  # Golden 不启用 profiler
             if not golden_result.success:
                 return EvalCaseResult(
                     case_id=case_id_str,
@@ -482,6 +574,9 @@ class Evaluator:
                     golden_run_result=golden_result,
                     error_msg=self._format_run_failure("Golden执行失败", golden_result),
                     baseline_perf_us=case.baseline_perf_us,
+                    baseline_source=(getattr(case, "metadata", None) or {}).get(
+                        "baseline_source", {}
+                    ),
                     t_hw_us=case.t_hw_us,
                     failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                 )
@@ -491,7 +586,9 @@ class Evaluator:
             actual_ai_func = ai_op_func
             if actual_ai_func is None:
                 try:
-                    actual_ai_func = self.operator_matcher.load_ai_operator(case.operator)
+                    actual_ai_func = self.operator_matcher.load_ai_operator(
+                        case.operator
+                    )
                 except Exception as load_err:
                     return EvalCaseResult(
                         case_id=case_id_str,
@@ -502,17 +599,27 @@ class Evaluator:
                         golden_run_result=golden_result,
                         error_msg=f"AI算子加载失败: {load_err}",
                         baseline_perf_us=case.baseline_perf_us,
+                        baseline_source=(getattr(case, "metadata", None) or {}).get(
+                            "baseline_source", {}
+                        ),
                         t_hw_us=case.t_hw_us,
                         failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                     )
 
             # 6. 执行AI算子（profiler 一次运行同时提供输出和性能数据，避免跑两遍）
-            use_profiler = (self.perf_evaluator is not None
-                        and self.perf_evaluator.config.enable_profiler)
+            use_profiler = (
+                self.perf_evaluator is not None
+                and self.perf_evaluator.config.enable_profiler
+            )
 
-            ai_result = self._run_ai_op_isolated(actual_ai_func, params, case_id_str,
-                                                  input_tensors, enable_perf=use_profiler,
-                                                  operator_name=case.operator)
+            ai_result = self._run_ai_op_isolated(
+                actual_ai_func,
+                params,
+                case_id_str,
+                input_tensors,
+                enable_perf=use_profiler,
+                operator_name=case.operator,
+            )
             if not ai_result.success:
                 return EvalCaseResult(
                     case_id=case_id_str,
@@ -524,6 +631,9 @@ class Evaluator:
                     ai_run_result=ai_result,
                     error_msg=self._format_run_failure("AI算子执行失败", ai_result),
                     baseline_perf_us=case.baseline_perf_us,
+                    baseline_source=(getattr(case, "metadata", None) or {}).get(
+                        "baseline_source", {}
+                    ),
                     t_hw_us=case.t_hw_us,
                     failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
                 )
@@ -534,10 +644,10 @@ class Evaluator:
 
             # 同精度参考输出（用于 checker 小值域判断）
             # native_cpu/native_npu 时 golden 已是同精度，直接复用以避免重复计算
-            golden_strategy = getattr(self.bench_config, 'golden_precision', 'fp64_cpu')
+            golden_strategy = getattr(self.bench_config, "golden_precision", "fp64_cpu")
             if cached is not None:
                 native_out = cached.native
-            elif golden_strategy in ('native_cpu', 'native_npu'):
+            elif golden_strategy in ("native_cpu", "native_npu"):
                 native_out = golden_result.outputs
             else:
                 # 同精度参考 (b)：优先 <op>_bench（硬件忠实），否则回退 golden（现状行为）。
@@ -546,10 +656,17 @@ class Evaluator:
                 if get_input_func is not None:
                     native_params = params
                 else:
-                    native_params = self.param_builder.build_call_params(bench_func, case, native_inputs)
-                native_result = self.op_runner.run(bench_func, native_params, case_id_str,
-                                                   native_inputs, to_device=False,
-                                                   enable_profiler=False)  # 同精度参考不启用 profiler
+                    native_params = self.param_builder.build_call_params(
+                        bench_func, case, native_inputs
+                    )
+                native_result = self.op_runner.run(
+                    bench_func,
+                    native_params,
+                    case_id_str,
+                    native_inputs,
+                    to_device=False,
+                    enable_profiler=False,
+                )  # 同精度参考不启用 profiler
                 native_out = native_result.outputs if native_result.success else None
 
             ignore_output_indices = self._get_ignore_output_indices(case.rel_path)
@@ -557,12 +674,15 @@ class Evaluator:
             # 获取算子输出名称（用于填充 SingleOutputResult.name）
             op_info = self.operator_loader.get_operator(case.rel_path)
             output_names = (
-                [out.name for out in op_info.outputs] if op_info and op_info.outputs else []
+                [out.name for out in op_info.outputs]
+                if op_info and op_info.outputs
+                else []
             )
             output_dtype_contracts = self._get_output_dtype_contracts(op_info)
             output_optional_flags = (
-                [bool(getattr(out, 'optional', False)) for out in op_info.outputs]
-                if op_info and op_info.outputs else None
+                [bool(getattr(out, "optional", False)) for out in op_info.outputs]
+                if op_info and op_info.outputs
+                else None
             )
 
             # 7.5 调用 get_output 后处理（如果存在）
@@ -574,12 +694,15 @@ class Evaluator:
             get_output_func = self.golden_loader.get_output_function(case.rel_path)
             if get_output_func is not None:
                 golden_outs = self._apply_get_output(
-                    get_output_func, golden_outs, op_info, case_attrs)
+                    get_output_func, golden_outs, op_info, case_attrs
+                )
                 ai_outs = self._apply_get_output(
-                    get_output_func, ai_outs, op_info, case_attrs)
+                    get_output_func, ai_outs, op_info, case_attrs
+                )
                 if native_out is not None:
                     native_out = self._apply_get_output(
-                        get_output_func, native_out, op_info, case_attrs)
+                        get_output_func, native_out, op_info, case_attrs
+                    )
 
             accuracy_result = self.accuracy_evaluator.evaluate(
                 ai_output=ai_outs,
@@ -597,7 +720,9 @@ class Evaluator:
 
             # 防作弊二次验证：用新鲜输入再跑一遍 golden + AI，两次都过才算 pass
             # 只在 config.enable_accuracy_retry=True 且第一次已通过时触发，避免开销
-            if accuracy_result.passed and getattr(self.config, 'enable_accuracy_retry', False):
+            if accuracy_result.passed and getattr(
+                self.config, "enable_accuracy_retry", False
+            ):
                 accuracy_result = self._retry_with_fresh_inputs(
                     case=case,
                     golden_func=golden_func,
@@ -614,17 +739,21 @@ class Evaluator:
             # 仅当 proto 为某输出声明了 index_gather 时才生效，对其他算子零影响。
             if accuracy_result.passed:
                 idx_ok, idx_msg = validate_index_gather_outputs(
-                    op_info, params, case_attrs, ai_result.outputs,
+                    op_info,
+                    params,
+                    case_attrs,
+                    ai_result.outputs,
                 )
                 if not idx_ok:
                     accuracy_result.passed = False
                     accuracy_result.error_msg = (
                         f"{accuracy_result.error_msg} | {idx_msg}"
-                        if accuracy_result.error_msg else idx_msg
+                        if accuracy_result.error_msg
+                        else idx_msg
                     )
 
             # 填充 output_results 中的输出名称
-            if hasattr(accuracy_result, 'output_results') and output_names:
+            if hasattr(accuracy_result, "output_results") and output_names:
                 for i, sr in enumerate(accuracy_result.output_results):
                     if i < len(output_names):
                         sr.name = output_names[i]
@@ -638,26 +767,45 @@ class Evaluator:
             else:
                 perf_result = None
                 # 使用新的多输出格式显示失败原因
-                if hasattr(accuracy_result, 'format_all_outputs') and accuracy_result.output_results:
+                if (
+                    hasattr(accuracy_result, "format_all_outputs")
+                    and accuracy_result.output_results
+                ):
                     output_details = accuracy_result.format_all_outputs()
                     # 用 " | " 连接多输出摘要，保持单行便于 console 显示
-                    output_details_single_line = output_details.replace('\n', ' | ')
+                    output_details_single_line = output_details.replace("\n", " | ")
                     error_msg = f"精度不达标: {output_details_single_line}"
                 else:
                     # 兼容旧格式（从 metadata 获取 mere/mare）
                     metadata = accuracy_result.get_metadata()
-                    mere = metadata.get('mere', 0.0)
-                    mare = metadata.get('mare', 0.0)
-                    mare_threshold = 10 * accuracy_result.threshold if accuracy_result.threshold and accuracy_result.threshold > 0 else 0
+                    mere = metadata.get("mere", 0.0)
+                    mare = metadata.get("mare", 0.0)
+                    mare_threshold = (
+                        10 * accuracy_result.threshold
+                        if accuracy_result.threshold and accuracy_result.threshold > 0
+                        else 0
+                    )
                     fail_reasons = []
                     # 只有当 mare 或 threshold 非零时才判断相对误差超标
                     if mare > 0 and mare_threshold > 0 and mare >= mare_threshold:
-                        fail_reasons.append(f"MARE({mare:.6e}) >= mare_threshold({mare_threshold:.6e})")
-                    if accuracy_result.threshold and accuracy_result.threshold > 0 and mere >= accuracy_result.threshold:
-                        fail_reasons.append(f"MERE({mere:.6e}) >= threshold({accuracy_result.threshold:.6e})")
+                        fail_reasons.append(
+                            f"MARE({mare:.6e}) >= mare_threshold({mare_threshold:.6e})"
+                        )
+                    if (
+                        accuracy_result.threshold
+                        and accuracy_result.threshold > 0
+                        and mere >= accuracy_result.threshold
+                    ):
+                        fail_reasons.append(
+                            f"MERE({mere:.6e}) >= threshold({accuracy_result.threshold:.6e})"
+                        )
                     if accuracy_result.error_msg:
                         fail_reasons.append(accuracy_result.error_msg)
-                    error_msg = f"精度不达标: {', '.join(fail_reasons)}" if fail_reasons else "精度不达标"
+                    error_msg = (
+                        f"精度不达标: {', '.join(fail_reasons)}"
+                        if fail_reasons
+                        else "精度不达标"
+                    )
 
             return EvalCaseResult(
                 case_id=case_id_str,
@@ -671,6 +819,9 @@ class Evaluator:
                 ai_run_result=ai_result,
                 error_msg=error_msg,
                 baseline_perf_us=case.baseline_perf_us,
+                baseline_source=(getattr(case, "metadata", None) or {}).get(
+                    "baseline_source", {}
+                ),
                 t_hw_us=case.t_hw_us,
                 failure_type=get_accuracy_failure_type(accuracy_result),
             )
@@ -707,7 +858,9 @@ class Evaluator:
             # 紧随的 gc.collect() 让上面的释放立即生效
             self._cleanup_memory()
 
-    def evaluate_operator(self, operator: str, rel_path: str, case_filter: Dict = None) -> EvalOperatorResult:
+    def evaluate_operator(
+        self, operator: str, rel_path: str, case_filter: Dict = None
+    ) -> EvalOperatorResult:
         """评测单个算子
 
         从磁盘扫描加载用例，然后委托给 run_cases() 执行评测循环。
@@ -718,20 +871,26 @@ class Evaluator:
 
         if not cases:
             return EvalOperatorResult(
-                rel_path=rel_path, operator=operator, total_cases=0,
-                passed_cases=0, failed_cases=0, skipped_cases=0,
-                results=[], pass_rate=0.0, avg_speedup=0.0,
+                rel_path=rel_path,
+                operator=operator,
+                total_cases=0,
+                passed_cases=0,
+                failed_cases=0,
+                skipped_cases=0,
+                results=[],
+                pass_rate=0.0,
+                avg_speedup=0.0,
             )
 
         return self.run_cases(cases, operator, rel_path)
 
     def _should_batch_perf(self, cases: list) -> bool:
-        if not getattr(self.config, 'perf_batch_cases', False):
+        if not getattr(self.config, "perf_batch_cases", False):
             return False
         # Pro worker reuse is experimental process/JIT reuse only. The shared
         # profiler currently discards sampled outputs and changes conditioning
         # boundaries; its unprofiled precheck cannot certify measured results.
-        if getattr(self.config, 'pypto_pro_outer_case_isolation', False):
+        if getattr(self.config, "pypto_pro_outer_case_isolation", False):
             return False
         if len(cases) < 2 or self._pypto_pro_jit_isolation:
             return False
@@ -740,14 +899,16 @@ class Evaluator:
         if not self.device_manager.is_npu_mode():
             return False
         strategy = self.perf_evaluator.perf_metric_strategy
-        if strategy is None or strategy.get_strategy_name() != 'kernel_details':
+        if strategy is None or strategy.get_strategy_name() != "kernel_details":
             return False
         return not any(
-            (getattr(case, 'attrs', None) or {}).get('mc2_distributed', False)
+            (getattr(case, "attrs", None) or {}).get("mc2_distributed", False)
             for case in cases
         )
 
-    def run_cases(self, cases: list, operator: str, rel_path: str) -> EvalOperatorResult:
+    def run_cases(
+        self, cases: list, operator: str, rel_path: str
+    ) -> EvalOperatorResult:
         """评测一组已加载的用例
 
         包含渐进式设备恢复机制：
@@ -759,13 +920,14 @@ class Evaluator:
         """
         import gc
 
+        cases = filter_cases_for_hardware(cases, getattr(self, "target_hardware", None))
         self.operator_matcher.clear_cache()
         results = []
         batch_perf = self._should_batch_perf(cases)
         if batch_perf:
             self.op_runner.begin_perf_batch()
         reused_pro_worker = (
-            getattr(self.config, 'pypto_pro_outer_case_isolation', False)
+            getattr(self.config, "pypto_pro_outer_case_isolation", False)
             and len(cases) > 1
         )
         consecutive_failures = 0
@@ -780,8 +942,10 @@ class Evaluator:
             if device_state == "unrecoverable":
                 # 设备不可恢复，剩余 case 直接标记跳过
                 result = EvalCaseResult(
-                    case_id=case_id_str, rel_path=case.rel_path,
-                    operator=case.operator, case_num=case.case_id,
+                    case_id=case_id_str,
+                    rel_path=case.rel_path,
+                    operator=case.operator,
+                    case_num=case.case_id,
                     success=False,
                     error_msg="设备不可恢复，用例跳过",
                     failure_type="cascade_device",
@@ -793,7 +957,7 @@ class Evaluator:
                 continue
 
             with _CaseMemoryMonitor(
-                bool(getattr(self.config, 'monitor_case_memory', False))
+                bool(getattr(self.config, "monitor_case_memory", False))
             ) as memory_monitor:
                 result = self.evaluate_case(case)
             result.memory_peak_mb = memory_monitor.peak_mb
@@ -808,10 +972,14 @@ class Evaluator:
                 self._write_incremental_output(operator, rel_path, results, len(cases))
 
             perf_failed_in_pro = (
-                reused_pro_worker and result.perf_result is not None
+                reused_pro_worker
+                and result.perf_result is not None
                 and not result.perf_result.is_success()
             )
-            if not result.success or perf_failed_in_pro:
+            if (
+                not result.success
+                and result.failure_type != FAILURE_TYPE_REFERENCE_INVALID
+            ) or perf_failed_in_pro:
                 consecutive_failures += 1
 
                 # 增强 cleanup：empty_cache + gc.collect
@@ -825,12 +993,16 @@ class Evaluator:
                         # later cases. The parent retries unexecuted cases in
                         # fresh workers while retaining the actual failure.
                         device_state = "unrecoverable"
-                        print("[WARN] Pro worker 设备不健康，停止后续执行并交给父进程隔离恢复")
+                        print(
+                            "[WARN] Pro worker 设备不健康，停止后续执行并交给父进程隔离恢复"
+                        )
                     # 仅在连续 ≥3 失败且设备不健康时触发恢复尝试
                     # 避免偶发的单个 case 失败触发不必要的设备 reset
                     elif consecutive_failures >= 3 and device_state == "healthy":
-                        print(f"[WARN] 连续 {consecutive_failures} 个 case 失败，"
-                              f"NPU 设备可能异常，尝试恢复...")
+                        print(
+                            f"[WARN] 连续 {consecutive_failures} 个 case 失败，"
+                            f"NPU 设备可能异常，尝试恢复..."
+                        )
 
                         # 渐进恢复：先 light，失败再 full
                         # profiler 活跃时不尝试 recover_full（aclrtResetDevice
@@ -847,22 +1019,34 @@ class Evaluator:
                                 print("[INFO] 轻量恢复成功，继续评测")
                             else:
                                 # light 恢复了但设备仍不健康 → 尝试 full（仅 profiler 未活跃时）
-                                if not profiler_active and self.device_manager.recover_full():
+                                if (
+                                    not profiler_active
+                                    and self.device_manager.recover_full()
+                                ):
                                     if self.device_manager.health_check():
                                         device_state = "recovering"
-                                        print("[INFO] 重量恢复成功（aclrtResetDevice），继续评测")
+                                        print(
+                                            "[INFO] 重量恢复成功（aclrtResetDevice），继续评测"
+                                        )
                                     else:
                                         device_state = "unrecoverable"
                                 else:
                                     if profiler_active:
-                                        print("[WARN] profiler 活跃，跳过 aclrtResetDevice")
+                                        print(
+                                            "[WARN] profiler 活跃，跳过 aclrtResetDevice"
+                                        )
                                     device_state = "unrecoverable"
                         else:
                             # light 恢复失败 → 尝试 full（仅 profiler 未活跃时）
-                            if not profiler_active and self.device_manager.recover_full():
+                            if (
+                                not profiler_active
+                                and self.device_manager.recover_full()
+                            ):
                                 if self.device_manager.health_check():
                                     device_state = "recovering"
-                                    print("[INFO] 重量恢复成功（aclrtResetDevice），继续评测")
+                                    print(
+                                        "[INFO] 重量恢复成功（aclrtResetDevice），继续评测"
+                                    )
                                 else:
                                     device_state = "unrecoverable"
                             else:
@@ -870,8 +1054,9 @@ class Evaluator:
 
                         if device_state == "unrecoverable":
                             remaining = len(cases) - i
-                            print(f"[WARN] NPU 设备不可恢复，剩余 "
-                                  f"{remaining} 个用例跳过")
+                            print(
+                                f"[WARN] NPU 设备不可恢复，剩余 {remaining} 个用例跳过"
+                            )
                         else:
                             # 恢复成功：重置 consecutive_failures，让下一个 case 有全新起点。
                             # 不在本次迭代中检查 recovering 状态——本次 case 的失败
@@ -884,8 +1069,10 @@ class Evaluator:
                 if device_state == "recovering" and consecutive_failures > 0:
                     device_state = "unrecoverable"
                     remaining = len(cases) - i
-                    print(f"[WARN] 恢复后仍失败，设备不可恢复，剩余 "
-                          f"{remaining} 个用例跳过")
+                    print(
+                        f"[WARN] 恢复后仍失败，设备不可恢复，剩余 "
+                        f"{remaining} 个用例跳过"
+                    )
 
             else:
                 consecutive_failures = 0
@@ -897,30 +1084,38 @@ class Evaluator:
             # 打印进度
             status_icon = "✅" if result.success else "❌"
             elapsed_str = self._format_elapsed(result)
-            speedup_str = f"{result.get_speedup():.2f}x" if result.get_speedup() > 0 else "N/A"
+            speedup_str = (
+                f"{result.get_speedup():.2f}x" if result.get_speedup() > 0 else "N/A"
+            )
 
             # 添加精度信息
             if result.success and result.accuracy_result:
                 acc = result.accuracy_result
-                if hasattr(acc, 'output_results') and acc.output_results:
-                    output_summaries = [sr.format_summary() for sr in acc.output_results]
+                if hasattr(acc, "output_results") and acc.output_results:
+                    output_summaries = [
+                        sr.format_summary() for sr in acc.output_results
+                    ]
                     acc_str = ", " + ", ".join(output_summaries)
                 else:
                     metadata = acc.get_metadata()
-                    mare = metadata.get('mare')
-                    mere = metadata.get('mere')
+                    mare = metadata.get("mare")
+                    mere = metadata.get("mere")
                     mare_str = f"MARE={mare:.6f}" if mare is not None else ""
                     mere_str = f"MERE={mere:.6f}" if mere is not None else ""
-                    acc_str = f", {mare_str}, {mere_str}" if mare_str or mere_str else ""
+                    acc_str = (
+                        f", {mare_str}, {mere_str}" if mare_str or mere_str else ""
+                    )
                 print(
                     f"[{i}/{len(cases)}] {case_id_str}: {status_icon} "
                     f"(耗时: {elapsed_str}, 加速比: {speedup_str}{acc_str})"
                 )
             elif result.success:
-                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon} (耗时: {elapsed_str}, 加速比: {speedup_str})")
+                print(
+                    f"[{i}/{len(cases)}] {case_id_str}: {status_icon} (耗时: {elapsed_str}, 加速比: {speedup_str})"
+                )
             else:
                 # 错误信息可能包含多行，只显示第一行（通常包含关键错误原因）
-                error_hint = result.error_msg.split('\n')[0] if result.error_msg else ""
+                error_hint = result.error_msg.split("\n")[0] if result.error_msg else ""
                 failure_tag = ""
                 if result.failure_type == "cascade_device":
                     failure_tag = " [级联失败-设备]"
@@ -928,7 +1123,11 @@ class Evaluator:
                     failure_tag = " [OOM Kill]"
                 elif result.failure_type == "skipped":
                     failure_tag = " [跳过]"
-                print(f"[{i}/{len(cases)}] {case_id_str}: {status_icon}{failure_tag} {error_hint}")
+                elif result.failure_type == FAILURE_TYPE_REFERENCE_INVALID:
+                    failure_tag = " [参考失效，评分不可用]"
+                print(
+                    f"[{i}/{len(cases)}] {case_id_str}: {status_icon}{failure_tag} {error_hint}"
+                )
 
         if batch_perf:
             try:
@@ -949,17 +1148,21 @@ class Evaluator:
                     result.ai_run_result.elapsed_us = perf_result.elapsed_us
             if self.incremental_output_path:
                 self._write_incremental_output(
-                    operator, rel_path, results, len(cases),
+                    operator,
+                    rel_path,
+                    results,
+                    len(cases),
                 )
             measured = sum(
-                1 for result in results
-                if result.perf_result is not None
-                and result.perf_result.elapsed_us > 0
+                1
+                for result in results
+                if result.perf_result is not None and result.perf_result.elapsed_us > 0
             )
             fallback = sum(
-                1 for result in results
+                1
+                for result in results
                 if result.perf_result is not None
-                and result.perf_result.metadata.get('perf_batch_fallback')
+                and result.perf_result.metadata.get("perf_batch_fallback")
             )
             print(
                 f"[INFO] 批量性能采集完成: {measured}/{len(results)} 有效, "
@@ -967,15 +1170,34 @@ class Evaluator:
             )
 
         passed = sum(1 for r in results if r.success)
-        failed = sum(1 for r in results if not r.success and r.failure_type not in ("cascade_device", "skipped"))
-        speedups = [r.get_speedup() for r in results if r.success and r.get_speedup() > 0]
+        failed = sum(
+            1
+            for r in results
+            if not r.success
+            and r.failure_type
+            not in ("cascade_device", "skipped", FAILURE_TYPE_REFERENCE_INVALID)
+        )
+        speedups = [
+            r.get_speedup() for r in results if r.success and r.get_speedup() > 0
+        ]
         avg_speedup = sum(speedups) / len(speedups) if speedups else 0.0
+        reference_invalid = sum(
+            1
+            for result in results
+            if not result.success
+            and result.failure_type == FAILURE_TYPE_REFERENCE_INVALID
+        )
+        valid_cases = len(cases) - reference_invalid
 
         return EvalOperatorResult(
-            rel_path=rel_path, operator=operator,
-            total_cases=len(cases), passed_cases=passed, failed_cases=failed,
-            skipped_cases=skipped_count, results=results,
-            pass_rate=passed / len(cases) if len(cases) > 0 else 0.0,
+            rel_path=rel_path,
+            operator=operator,
+            total_cases=len(cases),
+            passed_cases=passed,
+            failed_cases=failed,
+            skipped_cases=skipped_count,
+            results=results,
+            pass_rate=passed / valid_cases if valid_cases > 0 else 0.0,
             avg_speedup=avg_speedup,
         )
 
@@ -1001,6 +1223,15 @@ class Evaluator:
         payload = {"case_results": [r.to_dict() for r in results]}
         _write_json_atomic(self.incremental_output_path, payload)
 
+    def _has_selected_cases(self, operator_filter=None, case_filter=None) -> bool:
+        cases = self.case_loader.scan_all()
+        if operator_filter:
+            names = {name.lower() for name in operator_filter}
+            cases = [case for case in cases if case.operator.lower() in names]
+        if case_filter:
+            cases = self._filter_cases(cases, case_filter)
+        return bool(cases)
+
     def evaluate_from_source(
         self,
         source_dir: str,
@@ -1017,24 +1248,37 @@ class Evaluator:
         print("开始评测")
         print("=" * 60)
 
+        if not self._has_selected_cases(operator_filter, case_filter):
+            return EvalSessionResult(operators=[])
+
         # 1. 准备环境（编译安装）
         matched_operators, package_info = self.package_manager.prepare_from_source(
-            source_dir, verbose=verbose, iterative_compile=iterative_compile,
+            source_dir,
+            verbose=verbose,
+            iterative_compile=iterative_compile,
         )
 
         # 1.5 整体编译失败：不隔离/不补救，本次提交相关算子全部按编译失败计 0 分
         # （与 cli 共用 synthesize_all_compile_failures，逻辑单一真源）。
         if getattr(package_info, "build_failed", False):
-            print(f"[ERROR] 编译失败，本次提交相关算子按编译失败计 0 分（错误汇总见 _compile.log）")
+            print(
+                "[ERROR] 编译失败，本次提交相关算子按编译失败计 0 分（错误汇总见 _compile.log）"
+            )
             results = self.failure_synthesizer.synthesize_all_compile_failures(
-                self.operator_matcher, package_info,
-                operator_filter=operator_filter, case_filter=case_filter,
+                self.operator_matcher,
+                package_info,
+                operator_filter=operator_filter,
+                case_filter=case_filter,
                 filter_func=self._filter_cases,
             )
-            return EvalSessionResult(operators=results, package_info=package_info)
+            return EvalSessionResult(
+                operators=[result for result in results if result is not None],
+                package_info=package_info,
+            )
 
         # 2. APIGuard 验证
         from ..security.api_guard import APIGuard
+
         guard = APIGuard()
         try:
             guard.verify()
@@ -1045,16 +1289,29 @@ class Evaluator:
                 op_info = self.operator_matcher.find_operator_info(operator_name)
                 if op_info:
                     result = self.failure_synthesizer.synthesize_security_failure(
-                        op_info, str(e), case_filter, self._filter_cases,
+                        op_info,
+                        str(e),
+                        case_filter,
+                        self._filter_cases,
                     )
                     results.append(result)
             for snake_op_name, err in (package_info.compile_errors or {}).items():
-                op_info = self.operator_matcher.find_operator_info_by_snake(snake_op_name)
+                op_info = self.operator_matcher.find_operator_info_by_snake(
+                    snake_op_name
+                )
                 if op_info and (not operator_filter or op_info.name in operator_filter):
-                    results.append(self.failure_synthesizer.synthesize_compile_failure(
-                        op_info, err, case_filter, self._filter_cases,
-                    ))
-            return EvalSessionResult(operators=results, package_info=package_info)
+                    results.append(
+                        self.failure_synthesizer.synthesize_compile_failure(
+                            op_info,
+                            err,
+                            case_filter,
+                            self._filter_cases,
+                        )
+                    )
+            return EvalSessionResult(
+                operators=[result for result in results if result is not None],
+                package_info=package_info,
+            )
 
         # 3. 合成编译失败结果
         compile_failed_results: List[EvalOperatorResult] = []
@@ -1077,21 +1334,30 @@ class Evaluator:
             if operator_filter and op_info.name not in operator_filter:
                 continue
             compile_failed_results.append(
-                self.failure_synthesizer.synthesize_compile_failure(op_info, err, case_filter, self._filter_cases),
+                self.failure_synthesizer.synthesize_compile_failure(
+                    op_info, err, case_filter, self._filter_cases
+                ),
             )
 
+        compile_failed_results = [
+            result for result in compile_failed_results if result is not None
+        ]
         if not matched_operators and not compile_failed_results:
             return EvalSessionResult(operators=[], package_info=package_info)
 
         # 4. 应用算子筛选
         if operator_filter:
-            matched_operators = [op for op in matched_operators if op in operator_filter]
+            matched_operators = [
+                op for op in matched_operators if op in operator_filter
+            ]
             print(f"[INFO] 筛选后算子: {matched_operators}")
 
         # 5. 逐个评测算子（in-process 执行，不再 fork 子进程）
         results: List[EvalOperatorResult] = list(compile_failed_results)
-        print(f"[INFO] 编译失败: {len(compile_failed_results)} 个算子 | 可运行: "
-              f"{len(matched_operators)} 个算子")
+        print(
+            f"[INFO] 编译失败: {len(compile_failed_results)} 个算子 | 可运行: "
+            f"{len(matched_operators)} 个算子"
+        )
 
         for operator_name in matched_operators:
             op_info = self.operator_matcher.find_operator_info(operator_name)
@@ -1100,9 +1366,12 @@ class Evaluator:
                 continue
 
             result = self.evaluate_operator(
-                operator=operator_name, rel_path=op_info.rel_path,
+                operator=operator_name,
+                rel_path=op_info.rel_path,
+                case_filter=case_filter,
             )
-            results.append(result)
+            if result.total_cases:
+                results.append(result)
 
         print("")
         print("=" * 60)
@@ -1122,12 +1391,17 @@ class Evaluator:
         print("开始评测（跳过编译安装）")
         print("=" * 60)
 
+        if not self._has_selected_cases(operator_filter, case_filter):
+            return EvalSessionResult(operators=[])
+
         matched_operators = self.package_manager.prepare_skip_build()
         if not matched_operators:
             return EvalSessionResult(operators=[])
 
         if operator_filter:
-            matched_operators = [op for op in matched_operators if op in operator_filter]
+            matched_operators = [
+                op for op in matched_operators if op in operator_filter
+            ]
             print(f"[INFO] 筛选后算子: {matched_operators}")
 
         results = []
@@ -1140,10 +1414,12 @@ class Evaluator:
                 continue
 
             result = self.evaluate_operator(
-                operator=operator_name, rel_path=op_info.rel_path,
+                operator=operator_name,
+                rel_path=op_info.rel_path,
                 case_filter=case_filter,
             )
-            results.append(result)
+            if result.total_cases:
+                results.append(result)
 
         print("")
         print("=" * 60)
@@ -1172,42 +1448,48 @@ class Evaluator:
           - native_cpu: 保持原始精度在 CPU 上计算
           - native_npu: 保持原始精度在 NPU 上计算
         """
-        strategy = getattr(self.bench_config, 'golden_precision', 'fp64_cpu')
-        if strategy == 'fp64_cpu':
+        strategy = getattr(self.bench_config, "golden_precision", "fp64_cpu")
+        if strategy == "fp64_cpu":
             return tensors_to_fp64_cpu(input_tensors)
-        elif strategy == 'native_cpu':
+        elif strategy == "native_cpu":
             return tensors_to_cpu(input_tensors)
-        elif strategy == 'native_npu':
+        elif strategy == "native_npu":
             return list(input_tensors)
         return list(input_tensors)
 
     def _get_golden_to_device(self) -> bool:
         """golden 执行时 to_device 参数：仅 native_npu 在 NPU 上计算时为 True"""
-        strategy = getattr(self.bench_config, 'golden_precision', 'fp64_cpu')
-        return strategy == 'native_npu'
+        strategy = getattr(self.bench_config, "golden_precision", "fp64_cpu")
+        return strategy == "native_npu"
 
     def _determine_dtype(self, ai_result, case) -> str:
         """确定 dtype"""
         dtype = None
         if isinstance(ai_result.outputs, torch.Tensor):
-            dtype = str(ai_result.outputs.dtype).replace('torch.', '')
+            dtype = str(ai_result.outputs.dtype).replace("torch.", "")
         elif isinstance(ai_result.outputs, (list, tuple)) and ai_result.outputs:
             first_out = ai_result.outputs[0]
             if isinstance(first_out, torch.Tensor):
-                dtype = str(first_out.dtype).replace('torch.', '')
+                dtype = str(first_out.dtype).replace("torch.", "")
 
         if dtype is None:
             try:
                 op_info = self.operator_loader.get_operator(case.rel_path)
                 if op_info and op_info.outputs and op_info.outputs[0].dtype:
                     output_dtype_list = op_info.outputs[0].dtype
-                    dtype = output_dtype_list[0] if isinstance(output_dtype_list, list) else output_dtype_list
+                    dtype = (
+                        output_dtype_list[0]
+                        if isinstance(output_dtype_list, list)
+                        else output_dtype_list
+                    )
             except Exception as e:
                 # 静默吞掉会让 proto.yaml 缺失/损坏的算子退回到 case.dtypes[0]，
                 # 可能选错精度阈值。至少记录可见的告警。
-                print(f"[WARN] _determine_dtype: 读取 {case.rel_path} 算子定义失败({type(e).__name__}: {e})，回退到 case.dtypes")
+                print(
+                    f"[WARN] _determine_dtype: 读取 {case.rel_path} 算子定义失败({type(e).__name__}: {e})，回退到 case.dtypes"
+                )
 
-        return dtype or (case.dtypes[0] if case.dtypes else 'float32')
+        return dtype or (case.dtypes[0] if case.dtypes else "float32")
 
     def _format_elapsed(self, result) -> str:
         """格式化耗时"""
@@ -1237,7 +1519,9 @@ class Evaluator:
         if run_result.traceback:
             parts.append(f"AI算子执行 traceback:\n{run_result.traceback.rstrip()}")
         elif run_result.outputs is None:
-            parts.append("AI算子未抛异常但返回 None；请检查是否漏写 return 或使用了不匹配的 out-param 接口。")
+            parts.append(
+                "AI算子未抛异常但返回 None；请检查是否漏写 return 或使用了不匹配的 out-param 接口。"
+            )
         return "\n".join(parts)
 
     @staticmethod
@@ -1255,14 +1539,31 @@ class Evaluator:
     def _filter_cases(self, cases: List[CaseSpec], filter_dict: Dict) -> List[CaseSpec]:
         """筛选用例"""
         result = cases
-        if 'case_id' in filter_dict:
+        if "case_id" in filter_dict:
             # case_num 是 CannCaseSpec 的特化字段，通过 hasattr 兼容
-            result = [c for c in result if hasattr(c, 'case_num') and c.case_num == filter_dict['case_id']]
-        if 'dtype' in filter_dict:
-            result = [c for c in result if filter_dict['dtype'].lower() in [d.lower() for d in c.dtypes]]
+            result = [
+                c
+                for c in result
+                if hasattr(c, "case_num") and c.case_num == filter_dict["case_id"]
+            ]
+        if "case_id_range" in filter_dict:
+            start, end = filter_dict["case_id_range"]
+            result = [
+                c
+                for c in result
+                if hasattr(c, "case_num") and start <= c.case_num <= end
+            ]
+        if "dtype" in filter_dict:
+            result = [
+                c
+                for c in result
+                if filter_dict["dtype"].lower() in [d.lower() for d in c.dtypes]
+            ]
         return result
 
-    def _get_merged_thresholds(self, rel_path: str, dtype: str = None) -> Dict[str, float]:
+    def _get_merged_thresholds(
+        self, rel_path: str, dtype: str = None
+    ) -> Dict[str, float]:
         """获取合并后的精度阈值
 
         合并优先级（低 → 高）：
@@ -1273,12 +1574,12 @@ class Evaluator:
         """
         merged = dict(self.config.precision_thresholds)
         # 按 dtype 注入容差（仅当 bench 配置了 dtype_tolerance_map 且已知 dtype）
-        dtype_map = getattr(self.bench_config, 'dtype_tolerance_map', None)
+        dtype_map = getattr(self.bench_config, "dtype_tolerance_map", None)
         if dtype_map and dtype:
             tol = dtype_map.get(dtype) or dtype_map.get(dtype.lower())
             if tol is not None:
-                merged['atol'] = tol
-                merged['rtol'] = tol
+                merged["atol"] = tol
+                merged["rtol"] = tol
         op_info = self.operator_loader.get_operator(rel_path)
         if op_info and op_info.precision_thresholds:
             merged.update(op_info.precision_thresholds)
@@ -1336,9 +1637,17 @@ class Evaluator:
             return transformed
         return [transformed]
 
-    def _retry_with_fresh_inputs(self, case, golden_func, ai_op_func, dtype,
-                                  merged_thresholds, ignore_output_indices,
-                                  first_result, case_seed=None):
+    def _retry_with_fresh_inputs(
+        self,
+        case,
+        golden_func,
+        ai_op_func,
+        dtype,
+        merged_thresholds,
+        ignore_output_indices,
+        first_result,
+        case_seed=None,
+    ):
         """防作弊二次验证：用一组新鲜（微扰过的）输入再跑一遍 golden + AI，
         两次都过才记为 pass；任何一次失败把 first_result 替换成失败 result。
 
@@ -1375,23 +1684,35 @@ class Evaluator:
 
             # 重建 params + 跑 golden + 跑 AI
             case_id_str = case.get_case_id_str()
-            params = self.param_builder.build_call_params(golden_func, case, fresh_inputs)
+            params = self.param_builder.build_call_params(
+                golden_func, case, fresh_inputs
+            )
             oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
             golden_inputs = self._apply_golden_precision(fresh_inputs)
-            golden_params = self.param_builder.build_call_params(oracle_func, case, golden_inputs)
-            golden_result2 = self.op_runner.run(oracle_func, golden_params, case_id_str,
-                                                golden_inputs, to_device=self._get_golden_to_device(),
-                                                enable_profiler=False)  # 二次验证 Golden 不启用 profiler
+            golden_params = self.param_builder.build_call_params(
+                oracle_func, case, golden_inputs
+            )
+            golden_result2 = self.op_runner.run(
+                oracle_func,
+                golden_params,
+                case_id_str,
+                golden_inputs,
+                to_device=self._get_golden_to_device(),
+                enable_profiler=False,
+            )  # 二次验证 Golden 不启用 profiler
             if not golden_result2.success:
-                return first_result   # golden 自己挂了，第二轮无意义，保持第一轮结果
+                return first_result  # golden 自己挂了，第二轮无意义，保持第一轮结果
 
             # 二次验证 AI 算子也不启用 profiler，仅验证精度
-            ai_result2 = self.op_runner.run(ai_op_func, params, case_id_str, fresh_inputs,
-                                             enable_profiler=False)
+            ai_result2 = self.op_runner.run(
+                ai_op_func, params, case_id_str, fresh_inputs, enable_profiler=False
+            )
             if not ai_result2.success:
                 from ..base.result import AccuracyResult
+
                 return AccuracyResult(
-                    passed=False, threshold=first_result.threshold or 0,
+                    passed=False,
+                    threshold=first_result.threshold or 0,
                     error_msg=f"二次验证失败：AI 算子崩溃 ({ai_result2.error})",
                 )
 
@@ -1401,18 +1722,21 @@ class Evaluator:
             op_info = self.operator_loader.get_operator(case.rel_path)
             output_dtype_contracts = self._get_output_dtype_contracts(op_info)
             output_optional_flags = (
-                [bool(getattr(out, 'optional', False)) for out in op_info.outputs]
-                if op_info and op_info.outputs else None
+                [bool(getattr(out, "optional", False)) for out in op_info.outputs]
+                if op_info and op_info.outputs
+                else None
             )
             output_names = (
-                [out.name for out in op_info.outputs] if op_info and op_info.outputs else []
+                [out.name for out in op_info.outputs]
+                if op_info and op_info.outputs
+                else []
             )
 
             # 同精度参考 (b)：与主流程同构——优先 <op>_bench，否则回退 golden。
             # issue #311：此前复验硬传 native_output=None，compare 的小值域/相消
             # 兜底分母恒 0，依赖兜底营救的 case 会"首验过、复验必挂"。
-            golden_strategy = getattr(self.bench_config, 'golden_precision', 'fp64_cpu')
-            if golden_strategy in ('native_cpu', 'native_npu'):
+            golden_strategy = getattr(self.bench_config, "golden_precision", "fp64_cpu")
+            if golden_strategy in ("native_cpu", "native_npu"):
                 native_out2 = golden_outs2
             else:
                 bench_func = self._bench_reference_func(case.rel_path, golden_func)
@@ -1421,22 +1745,31 @@ class Evaluator:
                     native_params2 = params
                 else:
                     native_params2 = self.param_builder.build_call_params(
-                        bench_func, case, native_inputs2)
-                native_result2 = self.op_runner.run(bench_func, native_params2, case_id_str,
-                                                    native_inputs2, to_device=False,
-                                                    enable_profiler=False)
+                        bench_func, case, native_inputs2
+                    )
+                native_result2 = self.op_runner.run(
+                    bench_func,
+                    native_params2,
+                    case_id_str,
+                    native_inputs2,
+                    to_device=False,
+                    enable_profiler=False,
+                )
                 native_out2 = native_result2.outputs if native_result2.success else None
 
             get_output_func = self.golden_loader.get_output_function(case.rel_path)
             if get_output_func is not None:
-                retry_attrs = getattr(case, 'attrs', None) or {}
+                retry_attrs = getattr(case, "attrs", None) or {}
                 golden_outs2 = self._apply_get_output(
-                    get_output_func, golden_outs2, op_info, retry_attrs)
+                    get_output_func, golden_outs2, op_info, retry_attrs
+                )
                 ai_outs2 = self._apply_get_output(
-                    get_output_func, ai_outs2, op_info, retry_attrs)
+                    get_output_func, ai_outs2, op_info, retry_attrs
+                )
                 if native_out2 is not None:
                     native_out2 = self._apply_get_output(
-                        get_output_func, native_out2, op_info, retry_attrs)
+                        get_output_func, native_out2, op_info, retry_attrs
+                    )
 
             return self.accuracy_evaluator.evaluate(
                 ai_output=ai_outs2,
@@ -1452,11 +1785,15 @@ class Evaluator:
             )
         except Exception as e:
             # 二次验证基础设施异常不应整体阻断评测；记 warn 并返回第一轮
-            print(f"[WARN] enable_accuracy_retry 二次验证基础设施异常 ({case.rel_path}): {e}", flush=True)
+            print(
+                f"[WARN] enable_accuracy_retry 二次验证基础设施异常 ({case.rel_path}): {e}",
+                flush=True,
+            )
             return first_result
 
-    def _run_ai_op_isolated(self, ai_op_func, params, case_id_str, input_tensors,
-                            enable_perf, operator_name):
+    def _run_ai_op_isolated(
+        self, ai_op_func, params, case_id_str, input_tensors, enable_perf, operator_name
+    ):
         """执行 AI 算子。
 
         pypto_pro 模式下用独立子进程执行每个 case，确保 pypto_pro runtime
@@ -1468,8 +1805,9 @@ class Evaluator:
         父进程解析 prof 文件构造 PerfResult。
         """
         if not self._pypto_pro_jit_isolation:
-            return self.op_runner.run_ai_op(ai_op_func, params, case_id_str,
-                                             input_tensors, enable_perf=enable_perf)
+            return self.op_runner.run_ai_op(
+                ai_op_func, params, case_id_str, input_tensors, enable_perf=enable_perf
+            )
 
         import json
         import pickle
@@ -1478,7 +1816,7 @@ class Evaluator:
         work_dir = tempfile.mkdtemp(prefix="pypto_sub_")
         prof_dir = None
         try:
-            func_name = getattr(ai_op_func, '__name__', None) or operator_name.lower()
+            func_name = getattr(ai_op_func, "__name__", None) or operator_name.lower()
             with open(os.path.join(work_dir, "input.pkl"), "wb") as f:
                 pickle.dump(input_tensors, f)
             with open(os.path.join(work_dir, "params.pkl"), "wb") as f:
@@ -1492,14 +1830,16 @@ class Evaluator:
             # profiler 模式: 创建 prof_dir 并传给子进程
             warmup = 3
             repeat = 5
-            profiler_level = getattr(self.config, 'profiler_level', 'Level1')
-            freq_boost = getattr(self.config, 'perf_freq_boost', True)
+            profiler_level = getattr(self.config, "profiler_level", "Level1")
+            freq_boost = getattr(self.config, "perf_freq_boost", True)
             if enable_perf and self.perf_evaluator is not None:
                 warmup = self.perf_evaluator.warmup
                 repeat = self.perf_evaluator.repeat
                 rel_path, caseid = self.perf_evaluator._parse_case_id(case_id_str)
                 if self.perf_evaluator.archive_prof:
-                    prof_dir = os.path.join(self.perf_evaluator.prof_data_dir, rel_path, caseid)
+                    prof_dir = os.path.join(
+                        self.perf_evaluator.prof_data_dir, rel_path, caseid
+                    )
                 else:
                     prof_dir = tempfile.mkdtemp(prefix="cann_prof_")
                 os.makedirs(prof_dir, exist_ok=True)
@@ -1509,23 +1849,33 @@ class Evaluator:
                     if os.path.isdir(entry_path):
                         shutil.rmtree(entry_path, ignore_errors=True)
 
-            cmd = [sys.executable, "-u", child_script, work_dir, func_name,
-                   str(self.config.device_id)]
+            cmd = [
+                sys.executable,
+                "-u",
+                child_script,
+                work_dir,
+                func_name,
+                str(self.config.device_id),
+            ]
             if prof_dir:
-                cmd.extend([
-                    prof_dir,
-                    str(warmup),
-                    str(repeat),
-                    profiler_level,
-                    "1" if freq_boost else "0",
-                ])
+                cmd.extend(
+                    [
+                        prof_dir,
+                        str(warmup),
+                        str(repeat),
+                        profiler_level,
+                        "1" if freq_boost else "0",
+                    ]
+                )
             else:
                 cmd.extend(["", "", "", profiler_level, "1" if freq_boost else "0"])
 
             proc = subprocess.Popen(
                 cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env=env, start_new_session=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=env,
+                start_new_session=True,
             )
             timeout = max(1, getattr(self.config, "timeout_per_operator", 300) - 10)
             try:
@@ -1533,8 +1883,9 @@ class Evaluator:
             except subprocess.TimeoutExpired:
                 _terminate_process_group(proc)
                 stdout, stderr = proc.communicate()
-                captured = (stdout.decode(errors="replace") +
-                            stderr.decode(errors="replace")).strip()
+                captured = (
+                    stdout.decode(errors="replace") + stderr.decode(errors="replace")
+                ).strip()
                 return OpRunResult(
                     success=False,
                     error=f"PyPTO Pro 子进程超时 ({timeout}s)，已终止进程组",
@@ -1564,7 +1915,6 @@ class Evaluator:
 
                 # profiler 模式: 解析 prof 文件构造 PerfResult
                 perf_result = None
-                elapsed_us = 0.0
                 if prof_dir and self.perf_evaluator is not None:
                     perf_result = self._parse_prof_result(prof_dir, case_id_str)
 
@@ -1588,7 +1938,11 @@ class Evaluator:
         finally:
             shutil.rmtree(work_dir, ignore_errors=True)
             # 非 archive 模式清理临时 prof_dir
-            if prof_dir and self.perf_evaluator and not self.perf_evaluator.archive_prof:
+            if (
+                prof_dir
+                and self.perf_evaluator
+                and not self.perf_evaluator.archive_prof
+            ):
                 shutil.rmtree(prof_dir, ignore_errors=True)
 
     def _parse_prof_result(self, prof_dir, case_id_str):
@@ -1598,14 +1952,15 @@ class Evaluator:
         """
         from ..base.result import PerfResult
         import logging
+
         _logger = logging.getLogger(__name__)
 
         result = PerfResult(
             metadata={
-                'case_id': case_id_str,
-                '_repeat': self.perf_evaluator.repeat,
-                'warmup_used': self.perf_evaluator.freq_boost,
-                'freq_boost': self.perf_evaluator.freq_boost,
+                "case_id": case_id_str,
+                "_repeat": self.perf_evaluator.repeat,
+                "warmup_used": self.perf_evaluator.freq_boost,
+                "freq_boost": self.perf_evaluator.freq_boost,
             }
         )
 
@@ -1613,10 +1968,14 @@ class Evaluator:
             prof_files = self.perf_evaluator._locate_prof_files(prof_dir)
             _logger.info(
                 "pypto_pro_child: case %s — prof_files: csv=%s, trace_view=%s",
-                case_id_str, prof_files.csv_path, prof_files.trace_view_path,
+                case_id_str,
+                prof_files.csv_path,
+                prof_files.trace_view_path,
             )
             if self.perf_evaluator.perf_metric_strategy:
-                result = self.perf_evaluator.perf_metric_strategy.parse(prof_files, result)
+                result = self.perf_evaluator.perf_metric_strategy.parse(
+                    prof_files, result
+                )
             else:
                 result.elapsed_us = 0.0
                 result.error_msg = "no perf_metric_strategy configured"
@@ -1653,11 +2012,13 @@ class Evaluator:
         """
         try:
             import torch_npu
-            if hasattr(torch_npu, 'npu') and torch.npu.is_available():
+
+            if hasattr(torch_npu, "npu") and torch.npu.is_available():
                 torch_npu.npu.empty_cache()
         except Exception:
             pass
         import gc
+
         gc.collect()
         threshold_mb = _rss_trim_threshold_mb()
         if threshold_mb is None:
@@ -1668,8 +2029,10 @@ class Evaluator:
         if _malloc_trim():
             after_mb = _read_rss_mb()
             now = f"{after_mb:.0f}MB" if after_mb is not None else "未知"
-            print(f"[INFO] VmRSS {rss_mb:.0f}MB 超过阈值 {threshold_mb:.0f}MB，"
-                  f"malloc_trim 已归还空闲堆页（现 {now}）")
+            print(
+                f"[INFO] VmRSS {rss_mb:.0f}MB 超过阈值 {threshold_mb:.0f}MB，"
+                f"malloc_trim 已归还空闲堆页（现 {now}）"
+            )
 
     def _release_outputs(self, op_run_result: OpRunResult) -> OpRunResult:
         """释放 outputs tensor，保留元数据

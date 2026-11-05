@@ -3,8 +3,8 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Version 2.0 (the "License").
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,7 +37,6 @@ class TestResolveHardware:
     def test_exact_match(self):
         """精确匹配"""
         assert resolve_hardware("910b2") == "910b2"
-        assert resolve_hardware("Ascend910_9362") == "910b2"
         assert resolve_hardware("Ascend910B2") == "910b2"
         assert resolve_hardware("Atlas-A2") == "910b2"
 
@@ -55,17 +54,45 @@ class TestResolveHardware:
         """910B1 别名"""
         assert resolve_hardware("910b1") == "910b1"
         assert resolve_hardware("Ascend910B1") == "910b1"
-        assert resolve_hardware("Ascend910_9361") == "910b1"
 
-    def test_910b2_variants(self):
-        """910B2 变体"""
-        assert resolve_hardware("Ascend910_9362B") == "910b2"
+    @pytest.mark.parametrize(
+        "hardware",
+        [
+            "Ascend910_93",
+            "Ascend910_9391",
+            "Ascend910_9381",
+            "Ascend910_9372",
+            "Ascend910_9392",
+            "Ascend910_9382",
+            "Ascend910_9362",
+            "Ascend910_9362B",
+            "Ascend910_9361",
+            "Ascend910C",
+            "Atlas-A3",
+            "910c",
+        ],
+    )
+    def test_a3_family_does_not_use_a2_baselines(self, hardware):
+        """官方 ascend910_93 系列归 A3，不可沿用 A2 的固定基线。"""
+        assert resolve_hardware(hardware) == "910c"
 
     def test_950dt_aliases(self):
         """950DT 别名（含子型号前缀匹配）"""
         assert resolve_hardware("950dt") == "950dt"
         assert resolve_hardware("Ascend950DT") == "950dt"
         assert resolve_hardware("Ascend950DT_9581") == "950dt"
+
+    @pytest.mark.parametrize(
+        "hardware",
+        [
+            "950dt_9582",
+            "Ascend950DT_9582",
+            "Ascend950DT_9582B",
+        ],
+    )
+    def test_950dt_submodels_use_family_baseline(self, hardware):
+        """子型号和旧逻辑名都归一到通用 DT 基线。"""
+        assert resolve_hardware(hardware) == "950dt"
 
     def test_950dt_does_not_collide_with_950pr(self):
         """950DT 与 950PR 前缀互不误匹配"""
@@ -84,7 +111,8 @@ class TestPlatformAlias:
 
     def test_contains_key_entries(self):
         """包含必要的映射"""
-        assert "Ascend910_9362" in PLATFORM_ALIAS
+        assert "Ascend910_93" in PLATFORM_ALIAS
+        assert "910c" in PLATFORM_ALIAS
         assert "910b2" in PLATFORM_ALIAS
         assert "Ascend310P" in PLATFORM_ALIAS
         assert "Ascend950DT" in PLATFORM_ALIAS
@@ -92,7 +120,7 @@ class TestPlatformAlias:
     def test_all_values_are_logical_names(self):
         """所有值是逻辑名"""
         for key, value in PLATFORM_ALIAS.items():
-            assert value in ("910b2", "910b1", "310p", "950pr", "950dt")
+            assert value in ("910b2", "910b1", "910c", "310p", "950pr", "950dt")
 
 
 class TestDefaultHardware:

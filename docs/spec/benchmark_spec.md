@@ -217,7 +217,7 @@
 - 卷积：Conv2D、DepthwiseConv2D
 - 卷积反向：Conv3DBackpropFilter
 - VV融合：AddRmsNormDynamicQuant、DequantSwigluQuant、MhcSinkhorn、Engram
- 
+
 
 **L4算子**
 - Transformer类：MHA、GQA、MLA、SparseFlashAttention、MlaProlog
@@ -450,7 +450,9 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 
 - 这样设计的核心原因是**评测并行化（去中心化）的需要**：早期的"迭代隔离编译"会移动用户源码中编译失败算子的目录（`csrc/ops/<op>/`）并串行多轮重编，既会让提交方/Agent 困惑（源码被框架改动、目录"消失"），也无法在多卡 / 多 worker 并行、各算子独立编译评测的去中心化流程中安全执行。改为"整体编译、失败即整批 0 分"后，编译阶段不再修改任何用户源码、不再有跨算子的串行依赖，每个提交可独立、并行地完成编译与评测。
 - 与整体编译错误不同，**接口不支持 / 运行时报错**仍按用例（case）级隔离：单个用例异常不影响同算子其余用例的评测，但该 case 会扣除编译/运行项。
-- **退出码**：编译失败时评测进程返回**非零退出码**（即使这些用例按 cascade 统计、不计入"真实失败用例数"），便于 CI/CD、`&&` 链式调用判定本次提交是否达标；同时报告中相关算子记 0 分并附编译错误摘要，二者一致。
+- **退出码**：编译、候选精度/运行或参考有效性检查失败时返回非零；编译失败即使按 cascade 统计也返回非零。分阶段评测要求所请求的全部阶段完成才返回 0：性能超时、运行错误或未返回有效耗时会返回非零；精度阶段已经通过的结果继续保留，报告同时标注 `perf_unmeasured`（性能未完成），不把它改为候选精度失败。普通非分阶段入口沿用报告失败计数，不额外检查精度成功条目的性能缺失。`reference_invalid` 表示参考失效，本次评分不可用，不是候选零分；命令返回非零。`--no-perf` 不请求性能阶段，精度成功且参考有效时返回 0。结果退出码封顶 255；非法命令行参数返回 2。
+- **硬件适用性**：仅执行路径按 `attrs.supported_devices` 及实际 NPU 硬件别名筛选，用例在编译失败合成、调度和统计前被排除，不进入评分分母；未声明该字段的用例保持原行为。全部用例不适用时输出空报告并返回 0，不启动编译或 worker。CPU 仿真、离线目录浏览不按 NPU 硬件筛选。无可见 NPU、设备名为空或明确为 `unknown`、可见 NPU 为混合硬件时，显式报告环境错误并返回非零，不使用基线查找的默认 910b2 替代实际硬件；真实但未收录别名的设备名保留原值，兼容已有及自定义平台。rank 内检查作为兜底保留。
+- **编译超时**：`--build-timeout`（正整数秒）同时支持 shell、普通 Python CLI 和 staged CLI；有效值优先级为显式命令行、`CANN_BENCH_BUILD_TIMEOUT_SEC`、600 秒。只校验最终有效值，合法命令行值可以覆盖无效环境值。构建超时记录在 `_compile.log` 并按编译失败处理。
 - 提示：若要规避"一个算子编译错导致整批 0 分"，应将不同算子拆分为独立提交分别评测。
 
 > ⚠️ **提交前请务必本地确认编译通过**：在提交算子实现前，先在本地执行 `bash build.sh` 确认**无任何编译错误**再提交。只要任一算子编译失败，本次提交涉及的算子会**整批计 0 分**且评测退出码非零——这是最容易因疏忽（语法错、缺头文件、依赖未就绪等）而整批丢分的环节。
@@ -466,14 +468,14 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 该标准采用平均相对误差和最大相对误差指标来判断，计算公式如下：$actual$为NPU实际输出的结果；$golden$为参考计算的真值
 
 1. 平均相对误差（Mean Relative Error，MERE）：采样点中相对误差平均值。
-   
+
    $$
    \text{MERE} = \text{avg}(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
    $$
-   
+
    计算相对误差的时候引入小值1e-7避免golden出现除0风险。
 2. 最大相对误差（Max Relative Error，MARE）：采样点中相对误差最大值。
-   
+
    $$
    \text{MARE} = \max(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
    $$
@@ -514,13 +516,13 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 **误差指标：**
 
 1. 平均相对误差（MERE）：采样点中相对误差平均值。
-   
+
    $$
    \text{MERE} = \text{avg}(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
    $$
-   
+
 2. 最大相对误差（MARE）：采样点中相对误差最大值。
-   
+
    $$
    \text{MARE} = \max(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
    $$

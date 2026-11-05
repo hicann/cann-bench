@@ -1,5 +1,11 @@
 # ----------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.16)
@@ -134,6 +140,33 @@ target_compile_options(_C PRIVATE ${COMPILE_OPTIONS})
 target_include_directories(_C SYSTEM PRIVATE ${INCLUDE_DIRECTORIES})
 target_link_directories(_C PRIVATE ${LINK_DIRECTORIES})
 target_link_libraries(_C PRIVATE ${LINK_LIBRARIES})
+
+# Bisheng may otherwise select a libc linker script referring to /lib64/libc.so.6
+# on hosts where glibc lives in a multiarch directory. Keep this explicit -L
+# before the toolkit library directories; link_directories alone can omit
+# directories that CMake considers implicit.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_program(HOST_GCC_EXECUTABLE NAMES gcc)
+    if(NOT HOST_GCC_EXECUTABLE)
+        message(WARNING "gcc not found; keeping the default libc search paths")
+    else()
+        execute_process(
+            COMMAND "${HOST_GCC_EXECUTABLE}" -print-file-name=libc.so
+            OUTPUT_VARIABLE HOST_LIBC_SCRIPT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE HOST_LIBC_RESULT
+        )
+        if(HOST_LIBC_RESULT STREQUAL "0" AND IS_ABSOLUTE "${HOST_LIBC_SCRIPT}"
+           AND EXISTS "${HOST_LIBC_SCRIPT}")
+            get_filename_component(HOST_LIBC_SCRIPT "${HOST_LIBC_SCRIPT}" REALPATH)
+            get_filename_component(HOST_LIBC_DIR "${HOST_LIBC_SCRIPT}" DIRECTORY)
+            target_link_options(_C BEFORE PRIVATE "-L${HOST_LIBC_DIR}")
+            message(STATUS "Using host libc directory: ${HOST_LIBC_DIR}")
+        else()
+            message(WARNING "Cannot locate host libc.so using gcc: ${HOST_LIBC_SCRIPT}; keeping the default libc search paths")
+        endif()
+    endif()
+endif()
 
 add_custom_command(TARGET _C POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy

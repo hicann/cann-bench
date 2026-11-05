@@ -1,6 +1,17 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
+
 """Default staged evaluator for cann-bench local runs.
 
 Stages:
@@ -15,14 +26,22 @@ import argparse
 import json
 import os
 import re
+import shlex
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Tuple
 
 from .config import Config, get_project_root, set_config
+from .base.result import FAILURE_TYPE_REFERENCE_INVALID
 from .data.tensor_cache import add_cache_arguments, configure_cache
 from .data.data_generator import INPUT_DIST_CHOICES
+from .data.package_manager import resolve_build_timeout_sec
+from .utils.case_eligibility import HardwareDetectionError, detect_execution_hardware
+from .utils.case_selector import case_id_in_range, parse_case_id_range
+
+if TYPE_CHECKING:
+    from .eval.results import EvalCaseResult, EvalOperatorResult
 
 
 CaseKey = Tuple[str, int]
@@ -119,14 +138,20 @@ def _check_build_cann_consistency(args: argparse.Namespace) -> Optional[str]:
     )
 
 
-def _write_cann_mismatch_report(args: argparse.Namespace, bench_root: str, message: str) -> None:
+def _write_cann_mismatch_report(
+    args: argparse.Namespace, bench_root: str, message: str
+) -> None:
     """把 CANN 版本错配合成为提交级编译失败报告（result_stage=compile_failed）。"""
     cfg = _make_config(args, bench_root, enable_profiler=False)
     from .eval.evaluator import Evaluator
 
     evaluator = Evaluator(cfg, bench_name=args.bench_name)
-    failures = [evaluator.failure_synthesizer.synthesize_submission_compile_failure(message)]
-    _save_report(args, cfg, failures, stage="compile_failed", contains_performance=False)
+    failures = [
+        evaluator.failure_synthesizer.synthesize_submission_compile_failure(message)
+    ]
+    _save_report(
+        args, cfg, failures, stage="compile_failed", contains_performance=False
+    )
     evaluator.shutdown()
 
 
@@ -156,22 +181,28 @@ def _case_spec_key(case) -> CaseKey:
     return (str(getattr(case, "rel_path", "") or ""), _case_num(case))
 
 
-def _make_config(args: argparse.Namespace, bench_root: str, *, enable_profiler: bool) -> Config:
+def _make_config(
+    args: argparse.Namespace, bench_root: str, *, enable_profiler: bool
+) -> Config:
     cfg = Config()
     cfg.tasks_root = bench_root
+    cfg.build_timeout_sec = resolve_build_timeout_sec(
+        getattr(args, "build_timeout", None)
+    )
     cfg.bench_name = args.bench_name
     cfg.device_type = args.device
     cfg.device_id = int(args.device_id or 0)
     cfg.warmup = args.warmup
     cfg.repeat = args.repeat
     cfg.enable_profiler = enable_profiler
-    cfg.perf_batch_cases = bool(
-        getattr(args, 'perf_batch_cases', cfg.perf_batch_cases)
+    cfg.perf_batch_cases = bool(getattr(args, "perf_batch_cases", cfg.perf_batch_cases))
+    cfg.perf_batch_case_memory_limit_mb = float(
+        getattr(
+            args,
+            "perf_batch_case_memory_limit_mb",
+            cfg.perf_batch_case_memory_limit_mb,
+        )
     )
-    cfg.perf_batch_case_memory_limit_mb = float(getattr(
-        args, 'perf_batch_case_memory_limit_mb',
-        cfg.perf_batch_case_memory_limit_mb,
-    ))
     cfg.monitor_case_memory = bool(
         not enable_profiler
         and cfg.perf_batch_cases
@@ -187,9 +218,11 @@ def _make_config(args: argparse.Namespace, bench_root: str, *, enable_profiler: 
     configure_cache(cfg, args)
     if args.source_dir:
         cfg.source_dir = args.source_dir
-    cfg.agent_skill = getattr(args, 'agent_skill', '') or ''
-    cfg.base_model = getattr(args, 'base_model', '') or ''
-    cfg.harness = getattr(args, 'harness', '') or ''
+    if getattr(args, "source_build_args", ""):
+        cfg.source_build_args = shlex.split(args.source_build_args)
+    cfg.agent_skill = getattr(args, "agent_skill", "") or ""
+    cfg.base_model = getattr(args, "base_model", "") or ""
+    cfg.harness = getattr(args, "harness", "") or ""
     if args.torch_op_guard_mode:
         cfg.torch_op_guard_mode = args.torch_op_guard_mode
     if args.perf_metric_strategy:
@@ -199,14 +232,18 @@ def _make_config(args: argparse.Namespace, bench_root: str, *, enable_profiler: 
 
 
 def _operator_rel_paths(
-    matched_operators: Iterable[str],
+    matched_operators: Optional[Iterable[str]],
     bench_root: str,
     selected: Optional[Iterable[str]] = None,
 ) -> List[str]:
     from .benches import cann as _cann_bench  # noqa: F401
     from .registry.loader_registry import get_task_loader
 
-    matched = {str(op).lower() for op in matched_operators}
+    matched = (
+        {str(op).lower() for op in matched_operators}
+        if matched_operators is not None
+        else None
+    )
     selected_set = {str(op).lower() for op in selected} if selected else None
     loader = get_task_loader("cann", tasks_root=bench_root)
     rel_paths = []
@@ -215,7 +252,7 @@ def _operator_rel_paths(
             str(getattr(spec, "name", "")).lower(),
             str(spec.get_function_name()).lower(),
         }
-        if not (names & matched):
+        if matched is not None and not (names & matched):
             continue
         if selected_set is not None:
             all_names = names | {
@@ -254,7 +291,7 @@ def _install_or_scan(args: argparse.Namespace, cfg: Config) -> List[str]:
 def _load_cases(
     args: argparse.Namespace,
     bench_root: str,
-    rel_paths: List[str],
+    rel_paths: Optional[List[str]],
     *,
     filter_prefix: str,
     allowlist: Optional[Set[CaseKey]] = None,
@@ -262,17 +299,27 @@ def _load_cases(
     from .benches import cann as _cann_bench  # noqa: F401
     from .registry.loader_registry import get_case_loader
 
-    loader = get_case_loader(args.bench_name, tasks_root=bench_root)
+    hardware = detect_execution_hardware(args.device, args.device_id)
+    loader = get_case_loader(
+        args.bench_name, tasks_root=bench_root, target_hardware=hardware
+    )
     all_cases = []
-    rel_path_set = set(rel_paths)
+    rel_path_set = set(rel_paths) if rel_paths is not None else None
     for case in loader.scan_all():
-        if rel_path_set and case.rel_path not in rel_path_set:
+        if rel_path_set is not None and case.rel_path not in rel_path_set:
             continue
-        if filter_prefix and not (case.rel_path == filter_prefix or case.rel_path.startswith(filter_prefix + "/")):
+        if filter_prefix and not (
+            case.rel_path == filter_prefix
+            or case.rel_path.startswith(filter_prefix + "/")
+        ):
             continue
         if args.operator and str(case.operator).lower() != args.operator.lower():
             continue
         if args.case_id is not None and _case_num(case) != int(args.case_id):
+            continue
+        if args.case_id_range is not None and not case_id_in_range(
+            _case_num(case), args.case_id_range
+        ):
             continue
         if allowlist is not None and _case_spec_key(case) not in allowlist:
             continue
@@ -302,6 +349,7 @@ def _evaluate_cases(
         cases_by_operator[str(case.operator)].append(case)
 
     from .eval.subprocess_utils import detect_pypto_pro_submission
+
     pypto_outer_isolation = detect_pypto_pro_submission()
     cfg.pypto_pro_outer_case_isolation = pypto_outer_isolation
 
@@ -351,9 +399,15 @@ def _save_report(
     if not contains_performance:
         payload["overall_score"] = None
         payload.setdefault("summary", {})["overall_score"] = None
-        payload["summary"]["score_unavailable_reason"] = "performance stage has not completed"
+        payload["summary"]["score_unavailable_reason"] = (
+            "reference invalid"
+            if payload["summary"].get("reference_invalid_cases")
+            else "performance stage has not completed"
+        )
     paths = generator.save_all(report)
-    paths["json"].write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    paths["json"].write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     return payload, report
 
 
@@ -398,12 +452,14 @@ def _combine_operator_results(
 ) -> List[EvalOperatorResult]:
     from .eval.process_pool import aggregate_by_operator
 
-    return aggregate_by_operator([
-        case
-        for operator_results in groups
-        for op_result in operator_results
-        for case in op_result.results
-    ])
+    return aggregate_by_operator(
+        [
+            case
+            for operator_results in groups
+            for op_result in operator_results
+            for case in op_result.results
+        ]
+    )
 
 
 def _merge_results(
@@ -438,11 +494,38 @@ def _merge_results(
                 continue
 
             perf_case = perf_all.get(_case_result_key(case))
-            if perf_case is not None and perf_case.success:
+            if (
+                perf_case is not None
+                and perf_case.success
+                and perf_case.perf_result is not None
+                and perf_case.perf_result.elapsed_us > 0
+            ):
                 # 性能阶段精度复检同样通过 → 回填时延。
                 case.perf_result = perf_case.perf_result
                 case.ai_run_result = perf_case.ai_run_result
-            elif perf_case is not None and is_precision_failure_type(perf_case.failure_type):
+                case.golden_run_result = perf_case.golden_run_result
+                case.baseline_perf_us = perf_case.baseline_perf_us
+                case.t_hw_us = perf_case.t_hw_us
+                case.baseline_source = perf_case.baseline_source
+            elif (
+                perf_case is not None
+                and perf_case.failure_type == FAILURE_TYPE_REFERENCE_INVALID
+            ):
+                # An invalid reference invalidates scoring, not the candidate.
+                case.success = False
+                case.failure_type = perf_case.failure_type
+                case.accuracy_result = perf_case.accuracy_result
+                case.error_msg = perf_case.error_msg
+                case.perf_result = None
+                case.perf_recheck = {
+                    "status": "reference_invalid",
+                    "correctness_passed": True,
+                    "perf_failure_type": perf_case.failure_type,
+                    "error_msg": perf_case.error_msg,
+                }
+            elif perf_case is not None and is_precision_failure_type(
+                perf_case.failure_type
+            ):
                 # correctness 过、performance 精度翻车 → 视为该 case 精度错误：
                 # success=False + precision_mismatch，按原公式扣精度分（不扣编译分），
                 # 且无对应性能分；同时打标签便于在 results.json 中定位疑似非确定算子。
@@ -469,7 +552,7 @@ def _merge_results(
                 # 性能阶段无法测量（timeout / runtime / 未重跑）：非精度问题，
                 # 沿用 correctness 通过判定，仅标注缺失原因，无性能分。
                 case.perf_result = None
-                if perf_case is not None and not perf_case.success:
+                if perf_case is not None:
                     failure_reason = perf_case.error_msg or (
                         "performance stage did not produce a valid timing"
                     )
@@ -484,32 +567,51 @@ def _merge_results(
                             f"Reason: {failure_reason}"
                         ),
                     }
+                else:
+                    case.perf_recheck = {
+                        "status": "perf_unmeasured",
+                        "correctness_passed": True,
+                        "error_msg": "performance stage did not return this case",
+                    }
             cases.append(case)
 
-        speedups = [case.get_speedup() for case in cases if case.success and case.get_speedup() > 0]
+        speedups = [
+            case.get_speedup()
+            for case in cases
+            if case.success and case.get_speedup() > 0
+        ]
         total_cases = max(op_result.total_cases, len(cases))
         passed_cases = sum(1 for case in cases if case.success)
         skipped_cases = sum(
-            1 for case in cases
+            1
+            for case in cases
             if not case.success and case.failure_type in ("cascade_device", "skipped")
         )
         failed_cases = sum(
-            1 for case in cases
-            if not case.success and case.failure_type not in ("cascade_device", "skipped")
+            1
+            for case in cases
+            if not case.success
+            and case.failure_type
+            not in ("cascade_device", "skipped", FAILURE_TYPE_REFERENCE_INVALID)
         )
-        merged.append(EvalOperatorResult(
-            rel_path=op_result.rel_path,
-            operator=op_result.operator,
-            total_cases=total_cases,
-            passed_cases=passed_cases,
-            failed_cases=failed_cases,
-            skipped_cases=max(op_result.skipped_cases, skipped_cases),
-            results=cases,
-            pass_rate=passed_cases / total_cases if total_cases else 0.0,
-            avg_speedup=sum(speedups) / len(speedups) if speedups else 0.0,
-            compilation_error=op_result.compilation_error,
-            subprocess_failure_reason=op_result.subprocess_failure_reason,
-        ))
+        valid_cases = total_cases - sum(
+            case.failure_type == FAILURE_TYPE_REFERENCE_INVALID for case in cases
+        )
+        merged.append(
+            EvalOperatorResult(
+                rel_path=op_result.rel_path,
+                operator=op_result.operator,
+                total_cases=total_cases,
+                passed_cases=passed_cases,
+                failed_cases=failed_cases,
+                skipped_cases=max(op_result.skipped_cases, skipped_cases),
+                results=cases,
+                pass_rate=passed_cases / valid_cases if valid_cases > 0 else 0.0,
+                avg_speedup=sum(speedups) / len(speedups) if speedups else 0.0,
+                compilation_error=op_result.compilation_error,
+                subprocess_failure_reason=op_result.subprocess_failure_reason,
+            )
+        )
     return merged
 
 
@@ -528,7 +630,9 @@ def _write_compile_failure_report(
         package_info,
         operator_filter=op_filter,
     )
-    _save_report(args, cfg, failures, stage="compile_failed", contains_performance=False)
+    _save_report(
+        args, cfg, failures, stage="compile_failed", contains_performance=False
+    )
     evaluator.shutdown()
 
 
@@ -549,7 +653,9 @@ def _compile(args: argparse.Namespace, bench_root: str) -> int:
 
     cfg = _make_config(args, bench_root, enable_profiler=False)
     pm = PackageManager(config=cfg)
-    package_info = pm.build_packages(args.source_dir, iterative=not args.no_iterative_compile)
+    package_info = pm.build_packages(
+        args.source_dir, iterative=not args.no_iterative_compile
+    )
     if getattr(package_info, "build_failed", False) or not package_info.whl_path:
         _write_compile_failure_report(args, bench_root, package_info)
         return 1
@@ -576,7 +682,23 @@ def run(args: argparse.Namespace) -> int:
 
 
 def _run_with_score_profile(args, bench_root, filter_prefix):
+    detect_execution_hardware(args.device, args.device_id)
     Path(args.reports_dir).mkdir(parents=True, exist_ok=True)
+
+    selected_paths = _operator_rel_paths(
+        None, bench_root, selected=args.selected_operators
+    )
+    if not _load_cases(args, bench_root, selected_paths, filter_prefix=filter_prefix):
+        print("[staged_eval] no matching cases supported on this hardware")
+        empty_cfg = _make_config(args, bench_root, enable_profiler=False)
+        _save_report(
+            args,
+            empty_cfg,
+            [],
+            stage="correctness" if args.no_perf else "final",
+            contains_performance=False,
+        )
+        return 0
 
     print("[staged_eval] stage 1/3: compile")
     compile_rc = _compile(args, bench_root)
@@ -594,20 +716,43 @@ def _run_with_score_profile(args, bench_root, filter_prefix):
     print("[staged_eval] stage 2/3: correctness")
     correctness_cfg = _make_config(args, bench_root, enable_profiler=False)
     matched = _install_or_scan(args, correctness_cfg)
-    rel_paths = _operator_rel_paths(matched, bench_root, selected=args.selected_operators)
-    correctness_cases = _load_cases(args, bench_root, rel_paths, filter_prefix=filter_prefix)
-    correctness_ops = _evaluate_cases(args, correctness_cfg, correctness_cases, enable_profiler=False)
+    rel_paths = _operator_rel_paths(
+        matched, bench_root, selected=args.selected_operators
+    )
+    correctness_cases = _load_cases(
+        args, bench_root, rel_paths, filter_prefix=filter_prefix
+    )
+    if not correctness_cases:
+        # The request passed hardware/case selection before package preparation.
+        # Losing every case during interface matching is an implementation error.
+        print(
+            "[ERROR] Installed cann_bench interfaces do not match any requested cases "
+            "supported on this hardware; check the package entry points and operator selection.",
+            file=sys.stderr,
+        )
+        return 1
+    correctness_ops = _evaluate_cases(
+        args, correctness_cfg, correctness_cases, enable_profiler=False
+    )
     correctness_payload, _ = _save_report(
-        args, correctness_cfg, correctness_ops, stage="correctness", contains_performance=False,
+        args,
+        correctness_cfg,
+        correctness_ops,
+        stage="correctness",
+        contains_performance=False,
     )
 
     if args.no_perf:
         failed = int(correctness_payload.get("failed_cases") or 0)
-        return min(failed, 255)
+        reference_invalid = sum(
+            case.failure_type == FAILURE_TYPE_REFERENCE_INVALID
+            for op in correctness_ops
+            for case in op.results
+        )
+        return min(failed + reference_invalid, 255)
 
     allowlist = _passed_case_keys(correctness_ops)
-    memory_limit_mb = float(getattr(
-        args, "perf_batch_case_memory_limit_mb", 32 * 1024))
+    memory_limit_mb = float(getattr(args, "perf_batch_case_memory_limit_mb", 32 * 1024))
     batch_allowlist, individual_allowlist = _partition_performance_case_keys(
         correctness_ops,
         batch_enabled=bool(getattr(args, "perf_batch_cases", True)),
@@ -620,7 +765,9 @@ def _run_with_score_profile(args, bench_root, filter_prefix):
     )
     performance_cfg = _make_config(args, bench_root, enable_profiler=True)
     matched = _install_or_scan(args, performance_cfg)
-    rel_paths = _operator_rel_paths(matched, bench_root, selected=args.selected_operators)
+    rel_paths = _operator_rel_paths(
+        matched, bench_root, selected=args.selected_operators
+    )
     performance_cases = _load_cases(
         args,
         bench_root,
@@ -629,82 +776,172 @@ def _run_with_score_profile(args, bench_root, filter_prefix):
         allowlist=allowlist,
     )
     batch_cases = [
-        case for case in performance_cases
-        if _case_spec_key(case) in batch_allowlist
+        case for case in performance_cases if _case_spec_key(case) in batch_allowlist
     ]
     individual_cases = [
-        case for case in performance_cases
+        case
+        for case in performance_cases
         if _case_spec_key(case) in individual_allowlist
     ]
 
     batch_ops = _evaluate_cases(
-        args, performance_cfg, batch_cases, enable_profiler=True)
+        args, performance_cfg, batch_cases, enable_profiler=True
+    )
     individual_cfg = _make_config(args, bench_root, enable_profiler=True)
     individual_cfg.perf_batch_cases = False
     individual_cfg.monitor_case_memory = False
     individual_ops = _evaluate_cases(
-        args, individual_cfg, individual_cases, enable_profiler=True)
+        args, individual_cfg, individual_cases, enable_profiler=True
+    )
     performance_ops = _combine_operator_results([batch_ops, individual_ops])
-    _save_report(args, performance_cfg, performance_ops, stage="performance", contains_performance=True)
+    _save_report(
+        args,
+        performance_cfg,
+        performance_ops,
+        stage="performance",
+        contains_performance=True,
+    )
 
     merged_ops = _merge_results(correctness_ops, performance_ops)
     final_payload, _ = _save_report(
-        args, performance_cfg, merged_ops, stage="final", contains_performance=True,
+        args,
+        performance_cfg,
+        merged_ops,
+        stage="final",
+        contains_performance=True,
     )
     failed = int(final_payload.get("failed_cases") or 0)
-    return min(failed, 255)
+    # Keep correctness credit, but do not signal a fully successful command
+    # when performance workers failed (their reasons survive in perf_recheck).
+    perf_failed = sum(not case.success for op in performance_ops for case in op.results)
+    perf_failed = max(
+        perf_failed,
+        sum(
+            case.success and case.perf_result is None
+            for op in merged_ops
+            for case in op.results
+        ),
+    )
+    reference_invalid = sum(
+        case.failure_type == FAILURE_TYPE_REFERENCE_INVALID
+        for op in merged_ops
+        for case in op.results
+    )
+    return min(max(failed + reference_invalid, perf_failed), 255)
 
 
 def create_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run cann-bench in compile/correctness/performance stages")
+    parser = argparse.ArgumentParser(
+        description="Run cann-bench in compile/correctness/performance stages"
+    )
     parser.add_argument("--bench-name", default="cann")
     parser.add_argument("--source-dir", default=None)
+    parser.add_argument(
+        "--build-timeout",
+        type=int,
+        default=None,
+        help="编译超时秒数：命令行 > CANN_BENCH_BUILD_TIMEOUT_SEC > 600",
+    )
+    parser.add_argument(
+        "--source-build-args",
+        default=os.environ.get("CANN_BENCH_SOURCE_BUILD_ARGS", ""),
+        help='传给 source-dir/build.sh 的额外参数，例如: "--pkg --soc=ascend950 --ops=foo,bar"',
+    )
     parser.add_argument("--task-dir", default="tasks")
     parser.add_argument("--operator", default=None)
-    parser.add_argument("--case-id", type=int, default=None)
-    parser.add_argument("--selected-operators", nargs="*", default=None,
-                        help="仅评测指定算子（匹配 name / function_name / rel_path / 目录名，大小写不敏感）")
+    case_selector = parser.add_mutually_exclusive_group()
+    case_selector.add_argument("--case-id", type=int, default=None)
+    case_selector.add_argument(
+        "--case-id-range",
+        type=parse_case_id_range,
+        default=None,
+        metavar="START-END",
+        help="按闭区间筛选一组用例（如 21-40），所有结果写入同一份报告",
+    )
+    parser.add_argument(
+        "--selected-operators",
+        nargs="*",
+        default=None,
+        help="仅评测指定算子（匹配 name / function_name / rel_path / 目录名，大小写不敏感）",
+    )
     parser.add_argument("--device", choices=["npu"], default="npu")
     parser.add_argument("--device-id", type=int, default=None)
     parser.add_argument("--processes-per-card", type=int, default=2)
-    parser.add_argument("--max-cases-per-task-unit", type=int, default=64,
-                        help="单个 eval-child 最多处理的 case 数（默认: 64）")
+    parser.add_argument(
+        "--max-cases-per-task-unit",
+        type=int,
+        default=64,
+        help="单个 eval-child 最多处理的 case 数（默认: 64）",
+    )
     parser.add_argument("--timeout-per-operator", type=int, default=300)
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--repeat", type=int, default=5)
     parser.add_argument("--reports-dir", default="reports")
     parser.add_argument("--eval-code", default=None)
     parser.add_argument("--no-perf", action="store_true")
-    parser.add_argument("--perf-batch-cases", dest="perf_batch_cases",
-                        action="store_true",
-                        help="同一 TaskUnit 的 case 共用一次 profiler（默认开启）")
-    parser.add_argument("--no-perf-batch-cases", dest="perf_batch_cases",
-                        action="store_false",
-                        help="关闭批量 case 性能采集，恢复逐 case profiler")
+    parser.add_argument(
+        "--perf-batch-cases",
+        dest="perf_batch_cases",
+        action="store_true",
+        help="同一 TaskUnit 的 case 共用一次 profiler（默认开启）",
+    )
+    parser.add_argument(
+        "--no-perf-batch-cases",
+        dest="perf_batch_cases",
+        action="store_false",
+        help="关闭批量 case 性能采集，恢复逐 case profiler",
+    )
     parser.set_defaults(perf_batch_cases=True)
-    parser.add_argument("--perf-batch-case-memory-limit-mb", type=float,
-                        default=32 * 1024,
-                        help="正确性阶段单 case VmRSS 峰值上限（MB，默认: 32768）；"
-                             "超过或采样失败的 case 改为逐 case profiler，<=0 禁用分流")
-    parser.add_argument("--profiler-level", choices=["Level1", "Level2"], default="Level1")
+    parser.add_argument(
+        "--perf-batch-case-memory-limit-mb",
+        type=float,
+        default=32 * 1024,
+        help="正确性阶段单 case VmRSS 峰值上限（MB，默认: 32768）；"
+        "超过或采样失败的 case 改为逐 case profiler，<=0 禁用分流",
+    )
+    parser.add_argument(
+        "--profiler-level", choices=["Level1", "Level2"], default="Level1"
+    )
     parser.add_argument("--perf-metric-strategy", default=None)
-    parser.add_argument("--torch-op-guard-mode", choices=["off", "warn", "block"], default=None)
+    parser.add_argument(
+        "--torch-op-guard-mode", choices=["off", "warn", "block"], default=None
+    )
     parser.add_argument("--eval-seed", type=int, default=0)
-    parser.add_argument("--input-dist", type=str, default="uniform",
-                        choices=INPUT_DIST_CHOICES,
-                        metavar="DIST",
-                        help="输入数据分布（默认: uniform）。normal 走正态分布，"
-                             "参数由 value_range 推出。仅作用于浮点输入。")
+    parser.add_argument(
+        "--input-dist",
+        type=str,
+        default="uniform",
+        choices=INPUT_DIST_CHOICES,
+        metavar="DIST",
+        help="输入数据分布（默认: uniform）。normal 走正态分布，"
+        "参数由 value_range 推出。仅作用于浮点输入。",
+    )
     parser.add_argument("--no-iterative-compile", action="store_true")
-    parser.add_argument("--agent-skill", default="", help="评测对象 Agent/Skill 标签，写入报告元信息")
-    parser.add_argument("--base-model", default="", help="评测对象 BaseModel 标签，写入报告元信息")
-    parser.add_argument("--harness", default="", help="评测对象 Harness 标签，写入报告元信息")
+    parser.add_argument(
+        "--agent-skill", default="", help="评测对象 Agent/Skill 标签，写入报告元信息"
+    )
+    parser.add_argument(
+        "--base-model", default="", help="评测对象 BaseModel 标签，写入报告元信息"
+    )
+    parser.add_argument(
+        "--harness", default="", help="评测对象 Harness 标签，写入报告元信息"
+    )
     add_cache_arguments(parser)
     return parser
 
 
 def main() -> int:
-    return run(create_parser().parse_args())
+    parser = create_parser()
+    args = parser.parse_args()
+    try:
+        args.build_timeout = resolve_build_timeout_sec(args.build_timeout)
+    except ValueError as exc:
+        parser.error(str(exc))
+    try:
+        return run(args)
+    except HardwareDetectionError as exc:
+        print(f"[ERROR] Evaluation environment: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

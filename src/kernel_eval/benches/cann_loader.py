@@ -5,7 +5,7 @@
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
 # This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You can not use this file except in compliance with the License.
+# Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
@@ -39,7 +39,6 @@ import yaml
 
 from ..base.loaders import TaskLoader, CaseLoader, OperatorDirMixin, GoldenLoaderBase
 from ..config import get_project_root
-from ..utils.naming import camel_to_snake
 from ..base.models import AttrSpec, TaskSpec, CaseSpec
 from ..base.enums import DifficultyLevel, InvalidDifficulty
 from .cann_spec import CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec
@@ -50,6 +49,7 @@ logger = logging.getLogger(__name__)
 # === 辅助函数 ===
 
 # === CANN 任务加载器 ===
+
 
 class CannTaskLoader(OperatorDirMixin, TaskLoader):
     """CANN 任务加载器
@@ -97,14 +97,14 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
         if not proto_path.exists():
             return None
 
-        with open(proto_path, 'r', encoding='utf-8') as f:
+        with open(proto_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        if not data or 'operator' not in data:
+        if not data or "operator" not in data:
             logger.warning("proto.yaml format error: %s", proto_path)
             return None
 
-        op_data = data['operator']
+        op_data = data["operator"]
         task_spec = self._parse_operator(op_data, task_id, op_dir.name)
         self._cache[task_id] = task_spec
         return task_spec
@@ -114,13 +114,13 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
         operators = self.list_tasks()
         categories = {}
         for op in operators:
-            cat = getattr(op, 'category', '') or 'Unknown'
+            cat = getattr(op, "category", "") or "Unknown"
             categories[cat] = categories.get(cat, 0) + 1
         return {
-            'total': len(operators),
-            'operators': [op.name for op in operators],
-            'rel_paths': [op.rel_path for op in operators],
-            'categories': categories
+            "total": len(operators),
+            "operators": [op.name for op in operators],
+            "rel_paths": [op.rel_path for op in operators],
+            "categories": categories,
         }
 
     # === CANN 特有方法（兼容旧接口） ===
@@ -129,7 +129,9 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
         """获取算子定义信息（兼容旧接口）"""
         task_spec = self.get_task(rel_path)
         if task_spec is None:
-            raise FileNotFoundError(f"proto.yaml不存在或格式错误: {self.bench_root / rel_path}")
+            raise FileNotFoundError(
+                f"proto.yaml不存在或格式错误: {self.bench_root / rel_path}"
+            )
         return task_spec
 
     def get_operator_by_name(self, operator: str) -> Optional[CannTaskSpec]:
@@ -137,10 +139,10 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
         for op_dir in self._find_operator_dirs():
             proto_path = op_dir / "proto.yaml"
             try:
-                with open(proto_path, 'r', encoding='utf-8') as f:
+                with open(proto_path, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
-                if data and 'operator' in data:
-                    op_name = data['operator'].get('name', '')
+                if data and "operator" in data:
+                    op_name = data["operator"].get("name", "")
                     if op_name.lower() == operator.lower():
                         rel_path = op_dir.relative_to(self.bench_root).as_posix()
                         return self.get_operator(rel_path)
@@ -160,55 +162,63 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
     def _parse_operator(self, data: Dict, rel_path: str, dir_name: str) -> CannTaskSpec:
         """解析算子定义"""
         attrs = []
-        for attr_data in data.get('attrs', []) or []:
-            attrs.append(AttrSpec(
-                name=attr_data.get('name', ''),
-                type=attr_data.get('type', ''),
-                default=attr_data.get('default'),
-                description=attr_data.get('description', ''),
-            ))
+        for attr_data in data.get("attrs", []) or []:
+            attrs.append(
+                AttrSpec(
+                    name=attr_data.get("name", ""),
+                    type=attr_data.get("type", ""),
+                    default=attr_data.get("default"),
+                    description=attr_data.get("description", ""),
+                )
+            )
 
         inputs = []
-        for input_data in data.get('inputs', []) or []:
-            dtype_list = input_data.get('dtype', [])
+        for input_data in data.get("inputs", []) or []:
+            dtype_list = input_data.get("dtype", [])
             if isinstance(dtype_list, str):
                 dtype_list = [dtype_list]
-            inputs.append(CannInputSpec(
-                name=input_data.get('name', ''),
-                description=input_data.get('description', ''),
-                dtypes=dtype_list,
-            ))
+            inputs.append(
+                CannInputSpec(
+                    name=input_data.get("name", ""),
+                    description=input_data.get("description", ""),
+                    dtypes=dtype_list,
+                )
+            )
 
         outputs = []
-        for output_data in data.get('outputs', []) or []:
-            dtype_list = output_data.get('dtype', [])
+        for output_data in data.get("outputs", []) or []:
+            dtype_list = output_data.get("dtype", [])
             if isinstance(dtype_list, str):
                 dtype_list = [dtype_list]
-            outputs.append(CannOutputSpec(
-                name=output_data.get('name', ''),
-                description=output_data.get('description', ''),
-                dtypes=dtype_list,
-                compare=output_data.get('compare', True),
-                optional=bool(output_data.get('optional', False)),
-                index_gather=output_data.get('index_gather'),
-            ))
+            outputs.append(
+                CannOutputSpec(
+                    name=output_data.get("name", ""),
+                    description=output_data.get("description", ""),
+                    dtypes=dtype_list,
+                    compare=output_data.get("compare", True),
+                    optional=bool(output_data.get("optional", False)),
+                    index_gather=output_data.get("index_gather"),
+                )
+            )
 
-        if 'difficulty' not in data:
-            raise InvalidDifficulty(f"{rel_path} 的 proto.yaml 未声明 operator.difficulty")
-        difficulty = DifficultyLevel.parse(data['difficulty'])
+        if "difficulty" not in data:
+            raise InvalidDifficulty(
+                f"{rel_path} 的 proto.yaml 未声明 operator.difficulty"
+            )
+        difficulty = DifficultyLevel.parse(data["difficulty"])
 
         return CannTaskSpec(
             task_id=rel_path,
-            name=data.get('name', ''),
+            name=data.get("name", ""),
             difficulty=difficulty,
-            description=data.get('description', ''),
+            description=data.get("description", ""),
             rel_path=rel_path,
-            formula=data.get('formula', ''),
-            schema=data.get('schema', ''),
-            shape_support=data.get('shape_support', ''),
-            precision_thresholds=data.get('precision_thresholds', {}) or {},
-            category=data.get('category', ''),
-            note=data.get('note', ''),
+            formula=data.get("formula", ""),
+            schema=data.get("schema", ""),
+            shape_support=data.get("shape_support", ""),
+            precision_thresholds=data.get("precision_thresholds", {}) or {},
+            category=data.get("category", ""),
+            note=data.get("note", ""),
             dir_name=dir_name,
             attrs=attrs,
             inputs=inputs,
@@ -217,6 +227,7 @@ class CannTaskLoader(OperatorDirMixin, TaskLoader):
 
 
 # === CANN 用例加载器 ===
+
 
 class CannCaseLoader(OperatorDirMixin, CaseLoader):
     """CANN 用例加载器
@@ -229,13 +240,22 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
     确保子目录场景也能正确定位。
     """
 
-    def __init__(self, bench_root: str = None, tasks_root: str = None):
+    def __init__(
+        self,
+        bench_root: str = None,
+        tasks_root: str = None,
+        *,
+        target_hardware: str = None,
+    ):
         if tasks_root is not None:
             bench_root = tasks_root
         if bench_root is None:
             from ..config import get_project_root
+
             bench_root = str(get_project_root() / "tasks")
         self.bench_root = Path(bench_root)
+        self.target_hardware = target_hardware
+        self._hardware_excluded_cases = []
         if not self.bench_root.exists():
             raise ValueError(f"bench目录不存在: {bench_root}")
 
@@ -245,31 +265,32 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
         from ..utils.baseline_resolver import DEFAULT_HARDWARE, resolve_hardware
 
         # 自动检测当前 NPU 硬件，检测失败（如 CPU 模式）fallback 到默认值
-        detected_hw = DEFAULT_HARDWARE
+        detected_hw = target_hardware or DEFAULT_HARDWARE
         try:
-            from ..utils.device_manager import DeviceManager, DeviceConfig
-            dm = DeviceManager(DeviceConfig(type="npu", device_id=0))
-            device_name = dm.get_device_name()
-            if device_name != "unknown":
-                detected_hw = resolve_hardware(device_name)
+            if target_hardware is None:
+                from ..utils.device_manager import DeviceManager, DeviceConfig
+
+                dm = DeviceManager(DeviceConfig(type="npu", device_id=0))
+                device_name = dm.get_device_name()
+                if device_name != "unknown":
+                    detected_hw = resolve_hardware(device_name)
         except Exception:
             pass
 
         self._baseline_store = BaselineStore(
-            bench_root=self.bench_root,
-            project_root=_get_root(),
-            hardware=detected_hw
+            bench_root=self.bench_root, project_root=_get_root(), hardware=detected_hw
         )
         self._baseline_store.load()
 
     def _is_bench_root(self) -> bool:
         """检查当前目录是否为 bench 根目录"""
-        if (self.bench_root / 'proto.yaml').exists():
+        if (self.bench_root / "proto.yaml").exists():
             return not self._is_operator_dir(self.bench_root)
         return any(self._find_operator_dirs())
 
     def scan_all(self) -> List[CaseSpec]:
         """扫描所有用例（返回 CannCaseSpec 列表）"""
+        self._hardware_excluded_cases.clear()
         if self._is_operator_dir(self.bench_root):
             return self._load_operator_cases(self.bench_root)
         else:
@@ -290,9 +311,12 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
         for case in cases:
             operator_counts[case.operator] = operator_counts.get(case.operator, 0) + 1
         return {
-            'total': len(cases),
-            'operators': operator_counts,
-            'operator_dirs': [d.relative_to(self.bench_root).as_posix() for d in self._find_operator_dirs()]
+            "total": len(cases),
+            "operators": operator_counts,
+            "operator_dirs": [
+                d.relative_to(self.bench_root).as_posix()
+                for d in self._find_operator_dirs()
+            ],
         }
 
     # === CANN 特有方法（兼容旧接口） ===
@@ -312,6 +336,14 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
 
     # === 内部加载方法 ===
 
+    def get_hardware_excluded_cases(self, operator: str) -> List[CannCaseSpec]:
+        """Cases omitted by the latest scan, for selection-aware failure synthesis."""
+        return [
+            case
+            for case in self._hardware_excluded_cases
+            if case.operator.lower() == operator.lower()
+        ]
+
     def _load_operator_cases(self, op_dir: Path) -> List[CannCaseSpec]:
         """加载单个算子目录的用例"""
         cases_yaml = op_dir / "cases.yaml"
@@ -325,72 +357,95 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
 
         return self._load_yaml(cases_yaml, rel_path, op_dir)
 
-    def _load_yaml(self, yaml_path: Path, rel_path: str, op_dir: Path = None) -> List[CannCaseSpec]:
+    def _load_yaml(
+        self, yaml_path: Path, rel_path: str, op_dir: Path = None
+    ) -> List[CannCaseSpec]:
         """解析 YAML 文件"""
-        with open(yaml_path, 'r', encoding='utf-8') as f:
+        with open(yaml_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        if not data or 'cases' not in data:
+        if not data or "cases" not in data:
             return []
 
         op_dir_name = op_dir.name if op_dir else ""
 
         cases = []
-        for raw in data['cases']:
+        for raw in data["cases"]:
             warnings = self._validate_case(raw, str(yaml_path))
             for warning in warnings:
                 print(f"[WARN] {warning}")
             case = self._parse_case(raw, rel_path, str(yaml_path), op_dir_name)
             if case:
                 cases.append(case)
-        return cases
+        from ..utils.case_eligibility import filter_cases_for_hardware
+
+        eligible = filter_cases_for_hardware(cases, self.target_hardware)
+        eligible_ids = {id(case) for case in eligible}
+        self._hardware_excluded_cases.extend(
+            case for case in cases if id(case) not in eligible_ids
+        )
+        return eligible
 
     def _validate_case(self, raw: Dict, yaml_path: str) -> List[str]:
         """校验 YAML 格式"""
         warnings = []
 
-        case_id = raw.get('case_id')
+        case_id = raw.get("case_id")
         if case_id is None:
             warnings.append(f"{yaml_path}: missing 'case_id'")
         elif not isinstance(case_id, int):
-            warnings.append(f"{yaml_path}: case_id should be int, got {type(case_id).__name__}")
+            warnings.append(
+                f"{yaml_path}: case_id should be int, got {type(case_id).__name__}"
+            )
 
-        input_shapes = raw.get('input_shape', [])
+        input_shapes = raw.get("input_shape", [])
         if not isinstance(input_shapes, list) or not input_shapes:
             warnings.append(f"{yaml_path}: 'input_shape' must be non-empty list")
         elif isinstance(input_shapes[0], int):
-            warnings.append(f"{yaml_path}: input_shape is not nested list [[...]], auto-fixing")
+            warnings.append(
+                f"{yaml_path}: input_shape is not nested list [[...]], auto-fixing"
+            )
         elif not all(isinstance(s, list) or s is None for s in input_shapes):
-            warnings.append(f"{yaml_path}: input_shape elements should all be lists or None")
+            warnings.append(
+                f"{yaml_path}: input_shape elements should all be lists or None"
+            )
 
-        dtypes = raw.get('dtype', [])
+        dtypes = raw.get("dtype", [])
         if isinstance(dtypes, str):
             dtypes = [dtypes]
         if input_shapes and isinstance(input_shapes[0], list):
             if len(dtypes) == 1:
                 pass
             elif len(dtypes) != len(input_shapes):
-                warnings.append(f"{yaml_path}: dtype len={len(dtypes)} != input_shape len={len(input_shapes)}")
+                warnings.append(
+                    f"{yaml_path}: dtype len={len(dtypes)} != input_shape len={len(input_shapes)}"
+                )
 
         return warnings
 
-    def _parse_case(self, raw: Dict, rel_path: str, yaml_path: str, op_dir_name: str = "") -> CannCaseSpec:
+    def _parse_case(
+        self, raw: Dict, rel_path: str, yaml_path: str, op_dir_name: str = ""
+    ) -> CannCaseSpec:
         """解析单个用例
 
         baseline 性能数据从 BaselineStore（集中式 metadata/<hardware>.json）查询；
         cases.yaml / cases.csv 不再内嵌 baseline_perf_us / t_hw_us。
         """
-        input_shapes = raw.get('input_shape', [])
-        if isinstance(input_shapes, list) and input_shapes and not isinstance(input_shapes[0], list):
+        input_shapes = raw.get("input_shape", [])
+        if (
+            isinstance(input_shapes, list)
+            and input_shapes
+            and not isinstance(input_shapes[0], list)
+        ):
             input_shapes = [input_shapes]
 
-        dtypes = raw.get('dtype', [])
+        dtypes = raw.get("dtype", [])
         if isinstance(dtypes, str):
             dtypes = [dtypes]
         if len(dtypes) == 1 and len(input_shapes) > 1:
             dtypes = dtypes * len(input_shapes)
 
-        case_id_int = raw.get('case_id', 0)
+        case_id_int = raw.get("case_id", 0)
         display_path = op_dir_name if op_dir_name and rel_path == "." else rel_path
         case_id_str = f"{display_path}_{case_id_int}"
 
@@ -402,7 +457,9 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
             # metadata/ 的父目录就是评测集根目录（如 tasks/）
             baseline_root = self._baseline_store._baseline_dir.parent
             try:
-                baseline_rel_path = self.bench_root.relative_to(baseline_root).as_posix()
+                baseline_rel_path = self.bench_root.relative_to(
+                    baseline_root
+                ).as_posix()
             except ValueError:
                 baseline_rel_path = op_dir_name
 
@@ -413,21 +470,27 @@ class CannCaseLoader(OperatorDirMixin, CaseLoader):
         return CannCaseSpec(
             case_id=case_id_str,
             rel_path=rel_path,
-            operator=raw.get('operator', ''),
+            operator=raw.get("operator", ""),
             case_num=case_id_int,
             input_shapes=input_shapes,
             dtypes=dtypes,
-            attrs=raw.get('attrs', {}) or {},
-            value_ranges=raw.get('value_range', []) or [],
-            note=raw.get('note', '') or '',
+            attrs=raw.get("attrs", {}) or {},
+            value_ranges=raw.get("value_range", []) or [],
+            note=raw.get("note", "") or "",
             yaml_path=yaml_path,
             baseline_perf_us=baseline_perf_us,
             t_hw_us=t_hw_us,
-            metadata={'op_dir_name': op_dir_name},
+            metadata={
+                "op_dir_name": op_dir_name,
+                "baseline_source": self._baseline_store.get_sources(
+                    baseline_rel_path, case_id_int
+                ),
+            },
         )
 
 
 # === Golden 加载器 ===
+
 
 class GoldenLoader(GoldenLoaderBase):
     """Golden函数动态导入器（cann-bench 评测体系）
@@ -468,10 +531,13 @@ class GoldenLoader(GoldenLoaderBase):
             func_name = self._get_operator_name(rel_path).lower()
             if not hasattr(module, func_name):
                 raise AttributeError(
-                    f"模块 tasks.{rel_path.replace('/', '.')} 中找不到函数: {func_name}")
+                    f"模块 tasks.{rel_path.replace('/', '.')} 中找不到函数: {func_name}"
+                )
         return getattr(module, func_name)
 
-    def get_mc2_distributed_golden(self, rel_path: str, required: bool = False) -> Optional[Callable]:
+    def get_mc2_distributed_golden(
+        self, rel_path: str, required: bool = False
+    ) -> Optional[Callable]:
         """获取 MC2 多卡分布式 golden 钩子（golden.py 中的 mc2_distributed_golden）。
 
         MC2 类算子的 golden 逻辑依赖多 rank HCCL 通信，无法走单进程 golden 路径，
@@ -489,10 +555,13 @@ class GoldenLoader(GoldenLoaderBase):
         if hook is None and required:
             raise AttributeError(
                 f"模块 tasks.{rel_path.replace('/', '.')} 中找不到分布式 golden 钩子: "
-                f"mc2_distributed_golden")
+                f"mc2_distributed_golden"
+            )
         return hook
 
-    def get_oracle_function(self, rel_path: str, required: bool = False) -> Optional[Callable]:
+    def get_oracle_function(
+        self, rel_path: str, required: bool = False
+    ) -> Optional[Callable]:
         """获取可选的 oracle 钩子(dtype-agnostic 的 fp64 真值实现)。
 
         golden.py 可提供一个名为 ``<golden_func_name>_oracle`` 的顶层函数,签名与 golden 一致,
@@ -510,10 +579,13 @@ class GoldenLoader(GoldenLoaderBase):
         if hook is None and required:
             raise AttributeError(
                 f"模块 tasks.{rel_path.replace('/', '.')} 中找不到 oracle 钩子: "
-                f"{func_name}_oracle")
+                f"{func_name}_oracle"
+            )
         return hook
 
-    def get_bench_function(self, rel_path: str, required: bool = False) -> Optional[Callable]:
+    def get_bench_function(
+        self, rel_path: str, required: bool = False
+    ) -> Optional[Callable]:
         """获取可选的 bench 钩子(同精度参考实现,即 checker 的 b)。
 
         golden.py 可提供一个名为 ``<golden_func_name>_bench`` 的顶层函数,签名与 golden 一致。
@@ -533,7 +605,8 @@ class GoldenLoader(GoldenLoaderBase):
         if hook is None and required:
             raise AttributeError(
                 f"模块 tasks.{rel_path.replace('/', '.')} 中找不到 bench 钩子: "
-                f"{func_name}_bench")
+                f"{func_name}_bench"
+            )
         return hook
 
     def _get_operator_name(self, rel_path: str) -> str:
@@ -541,10 +614,10 @@ class GoldenLoader(GoldenLoaderBase):
         proto_path = self.bench_root / rel_path / "proto.yaml"
         if proto_path.exists():
             try:
-                with open(proto_path, 'r', encoding='utf-8') as f:
+                with open(proto_path, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
-                if data and 'operator' in data:
-                    return data['operator'].get('name', '')
+                if data and "operator" in data:
+                    return data["operator"].get("name", "")
             except Exception as e:
                 logger.warning("Failed to parse proto.yaml at %s: %s", proto_path, e)
         return Path(rel_path).name
@@ -557,11 +630,11 @@ class GoldenLoader(GoldenLoaderBase):
         proto_path = self.bench_root / rel_path / "proto.yaml"
         if proto_path.exists():
             try:
-                with open(proto_path, 'r', encoding='utf-8') as f:
+                with open(proto_path, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
-                if data and 'operator' in data:
-                    schema = data['operator'].get('schema', '')
-                    match = re.match(r'^(\w+)\s*\(', schema.strip())
+                if data and "operator" in data:
+                    schema = data["operator"].get("schema", "")
+                    match = re.match(r"^(\w+)\s*\(", schema.strip())
                     if match:
                         self._func_cache[rel_path] = match.group(1)
                         return match.group(1)
@@ -577,25 +650,25 @@ class GoldenLoader(GoldenLoaderBase):
     def get_input_function(self, rel_path: str) -> Optional[Callable]:
         """获取 get_input 函数（可选）"""
         module = self._load_module(rel_path)
-        if hasattr(module, 'get_input'):
-            return getattr(module, 'get_input')
+        if hasattr(module, "get_input"):
+            return getattr(module, "get_input")
         return None
 
     def get_output_function(self, rel_path: str) -> Optional[Callable]:
         """获取 get_output 函数（可选）"""
         module = self._load_module(rel_path)
-        if hasattr(module, 'get_output'):
-            return getattr(module, 'get_output')
+        if hasattr(module, "get_output"):
+            return getattr(module, "get_output")
         return None
 
     def get_golden_by_operator_name(self, operator: str) -> Callable:
         """按算子名称查找golden函数（遍历查找）"""
         for proto_path in self.bench_root.rglob("proto.yaml"):
             try:
-                with open(proto_path, 'r', encoding='utf-8') as f:
+                with open(proto_path, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
-                if data and 'operator' in data:
-                    op_name = data['operator'].get('name', '')
+                if data and "operator" in data:
+                    op_name = data["operator"].get("name", "")
                     if op_name.lower() == operator.lower():
                         op_dir = proto_path.parent
                         rel_path = op_dir.relative_to(self.bench_root).as_posix()

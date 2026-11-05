@@ -3,12 +3,12 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the software repository for the full text of the License.
+# See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
 """
@@ -55,11 +55,9 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from .baseline_resolver import DEFAULT_HARDWARE, PLATFORM_ALIAS, resolve_hardware
+from .baseline_resolver import DEFAULT_HARDWARE, resolve_hardware
 
 logger = logging.getLogger(__name__)
-
-_WARNED_HARDWARES: set = set()
 
 # 默认硬件的 baseline 文件名（如 "910b2.json"）
 DEFAULT_PLATFORM_FILE = f"{DEFAULT_HARDWARE}.json"
@@ -86,16 +84,20 @@ class BaselineStore:
         store_b1.load()  # 加载 metadata/910b1.json, 未覆盖的用例 fallback 到 910b2
     """
 
-    def __init__(self, bench_root: Path, project_root: Path = None,
-                 hardware: str = DEFAULT_HARDWARE):
+    def __init__(
+        self,
+        bench_root: Path,
+        project_root: Path = None,
+        hardware: str = DEFAULT_HARDWARE,
+    ):
         self.bench_root = Path(bench_root)
         self.project_root = Path(project_root) if project_root else None
         # 将硬件名称（含产品型号别名）解析为 baseline 逻辑名
         self.hardware = resolve_hardware(hardware)
-        self._original_hardware = hardware  # 保留原始输入，用于 WARNING 显示
+        self._data_hardware = self.hardware
         self._data: Dict[str, Any] = {}
         self._fallback_data: Dict[str, Any] = {}  # 默认平台 fallback
-        self._baseline_dir: Optional[Path] = None   # 找到的 metadata/ 目录路径
+        self._baseline_dir: Optional[Path] = None  # 找到的 metadata/ 目录路径
         self._loaded = False
 
     def _find_metadata_dir(self) -> Optional[Path]:
@@ -135,8 +137,9 @@ class BaselineStore:
         """
         metadata_dir = self._find_metadata_dir()
         if metadata_dir is None:
-            logger.debug("BaselineStore: no metadata/ dir found from %s upward",
-                         self.bench_root)
+            logger.debug(
+                "BaselineStore: no metadata/ dir found from %s upward", self.bench_root
+            )
             self._loaded = True
             return
 
@@ -150,13 +153,16 @@ class BaselineStore:
             manifest = self._load_json(manifest_path)
             if manifest.get("metadata_fallback_policy") == "same_platform_only":
                 platform_file = metadata_dir / f"{self.hardware}.json"
-                self._data = self._load_json(platform_file) if platform_file.is_file() else {}
+                self._data = (
+                    self._load_json(platform_file) if platform_file.is_file() else {}
+                )
                 self._fallback_data = {}
                 if not self._data:
                     logger.warning(
                         "BaselineStore: suite=%r has no published metadata for %r; "
                         "cross-platform fallback is disabled.",
-                        manifest.get("suite"), self.hardware,
+                        manifest.get("suite"),
+                        self.hardware,
                     )
                 self._loaded = True
                 return
@@ -165,40 +171,29 @@ class BaselineStore:
         platform_file = metadata_dir / f"{self.hardware}.json"
         if platform_file.is_file():
             self._data = self._load_json(platform_file)
-            logger.debug("BaselineStore loaded %s (%d top-level keys)",
-                         platform_file, len(self._data))
-        else:
-            # 目标平台文件不存在 → 需 fallback，打印 WARNING
-            if self.hardware != DEFAULT_HARDWARE:
-                # 显示原始硬件名（如 Ascend910_9362）和解析后的逻辑名（如 910b2）
-                hw_display = self._original_hardware
-                if self._original_hardware != self.hardware:
-                    hw_display = f"{self._original_hardware} → {self.hardware}"
-                logger.warning(
-                    "BaselineStore: hardware=%r 的平台文件不存在 (%s)，"
-                    "将 fallback 到默认平台 %r 的数据 (%s)。"
-                    "如需支持此平台，请在 metadata/ 下创建 %s。",
-                    hw_display, platform_file,
-                    DEFAULT_HARDWARE, metadata_dir / DEFAULT_PLATFORM_FILE,
-                    f"{self.hardware}.json",
-                )
-            else:
-                logger.warning(
-                    "BaselineStore: 默认平台 %r 的文件不存在 (%s)，"
-                    "baseline 数据将为空。",
-                    DEFAULT_HARDWARE, platform_file,
-                )
+            self._data_hardware = self.hardware
+            logger.debug(
+                "BaselineStore loaded %s (%d top-level keys)",
+                platform_file,
+                len(self._data),
+            )
+        elif self.hardware == DEFAULT_HARDWARE:
+            logger.warning(
+                "BaselineStore: 默认平台 %r 的文件不存在 (%s)，baseline 数据将为空。",
+                DEFAULT_HARDWARE,
+                platform_file,
+            )
 
         # 非默认平台时，加载默认平台作为 fallback
         if self.hardware != DEFAULT_HARDWARE:
             default_file = metadata_dir / DEFAULT_PLATFORM_FILE
             if default_file.is_file():
                 self._fallback_data = self._load_json(default_file)
-                logger.debug("BaselineStore loaded fallback %s",
-                             default_file)
+                logger.debug("BaselineStore loaded fallback %s", default_file)
             # 如果目标平台文件也不存在，fallback 数据作为主数据
             if not self._data and self._fallback_data:
                 self._data = self._fallback_data
+                self._data_hardware = DEFAULT_HARDWARE
                 self._fallback_data = {}
 
         # 默认平台文件缺失时，目标平台也没有 → 数据为空
@@ -207,6 +202,7 @@ class BaselineStore:
             default_file = metadata_dir / DEFAULT_PLATFORM_FILE
             if default_file.is_file():
                 self._data = self._load_json(default_file)
+                self._data_hardware = DEFAULT_HARDWARE
 
         self._loaded = True
 
@@ -219,8 +215,9 @@ class BaselineStore:
             logger.warning("BaselineStore: failed to load %s: %s", path, e)
             return {}
 
-    def _resolve_entry(self, rel_path: str, case_id: int,
-                       data: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
+    def _resolve_entry(
+        self, rel_path: str, case_id: int, data: Dict[str, Any] = None
+    ) -> Optional[Dict[str, Any]]:
         """Resolve the JSON entry for a given (rel_path, case_id) from specified data.
 
         Path resolution:
@@ -262,8 +259,7 @@ class BaselineStore:
             return float(v)
         return 0.0
 
-    def get_perf(self, rel_path: str, case_id: int,
-                 hardware: str = None) -> float:
+    def get_perf(self, rel_path: str, case_id: int, hardware: str = None) -> float:
         """Get baseline_perf_us for a specific case.
 
         查找顺序：目标平台文件 → 默认平台 fallback → 0.0
@@ -276,34 +272,11 @@ class BaselineStore:
         Returns:
             float: baseline_perf_us, 0.0 if not found
         """
-        hw = hardware or self.hardware
+        return self._get_value_and_source(
+            rel_path, case_id, "baseline_perf_us", hardware
+        )[0]
 
-        # 1. 查目标平台数据
-        entry = self._resolve_entry(rel_path, case_id, self._data)
-        if entry is not None and "baseline_perf_us" in entry:
-            val = self._resolve_perf_value(entry["baseline_perf_us"], hw)
-            if val > 0:
-                return val
-
-        # 2. fallback 到默认平台数据（非默认平台时）
-        if self._fallback_data:
-            entry = self._resolve_entry(rel_path, case_id, self._fallback_data)
-            if entry is not None and "baseline_perf_us" in entry:
-                # fallback 时打印 WARNING（每个 hardware 只 warn 一次）
-                if hw != DEFAULT_HARDWARE and hw not in _WARNED_HARDWARES:
-                    _WARNED_HARDWARES.add(hw)
-                    logger.warning(
-                        "BaselineStore: hardware=%r 无 baseline 数据，"
-                        "case %s/%d 使用默认平台 %r 的 baseline_perf_us=%r 作为 fallback。",
-                        hw, rel_path, case_id, DEFAULT_HARDWARE,
-                        self._resolve_perf_value(entry["baseline_perf_us"], DEFAULT_HARDWARE),
-                    )
-                return self._resolve_perf_value(entry["baseline_perf_us"], DEFAULT_HARDWARE)
-
-        return 0.0
-
-    def get_t_hw(self, rel_path: str, case_id: int,
-                 hardware: str = None) -> float:
+    def get_t_hw(self, rel_path: str, case_id: int, hardware: str = None) -> float:
         """Get t_hw_us for a specific case.
 
         查找顺序同 get_perf。
@@ -316,34 +289,51 @@ class BaselineStore:
         Returns:
             float: t_hw_us, 0.0 if not found
         """
+        return self._get_value_and_source(rel_path, case_id, "t_hw_us", hardware)[0]
+
+    def get_sources(
+        self, rel_path: str, case_id: int, hardware: str = None
+    ) -> Dict[str, Any]:
+        """Return per-field origins without changing legacy value/fallback selection.
+
+        A metadata origin identifies a file/platform, not proof of measurement.
+        Measurement declarations remain in that file's provenance metadata.
+        """
+        sources = {}
+        for field in ("baseline_perf_us", "t_hw_us"):
+            _, source = self._get_value_and_source(rel_path, case_id, field, hardware)
+            if source:
+                sources[field] = source
+        return sources
+
+    def _get_value_and_source(self, rel_path, case_id, field, hardware):
         hw = hardware or self.hardware
+        for data, file_hardware, lookup_hardware, is_fallback in (
+            (self._data, self._data_hardware, hw, False),
+            (self._fallback_data, DEFAULT_HARDWARE, DEFAULT_HARDWARE, True),
+        ):
+            entry = self._resolve_entry(rel_path, case_id, data)
+            if entry is None or field not in entry:
+                continue
+            raw = entry[field]
+            value = self._resolve_perf_value(raw, lookup_hardware)
+            # Preserve the existing fallback semantics, including zero/missing.
+            if not value > 0 and not is_fallback:
+                continue
+            if not value > 0:
+                return value, {}
+            source_hardware = (
+                lookup_hardware if isinstance(raw, dict) else file_hardware
+            )
+            return value, {
+                "requested_hardware": hw,
+                "source_hardware": source_hardware,
+                "fallback_used": source_hardware != hw,
+                "source": f"metadata/{file_hardware}.json",
+            }
+        return 0.0, {}
 
-        # 1. 查目标平台数据
-        entry = self._resolve_entry(rel_path, case_id, self._data)
-        if entry is not None and "t_hw_us" in entry:
-            val = self._resolve_perf_value(entry["t_hw_us"], hw)
-            if val > 0:
-                return val
-
-        # 2. fallback 到默认平台数据
-        if self._fallback_data:
-            entry = self._resolve_entry(rel_path, case_id, self._fallback_data)
-            if entry is not None and "t_hw_us" in entry:
-                # fallback 时打印 WARNING（每个 hardware 只 warn 一次）
-                if hw != DEFAULT_HARDWARE and hw not in _WARNED_HARDWARES:
-                    _WARNED_HARDWARES.add(hw)
-                    logger.warning(
-                        "BaselineStore: hardware=%r 无 t_hw 数据，"
-                        "case %s/%d 使用默认平台 %r 的 t_hw_us=%r 作为 fallback。",
-                        hw, rel_path, case_id, DEFAULT_HARDWARE,
-                        self._resolve_perf_value(entry["t_hw_us"], DEFAULT_HARDWARE),
-                    )
-                return self._resolve_perf_value(entry["t_hw_us"], DEFAULT_HARDWARE)
-
-        return 0.0
-
-    def has_baseline(self, rel_path: str, case_id: int,
-                     hardware: str = None) -> bool:
+    def has_baseline(self, rel_path: str, case_id: int, hardware: str = None) -> bool:
         """Check whether baseline exists for the given case+hardware.
 
         Args:
@@ -372,7 +362,9 @@ class BaselineStore:
                 bp = entry.get("baseline_perf_us")
                 if bp is not None:
                     if isinstance(bp, dict):
-                        return DEFAULT_HARDWARE in bp and bp[DEFAULT_HARDWARE] is not None
+                        return (
+                            DEFAULT_HARDWARE in bp and bp[DEFAULT_HARDWARE] is not None
+                        )
                     return True
 
         return False

@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 import argparse
 import json
 import os
@@ -7,13 +17,15 @@ import auto_pipeline.cli as cli
 
 
 def _parse_run_args(*extra: str):
-    return cli.create_run_parser().parse_args([
-        "--config",
-        "config.yaml",
-        "--workspace",
-        "workspace",
-        *extra,
-    ])
+    return cli.create_run_parser().parse_args(
+        [
+            "--config",
+            "config.yaml",
+            "--workspace",
+            "workspace",
+            *extra,
+        ]
+    )
 
 
 def test_run_parser_defaults_to_background_mode():
@@ -53,7 +65,10 @@ def test_main_run_defaults_to_background(monkeypatch):
     monkeypatch.setattr(cli, "_start_background", fake_start_background)
     monkeypatch.setattr(cli, "run_from_config", fail_run_from_config)
 
-    assert cli._main_run(args, ["--config", "config.yaml", "--workspace", "workspace"]) == 0
+    assert (
+        cli._main_run(args, ["--config", "config.yaml", "--workspace", "workspace"])
+        == 0
+    )
     assert calls["run_args"] is args
     assert calls["run_id"] == "run-1"
 
@@ -74,10 +89,21 @@ def test_main_run_foreground_executes_pipeline(monkeypatch):
     monkeypatch.setattr(cli, "_start_background", fail_start_background)
     monkeypatch.setattr(cli, "run_from_config", fake_run_from_config)
 
-    assert cli._main_run(
-        args,
-        ["--config", "config.yaml", "--workspace", "workspace", "--foreground", "--output", "out"],
-    ) == 17
+    assert (
+        cli._main_run(
+            args,
+            [
+                "--config",
+                "config.yaml",
+                "--workspace",
+                "workspace",
+                "--foreground",
+                "--output",
+                "out",
+            ],
+        )
+        == 17
+    )
     assert calls["config_path"] == Path("config.yaml")
     assert calls["runtime"]["run_id"] == "run-1"
     assert calls["runtime"]["output"] == "out"
@@ -122,7 +148,9 @@ def test_watch_monitor_stops_when_auto_started_run_is_terminal(monkeypatch, caps
 
 
 def test_start_background_opens_monitor_by_default(monkeypatch, tmp_path):
-    args = _parse_run_args("--output", str(tmp_path / "out"), "--monitor-interval", "0.25")
+    args = _parse_run_args(
+        "--output", str(tmp_path / "out"), "--monitor-interval", "0.25"
+    )
     calls = {}
 
     class FakeProcess:
@@ -141,14 +169,23 @@ def test_start_background_opens_monitor_by_default(monkeypatch, tmp_path):
         return 0
 
     monkeypatch.setattr(cli.subprocess, "Popen", fake_popen)
-    monkeypatch.setattr(cli.os, "getpgid", lambda pid: 12345)
+    monkeypatch.setattr(cli.os, "getpgid", lambda pid: 12345, raising=False)
     monkeypatch.setattr(cli.pipeline_state, "run_dir", lambda run_id: tmp_path / run_id)
-    monkeypatch.setattr(cli.pipeline_state, "upsert_run", lambda run_id, payload: calls.setdefault("run_payload", payload))
+    monkeypatch.setattr(
+        cli.pipeline_state,
+        "upsert_run",
+        lambda run_id, payload: calls.setdefault("run_payload", payload),
+    )
     monkeypatch.setattr(cli, "_watch_run", fake_watch)
 
     assert cli._start_background(args, run_id="run-1") == 0
 
-    assert calls["command"][:4] == [cli.sys.executable, "-m", "auto_pipeline.cli", "run"]
+    assert calls["command"][:4] == [
+        cli.sys.executable,
+        "-m",
+        "auto_pipeline.cli",
+        "run",
+    ]
     assert "--foreground" in calls["command"]
     assert calls["selector"].run_id == "run-1"
     assert calls["interval"] == 0.25
@@ -164,11 +201,23 @@ def test_start_background_can_skip_auto_monitor(monkeypatch, tmp_path, capsys):
     class FakeProcess:
         pid = 12345
 
-    monkeypatch.setattr(cli.subprocess, "Popen", lambda command, **kwargs: FakeProcess())
-    monkeypatch.setattr(cli.os, "getpgid", lambda pid: 12345)
+    monkeypatch.setattr(
+        cli.subprocess, "Popen", lambda command, **kwargs: FakeProcess()
+    )
+    monkeypatch.setattr(cli.os, "getpgid", lambda pid: 12345, raising=False)
     monkeypatch.setattr(cli.pipeline_state, "run_dir", lambda run_id: tmp_path / run_id)
-    monkeypatch.setattr(cli.pipeline_state, "upsert_run", lambda run_id, payload: calls.setdefault("run_payload", payload))
-    monkeypatch.setattr(cli, "_watch_run", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("monitor disabled")))
+    monkeypatch.setattr(
+        cli.pipeline_state,
+        "upsert_run",
+        lambda run_id, payload: calls.setdefault("run_payload", payload),
+    )
+    monkeypatch.setattr(
+        cli,
+        "_watch_run",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("monitor disabled")
+        ),
+    )
 
     assert cli._start_background(args, run_id="run-1") == 0
     captured = capsys.readouterr()
@@ -177,8 +226,12 @@ def test_start_background_can_skip_auto_monitor(monkeypatch, tmp_path, capsys):
     assert "pid: 12345" in captured.out
 
 
-def test_main_monitor_defaults_to_watch_and_exits_after_terminal_snapshot(monkeypatch, capsys):
-    args = argparse.Namespace(run_id="run-1", output=None, latest=False, json=False, once=False, interval=0.1)
+def test_main_monitor_defaults_to_watch_and_exits_after_terminal_snapshot(
+    monkeypatch, capsys
+):
+    args = argparse.Namespace(
+        run_id="run-1", output=None, latest=False, json=False, once=False, interval=0.1
+    )
     run = {"run_id": "run-1", "status": "failed", "tasks": []}
 
     monkeypatch.setattr(cli, "_select_run", lambda _args: run)
@@ -196,7 +249,9 @@ def test_main_monitor_defaults_to_watch_and_exits_after_terminal_snapshot(monkey
 
 
 def test_main_monitor_once_renders_single_snapshot(monkeypatch, capsys):
-    args = argparse.Namespace(run_id="run-1", output=None, latest=False, json=False, once=True, interval=0.1)
+    args = argparse.Namespace(
+        run_id="run-1", output=None, latest=False, json=False, once=True, interval=0.1
+    )
     run = {"run_id": "run-1", "status": "running", "tasks": []}
 
     monkeypatch.setattr(cli, "_select_run", lambda _args: run)
@@ -280,7 +335,9 @@ def test_task_total_elapsed_ignores_pending_wait_time():
     }
 
     assert (
-        cli._format_task_total_elapsed(task, now=cli._parse_utc_timestamp("2026-06-08T00:05:43Z"))
+        cli._format_task_total_elapsed(
+            task, now=cli._parse_utc_timestamp("2026-06-08T00:05:43Z")
+        )
         == "00:00:00"
     )
 
@@ -346,7 +403,10 @@ def test_format_display_timestamp_uses_local_timezone(monkeypatch):
     if hasattr(cli.time, "tzset"):
         cli.time.tzset()
     try:
-        assert cli._format_display_timestamp("2026-06-07T18:44:28Z") == "2026-06-08 02:44:28"
+        assert (
+            cli._format_display_timestamp("2026-06-07T18:44:28Z")
+            == "2026-06-08 02:44:28"
+        )
     finally:
         if old_tz is None:
             monkeypatch.delenv("TZ", raising=False)
@@ -367,18 +427,25 @@ def _kill_args(run_id: str) -> argparse.Namespace:
     return argparse.Namespace(run_id=run_id, output=None, latest=False, grace_sec=0.0)
 
 
-def test_kill_keeps_terminal_run_status_when_process_already_gone(monkeypatch, tmp_path):
+def test_kill_keeps_terminal_run_status_when_process_already_gone(
+    monkeypatch, tmp_path
+):
     """进程已退出（sent only not-found）时 kill 不能把 success 改写成 killed。"""
     monkeypatch.setattr(cli.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
-    monkeypatch.setattr(cli.pipeline_state, "_pid_identity_status", lambda _pid, _start: "not-found")
+    monkeypatch.setattr(
+        cli.pipeline_state, "_pid_identity_status", lambda _pid, _start: "not-found"
+    )
     monkeypatch.setattr(cli.pipeline_state, "_env_snapshots", lambda _matchers: {})
-    path = _seed_registered_run(tmp_path, {
-        "run_id": "finished-run",
-        "status": "success",
-        "pid": 999999,
-        "pgid": 999999,
-        "pid_start_time": 12345,
-    })
+    path = _seed_registered_run(
+        tmp_path,
+        {
+            "run_id": "finished-run",
+            "status": "success",
+            "pid": 999999,
+            "pgid": 999999,
+            "pid_start_time": 12345,
+        },
+    )
 
     assert cli._main_kill(_kill_args("finished-run")) == 0
 
@@ -389,11 +456,14 @@ def test_refused_kill_does_not_mark_run_as_killed(monkeypatch, tmp_path):
     """kill_run 拒绝执行（pid 身份不明 → ok=False）时 registry 状态不得被改写。"""
     monkeypatch.setattr(cli.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
     monkeypatch.setattr(cli.pipeline_state, "_env_snapshots", lambda _matchers: {})
-    path = _seed_registered_run(tmp_path, {
-        "run_id": "unsafe-run",
-        "status": "success",
-        "pid": 999998,
-    })
+    path = _seed_registered_run(
+        tmp_path,
+        {
+            "run_id": "unsafe-run",
+            "status": "success",
+            "pid": 999998,
+        },
+    )
 
     assert cli._main_kill(_kill_args("unsafe-run")) == 1
 

@@ -42,7 +42,7 @@ def _make_submission(root: Path, build_sh: str) -> Path:
     for op in ("good_op", "bad_op"):
         (sub / "csrc" / "ops" / op / "op_kernel").mkdir(parents=True)
         (sub / "csrc" / "ops" / op / "op_kernel" / f"{op}.cpp").write_text("// x\n")
-    (sub / "build.sh").write_text(build_sh)
+    (sub / "build.sh").write_text(build_sh, encoding="utf-8", newline="\n")
     return sub
 
 
@@ -59,7 +59,10 @@ def test_compile_failure_zeros_all_ops_without_touching_source(tmp_path):
     # 2) 本次提交的所有算子都被标记为编译失败（→ 全部计 0 分）
     assert set(pkg.compile_errors.keys()) == {"good_op", "bad_op"}
     # 能定位到的 bad_op 带具体错误片段；good_op 带整体日志摘要
-    assert "bad_op" in pkg.compile_errors["bad_op"] or "error" in pkg.compile_errors["bad_op"].lower()
+    assert (
+        "bad_op" in pkg.compile_errors["bad_op"]
+        or "error" in pkg.compile_errors["bad_op"].lower()
+    )
 
     # 3) 关键：用户源码零改动，且不产生 _quarantine 目录（不隔离/不挪源码）
     assert (sub / "csrc" / "ops" / "good_op" / "op_kernel" / "good_op.cpp").is_file()
@@ -142,6 +145,7 @@ class _FakeOp:
 
 class _FakeMatcher:
     """snake 名 -> _FakeOp 的反查表替身（None 表示未注册）。"""
+
     def __init__(self, mapping):
         self.mapping = mapping
 
@@ -155,6 +159,7 @@ class _FakeMatcher:
 def _pkg(compile_errors):
     class _P:
         pass
+
     p = _P()
     p.compile_errors = compile_errors
     p.build_failed = True
@@ -163,12 +168,15 @@ def _pkg(compile_errors):
 
 def _synth():
     from kernel_eval.eval.failure_synthesizer import FailureSynthesizer
+
     # 提交级/编译失败合成不依赖 case_loader（_synthesize_failure 对异常兜底为空用例集）。
     return FailureSynthesizer(case_loader=None)
 
 
 def test_synth_all_maps_every_registered_op():
-    m = _FakeMatcher({"exp": _FakeOp("Exp", "level1/exp"), "foo": _FakeOp("Foo", "level1/foo")})
+    m = _FakeMatcher(
+        {"exp": _FakeOp("Exp", "level1/exp"), "foo": _FakeOp("Foo", "level1/foo")}
+    )
     res = _synth().synthesize_all_compile_failures(m, _pkg({"exp": "e1", "foo": "e2"}))
     assert sorted(r.operator for r in res) == ["Exp", "Foo"]
     assert all(r.compilation_error for r in res)
@@ -177,13 +185,16 @@ def test_synth_all_maps_every_registered_op():
 def test_synth_all_respects_operator_filter():
     m = _FakeMatcher({"exp": _FakeOp("Exp"), "foo": _FakeOp("Foo")})
     res = _synth().synthesize_all_compile_failures(
-        m, _pkg({"exp": "e1", "foo": "e2"}), operator_filter=["Exp"])
+        m, _pkg({"exp": "e1", "foo": "e2"}), operator_filter=["Exp"]
+    )
     assert [r.operator for r in res] == ["Exp"]
 
 
 def test_synth_all_build_sentinel_falls_back_to_submission_level():
     m = _FakeMatcher({})  # 没有任何算子能反查到 spec
-    res = _synth().synthesize_all_compile_failures(m, _pkg({"<build>": "boom cmake error"}))
+    res = _synth().synthesize_all_compile_failures(
+        m, _pkg({"<build>": "boom cmake error"})
+    )
     assert len(res) == 1 and res[0].operator == "<submission>"
     assert "boom cmake error" in (res[0].compilation_error or "")
 
@@ -221,7 +232,8 @@ def test_synth_all_filtered_out_does_not_trigger_submission_fallback():
     """算子能映射但被 operator_filter 过滤掉时，不应虚报提交级失败（潜在 bug 回归）。"""
     m = _FakeMatcher({"foo": _FakeOp("Foo")})
     res = _synth().synthesize_all_compile_failures(
-        m, _pkg({"foo": "e"}), operator_filter=["Exp"])
+        m, _pkg({"foo": "e"}), operator_filter=["Exp"]
+    )
     assert res == []
 
 
@@ -234,6 +246,7 @@ def test_synth_all_mixed_mapped_and_unregistered():
 
 def _fake_report(failed_cases, compile_errors):
     """构造最小 report 替身，仅含 _compute_exit_code 关心的字段。"""
+
     class _Op:
         def __init__(self, ce):
             self.compilation_error = ce
@@ -248,17 +261,20 @@ def _fake_report(failed_cases, compile_errors):
 
 def test_exit_code_zero_when_all_pass():
     from kernel_eval.cli import _compute_exit_code
+
     assert _compute_exit_code(_fake_report(0, [None, None])) == 0
 
 
 def test_exit_code_nonzero_on_genuine_failures():
     from kernel_eval.cli import _compute_exit_code
+
     assert _compute_exit_code(_fake_report(5, [None])) == 5
 
 
 def test_exit_code_nonzero_on_compile_failure():
     """编译失败（compilation_error 非空）即使 failed_cases==0 也必须退出非零。"""
     from kernel_eval.cli import _compute_exit_code
+
     # 1 个算子编译失败、无真实失败用例 → 退出码 1（而非 0）
     assert _compute_exit_code(_fake_report(0, ["compile failed: ..."])) == 1
     # 多算子编译失败累加
@@ -267,6 +283,7 @@ def test_exit_code_nonzero_on_compile_failure():
 
 def test_exit_code_capped_at_255():
     from kernel_eval.cli import _compute_exit_code
+
     assert _compute_exit_code(_fake_report(1000, ["e"])) == 255
 
 
@@ -276,7 +293,9 @@ def test_submission_level_compile_failure_is_visible():
 
     # 提交级合成不依赖 case_loader（不按算子展开用例），传 None 即可。
     synth = FailureSynthesizer(case_loader=None)
-    res = synth.synthesize_submission_compile_failure("[<build>] build.sh 编译失败：CMake Error")
+    res = synth.synthesize_submission_compile_failure(
+        "[<build>] build.sh 编译失败：CMake Error"
+    )
 
     # 报告可见：非空、计为失败、0 分、带编译错误诊断
     assert res.total_cases == 1

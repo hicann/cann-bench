@@ -1,0 +1,112 @@
+operator:
+  name: QuantReduceScatter
+  category: FusedComposite
+  difficulty: L4
+  platform: Ascend 950DT (A5)
+  formula: D_s = float32(x_s) * repeat(scales_s,128); Z = SUM_s D_s; Y_r = cast(Z.reshape(-1,H)[r*T/p:(r+1)*T/p])
+  description: >-
+    Ascend 950DT INT8 分组反量化与ReduceScatter通信融合。
+    hcomm_info为已初始化的专用HCCL域名称；候选host层必须以此名称创建channel context，可参考CommContextManager或实现等价初始化，
+    按2*((align32(x.nbytes)+align32(scales.nbytes))*world_size+1MiB)分配buffer，建议缓存并保活至相应设备工作完成，
+    将context及hccl_buffer_size传给生成的自定义AscendC kernel；原生低层接口仅作资源契约参考。
+    不得直接转发当前源码固定使用_default_group的高层wrapper；详见desc.md候选通信资源初始化。
+  shape_support: 'x: [BS,H] or [B,S,H]; scales: x.shape[:-1]+[H/128]; y: [BS/world_size,H] or [B*S/world_size,H]'
+  precision_thresholds:
+    float16: 0.005
+    bfloat16: 0.005
+    float32: 0.0001
+  attrs:
+  - name: mc2_distributed
+    type: bool
+    description: Use the distributed MC2 runner.
+    required: false
+    default: true
+  - name: mc2_accuracy_mode
+    type: str
+    description: Compare candidate and NPU cascade against CPU FP32.
+    required: false
+    default: three_way
+  - name: mc2_compare_dtype
+    type: str
+    description: FP32 small-value comparison parameters.
+    required: false
+    default: float32
+  - name: mc2_isolated_candidate_group
+    type: bool
+    description: Candidate uses an exclusive group; native channel context must be created from its hcomm_info, not the default group.
+    required: false
+    default: true
+  - name: world_size
+    type: int
+    description: Number of ranks; supports 2, 4, or 8.
+    required: false
+    default: 2
+  - name: out_dtype
+    type: str
+    description: 'Output dtype: float16, bfloat16, or float32.'
+    required: false
+    default: float16
+  - name: x_dtype
+    type: str
+    description: This interface uses INT8 communication input.
+    required: false
+    default: int8
+  - name: scales_dtype
+    type: str
+    description: This interface uses FP32 scale values.
+    required: false
+    default: float32
+  - name: group_size
+    type: int
+    description: Number of contiguous channels per scale, fixed at 128.
+    required: false
+    default: 128
+  - name: reduce_op
+    type: str
+    description: Reduction type, fixed at sum.
+    required: false
+    default: sum
+  - name: seed
+    type: int
+    description: Rank-distinct deterministic input seed.
+    required: false
+    default: 1
+  - name: platform
+    type: str
+    description: This suite is Ascend 950DT only.
+    required: false
+    default: Ascend 950DT (A5)
+  - name: supported_devices
+    type: list
+    description: Eligible Ascend device families.
+    required: false
+    default:
+    - 950dt
+  - name: source
+    type: str
+    description: Operator specification used to design the case.
+    required: true
+  inputs:
+  - name: x
+    description: 当前 rank 的 INT8 通信输入。
+    dtype:
+    - int8
+    shape: '[BS,H] or [B,S,H]'
+    required: true
+  - name: scales
+    description: 每 token、每128通道的FP32反量化系数。
+    dtype:
+    - float32
+    shape: '[BS,H/128] or [B,S,H/128]'
+    required: true
+  outputs:
+  - name: y
+    description: 当前 rank 的归约二维分片。
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[BS/world_size,H] or [B*S/world_size,H]'
+    required: true
+  schema: quant_reduce_scatter(Tensor x, Tensor scales, str hcomm_info, int world_size, str out_dtype="float16")
+    -> Tensor

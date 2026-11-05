@@ -1,9 +1,27 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
+
 """Unit tests for PyPTO-Pro child profiler conditioning."""
 
 from unittest.mock import patch
+
+import pytest
+
+pytest.importorskip(
+    "torch_npu",
+    reason="PyPTO-Pro child profiler tests require the torch_npu platform dependency",
+)
 
 from kernel_eval.eval import pypto_pro_child
 
@@ -31,8 +49,11 @@ def test_preflight_stabilizes_before_candidate():
     calls = []
     conditioner = _FakeConditioner(calls)
 
-    with patch.object(pypto_pro_child.torch.npu, "synchronize",
-                      side_effect=lambda *args: calls.append("sync")):
+    with patch.object(
+        pypto_pro_child.torch.npu,
+        "synchronize",
+        side_effect=lambda *args: calls.append("sync"),
+    ):
         pypto_pro_child._run_preflight(
             lambda: calls.append("fn"), conditioner=conditioner
         )
@@ -45,8 +66,11 @@ def test_profile_steps_clear_cache_only_for_active_repeats():
     conditioner = _FakeConditioner(calls)
     profiler = _FakeProfiler(calls)
 
-    with patch.object(pypto_pro_child.torch.npu, "synchronize",
-                      side_effect=lambda *args: calls.append("sync")):
+    with patch.object(
+        pypto_pro_child.torch.npu,
+        "synchronize",
+        side_effect=lambda *args: calls.append("sync"),
+    ):
         exc = pypto_pro_child._run_profile_steps(
             lambda: calls.append("fn"),
             profiler,
@@ -57,11 +81,24 @@ def test_profile_steps_clear_cache_only_for_active_repeats():
 
     assert exc is None
     assert calls == [
-        "fn", "sync", "step",
-        "fn", "sync", "step",
-        "clear_cache", "fn", "sync", "step",
-        "clear_cache", "fn", "sync", "step",
-        "clear_cache", "fn", "sync", "step",
+        "fn",
+        "sync",
+        "step",
+        "fn",
+        "sync",
+        "step",
+        "clear_cache",
+        "fn",
+        "sync",
+        "step",
+        "clear_cache",
+        "fn",
+        "sync",
+        "step",
+        "clear_cache",
+        "fn",
+        "sync",
+        "step",
     ]
 
 
@@ -74,9 +111,7 @@ def test_profile_steps_advance_profiler_after_candidate_failure():
         calls.append("fn")
         raise expected
 
-    exc = pypto_pro_child._run_profile_steps(
-        fail, profiler, warmup=0, repeat=1
-    )
+    exc = pypto_pro_child._run_profile_steps(fail, profiler, warmup=0, repeat=1)
 
     assert exc is expected
     assert calls == ["fn", "step"]

@@ -3,10 +3,10 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR ANY KIND, EITHER EXPRESS OR IMPLIED,
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ import signal
 import subprocess
 from importlib import metadata
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 from .results import EvalCaseResult
 
@@ -36,6 +36,7 @@ from .results import EvalCaseResult
 # ---------------------------------------------------------------------------
 # OOM Killer 保护
 # ---------------------------------------------------------------------------
+
 
 def _signal_process_group(proc: subprocess.Popen, sig: int) -> None:
     """向由 ``start_new_session=True`` 启动的子进程组发送信号。
@@ -117,6 +118,7 @@ def detect_pypto_pro_submission() -> bool:
     """通过当前 ``cann_bench`` wheel 拥有的源码检测 PyPTO Pro。"""
     try:
         import cann_bench
+
         pkg_dir = os.path.dirname(cann_bench.__file__)
     except (ImportError, OSError, AttributeError, TypeError):
         return False
@@ -128,24 +130,25 @@ def detect_pypto_pro_submission() -> bool:
             Path(root) / name
             for root, _dirs, files in os.walk(pkg_dir)
             for name in files
-            if name.endswith('.py') and '__pycache__' not in Path(root).parts
+            if name.endswith(".py") and "__pycache__" not in Path(root).parts
         ]
 
     for source_file in source_files:
         try:
-            tree = ast.parse(source_file.read_text(encoding='utf-8'))
+            tree = ast.parse(source_file.read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, SyntaxError):
             continue
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
-                if any(alias.name == 'pypto_pro' or
-                       alias.name.startswith('pypto_pro.')
-                       for alias in node.names):
+                if any(
+                    alias.name == "pypto_pro" or alias.name.startswith("pypto_pro.")
+                    for alias in node.names
+                ):
                     return True
             elif isinstance(node, ast.ImportFrom):
-                module = node.module or ''
-                if module == 'pypto_pro' or module.startswith('pypto_pro.'):
+                module = node.module or ""
+                if module == "pypto_pro" or module.startswith("pypto_pro."):
                     return True
     return False
 
@@ -165,16 +168,22 @@ def _write_oom_score_adj(pid: int, value: int) -> bool:
         print(f"[INFO] oom_score_adj={value} 设置成功: PID={pid}", flush=True)
         return True
     except PermissionError:
-        print(f"[WARN] oom_score_adj 写入失败: {path} — 权限不足"
-              f"（需要 root 或 CAP_SYS_ADMIN，OOM 保护未生效）", flush=True)
+        print(
+            f"[WARN] oom_score_adj 写入失败: {path} — 权限不足"
+            f"（需要 root 或 CAP_SYS_ADMIN，OOM 保护未生效）",
+            flush=True,
+        )
         return False
     except FileNotFoundError:
-        print(f"[WARN] oom_score_adj 写入失败: {path} — 进程已退出"
-              f"（子进程可能瞬间崩溃）", flush=True)
+        print(
+            f"[WARN] oom_score_adj 写入失败: {path} — 进程已退出（子进程可能瞬间崩溃）",
+            flush=True,
+        )
         return False
     except OSError as e:
-        print(f"[WARN] oom_score_adj 写入失败: {path} — {e}"
-              f"（OOM 保护未生效）", flush=True)
+        print(
+            f"[WARN] oom_score_adj 写入失败: {path} — {e}（OOM 保护未生效）", flush=True
+        )
         return False
 
 
@@ -197,6 +206,7 @@ def get_available_memory_mb() -> float:
     # 回退：尝试 psutil
     try:
         import psutil
+
         return psutil.virtual_memory().available / (1024 * 1024)
     except ImportError:
         return 0.0
@@ -221,18 +231,26 @@ def _is_oom_killed(proc: subprocess.Popen, rc: int) -> bool:
 # ---------------------------------------------------------------------------
 
 _CANN_ENV_VARS = [
-    "ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME", "ASCEND_OPP_PATH",
+    "ASCEND_HOME_PATH",
+    "ASCEND_TOOLKIT_HOME",
+    "ASCEND_OPP_PATH",
     "ASCEND_CUSTOM_OPP_PATH",
-    "ASCEND_AICPU_PATH", "ASCEND_RT_VISIBLE_DEVICES",
-    "ASCEND_VISIBLE_DEVICES", "NPU_VISIBLE_DEVICES",
-    "LD_LIBRARY_PATH", "PATH", "TBE_IMPL_PATH",
-    "ASCEND_CACHE_PATH", "ASCEND_WORK_PATH",
+    "ASCEND_AICPU_PATH",
+    "ASCEND_RT_VISIBLE_DEVICES",
+    "ASCEND_VISIBLE_DEVICES",
+    "NPU_VISIBLE_DEVICES",
+    "LD_LIBRARY_PATH",
+    "PATH",
+    "TBE_IMPL_PATH",
+    "ASCEND_CACHE_PATH",
+    "ASCEND_WORK_PATH",
 ]
 
 
 # ---------------------------------------------------------------------------
 # 子进程失败结果合成
 # ---------------------------------------------------------------------------
+
 
 def _synthesize_failure_cases(
     task_cases: list,
@@ -253,17 +271,22 @@ def _synthesize_failure_cases(
     results = []
     for c in task_cases:
         case_id_str = c.get_case_id_str()
-        results.append(EvalCaseResult(
-            case_id=case_id_str,
-            rel_path=c.rel_path,
-            operator=c.operator,
-            case_num=c.case_num,
-            success=False,
-            error_msg=error_msg,
-            failure_type=failure_type,
-            baseline_perf_us=getattr(c, 'baseline_perf_us', 0.0) or 0.0,
-            t_hw_us=getattr(c, 't_hw_us', 0.0) or 0.0,
-        ))
+        results.append(
+            EvalCaseResult(
+                case_id=case_id_str,
+                rel_path=c.rel_path,
+                operator=c.operator,
+                case_num=c.case_num,
+                success=False,
+                error_msg=error_msg,
+                failure_type=failure_type,
+                baseline_perf_us=getattr(c, "baseline_perf_us", 0.0) or 0.0,
+                baseline_source=(getattr(c, "metadata", None) or {}).get(
+                    "baseline_source", {}
+                ),
+                t_hw_us=getattr(c, "t_hw_us", 0.0) or 0.0,
+            )
+        )
     return results
 
 

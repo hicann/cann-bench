@@ -1,0 +1,210 @@
+operator:
+  name: AlltoAllvQuantGroupedMatMul
+  category: FusedComposite
+  difficulty: L4
+  platform: Ascend 950DT (A5)
+  formula: y=GroupedMatMul(MXDequant(Permute(AlltoAllv(gmm_x))),MXDequant(gmm_weight)); mm_y=MXDequant(mm_x)@MXDequant(mm_weight)
+    optional
+  description: MXFP8 AlltoAllv, expert permutation and grouped matmul, with an optional shared expert.
+  shape_support: Input follows [destination,expert,token]; output follows [expert,source,token].
+  precision_thresholds:
+    float16: 0.05
+    bfloat16: 0.05
+  attrs:
+  - name: mc2_distributed
+    type: bool
+    description: mc2 distributed
+    required: false
+    default: true
+  - name: world_size
+    type: int
+    description: world size
+    required: false
+    default: 2
+  - name: e
+    type: int
+    description: e
+    required: false
+    default: 1
+  - name: trans_gmm_weight
+    type: bool
+    description: trans gmm weight
+    required: false
+    default: false
+  - name: trans_mm_weight
+    type: bool
+    description: trans mm weight
+    required: false
+    default: false
+  - name: mm_out
+    type: bool
+    description: Shared input, weight and both scales appear together.
+    required: false
+    default: false
+  - name: seed
+    type: int
+    description: seed
+    required: false
+    default: 96301
+  - name: mc2_accuracy_mode
+    type: str
+    description: mc2 accuracy mode
+    required: false
+    default: three_way
+  - name: mc2_compare_dtype
+    type: str
+    description: mc2 compare dtype
+    required: false
+    default: float32
+  - name: platform
+    type: str
+    description: platform
+    required: false
+    default: Ascend 950DT (A5)
+  - name: supported_devices
+    type: list
+    description: supported devices
+    required: false
+    default:
+    - 950dt
+  - name: source
+    type: str
+    description: Upstream API and arch35 constraints defining this contract.
+    required: true
+  - name: token_counts
+    type: list
+    description: C[source][destination][expert], with equal per-rank row totals.
+    required: true
+  - name: out_dtype
+    type: str
+    description: Both outputs use float16 or bfloat16.
+    required: false
+    default: bfloat16
+  - name: gmm_x_quant_mode
+    type: int
+    description: gmm x quant mode
+    required: false
+    default: 6
+  - name: gmm_weight_quant_mode
+    type: int
+    description: gmm weight quant mode
+    required: false
+    default: 6
+  - name: mm_x_quant_mode
+    type: int
+    description: mm x quant mode
+    required: false
+    default: 0
+  - name: mm_weight_quant_mode
+    type: int
+    description: mm weight quant mode
+    required: false
+    default: 0
+  - name: group_size
+    type: int
+    description: 'Packed MX [1,1,32]: 32 | (1<<16) | (1<<32).'
+    required: false
+    default: 4295032864
+  - name: scale_dtype
+    type: int
+    description: 293 interprets scale uint8 storage as FLOAT8_E8M0.
+    required: false
+    default: 293
+  - name: permute_out_flag
+    type: bool
+    description: Return raw FP8 tokens in expert-major order, before dequantization.
+    required: false
+    default: false
+  inputs:
+  - name: gmm_x
+    shape: '[T,H1]'
+    dtype: &id001
+    - float8_e4m3fn
+    - float8_e5m2
+    description: Sent FP8 tokens in destination-rank/expert order.
+    required: true
+  - name: gmm_weight
+    shape: '[e,K,N] or [e,N,K]'
+    dtype: *id001
+    description: Contiguous physical storage; weight transpose is an explicit attribute.
+    required: true
+  - name: send_counts
+    shape: '[p*e]'
+    dtype:
+    - int64
+    description: Host token counts in rank-major expert order.
+    required: true
+  - name: recv_counts
+    shape: '[p*e]'
+    dtype:
+    - int64
+    description: Host token counts in rank-major expert order.
+    required: true
+  - name: mm_x
+    shape: '[BS,H2]'
+    dtype: *id001
+    description: Contiguous physical storage; weight transpose is an explicit attribute.
+    required: false
+    optional: true
+  - name: mm_weight
+    shape: '[H2,N2] or [N2,H2]'
+    dtype: *id001
+    description: Contiguous physical storage; weight transpose is an explicit attribute.
+    required: false
+    optional: true
+  - name: gmm_x_scale
+    shape: '[T,ceil(H1/64),2]'
+    dtype:
+    - uint8
+    description: E8M0 exponent bytes; each code scales 32 K values.
+    required: true
+  - name: gmm_weight_scale
+    shape: '[e,ceil(K/64),N,2] or [e,N,ceil(K/64),2]'
+    dtype:
+    - uint8
+    description: E8M0 exponent bytes; each code scales 32 K values.
+    required: true
+  - name: mm_x_scale
+    shape: '[BS,ceil(H2/64),2]'
+    dtype:
+    - uint8
+    description: E8M0 exponent bytes; each code scales 32 K values.
+    required: false
+    optional: true
+  - name: mm_weight_scale
+    shape: '[ceil(H2/64),N2,2] or [N2,ceil(H2/64),2]'
+    dtype:
+    - uint8
+    description: E8M0 exponent bytes; each code scales 32 K values.
+    required: false
+    optional: true
+  outputs:
+  - name: gmm_y
+    shape: '[sum(recv_counts),N]'
+    dtype:
+    - float16
+    - bfloat16
+    description: Expert-major received-token matrix products.
+    required: true
+  - name: mm_y
+    shape: '[BS,N2]'
+    dtype:
+    - float16
+    - bfloat16
+    description: Optional shared output, same dtype as y.
+    required: false
+    optional: true
+  - name: permute_out
+    shape: '[sum(recv_counts),H1]'
+    dtype:
+    - float8_e4m3fn
+    - float8_e5m2
+    description: Optional raw FP8 tokens after expert permutation, before scaling.
+    required: false
+    optional: true
+  schema: allto_allv_quant_grouped_mat_mul(Tensor gmm_x, Tensor gmm_weight, Tensor gmm_x_scale, Tensor gmm_weight_scale,
+    str hcomm_info, int world_size, int[] send_counts, int[] recv_counts, Tensor? mm_x=None, Tensor? mm_weight=None,
+    Tensor? mm_x_scale=None, Tensor? mm_weight_scale=None, bool trans_gmm_weight=False, bool trans_mm_weight=False,
+    str out_dtype="bfloat16", int gmm_x_quant_mode=6, int gmm_weight_quant_mode=6, int mm_x_quant_mode=0, int mm_weight_quant_mode=0,
+    int group_size=4295032864, int scale_dtype=293, bool permute_out_flag=False) -> (Tensor gmm_y, Tensor? mm_y,
+    Tensor? permute_out)

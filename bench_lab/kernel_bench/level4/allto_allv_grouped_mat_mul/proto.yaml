@@ -1,0 +1,153 @@
+operator:
+  name: AlltoAllvGroupedMatMul
+  category: FusedComposite
+  difficulty: L4
+  platform: Ascend 950DT (A5)
+  formula: a = AllToAllv(gmm_x); q = Permute(a, source_major -> expert_major); gmm_y = GroupedMatMul(q, gmm_weight);
+    mm_y = mm_x @ mm_weight (optional)
+  description: 非量化 AllToAllv、专家重排与分组矩阵乘融合，可并行执行共享专家矩阵乘。
+  shape_support: 'gmm_x: [T,H1]; gmm_weight: [e,H1,N1] or [e,N1,H1]; gmm_y: [A,N1]; permute_out: [A,H1]; optional
+    mm_y: [BS,N2]'
+  precision_thresholds:
+    float16: 0.005
+    bfloat16: 0.005
+  attrs:
+  - name: mc2_distributed
+    type: bool
+    description: Use the distributed MC2 runner.
+    required: false
+    default: true
+  - name: mc2_accuracy_mode
+    type: str
+    description: Compare candidate and NPU cascade against CPU FP32.
+    required: false
+    default: three_way
+  - name: mc2_compare_dtype
+    type: str
+    description: FP32 small-value comparison parameters.
+    required: false
+    default: float32
+  - name: world_size
+    type: int
+    description: Number of ranks; the A5 suite uses two.
+    required: false
+    default: 2
+  - name: e
+    type: int
+    description: Experts per rank, from 1 to 32 with world_size*e <= 256.
+    required: false
+    default: 2
+  - name: trans_gmm_weight
+    type: bool
+    description: gmm_weight is physically [e,N1,H1] when enabled.
+    required: false
+    default: false
+  - name: trans_mm_weight
+    type: bool
+    description: mm_weight is physically [N2,H2] when enabled.
+    required: false
+    default: false
+  - name: mm_out
+    type: bool
+    description: Request the optional shared-expert MatMul.
+    required: false
+    default: false
+  - name: permute_out_flag
+    type: bool
+    description: Request the expert-major permuted input.
+    required: false
+    default: false
+  - name: token_counts
+    type: list
+    description: C[source][destination][expert], measured in token rows.
+    required: true
+  - name: seed
+    type: int
+    description: Rank-distinct deterministic input seed.
+    required: false
+    default: 1
+  - name: platform
+    type: str
+    description: This suite is Ascend 950DT only.
+    required: false
+    default: Ascend 950DT (A5)
+  - name: supported_devices
+    type: list
+    description: Eligible Ascend device families.
+    required: false
+    default:
+    - 950dt
+  - name: source
+    type: str
+    description: Operator source and test reference used to design the case.
+    required: true
+  inputs:
+  - name: gmm_x
+    description: 按目标 rank、目标本地专家连续排列的 token 行。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[T,H1]'
+    required: true
+  - name: gmm_weight
+    description: 当前 rank 的 e 个专家权重，物理布局由转置属性决定。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[e,H1,N1] or [e,N1,H1]'
+    required: true
+  - name: send_counts
+    description: 长度 p*e 的整数列表，按 [destination][expert] 排列。
+    dtype:
+    - int64
+    shape: '[world_size*e]'
+    required: true
+  - name: recv_counts
+    description: 长度 p*e 的整数列表，按 [source][expert] 排列。
+    dtype:
+    - int64
+    shape: '[world_size*e]'
+    required: true
+  - name: mm_x
+    description: 可选共享专家输入；必须与 mm_weight 同时出现。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[BS,H2]'
+    required: false
+    optional: true
+  - name: mm_weight
+    description: 可选共享专家权重；仅做本地矩阵乘。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[H2,N2] or [N2,H2]'
+    required: false
+    optional: true
+  outputs:
+  - name: gmm_y
+    description: 按本地专家、源 rank 排列的分组矩阵乘输出。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[A,N1]'
+    required: true
+  - name: mm_y
+    description: 可选共享专家输出。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[BS,N2]'
+    required: false
+    optional: true
+  - name: permute_out
+    description: 可选专家优先排列的通信输入。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[A,H1]'
+    required: false
+    optional: true
+  schema: allto_allv_grouped_mat_mul(Tensor gmm_x, Tensor gmm_weight, str hcomm_info, int world_size, int[] send_counts,
+    int[] recv_counts, Tensor? mm_x=None, Tensor? mm_weight=None, bool trans_gmm_weight=False, bool trans_mm_weight=False,
+    bool permute_out_flag=False) -> (Tensor gmm_y, Tensor? mm_y, Tensor? permute_out)

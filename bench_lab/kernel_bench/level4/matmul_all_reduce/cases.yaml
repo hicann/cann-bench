@@ -519,3 +519,1586 @@ cases:
     source_excel_row: 2289
     platform: "Atlas A2"
   note: "3272_5632_11264_fp16_ND_allreduce_network_ks_65b_ID1071"
+- operator: MatmulAllReduce
+  case_id: 21
+  input_shape:
+  - - 263
+    - 1408
+  - - 11264
+    - 1408
+  - null
+  - - 11264
+  - - 263
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 2
+    source_sheet: daily
+    source_excel_row: 79
+    case_name: 263_1408_11264_int8_bf16_ND_GPT_200B_QuantMatmuAllreduceV4_ID022
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. 263_1408_11264_int8_bf16_ND_GPT_200B_QuantMatmuAllreduceV4_ID022'
+- operator: MatmulAllReduce
+  case_id: 22
+  input_shape:
+  - - 373
+    - 377
+  - - 8192
+    - 377
+  - - 8192
+  - - 8192
+  - - 373
+  - - 373
+    - 8192
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 7509
+    source_sheet: level2_8p
+    source_excel_row: 179
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0182
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0182'
+- operator: MatmulAllReduce
+  case_id: 23
+  input_shape:
+  - - 16
+    - 1
+    - 198
+  - - 198
+    - 16360
+  - null
+  - - 16360
+  - - 16
+  - - 16
+    - 1
+    - 16360
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 5442
+    source_sheet: level2
+    source_excel_row: 181
+    case_name: quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0184
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0184'
+- operator: MatmulAllReduce
+  case_id: 24
+  input_shape:
+  - - 14
+    - 12
+    - 229
+  - - 472
+    - 229
+  - - 472
+  - - 472
+  - - 168
+  - - 14
+    - 12
+    - 472
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 8970
+    source_sheet: level2_4p
+    source_excel_row: 15
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0166
+    source_graph_type: 1
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0166'
+- operator: MatmulAllReduce
+  case_id: 25
+  input_shape:
+  - - 373
+    - 377
+  - - 8192
+    - 377
+  - - 8192
+  - - 8192
+  - - 373
+  - - 373
+    - 8192
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 7509
+    source_sheet: level2
+    source_excel_row: 179
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0182
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0182'
+- operator: MatmulAllReduce
+  case_id: 26
+  input_shape:
+  - - 401
+    - 12713
+  - - 631
+    - 12713
+  - - 631
+  - - 631
+  - - 401
+  - - 401
+    - 631
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1380
+    source_sheet: level2
+    source_excel_row: 221
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0224
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0224'
+- operator: MatmulAllReduce
+  case_id: 27
+  input_shape:
+  - - 19
+    - 499
+    - 437
+  - - 437
+    - 128
+  - null
+  - - 128
+  - - 9481
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 8616
+    source_sheet: level2
+    source_excel_row: 249
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0252
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0252'
+- operator: MatmulAllReduce
+  case_id: 28
+  input_shape:
+  - - 789
+    - 9492
+  - - 631
+    - 9492
+  - null
+  - - 631
+  - - 789
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 2370
+    source_sheet: level2
+    source_excel_row: 265
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0268
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0268'
+- operator: MatmulAllReduce
+  case_id: 29
+  input_shape:
+  - - 13
+    - 2
+    - 675
+  - - 675
+    - 15
+  - null
+  - - 15
+  - - 26
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 8725
+    source_sheet: level2
+    source_excel_row: 315
+    case_name: quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0318
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0318'
+- operator: MatmulAllReduce
+  case_id: 30
+  input_shape:
+  - - 19
+    - 33
+    - 1024
+  - - 5856
+    - 1024
+  - null
+  - - 5856
+  - - 627
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1278
+    source_sheet: level2
+    source_excel_row: 435
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0440
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0440'
+- operator: MatmulAllReduce
+  case_id: 31
+  input_shape:
+  - - 1
+    - 3326
+    - 279
+  - - 279
+    - 192
+  - null
+  - - 192
+  - - 3326
+  - - 1
+    - 3326
+    - 192
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 918
+    source_sheet: level2
+    source_excel_row: 436
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0441
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0441'
+- operator: MatmulAllReduce
+  case_id: 32
+  input_shape:
+  - - 1
+    - 128
+    - 79
+  - - 79
+    - 8457
+  - - 8457
+  - - 8457
+  - - 128
+  - - 1
+    - 128
+    - 8457
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 2908
+    source_sheet: level2
+    source_excel_row: 517
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0524
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0524'
+- operator: MatmulAllReduce
+  case_id: 33
+  input_shape:
+  - - 401
+    - 741
+  - - 741
+    - 15
+  - null
+  - - 15
+  - - 401
+  - - 401
+    - 15
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1543
+    source_sheet: level2
+    source_excel_row: 543
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0550
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0550'
+- operator: MatmulAllReduce
+  case_id: 34
+  input_shape:
+  - - 229
+    - 754
+  - - 62
+    - 754
+  - null
+  - - 62
+  - - 229
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 1067
+    source_sheet: level2_4p
+    source_excel_row: 82
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_1011
+    source_graph_type: 1
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_1011'
+- operator: MatmulAllReduce
+  case_id: 35
+  input_shape:
+  - - 146
+    - 57
+  - - 1388
+    - 57
+  - null
+  - - 1388
+  - - 146
+  - - 146
+    - 1388
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 2209
+    source_sheet: level2_4p
+    source_excel_row: 135
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_1812
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_1812'
+- operator: MatmulAllReduce
+  case_id: 36
+  input_shape:
+  - - 16
+    - 1
+    - 198
+  - - 198
+    - 16360
+  - null
+  - - 16360
+  - - 16
+  - - 16
+    - 1
+    - 16360
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 5442
+    source_sheet: level2_8p
+    source_excel_row: 181
+    case_name: quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0184
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0184'
+- operator: MatmulAllReduce
+  case_id: 37
+  input_shape:
+  - - 401
+    - 12713
+  - - 631
+    - 12713
+  - - 631
+  - - 631
+  - - 401
+  - - 401
+    - 631
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - -10
+    - 10
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1380
+    source_sheet: level2_8p
+    source_excel_row: 221
+    case_name: quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0224
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: true
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v2_fanhua_2p_0224'
+- operator: MatmulAllReduce
+  case_id: 38
+  input_shape:
+  - - 19
+    - 499
+    - 437
+  - - 437
+    - 128
+  - null
+  - - 128
+  - - 9481
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 8616
+    source_sheet: level2_8p
+    source_excel_row: 249
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0252
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0252'
+- operator: MatmulAllReduce
+  case_id: 39
+  input_shape:
+  - - 789
+    - 9492
+  - - 631
+    - 9492
+  - null
+  - - 631
+  - - 789
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - float32
+  - float32
+  - float16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 2370
+    source_sheet: level2_8p
+    source_excel_row: 265
+    case_name: quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0268
+    source_graph_type: 0
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_fp16_ND_v2_fanhua_2p_0268'
+- operator: MatmulAllReduce
+  case_id: 40
+  input_shape:
+  - - 13
+    - 2
+    - 675
+  - - 675
+    - 15
+  - null
+  - - 15
+  - - 26
+  - null
+  dtype:
+  - int8
+  - int8
+  - int32
+  - bfloat16
+  - float32
+  - bfloat16
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - null
+  - - 0.001
+    - 0.01
+  - - 0.1
+    - 1.0
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 8725
+    source_sheet: level2_8p
+    source_excel_row: 315
+    case_name: quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0318
+    source_graph_type: 2
+    quantized: true
+    reduce_op: sum
+    is_x3: false
+    quant_type: per_token_channel
+    comm_quant_mode: 0
+  note: 'A5 INT8 V4: source M/K/N/rank/bias/x3; eager mode, per-token+per-channel
+    scales; bounded ranges avoid overflow. quantMatmulAllReduceV4_bf16_ND_v3_fanhua_2p_0318'
+- operator: MatmulAllReduce
+  case_id: 41
+  input_shape:
+  - [2776, 1024]
+  - [1024, 8192]
+  - [8192]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "2776_1024_8192_bf16_ND_allreduce_network_x1_65b_ID0045"
+    source_sheet: "level0"
+    source_excel_row: 31
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "2776_1024_8192_bf16_ND_allreduce_network_x1_65b_ID0045"
+- operator: MatmulAllReduce
+  case_id: 42
+  input_shape:
+  - [3592, 2732]
+  - [2732, 8192]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3592_2732_8192_bf16_ND_allreduce_network_x1_65b_ID0066"
+    source_sheet: "level0"
+    source_excel_row: 33
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3592_2732_8192_bf16_ND_allreduce_network_x1_65b_ID0066"
+- operator: MatmulAllReduce
+  case_id: 43
+  input_shape:
+  - [5864, 2732]
+  - [2732, 8192]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "5864_2732_8192_bf16_ND_allreduce_network_x1_65b_ID0171"
+    source_sheet: "level0"
+    source_excel_row: 54
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "5864_2732_8192_bf16_ND_allreduce_network_x1_65b_ID0171"
+- operator: MatmulAllReduce
+  case_id: 44
+  input_shape:
+  - [3624, 4096]
+  - [4096, 8192]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3624_4096_8192_bf16_ND_allreduce_network_x1_175b_ID0220"
+    source_sheet: "level0"
+    source_excel_row: 66
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3624_4096_8192_bf16_ND_allreduce_network_x1_175b_ID0220"
+- operator: MatmulAllReduce
+  case_id: 45
+  input_shape:
+  - [4432, 4096]
+  - [4096, 8192]
+  - [8192]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "4432_4096_8192_bf16_ND_allreduce_network_x1_175b_ID0240"
+    source_sheet: "level0"
+    source_excel_row: 74
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "4432_4096_8192_bf16_ND_allreduce_network_x1_175b_ID0240"
+- operator: MatmulAllReduce
+  case_id: 46
+  input_shape:
+  - [2168, 1536]
+  - [1536, 8192]
+  - [8192]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "2168_1536_8192_bf16_ND_allreduce_network_x1_175b_ID0329"
+    source_sheet: "level0"
+    source_excel_row: 96
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "2168_1536_8192_bf16_ND_allreduce_network_x1_175b_ID0329"
+- operator: MatmulAllReduce
+  case_id: 47
+  input_shape:
+  - [1376, 640]
+  - [640, 5120]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "1376_640_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0424"
+    source_sheet: "level0"
+    source_excel_row: 119
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "1376_640_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0424"
+- operator: MatmulAllReduce
+  case_id: 48
+  input_shape:
+  - [3384, 640]
+  - [640, 5120]
+  - [5120]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3384_640_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0445"
+    source_sheet: "level0"
+    source_excel_row: 122
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3384_640_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0445"
+- operator: MatmulAllReduce
+  case_id: 49
+  input_shape:
+  - [3712, 2560]
+  - [2560, 5120]
+  - [5120]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3712_2560_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0462"
+    source_sheet: "level0"
+    source_excel_row: 131
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3712_2560_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0462"
+- operator: MatmulAllReduce
+  case_id: 50
+  input_shape:
+  - [3176, 2560]
+  - [2560, 5120]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3176_2560_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0503"
+    source_sheet: "level0"
+    source_excel_row: 144
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3176_2560_5120_bf16_ND_allreduce_network_xiaoyi_38b_71b_ID0503"
+- operator: MatmulAllReduce
+  case_id: 51
+  input_shape:
+  - [1768, 6912]
+  - [6912, 11264]
+  - [11264]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "1768_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0837"
+    source_sheet: "level0"
+    source_excel_row: 224
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "1768_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0837"
+- operator: MatmulAllReduce
+  case_id: 52
+  input_shape:
+  - [4072, 6912]
+  - [6912, 11264]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "4072_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0887"
+    source_sheet: "level0"
+    source_excel_row: 241
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "4072_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0887"
+- operator: MatmulAllReduce
+  case_id: 53
+  input_shape:
+  - [1080, 6912]
+  - [6912, 11264]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [0, 10]
+  - [0, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "1080_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0920"
+    source_sheet: "level0"
+    source_excel_row: 249
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "1080_6912_11264_bf16_ND_allreduce_network_z1_200b_ID0920"
+- operator: MatmulAllReduce
+  case_id: 54
+  input_shape:
+  - [4096, 1408]
+  - [1408, 11264]
+  - null
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "4096_1408_11264_bf16_ND_allreduce_network_ks_65b_ID1029"
+    source_sheet: "level0"
+    source_excel_row: 284
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "4096_1408_11264_bf16_ND_allreduce_network_ks_65b_ID1029"
+- operator: MatmulAllReduce
+  case_id: 55
+  input_shape:
+  - [3584, 5632]
+  - [5632, 11264]
+  - [11264]
+  dtype:
+  - "bfloat16"
+  - "bfloat16"
+  - "bfloat16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3584_5632_11264_bf16_ND_allreduce_network_ks_65b_ID1123"
+    source_sheet: "level0"
+    source_excel_row: 306
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3584_5632_11264_bf16_ND_allreduce_network_ks_65b_ID1123"
+- operator: MatmulAllReduce
+  case_id: 56
+  input_shape:
+  - [1024, 1024]
+  - [1024, 8192]
+  - [8192]
+  dtype:
+  - "float16"
+  - "float16"
+  - "float16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "1024_1024_8192_fp16_ND_allreduce_network_x1_65b_ID0006"
+    source_sheet: "level1"
+    source_excel_row: 1224
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "1024_1024_8192_fp16_ND_allreduce_network_x1_65b_ID0006"
+- operator: MatmulAllReduce
+  case_id: 57
+  input_shape:
+  - [752, 2732]
+  - [2732, 8192]
+  - [8192]
+  dtype:
+  - "float16"
+  - "float16"
+  - "float16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "752_2732_8192_fp16_ND_allreduce_network_x1_65b_ID0055"
+    source_sheet: "level1"
+    source_excel_row: 1273
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "752_2732_8192_fp16_ND_allreduce_network_x1_65b_ID0055"
+- operator: MatmulAllReduce
+  case_id: 58
+  input_shape:
+  - [3888, 1024]
+  - [1024, 8192]
+  - [8192]
+  dtype:
+  - "float16"
+  - "float16"
+  - "float16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3888_1024_8192_fp16_ND_allreduce_network_x1_65b_ID0059"
+    source_sheet: "level1"
+    source_excel_row: 1277
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3888_1024_8192_fp16_ND_allreduce_network_x1_65b_ID0059"
+- operator: MatmulAllReduce
+  case_id: 59
+  input_shape:
+  - [3392, 1536]
+  - [1536, 8192]
+  - [8192]
+  dtype:
+  - "float16"
+  - "float16"
+  - "float16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - [-10, 10]
+  attrs:
+    is_trans_b: false
+    is_bias: true
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3392_1536_8192_fp16_ND_allreduce_network_x1_175b_ID0246"
+    source_sheet: "level1"
+    source_excel_row: 1464
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3392_1536_8192_fp16_ND_allreduce_network_x1_175b_ID0246"
+- operator: MatmulAllReduce
+  case_id: 60
+  input_shape:
+  - [3272, 5632]
+  - [5632, 11264]
+  - null
+  dtype:
+  - "float16"
+  - "float16"
+  - "float16"
+  value_range:
+  - [-10, 10]
+  - [-10, 10]
+  - null
+  attrs:
+    is_trans_b: false
+    is_bias: false
+    world_size: 2
+    reduce_op: "sum"
+    graph_type: 0
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    case_name: "3272_5632_11264_fp16_ND_allreduce_network_ks_65b_ID1071"
+    source_sheet: "level1"
+    source_excel_row: 2289
+    platform: "Ascend 950PR/950DT (A5)"
+  note: "3272_5632_11264_fp16_ND_allreduce_network_ks_65b_ID1071"

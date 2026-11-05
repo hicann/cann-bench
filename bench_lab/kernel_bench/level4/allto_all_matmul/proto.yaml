@@ -1,0 +1,163 @@
+operator:
+  name: AlltoAllMatmul
+  category: FusedComposite
+  difficulty: L4
+  platform: Ascend 950PR / 950DT
+  formula: 'a = AllToAll(x1, split_axis=-2, concat_axis=-1)
+
+    y = a @ x2 (+ bias); MX: y = dequant(a, AllToAll(x1_scale)) @ dequant(x2, x2_scale).T (+ bias)
+
+    '
+  description: 先执行 AllToAll 再执行矩阵乘的 A5 MC2 通算融合算子，支持非量化和 MXFP8 量化。
+  shape_support: 'x1: [M, K], x2: [K*world_size, N] or [N, K*world_size] when is_trans_x2=true; y: [M/world_size,
+    N]'
+  precision_thresholds:
+    float16: 0.05
+    bfloat16: 0.05
+  attrs:
+  - name: mc2_distributed
+    type: bool
+    default: 'true'
+    description: Route through the distributed MC2 runner.
+    required: false
+  - name: world_size
+    type: int
+    description: Number of HCCL ranks.
+    required: true
+  - name: is_trans_x2
+    type: bool
+    default: 'false'
+    description: x2 is stored as [N, K*world_size].
+    required: false
+  - name: is_bias
+    type: bool
+    default: 'false'
+    description: Whether a rank-local bias [N] is supplied.
+    required: false
+  - name: alltoall_out_flag
+    type: bool
+    default: 'false'
+    description: Request the intermediate all-to-all result as the second return value.
+    required: false
+  - name: seed
+    type: int
+    default: 1
+    description: mc2_test-compatible deterministic input seed.
+    required: false
+  - name: platform
+    type: str
+    default: Ascend 950PR/950DT (A5)
+    description: This suite is A5 only.
+    required: false
+  - name: source_sheet
+    type: str
+    description: 规格来源工作表。
+    required: false
+  - name: source_excel_row
+    type: int
+    description: 规格来源 Excel 行号。
+    required: false
+  - name: mc2_accuracy_mode
+    type: str
+    required: false
+    description: A5 three-way accuracy setting; see docs/guide/mc2_accuracy.md.
+  - name: mc2_compare_dtype
+    type: str
+    required: false
+    description: A5 three-way accuracy setting; see docs/guide/mc2_accuracy.md.
+  - name: supported_devices
+    type: ListStr
+    required: false
+    description: 支持的平台列表。
+  - name: is_quant
+    type: bool
+    default: 'false'
+    required: false
+    description: 为 true 时调用 AlltoAllQuantMatmul 的 MXFP8 接口。
+  - name: x1_quant_mode
+    type: int
+    default: 6
+    required: false
+    description: 左矩阵量化模式，MX 为 6。
+  - name: x2_quant_mode
+    type: int
+    default: 6
+    required: false
+    description: 右矩阵量化模式，MX 为 6。
+  - name: group_size
+    type: int
+    default: 4295032864
+    required: false
+    description: MX 分组 [1,1,32] 的打包属性值。
+  - name: scale_dtype
+    type: int
+    default: 293
+    required: false
+    description: uint8 张量按 E8M0 原始指数码解释。
+  - name: out_dtype
+    type: str
+    default: bfloat16
+    required: false
+    description: MX 输出类型，float16 或 bfloat16；非量化时忽略。
+  inputs:
+  - name: x1
+    description: 矩阵乘左输入。
+    dtype:
+    - float16
+    - bfloat16
+    - float8_e4m3fn
+    - float8_e5m2
+    shape: '[M, K]'
+    required: true
+  - name: x2
+    description: 矩阵乘右输入。
+    dtype:
+    - float16
+    - bfloat16
+    - float8_e4m3fn
+    - float8_e5m2
+    shape: '[K*world_size, N] or [N, K*world_size]'
+    required: true
+  - name: bias
+    description: 可选本地偏置。
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[N]'
+    optional: true
+    required: false
+  - name: x1_scale
+    description: MX 左输入尺度，随 token 进行 AllToAll。
+    dtype: [uint8]
+    shape: '[M, K/64, 2]'
+    optional: true
+    required: false
+  - name: x2_scale
+    description: MX 转置权重尺度。
+    dtype: [uint8]
+    shape: '[N, K*world_size/64, 2]'
+    optional: true
+    required: false
+  outputs:
+  - name: y
+    description: 当前 rank 的输出。
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[M/world_size, N]'
+    required: true
+  - name: alltoall_y
+    description: 可选 AllToAll 中间结果。
+    dtype:
+    - float16
+    - bfloat16
+    - float8_e4m3fn
+    - float8_e5m2
+    shape: '[M/world_size, K*world_size]'
+    optional: true
+    required: false
+  schema: all_to_all_matmul(Tensor x1, Tensor x2, str hcomm_info, int world_size, Tensor? bias=None, bool is_trans_x2=False,
+    bool alltoall_out_flag=False, bool is_quant=False, Tensor? x1_scale=None, Tensor? x2_scale=None,
+    int x1_quant_mode=6, int x2_quant_mode=6, int group_size=4295032864, int scale_dtype=293,
+    str out_dtype="bfloat16") -> (Tensor y, Tensor? alltoall_y)

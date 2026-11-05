@@ -48,7 +48,7 @@ class FailureSynthesizer:
         rel_path: str,
         case_filter: Optional[Dict] = None,
         filter_func: Optional[callable] = None,
-    ) -> EvalOperatorResult:
+    ) -> Optional[EvalOperatorResult]:
         """为无法评测的算子生成一条 all-FAIL 的 EvalOperatorResult。
 
         三个公有方法（compile / security / subprocess）的共享实现，
@@ -69,20 +69,35 @@ class FailureSynthesizer:
         except Exception:
             cases = []
 
+        excluded_getter = getattr(self.case_loader, "get_hardware_excluded_cases", None)
+        if not cases and excluded_getter is not None:
+            excluded = excluded_getter(operator_name)
+            if case_filter and filter_func:
+                excluded = filter_func(excluded, case_filter)
+            if excluded:
+                return None
+
         first_line = (error_text.strip().splitlines() or ["(no detail)"])[0]
         reason_short = f"{error_prefix} {first_line[:180]}"
 
         case_results: List[EvalCaseResult] = []
         for c in cases:
-            case_results.append(EvalCaseResult(
-                case_id=str(getattr(c, "case_id", "")),
-                rel_path=rel_path,
-                operator=operator_name,
-                case_num=getattr(c, "case_num", 0),
-                success=False,
-                error_msg=reason_short,
-                failure_type="cascade_device",  # 子进程崩溃/编译失败等合成的结果标记为级联失败
-            ))
+            case_results.append(
+                EvalCaseResult(
+                    case_id=str(getattr(c, "case_id", "")),
+                    rel_path=rel_path,
+                    operator=operator_name,
+                    case_num=getattr(c, "case_num", 0),
+                    success=False,
+                    error_msg=reason_short,
+                    baseline_perf_us=getattr(c, "baseline_perf_us", 0.0) or 0.0,
+                    t_hw_us=getattr(c, "t_hw_us", 0.0) or 0.0,
+                    baseline_source=(getattr(c, "metadata", None) or {}).get(
+                        "baseline_source", {}
+                    ),
+                    failure_type="cascade_device",  # 子进程崩溃/编译失败等合成的结果标记为级联失败
+                )
+            )
 
         kwargs: Dict[str, Any] = {
             "rel_path": rel_path,
@@ -109,7 +124,7 @@ class FailureSynthesizer:
         error_excerpt: str,
         case_filter: Optional[Dict] = None,
         filter_func: Optional[callable] = None,
-    ) -> EvalOperatorResult:
+    ) -> Optional[EvalOperatorResult]:
         """为编译失败的算子生成一条 all-FAIL 的 EvalOperatorResult"""
         return self._synthesize_failure(
             error_text=error_excerpt,
@@ -153,7 +168,8 @@ class FailureSynthesizer:
             if op_info is None:
                 print(
                     f"[WARN] 指定算子 {requested!r} 未在 OperatorMatcher 中找到对应 spec。",
-                    file=sys.stderr, flush=True,
+                    file=sys.stderr,
+                    flush=True,
                 )
                 continue
             if op_info.name in requested_names:
@@ -169,36 +185,51 @@ class FailureSynthesizer:
                 print(
                     f"[WARN] 编译失败算子 {snake_op_name!r} 未在 OperatorMatcher 中找到对应 spec，"
                     f"跳过逐算子合成（可能是 <build> 兜底键或未注册的 snake 名）。",
-                    file=sys.stderr, flush=True,
+                    file=sys.stderr,
+                    flush=True,
                 )
                 continue
             mapped_any = True
             if operator_filter and op_info.name not in requested_names:
                 continue
-            results.append(self.synthesize_compile_failure(
-                op_info, err, case_filter, filter_func,
-            ))
+            result = self.synthesize_compile_failure(
+                op_info,
+                err,
+                case_filter,
+                filter_func,
+            )
+            if result is not None:
+                results.append(result)
 
         if not mapped_any and not results:
-            joined = "\n".join(
-                f"[{k}] {v}" for k, v in (package_info.compile_errors or {}).items()
-            ) or "build.sh 编译失败（无更多详情）"
+            joined = (
+                "\n".join(
+                    f"[{k}] {v}" for k, v in (package_info.compile_errors or {}).items()
+                )
+                or "build.sh 编译失败（无更多详情）"
+            )
             if requested_specs:
                 print(
                     "[WARN] 编译失败日志未能映射到具体算子，"
                     "按调用方指定的目标算子合成编译失败结果。",
-                    file=sys.stderr, flush=True,
+                    file=sys.stderr,
+                    flush=True,
                 )
-                return [
+                requested_results = [
                     self.synthesize_compile_failure(
-                        op_info, joined, case_filter, filter_func,
+                        op_info,
+                        joined,
+                        case_filter,
+                        filter_func,
                     )
                     for op_info in requested_specs
                 ]
+                return [result for result in requested_results if result is not None]
             print(
                 "[WARN] 编译失败但未能映射到任何已注册算子，"
                 "合成提交级编译失败记录以避免空报告。",
-                file=sys.stderr, flush=True,
+                file=sys.stderr,
+                flush=True,
             )
             results.append(self.synthesize_submission_compile_failure(joined))
         return results
@@ -221,15 +252,17 @@ class FailureSynthesizer:
         """
         first_line = (error_text.strip().splitlines() or ["(no detail)"])[0]
         reason_short = f"compile failed: {first_line[:180]}"
-        case_results = [EvalCaseResult(
-            case_id="",
-            rel_path="",
-            operator=operator_name,
-            case_num=0,
-            success=False,
-            error_msg=reason_short,
-            failure_type="cascade_device",
-        )]
+        case_results = [
+            EvalCaseResult(
+                case_id="",
+                rel_path="",
+                operator=operator_name,
+                case_num=0,
+                success=False,
+                error_msg=reason_short,
+                failure_type="cascade_device",
+            )
+        ]
         return EvalOperatorResult(
             rel_path="",
             operator=operator_name,
@@ -249,7 +282,7 @@ class FailureSynthesizer:
         security_error: str,
         case_filter: Optional[Dict] = None,
         filter_func: Optional[callable] = None,
-    ) -> EvalOperatorResult:
+    ) -> Optional[EvalOperatorResult]:
         """为安全检查失败的算子生成一条 all-FAIL 的 EvalOperatorResult"""
         return self._synthesize_failure(
             error_text=security_error,
@@ -268,7 +301,7 @@ class FailureSynthesizer:
         reason: str = "",
         case_filter: Optional[Dict] = None,
         filter_func: Optional[callable] = None,
-    ) -> EvalOperatorResult:
+    ) -> Optional[EvalOperatorResult]:
         """子进程超时 / 崩溃时合成 all-FAIL 的 EvalOperatorResult"""
         return self._synthesize_failure(
             error_text=reason,
@@ -304,17 +337,22 @@ class FailureSynthesizer:
 
         case_results: List[EvalCaseResult] = []
         for c in cases:
-            case_results.append(EvalCaseResult(
-                case_id=str(getattr(c, "case_id", "")),
-                rel_path=rel_path,
-                operator=operator_name,
-                case_num=getattr(c, "case_num", 0),
-                success=False,
-                error_msg=error_msg,
-                baseline_perf_us=getattr(c, "baseline_perf_us", 0.0) or 0.0,
-                t_hw_us=getattr(c, "t_hw_us", 0.0) or 0.0,
-                failure_type="oom_killed",
-            ))
+            case_results.append(
+                EvalCaseResult(
+                    case_id=str(getattr(c, "case_id", "")),
+                    rel_path=rel_path,
+                    operator=operator_name,
+                    case_num=getattr(c, "case_num", 0),
+                    success=False,
+                    error_msg=error_msg,
+                    baseline_perf_us=getattr(c, "baseline_perf_us", 0.0) or 0.0,
+                    baseline_source=(getattr(c, "metadata", None) or {}).get(
+                        "baseline_source", {}
+                    ),
+                    t_hw_us=getattr(c, "t_hw_us", 0.0) or 0.0,
+                    failure_type="oom_killed",
+                )
+            )
 
         return EvalOperatorResult(
             rel_path=rel_path,

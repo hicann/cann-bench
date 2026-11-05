@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """Core contracts and orchestration for the auto pipeline."""
 
 from __future__ import annotations
@@ -20,7 +30,18 @@ from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from pathlib import Path
 from types import FrameType
-from typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, Optional, Protocol, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Protocol,
+    TYPE_CHECKING,
+)
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -78,6 +99,7 @@ class Submission:
     source_dir: Path
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+
 @dataclass(frozen=True)
 class CannBenchCase:
     """Task context loaded from cann-bench tasks."""
@@ -106,8 +128,6 @@ class EvalTarget:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-
-
 def read_case_preview(path: Path, *, limit: int = 3) -> List[Dict[str, Any]]:
     """Read a small case preview for prompts without owning evaluation."""
 
@@ -123,6 +143,7 @@ def read_case_preview(path: Path, *, limit: int = 3) -> List[Dict[str, Any]]:
             return [dict(row) for _, row in zip(range(limit), csv.DictReader(handle))]
 
     return []
+
 
 class ParentProcessSignal(SystemExit):
     """Raised when the pipeline receives a terminating parent signal."""
@@ -355,7 +376,9 @@ def _send_signal_to_snapshotted_pids(snapshot: dict[int, int], signum: int) -> N
 
 
 def _snapshot_has_live_pids(snapshot: dict[int, int]) -> bool:
-    return any(_pid_matches_start_time(pid, start_time) for pid, start_time in snapshot.items())
+    return any(
+        _pid_matches_start_time(pid, start_time) for pid, start_time in snapshot.items()
+    )
 
 
 def _descendant_snapshot(root_pid: int) -> dict[int, int]:
@@ -448,6 +471,7 @@ def _read_proc_stat(pid: int) -> Optional[tuple[int, int, str]]:
         return None
     return ppid, start_time, state
 
+
 @lru_cache(maxsize=None)
 def _prompt_environment(template_dir: str) -> Environment:
     return Environment(
@@ -462,16 +486,22 @@ def _prompt_environment(template_dir: str) -> Environment:
 
 def render_prompt_file(path: Path, **context: Any) -> str:
     template_path = Path(path).expanduser().resolve()
-    return _prompt_environment(str(template_path.parent)).get_template(template_path.name).render(**context).strip()
+    return (
+        _prompt_environment(str(template_path.parent))
+        .get_template(template_path.name)
+        .render(**context)
+        .strip()
+    )
 
 
 def render_case_preview_json(case_preview: object) -> str:
     return json.dumps(case_preview or [], ensure_ascii=False, indent=2)
 
+
 DEFAULT_CANN_BENCH_ROOT = Path(__file__).resolve().parents[2]
 _REQUIRED_TASK_FILES = ("proto.yaml", "golden.py")
 _CASE_FILENAMES = ("cases.yaml", "cases.yml", "cases.csv")
-_PIP_SHIM_SOURCE = r'''from __future__ import annotations
+_PIP_SHIM_SOURCE = r"""from __future__ import annotations
 
 import os
 import subprocess
@@ -520,7 +550,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-'''
+"""
 
 
 def _prepend_path_values(existing: Optional[str], values: Iterable[Path]) -> str:
@@ -567,7 +597,9 @@ class CannBenchClient:
         env: Optional[Mapping[str, str]] = None,
         timeout_sec: Optional[int] = None,
     ) -> None:
-        self.cann_bench_root = Path(cann_bench_root or DEFAULT_CANN_BENCH_ROOT).expanduser().resolve()
+        self.cann_bench_root = (
+            Path(cann_bench_root or DEFAULT_CANN_BENCH_ROOT).expanduser().resolve()
+        )
         self.python_executable = python_executable
         self.extra_env = dict(env or {})
         self.timeout_sec = timeout_sec
@@ -665,7 +697,9 @@ class CannBenchClient:
         eval_task_selector = task_selector
         auto_operator = None
         if bench_name.lower() == "stanford":
-            eval_task_selector, auto_operator = self._stanford_eval_selector(task_selector)
+            eval_task_selector, auto_operator = self._stanford_eval_selector(
+                task_selector
+            )
 
         command = [
             self.python_executable,
@@ -765,7 +799,9 @@ class CannBenchClient:
         pip_package_dir.mkdir(parents=True, exist_ok=True)
         pip_bin_dir.mkdir(parents=True, exist_ok=True)
         pip_package_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
-        pip_package_dir.joinpath("__main__.py").write_text(_PIP_SHIM_SOURCE, encoding="utf-8")
+        pip_package_dir.joinpath("__main__.py").write_text(
+            _PIP_SHIM_SOURCE, encoding="utf-8"
+        )
         for name in ("pip", "pip3"):
             wrapper = pip_bin_dir / name
             wrapper.write_text(_pip_wrapper_source(), encoding="utf-8")
@@ -777,14 +813,18 @@ class CannBenchClient:
         if selector.is_absolute():
             candidates.append(selector)
         else:
-            candidates.extend([self.cann_bench_root / selector, self.tasks_root / selector])
+            candidates.extend(
+                [self.cann_bench_root / selector, self.tasks_root / selector]
+            )
 
         for candidate in candidates:
             resolved = candidate.resolve()
             if resolved.is_dir():
                 return resolved
         display = ", ".join(str(path) for path in candidates)
-        raise FileNotFoundError(f"cann-bench task not found: {task_selector}; tried: {display}")
+        raise FileNotFoundError(
+            f"cann-bench task not found: {task_selector}; tried: {display}"
+        )
 
     def _load_stanford_case(self, bench_name: str, task_selector: str) -> CannBenchCase:
         py_path = self._resolve_stanford_task_file(task_selector)
@@ -807,7 +847,9 @@ class CannBenchClient:
 
     def _stanford_eval_selector(self, task_selector: str) -> tuple:
         py_path = self._resolve_stanford_task_file(task_selector)
-        return str(self._stanford_bench_root_for(py_path)), self._stanford_operator_name(py_path.stem)
+        return str(
+            self._stanford_bench_root_for(py_path)
+        ), self._stanford_operator_name(py_path.stem)
 
     def _resolve_stanford_task_file(self, task_selector: str) -> Path:
         selector = Path(task_selector).expanduser()
@@ -816,7 +858,13 @@ class CannBenchClient:
             candidates.append(selector)
         else:
             candidates.append(self.cann_bench_root / selector)
-            default_root = self.cann_bench_root / "bench_lab" / "stanford_bench" / "KernelBench" / "KernelBench"
+            default_root = (
+                self.cann_bench_root
+                / "bench_lab"
+                / "stanford_bench"
+                / "KernelBench"
+                / "KernelBench"
+            )
             if selector.suffix == ".py":
                 candidates.append(default_root / selector)
             else:
@@ -827,17 +875,25 @@ class CannBenchClient:
             if resolved.is_file() and resolved.suffix == ".py":
                 return resolved
         display = ", ".join(str(path) for path in candidates)
-        raise FileNotFoundError(f"stanford task file not found: {task_selector}; tried: {display}")
+        raise FileNotFoundError(
+            f"stanford task file not found: {task_selector}; tried: {display}"
+        )
 
     def _stanford_task_id(self, py_path: Path) -> str:
         bench_root = self._stanford_bench_root_for(py_path)
         try:
-            return str(py_path.with_suffix("").relative_to(bench_root))
+            return py_path.with_suffix("").relative_to(bench_root).as_posix()
         except ValueError:
             return py_path.stem
 
     def _stanford_bench_root_for(self, py_path: Path) -> Path:
-        default_root = (self.cann_bench_root / "bench_lab" / "stanford_bench" / "KernelBench" / "KernelBench").resolve()
+        default_root = (
+            self.cann_bench_root
+            / "bench_lab"
+            / "stanford_bench"
+            / "KernelBench"
+            / "KernelBench"
+        ).resolve()
         try:
             py_path.relative_to(default_root)
             return default_root
@@ -852,7 +908,9 @@ class CannBenchClient:
         return "".join(part.capitalize() for part in name.split("_") if part)
 
     def _validate_task_dir(self, task_dir: Path) -> None:
-        missing = [name for name in _REQUIRED_TASK_FILES if not (task_dir / name).is_file()]
+        missing = [
+            name for name in _REQUIRED_TASK_FILES if not (task_dir / name).is_file()
+        ]
         if missing:
             raise FileNotFoundError(
                 f"invalid cann-bench task dir: {task_dir}; missing: {', '.join(missing)}"
@@ -860,12 +918,16 @@ class CannBenchClient:
         self._find_cases_file(task_dir)
 
     def _is_single_task_dir(self, task_dir: Path) -> bool:
-        return all((task_dir / name).is_file() for name in _REQUIRED_TASK_FILES) and any(
-            (task_dir / name).is_file() for name in _CASE_FILENAMES
-        )
+        return all(
+            (task_dir / name).is_file() for name in _REQUIRED_TASK_FILES
+        ) and any((task_dir / name).is_file() for name in _CASE_FILENAMES)
 
     def _discover_task_dirs(self, root: Path) -> List[Path]:
-        return sorted(path for path in root.rglob("*") if path.is_dir() and self._is_single_task_dir(path))
+        return sorted(
+            path
+            for path in root.rglob("*")
+            if path.is_dir() and self._is_single_task_dir(path)
+        )
 
     def _find_cases_file(self, task_dir: Path) -> Path:
         for name in _CASE_FILENAMES:
@@ -879,7 +941,7 @@ class CannBenchClient:
     def _task_rel_path(self, task_dir: Path) -> str:
         for root in (self.tasks_root, self.cann_bench_root):
             try:
-                return str(task_dir.relative_to(root))
+                return task_dir.relative_to(root).as_posix()
             except ValueError:
                 continue
         return task_dir.name
@@ -903,7 +965,8 @@ class CannBenchClient:
         return sorted(
             path
             for path in reports_dir.rglob("*")
-            if path.is_file() and path.suffix.lower() in {".json", ".md", ".csv"}
+            if path.is_file()
+            and path.suffix.lower() in {".json", ".md", ".csv"}
             and not any(part.startswith("_eval_isolation_") for part in path.parts)
         )
 
@@ -950,6 +1013,7 @@ def _run_captured_process(
         stderr=stderr or "",
     )
 
+
 @dataclass(frozen=True)
 class GeneratorInput:
     """Structured case material passed from the benchmark layer to a generator."""
@@ -969,8 +1033,7 @@ class Generator(Protocol):
 
     type: str
 
-    def generate(self, task: GeneratorInput) -> Artifact:
-        ...
+    def generate(self, task: GeneratorInput) -> Artifact: ...
 
 
 class PromptGenerator:
@@ -985,10 +1048,13 @@ class PromptGenerator:
 
 
 def _build_generic_prompt(task: GeneratorInput) -> RunnerPrompt:
-    task_files = "\n".join(
-        f"- {task_file.key}: {task_file.source_path}"
-        for task_file in task.material.task_files
-    ) or "- <none>"
+    task_files = (
+        "\n".join(
+            f"- {task_file.key}: {task_file.source_path}"
+            for task_file in task.material.task_files
+        )
+        or "- <none>"
+    )
     text = "\n".join(
         [
             f"请为 benchmark `{task.material.bench_name}` 的算子 `{task.material.op_name}` 生成实现。",
@@ -1007,9 +1073,13 @@ def _build_generic_prompt(task: GeneratorInput) -> RunnerPrompt:
         timeout_sec=task.timeout_sec,
         env=dict(task.env),
         title=task.title,
-        files={task_file.key: task_file.source_path for task_file in task.material.task_files},
+        files={
+            task_file.key: task_file.source_path
+            for task_file in task.material.task_files
+        },
         metadata=dict(task.metadata),
     )
+
 
 @dataclass(frozen=True)
 class PipelineRunResult:
@@ -1089,7 +1159,9 @@ class BenchmarkPipeline:
     ) -> PipelineRunResult:
         case = self.client.load_case(self.bench_name, selector)
         if status_callback is not None:
-            status_callback(stage="generation", status="running", operator=case.operator)
+            status_callback(
+                stage="generation", status="running", operator=case.operator
+            )
         generator_input = self._build_generator_input(
             case=case,
             generator=generator,
@@ -1163,7 +1235,9 @@ class BenchmarkPipeline:
         if opencode_json_path is not None and conversion_workdir is not None:
             _install_opencode_json(opencode_json_path, conversion_workdir)
         if status_callback is not None:
-            status_callback(stage="conversion", status="running", operator=case.operator)
+            status_callback(
+                stage="conversion", status="running", operator=case.operator
+            )
         conversion = converter.convert(
             self.bench_name,
             case,
@@ -1204,7 +1278,9 @@ class BenchmarkPipeline:
             generator_prompt_file=generator_prompt_file,
             converter_prompt_file=conversion.prompt_file,
             generated_artifact=generated_artifact,
-            conversion_artifact=conversion.artifact if conversion_runner is not None else None,
+            conversion_artifact=conversion.artifact
+            if conversion_runner is not None
+            else None,
             status=AGENT_SUCCESS,
         )
 
@@ -1259,8 +1335,12 @@ class BenchmarkPipeline:
                 operator=case.operator,
                 source_dir=Path(submission_dir).expanduser().resolve(),
                 metadata={
-                    "generated_status": generated_artifact.status if generated_artifact else "",
-                    "conversion_status": conversion_artifact.status if conversion_artifact else "",
+                    "generated_status": generated_artifact.status
+                    if generated_artifact
+                    else "",
+                    "conversion_status": conversion_artifact.status
+                    if conversion_artifact
+                    else "",
                 },
             ),
             eval_result=CannBenchEvalResult(
@@ -1285,7 +1365,10 @@ def _snapshot_pypto_custom_artifact(
     task_root: Path,
     strict: bool,
 ) -> Artifact:
-    if "pypto_status" not in artifact.metadata and "pypto_pro_status" not in artifact.metadata:
+    if (
+        "pypto_status" not in artifact.metadata
+        and "pypto_pro_status" not in artifact.metadata
+    ):
         return artifact
     source_dir = artifact.files.get("source_dir")
     if source_dir is None:
@@ -1313,7 +1396,11 @@ def _snapshot_pypto_custom_artifact(
                 target,
                 ignore=shutil.ignore_patterns(".tmp", "__pycache__", "*.pyc", "prof"),
             )
-        snapshot["file_count"] = sum(1 for path in target.rglob("*") if path.is_file()) if target.is_dir() else 0
+        snapshot["file_count"] = (
+            sum(1 for path in target.rglob("*") if path.is_file())
+            if target.is_dir()
+            else 0
+        )
     except OSError as exc:
         snapshot.update({"status": "failed", "error": str(exc)})
         metadata["custom_snapshot"] = snapshot
@@ -1360,12 +1447,19 @@ def _load_reusable_generated_artifact(
     code_file = artifact_dir / "akg_model.py"
 
     result = pipeline_state.read_json(result_path)
-    generated = result.get("generated_artifact") if isinstance(result, Mapping) else None
-    if isinstance(generated, Mapping) and str(generated.get("status") or "") == AGENT_SUCCESS:
+    generated = (
+        result.get("generated_artifact") if isinstance(result, Mapping) else None
+    )
+    if (
+        isinstance(generated, Mapping)
+        and str(generated.get("status") or "") == AGENT_SUCCESS
+    ):
         code = str(generated.get("output_text") or "")
         source = "benchmark_result.generated_artifact.output_text"
         generated_files = generated.get("files")
-        existing_code_file = _generated_code_file_from_mapping(generated_files, generated.get("workdir"))
+        existing_code_file = _generated_code_file_from_mapping(
+            generated_files, generated.get("workdir")
+        )
         if not code and existing_code_file is not None:
             code = existing_code_file.read_text(encoding="utf-8")
             source = str(existing_code_file)
@@ -1375,9 +1469,21 @@ def _load_reusable_generated_artifact(
                 code_file = existing_code_file
             else:
                 code_file.write_text(code, encoding="utf-8")
-            metadata = dict(generated.get("metadata") or {}) if isinstance(generated.get("metadata"), Mapping) else {}
-            metadata.update({"akg_reused": True, "akg_reuse_source": source, "akg_reuse_result": str(result_path)})
-            log_file = Path(str(generated.get("log_file") or artifact_dir / "akg-agent.log")).expanduser()
+            metadata = (
+                dict(generated.get("metadata") or {})
+                if isinstance(generated.get("metadata"), Mapping)
+                else {}
+            )
+            metadata.update(
+                {
+                    "akg_reused": True,
+                    "akg_reuse_source": source,
+                    "akg_reuse_result": str(result_path),
+                }
+            )
+            log_file = Path(
+                str(generated.get("log_file") or artifact_dir / "akg-agent.log")
+            ).expanduser()
             return Artifact(
                 status=AGENT_SUCCESS,
                 workdir=artifact_dir,
@@ -1423,12 +1529,16 @@ def _generated_code_file_from_mapping(value: object, workdir: object) -> Optiona
 
 
 def build_case_material(case: CannBenchCase) -> CaseMaterial:
-    from auto_pipeline.prompt.registry import build_case_material as _build_case_material
+    from auto_pipeline.prompt.registry import (
+        build_case_material as _build_case_material,
+    )
 
     return _build_case_material(case)
 
 
-def create_converter(source_generator: str, target_benchmark: str, cfg: Mapping[str, Any]) -> Converter:
+def create_converter(
+    source_generator: str, target_benchmark: str, cfg: Mapping[str, Any]
+) -> Converter:
     from auto_pipeline.converter.registry import create_converter as _create_converter
 
     return _create_converter(source_generator, target_benchmark, cfg)
@@ -1444,6 +1554,7 @@ def create_runner(runner_type: str, cfg: Mapping[str, Any]) -> Runner:
     from auto_pipeline.generator.registry import create_runner as _create_runner
 
     return _create_runner(runner_type, cfg)
+
 
 DEFAULT_OUTPUT_ROOT = DEFAULT_CANN_BENCH_ROOT / "benchmark_runs"
 DEFAULT_TIMEOUT_SEC = 10800
@@ -1505,10 +1616,14 @@ class SimpleConfig:
         return self.output / "batch_result.json"
 
 
-def run_from_config(config_path: Path, *, runtime: Optional[Mapping[str, Any]] = None) -> int:
+def run_from_config(
+    config_path: Path, *, runtime: Optional[Mapping[str, Any]] = None
+) -> int:
     try:
         cfg = read_yaml_mapping(Path(config_path))
-        entries = run_cases_from_mapping(cfg, config_path=Path(config_path), runtime=runtime)
+        entries = run_cases_from_mapping(
+            cfg, config_path=Path(config_path), runtime=runtime
+        )
     except Exception as exc:
         _mark_unregistered_run_failed(runtime, exc)
         raise
@@ -1556,7 +1671,11 @@ def run_cases_from_mapping(
     runtime: Optional[Mapping[str, Any]] = None,
 ) -> list:
     spec = _parse_config(cfg, config_path=config_path, runtime=runtime)
-    report = Path(report_path).expanduser().resolve() if report_path else spec.batch_report_path
+    report = (
+        Path(report_path).expanduser().resolve()
+        if report_path
+        else spec.batch_report_path
+    )
     if not spec.share_device and len(set(spec.devices)) != len(spec.devices):
         raise ValueError("devices must not contain duplicate device ids")
     if spec.parallel > 1 and not spec.devices and not spec.share_device:
@@ -1570,8 +1689,12 @@ def run_cases_from_mapping(
             if spec.share_device:
                 max_workers = min(len(spec.tasks), spec.parallel)
             else:
-                max_workers = min(len(spec.tasks), spec.parallel, len(spec.devices) or spec.parallel)
-            entries = _run_cases_with_device_pool(spec, max_workers=max_workers, report_path=report)
+                max_workers = min(
+                    len(spec.tasks), spec.parallel, len(spec.devices) or spec.parallel
+                )
+            entries = _run_cases_with_device_pool(
+                spec, max_workers=max_workers, report_path=report
+            )
 
         write_batch_report(entries, report, output=spec.output)
         _update_run_from_entries(spec, entries, status="completed")
@@ -1589,7 +1712,9 @@ def run_from_mapping(
 ) -> PipelineRunResult:
     spec = _parse_config(cfg, config_path=config_path, runtime=runtime)
     if len(spec.tasks) != 1:
-        raise ValueError("run_from_mapping requires exactly one benchmark task; use run_cases_from_mapping")
+        raise ValueError(
+            "run_from_mapping requires exactly one benchmark task; use run_cases_from_mapping"
+        )
     _register_run_start(spec)
     device_id = spec.devices[0] if spec.devices else None
     try:
@@ -1611,7 +1736,11 @@ def _run_cases_serial(spec: SimpleConfig, *, report_path: Path) -> list:
         _write_task_state(
             spec,
             task,
-            payload={**pipeline_state.process_identity(), "status": "running", "stage": "queued"},
+            payload={
+                **pipeline_state.process_identity(),
+                "status": "running",
+                "stage": "queued",
+            },
             device_id=device_id,
         )
         entries.append(_run_one_task_entry(spec, task, device_id=device_id))
@@ -1620,7 +1749,9 @@ def _run_cases_serial(spec: SimpleConfig, *, report_path: Path) -> list:
     return entries
 
 
-def _run_cases_with_device_pool(spec: SimpleConfig, *, max_workers: int, report_path: Path) -> list:
+def _run_cases_with_device_pool(
+    spec: SimpleConfig, *, max_workers: int, report_path: Path
+) -> list:
     if max_workers <= 0:
         raise ValueError("parallel must be positive")
 
@@ -1637,7 +1768,9 @@ def _run_cases_with_device_pool(spec: SimpleConfig, *, max_workers: int, report_
         while pending and len(active) < max_workers:
             if spec.share_device:
                 index = pending.popleft()
-                device_id = spec.devices[index % len(spec.devices)] if spec.devices else None
+                device_id = (
+                    spec.devices[index % len(spec.devices)] if spec.devices else None
+                )
             elif available_devices:
                 index = pending.popleft()
                 device_id = available_devices.popleft()
@@ -1648,11 +1781,17 @@ def _run_cases_with_device_pool(spec: SimpleConfig, *, max_workers: int, report_
             _write_task_state(spec, task, entry=entries[index], device_id=device_id)
             write_batch_report(entries, report_path, output=spec.output)
             entry_path = task.root_dir / ".auto_pipeline_entry.json"
-            process = multiprocessing.Process(target=_run_task_process, args=(spec, task, device_id, entry_path))
+            process = multiprocessing.Process(
+                target=_run_task_process, args=(spec, task, device_id, entry_path)
+            )
             process.start()
             active[process.pid or id(process)] = (process, entry_path, index, device_id)
 
-        completed = [key for key, (process, _entry_path, _index, _device_id) in active.items() if not process.is_alive()]
+        completed = [
+            key
+            for key, (process, _entry_path, _index, _device_id) in active.items()
+            if not process.is_alive()
+        ]
         if not completed:
             time.sleep(0.1)
             continue
@@ -1661,7 +1800,9 @@ def _run_cases_with_device_pool(spec: SimpleConfig, *, max_workers: int, report_
             process, entry_path, index, device_id = active.pop(key)
             task = spec.tasks[index]
             process.join()
-            entry = _task_process_entry(task, entry_path, process.exitcode, device_id=device_id)
+            entry = _task_process_entry(
+                task, entry_path, process.exitcode, device_id=device_id
+            )
             entries[index] = entry
             _write_task_state(spec, task, entry=entry, device_id=device_id)
             write_batch_report(entries, report_path, output=spec.output)
@@ -1684,7 +1825,9 @@ def _run_task_process(
         entry = _exception_entry(task, exc, device_id=device_id)
         _write_task_state(spec, task, entry=entry, device_id=device_id)
     entry_path.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_write_text(entry_path, json.dumps(entry, indent=2, ensure_ascii=False) + "\n")
+    _atomic_write_text(
+        entry_path, json.dumps(entry, indent=2, ensure_ascii=False) + "\n"
+    )
 
 
 def _task_process_entry(
@@ -1714,7 +1857,11 @@ def _run_one_task_entry(
         _write_task_state(
             spec,
             task,
-            payload={**pipeline_state.process_identity(), "status": "running", "stage": "start"},
+            payload={
+                **pipeline_state.process_identity(),
+                "status": "running",
+                "stage": "start",
+            },
             device_id=device_id,
         )
         result = _run_task(spec, task, device_id=device_id)
@@ -1728,11 +1875,15 @@ def _run_one_task_entry(
         return entry
 
 
-def _run_task_child(spec: SimpleConfig, task: ConfiguredTask, device_id: Optional[int]) -> dict[str, Any]:
+def _run_task_child(
+    spec: SimpleConfig, task: ConfiguredTask, device_id: Optional[int]
+) -> dict[str, Any]:
     return _run_one_task_entry(spec, task, device_id=device_id)
 
 
-def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]) -> PipelineRunResult:
+def _run_task(
+    spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]
+) -> PipelineRunResult:
     agent_l = str(spec.agent_type or "").strip().lower().replace("-", "_")
     if agent_l == "pypto_pro" and str(spec.bench_name or "").strip().lower() == "cann":
         perf_strategy = "kernel_details"
@@ -1753,10 +1904,14 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
     )
     pipeline = BenchmarkPipeline(bench_name=spec.bench_name, client=client)
 
-    converter = create_converter(spec.agent_type, spec.bench_name, _converter_config(spec, task))
+    converter = create_converter(
+        spec.agent_type, spec.bench_name, _converter_config(spec, task)
+    )
     conversion_runner = _conversion_runner(spec)
     conversion_workdir = task.convert_dir if conversion_runner is not None else None
-    generator = create_generator(spec.agent_type, _generator_config(spec, task, device_id=device_id))
+    generator = create_generator(
+        spec.agent_type, _generator_config(spec, task, device_id=device_id)
+    )
 
     def status_update(**payload: Any) -> None:
         _write_task_state(spec, task, payload=payload, device_id=device_id)
@@ -1774,7 +1929,8 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
         env=_task_env(spec, task),
         device_id=device_id,
         extra_eval_args=build_eval_args(
-            _default_eval_config(perf_metric_strategy=perf_strategy)),
+            _default_eval_config(perf_metric_strategy=perf_strategy)
+        ),
         status_callback=status_update,
         reuse_generated=spec.reuse_generated,
         opencode_json_path=spec.opencode_json_path,
@@ -1807,7 +1963,9 @@ def _install_opencode_json(src: Path, workdir: Path) -> None:
     shutil.copy2(src_path, target)
 
 
-def _generator_config(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]) -> dict[str, Any]:
+def _generator_config(
+    spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[int]
+) -> dict[str, Any]:
     cfg: dict[str, Any] = {
         "repo_root": spec.workspace,
         **dict(spec.agent_options),
@@ -1858,8 +2016,16 @@ def _task_env(spec: SimpleConfig, task: ConfiguredTask) -> Dict[str, str]:
 def _task_cleanup_env(spec: SimpleConfig, task: ConfiguredTask) -> list[dict[str, str]]:
     return [
         _task_env(spec, task),
-        {"BENCHMARK_OUTPUT_DIR": str((task.workdir / "artifact").expanduser().resolve())},
-        {"BENCHMARK_OUTPUT_DIR": str((task.convert_dir / "artifact").expanduser().resolve())},
+        {
+            "BENCHMARK_OUTPUT_DIR": str(
+                (task.workdir / "artifact").expanduser().resolve()
+            )
+        },
+        {
+            "BENCHMARK_OUTPUT_DIR": str(
+                (task.convert_dir / "artifact").expanduser().resolve()
+            )
+        },
     ]
 
 
@@ -1873,7 +2039,9 @@ def _result_entry(
         "name": task.name,
         "selector": task.selector,
         "ok": result.ok,
-        "status": result.status if result.ok or result.status != AGENT_SUCCESS else "eval_failed",
+        "status": result.status
+        if result.ok or result.status != AGENT_SUCCESS
+        else "eval_failed",
         "result_file": str(task.result_path),
         "result": _pipeline_result_payload(result),
     }
@@ -1978,7 +2146,11 @@ def _update_run_from_entries(spec: SimpleConfig, entries: list, *, status: str) 
     summary = _entries_summary(entries)
     final_status = status
     if status == "completed":
-        final_status = "success" if summary.get("failed", 0) == 0 and summary.get("running", 0) == 0 else "failed"
+        final_status = (
+            "success"
+            if summary.get("failed", 0) == 0 and summary.get("running", 0) == 0
+            else "failed"
+        )
     pipeline_state.update_run(
         spec.run_id,
         {
@@ -2052,14 +2224,18 @@ def _write_task_state(
                     if meta.get("output_custom_dir"):
                         merged["output_custom_dir"] = meta.get("output_custom_dir")
                     if meta.get("workspace_custom_dir"):
-                        merged["workspace_custom_dir"] = meta.get("workspace_custom_dir")
+                        merged["workspace_custom_dir"] = meta.get(
+                            "workspace_custom_dir"
+                        )
                     state = meta.get("orchestrator_state")
                     if isinstance(state, Mapping):
                         merged["orchestrator_state"] = state
             kernel_eval = result.get("kernel_eval")
             if isinstance(kernel_eval, Mapping) and kernel_eval.get("stderr"):
                 merged["last_error"] = str(kernel_eval.get("stderr"))[:1000]
-    timing_update = _task_stage_timing_update(spec.run_id, task.name, payload=payload, entry=entry)
+    timing_update = _task_stage_timing_update(
+        spec.run_id, task.name, payload=payload, entry=entry
+    )
     if timing_update:
         merged.update(timing_update)
     if payload:
@@ -2073,7 +2249,9 @@ def _run_is_marked_killed(spec: SimpleConfig) -> bool:
 
 
 def _task_is_marked_killed(spec: SimpleConfig, task: ConfiguredTask) -> bool:
-    task_state = pipeline_state.read_json(pipeline_state.task_file(spec.run_id, task.name))
+    task_state = pipeline_state.read_json(
+        pipeline_state.task_file(spec.run_id, task.name)
+    )
     return str(task_state.get("status") or "") == "killed"
 
 
@@ -2112,7 +2290,15 @@ def _task_stage_timing_update(
 
 
 def _entries_summary(entries: Iterable[Mapping[str, Any]]) -> dict[str, int]:
-    summary = {"total": 0, "pending": 0, "running": 0, "success": 0, "failed": 0, "timeout": 0, "killed": 0}
+    summary = {
+        "total": 0,
+        "pending": 0,
+        "running": 0,
+        "success": 0,
+        "failed": 0,
+        "timeout": 0,
+        "killed": 0,
+    }
     for entry in entries:
         summary["total"] += 1
         status = str(entry.get("status") or "")
@@ -2163,13 +2349,17 @@ def _parse_config(
     selectors = _task_selectors(benchmark_cfg)
     tasks = _configured_tasks(selectors, output)
     devices = tuple(_int_list(runtime_cfg.get("devices")))
-    parallel = _int_or_default(runtime_cfg.get("parallel"), len(devices) if devices else 1)
+    parallel = _int_or_default(
+        runtime_cfg.get("parallel"), len(devices) if devices else 1
+    )
     share_device = _optional_bool(runtime_cfg.get("share_device")) is True
     gen_timeout = _int_or_default(runtime_cfg.get("gen_timeout"), DEFAULT_TIMEOUT_SEC)
     eval_timeout = _int_or_default(runtime_cfg.get("eval_timeout"), DEFAULT_TIMEOUT_SEC)
     run_id = str(runtime_cfg.get("run_id") or pipeline_state.new_run_id())
     opencode_json_path_raw = runtime_cfg.get("opencode_json_path")
-    opencode_json_path = _resolve_path(opencode_json_path_raw) if opencode_json_path_raw else None
+    opencode_json_path = (
+        _resolve_path(opencode_json_path_raw) if opencode_json_path_raw else None
+    )
     if parallel <= 0:
         raise ValueError("parallel must be positive")
     if gen_timeout <= 0:
@@ -2191,7 +2381,9 @@ def _parse_config(
         gen_timeout=gen_timeout,
         eval_timeout=eval_timeout,
         run_id=run_id,
-        config_path=Path(config_path).expanduser().resolve() if config_path is not None else None,
+        config_path=Path(config_path).expanduser().resolve()
+        if config_path is not None
+        else None,
         launch_command=str(runtime_cfg.get("command") or ""),
         reuse_generated=_optional_bool(runtime_cfg.get("reuse_generated")) is True,
         share_device=share_device,
@@ -2214,9 +2406,7 @@ def _allowed_agent_keys() -> set[str]:
 
 def _agent_options(agent_cfg: Mapping[str, Any]) -> Dict[str, Any]:
     options = {
-        str(key): value
-        for key, value in agent_cfg.items()
-        if key not in {"type"}
+        str(key): value for key, value in agent_cfg.items() if key not in {"type"}
     }
     if options.get("config_path"):
         options["config_path"] = _resolve_path(options["config_path"])
@@ -2274,11 +2464,15 @@ def _reject_legacy_sections(cfg: Mapping[str, Any]) -> None:
         )
 
 
-def _reject_unknown_keys(value: Mapping[str, Any], allowed: set[str], *, prefix: str = "") -> None:
+def _reject_unknown_keys(
+    value: Mapping[str, Any], allowed: set[str], *, prefix: str = ""
+) -> None:
     unknown = sorted(str(key) for key in value if str(key) not in allowed)
     if unknown:
         location = f"{prefix}." if prefix else ""
-        raise ValueError(f"unsupported config keys: {', '.join(location + key for key in unknown)}")
+        raise ValueError(
+            f"unsupported config keys: {', '.join(location + key for key in unknown)}"
+        )
 
 
 def _task_selectors(benchmark_cfg: Mapping[str, Any]) -> list[str]:
@@ -2301,7 +2495,9 @@ def _configured_tasks(selectors: list[str], output: Path) -> list[ConfiguredTask
         seen_selectors.add(selector)
         base = _selector_leaf_name(selector)
         slug = _unique_slug(base, selector, used)
-        tasks.append(ConfiguredTask(name=slug, selector=selector, root_dir=output / slug))
+        tasks.append(
+            ConfiguredTask(name=slug, selector=selector, root_dir=output / slug)
+        )
     return tasks
 
 
@@ -2327,12 +2523,17 @@ def _unique_slug(base: str, selector: str, used: set[str]) -> str:
 
 
 def _safe_path_name(value: str) -> str:
-    return "_".join(part for part in str(value).replace("\\", "/").split("/") if part).strip("_")
+    return "_".join(
+        part for part in str(value).replace("\\", "/").split("/") if part
+    ).strip("_")
 
 
 def _resolve_output(value: object) -> Path:
     if value is None or value == "":
-        value = DEFAULT_OUTPUT_ROOT / f"run_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        value = (
+            DEFAULT_OUTPUT_ROOT
+            / f"run_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        )
     return _resolve_path(value)
 
 
@@ -2351,8 +2552,13 @@ def _normalize_name(name: str) -> str:
 
 
 def _validate_environment(*, agent_type: str) -> None:
-    if _normalize_name(agent_type) in ("pypto", "pypto-pro") and not os.environ.get(TILE_LIB_ENV, "").strip():
-        raise ValueError(f"{TILE_LIB_ENV} must be set in the environment for {agent_type}")
+    if (
+        _normalize_name(agent_type) in ("pypto", "pypto-pro")
+        and not os.environ.get(TILE_LIB_ENV, "").strip()
+    ):
+        raise ValueError(
+            f"{TILE_LIB_ENV} must be set in the environment for {agent_type}"
+        )
 
 
 def write_pipeline_report(result: PipelineRunResult, output_path: Path) -> Path:
@@ -2362,28 +2568,40 @@ def write_pipeline_report(result: PipelineRunResult, output_path: Path) -> Path:
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         **_pipeline_result_payload(result),
     }
-    output_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     return output_path
 
 
-def write_batch_report(entries: list, output_path: Path, *, output: Optional[Path] = None) -> Path:
+def write_batch_report(
+    entries: list, output_path: Path, *, output: Optional[Path] = None
+) -> Path:
     output_path = Path(output_path).expanduser().resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     completed = [entry for entry in entries if entry.get("ok") is not None]
     payload = {
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "output": str(output) if output is not None else str(output_path.parent),
-        "ok": bool(entries) and len(completed) == len(entries) and all(entry.get("ok") for entry in entries),
+        "ok": bool(entries)
+        and len(completed) == len(entries)
+        and all(entry.get("ok") for entry in entries),
         "total_cases": len(entries),
         "completed_cases": len(completed),
         "passed_cases": sum(1 for entry in entries if entry.get("ok") is True),
         "failed_cases": sum(1 for entry in entries if entry.get("ok") is False),
-        "running_cases": sum(1 for entry in entries if entry.get("status") == "running"),
-        "pending_cases": sum(1 for entry in entries if entry.get("status") == "pending"),
+        "running_cases": sum(
+            1 for entry in entries if entry.get("status") == "running"
+        ),
+        "pending_cases": sum(
+            1 for entry in entries if entry.get("status") == "pending"
+        ),
         "token_usage": _batch_token_usage(entries),
         "cases": entries,
     }
-    _atomic_write_text(output_path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+    _atomic_write_text(
+        output_path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    )
     return output_path
 
 
@@ -2504,15 +2722,20 @@ def _eval_env(
     # PERF_SOURCE_ENV 已废弃 — perf 策略现在通过
     # BenchConfig.perf_metric_strategy + CLI --perf-metric-strategy 控制，
     # 不再通过环境变量传递。
-    env: Dict[str, str] = {str(key): str(value) for key, value in dict(task_env or {}).items()}
-    if device_id is not None and _is_pypto_cann_eval(agent_type=agent_type, bench_name=bench_name):
+    env: Dict[str, str] = {
+        str(key): str(value) for key, value in dict(task_env or {}).items()
+    }
+    if device_id is not None and _is_pypto_cann_eval(
+        agent_type=agent_type, bench_name=bench_name
+    ):
         env["TILE_FWK_DEVICE_ID"] = str(device_id)
     return env
 
 
 def _is_pypto_cann_eval(*, agent_type: str, bench_name: str) -> bool:
     return (
-        str(agent_type or "").strip().lower().replace("-", "_") in ("pypto", "pypto_pro")
+        str(agent_type or "").strip().lower().replace("-", "_")
+        in ("pypto", "pypto_pro")
         and str(bench_name or "").strip().lower() == "cann"
     )
 
@@ -2531,9 +2754,13 @@ def _pipeline_result_payload(result: PipelineRunResult) -> Dict[str, Any]:
         "metadata": result.metadata,
         "token_usage": _pipeline_token_usage(result),
         "case": _task_to_dict(result.case),
-        "generator_prompt_file": str(result.generator_prompt_file) if result.generator_prompt_file else "",
+        "generator_prompt_file": str(result.generator_prompt_file)
+        if result.generator_prompt_file
+        else "",
         "generated_artifact": _artifact_to_dict(result.generated_artifact),
-        "converter_prompt_file": str(result.converter_prompt_file) if result.converter_prompt_file else "",
+        "converter_prompt_file": str(result.converter_prompt_file)
+        if result.converter_prompt_file
+        else "",
         "conversion_artifact": _artifact_to_dict(result.conversion_artifact),
         "submission": {
             "kind": result.submission.kind,
@@ -2618,7 +2845,9 @@ def _empty_token_usage() -> Dict[str, Any]:
         }
 
 
-def _merge_token_usages(usages: Iterable[Optional[Mapping[str, Any]]]) -> Dict[str, Any]:
+def _merge_token_usages(
+    usages: Iterable[Optional[Mapping[str, Any]]],
+) -> Dict[str, Any]:
     try:
         from auto_pipeline.generator.opencode.exporter import merge_token_usage
 
@@ -2630,12 +2859,23 @@ def _merge_token_usages(usages: Iterable[Optional[Mapping[str, Any]]]) -> Dict[s
                 continue
             if usage.get("supported"):
                 merged["supported"] = True
-            for key in ("message_count", "session_count", "total", "input", "output", "reasoning"):
+            for key in (
+                "message_count",
+                "session_count",
+                "total",
+                "input",
+                "output",
+                "reasoning",
+            ):
                 merged[key] = int(merged.get(key, 0) or 0) + int(usage.get(key, 0) or 0)
-            cache = usage.get("cache") if isinstance(usage.get("cache"), Mapping) else {}
+            cache = (
+                usage.get("cache") if isinstance(usage.get("cache"), Mapping) else {}
+            )
             merged["cache"]["read"] += int(cache.get("read", 0) or 0)
             merged["cache"]["write"] += int(cache.get("write", 0) or 0)
-            merged["cost"] = float(merged.get("cost", 0.0) or 0.0) + float(usage.get("cost", 0.0) or 0.0)
+            merged["cost"] = float(merged.get("cost", 0.0) or 0.0) + float(
+                usage.get("cost", 0.0) or 0.0
+            )
         return merged
 
 

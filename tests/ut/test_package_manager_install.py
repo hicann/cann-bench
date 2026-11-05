@@ -11,11 +11,34 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
+import os
 import subprocess
 import sys
 import types
 
-from src.kernel_eval.data.package_manager import PackageManager
+from src.kernel_eval.data.package_manager import PackageManager, _detect_opp_path
+
+
+def test_private_opp_install_root_does_not_replace_system_opp(monkeypatch, tmp_path):
+    system_opp = tmp_path / "system_opp"
+    system_opp.mkdir()
+    private_opp = tmp_path / "lane" / "opp"
+    monkeypatch.setenv("ASCEND_OPP_PATH", str(system_opp))
+    monkeypatch.setenv("MC2_OPP_INSTALL_ROOT", str(private_opp))
+
+    assert _detect_opp_path() == str(private_opp.resolve())
+    assert private_opp.is_dir()
+    assert os.environ["ASCEND_OPP_PATH"] == str(system_opp)
+
+
+def test_private_opp_install_root_requires_absolute_path(monkeypatch):
+    monkeypatch.setenv("MC2_OPP_INSTALL_ROOT", "relative/opp")
+    try:
+        _detect_opp_path()
+    except ValueError as exc:
+        assert "absolute" in str(exc)
+    else:
+        raise AssertionError("relative MC2_OPP_INSTALL_ROOT unexpectedly accepted")
 
 
 def test_install_run_package_uses_supported_makeself_flags(monkeypatch, tmp_path):
@@ -41,6 +64,42 @@ def test_install_run_package_uses_supported_makeself_flags(monkeypatch, tmp_path
     assert "--quiet" in cmd
     assert f"--install-path={opp_path}" in cmd
     assert "--force" not in cmd
+
+
+def test_install_run_package_sources_vendor_created_by_installer(monkeypatch, tmp_path):
+    """The evaluator must source the actual vendor instead of assuming custom_ops."""
+    run_file = tmp_path / "custom.run"
+    run_file.write_text("#!/bin/sh\nexit 0\n")
+    opp_path = tmp_path / "opp"
+    stale_vendor = opp_path / "vendors" / "custom_ops" / "bin"
+    stale_vendor.mkdir(parents=True)
+    stale_vendor.joinpath("set_env.bash").write_text(
+        "export ASCEND_CUSTOM_OPP_PATH=/stale/custom_ops:${ASCEND_CUSTOM_OPP_PATH}\n"
+    )
+
+    actual_vendor = opp_path / "vendors" / "custom_transformer"
+
+    def fake_run(cmd, **kwargs):
+        env_dir = actual_vendor / "bin"
+        env_dir.mkdir(parents=True, exist_ok=True)
+        env_dir.joinpath("set_env.bash").write_text(
+            f"export ASCEND_CUSTOM_OPP_PATH={actual_vendor}:${{ASCEND_CUSTOM_OPP_PATH}}\n"
+            f"export LD_LIBRARY_PATH={actual_vendor}/op_api/lib/:${{LD_LIBRARY_PATH}}\n"
+        )
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    monkeypatch.setenv("ASCEND_OPP_PATH", str(opp_path))
+    monkeypatch.delenv("ASCEND_CUSTOM_OPP_PATH", raising=False)
+    monkeypatch.delenv("LD_LIBRARY_PATH", raising=False)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    PackageManager().install_run_package(str(run_file))
+
+    assert os.environ["ASCEND_CUSTOM_OPP_PATH"].startswith(str(actual_vendor))
+    normalized_ld_path = os.environ["LD_LIBRARY_PATH"].replace("\\", "/")
+    assert (
+        str(actual_vendor / "op_api" / "lib").replace("\\", "/") in normalized_ld_path
+    )
 
 
 def test_install_whl_force_reinstalls_same_version_without_dependencies(

@@ -31,10 +31,12 @@ TASKS_ROOT="${PROJECT_ROOT}/tasks"
 
 # 默认配置
 SOURCE_DIR=""
+SOURCE_BUILD_ARGS=""
 TASK_DIR=""
 BENCH_NAME="cann"  # 评测集名称：cann 或 stanford
 OPERATOR=""
 CASE_ID=""
+CASE_ID_RANGE=""
 DEVICE_ID=""  # 空表示多卡模式，指定值表示单卡模式
 VERBOSE=false
 ACTION="eval"
@@ -43,6 +45,7 @@ STAGED_EVAL=true
 # 多进程并行配置（统一架构）
 PROCESSES_PER_CARD=2
 TIMEOUT_PER_PROCESS=300
+BUILD_TIMEOUT="${CANN_BENCH_BUILD_TIMEOUT_SEC-600}"
 
 # 性能配置
 WARMUP=3
@@ -77,6 +80,8 @@ print_help() {
     echo "  -a, --action <action>     操作类型: eval(评测), list(列表), info(详情), config(配置)"
     echo "                            默认: eval"
     echo "  --source-dir <dir>        AI生成的算子源码目录（显式指定，与位置参数等效）"
+    echo "  --source-build-args <s>   透传给源码目录 build.sh 的参数字符串"
+    echo "                            例如: \"--pkg --soc=ascend950 --ops=foo,bar\""
     echo ""
     echo "评测集配置:"
     echo "  --bench-name <name>       评测集名称: cann, stanford（默认: cann）"
@@ -96,10 +101,12 @@ print_help() {
     echo "多进程并行配置:"
     echo "  --processes-per-card <n>  每卡进程数（默认: 2）"
     echo "  --timeout-per-process <n> 单进程超时（秒，默认: 300）"
+    echo "  --build-timeout <n>       submission 编译超时（秒，默认: 600）"
     echo ""
     echo "用例筛选:"
     echo "  --operator <name>         按算子名称筛选"
     echo "  --case-id <id>            按用例编号筛选"
+    echo "  --case-id-range <a-b>     按闭区间筛选用例并汇总为一份报告（如 21-40）"
     echo ""
     echo "性能配置:"
     echo "  --warmup <n>              预热次数（默认: 3）"
@@ -191,6 +198,10 @@ while [[ $# -gt 0 ]]; do
             SOURCE_DIR="$2"
             shift 2
             ;;
+        --source-build-args)
+            SOURCE_BUILD_ARGS="$2"
+            shift 2
+            ;;
         --task-dir)
             TASK_DIR="$2"
             shift 2
@@ -211,6 +222,10 @@ while [[ $# -gt 0 ]]; do
             CASE_ID="$2"
             shift 2
             ;;
+        --case-id-range)
+            CASE_ID_RANGE="$2"
+            shift 2
+            ;;
         --device)
             DEVICE_TYPE="$2"
             shift 2
@@ -225,6 +240,18 @@ while [[ $# -gt 0 ]]; do
             ;;
         --timeout-per-process)
             TIMEOUT_PER_PROCESS="$2"
+            shift 2
+            ;;
+        --build-timeout)
+            if [[ $# -lt 2 || -z "$2" || "$2" == --* ]]; then
+                log_error "--build-timeout 缺少参数，必须指定正整数秒数" >&2
+                exit 2
+            fi
+            if [[ ! "$2" =~ ^[0-9]+$ || ! "$2" =~ [1-9] ]]; then
+                log_error "--build-timeout 必须为正整数秒数: $2" >&2
+                exit 2
+            fi
+            BUILD_TIMEOUT="$2"
             shift 2
             ;;
         --warmup)
@@ -292,6 +319,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Validate the effective value after CLI overrides, before any setup or build.
+if ! [[ "${BUILD_TIMEOUT}" =~ ^[0-9]+$ ]] || [[ "${BUILD_TIMEOUT}" =~ ^0+$ ]]; then
+    log_error "--build-timeout / CANN_BENCH_BUILD_TIMEOUT_SEC 必须为正整数秒数: ${BUILD_TIMEOUT}" >&2
+    exit 2
+fi
+
 # 处理位置参数：第一个位置参数作为源码目录（如果 --source-dir 未显式指定）
 if [[ -z "${SOURCE_DIR}" && ${#POSITIONAL_ARGS[@]} -gt 0 ]]; then
     SOURCE_DIR="${POSITIONAL_ARGS[0]}"
@@ -314,9 +347,9 @@ source "${PROJECT_ROOT}/scripts/ensure_cann_bench_utils.sh"
 # V3 Anti-Cheat: 排除 cann_bench_utils（强制依赖，不能卸载）
 uninstall_packages() {
     for pkg in cann_bench cann_bench_golden; do
-        if pip show "${pkg}" &> /dev/null; then
+        if python -m pip show "${pkg}" &> /dev/null; then
             log_info "卸载已安装的包: ${pkg}"
-            pip uninstall "${pkg}" -y &> /dev/null || true
+            python -m pip uninstall "${pkg}" -y &> /dev/null || true
         fi
     done
 
@@ -380,6 +413,9 @@ build_cmd_args() {
             fi
             if [[ -n "${CASE_ID}" ]]; then
                 CMD_ARGS+=(--case-id "${CASE_ID}")
+            fi
+            if [[ -n "${CASE_ID_RANGE}" ]]; then
+                CMD_ARGS+=(--case-id-range "${CASE_ID_RANGE}")
             fi
 
             # 设备配置
@@ -461,9 +497,15 @@ build_cmd_args() {
 # 执行命令
 run_cmd() {
     if [[ "${CMD_ARGS[0]}" == staged-eval ]]; then
-        PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.staged_eval "${CMD_ARGS[@]:1}"
+        CANN_BENCH_BUILD_TIMEOUT_SEC="${BUILD_TIMEOUT}" \
+            CANN_BENCH_SOURCE_BUILD_ARGS="${SOURCE_BUILD_ARGS}" \
+            PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" \
+            python -m kernel_eval.staged_eval "${CMD_ARGS[@]:1}"
     else
-        PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" python -m kernel_eval.cli "${CMD_ARGS[@]}"
+        CANN_BENCH_BUILD_TIMEOUT_SEC="${BUILD_TIMEOUT}" \
+            CANN_BENCH_SOURCE_BUILD_ARGS="${SOURCE_BUILD_ARGS}" \
+            PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" \
+            python -m kernel_eval.cli "${CMD_ARGS[@]}"
     fi
 }
 
@@ -523,6 +565,10 @@ main() {
 
         if [[ -n "${SOURCE_DIR}" ]]; then
             log_info "源码目录: ${SOURCE_DIR}"
+            log_info "编译超时: ${BUILD_TIMEOUT}s"
+            if [[ -n "${SOURCE_BUILD_ARGS}" ]]; then
+                log_info "源码构建参数: ${SOURCE_BUILD_ARGS}"
+            fi
         fi
         if [[ -n "${TASK_DIR}" ]]; then
             log_info "评测目录: ${TASK_DIR}"

@@ -65,21 +65,21 @@ class TestConfig:
         config = Config(tasks_root="/test/path")
         path = config.get_tasks_path()
         assert isinstance(path, Path)
-        assert str(path) == "/test/path"
+        assert str(path) == str(Path("/test/path"))
 
     def test_get_reports_path(self):
         """获取报告路径"""
         config = Config(reports_dir="/reports")
         path = config.get_reports_path()
         assert isinstance(path, Path)
-        assert str(path) == "/reports"
+        assert str(path) == str(Path("/reports"))
 
     def test_get_source_path(self):
         """获取源码路径"""
         config = Config(source_dir="/source")
         path = config.get_source_path()
         assert isinstance(path, Path)
-        assert str(path) == "/source"
+        assert str(path) == str(Path("/source"))
 
     def test_get_source_path_empty(self):
         """空源码路径"""
@@ -114,7 +114,6 @@ class TestConfig:
         config = Config()
         assert config.profiler_level == "Level1"
 
-    
 
 class TestGetSetConfig:
     """get_config / set_config 函数测试"""
@@ -220,10 +219,20 @@ class TestConfigPrecisionSettings:
         """所有 dtype 阈值存在"""
         config = Config()
         expected_dtypes = [
-            "float16", "bfloat16", "float32", "hifloat32",
-            "float8_e4m3fn", "float8_e5m2",
-            "int8", "int16", "int32", "int64",
-            "uint8", "uint16", "uint32", "uint64",
+            "float16",
+            "bfloat16",
+            "float32",
+            "hifloat32",
+            "float8_e4m3fn",
+            "float8_e5m2",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "uint8",
+            "uint16",
+            "uint32",
+            "uint64",
         ]
         for dtype in expected_dtypes:
             assert dtype in config.precision_thresholds

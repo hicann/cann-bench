@@ -1,10 +1,20 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
+
 import csv
 import json
 import os
-import signal
 import sqlite3
 import subprocess
 from pathlib import Path
@@ -13,7 +23,10 @@ import pytest
 
 import auto_pipeline.core as config_runner
 from auto_pipeline.generator.opencode.exporter import export_session_to_markdown
-from auto_pipeline.generator.opencode.live_bridge import OpencodeLiveBridge, _opencode_config_with_plugin
+from auto_pipeline.generator.opencode.live_bridge import (
+    OpencodeLiveBridge,
+    _opencode_config_with_plugin,
+)
 from auto_pipeline.generator.opencode import opencode_permission_without_external_asks
 from auto_pipeline.generator.pypto import PyptoOrchestratorAgent
 from auto_pipeline.generator.registry import available_generators, create_generator
@@ -23,7 +36,10 @@ from auto_pipeline.core import CannBenchClient, CannBenchEvalResult
 from auto_pipeline.core import GeneratorInput, PromptGenerator
 from auto_pipeline.core import AGENT_SUCCESS, Artifact, RunnerPrompt, Submission
 from auto_pipeline.core import BenchmarkPipeline, PipelineRunResult
-from auto_pipeline.generator.pypto.converter import PyptoToCannConverter, PyptoToStanfordConverter
+from auto_pipeline.generator.pypto.converter import (
+    PyptoToCannConverter,
+    PyptoToStanfordConverter,
+)
 from auto_pipeline.converter.base import ConversionResult
 from auto_pipeline.converter.registry import available_converters, create_converter
 from auto_pipeline.core import CannBenchCase
@@ -37,11 +53,27 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SEASON1_GELU_SELECTOR = "archives/season1/tasks/level1/gelu"
 
 
-def _build_submission(adapter, case: CannBenchCase, artifact: Artifact, *, output_dir: Path) -> Submission:
-    return adapter.build_submission(case.bench_name, case, artifact, output_dir=output_dir)
+@pytest.fixture
+def mock_process_identity(monkeypatch):
+    # Configuration/dispatch tests do not require POSIX process metadata.
+    monkeypatch.setattr(
+        config_runner.pipeline_state,
+        "process_identity",
+        lambda pid=None: {"pid": 12345},
+    )
 
 
-def _generation_task(case: CannBenchCase, workdir: Path, *, timeout_sec: int = 30) -> GeneratorInput:
+def _build_submission(
+    adapter, case: CannBenchCase, artifact: Artifact, *, output_dir: Path
+) -> Submission:
+    return adapter.build_submission(
+        case.bench_name, case, artifact, output_dir=output_dir
+    )
+
+
+def _generation_task(
+    case: CannBenchCase, workdir: Path, *, timeout_sec: int = 30
+) -> GeneratorInput:
     material = build_case_material(case)
     workdir = Path(workdir)
     return GeneratorInput(
@@ -75,10 +107,16 @@ def test_loads_cann_bench_gelu_case():
 
 
 def test_exp_general_case_remains_full_task():
-    yaml_cases = config_runner.read_yaml_mapping(REPO_ROOT / "tasks/level1/exp/cases.yaml")["cases"]
+    yaml_cases = config_runner.read_yaml_mapping(
+        REPO_ROOT / "tasks/level1/exp/cases.yaml"
+    )["cases"]
     assert len(yaml_cases) == 20
     assert [case["case_id"] for case in yaml_cases] == list(range(1, 21))
-    assert {dtype for case in yaml_cases for dtype in case["dtype"]} == {"float16", "float32", "bfloat16"}
+    assert {dtype for case in yaml_cases for dtype in case["dtype"]} == {
+        "float16",
+        "float32",
+        "bfloat16",
+    }
 
 
 def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
@@ -97,7 +135,10 @@ def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
     yaml_cases = config_runner.read_yaml_mapping(task_dir / "cases.yaml")["cases"]
     assert [case["case_id"] for case in yaml_cases] == [2, 8, 15]
     assert {tuple(case["dtype"]) for case in yaml_cases} == {("float32",)}
-    assert all(len(case["input_shape"]) == 1 and len(case["input_shape"][0]) == 2 for case in yaml_cases)
+    assert all(
+        len(case["input_shape"]) == 1 and len(case["input_shape"][0]) == 2
+        for case in yaml_cases
+    )
     # baseline_perf_us/t_hw_us 已迁移到 data/ JSON，不再在 YAML/CSV 中
 
     with (task_dir / "cases.csv").open(encoding="utf-8", newline="") as handle:
@@ -109,7 +150,10 @@ def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
 
     proto = config_runner.read_yaml_mapping(task_dir / "proto.yaml")["operator"]
     assert proto["name"] == "Exp"
-    assert proto["schema"] == "exp(Tensor x, float base, float scale, float shift) -> Tensor y"
+    assert (
+        proto["schema"]
+        == "exp(Tensor x, float base, float scale, float shift) -> Tensor y"
+    )
     assert proto["inputs"][0]["dtype"] == ["float32"]
     assert proto["outputs"][0]["dtype"] == ["float32"]
 
@@ -126,7 +170,9 @@ def test_pypto_cann_bench_exp_task_is_static_2d_float32_subset():
     assert "1D" not in scoped_text
     assert "5D" not in scoped_text
 
-    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("level1/exp")
+    loaded_cases = CannCaseLoader(
+        tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")
+    ).scan_by_rel_path("level1/exp")
     assert [case.case_id for case in loaded_cases] == [
         "level1/exp_2",
         "level1/exp_8",
@@ -151,7 +197,10 @@ def test_pypto_cann_bench_sigmoid_task_is_static_2d_float32_subset():
     yaml_cases = config_runner.read_yaml_mapping(task_dir / "cases.yaml")["cases"]
     assert [case["case_id"] for case in yaml_cases] == [8, 15]
     assert {tuple(case["dtype"]) for case in yaml_cases} == {("float32",)}
-    assert all(len(case["input_shape"]) == 1 and len(case["input_shape"][0]) == 2 for case in yaml_cases)
+    assert all(
+        len(case["input_shape"]) == 1 and len(case["input_shape"][0]) == 2
+        for case in yaml_cases
+    )
     # baseline_perf_us/t_hw_us 已迁移到 data/ JSON，不再在 YAML/CSV 中
 
     with (task_dir / "cases.csv").open(encoding="utf-8", newline="") as handle:
@@ -179,7 +228,9 @@ def test_pypto_cann_bench_sigmoid_task_is_static_2d_float32_subset():
     assert "1D" not in scoped_text
     assert "5D" not in scoped_text
 
-    loaded_cases = CannCaseLoader(tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")).scan_by_rel_path("level1/sigmoid")
+    loaded_cases = CannCaseLoader(
+        tasks_root=str(REPO_ROOT / "bench_lab/pypto_cann_bench")
+    ).scan_by_rel_path("level1/sigmoid")
     assert [case.case_id for case in loaded_cases] == [
         "level1/sigmoid_8",
         "level1/sigmoid_15",
@@ -193,11 +244,19 @@ def test_generator_benchmark_converters_are_registered():
     assert "akg-agent -> cann" in names
     assert "akg-agent -> stanford" in names
     assert isinstance(create_converter("pypto", "cann", {}), PyptoToCannConverter)
-    assert isinstance(create_converter("pypto", "stanford", {}), PyptoToStanfordConverter)
+    assert isinstance(
+        create_converter("pypto", "stanford", {}), PyptoToStanfordConverter
+    )
     assert create_converter("akg-agent", "cann", {}).name == "akg-agent-to-cann"
     assert create_converter("akg-agent", "stanford", {}).name == "akg-agent-to-stanford"
     assert create_converter("akg_agent", "cann", {}).name == "akg-agent-to-cann"
-    for generator_type in ("tilelang-ascend", "tilelang", "ascendc", "ascend-c", "triton"):
+    for generator_type in (
+        "tilelang-ascend",
+        "tilelang",
+        "ascendc",
+        "ascend-c",
+        "triton",
+    ):
         with pytest.raises(ValueError, match="unsupported converter"):
             create_converter(generator_type, "cann", {})
 
@@ -227,7 +286,9 @@ def test_pipeline_generates_akg_to_cann_submission_from_fake_agent(tmp_path):
             source_dir = Path(source_dir)
             assert source_dir.joinpath("build.sh").is_file()
             assert source_dir.joinpath("cann_bench", "exp.py").is_file()
-            return CannBenchEvalResult(returncode=0, command=["fake"], reports_dir=Path(reports_dir))
+            return CannBenchEvalResult(
+                returncode=0, command=["fake"], reports_dir=Path(reports_dir)
+            )
 
     pipeline = BenchmarkPipeline(bench_name="cann", client=FakeEvalClient(REPO_ROOT))
 
@@ -292,18 +353,30 @@ def test_pypto_adapter_validates_backend_artifact(tmp_path):
     assert "schema: gelu" in material.require_text
     assert "golden.py 参考实现" in material.require_text
 
-    pypto_cann_bench_case = client.load_case("cann", "bench_lab/pypto_cann_bench/level1/exp")
+    pypto_cann_bench_case = client.load_case(
+        "cann", "bench_lab/pypto_cann_bench/level1/exp"
+    )
     exp_material = build_case_material(pypto_cann_bench_case)
     assert exp_material.op_name == "exp"
 
     source_dir = tmp_path / "pypto" / "artifact" / "submission"
     source_dir.joinpath("cann_bench").mkdir(parents=True)
     source_dir.joinpath("cann_bench", "__init__.py").write_text("", encoding="utf-8")
-    source_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
-    source_dir.joinpath("cann_bench", "gelu.py").write_text("import pypto\n", encoding="utf-8")
+    source_dir.joinpath("build.sh").write_text(
+        "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+    )
+    source_dir.joinpath("cann_bench", "gelu.py").write_text(
+        "import pypto\n", encoding="utf-8"
+    )
 
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
-    submission = _build_submission(adapter, case, output, output_dir=tmp_path / "pypto" / "submission")
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
+    submission = _build_submission(
+        adapter, case, output, output_dir=tmp_path / "pypto" / "submission"
+    )
 
     assert submission.kind == "cann"
     assert submission.source_dir.joinpath("build.sh").is_file()
@@ -429,7 +502,9 @@ def test_pypto_orchestrator_agent_runs_real_pypto_agent_contract(tmp_path):
     assert "下游 KernelBench 调用约定" not in pypto_prompt
     assert "state_dict" not in pypto_prompt
     assert (repo_root / "custom" / "ReLU" / "task_desc.py").is_file()
-    assert (repo_root / "custom" / "ReLU" / "REQUIRE.md").read_text(encoding="utf-8") == "# ReLU\n"
+    assert (repo_root / "custom" / "ReLU" / "REQUIRE.md").read_text(
+        encoding="utf-8"
+    ) == "# ReLU\n"
     log_text = output.log_file.read_text(encoding="utf-8")
     assert "--agent pypto-op-orchestrator" in log_text
     assert "-m zai-coding-plan/glm-5.1" in log_text
@@ -439,9 +514,14 @@ def test_pypto_orchestrator_agent_runs_real_pypto_agent_contract(tmp_path):
     env = json.loads((repo_root / "env.json").read_text(encoding="utf-8"))
     assert env["TMPDIR"] == str(repo_root / "custom" / "ReLU" / ".tmp")
     assert json.loads(env["OPENCODE_PERMISSION"])["external_directory"] == "deny"
-    assert env["OPENCODE_SUBAGENT_BRIDGE_LOG"] == str(task.output_dir / "opencode-live" / "events.jsonl")
+    assert env["OPENCODE_SUBAGENT_BRIDGE_LOG"] == str(
+        task.output_dir / "opencode-live" / "events.jsonl"
+    )
     opencode_config = json.loads(env["OPENCODE_CONFIG_CONTENT"])
-    assert any(str(plugin).endswith("opencode_live_bridge_plugin.js") for plugin in opencode_config["plugin"])
+    assert any(
+        str(plugin).endswith("opencode_live_bridge_plugin.js")
+        for plugin in opencode_config["plugin"]
+    )
     assert (repo_root / "custom" / "ReLU" / ".tmp").is_dir()
     bridge = output.metadata["opencode_live_bridge"]
     assert bridge["status"] == "captured"
@@ -451,7 +531,11 @@ def test_pypto_orchestrator_agent_runs_real_pypto_agent_contract(tmp_path):
     assert Path(bridge["events_file"]).is_file()
     session_tree = Path(bridge["session_tree_file"])
     assert "ses_child" in session_tree.read_text(encoding="utf-8")
-    child_live = next((task.output_dir / "opencode-live" / "nodes").glob("subagent__ses_child__*.live.md"))
+    child_live = next(
+        (task.output_dir / "opencode-live" / "nodes").glob(
+            "subagent__ses_child__*.live.md"
+        )
+    )
     child_live_text = child_live.read_text(encoding="utf-8")
     assert "live child line" in child_live_text
     assert "child done" in child_live_text
@@ -462,7 +546,9 @@ def test_pypto_orchestrator_agent_runs_real_pypto_agent_contract(tmp_path):
     assert Path(output.metadata["opencode_session"]["markdown_file"]).is_file()
     assert Path(output.metadata["opencode_session"]["json_file"]).is_file()
     assert Path(output.metadata["opencode_session"]["session_tree_file"]).is_file()
-    assert "child transcript" in (task.output_dir / "opencode-session.md").read_text(encoding="utf-8")
+    assert "child transcript" in (task.output_dir / "opencode-session.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_pypto_orchestrator_agent_uses_isolated_git_worktree(tmp_path):
@@ -596,10 +682,16 @@ def test_opencode_live_bridge_appends_node_markdown_without_replacing(tmp_path):
         "type": "session.created",
         "sessionID": "ses_child",
         "parentID": "ses_root",
-        "session": {"id": "ses_child", "title": "fake subagent", "parentID": "ses_root"},
+        "session": {
+            "id": "ses_child",
+            "title": "fake subagent",
+            "parentID": "ses_root",
+        },
     }
     bridge._process_jsonl_line(json.dumps(session_event), render=True)
-    child_live = next((tmp_path / "opencode-live" / "nodes").glob("subagent__ses_child__*.live.md"))
+    child_live = next(
+        (tmp_path / "opencode-live" / "nodes").glob("subagent__ses_child__*.live.md")
+    )
     inode = child_live.stat().st_ino
 
     for text in ["hello ", "world"]:
@@ -694,7 +786,9 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
     task_dir = tmp_path / "tasks" / "level1" / "gelu"
     task_dir.mkdir(parents=True)
     proto = task_dir / "proto.yaml"
-    proto.write_text("operator:\n  name: Gelu\n  schema: gelu(x) -> y\n", encoding="utf-8")
+    proto.write_text(
+        "operator:\n  name: Gelu\n  schema: gelu(x) -> y\n", encoding="utf-8"
+    )
     cases = task_dir / "cases.yaml"
     cases.write_text("cases:\n  - shape: [16]\n", encoding="utf-8")
     golden = task_dir / "golden.py"
@@ -714,7 +808,9 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
         },
     )
     task = _generation_task(case, tmp_path / "work")
-    agent = PyptoOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+    agent = PyptoOrchestratorAgent(
+        pypto_repo_root=repo_root, opencode_bin=str(opencode)
+    )
 
     output = agent.generate(task)
 
@@ -724,7 +820,9 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
     assert (repo_root / "custom" / "gelu" / "cases.yaml").is_file()
     assert (repo_root / "custom" / "gelu" / "golden.py").is_file()
     assert (repo_root / "custom" / "gelu" / "desc.md").is_file()
-    require_text = (repo_root / "custom" / "gelu" / "REQUIRE.md").read_text(encoding="utf-8")
+    require_text = (repo_root / "custom" / "gelu" / "REQUIRE.md").read_text(
+        encoding="utf-8"
+    )
     assert "cann-bench 输入材料" in require_text
     assert "gelu(x) -> y" in require_text
     assert not (task.output_dir / "PYPTO_PROMPT.md").exists()
@@ -739,7 +837,10 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
     assert "input_shape、dtype、attrs 和 value_range" in pypto_prompt
     assert "不扩大本次 benchmark 的 dtype、rank 或 shape 范围" in pypto_prompt
     assert "schema 描述的算子语义" in pypto_prompt
-    assert "convert 阶段只做提交格式归一，不作为需求修正或 kernel 语义修复环节" in pypto_prompt
+    assert (
+        "convert 阶段只做提交格式归一，不作为需求修正或 kernel 语义修复环节"
+        in pypto_prompt
+    )
     assert "实验可复现" in pypto_prompt
     assert "历史 run、历史 submission、历史 eval 或其它 artifact" in pypto_prompt
     assert "性能调优轮次" in pypto_prompt
@@ -781,7 +882,9 @@ def test_pypto_orchestrator_agent_renders_cann_input_branch(tmp_path):
     assert "ModelNew" not in pypto_prompt
 
 
-def test_pypto_orchestrator_accepts_six_stages_when_perf_round_zero(monkeypatch, tmp_path):
+def test_pypto_orchestrator_accepts_six_stages_when_perf_round_zero(
+    monkeypatch, tmp_path
+):
     monkeypatch.setenv("PYPTO_PERF_ROUND", "0")
     repo_root = tmp_path / "pypto_repo"
     repo_root.mkdir()
@@ -805,7 +908,9 @@ def test_pypto_orchestrator_accepts_six_stages_when_perf_round_zero(monkeypatch,
     task_dir = tmp_path / "tasks" / "level1" / "gelu"
     task_dir.mkdir(parents=True)
     proto = task_dir / "proto.yaml"
-    proto.write_text("operator:\n  name: Gelu\n  schema: gelu(x) -> y\n", encoding="utf-8")
+    proto.write_text(
+        "operator:\n  name: Gelu\n  schema: gelu(x) -> y\n", encoding="utf-8"
+    )
     cases = task_dir / "cases.yaml"
     cases.write_text("cases:\n  - shape: [16]\n", encoding="utf-8")
     golden = task_dir / "golden.py"
@@ -820,7 +925,9 @@ def test_pypto_orchestrator_accepts_six_stages_when_perf_round_zero(monkeypatch,
         metadata={"schema": "gelu(x) -> y"},
     )
     task = _generation_task(case, tmp_path / "work")
-    agent = PyptoOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+    agent = PyptoOrchestratorAgent(
+        pypto_repo_root=repo_root, opencode_bin=str(opencode)
+    )
 
     output = agent.generate(task)
 
@@ -837,7 +944,7 @@ def test_opencode_exporter_rejects_truncated_cli_json(monkeypatch, tmp_path):
         "#!/usr/bin/env python3\n"
         "import sys\n"
         "if sys.argv[1:3] == ['export', 'ses_truncated']:\n"
-        "    sys.stdout.write('{\"info\":{\"id\":\"ses_truncated\"},\"messages\":[{\"parts\":[{\"text\":\"cut')\n"
+        '    sys.stdout.write(\'{"info":{"id":"ses_truncated"},"messages":[{"parts":[{"text":"cut\')\n'
         "    raise SystemExit(0)\n"
         "raise SystemExit(2)\n",
         encoding="utf-8",
@@ -880,7 +987,15 @@ def test_opencode_exporter_exports_sqlite_child_sessions(monkeypatch, tmp_path):
         )
         conn.execute(
             "insert into session values (?, ?, ?, ?, ?, ?, ?)",
-            ("ses_child", "ses_parent", "child transcript", str(tmp_path), "test", 2, 6),
+            (
+                "ses_child",
+                "ses_parent",
+                "child transcript",
+                str(tmp_path),
+                "test",
+                2,
+                6,
+            ),
         )
         conn.execute(
             "insert into message values (?, ?, ?, ?, ?)",
@@ -930,7 +1045,13 @@ def test_opencode_exporter_exports_sqlite_child_sessions(monkeypatch, tmp_path):
                 "ses_child",
                 2,
                 3,
-                json.dumps({"type": "tool", "tool": "read", "state": {"status": "completed", "output": "child tool output"}}),
+                json.dumps(
+                    {
+                        "type": "tool",
+                        "tool": "read",
+                        "state": {"status": "completed", "output": "child tool output"},
+                    }
+                ),
             ),
         )
 
@@ -960,9 +1081,7 @@ def test_pypto_adapter_reports_invalid_stanford_submission_details(tmp_path):
     source_dir = tmp_path / "artifact"
     source_dir.mkdir()
     source_dir.joinpath("ReLU_impl.py").write_text(
-        "import pypto\n\n"
-        "def ReLU_wrapper(x):\n"
-        "    return x\n",
+        "import pypto\n\ndef ReLU_wrapper(x):\n    return x\n",
         encoding="utf-8",
     )
     source_dir.joinpath("ReLU_pypto_impl.py").write_text(
@@ -980,10 +1099,14 @@ def test_pypto_adapter_reports_invalid_stanford_submission_details(tmp_path):
         files={},
         metadata={},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=source_dir, files={"source_dir": source_dir}
+    )
 
     with pytest.raises(ValueError) as exc_info:
-        _build_submission(PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission")
+        _build_submission(
+            PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission"
+        )
 
     message = str(exc_info.value)
     assert "[AUTO-STANFORD-001]" in message
@@ -995,9 +1118,7 @@ def test_pypto_adapter_accepts_explicit_stanford_ai_op_from_converter(tmp_path):
     source_dir = tmp_path / "conversion_artifact" / "submission"
     source_dir.mkdir(parents=True)
     source_dir.joinpath("ReLU_impl.py").write_text(
-        "# pypto\n\n"
-        "def ReLU_wrapper(x):\n"
-        "    return x\n",
+        "# pypto\n\ndef ReLU_wrapper(x):\n    return x\n",
         encoding="utf-8",
     )
     source_dir.joinpath("ai_op.py").write_text(
@@ -1015,9 +1136,15 @@ def test_pypto_adapter_accepts_explicit_stanford_ai_op_from_converter(tmp_path):
         files={},
         metadata={},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
 
-    submission = _build_submission(PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission")
+    submission = _build_submission(
+        PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission"
+    )
 
     ai_op = submission.source_dir / "ai_op.py"
     assert ai_op.is_file()
@@ -1030,7 +1157,9 @@ def test_pypto_adapter_accepts_explicit_stanford_ai_op_from_converter(tmp_path):
     assert submission.source_dir.joinpath("ReLU_impl.py").is_file()
 
 
-def test_pypto_adapter_materializes_stanford_ai_op_before_cannbench_shape_check(tmp_path):
+def test_pypto_adapter_materializes_stanford_ai_op_before_cannbench_shape_check(
+    tmp_path,
+):
     task_path = tmp_path / "task.py"
     task_path.write_text(
         "import torch.nn as nn\n"
@@ -1046,8 +1175,12 @@ def test_pypto_adapter_materializes_stanford_ai_op_before_cannbench_shape_check(
     source_dir = tmp_path / "conversion_artifact" / "submission"
     source_dir.joinpath("cann_bench").mkdir(parents=True)
     source_dir.joinpath("cann_bench", "__init__.py").write_text("", encoding="utf-8")
-    source_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
-    source_dir.joinpath("Foo_impl.py").write_text("# pypto\ndef Foo_wrapper(x):\n    return x\n", encoding="utf-8")
+    source_dir.joinpath("build.sh").write_text(
+        "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+    )
+    source_dir.joinpath("Foo_impl.py").write_text(
+        "# pypto\ndef Foo_wrapper(x):\n    return x\n", encoding="utf-8"
+    )
     source_dir.joinpath("ai_op.py").write_text(
         "import torch.nn as nn\n"
         "from Foo_impl import Foo_wrapper\n"
@@ -1065,19 +1198,35 @@ def test_pypto_adapter_materializes_stanford_ai_op_before_cannbench_shape_check(
         rel_path="level1/Foo",
         files={"task": task_path},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
 
-    submission = _build_submission(PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission")
+    submission = _build_submission(
+        PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "submission"
+    )
 
     ai_op_text = submission.source_dir.joinpath("ai_op.py").read_text(encoding="utf-8")
     assert "_sys.path.insert(0, _op_dir)" in ai_op_text
     assert submission.source_dir.joinpath("build.sh").is_file()
 
 
-def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(monkeypatch, tmp_path):
+def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(
+    monkeypatch, tmp_path, mock_process_identity
+):
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
     bench_root = tmp_path / "bench"
-    task_path = bench_root / "bench_lab" / "stanford_bench" / "KernelBench" / "KernelBench" / "level1" / "19_ReLU.py"
+    task_path = (
+        bench_root
+        / "bench_lab"
+        / "stanford_bench"
+        / "KernelBench"
+        / "KernelBench"
+        / "level1"
+        / "19_ReLU.py"
+    )
     task_path.parent.mkdir(parents=True)
     task_path.write_text(
         "import torch.nn as nn\n"
@@ -1098,18 +1247,27 @@ def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(monkey
     raw_dir = tmp_path / "raw_artifact"
     raw_dir.mkdir()
     raw_dir.joinpath("ReLU_impl.py").write_text(
-        "# pypto\n\n"
-        "def ReLU_wrapper(x):\n"
-        "    return x\n",
+        "# pypto\n\ndef ReLU_wrapper(x):\n    return x\n",
         encoding="utf-8",
     )
-    raw_dir.joinpath("ReLU_pypto_impl.py").write_text("# legacy bridge\n", encoding="utf-8")
+    raw_dir.joinpath("ReLU_pypto_impl.py").write_text(
+        "# legacy bridge\n", encoding="utf-8"
+    )
     raw_dir.joinpath("test_ReLU.py").write_text("# test helper\n", encoding="utf-8")
     raw_dir.joinpath("ReLU_golden.py").write_text("# golden helper\n", encoding="utf-8")
     raw_dir.joinpath("modules").mkdir()
     raw_dir.joinpath("modules", "helper.py").write_text("# helper\n", encoding="utf-8")
 
-    def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
+    def fake_eval(
+        self,
+        *,
+        bench_name,
+        source_dir,
+        task_selector,
+        reports_dir,
+        device_id=None,
+        extra_args=None,
+    ):
         return CannBenchEvalResult(
             returncode=0,
             command=self.build_eval_command(
@@ -1130,11 +1288,15 @@ def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(monkey
 
         def run(self, prompt: RunnerPrompt) -> Artifact:
             prompt.output_dir.mkdir(parents=True, exist_ok=True)
-            prompt.output_dir.joinpath("PROMPT.md").write_text(prompt.text, encoding="utf-8")
+            prompt.output_dir.joinpath("PROMPT.md").write_text(
+                prompt.text, encoding="utf-8"
+            )
             submission_dir = prompt.output_dir / "submission"
             submission_dir.mkdir(parents=True, exist_ok=True)
             raw_impl = prompt.output_dir / "input" / "raw" / "ReLU_impl.py"
-            submission_dir.joinpath("ReLU_impl.py").write_text(raw_impl.read_text(encoding="utf-8"), encoding="utf-8")
+            submission_dir.joinpath("ReLU_impl.py").write_text(
+                raw_impl.read_text(encoding="utf-8"), encoding="utf-8"
+            )
             submission_dir.joinpath("ai_op.py").write_text(
                 "import torch.nn as nn\n"
                 "from ReLU_impl import ReLU_wrapper\n"
@@ -1145,22 +1307,34 @@ def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(monkey
                 "        return ReLU_wrapper(x)\n",
                 encoding="utf-8",
             )
-            return Artifact(status=AGENT_SUCCESS, workdir=prompt.output_dir, files={"source_dir": submission_dir})
+            return Artifact(
+                status=AGENT_SUCCESS,
+                workdir=prompt.output_dir,
+                files={"source_dir": submission_dir},
+            )
 
     class FakeGenerator:
         type = "pypto"
 
         def generate(self, task: GeneratorInput) -> Artifact:
-            return Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+            return Artifact(
+                status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+            )
 
-    monkeypatch.setattr(config_runner, "create_generator", lambda generator_type, cfg: FakeGenerator())
-    monkeypatch.setattr(config_runner, "create_runner", lambda runner_type, cfg: FakeConverterRunner())
+    monkeypatch.setattr(
+        config_runner, "create_generator", lambda generator_type, cfg: FakeGenerator()
+    )
+    monkeypatch.setattr(
+        config_runner, "create_runner", lambda runner_type, cfg: FakeConverterRunner()
+    )
     cfg = {
         "agent": {"type": "pypto"},
         "benchmark": {
             "root": str(bench_root),
             "name": "stanford",
-            "tasks": ["bench_lab/stanford_bench/KernelBench/KernelBench/level1/19_ReLU.py"],
+            "tasks": [
+                "bench_lab/stanford_bench/KernelBench/KernelBench/level1/19_ReLU.py"
+            ],
         },
     }
 
@@ -1185,7 +1359,7 @@ def test_config_runner_uses_isolated_converter_agent_for_raw_pypto_output(monkey
     assert "不要实例化 ModelNew" in converter_prompt
     assert "不要调用 ModelNew.forward" in converter_prompt
     assert "触发 PyPTO/NPU 执行" in converter_prompt
-    assert "input/raw/ReLU_impl.py" in converter_prompt
+    assert str(Path("input/raw/ReLU_impl.py")) in converter_prompt
     assert "state_dict 键、shape 和 dtype 必须完全一致" in converter_prompt
     assert "相对导入" in converter_prompt
     assert "build.sh" not in converter_prompt
@@ -1206,8 +1380,12 @@ def test_pypto_conversion_input_includes_nested_module_impls(tmp_path):
     task_path.write_text("class Model:\n    pass\n", encoding="utf-8")
     raw_dir = tmp_path / "raw_artifact"
     raw_dir.joinpath("modules").mkdir(parents=True)
-    raw_dir.joinpath("modules", "Block_impl.py").write_text("# pypto\n", encoding="utf-8")
-    raw_dir.joinpath("modules", "Block_golden.py").write_text("# golden\n", encoding="utf-8")
+    raw_dir.joinpath("modules", "Block_impl.py").write_text(
+        "# pypto\n", encoding="utf-8"
+    )
+    raw_dir.joinpath("modules", "Block_golden.py").write_text(
+        "# golden\n", encoding="utf-8"
+    )
     case = CannBenchCase(
         bench_name="stanford",
         task_dir=tmp_path,
@@ -1215,7 +1393,9 @@ def test_pypto_conversion_input_includes_nested_module_impls(tmp_path):
         rel_path="level3/Nested",
         files={"task": task_path},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     prompt = PyptoToStanfordConverter().build_conversion_prompt(
         "stanford",
@@ -1226,9 +1406,13 @@ def test_pypto_conversion_input_includes_nested_module_impls(tmp_path):
         submission_dir=tmp_path / "submission",
     )
 
-    assert prompt.output_dir.joinpath("input", "raw", "modules", "Block_impl.py").is_file()
-    assert not prompt.output_dir.joinpath("input", "raw", "modules", "Block_golden.py").exists()
-    assert "input/raw/modules/Block_impl.py" in prompt.text
+    assert prompt.output_dir.joinpath(
+        "input", "raw", "modules", "Block_impl.py"
+    ).is_file()
+    assert not prompt.output_dir.joinpath(
+        "input", "raw", "modules", "Block_golden.py"
+    ).exists()
+    assert str(Path("input/raw/modules/Block_impl.py")) in prompt.text
     assert "build.sh" not in prompt.text
     assert "cann_bench" not in prompt.text
 
@@ -1237,7 +1421,9 @@ def test_pypto_conversion_prompt_uses_bench_specific_contract(tmp_path):
     raw_dir = tmp_path / "raw_artifact"
     raw_dir.mkdir()
     raw_dir.joinpath("Foo_impl.py").write_text("# pypto\n", encoding="utf-8")
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     stanford_task = tmp_path / "stanford_task.py"
     stanford_task.write_text("class Model:\n    pass\n", encoding="utf-8")
@@ -1362,7 +1548,9 @@ def test_pypto_adapter_rejects_relative_stanford_ai_op_import(tmp_path):
     )
     source_dir = tmp_path / "submission"
     source_dir.mkdir()
-    source_dir.joinpath("Foo_impl.py").write_text("# pypto\ndef Foo_wrapper(x):\n    return x\n", encoding="utf-8")
+    source_dir.joinpath("Foo_impl.py").write_text(
+        "# pypto\ndef Foo_wrapper(x):\n    return x\n", encoding="utf-8"
+    )
     source_dir.joinpath("ai_op.py").write_text(
         "import torch.nn as nn\n"
         "from .Foo_impl import Foo_wrapper\n"
@@ -1380,10 +1568,16 @@ def test_pypto_adapter_rejects_relative_stanford_ai_op_import(tmp_path):
         rel_path="level1/Foo",
         files={"task": task_path},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
 
     with pytest.raises(ValueError, match="relative import"):
-        _build_submission(PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "converted")
+        _build_submission(
+            PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "converted"
+        )
 
 
 def test_pypto_adapter_rejects_stanford_state_dict_mismatch(tmp_path):
@@ -1402,7 +1596,9 @@ def test_pypto_adapter_rejects_stanford_state_dict_mismatch(tmp_path):
     )
     source_dir = tmp_path / "submission"
     source_dir.mkdir()
-    source_dir.joinpath("Foo_impl.py").write_text("# pypto\ndef Foo_wrapper(x, weight, bias):\n    return x\n", encoding="utf-8")
+    source_dir.joinpath("Foo_impl.py").write_text(
+        "# pypto\ndef Foo_wrapper(x, weight, bias):\n    return x\n", encoding="utf-8"
+    )
     source_dir.joinpath("ai_op.py").write_text(
         "import torch\n"
         "import torch.nn as nn\n"
@@ -1423,10 +1619,16 @@ def test_pypto_adapter_rejects_stanford_state_dict_mismatch(tmp_path):
         rel_path="level2/Foo",
         files={"task": task_path},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
 
     with pytest.raises(ValueError, match="state_dict keys"):
-        _build_submission(PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "converted")
+        _build_submission(
+            PyptoToStanfordConverter(), case, output, output_dir=tmp_path / "converted"
+        )
 
 
 def test_stanford_matcher_uses_task_init_inputs_for_source_ai_op(tmp_path):
@@ -1474,8 +1676,13 @@ def test_config_runner_pypto_eval_env_is_empty_perf_strategy_via_cli():
     assert config_runner._eval_env(agent_type="pypto", bench_name="cann") == {}
     assert config_runner._eval_env(agent_type="akg-agent", bench_name="cann") == {}
     # _is_pypto_cann_eval 仍用于判断是否传递 trace_view 策略
-    assert config_runner._is_pypto_cann_eval(agent_type="pypto", bench_name="cann") is True
-    assert config_runner._is_pypto_cann_eval(agent_type="akg-agent", bench_name="cann") is False
+    assert (
+        config_runner._is_pypto_cann_eval(agent_type="pypto", bench_name="cann") is True
+    )
+    assert (
+        config_runner._is_pypto_cann_eval(agent_type="akg-agent", bench_name="cann")
+        is False
+    )
 
 
 def test_config_runner_requires_pypto_tile_lib_environment(monkeypatch):
@@ -1486,21 +1693,36 @@ def test_config_runner_requires_pypto_tile_lib_environment(monkeypatch):
     monkeypatch.delenv("PTO_TILE_LIB_CODE_PATH", raising=False)
 
     with pytest.raises(ValueError, match="PTO_TILE_LIB_CODE_PATH"):
-        config_runner._parse_config(cfg, config_path=None, runtime={"workspace": "/tmp/pypto"})
+        config_runner._parse_config(
+            cfg, config_path=None, runtime={"workspace": "/tmp/pypto"}
+        )
 
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
-    spec = config_runner._parse_config(cfg, config_path=None, runtime={"workspace": "/tmp/pypto"})
+    spec = config_runner._parse_config(
+        cfg, config_path=None, runtime={"workspace": "/tmp/pypto"}
+    )
     assert spec.agent_type == "pypto"
 
 
-def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypatch, tmp_path):
+def test_config_runner_wires_simplified_pypto_config_and_derived_paths(
+    monkeypatch, tmp_path, mock_process_identity
+):
     tile_path = tmp_path / "pto-isa"
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", str(tile_path))
     pypto_repo = tmp_path / "pypto"
     generator_cfgs = []
     runner_types = []
 
-    def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
+    def fake_eval(
+        self,
+        *,
+        bench_name,
+        source_dir,
+        task_selector,
+        reports_dir,
+        device_id=None,
+        extra_args=None,
+    ):
         # perf 策略不再通过环境变量传递，改为通过 extra_args 里的
         # --perf-metric-strategy CLI 参数
         assert self.extra_env["AUTO_PIPELINE_RUN_ID"]
@@ -1520,7 +1742,9 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
             device_id=device_id,
             extra_args=extra_args,
         )
-        return CannBenchEvalResult(returncode=0, command=command, reports_dir=Path(reports_dir))
+        return CannBenchEvalResult(
+            returncode=0, command=command, reports_dir=Path(reports_dir)
+        )
 
     monkeypatch.setattr(CannBenchClient, "eval_submission", fake_eval)
 
@@ -1535,30 +1759,38 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
             assert task.timeout_sec == 111
             assert task.env["AUTO_PIPELINE_RUN_ID"]
             assert task.env["AUTO_PIPELINE_TASK_ID"] == "gelu"
-            return Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+            return Artifact(
+                status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+            )
 
     class FakeConverterRunner:
         type = "fake-converter"
 
         def run(self, prompt: RunnerPrompt) -> Artifact:
             prompt.output_dir.mkdir(parents=True, exist_ok=True)
-            prompt.output_dir.joinpath("PROMPT.md").write_text(prompt.text, encoding="utf-8")
+            prompt.output_dir.joinpath("PROMPT.md").write_text(
+                prompt.text, encoding="utf-8"
+            )
             submission_dir = prompt.output_dir / "submission"
             package_dir = submission_dir / "cann_bench"
             package_dir.mkdir(parents=True, exist_ok=True)
-            submission_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
+            submission_dir.joinpath("build.sh").write_text(
+                "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+            )
             package_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
             package_dir.joinpath("gelu.py").write_text(
-                "import pypto\n"
-                "def gelu(x, approximate='none'):\n"
-                "    return x\n",
+                "import pypto\ndef gelu(x, approximate='none'):\n    return x\n",
                 encoding="utf-8",
             )
             assert prompt.cwd == tmp_path / "run" / "gelu" / "convert"
             assert prompt.timeout_sec == 111
             assert prompt.env["AUTO_PIPELINE_RUN_ID"]
             assert prompt.env["AUTO_PIPELINE_TASK_ID"] == "gelu"
-            return Artifact(status=AGENT_SUCCESS, workdir=prompt.output_dir, files={"source_dir": submission_dir})
+            return Artifact(
+                status=AGENT_SUCCESS,
+                workdir=prompt.output_dir,
+                files={"source_dir": submission_dir},
+            )
 
     def fake_create_generator(generator_type, cfg):
         generator_cfgs.append((generator_type, cfg))
@@ -1573,7 +1805,11 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
 
     cfg = {
         "agent": {"type": "pypto"},
-        "benchmark": {"root": str(REPO_ROOT), "name": "cann", "tasks": [SEASON1_GELU_SELECTOR]},
+        "benchmark": {
+            "root": str(REPO_ROOT),
+            "name": "cann",
+            "tasks": [SEASON1_GELU_SELECTOR],
+        },
     }
 
     result = run_from_mapping(
@@ -1609,8 +1845,19 @@ def test_config_runner_wires_simplified_pypto_config_and_derived_paths(monkeypat
 def test_pipeline_snapshots_pypto_custom_and_summarizes_tokens(monkeypatch, tmp_path):
     client = CannBenchClient(REPO_ROOT, timeout_sec=77)
 
-    def fake_eval(self, *, bench_name, source_dir, task_selector, reports_dir, device_id=None, extra_args=None):
-        return CannBenchEvalResult(returncode=0, command=["eval"], reports_dir=Path(reports_dir))
+    def fake_eval(
+        self,
+        *,
+        bench_name,
+        source_dir,
+        task_selector,
+        reports_dir,
+        device_id=None,
+        extra_args=None,
+    ):
+        return CannBenchEvalResult(
+            returncode=0, command=["eval"], reports_dir=Path(reports_dir)
+        )
 
     monkeypatch.setattr(CannBenchClient, "eval_submission", fake_eval)
 
@@ -1655,7 +1902,9 @@ def test_pipeline_snapshots_pypto_custom_and_summarizes_tokens(monkeypatch, tmp_
         source_generator = "pypto"
         target_benchmark = "cann"
 
-        def convert(self, bench_name, case, artifact, *, output_dir, runner=None, workdir=None):
+        def convert(
+            self, bench_name, case, artifact, *, output_dir, runner=None, workdir=None
+        ):
             snapshot_dir = tmp_path / "run" / "gelu" / "custom" / "gelu"
             assert artifact.workdir == snapshot_dir
             assert artifact.files["source_dir"] == snapshot_dir
@@ -1663,11 +1912,18 @@ def test_pipeline_snapshots_pypto_custom_and_summarizes_tokens(monkeypatch, tmp_
             submission_dir = Path(output_dir)
             package_dir = submission_dir / "cann_bench"
             package_dir.mkdir(parents=True, exist_ok=True)
-            submission_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+            submission_dir.joinpath("build.sh").write_text(
+                "#!/usr/bin/env bash\n", encoding="utf-8"
+            )
             package_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
-            package_dir.joinpath("gelu.py").write_text("import pypto\n", encoding="utf-8")
+            package_dir.joinpath("gelu.py").write_text(
+                "import pypto\n", encoding="utf-8"
+            )
             submission = Submission("cann", case.operator, submission_dir, {})
-            return ConversionResult(artifact=Artifact(status=AGENT_SUCCESS, workdir=submission_dir), submission=submission)
+            return ConversionResult(
+                artifact=Artifact(status=AGENT_SUCCESS, workdir=submission_dir),
+                submission=submission,
+            )
 
     pipeline = BenchmarkPipeline(bench_name="cann", client=client)
     result = pipeline.run_case(
@@ -1684,13 +1940,19 @@ def test_pipeline_snapshots_pypto_custom_and_summarizes_tokens(monkeypatch, tmp_
     snapshot_custom = tmp_path / "run" / "gelu" / "custom" / "gelu"
     assert (snapshot_custom / "gelu_impl.py").is_file()
     assert not (snapshot_custom / "prof").exists()
-    assert result.generated_artifact.metadata["workspace_custom_dir"] == str(workspace_custom.resolve())
-    assert result.generated_artifact.metadata["output_custom_dir"] == str((tmp_path / "run" / "gelu" / "custom" / "gelu").resolve())
+    assert result.generated_artifact.metadata["workspace_custom_dir"] == str(
+        workspace_custom.resolve()
+    )
+    assert result.generated_artifact.metadata["output_custom_dir"] == str(
+        (tmp_path / "run" / "gelu" / "custom" / "gelu").resolve()
+    )
     payload = config_runner._pipeline_result_payload(result)
     assert payload["token_usage"]["total"] == 9
 
 
-def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch, tmp_path):
+def test_config_runner_device_pool_uses_tasks_without_case_overrides(
+    monkeypatch, tmp_path
+):
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
     calls_dir = tmp_path / "calls"
     calls_dir.mkdir()
@@ -1718,7 +1980,9 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
             case=case,
             submission=Submission("cann", case.operator, tmp_path / "submission"),
             eval_result=CannBenchEvalResult(
-                returncode=0, command=["eval", case.operator], reports_dir=tmp_path / "reports"
+                returncode=0,
+                command=["eval", case.operator],
+                reports_dir=tmp_path / "reports",
             ),
         )
 
@@ -1743,7 +2007,10 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
         },
     )
 
-    calls = {path.stem: json.loads(path.read_text(encoding="utf-8")) for path in calls_dir.glob("*.json")}
+    calls = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in calls_dir.glob("*.json")
+    }
     assert [entry["name"] for entry in entries] == ["exp", "gelu", "mish"]
     assert set(calls) == {"exp", "gelu", "mish"}
     assert {calls["exp"]["device_id"], calls["gelu"]["device_id"]} == {0, 3}
@@ -1766,14 +2033,19 @@ def test_config_runner_device_pool_uses_tasks_without_case_overrides(monkeypatch
     assert batch["output"] == str(tmp_path / "run")
 
 
-def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(monkeypatch, tmp_path):
+def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(
+    monkeypatch, tmp_path
+):
     # torchair.core._backend 在导入时安装 SIGTERM handler，
     # 会被 fork 子进程继承，导致子进程中 os.kill(SIGTERM) 被拦截而非杀死进程。
     # 在此测试前恢复 SIGTERM 为 SIG_DFL，确保子进程中 SIGTERM 能正常杀死进程。
     import signal
+
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
-    monkeypatch.setattr(config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
+    monkeypatch.setattr(
+        config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path
+    )
 
     def fake_run_task(spec, task, *, device_id):
         if task.name == "exp":
@@ -1789,7 +2061,9 @@ def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(mon
             case=case,
             submission=Submission("cann", case.operator, tmp_path / "submission"),
             eval_result=CannBenchEvalResult(
-                returncode=0, command=["eval", case.operator], reports_dir=tmp_path / "reports"
+                returncode=0,
+                command=["eval", case.operator],
+                reports_dir=tmp_path / "reports",
             ),
         )
 
@@ -1826,7 +2100,9 @@ def test_config_runner_device_pool_task_process_signal_does_not_stop_sibling(mon
     assert batch["pending_cases"] == 0
 
     run_state = config_runner.pipeline_state.read_json(
-        config_runner.pipeline_state.run_file("run-task-pid-kill", cann_bench_root=tmp_path)
+        config_runner.pipeline_state.run_file(
+            "run-task-pid-kill", cann_bench_root=tmp_path
+        )
     )
     assert run_state["status"] == "failed"
     assert run_state["summary"]["success"] == 1
@@ -1846,7 +2122,10 @@ def test_config_runner_preserves_akg_triton_ascend_options_and_device(tmp_path):
             "workflow": "kernelgen_only_workflow",
             "verify_timeout": 1800,
         },
-        "benchmark": {"name": "cann", "tasks": ["tasks/level1/exp", "tasks/level1/sigmoid"]},
+        "benchmark": {
+            "name": "cann",
+            "tasks": ["tasks/level1/exp", "tasks/level1/sigmoid"],
+        },
     }
 
     spec = config_runner._parse_config(
@@ -1916,18 +2195,25 @@ def test_config_runner_rejects_duplicate_devices(monkeypatch):
     }
 
     with pytest.raises(ValueError, match="duplicate device ids"):
-        config_runner.run_cases_from_mapping(cfg, runtime={"workspace": "/tmp/pypto", "devices": [0, 0]})
+        config_runner.run_cases_from_mapping(
+            cfg, runtime={"workspace": "/tmp/pypto", "devices": [0, 0]}
+        )
 
 
 def test_config_runner_rejects_parallel_without_devices(monkeypatch):
     monkeypatch.setenv("PTO_TILE_LIB_CODE_PATH", "/data/pto-isa")
     cfg = {
         "agent": {"type": "pypto"},
-        "benchmark": {"name": "cann", "tasks": ["tasks/level1/exp", "tasks/level1/gelu"]},
+        "benchmark": {
+            "name": "cann",
+            "tasks": ["tasks/level1/exp", "tasks/level1/gelu"],
+        },
     }
 
     with pytest.raises(ValueError, match="devices is required"):
-        config_runner.run_cases_from_mapping(cfg, runtime={"workspace": "/tmp/pypto", "parallel": 2})
+        config_runner.run_cases_from_mapping(
+            cfg, runtime={"workspace": "/tmp/pypto", "parallel": 2}
+        )
 
 
 def test_config_runner_generates_random_output_when_omitted(monkeypatch):
@@ -1937,7 +2223,9 @@ def test_config_runner_generates_random_output_when_omitted(monkeypatch):
         "benchmark": {"name": "cann", "tasks": ["tasks/level1/exp"]},
     }
 
-    spec = config_runner._parse_config(cfg, config_path=None, runtime={"workspace": "/tmp/pypto"})
+    spec = config_runner._parse_config(
+        cfg, config_path=None, runtime={"workspace": "/tmp/pypto"}
+    )
 
     assert spec.output.parent == (REPO_ROOT / "benchmark_runs").resolve()
     assert spec.output.name.startswith("run_")
@@ -1960,7 +2248,9 @@ def test_configured_tasks_use_unique_ids_for_same_basename(tmp_path):
             cann_bench_root=tmp_path,
         )
 
-    listed = config_runner.pipeline_state.list_tasks("run-same-basename", cann_bench_root=tmp_path)
+    listed = config_runner.pipeline_state.list_tasks(
+        "run-same-basename", cann_bench_root=tmp_path
+    )
     assert [item["selector"] for item in listed] == selectors
     state_files = [
         config_runner.pipeline_state.task_file("run-same-basename", task.name, tmp_path)
@@ -2003,7 +2293,9 @@ def test_eval_args_pass_through_kernel_eval_options():
 
 
 def test_task_registry_records_stage_timing(monkeypatch, tmp_path):
-    monkeypatch.setattr(config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path)
+    monkeypatch.setattr(
+        config_runner.pipeline_state, "DEFAULT_CANN_BENCH_ROOT", tmp_path
+    )
     task = config_runner.ConfiguredTask(
         name="exp",
         selector="tasks/exp",
@@ -2025,13 +2317,23 @@ def test_task_registry_records_stage_timing(monkeypatch, tmp_path):
         run_id="run-stage-timing",
     )
 
-    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "generation"}, device_id=None)
-    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "conversion"}, device_id=None)
-    config_runner._write_task_state(spec, task, payload={"status": "running", "stage": "eval"}, device_id=None)
-    config_runner._write_task_state(spec, task, entry={"ok": True, "status": "success"}, device_id=None)
+    config_runner._write_task_state(
+        spec, task, payload={"status": "running", "stage": "generation"}, device_id=None
+    )
+    config_runner._write_task_state(
+        spec, task, payload={"status": "running", "stage": "conversion"}, device_id=None
+    )
+    config_runner._write_task_state(
+        spec, task, payload={"status": "running", "stage": "eval"}, device_id=None
+    )
+    config_runner._write_task_state(
+        spec, task, entry={"ok": True, "status": "success"}, device_id=None
+    )
 
     task_state = config_runner.pipeline_state.read_json(
-        config_runner.pipeline_state.task_file("run-stage-timing", "exp", cann_bench_root=tmp_path)
+        config_runner.pipeline_state.task_file(
+            "run-stage-timing", "exp", cann_bench_root=tmp_path
+        )
     )
     stage_times = task_state["stage_times"]
 
@@ -2042,16 +2344,22 @@ def test_task_registry_records_stage_timing(monkeypatch, tmp_path):
 
 
 def test_eval_env_sets_tile_device_for_pypto_cann_only():
-    assert config_runner._eval_env(
-        agent_type="pypto",
-        bench_name="cann",
-        device_id=3,
-    )["TILE_FWK_DEVICE_ID"] == "3"
-    assert config_runner._eval_env(
-        agent_type="pypto",
-        bench_name="cann",
-        task_env={"AUTO_PIPELINE_RUN_ID": "run-1", "AUTO_PIPELINE_TASK_ID": "exp"},
-    )["AUTO_PIPELINE_TASK_ID"] == "exp"
+    assert (
+        config_runner._eval_env(
+            agent_type="pypto",
+            bench_name="cann",
+            device_id=3,
+        )["TILE_FWK_DEVICE_ID"]
+        == "3"
+    )
+    assert (
+        config_runner._eval_env(
+            agent_type="pypto",
+            bench_name="cann",
+            task_env={"AUTO_PIPELINE_RUN_ID": "run-1", "AUTO_PIPELINE_TASK_ID": "exp"},
+        )["AUTO_PIPELINE_TASK_ID"]
+        == "exp"
+    )
     assert "TILE_FWK_DEVICE_ID" not in config_runner._eval_env(
         agent_type="akg-agent",
         bench_name="cann",

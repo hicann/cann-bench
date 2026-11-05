@@ -3,12 +3,12 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the software repository for the full text of the License.
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
 """
@@ -27,17 +27,15 @@ MsProfSummaryStrategy），复用 NPU 参考算子代码（refs/level{1-4}.py + 
 """
 
 import argparse
-import gc
 import json
 import logging
 import os
 import sys
 import time
-import traceback
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 import yaml
 
@@ -55,8 +53,9 @@ os.environ["ASCEND_LAUNCH_MODE"] = "ACL"
 # 将 torch_npu.dynamo.torchair 注册到 sys.modules 使得 `import torchair` 能找到。
 # ---------------------------------------------------------------------------
 try:
-    import torch_npu
+    import torch_npu  # noqa: F401 -- initialize the NPU backend before torchair registration
     from torch_npu.dynamo import torchair as _torchair_inner
+
     sys.modules.setdefault("torchair", _torchair_inner)
 except ImportError:
     pass  # 没有 torch_npu 就没有 torchair，refs 中会自然 skip
@@ -76,12 +75,16 @@ import inputs as bench_inputs
 import ref_registry
 
 # 导入评测体系的公开类（不修改 src 下任何文件）
-from kernel_eval.config import Config, get_config, get_project_root
+from kernel_eval.config import Config, get_project_root
 from kernel_eval.eval.perf_eval import PerfEvaluator
-from kernel_eval.eval.op_runner import OpRunner, OpRunResult
 from kernel_eval.utils.device_manager import DeviceManager, DeviceConfig
 from kernel_eval.utils.baseline_store import BaselineStore
-from kernel_eval.utils.baseline_resolver import DEFAULT_HARDWARE, resolve_hardware
+from kernel_eval.utils.baseline_resolver import DEFAULT_HARDWARE
+from kernel_eval.utils.case_eligibility import (
+    detect_execution_hardware,
+    filter_cases_for_hardware,
+    supports_case,
+)
 from kernel_eval.registry.loader_registry import get_case_loader, get_task_loader
 
 logger = logging.getLogger(__name__)
@@ -90,6 +93,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # 辅助函数
 # ---------------------------------------------------------------------------
+
 
 def _normalize_attrs(attrs: dict) -> dict:
     """PyYAML-string normalization（与 bench_baseline.py 一致）"""
@@ -101,21 +105,29 @@ def _normalize_attrs(attrs: dict) -> dict:
             sv = v.strip()
             sv_l = sv.lower()
             if sv_l in ("inf", "+inf"):
-                out[k] = float("inf"); continue
+                out[k] = float("inf")
+                continue
             if sv_l == "-inf":
-                out[k] = float("-inf"); continue
+                out[k] = float("-inf")
+                continue
             if sv_l == "nan":
-                out[k] = float("nan"); continue
+                out[k] = float("nan")
+                continue
             if sv_l in ("null", "~", ""):
-                out[k] = None; continue
+                out[k] = None
+                continue
             if sv_l == "true":
-                out[k] = True; continue
+                out[k] = True
+                continue
             if sv_l == "false":
-                out[k] = False; continue
+                out[k] = False
+                continue
             try:
                 if any(c in sv for c in ".eE"):
-                    out[k] = float(sv); continue
-                out[k] = int(sv); continue
+                    out[k] = float(sv)
+                    continue
+                out[k] = int(sv)
+                continue
             except ValueError:
                 pass
         out[k] = v
@@ -178,6 +190,7 @@ class GenericRefModule:
 # BaselineCollector — 主采集逻辑
 # ---------------------------------------------------------------------------
 
+
 class BaselineCollector:
     """Baseline 性能采集器
 
@@ -186,22 +199,27 @@ class BaselineCollector:
     默认产出 scripts/baseline/output/<hardware>.json。
     """
 
-    def __init__(self, config: Config, bench_root: Path,
-                 warmup: int = 5, repeat: int = 20):
+    def __init__(
+        self, config: Config, bench_root: Path, warmup: int = 5, repeat: int = 20
+    ):
         self.config = config
         self.bench_root = Path(bench_root)
         self.warmup = warmup
         self.repeat = repeat
 
         # 初始化设备管理器
-        self.device_manager = DeviceManager(DeviceConfig(
-            type=config.device_type,
-            device_id=config.device_id,
-        ))
+        self.device_manager = DeviceManager(
+            DeviceConfig(
+                type=config.device_type,
+                device_id=config.device_id,
+            )
+        )
 
         # 自动检测当前硬件
-        device_name = self.device_manager.get_device_name()
-        self.hardware = resolve_hardware(device_name) if device_name != "unknown" else DEFAULT_HARDWARE
+        self.target_hardware = detect_execution_hardware(
+            config.device_type, config.device_id
+        )
+        self.hardware = self.target_hardware or DEFAULT_HARDWARE
 
         # 初始化性能评测器
         self.perf_evaluator = PerfEvaluator(
@@ -213,7 +231,9 @@ class BaselineCollector:
         )
 
         # 初始化数据加载器
-        self.case_loader = get_case_loader("cann", tasks_root=str(bench_root))
+        self.case_loader = get_case_loader(
+            "cann", tasks_root=str(bench_root), target_hardware=self.target_hardware
+        )
         self.task_loader = get_task_loader("cann", tasks_root=str(bench_root))
 
         # 初始化 BaselineStore（读取已有 t_hw_us）
@@ -253,8 +273,9 @@ class BaselineCollector:
 
     # === 单 case 采集 ===
 
-    def collect_one_case(self, op_path: str, case_id: int,
-                         case_raw: Dict) -> Optional[Dict]:
+    def collect_one_case(
+        self, op_path: str, case_id: int, case_raw: Dict
+    ) -> Optional[Dict]:
         """采集单个 case 的 baseline 性能数据
 
         Args:
@@ -264,13 +285,19 @@ class BaselineCollector:
         """
         case_id_str = f"{op_path}_{case_id}"
         attrs = _normalize_attrs(case_raw.get("attrs") or {})
+        if not supports_case(attrs, self.target_hardware):
+            return None
 
         # 1. 获取 ref 函数
         ref_fn = ref_registry.get_ref(op_path)
         if ref_fn is None:
             logger.warning("SKIP: no ref registered for %s", op_path)
-            return {"op_path": op_path, "case_id": case_id,
-                    "skipped": True, "error": "no_ref"}
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "skipped": True,
+                "error": "no_ref",
+            }
 
         # 2. 构建输入（使用 inputs.py）
         try:
@@ -283,8 +310,12 @@ class BaselineCollector:
             )
         except Exception as e:
             logger.warning("input build failed for %s case %d: %s", op_path, case_id, e)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": f"input_build_FAIL: {e}"}
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": f"input_build_FAIL: {e}",
+            }
 
         # 3. To device + NPU 别名处理
         try:
@@ -292,9 +323,15 @@ class BaselineCollector:
             inputs_npu = bench_inputs.to_device(inputs_cpu, device)
             inputs_npu = bench_inputs.apply_npu_op_aliases(inputs_npu, op_path, attrs)
         except Exception as e:
-            logger.warning("to_device/aliases failed for %s case %d: %s", op_path, case_id, e)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": f"device_FAIL: {e}"}
+            logger.warning(
+                "to_device/aliases failed for %s case %d: %s", op_path, case_id, e
+            )
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": f"device_FAIL: {e}",
+            }
 
         # 4. Flatten inputs for profiling
         flat, structure = _flatten_with_structure(inputs_npu)
@@ -313,7 +350,7 @@ class BaselineCollector:
                     reconstructed.append(flat_args[i])
                     i += 1
                 else:
-                    reconstructed.append(list(flat_args[i:i + s]))
+                    reconstructed.append(list(flat_args[i : i + s]))
                     i += s
             result = ref_fn(reconstructed, attrs)
             # ref_fn may return None (unsupported dtype/shape)
@@ -330,24 +367,43 @@ class BaselineCollector:
             )
         except Exception as e:
             logger.warning("profiler failed for %s case %d: %s", op_path, case_id, e)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": f"profiler_FAIL: {e}"}
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": f"profiler_FAIL: {e}",
+            }
 
         # 7. Check result — profiler 采集失败时直接记录错误，不做外部计时替代。
         #    kernel 耗时必须来自 profiler 产出的 kernel_details.csv，
         #    若 profiler 未产出 CSV，则正向定位问题（通常是同进程内连续
         #    profiler session 状态污染，由 collect_op 的子进程隔离解决）。
         if perf_result.error_msg:
-            logger.warning("perf_result has error for %s case %d: %s",
-                           op_path, case_id, perf_result.error_msg)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": perf_result.error_msg}
+            logger.warning(
+                "perf_result has error for %s case %d: %s",
+                op_path,
+                case_id,
+                perf_result.error_msg,
+            )
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": perf_result.error_msg,
+            }
 
         if perf_result.elapsed_us <= 0:
-            logger.warning("elapsed_us<=0 for %s case %d (kernel_details.csv 未产出)",
-                           op_path, case_id)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": "no_kernel_details_csv"}
+            logger.warning(
+                "elapsed_us<=0 for %s case %d (kernel_details.csv 未产出)",
+                op_path,
+                case_id,
+            )
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": "no_kernel_details_csv",
+            }
 
         # 8. 读取 t_hw_us from BaselineStore
         t_hw_us = self.baseline_store.get_t_hw(op_path, case_id)
@@ -378,8 +434,9 @@ class BaselineCollector:
             return len(device_kernels)
         return None
 
-    def _collect_one_case_in_subprocess(self, op_path: str, case_id: int,
-                                        case_raw: Dict) -> Optional[Dict]:
+    def _collect_one_case_in_subprocess(
+        self, op_path: str, case_id: int, case_raw: Dict
+    ) -> Optional[Dict]:
         """在独立子进程中采集单个 case 的 profiler 数据。
 
         torch_npu.profiler 在同一进程内连续调用多次时，C++ 层的 profiler
@@ -397,43 +454,70 @@ class BaselineCollector:
         case_json = json.dumps(case_raw, ensure_ascii=False, default=str)
 
         cmd = [
-            sys.executable, str(Path(__file__).resolve()),
+            sys.executable,
+            str(Path(__file__).resolve()),
             "--subprocess-collect",
-            "--op", op_path,
-            "--case-id", str(case_id),
-            "--case-json", case_json,
-            "--device-id", str(self.config.device_id),
-            "--warmup", str(self.warmup),
-            "--repeat", str(self.repeat),
-            "--bench-root", str(self.bench_root),
-            "--result-file", result_file,
+            "--op",
+            op_path,
+            "--case-id",
+            str(case_id),
+            "--case-json",
+            case_json,
+            "--device-id",
+            str(self.config.device_id),
+            "--warmup",
+            str(self.warmup),
+            "--repeat",
+            str(self.repeat),
+            "--bench-root",
+            str(self.bench_root),
+            "--result-file",
+            result_file,
         ]
 
         try:
             proc = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=300,
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
             )
         except subprocess.TimeoutExpired:
             logger.warning("subprocess timeout for %s case %d", op_path, case_id)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": "subprocess_timeout"}
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": "subprocess_timeout",
+            }
 
         if proc.returncode != 0:
             stderr_tail = (proc.stderr or "")[-500:]
-            logger.warning("subprocess failed (rc=%d) for %s case %d: %s",
-                           proc.returncode, op_path, case_id, stderr_tail)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None,
-                    "error_msg": f"subprocess_rc{proc.returncode}: {stderr_tail}"}
+            logger.warning(
+                "subprocess failed (rc=%d) for %s case %d: %s",
+                proc.returncode,
+                op_path,
+                case_id,
+                stderr_tail,
+            )
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": f"subprocess_rc{proc.returncode}: {stderr_tail}",
+            }
 
         try:
             with open(result_file) as f:
                 result = json.load(f)
         except Exception as e:
-            logger.warning("read result failed for %s case %d: %s",
-                           op_path, case_id, e)
-            return {"op_path": op_path, "case_id": case_id,
-                    "elapsed_us": None, "error_msg": f"result_read_FAIL: {e}"}
+            logger.warning("read result failed for %s case %d: %s", op_path, case_id, e)
+            return {
+                "op_path": op_path,
+                "case_id": case_id,
+                "elapsed_us": None,
+                "error_msg": f"result_read_FAIL: {e}",
+            }
         finally:
             try:
                 os.remove(result_file)
@@ -463,6 +547,7 @@ class BaselineCollector:
             return []
 
         cases = data["cases"]
+        cases = filter_cases_for_hardware(cases, self.target_hardware)
         if cases_filter:
             cases = [c for c in cases if int(c["case_id"]) in cases_filter]
 
@@ -472,7 +557,9 @@ class BaselineCollector:
             print(f"[SKIP] {op_path}: no ref registered")
             return []
 
-        print(f"\n=== {op_path} ({len(cases)} cases, device {self.device_manager.get_device()}) ===")
+        print(
+            f"\n=== {op_path} ({len(cases)} cases, device {self.device_manager.get_device()}) ==="
+        )
 
         # 每个 case 在独立子进程中采集 profiler 数据，避免同进程内连续
         # torch_npu.profiler session 状态污染导致 kernel_details.csv 不产出。
@@ -492,7 +579,11 @@ class BaselineCollector:
 
                 if attempt < MAX_RETRIES:
                     wait = attempt
-                    print(f"retry({attempt}/{MAX_RETRIES}, wait {wait}s) ", end="", flush=True)
+                    print(
+                        f"retry({attempt}/{MAX_RETRIES}, wait {wait}s) ",
+                        end="",
+                        flush=True,
+                    )
                     time.sleep(wait)
 
             results.append(result)
@@ -504,12 +595,11 @@ class BaselineCollector:
                 dk = result.get("device_kernels", {})
                 if dk:
                     kernels_str = " + ".join(
-                        f"{k}×{Counter([k]).get(k,1)}"
-                        for k in dk.keys()
+                        f"{k}×{Counter([k]).get(k, 1)}" for k in dk.keys()
                     )
                 print(f"✅ {elapsed:.2f}μs (k={k_per_call}, {kernels_str})")
             elif result and result.get("skipped"):
-                print(f"⏭️ no ref")
+                print("⏭️ no ref")
             else:
                 err = result.get("error_msg", "unknown") if result else "unknown"
                 print(f"❌ {err}")
@@ -601,13 +691,21 @@ class BaselineCollector:
         print("=" * 80)
 
         for op_path, cases_dict in sorted(self._results.items()):
-            collected = [r for r in cases_dict.values() if r.get("elapsed_us") is not None]
-            skipped = [r for r in cases_dict.values() if r.get("skipped") or r.get("elapsed_us") is None]
+            collected = [
+                r for r in cases_dict.values() if r.get("elapsed_us") is not None
+            ]
+            skipped = [
+                r
+                for r in cases_dict.values()
+                if r.get("skipped") or r.get("elapsed_us") is None
+            ]
             if collected:
                 elapsed_list = [r["elapsed_us"] for r in collected]
                 mean_us = sum(elapsed_list) / len(elapsed_list)
-                print(f"  {op_path}: collected={len(collected)}, skipped={len(skipped)}, "
-                      f"mean={mean_us:.2f}μs")
+                print(
+                    f"  {op_path}: collected={len(collected)}, skipped={len(skipped)}, "
+                    f"mean={mean_us:.2f}μs"
+                )
             else:
                 print(f"  {op_path}: all skipped/failed ({len(skipped)} cases)")
 
@@ -631,11 +729,14 @@ def _deep_merge(base: Dict, overlay: Dict) -> Dict:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def _check_npu_available():
     """检查 NPU 环境是否可用"""
     import torch
+
     try:
-        import torch_npu
+        import torch_npu  # noqa: F401 -- register torch.npu before checking device availability
+
         if torch.npu.is_available():
             # ACL 模式：单算子 benchmark 不需要 Ge 图优化，
             # ACL 逐算子下发确保 profiler 产出完整 kernel_details.csv
@@ -699,6 +800,7 @@ def _run_subprocess_collect(args):
 
 def _write_subprocess_error(result_file: str, msg: str):
     import json
+
     try:
         with open(result_file, "w") as f:
             json.dump({"elapsed_us": None, "error_msg": msg}, f)
@@ -711,39 +813,40 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Baseline 性能采集脚本\n\n复用评测体系的 PerfEvaluator + refs 的 NPU 参考算子",
     )
-    parser.add_argument("--op", dest="op_path", default=None,
-                        help="算子路径 (如 level1/exp) 或算子名 (如 Sigmoid)")
-    parser.add_argument("--level", type=int, default=None,
-                        help="采集指定级别的所有算子 (1/2/3/4)")
-    parser.add_argument("--all", action="store_true",
-                        help="采集所有级别")
-    parser.add_argument("--cases", default="",
-                        help="逗号分隔的 case_id（默认全部）")
-    parser.add_argument("--device-id", type=int, default=0,
-                        help="NPU 设备 ID (默认 0)")
-    parser.add_argument("--bench-root", default=None,
-                        help="评测集根目录 (默认 tasks/)")
-    parser.add_argument("--output", default=None,
-                        help="输出 JSON 文件路径 (默认 scripts/baseline/output/<hardware>.json)")
-    parser.add_argument("--warmup", type=int, default=5,
-                        help="预热次数 (默认 5)")
-    parser.add_argument("--repeat", type=int, default=20,
-                        help="采集次数 (默认 20)")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="只打印计划，不执行")
-    parser.add_argument("--skip-existing", action="store_true",
-                        help="跳过已有 metadata 的 case")
-    parser.add_argument("--force-recollect", action="store_true",
-                        help="强制重新采集所有 case")
+    parser.add_argument(
+        "--op",
+        dest="op_path",
+        default=None,
+        help="算子路径 (如 level1/exp) 或算子名 (如 Sigmoid)",
+    )
+    parser.add_argument(
+        "--level", type=int, default=None, help="采集指定级别的所有算子 (1/2/3/4)"
+    )
+    parser.add_argument("--all", action="store_true", help="采集所有级别")
+    parser.add_argument("--cases", default="", help="逗号分隔的 case_id（默认全部）")
+    parser.add_argument("--device-id", type=int, default=0, help="NPU 设备 ID (默认 0)")
+    parser.add_argument("--bench-root", default=None, help="评测集根目录 (默认 tasks/)")
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="输出 JSON 文件路径 (默认 scripts/baseline/output/<hardware>.json)",
+    )
+    parser.add_argument("--warmup", type=int, default=5, help="预热次数 (默认 5)")
+    parser.add_argument("--repeat", type=int, default=20, help="采集次数 (默认 20)")
+    parser.add_argument("--dry-run", action="store_true", help="只打印计划，不执行")
+    parser.add_argument(
+        "--skip-existing", action="store_true", help="跳过已有 metadata 的 case"
+    )
+    parser.add_argument(
+        "--force-recollect", action="store_true", help="强制重新采集所有 case"
+    )
     # --- 子进程采集入口参数（由 _collect_one_case_in_subprocess 构造调用）---
-    parser.add_argument("--subprocess-collect", action="store_true",
-                        help=argparse.SUPPRESS)
-    parser.add_argument("--case-id", type=int, default=None,
-                        help=argparse.SUPPRESS)
-    parser.add_argument("--case-json", default=None,
-                        help=argparse.SUPPRESS)
-    parser.add_argument("--result-file", default=None,
-                        help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--subprocess-collect", action="store_true", help=argparse.SUPPRESS
+    )
+    parser.add_argument("--case-id", type=int, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--case-json", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--result-file", default=None, help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     # 子进程采集入口：独立进程内只跑单个 case 的 profiler，结果写 JSON 文件。
@@ -817,7 +920,9 @@ def main():
                 print(f"  {op_path}: {n_cases} cases")
             else:
                 print(f"  {op_path}: cases.yaml 不存在")
-        print(f"\n[INFO] warmup={args.warmup}, repeat={args.repeat}, device_id={args.device_id}")
+        print(
+            f"\n[INFO] warmup={args.warmup}, repeat={args.repeat}, device_id={args.device_id}"
+        )
         sys.exit(0)
 
     # 执行采集

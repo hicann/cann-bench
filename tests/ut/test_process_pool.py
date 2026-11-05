@@ -3,8 +3,8 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Version 2.0 (the "License").
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,6 +34,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock, call
 
 import sys
+
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -54,13 +55,19 @@ from src.kernel_eval.eval.subprocess_utils import (
     _terminate_process_group,
     detect_pypto_pro_submission,
 )
-from src.kernel_eval.eval.results import EvalCaseResult, summarize_case_results, dedup_case_results
+from src.kernel_eval.eval.results import EvalCaseResult, dedup_case_results
 from src.kernel_eval.benches import CannCaseSpec
 from src.kernel_eval.config import Config
 
 
-def make_case(operator, case_id, input_shapes=None, dtypes=None, value_ranges=None,
-              rel_path="level1/test"):
+def make_case(
+    operator,
+    case_id,
+    input_shapes=None,
+    dtypes=None,
+    value_ranges=None,
+    rel_path="level1/test",
+):
     """创建测试用例的辅助函数"""
     vr = value_ranges or [{"min": -1, "max": 1}]
     return CannCaseSpec(
@@ -102,7 +109,7 @@ class TestProcessConfig(unittest.TestCase):
         base_config = Config()
         base_config.device_type = "npu"
         process_config = ProcessConfig(processes_per_card=4, enable_profiler=True)
-        with patch.object(ProcessPoolCoordinator, '_detect_cards', return_value=2):
+        with patch.object(ProcessPoolCoordinator, "_detect_cards", return_value=2):
             coordinator = ProcessPoolCoordinator(
                 base_config=base_config,
                 process_config=process_config,
@@ -160,8 +167,7 @@ class TestTaskUnit(unittest.TestCase):
     def test_build_task_units_isolates_every_case(self):
         """PyPTO Pro 模式下每个 case 都是独立 TaskUnit。"""
         cases = [make_case("Exp", i) for i in range(5)]
-        units = build_task_units(
-            {"Exp": cases}, card_count=2, isolate_each_case=True)
+        units = build_task_units({"Exp": cases}, card_count=2, isolate_each_case=True)
 
         self.assertEqual(len(units), 5)
         self.assertTrue(all(len(unit.cases) == 1 for unit in units))
@@ -172,7 +178,8 @@ class TestTaskUnit(unittest.TestCase):
         cases = [make_case("Exp", i) for i in range(150)]
 
         units = build_task_units(
-            {"Exp": cases}, card_count=1, max_cases_per_task_unit=64)
+            {"Exp": cases}, card_count=1, max_cases_per_task_unit=64
+        )
 
         self.assertEqual([len(unit.cases) for unit in units], [64, 64, 22])
         self.assertEqual([unit.device_id for unit in units], [0, 0, 0])
@@ -182,7 +189,8 @@ class TestTaskUnit(unittest.TestCase):
         cases = [make_case("Exp", i) for i in range(260)]
 
         units = build_task_units(
-            {"Exp": cases}, card_count=2, max_cases_per_task_unit=64)
+            {"Exp": cases}, card_count=2, max_cases_per_task_unit=64
+        )
 
         self.assertEqual([len(unit.cases) for unit in units], [64, 64, 2, 64, 64, 2])
         self.assertEqual([unit.device_id for unit in units], [0, 0, 0, 1, 1, 1])
@@ -201,28 +209,55 @@ class TestAggregateByOperator(unittest.TestCase):
 
     def test_aggregate_single_operator(self):
         """单算子结果聚合"""
-        passed = EvalCaseResult(case_id="test_1", rel_path="level1/Exp",
-                                operator="Exp", case_num=1, success=True)
-        failed = EvalCaseResult(case_id="test_2", rel_path="level1/Exp",
-                                operator="Exp", case_num=2, success=False, error_msg="err",
-                                failure_type="oom_killed")
+        passed = EvalCaseResult(
+            case_id="test_1",
+            rel_path="level1/Exp",
+            operator="Exp",
+            case_num=1,
+            success=True,
+        )
+        failed = EvalCaseResult(
+            case_id="test_2",
+            rel_path="level1/Exp",
+            operator="Exp",
+            case_num=2,
+            success=False,
+            error_msg="err",
+            failure_type="oom_killed",
+        )
         results = aggregate_by_operator([passed, failed])
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].operator, "Exp")
         self.assertEqual(results[0].passed_cases, 1)
-        # summarize_case_results 区分 failed/skipped: accuracy_result=None → skipped
-        # failure_type=oom_killed 的结果 accuracy_result=None → skipped
-        self.assertEqual(results[0].skipped_cases, 1)
+        # OOM is an execution failure even when no accuracy result was produced.
+        self.assertEqual(results[0].failed_cases, 1)
+        self.assertEqual(results[0].skipped_cases, 0)
 
     def test_aggregate_multi_operator(self):
         """多算子结果聚合"""
-        r1 = EvalCaseResult(case_id="a_1", rel_path="level1/Exp",
-                             operator="Exp", case_num=1, success=True)
-        r2 = EvalCaseResult(case_id="b_1", rel_path="level1/Sigmoid",
-                             operator="Sigmoid", case_num=1, success=True)
-        r3 = EvalCaseResult(case_id="b_2", rel_path="level1/Sigmoid",
-                             operator="Sigmoid", case_num=2, success=False, error_msg="err",
-                             failure_type="oom_killed")
+        r1 = EvalCaseResult(
+            case_id="a_1",
+            rel_path="level1/Exp",
+            operator="Exp",
+            case_num=1,
+            success=True,
+        )
+        r2 = EvalCaseResult(
+            case_id="b_1",
+            rel_path="level1/Sigmoid",
+            operator="Sigmoid",
+            case_num=1,
+            success=True,
+        )
+        r3 = EvalCaseResult(
+            case_id="b_2",
+            rel_path="level1/Sigmoid",
+            operator="Sigmoid",
+            case_num=2,
+            success=False,
+            error_msg="err",
+            failure_type="oom_killed",
+        )
         results = aggregate_by_operator([r1, r2, r3])
         self.assertEqual(len(results), 2)
         # 每个算子的 passed/skipped 正确
@@ -231,7 +266,8 @@ class TestAggregateByOperator(unittest.TestCase):
                 self.assertEqual(op_result.passed_cases, 1)
             elif op_result.operator == "Sigmoid":
                 self.assertEqual(op_result.passed_cases, 1)
-                self.assertEqual(op_result.skipped_cases, 1)
+                self.assertEqual(op_result.failed_cases, 1)
+                self.assertEqual(op_result.skipped_cases, 0)
 
     def test_aggregate_dedup_stub_and_real(self):
         """子进程崩溃桩 + 重跑真实结果应去重，total_cases 不虚高"""
@@ -239,18 +275,27 @@ class TestAggregateByOperator(unittest.TestCase):
 
         # case 1-6: 子进程崩溃合成的 all-FAIL 桩（无 accuracy_result）
         stubs = [
-            EvalCaseResult(case_id=f"level1/Exp_{i}", rel_path="level1/Exp",
-                           operator="Exp", case_num=i, success=False,
-                           error_msg="子进程异常退出 rc=1",
-                           failure_type="subprocess_failure")
+            EvalCaseResult(
+                case_id=f"level1/Exp_{i}",
+                rel_path="level1/Exp",
+                operator="Exp",
+                case_num=i,
+                success=False,
+                error_msg="子进程异常退出 rc=1",
+                failure_type="subprocess_failure",
+            )
             for i in range(1, 7)
         ]
         # case 1-20: 重跑的真实结果（有 accuracy_result）
         real = [
-            EvalCaseResult(case_id=f"level1/Exp_{i}", rel_path="level1/Exp",
-                           operator="Exp", case_num=i,
-                           success=(i in (18, 19)),
-                           accuracy_result=AccuracyResult(passed=(i in (18, 19))))
+            EvalCaseResult(
+                case_id=f"level1/Exp_{i}",
+                rel_path="level1/Exp",
+                operator="Exp",
+                case_num=i,
+                success=(i in (18, 19)),
+                accuracy_result=AccuracyResult(passed=(i in (18, 19))),
+            )
             for i in range(1, 21)
         ]
 
@@ -272,12 +317,22 @@ class TestDedupCaseResults(unittest.TestCase):
         """有 accuracy_result 的真实记录优先于无 accuracy 的桩"""
         from src.kernel_eval.eval.accuracy_eval import AccuracyResult
 
-        stub = EvalCaseResult(case_id="op_1", rel_path="level1/op",
-                              operator="op", case_num=1, success=False,
-                              failure_type="subprocess_failure")
-        real = EvalCaseResult(case_id="op_1", rel_path="level1/op",
-                              operator="op", case_num=1, success=True,
-                              accuracy_result=AccuracyResult(passed=True))
+        stub = EvalCaseResult(
+            case_id="op_1",
+            rel_path="level1/op",
+            operator="op",
+            case_num=1,
+            success=False,
+            failure_type="subprocess_failure",
+        )
+        real = EvalCaseResult(
+            case_id="op_1",
+            rel_path="level1/op",
+            operator="op",
+            case_num=1,
+            success=True,
+            accuracy_result=AccuracyResult(passed=True),
+        )
         deduped = dedup_case_results([stub, real])
         self.assertEqual(len(deduped), 1)
         self.assertTrue(deduped[0].success)
@@ -285,12 +340,24 @@ class TestDedupCaseResults(unittest.TestCase):
 
     def test_dedup_keeps_last_when_both_stubs(self):
         """两条都是桩时保留最后出现的（重试结果）"""
-        stub1 = EvalCaseResult(case_id="op_1", rel_path="level1/op",
-                               operator="op", case_num=1, success=False,
-                               error_msg="first", failure_type="subprocess_failure")
-        stub2 = EvalCaseResult(case_id="op_1", rel_path="level1/op",
-                               operator="op", case_num=1, success=False,
-                               error_msg="retry", failure_type="subprocess_failure")
+        stub1 = EvalCaseResult(
+            case_id="op_1",
+            rel_path="level1/op",
+            operator="op",
+            case_num=1,
+            success=False,
+            error_msg="first",
+            failure_type="subprocess_failure",
+        )
+        stub2 = EvalCaseResult(
+            case_id="op_1",
+            rel_path="level1/op",
+            operator="op",
+            case_num=1,
+            success=False,
+            error_msg="retry",
+            failure_type="subprocess_failure",
+        )
         deduped = dedup_case_results([stub1, stub2])
         self.assertEqual(len(deduped), 1)
         self.assertEqual(deduped[0].error_msg, "retry")
@@ -298,8 +365,13 @@ class TestDedupCaseResults(unittest.TestCase):
     def test_dedup_no_duplicates(self):
         """无重复时原样返回"""
         cases = [
-            EvalCaseResult(case_id=f"op_{i}", rel_path="level1/op",
-                           operator="op", case_num=i, success=True)
+            EvalCaseResult(
+                case_id=f"op_{i}",
+                rel_path="level1/op",
+                operator="op",
+                case_num=i,
+                success=True,
+            )
             for i in range(3)
         ]
         deduped = dedup_case_results(cases)
@@ -314,7 +386,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         self.base_config.tasks_root = str(project_root / "tasks")
         self.base_config.device_type = "npu"
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_coordinator_creation_multi_card(self, mock_detect):
         """多卡模式创建"""
         mock_detect.return_value = 2
@@ -326,7 +398,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         self.assertEqual(coordinator.card_count, 2)
         self.assertEqual(coordinator.total_processes, 4)
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_coordinator_creation_single_card(self, mock_detect):
         """单卡模式（指定 device_id）"""
         mock_detect.return_value = 2
@@ -358,10 +430,10 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             process_config=ProcessConfig(processes_per_card=3, enable_profiler=False),
         )
         stats = coordinator.get_stats()
-        self.assertIn('device_id', stats)
-        self.assertIn('card_count', stats)
-        self.assertIn('processes_per_card', stats)
-        self.assertEqual(stats['processes_per_card'], 3)
+        self.assertIn("device_id", stats)
+        self.assertIn("card_count", stats)
+        self.assertIn("processes_per_card", stats)
+        self.assertEqual(stats["processes_per_card"], 3)
 
     def test_build_env_includes_cann_vars(self):
         """环境变量构建包含 CANN 继承"""
@@ -413,7 +485,9 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         )
 
         cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json",
+            task,
+            "/tmp/cases.json",
+            "/tmp/out.json",
         )
 
         self.assertIn("--perf-batch-cases", cmd)
@@ -434,7 +508,9 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         )
 
         cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json",
+            task,
+            "/tmp/cases.json",
+            "/tmp/out.json",
         )
 
         self.assertIn("--no-perf-batch-cases", cmd)
@@ -454,8 +530,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             perf_batch_cases=False,
         )
 
-        cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json")
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
 
         self.assertIn("--no-perf-batch-cases", cmd)
         self.assertNotIn("--perf-batch-cases", cmd)
@@ -475,8 +550,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             device_id=0,
         )
 
-        cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json")
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
 
         self.assertNotIn("--pypto-pro-outer-case-isolation", cmd)
         self.assertNotIn("--timeout-per-operator", cmd)
@@ -539,10 +613,13 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         ) as signal_group:
             coordinator.shutdown()
 
-        self.assertEqual(signal_group.call_args_list, [
-            call(proc, signal.SIGTERM),
-            call(proc, signal.SIGKILL),
-        ])
+        self.assertEqual(
+            signal_group.call_args_list,
+            [
+                call(proc, signal.SIGTERM),
+                call(proc, signal.SIGKILL),
+            ],
+        )
         self.assertEqual(coordinator._active_processes, [])
 
     def test_build_child_cmd_propagates_outer_isolation_and_timeout(self):
@@ -551,7 +628,8 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=ProcessConfig(
-                enable_profiler=False, timeout_per_operator=123),
+                enable_profiler=False, timeout_per_operator=123
+            ),
         )
         task = TaskUnit(
             operator="Exp",
@@ -560,8 +638,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             device_id=0,
         )
 
-        cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json")
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
 
         self.assertIn("--pypto-pro-outer-case-isolation", cmd)
         idx = cmd.index("--timeout-per-operator")
@@ -583,24 +660,27 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             device_id=0,
         )
 
-        cmd = coordinator._build_child_cmd(
-            task, "/tmp/cases.json", "/tmp/out.json")
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
 
         reports_idx = cmd.index("--reports-dir")
         source_idx = cmd.index("--source-dir")
         self.assertTrue(Path(cmd[reports_idx + 1]).is_absolute())
         self.assertTrue(Path(cmd[source_idx + 1]).is_absolute())
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_multi_card_child_visibility_is_narrowed(self, mock_detect):
         """多卡 child 通过 ASCEND_RT_VISIBLE_DEVICES 收窄到分配的物理卡"""
         mock_detect.return_value = 4
         process_config = ProcessConfig(processes_per_card=1, enable_profiler=False)
-        with patch.dict(os.environ, {
-            "ASCEND_RT_VISIBLE_DEVICES": "4,5,6,7",
-            "ASCEND_VISIBLE_DEVICES": "4,5,6,7",
-            "NPU_VISIBLE_DEVICES": "4,5,6,7",
-        }, clear=False):
+        with patch.dict(
+            os.environ,
+            {
+                "ASCEND_RT_VISIBLE_DEVICES": "4,5,6,7",
+                "ASCEND_VISIBLE_DEVICES": "4,5,6,7",
+                "NPU_VISIBLE_DEVICES": "4,5,6,7",
+            },
+            clear=False,
+        ):
             coordinator = ProcessPoolCoordinator(
                 base_config=self.base_config,
                 process_config=process_config,
@@ -615,7 +695,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             # 逻辑索引 2 映射到物理 chip 6（ASCEND_VISIBLE_DEVICES=4,5,6,7）
             self.assertEqual(env["ASCEND_RT_VISIBLE_DEVICES"], "6")
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_multi_card_child_uses_logical_device_zero(self, mock_detect):
         """多卡 child 的 --device-id 直接使用 task.device_id（逻辑索引）"""
         mock_detect.return_value = 2
@@ -634,7 +714,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         device_idx = cmd.index("--device-id") + 1
         self.assertEqual(cmd[device_idx], "1")
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_single_card_child_narrows_visibility_to_logical_zero(self, mock_detect):
         """单卡显式 device_id：ASCEND_RT_VISIBLE_DEVICES 设为该逻辑索引，--device-id 直接使用该值"""
         mock_detect.return_value = 4
@@ -658,7 +738,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         device_idx = cmd.index("--device-id") + 1
         self.assertEqual(cmd[device_idx], "3")
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_filter_healthy_cards_misaligned_columns_keeps_card(self, mock_detect):
         """npu-smi 列错位（health 不在 parts[3]、值为数字/用量）时 fail-open 保留卡
 
@@ -678,12 +758,14 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             "| 0  Ascend910B4 | 0      | 169.9  3018 / 32768        |\n"
             "+---+\n"
         )
-        with patch('src.kernel_eval.eval.process_pool.subprocess.run',
-                   return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr="")):
+        with patch(
+            "src.kernel_eval.eval.process_pool.subprocess.run",
+            return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr=""),
+        ):
             healthy = coordinator._filter_healthy_cards(1)
         self.assertEqual(healthy, [0])  # fail-open：不误杀健康卡
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_filter_healthy_cards_skips_alarm_card(self, mock_detect):
         """明确 Alarm 状态的卡应被跳过"""
         mock_detect.return_value = 2
@@ -698,8 +780,10 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             "| 1  Ascend910   | Alarm  | 0     |\n"
             "+---+\n"
         )
-        with patch('src.kernel_eval.eval.process_pool.subprocess.run',
-                   return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr="")):
+        with patch(
+            "src.kernel_eval.eval.process_pool.subprocess.run",
+            return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr=""),
+        ):
             healthy = coordinator._filter_healthy_cards(2)
         self.assertEqual(healthy, [0])  # 仅跳过 Alarm 卡
 
@@ -795,13 +879,17 @@ class TestSubprocessUtils(unittest.TestCase):
             init_file = pkg_dir / "__init__.py"
             init_file.write_text("", encoding="utf-8")
             (pkg_dir / "rotary_impl.py").write_text(
-                "from pypto_pro import tile\n", encoding="utf-8")
+                "from pypto_pro import tile\n", encoding="utf-8"
+            )
             module = types.ModuleType("cann_bench")
             module.__file__ = str(init_file)
 
-            with patch.dict(sys.modules, {"cann_bench": module}), patch(
-                "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
-                side_effect=metadata.PackageNotFoundError,
+            with (
+                patch.dict(sys.modules, {"cann_bench": module}),
+                patch(
+                    "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
+                    side_effect=metadata.PackageNotFoundError,
+                ),
             ):
                 self.assertTrue(detect_pypto_pro_submission())
 
@@ -815,7 +903,8 @@ class TestSubprocessUtils(unittest.TestCase):
             active_file = pkg_dir / "swi_glu_impl.py"
             active_file.write_text("import pypto\n", encoding="utf-8")
             (pkg_dir / "stale_pypto_pro.py").write_text(
-                "import pypto_pro.language as pl\n", encoding="utf-8")
+                "import pypto_pro.language as pl\n", encoding="utf-8"
+            )
 
             module = types.ModuleType("cann_bench")
             module.__file__ = str(init_file)
@@ -823,9 +912,12 @@ class TestSubprocessUtils(unittest.TestCase):
             dist.files = [Path("cann_bench/swi_glu_impl.py")]
             dist.locate_file.return_value = active_file
 
-            with patch.dict(sys.modules, {"cann_bench": module}), patch(
-                "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
-                return_value=dist,
+            with (
+                patch.dict(sys.modules, {"cann_bench": module}),
+                patch(
+                    "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
+                    return_value=dist,
+                ),
             ):
                 self.assertFalse(detect_pypto_pro_submission())
 
@@ -849,17 +941,21 @@ class TestSubprocessUtils(unittest.TestCase):
             dist.files = [Path("cann_bench/ordinary_impl.py")]
             dist.locate_file.return_value = active_file
 
-            with patch.dict(sys.modules, {"cann_bench": module}), patch(
-                "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
-                return_value=dist,
+            with (
+                patch.dict(sys.modules, {"cann_bench": module}),
+                patch(
+                    "src.kernel_eval.eval.subprocess_utils.metadata.distribution",
+                    return_value=dist,
+                ),
             ):
                 self.assertFalse(detect_pypto_pro_submission())
 
     def test_synthesize_failure_cases_oom(self):
         """OOM 失败结果合成"""
         cases = [make_case("Exp", 1), make_case("Exp", 2)]
-        results = _synthesize_failure_cases(cases, "oom_killed",
-            "子进程被 OOM Killer 杀死")
+        results = _synthesize_failure_cases(
+            cases, "oom_killed", "子进程被 OOM Killer 杀死"
+        )
         self.assertEqual(len(results), 2)
         for r in results:
             self.assertFalse(r.success)
@@ -869,8 +965,7 @@ class TestSubprocessUtils(unittest.TestCase):
     def test_synthesize_failure_cases_timeout(self):
         """超时失败结果合成"""
         cases = [make_case("Exp", 1)]
-        results = _synthesize_failure_cases(cases, "timeout",
-            "子进程超时被杀")
+        results = _synthesize_failure_cases(cases, "timeout", "子进程超时被杀")
         self.assertEqual(len(results), 1)
         self.assertFalse(results[0].success)
         self.assertEqual(results[0].failure_type, "timeout")
@@ -899,10 +994,17 @@ class TestSubprocessUtils(unittest.TestCase):
         fd, tmp = tempfile.mkstemp(suffix=".json")
         os.close(fd)
         try:
-            payload = {"case_results": [
-                {"case_id": "test_1", "rel_path": "level1/Exp",
-                 "operator": "Exp", "case_num": 1, "success": True},
-            ]}
+            payload = {
+                "case_results": [
+                    {
+                        "case_id": "test_1",
+                        "rel_path": "level1/Exp",
+                        "operator": "Exp",
+                        "case_num": 1,
+                        "success": True,
+                    },
+                ]
+            }
             Path(tmp).write_text(json.dumps(payload))
             results = _try_recover_partial_results(tmp)
             self.assertEqual(len(results), 1)
@@ -923,8 +1025,12 @@ class TestSubprocessUtils(unittest.TestCase):
 
     def test_cann_env_vars_list_complete(self):
         """CANN 环境变量列表包含关键变量"""
-        essential = ["ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME",
-                     "LD_LIBRARY_PATH", "PATH"]
+        essential = [
+            "ASCEND_HOME_PATH",
+            "ASCEND_TOOLKIT_HOME",
+            "LD_LIBRARY_PATH",
+            "PATH",
+        ]
         for var in essential:
             self.assertIn(var, _CANN_ENV_VARS)
 
@@ -935,25 +1041,36 @@ class TestCLI(unittest.TestCase):
     def test_cli_eval_child_parse(self):
         """eval-child 命令参数解析"""
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
-        args = parser.parse_args([
-            'eval-child',
-            '--device-id', '0',
-            '--cases-file', '/tmp/cases.json',
-            '--output', '/tmp/output.json',
-            '--reports-dir', '/tmp/reports',
-            '--bench-name', 'cann',
-            '--warmup', '3',
-            '--repeat', '5',
-            '--no-perf',
-            '--pypto-pro-outer-case-isolation',
-            '--timeout-per-operator', '123',
-        ])
-        self.assertEqual(args.command, 'eval-child')
+        args = parser.parse_args(
+            [
+                "eval-child",
+                "--device-id",
+                "0",
+                "--cases-file",
+                "/tmp/cases.json",
+                "--output",
+                "/tmp/output.json",
+                "--reports-dir",
+                "/tmp/reports",
+                "--bench-name",
+                "cann",
+                "--warmup",
+                "3",
+                "--repeat",
+                "5",
+                "--no-perf",
+                "--pypto-pro-outer-case-isolation",
+                "--timeout-per-operator",
+                "123",
+            ]
+        )
+        self.assertEqual(args.command, "eval-child")
         self.assertEqual(args.device_id, 0)
-        self.assertEqual(args.cases_file, '/tmp/cases.json')
-        self.assertEqual(args.output, '/tmp/output.json')
-        self.assertEqual(args.reports_dir, '/tmp/reports')
+        self.assertEqual(args.cases_file, "/tmp/cases.json")
+        self.assertEqual(args.output, "/tmp/output.json")
+        self.assertEqual(args.reports_dir, "/tmp/reports")
         self.assertTrue(args.no_perf)
         self.assertTrue(args.perf_batch_cases)
         self.assertTrue(args.pypto_pro_outer_case_isolation)
@@ -962,71 +1079,100 @@ class TestCLI(unittest.TestCase):
     def test_cli_perf_batch_cases_can_be_disabled(self):
         """eval 与 eval-child 都支持显式恢复逐 case profiler。"""
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
 
-        eval_args = parser.parse_args(['eval', '--no-perf-batch-cases'])
+        eval_args = parser.parse_args(["eval", "--no-perf-batch-cases"])
         self.assertFalse(eval_args.perf_batch_cases)
 
-        child_args = parser.parse_args([
-            'eval-child',
-            '--device-id', '0',
-            '--cases-file', '/tmp/cases.json',
-            '--output', '/tmp/output.json',
-            '--no-perf-batch-cases',
-        ])
+        child_args = parser.parse_args(
+            [
+                "eval-child",
+                "--device-id",
+                "0",
+                "--cases-file",
+                "/tmp/cases.json",
+                "--output",
+                "/tmp/output.json",
+                "--no-perf-batch-cases",
+            ]
+        )
         self.assertFalse(child_args.perf_batch_cases)
 
     def test_cli_eval_max_cases_per_task_unit(self):
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
 
         self.assertEqual(
-            parser.parse_args(['eval']).max_cases_per_task_unit,
+            parser.parse_args(["eval"]).max_cases_per_task_unit,
             64,
         )
         self.assertEqual(
-            parser.parse_args([
-                'eval', '--max-cases-per-task-unit', '32',
-            ]).max_cases_per_task_unit,
+            parser.parse_args(
+                [
+                    "eval",
+                    "--max-cases-per-task-unit",
+                    "32",
+                ]
+            ).max_cases_per_task_unit,
             32,
         )
 
     def test_cli_eval_child_config_uses_reports_dir(self):
         """eval-child 配置使用命令行 reports_dir 而不是默认项目 reports"""
-        from src.kernel_eval.cli import create_parser, _create_config_from_args_for_child
+        from src.kernel_eval.cli import (
+            create_parser,
+            _create_config_from_args_for_child,
+        )
+
         parser = create_parser()
-        args = parser.parse_args([
-            'eval-child',
-            '--device-id', '0',
-            '--cases-file', '/tmp/cases.json',
-            '--output', '/tmp/output.json',
-            '--reports-dir', '/tmp/job-local-reports',
-        ])
+        args = parser.parse_args(
+            [
+                "eval-child",
+                "--device-id",
+                "0",
+                "--cases-file",
+                "/tmp/cases.json",
+                "--output",
+                "/tmp/output.json",
+                "--reports-dir",
+                "/tmp/job-local-reports",
+            ]
+        )
         config = _create_config_from_args_for_child(args, str(project_root / "tasks"))
-        self.assertEqual(config.reports_dir, '/tmp/job-local-reports')
+        self.assertEqual(config.reports_dir, "/tmp/job-local-reports")
 
     def test_cli_eval_child_torch_op_guard(self):
         """eval-child 接收 torch-op-guard-mode"""
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
-        args = parser.parse_args([
-            'eval-child',
-            '--device-id', '0',
-            '--cases-file', '/tmp/cases.json',
-            '--output', '/tmp/output.json',
-            '--torch-op-guard-mode', 'block',
-        ])
-        self.assertEqual(args.torch_op_guard_mode, 'block')
+        args = parser.parse_args(
+            [
+                "eval-child",
+                "--device-id",
+                "0",
+                "--cases-file",
+                "/tmp/cases.json",
+                "--output",
+                "/tmp/output.json",
+                "--torch-op-guard-mode",
+                "block",
+            ]
+        )
+        self.assertEqual(args.torch_op_guard_mode, "block")
 
     def test_cli_eval_no_removed_flags(self):
         """eval 命令不再包含已删除的内部开关"""
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
         # --no-subprocess-isolation, --child-json-output 已删除
         # 注：--skip-install 已恢复，供 ST harness 使用
-        for flag in ['--no-subprocess-isolation', '--child-json-output']:
+        for flag in ["--no-subprocess-isolation", "--child-json-output"]:
             try:
-                parser.parse_args(['eval', flag])
+                parser.parse_args(["eval", flag])
                 self.fail(f"已删除的参数 {flag} 不应被 parser 接受")
             except SystemExit:
                 pass  # argparse 拒绝未知参数 → 正确行为
@@ -1034,9 +1180,10 @@ class TestCLI(unittest.TestCase):
     def test_cli_eval_process_no_longer_exists(self):
         """eval-process 命令已删除"""
         from src.kernel_eval.cli import create_parser
+
         parser = create_parser()
         try:
-            parser.parse_args(['eval-process', '--process-id', '0'])
+            parser.parse_args(["eval-process", "--process-id", "0"])
             self.fail("eval-process 不应被 parser 接受")
         except SystemExit:
             pass
@@ -1122,8 +1269,10 @@ class TestDynamicDispatch(unittest.TestCase):
     """测试设备池动态调度"""
 
     _CLEAN_ENV_KEYS = (
-        "ASCEND_VISIBLE_DEVICES", "NPU_VISIBLE_DEVICES",
-        "BENCH_DEVICE_VISIBILITY", "ASCEND_RT_VISIBLE_DEVICES",
+        "ASCEND_VISIBLE_DEVICES",
+        "NPU_VISIBLE_DEVICES",
+        "BENCH_DEVICE_VISIBILITY",
+        "ASCEND_RT_VISIBLE_DEVICES",
     )
 
     def setUp(self):
@@ -1140,7 +1289,7 @@ class TestDynamicDispatch(unittest.TestCase):
         for k, v in self._saved_env.items():
             os.environ[k] = v
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def _make_coordinator(self, mock_detect, card_count=2, processes_per_card=1):
         mock_detect.return_value = card_count
         return ProcessPoolCoordinator(
@@ -1156,29 +1305,37 @@ class TestDynamicDispatch(unittest.TestCase):
         coordinator = self._make_coordinator(card_count=2, processes_per_card=1)
         assigned_devices = []
 
-        original_popen = subprocess.Popen
-
         def mock_popen(cmd, **kwargs):
             # 从 env 中提取分配的卡
-            self.assertNotIn('cwd', kwargs)
-            env = kwargs.get('env', {})
-            dev = env.get('ASCEND_RT_VISIBLE_DEVICES', '?')
+            self.assertNotIn("cwd", kwargs)
+            env = kwargs.get("env", {})
+            dev = env.get("ASCEND_RT_VISIBLE_DEVICES", "?")
             assigned_devices.append(dev)
             proc = Mock()
             proc.pid = 12345
             proc.wait = Mock(return_value=0)
             proc.poll = Mock(return_value=0)
             # 写 output 文件
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             Path(output_file).write_text('{"case_results": []}')
             return proc
 
         cases = [make_case("Exp", i) for i in range(4)]
-        task_units = [TaskUnit(operator="Exp", rel_path="level1/Exp",
-                               cases=[c], device_id=0) for c in cases]
+        task_units = [
+            TaskUnit(operator="Exp", rel_path="level1/Exp", cases=[c], device_id=0)
+            for c in cases
+        ]
 
-        with patch('src.kernel_eval.eval.process_pool.subprocess.Popen', side_effect=mock_popen), \
-             patch('src.kernel_eval.eval.process_pool._write_oom_score_adj', return_value=True):
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
+        ):
             results = coordinator.evaluate_task_units(task_units)
 
         self.assertEqual(len(results), 0)  # 空 case_results
@@ -1186,7 +1343,7 @@ class TestDynamicDispatch(unittest.TestCase):
         self.assertEqual(len(assigned_devices), 4)
         # 每个分配的设备都在 [0, 1] 范围内
         for dev in assigned_devices:
-            self.assertIn(dev, ['0', '1'])
+            self.assertIn(dev, ["0", "1"])
 
     def test_pypto_task_uses_and_removes_isolated_child_cwd(self):
         self.base_config.pypto_pro_outer_case_isolation = True
@@ -1213,12 +1370,15 @@ class TestDynamicDispatch(unittest.TestCase):
             device_id=0,
         )
 
-        with patch(
-            'src.kernel_eval.eval.process_pool.subprocess.Popen',
-            side_effect=mock_popen,
-        ), patch(
-            'src.kernel_eval.eval.process_pool._write_oom_score_adj',
-            return_value=True,
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
         ):
             coordinator.evaluate_task_units([task])
 
@@ -1234,16 +1394,26 @@ class TestDynamicDispatch(unittest.TestCase):
             proc.pid = 12345
             proc.wait = Mock(return_value=0)
             proc.poll = Mock(return_value=0)
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             Path(output_file).write_text('{"case_results": []}')
             return proc
 
         cases = [make_case("Exp", i) for i in range(3)]
-        task_units = [TaskUnit(operator="Exp", rel_path="level1/Exp",
-                               cases=[c], device_id=0) for c in cases]
+        task_units = [
+            TaskUnit(operator="Exp", rel_path="level1/Exp", cases=[c], device_id=0)
+            for c in cases
+        ]
 
-        with patch('src.kernel_eval.eval.process_pool.subprocess.Popen', side_effect=mock_popen), \
-             patch('src.kernel_eval.eval.process_pool._write_oom_score_adj', return_value=True):
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
+        ):
             results = coordinator.evaluate_task_units(task_units)
 
         # 3 个任务都能完成（1卡1槽，串行执行）
@@ -1264,31 +1434,43 @@ class TestDynamicDispatch(unittest.TestCase):
             proc.pid = 12345
             proc.wait = Mock(return_value=0)
             proc.poll = Mock(return_value=0)
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             Path(output_file).write_text('{"case_results": []}')
             current[0] -= 1
             return proc
 
         cases = [make_case("Exp", i) for i in range(6)]
-        task_units = [TaskUnit(operator="Exp", rel_path="level1/Exp",
-                               cases=[c], device_id=0) for c in cases]
+        task_units = [
+            TaskUnit(operator="Exp", rel_path="level1/Exp", cases=[c], device_id=0)
+            for c in cases
+        ]
 
-        with patch('src.kernel_eval.eval.process_pool.subprocess.Popen', side_effect=mock_popen), \
-             patch('src.kernel_eval.eval.process_pool._write_oom_score_adj', return_value=True):
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
+        ):
             coordinator.evaluate_task_units(task_units)
 
         # max_concurrent 不超过 4 (2卡 × 2槽)
         self.assertLessEqual(max_concurrent[0], 4)
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
     def test_dispatch_retry_uses_pool(self, mock_detect):
         """重试阶段也动态分配卡"""
         mock_detect.return_value = 2
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,
             process_config=ProcessConfig(
-                processes_per_card=1, enable_profiler=False,
-                retry_on_failure=True, max_retries=1,
+                processes_per_card=1,
+                enable_profiler=False,
+                retry_on_failure=True,
+                max_retries=1,
             ),
         )
 
@@ -1300,7 +1482,7 @@ class TestDynamicDispatch(unittest.TestCase):
             proc.pid = 12345
             proc.poll = Mock(return_value=0)
             proc.communicate = Mock(return_value=("", ""))
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             if call_count[0] == 1:
                 # 第一次：失败，触发重试
                 proc.wait = Mock(return_value=1)
@@ -1314,19 +1496,32 @@ class TestDynamicDispatch(unittest.TestCase):
             return proc
 
         case = make_case("Exp", 1)
-        task_units = [TaskUnit(operator="Exp", rel_path="level1/Exp",
-                               cases=[case], device_id=0)]
+        task_units = [
+            TaskUnit(operator="Exp", rel_path="level1/Exp", cases=[case], device_id=0)
+        ]
 
-        with patch('src.kernel_eval.eval.process_pool.subprocess.Popen', side_effect=mock_popen), \
-             patch('src.kernel_eval.eval.process_pool._is_oom_killed', return_value=False), \
-             patch('src.kernel_eval.eval.process_pool._write_oom_score_adj', return_value=True):
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._is_oom_killed", return_value=False
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
+        ):
             coordinator.evaluate_task_units(task_units)
 
         # 第一次失败 + 1次重试 = 2 次调用
         self.assertEqual(call_count[0], 2)
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_batch_oom_stops_group_and_retries_every_case_individually(self, mock_detect):
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
+    def test_batch_oom_stops_group_and_retries_every_case_individually(
+        self, mock_detect
+    ):
         mock_detect.return_value = 2
         self.base_config.perf_batch_cases = True
         coordinator = ProcessPoolCoordinator(
@@ -1340,8 +1535,10 @@ class TestDynamicDispatch(unittest.TestCase):
         )
         cases = [make_case("Exp", 1), make_case("Exp", 2)]
         task = TaskUnit(
-            operator="Exp", rel_path="level1/test",
-            cases=cases, device_id=0,
+            operator="Exp",
+            rel_path="level1/test",
+            cases=cases,
+            device_id=0,
         )
         submitted = []
         child_flags = []
@@ -1359,15 +1556,15 @@ class TestDynamicDispatch(unittest.TestCase):
 
         def mock_popen(cmd, **kwargs):
             del kwargs
-            case_data = json.loads(Path(
-                cmd[cmd.index('--cases-file') + 1]).read_text())
+            case_data = json.loads(Path(cmd[cmd.index("--cases-file") + 1]).read_text())
             submitted.append([item["case_id"] for item in case_data])
             child_flags.append(
-                "individual" if "--no-perf-batch-cases" in cmd else "batch")
+                "individual" if "--no-perf-batch-cases" in cmd else "batch"
+            )
             proc = Mock()
             proc.pid = 12000 + len(submitted)
             proc.communicate = Mock(return_value=("", ""))
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             if len(submitted) == 1:
                 proc.returncode = -9
                 proc.poll = Mock(return_value=-9)
@@ -1375,21 +1572,29 @@ class TestDynamicDispatch(unittest.TestCase):
             else:
                 proc.returncode = 0
                 proc.poll = Mock(return_value=0)
-                Path(output_file).write_text(json.dumps({
-                    "case_results": [result_payload(case_data[0])],
-                }))
+                Path(output_file).write_text(
+                    json.dumps(
+                        {
+                            "case_results": [result_payload(case_data[0])],
+                        }
+                    )
+                )
             proc.wait = Mock(return_value=proc.returncode)
             return proc
 
-        with patch(
-            'src.kernel_eval.eval.process_pool.subprocess.Popen',
-            side_effect=mock_popen,
-        ), patch(
-            'src.kernel_eval.eval.process_pool._write_oom_score_adj',
-            return_value=True,
-        ), patch(
-            'src.kernel_eval.eval.process_pool._terminate_process_group',
-        ) as terminate_group:
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._terminate_process_group",
+            ) as terminate_group,
+        ):
             raw_results = coordinator.evaluate_task_units([task])
 
         self.assertEqual(len(submitted), 3)
@@ -1400,13 +1605,17 @@ class TestDynamicDispatch(unittest.TestCase):
         aggregated = aggregate_by_operator(raw_results)[0]
         self.assertEqual(aggregated.total_cases, 2)
         self.assertEqual(aggregated.passed_cases, 2)
-        self.assertTrue(all(
-            case.perf_result.metadata["perf_batch_external_retry"]
-            for case in aggregated.results
-        ))
+        self.assertTrue(
+            all(
+                case.perf_result.metadata["perf_batch_external_retry"]
+                for case in aggregated.results
+            )
+        )
 
-    @patch('src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards')
-    def test_sigsegv_recovers_partial_results_and_retries_only_remaining(self, mock_detect):
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
+    def test_sigsegv_recovers_partial_results_and_retries_only_remaining(
+        self, mock_detect
+    ):
         """普通异常退出也恢复增量结果，重试仅覆盖尚未完成的 case。"""
         mock_detect.return_value = 2
         coordinator = ProcessPoolCoordinator(
@@ -1420,12 +1629,14 @@ class TestDynamicDispatch(unittest.TestCase):
         )
 
         cases = [make_case("Exp", i) for i in range(1, 4)]
-        task_units = [TaskUnit(
-            operator="Exp",
-            rel_path="level1/test",
-            cases=cases,
-            device_id=0,
-        )]
+        task_units = [
+            TaskUnit(
+                operator="Exp",
+                rel_path="level1/test",
+                cases=cases,
+                device_id=0,
+            )
+        ]
         case_batches = []
         call_count = [0]
 
@@ -1448,34 +1659,45 @@ class TestDynamicDispatch(unittest.TestCase):
             proc.communicate = Mock(return_value=("", ""))
             proc.returncode = -11
 
-            cases_file = cmd[cmd.index('--cases-file') + 1]
+            cases_file = cmd[cmd.index("--cases-file") + 1]
             submitted = json.loads(Path(cases_file).read_text())
             case_batches.append([item["case_id"] for item in submitted])
 
-            output_file = cmd[cmd.index('--output') + 1]
+            output_file = cmd[cmd.index("--output") + 1]
             completed_case = cases[call_count[0] - 1]
-            Path(output_file).write_text(json.dumps({
-                "case_results": [result_payload(completed_case)],
-            }))
+            Path(output_file).write_text(
+                json.dumps(
+                    {
+                        "case_results": [result_payload(completed_case)],
+                    }
+                )
+            )
             return proc
 
-        with patch(
-            'src.kernel_eval.eval.process_pool.subprocess.Popen',
-            side_effect=mock_popen,
-        ), patch(
-            'src.kernel_eval.eval.process_pool._is_oom_killed',
-            return_value=False,
-        ), patch(
-            'src.kernel_eval.eval.process_pool._write_oom_score_adj',
-            return_value=True,
+        with (
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.Popen",
+                side_effect=mock_popen,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._is_oom_killed",
+                return_value=False,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool._write_oom_score_adj",
+                return_value=True,
+            ),
         ):
             raw_results = coordinator.evaluate_task_units(task_units)
 
         self.assertEqual(call_count[0], 2)
-        self.assertEqual(case_batches, [
-            [case.get_case_id_str() for case in cases],
-            [case.get_case_id_str() for case in cases[1:]],
-        ])
+        self.assertEqual(
+            case_batches,
+            [
+                [case.get_case_id_str() for case in cases],
+                [case.get_case_id_str() for case in cases[1:]],
+            ],
+        )
 
         aggregated = aggregate_by_operator(raw_results)[0]
         self.assertEqual(aggregated.total_cases, 3)
@@ -1505,20 +1727,23 @@ class TestDynamicDispatch(unittest.TestCase):
         )
 
         def mock_subprocess_run(cmd, **kwargs):
-            if '-m' in cmd:
+            if "-m" in cmd:
                 return Mock(returncode=0, stdout=mapping_output, stderr="")
-            elif 'proc-mem' in cmd:
+            elif "proc-mem" in cmd:
                 return Mock(returncode=0, stdout="\tNo process in device.\n", stderr="")
             else:
                 return Mock(returncode=0, stdout=healthy_smi, stderr="")
 
         mock_torch_npu = Mock()
 
-        with patch.dict(sys.modules, {'torch_npu': mock_torch_npu}), \
-             patch('src.kernel_eval.eval.process_pool.torch') as mock_torch, \
-             patch('src.kernel_eval.eval.process_pool.subprocess.run',
-                   side_effect=mock_subprocess_run):
-
+        with (
+            patch.dict(sys.modules, {"torch_npu": mock_torch_npu}),
+            patch("src.kernel_eval.eval.process_pool.torch") as mock_torch,
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.run",
+                side_effect=mock_subprocess_run,
+            ),
+        ):
             mock_npu = Mock()
             mock_npu.is_available.return_value = True
             mock_npu.device_count.return_value = 2
@@ -1540,6 +1765,7 @@ class TestCrashDiagnostics(unittest.TestCase):
     def test_extract_crash_diag_sigsegv_with_stderr(self):
         """SIGSEGV (rc=-11) + stderr 尾行 → 诊断含信号名和 stderr 摘要"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         diag = _extract_crash_diag(-11, "", "line1\nFatal: segfault\n")
         self.assertIn("SIGSEGV", diag)
         self.assertIn("segfault", diag)
@@ -1547,6 +1773,7 @@ class TestCrashDiagnostics(unittest.TestCase):
     def test_extract_crash_diag_sigabrt_no_stderr(self):
         """SIGABRT (rc=-6) + 无 stderr → 诊断含信号名，无 stderr_tail"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         diag = _extract_crash_diag(-6, "", "")
         self.assertIn("SIGABRT", diag)
         self.assertNotIn("stderr_tail", diag)
@@ -1554,11 +1781,13 @@ class TestCrashDiagnostics(unittest.TestCase):
     def test_extract_crash_diag_normal_rc(self):
         """正常退出 (rc=1) + 无输出 → 空诊断"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         self.assertEqual(_extract_crash_diag(1, "", ""), "")
 
     def test_extract_crash_diag_stdout_fallback(self):
         """stderr 为空时 fallback 到 stdout"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         diag = _extract_crash_diag(-11, "some error on stdout\n", "")
         self.assertIn("SIGSEGV", diag)
         self.assertIn("some error on stdout", diag)
@@ -1566,6 +1795,7 @@ class TestCrashDiagnostics(unittest.TestCase):
     def test_extract_crash_diag_tail_limit(self):
         """stderr 超过 5 行时只取最后 5 行"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         stderr = "\n".join(f"line{i}" for i in range(20))
         diag = _extract_crash_diag(-11, "", stderr)
         self.assertIn("line19", diag)
@@ -1574,6 +1804,7 @@ class TestCrashDiagnostics(unittest.TestCase):
     def test_extract_crash_diag_unknown_signal(self):
         """未知信号 → 使用 signal N 形式"""
         from src.kernel_eval.eval.process_pool import _extract_crash_diag
+
         diag = _extract_crash_diag(-12, "", "boom\n")
         self.assertIn("signal 12(-12)", diag)
 
@@ -1584,6 +1815,7 @@ class TestForwardChildOutput(unittest.TestCase):
     def test_forwards_stdout_and_stderr(self):
         from src.kernel_eval.eval.process_pool import _forward_child_output
         from io import StringIO
+
         captured_out, captured_err = StringIO(), StringIO()
         old_out, old_err = sys.stdout, sys.stderr
         sys.stdout, sys.stderr = captured_out, captured_err
@@ -1597,6 +1829,7 @@ class TestForwardChildOutput(unittest.TestCase):
     def test_empty_output_prints_nothing(self):
         from src.kernel_eval.eval.process_pool import _forward_child_output
         from io import StringIO
+
         captured_out, captured_err = StringIO(), StringIO()
         old_out, old_err = sys.stdout, sys.stderr
         sys.stdout, sys.stderr = captured_out, captured_err
@@ -1608,5 +1841,5 @@ class TestForwardChildOutput(unittest.TestCase):
         self.assertEqual(captured_err.getvalue(), "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

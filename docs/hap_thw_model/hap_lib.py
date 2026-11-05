@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
-"""Shared HAP (Hardware-Anchored Performance, t_hw) model for Ascend 910B2, 950PR and 910C.
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
+"""Shared HAP (Hardware-Anchored Performance, t_hw) resource model.
 
 t_hw = max(t_cube, t_vector, t_hbm_read, t_write)   [microseconds]
 
@@ -27,20 +38,21 @@ Output conventions applied at finalize():
     baseline_perf_us = min(measured, baseline_cap_us); where no measurement
     exists, the cap itself is published.
 
-PUBLIC RELEASE NOTE -- hardware constants are NOT included.
-This directory publishes the *logic* of the t_hw computation. The per-platform
-hardware constant table (HBM read bandwidth, L2 bus bandwidth and capacity,
-cube peak FLOP/s per dtype, vector rates per dtype, SFU/div rate factors) is
-loaded from an external `hap_platform_constants.json` that is not distributed.
-Obtain the values for your device from the official hardware documentation:
+PUBLIC RELEASE NOTE -- a documented A5 Cube/HBM/link subset is included in
+hap_platform_constants.public.json and shared by all models. Complete L2,
+vector and other platform constants still require an external
+`hap_platform_constants.json`. Obtain missing values from official documentation:
 
     https://www.hiascend.com/document
 
 then fill in `hap_platform_constants.template.json` (schema below) and save it
-as `hap_platform_constants.json` next to this file. Without it every script
-still imports and reads cleanly, but raises a clear error on first computation.
+as `hap_platform_constants.json` next to this file. Without it public resource
+components and MC2 bounds work; components needing missing data fail explicitly.
 """
+
+import copy
 import json
+import math
 import os
 from functools import reduce
 
@@ -53,8 +65,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(HERE))
 
 # ---------------------------------------------------------------------------
-# Hardware facts -- loaded from an external file, not distributed publicly.
-# Schema, per platform key (all three of "910b2" / "950pr" / "910c" required):
+# Hardware facts -- public A5 subset plus externally supplied complete profiles.
+# Schema: "910b2" / "950pr" / "910c" required; complete "950dt" optional.
 #   hbm        : HBM read bandwidth, bytes/s
 #   l2         : L2 write-fill (bus) bandwidth, bytes/s
 #   l2cap      : L2 capacity, bytes
@@ -72,11 +84,62 @@ _CONST_FILE = os.path.join(HERE, "hap_platform_constants.json")
 _CONST_HELP = (
     "fill in hap_platform_constants.template.json from your device's official "
     "hardware documentation (https://www.hiascend.com/document) and save it as "
-    "hap_platform_constants.json next to hap_lib.py")
+    "hap_platform_constants.json next to hap_lib.py"
+)
 
-_PLATFORMS = ("910b2", "950pr", "910c")
+_REQUIRED_PLATFORMS = ("910b2", "950pr", "910c")
+_PLATFORMS = (*_REQUIRED_PLATFORMS, "950dt")
 _SCALAR_KEYS = ("hbm", "l2", "l2cap", "cast_rate", "sfu_factor", "div_factor")
 _TABLE_KEYS = ("cube", "vec_basic")
+
+
+def _load_public_constants():
+    with open(
+        os.path.join(HERE, "hap_platform_constants.public.json"), encoding="utf-8"
+    ) as f:
+        published = json.load(f)
+    public = {}
+    for plat in ("950pr", "950dt"):
+        block = published[plat]
+        public[plat] = {
+            key: copy.deepcopy(block[key]) for key in ("hbm", "cube", "link")
+        }
+        values = [block["hbm"], block["link"], *block["cube"].values()]
+        if any(
+            isinstance(v, bool)
+            or not isinstance(v, (int, float))
+            or not math.isfinite(v)
+            or v <= 0
+            for v in values
+        ):
+            raise RuntimeError(f"Invalid public hardware constants for {plat}")
+    return public
+
+
+PUBLIC_PLAT = _load_public_constants()
+
+
+def _merge_public_constants(table):
+    """One canonical A5 subset; reject conflicting private copies, never silently override."""
+    result = copy.deepcopy(table)
+    for plat, public in PUBLIC_PLAT.items():
+        block = result.get(plat)
+        if not isinstance(block, dict):
+            continue
+        for key in ("hbm", "link", "cube"):
+            expected = public[key] if key == "cube" else {key: public[key]}
+            actual = block.setdefault("cube", {}) if key == "cube" else block
+            if not isinstance(actual, dict):
+                raise RuntimeError(f"{plat}.cube must be a dtype->rate table")
+            for name, value in expected.items():
+                existing = actual.get(name)
+                if existing is not None and existing != value:
+                    raise RuntimeError(
+                        f"Hardware constant conflict: {plat}.{key}.{name}={existing}; "
+                        f"public family profile requires {value}. See mc2_a5.md."
+                    )
+                actual[name] = value
+    return result
 
 
 class _MissingConstants(dict):
@@ -85,7 +148,10 @@ class _MissingConstants(dict):
     def _fail(self):
         raise RuntimeError(
             "hap_platform_constants.json not found. This public copy ships the "
-            "t_hw logic without the per-platform hardware constants; " + _CONST_HELP + ".")
+            "complete L2/vector/platform constants are required for this component; "
+            + _CONST_HELP
+            + "."
+        )
 
     def __getitem__(self, key):
         self._fail()
@@ -100,33 +166,53 @@ class _MissingConstants(dict):
 def _validate_platform_constants(plat_table):
     """Reject partial/misshapen constant files with a readable error instead of
     letting a half-filled template surface as KeyError/TypeError mid-compute."""
+
+    def valid_number(value, allow_zero=False):
+        return (
+            not isinstance(value, bool)
+            and isinstance(value, (int, float))
+            and math.isfinite(value)
+            and (value >= 0 if allow_zero else value > 0)
+        )
+
     problems = []
-    for plat in _PLATFORMS:
+    for plat in _REQUIRED_PLATFORMS + (("950dt",) if "950dt" in plat_table else ()):
         block = plat_table.get(plat)
         if not isinstance(block, dict):
             problems.append(f"missing platform block {plat!r}")
             continue
         for k in _SCALAR_KEYS:
-            if not isinstance(block.get(k), (int, float)):
-                problems.append(f"{plat}.{k} must be a number")
+            if not valid_number(block.get(k), allow_zero=k == "l2cap"):
+                qualifier = "nonnegative" if k == "l2cap" else "positive"
+                problems.append(f"{plat}.{k} must be a finite {qualifier} number")
         for k in _TABLE_KEYS:
             tbl = block.get(k)
-            if not isinstance(tbl, dict) or not tbl or \
-                    not all(isinstance(v, (int, float)) for v in tbl.values()):
-                problems.append(f"{plat}.{k} must be a non-empty dtype->rate table")
-        if isinstance(block.get("vec_basic"), dict) and \
-                not isinstance(block["vec_basic"].get("float32"), (int, float)):
+            if (
+                not isinstance(tbl, dict)
+                or not tbl
+                or not all(valid_number(v) for v in tbl.values())
+            ):
+                problems.append(
+                    f"{plat}.{k} must be a non-empty dtype->finite positive rate table"
+                )
+        if isinstance(block.get("vec_basic"), dict) and not valid_number(
+            block["vec_basic"].get("float32")
+        ):
             problems.append(f"{plat}.vec_basic must include 'float32' (fallback rate)")
     if problems:
         raise RuntimeError(
             "hap_platform_constants.json is incomplete: "
-            + "; ".join(problems) + ". " + _CONST_HELP + ".")
+            + "; ".join(problems)
+            + ". "
+            + _CONST_HELP
+            + "."
+        )
 
 
 def _load_platform_constants():
     if os.path.exists(_CONST_FILE):
-        with open(_CONST_FILE) as f:
-            table = json.load(f)
+        with open(_CONST_FILE, encoding="utf-8") as f:
+            table = _merge_public_constants(json.load(f))
         _validate_platform_constants(table)
         return table
     return _MissingConstants()
@@ -134,11 +220,42 @@ def _load_platform_constants():
 
 PLAT = _load_platform_constants()
 
+
+def _full_constants(plat):
+    if not isinstance(PLAT, _MissingConstants) and plat not in PLAT:
+        raise RuntimeError(f"Complete constants for {plat} unavailable; " + _CONST_HELP)
+    return PLAT[plat]
+
+
+def _resource_constants(plat):
+    if not isinstance(PLAT, _MissingConstants) and plat in PLAT:
+        return PLAT[plat]
+    return PUBLIC_PLAT[plat] if plat in PUBLIC_PLAT else _full_constants(plat)
+
+
+def complete_platforms():
+    """Keep legacy three-profile files valid; include DT only when fully supplied."""
+    return _REQUIRED_PLATFORMS + (
+        ("950dt",)
+        if not isinstance(PLAT, _MissingConstants) and "950dt" in PLAT
+        else ()
+    )
+
+
 DTYPE_BYTES = {
-    "float16": 2, "bfloat16": 2, "float32": 4, "float64": 8,
-    "int8": 1, "uint8": 1, "int16": 2, "int32": 4, "int64": 8,
+    "float16": 2,
+    "bfloat16": 2,
+    "float32": 4,
+    "float64": 8,
+    "int8": 1,
+    "uint8": 1,
+    "int16": 2,
+    "int32": 4,
+    "int64": 8,
     "bool": 1,
-    "float8_e4m3fn": 1, "float8_e5m2": 1, "hif8": 1,
+    "float8_e4m3fn": 1,
+    "float8_e5m2": 1,
+    "hif8": 1,
     "mxfp4": 0.5,
 }
 
@@ -162,11 +279,16 @@ def inner_cases_available(innerdir):
 # Per-component times (return microseconds)
 # ---------------------------------------------------------------------------
 def t_read_us(input_bytes, plat):
-    return input_bytes / PLAT[plat]["hbm"] * 1e6
+    return input_bytes / _resource_constants(plat)["hbm"] * 1e6
+
+
+def t_network_us(send_bytes, plat):
+    """Optimistic aggregate-link bound, not measured point-to-point bandwidth."""
+    return send_bytes / _resource_constants(plat)["link"] * 1e6
 
 
 def t_write_us(output_bytes, plat):
-    p = PLAT[plat]
+    p = _full_constants(plat)
     cap = p["l2cap"]
     if output_bytes <= cap:
         return output_bytes / p["l2"] * 1e6
@@ -177,7 +299,7 @@ def t_cube_us(flops, dtype, plat):
     """flops = total multiply-add FLOPs (i.e. 2*M*N*K for a matmul)."""
     if flops <= 0:
         return 0.0
-    peak = PLAT[plat]["cube"].get(dtype)
+    peak = _resource_constants(plat)["cube"].get(dtype)
     if peak is None:
         raise ValueError(f"cube dtype {dtype!r} unsupported on {plat}")
     return flops / peak * 1e6
@@ -193,13 +315,13 @@ def cube_dtype_hf32(dtype, plat):
     eligibility. Platforms without a "tf32" cube entry fall through to the caller's
     dtype unchanged.
     """
-    if dtype == "float32" and "tf32" in PLAT[plat]["cube"]:
+    if dtype == "float32" and "tf32" in _resource_constants(plat)["cube"]:
         return "tf32"
     return dtype
 
 
 def vec_rate(dtype, plat, kind="basic"):
-    p = PLAT[plat]
+    p = _full_constants(plat)
     basic = p["vec_basic"].get(dtype, p["vec_basic"]["float32"])
     if kind == "basic":
         return basic
@@ -271,8 +393,22 @@ def confidence_910c(bottleneck, output_bytes):
     return "Confirmed"
 
 
-def compute_both(vec_ops=None, input_bytes=0.0, output_bytes=0.0,
-                 cube_dtype=None, cube_flops=0.0, cube_hf32=False):
+def confidence_950dt(bottleneck, output_bytes):
+    # Full-model L2 write bandwidth needs validation just as on 950PR.
+    if bottleneck == "write" and output_bytes <= _full_constants("950dt")["l2cap"]:
+        return "Unconfirmed"
+    return "Confirmed"
+
+
+def compute_both(
+    vec_ops=None,
+    input_bytes=0.0,
+    output_bytes=0.0,
+    cube_dtype=None,
+    cube_flops=0.0,
+    cube_hf32=False,
+    platforms=None,
+):
     """Convenience: compute (t_hw, bottleneck) for all platforms given
     platform-independent work descriptors.
 
@@ -283,8 +419,12 @@ def compute_both(vec_ops=None, input_bytes=0.0, output_bytes=0.0,
     """
     vec_ops = vec_ops or []
     res = {}
-    for plat in _PLATFORMS:
-        cdt = cube_dtype_hf32(cube_dtype, plat) if (cube_hf32 and cube_dtype) else cube_dtype
+    for plat in complete_platforms() if platforms is None else platforms:
+        cdt = (
+            cube_dtype_hf32(cube_dtype, plat)
+            if (cube_hf32 and cube_dtype)
+            else cube_dtype
+        )
         tc = t_cube_us(cube_flops, cdt, plat) if cube_flops and cdt else 0.0
         tv = sum(t_vec_us(n, dt, plat, k) for (n, dt, k) in vec_ops)
         tr = t_read_us(input_bytes, plat)
@@ -296,5 +436,7 @@ def compute_both(vec_ops=None, input_bytes=0.0, output_bytes=0.0,
             entry["confidence"] = confidence_950pr(bn, output_bytes)
         elif plat == "910c":
             entry["confidence"] = confidence_910c(bn, output_bytes)
+        elif plat == "950dt":
+            entry["confidence"] = confidence_950dt(bn, output_bytes)
         res[plat] = entry
     return res

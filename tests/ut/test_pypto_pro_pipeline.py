@@ -1,6 +1,17 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
+
 """Unit tests for the PyPTO-Pro integration in auto_pipeline.
 
 These tests mirror the PyPTO (non-Pro) tests in ``test_benchmark_pipeline.py``
@@ -45,7 +56,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _build_submission(adapter, case, artifact, *, output_dir):
-    return adapter.build_submission(case.bench_name, case, artifact, output_dir=output_dir)
+    return adapter.build_submission(
+        case.bench_name, case, artifact, output_dir=output_dir
+    )
 
 
 def _generation_task(case, workdir, *, timeout_sec=30):
@@ -68,7 +81,9 @@ def _generation_task(case, workdir, *, timeout_sec=30):
     )
 
 
-def _write_fake_opencode_stanford(opencode, *, op="ReLU", root_dir="custom", with_bridge=False):
+def _write_fake_opencode_stanford(
+    opencode, *, op="ReLU", root_dir="custom", with_bridge=False
+):
     """Write a fake opencode script that produces PyPTO-Pro artifacts.
 
     Unlike PyPTO, there is no ``.orchestrator_state.json`` and no ``{op}_impl.py``.
@@ -169,7 +184,10 @@ def _make_cann_case(tmp_path, op="gelu"):
     task_dir = tmp_path / "tasks" / "level1" / op
     task_dir.mkdir(parents=True)
     proto = task_dir / "proto.yaml"
-    proto.write_text(f"operator:\n  name: {op.capitalize()}\n  schema: {op}(x) -> y\n", encoding="utf-8")
+    proto.write_text(
+        f"operator:\n  name: {op.capitalize()}\n  schema: {op}(x) -> y\n",
+        encoding="utf-8",
+    )
     cases = task_dir / "cases.yaml"
     cases.write_text("cases:\n  - shape: [16]\n", encoding="utf-8")
     golden = task_dir / "golden.py"
@@ -202,8 +220,12 @@ def test_pypto_pro_generators_and_converters_are_registered():
     assert "pypto-pro -> cann" in names
     assert "pypto-pro -> stanford" in names
 
-    assert isinstance(create_converter("pypto-pro", "cann", {}), PyptoProToCannConverter)
-    assert isinstance(create_converter("pypto-pro", "stanford", {}), PyptoProToStanfordConverter)
+    assert isinstance(
+        create_converter("pypto-pro", "cann", {}), PyptoProToCannConverter
+    )
+    assert isinstance(
+        create_converter("pypto-pro", "stanford", {}), PyptoProToStanfordConverter
+    )
     # Underscore normalisation
     assert create_converter("pypto_pro", "cann", {}).name == "pypto-pro-to-cann"
     assert create_converter("pypto_pro", "stanford", {}).name == "pypto-pro-to-stanford"
@@ -260,7 +282,9 @@ def test_pypto_pro_orchestrator_agent_runs_real_agent_contract(tmp_path):
     assert output.files["SPEC.md"].is_file()
     assert "ReLU_impl.py" not in output.files
     assert output.metadata["pypto_pro_status"] == "success"
-    assert not (task.output_dir / "PROMPT.md").exists() or (task.output_dir / "PROMPT.md").read_text(encoding="utf-8")
+    assert not (task.output_dir / "PROMPT.md").exists() or (
+        task.output_dir / "PROMPT.md"
+    ).read_text(encoding="utf-8")
     prompt_text = (task.output_dir / "PROMPT.md").read_text(encoding="utf-8")
     assert "pypto-pro-op-orchestrator" in prompt_text
     assert "工作目录: `custom/ReLU/`" in prompt_text
@@ -281,7 +305,9 @@ def test_pypto_pro_orchestrator_agent_runs_real_agent_contract(tmp_path):
     assert "ModelNew" not in prompt_text
     # Task input files copied to workspace
     assert (repo_root / "custom" / "ReLU" / "task_desc.py").is_file()
-    assert (repo_root / "custom" / "ReLU" / "REQUIRE.md").read_text(encoding="utf-8") == "# ReLU\n"
+    assert (repo_root / "custom" / "ReLU" / "REQUIRE.md").read_text(
+        encoding="utf-8"
+    ) == "# ReLU\n"
     # opencode invoked without --agent (build auto-loads primary AGENTS.md)
     log_text = output.log_file.read_text(encoding="utf-8")
     assert "--agent" not in log_text
@@ -291,7 +317,9 @@ def test_pypto_pro_orchestrator_agent_runs_real_agent_contract(tmp_path):
     env = json.loads((repo_root / "env.json").read_text(encoding="utf-8"))
     assert env["TMPDIR"] == str(repo_root / "custom" / "ReLU" / ".tmp")
     assert json.loads(env["OPENCODE_PERMISSION"])["external_directory"] == "deny"
-    assert env["OPENCODE_SUBAGENT_BRIDGE_LOG"] == str(task.output_dir / "opencode-live" / "events.jsonl")
+    assert env["OPENCODE_SUBAGENT_BRIDGE_LOG"] == str(
+        task.output_dir / "opencode-live" / "events.jsonl"
+    )
     assert (repo_root / "custom" / "ReLU" / ".tmp").is_dir()
     # No .orchestrator_state.json should exist (unlike PyPTO)
     assert not (repo_root / "custom" / "ReLU" / ".orchestrator_state.json").exists()
@@ -336,7 +364,9 @@ def test_pypto_pro_orchestrator_agent_does_not_write_state_machine(tmp_path):
 
     case = _make_stanford_case(tmp_path, op="ReLU")
     task = _generation_task(case, tmp_path / "work")
-    agent = PyptoProOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+    agent = PyptoProOrchestratorAgent(
+        pypto_repo_root=repo_root, opencode_bin=str(opencode)
+    )
 
     output = agent.generate(task)
 
@@ -374,7 +404,9 @@ def test_pypto_pro_orchestrator_agent_fails_on_missing_artifacts(tmp_path):
 
     case = _make_stanford_case(tmp_path, op="ReLU")
     task = _generation_task(case, tmp_path / "work")
-    agent = PyptoProOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+    agent = PyptoProOrchestratorAgent(
+        pypto_repo_root=repo_root, opencode_bin=str(opencode)
+    )
 
     output = agent.generate(task)
 
@@ -390,7 +422,16 @@ def test_pypto_pro_orchestrator_agent_uses_isolated_git_worktree(tmp_path):
     subprocess.run(["git", "init"], cwd=repo_root, check=True, stdout=subprocess.PIPE)
     subprocess.run(["git", "add", "README.md"], cwd=repo_root, check=True)
     subprocess.run(
-        ["git", "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-m", "init"],
+        [
+            "git",
+            "-c",
+            "user.email=test@example.com",
+            "-c",
+            "user.name=Test",
+            "commit",
+            "-m",
+            "init",
+        ],
         cwd=repo_root,
         check=True,
         stdout=subprocess.PIPE,
@@ -481,7 +522,9 @@ def test_pypto_pro_orchestrator_agent_renders_cann_input_branch(tmp_path):
 
     case = _make_cann_case(tmp_path, op="gelu")
     task = _generation_task(case, tmp_path / "work")
-    agent = PyptoProOrchestratorAgent(pypto_repo_root=repo_root, opencode_bin=str(opencode))
+    agent = PyptoProOrchestratorAgent(
+        pypto_repo_root=repo_root, opencode_bin=str(opencode)
+    )
 
     output = agent.generate(task)
 
@@ -491,7 +534,9 @@ def test_pypto_pro_orchestrator_agent_renders_cann_input_branch(tmp_path):
     assert (repo_root / "custom" / "gelu" / "cases.yaml").is_file()
     assert (repo_root / "custom" / "gelu" / "golden.py").is_file()
     assert (repo_root / "custom" / "gelu" / "desc.md").is_file()
-    require_text = (repo_root / "custom" / "gelu" / "REQUIRE.md").read_text(encoding="utf-8")
+    require_text = (repo_root / "custom" / "gelu" / "REQUIRE.md").read_text(
+        encoding="utf-8"
+    )
     assert "cann-bench 输入材料" in require_text
     assert "gelu(x) -> y" in require_text
     prompt_text = (task.output_dir / "PROMPT.md").read_text(encoding="utf-8")
@@ -529,11 +574,21 @@ def test_pypto_pro_adapter_validates_cann_artifact(tmp_path):
     source_dir = tmp_path / "pypto_pro" / "artifact" / "submission"
     source_dir.joinpath("cann_bench").mkdir(parents=True)
     source_dir.joinpath("cann_bench", "__init__.py").write_text("", encoding="utf-8")
-    source_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
-    source_dir.joinpath("cann_bench", "gelu.py").write_text("import pypto_pro\n", encoding="utf-8")
+    source_dir.joinpath("build.sh").write_text(
+        "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+    )
+    source_dir.joinpath("cann_bench", "gelu.py").write_text(
+        "import pypto_pro\n", encoding="utf-8"
+    )
 
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
-    submission = _build_submission(adapter, case, output, output_dir=tmp_path / "pypto_pro" / "submission")
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
+    submission = _build_submission(
+        adapter, case, output, output_dir=tmp_path / "pypto_pro" / "submission"
+    )
 
     assert submission.kind == "cann"
     assert submission.source_dir.joinpath("build.sh").is_file()
@@ -548,11 +603,19 @@ def test_pypto_pro_adapter_rejects_submission_without_pypto_pro(tmp_path):
     source_dir = tmp_path / "submission"
     source_dir.joinpath("cann_bench").mkdir(parents=True)
     source_dir.joinpath("cann_bench", "__init__.py").write_text("", encoding="utf-8")
-    source_dir.joinpath("build.sh").write_text("#!/usr/bin/env bash\nset -e\n", encoding="utf-8")
+    source_dir.joinpath("build.sh").write_text(
+        "#!/usr/bin/env bash\nset -e\n", encoding="utf-8"
+    )
     # No 'pypto_pro' token in any file
-    source_dir.joinpath("cann_bench", "gelu.py").write_text("import torch\n", encoding="utf-8")
+    source_dir.joinpath("cann_bench", "gelu.py").write_text(
+        "import torch\n", encoding="utf-8"
+    )
 
-    output = Artifact(status=AGENT_SUCCESS, workdir=source_dir.parent, files={"source_dir": source_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS,
+        workdir=source_dir.parent,
+        files={"source_dir": source_dir},
+    )
     with pytest.raises(ValueError, match="pypto.pro"):
         _build_submission(adapter, case, output, output_dir=tmp_path / "out")
 
@@ -566,7 +629,9 @@ def test_pypto_pro_conversion_input_collects_test_and_golden(tmp_path):
     raw_dir.joinpath("Foo_golden.py").write_text("# golden\n", encoding="utf-8")
     raw_dir.joinpath("SPEC.md").write_text("# spec\n", encoding="utf-8")
     # Should NOT be collected
-    raw_dir.joinpath("Foo_impl.py").write_text("# should be excluded\n", encoding="utf-8")
+    raw_dir.joinpath("Foo_impl.py").write_text(
+        "# should be excluded\n", encoding="utf-8"
+    )
     raw_dir.joinpath("__init__.py").write_text("", encoding="utf-8")
 
     case = CannBenchCase(
@@ -577,7 +642,9 @@ def test_pypto_pro_conversion_input_collects_test_and_golden(tmp_path):
         files={"task": tmp_path / "task.py"},
     )
     (tmp_path / "task.py").write_text("class Model:\n    pass\n", encoding="utf-8")
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     prompt = PyptoProToStanfordConverter().build_conversion_prompt(
         "stanford",
@@ -597,8 +664,8 @@ def test_pypto_pro_conversion_input_collects_test_and_golden(tmp_path):
     assert not raw_input.joinpath("__init__.py").exists()
     # SPEC.md is not a runtime file
     assert not raw_input.joinpath("SPEC.md").exists()
-    assert "input/raw/test_Foo.py" in prompt.text
-    assert "input/raw/Foo_golden.py" in prompt.text
+    assert str(Path("input/raw/test_Foo.py")) in prompt.text
+    assert str(Path("input/raw/Foo_golden.py")) in prompt.text
     assert "Foo_impl.py" not in prompt.text
     assert "build.sh" not in prompt.text
     assert "cann_bench" not in prompt.text
@@ -609,7 +676,9 @@ def test_pypto_pro_conversion_prompt_uses_bench_specific_contract(tmp_path):
     raw_dir.mkdir()
     raw_dir.joinpath("test_Foo.py").write_text("# pypto_pro\n", encoding="utf-8")
     raw_dir.joinpath("Foo_golden.py").write_text("# golden\n", encoding="utf-8")
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     stanford_task = tmp_path / "stanford_task.py"
     stanford_task.write_text("class Model:\n    pass\n", encoding="utf-8")
@@ -668,7 +737,9 @@ def test_pypto_pro_conversion_excludes_state_machine_docs(tmp_path):
     raw_dir.mkdir()
     raw_dir.joinpath("test_Foo.py").write_text("# pypto_pro\n", encoding="utf-8")
     raw_dir.joinpath("Foo_golden.py").write_text("# golden\n", encoding="utf-8")
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     proto = tmp_path / "proto.yaml"
     proto.write_text("schema: foo(x) -> y\n", encoding="utf-8")
@@ -704,8 +775,12 @@ def test_pypto_pro_conversion_input_includes_nested_runtime_files(tmp_path):
     task_path.write_text("class Model:\n    pass\n", encoding="utf-8")
     raw_dir = tmp_path / "raw_artifact"
     raw_dir.joinpath("modules").mkdir(parents=True)
-    raw_dir.joinpath("modules", "test_Block.py").write_text("# pypto_pro\n", encoding="utf-8")
-    raw_dir.joinpath("modules", "Block_golden.py").write_text("# golden\n", encoding="utf-8")
+    raw_dir.joinpath("modules", "test_Block.py").write_text(
+        "# pypto_pro\n", encoding="utf-8"
+    )
+    raw_dir.joinpath("modules", "Block_golden.py").write_text(
+        "# golden\n", encoding="utf-8"
+    )
     case = CannBenchCase(
         bench_name="stanford",
         task_dir=tmp_path,
@@ -713,7 +788,9 @@ def test_pypto_pro_conversion_input_includes_nested_runtime_files(tmp_path):
         rel_path="level3/Nested",
         files={"task": task_path},
     )
-    output = Artifact(status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir})
+    output = Artifact(
+        status=AGENT_SUCCESS, workdir=raw_dir, files={"source_dir": raw_dir}
+    )
 
     prompt = PyptoProToStanfordConverter().build_conversion_prompt(
         "stanford",
@@ -724,9 +801,13 @@ def test_pypto_pro_conversion_input_includes_nested_runtime_files(tmp_path):
         submission_dir=tmp_path / "submission",
     )
 
-    assert prompt.output_dir.joinpath("input", "raw", "modules", "test_Block.py").is_file()
-    assert prompt.output_dir.joinpath("input", "raw", "modules", "Block_golden.py").is_file()
-    assert "input/raw/modules/test_Block.py" in prompt.text
+    assert prompt.output_dir.joinpath(
+        "input", "raw", "modules", "test_Block.py"
+    ).is_file()
+    assert prompt.output_dir.joinpath(
+        "input", "raw", "modules", "Block_golden.py"
+    ).is_file()
+    assert str(Path("input/raw/modules/test_Block.py")) in prompt.text
     assert "build.sh" not in prompt.text
     assert "cann_bench" not in prompt.text
 
@@ -752,7 +833,7 @@ def test_pypto_pro_dispatcher_loads_test_file(tmp_path):
     c1_dir = parent_op_dir / "c1"
     c1_dir.mkdir()
     (c1_dir / "test_softmax.py").write_text(
-        "def softmax(x):\n" "    return x\n",
+        "def softmax(x):\n    return x\n",
         encoding="utf-8",
     )
     manifest = {

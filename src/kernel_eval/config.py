@@ -20,10 +20,9 @@
 3. 管理路径配置（tasks 数据目录、报告输出目录等）
 """
 
-import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 
 def _default_precision_thresholds() -> dict:
@@ -32,6 +31,7 @@ def _default_precision_thresholds() -> dict:
     在函数体内延迟 import 是为了打破 utils <-> config 的潜在循环依赖。
     """
     from .utils.thresholds import PRECISION_THRESHOLDS
+
     return dict(PRECISION_THRESHOLDS)
 
 
@@ -41,8 +41,8 @@ class Config:
 
     # 路径配置
     tasks_root: str = ""  # tasks 数据目录路径
-    reports_dir: str = ""        # 报告输出目录
-    bench_name: str = "cann"    # 评测集名称
+    reports_dir: str = ""  # 报告输出目录
+    bench_name: str = "cann"  # 评测集名称
 
     # AI 模型信息（由用户配置，用于报告摘要；为空时摘要中不体现）
     agent_skill: str = ""
@@ -50,10 +50,14 @@ class Config:
     harness: str = ""
 
     # 源码目录（AI生成的算子源码，通过参数传入）
-    source_dir: str = ""        # AI生成的算子源码目录
+    source_dir: str = ""  # AI生成的算子源码目录
+    source_build_args: List[str] = field(
+        default_factory=list
+    )  # 传给 source_dir/build.sh 的额外参数
+    build_timeout_sec: Optional[int] = None  # CLI > environment > 600 seconds
 
     # 设备配置
-    device_type: str = "npu"       # cpu / npu
+    device_type: str = "npu"  # cpu / npu
     device_id: int = 0
 
     # 性能配置
@@ -71,8 +75,8 @@ class Config:
     profiler_retry_delay: float = 1.0
 
     # 评测配置
-    warmup: int = 3              # 性能评测预热次数
-    repeat: int = 5              # 性能评测采集次数
+    warmup: int = 3  # 性能评测预热次数
+    repeat: int = 5  # 性能评测采集次数
     timeout_per_operator: int = 300  # 单算子超时（秒）
 
     # PyPTO Pro 评测进程隔离标记。由外层调度器在确认每个
@@ -117,7 +121,9 @@ class Config:
     # 单一事实来源：utils.precision.PRECISION_THRESHOLDS。本字段持有它的拷贝，
     # 允许 caller 在不污染模块级常量的前提下自定义阈值（例如 op_info.precision_thresholds
     # 通过 dict.update 覆盖单 dtype）。
-    precision_thresholds: dict = field(default_factory=lambda: _default_precision_thresholds())
+    precision_thresholds: dict = field(
+        default_factory=lambda: _default_precision_thresholds()
+    )
 
     # 精度判断器名称
     # 支持选择不同的精度判断标准：
@@ -146,7 +152,7 @@ class Config:
     tensor_cache_mode: str = "off"  # off / prefer (compute on miss) / require
     tensor_cache_tasks: list[str] = field(default_factory=list)
 
-# 性能指标策略覆盖
+    # 性能指标策略覆盖
     # None（默认）: 使用 BenchConfig 中注册的策略（通常为 kernel_details）
     # "trace_view": PYPTO 口径 — tilefwk/PYPTO aicore_e2e（由 CLI --perf-metric-strategy 设置）
     # "msprof_summary": 基准采集专用 — 优先 kernel_details.csv，fallback msprof op_summary
@@ -161,6 +167,7 @@ class Config:
     # msprof export 开关（默认 True）
     # 仅在 MsProfSummaryStrategy 下生效
     enable_msprof_export: bool = True
+
     def __post_init__(self):
         """初始化后自动设置默认路径"""
         if not self.tasks_root:

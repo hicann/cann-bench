@@ -3,12 +3,12 @@
 
 # ----------------------------------------------------------------------------------------------------------
 # Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
 # CANN Open Software License Agreement Version 2.0 (the "License").
-# You may refer to the License for details. You may not use this file except in compliance with the License.
+# Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the software repository for the full text of the License.
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
 """
@@ -22,9 +22,7 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
 import torch
-import yaml
 
 # 路径设置
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -40,27 +38,48 @@ import inputs as bench_inputs
 
 # ==================== ref_registry 测试 ====================
 
+
 class TestRefRegistry:
     """测试迁移后的 ref_registry.py"""
 
     # 预期的注册算子列表
     EXPECTED_LEVEL1 = {
-        "level1/exp", "level1/gelu", "level1/sigmoid", "level1/mish",
-        "level1/masked_scale", "level1/swi_glu",
-        "level1/foreach_norm", "level1/foreach_addcdiv_scalar",
+        "level1/exp",
+        "level1/gelu",
+        "level1/sigmoid",
+        "level1/mish",
+        "level1/masked_scale",
+        "level1/swi_glu",
+        "level1/foreach_norm",
+        "level1/foreach_addcdiv_scalar",
     }
     EXPECTED_LEVEL2 = {
-        "level2/apply_adam_w", "level2/apply_rotary_pos_emb",
-        "level2/arg_max", "level2/cross_entropy_loss", "level2/cummin",
-        "level2/dynamic_quant", "level2/gather", "level2/gcd",
-        "level2/grid_sampler_3d", "level2/group_norm", "level2/maximum",
-        "level2/resize_bilinear", "level2/rms_norm", "level2/scatter",
-        "level2/softmax", "level2/unsorted_segment_sum",
+        "level2/apply_adam_w",
+        "level2/apply_rotary_pos_emb",
+        "level2/arg_max",
+        "level2/cross_entropy_loss",
+        "level2/cummin",
+        "level2/dynamic_quant",
+        "level2/gather",
+        "level2/gcd",
+        "level2/grid_sampler_3d",
+        "level2/group_norm",
+        "level2/maximum",
+        "level2/resize_bilinear",
+        "level2/rms_norm",
+        "level2/scatter",
+        "level2/softmax",
+        "level2/unsorted_segment_sum",
     }
     EXPECTED_LEVEL4 = {
-        "level4/gqa", "level4/grouped_matmul_swiglu_quant",
-        "level4/gru", "level4/lstm", "level4/mha", "level4/mla",
-        "level4/mla_prolog", "level4/sparse_flash_attention",
+        "level4/gqa",
+        "level4/grouped_matmul_swiglu_quant",
+        "level4/gru",
+        "level4/lstm",
+        "level4/mha",
+        "level4/mla",
+        "level4/mla_prolog",
+        "level4/sparse_flash_attention",
     }
 
     def test_all_keys_returns_list(self):
@@ -113,6 +132,7 @@ class TestRefRegistry:
 
 # ==================== inputs.py 测试 ====================
 
+
 class TestInputsPy:
     """测试迁移后的 inputs.py"""
 
@@ -135,8 +155,11 @@ class TestInputsPy:
     def test_build_inputs_multiple_inputs(self):
         """多输入算子（如 level2/maximum）"""
         inputs = bench_inputs.build_inputs(
-            [[1024, 1024], [1024, 1024]], ["float16", "float16"],
-            [-1, 1], 1, op_key="level2/maximum"
+            [[1024, 1024], [1024, 1024]],
+            ["float16", "float16"],
+            [-1, 1],
+            1,
+            op_key="level2/maximum",
         )
         assert len(inputs) == 2
 
@@ -168,9 +191,7 @@ class TestInputsPy:
 
     def test_to_device_cpu(self):
         """to_device 在 CPU 上应该是 no-op"""
-        inputs = bench_inputs.build_inputs(
-            [[64, 64]], ["float32"], [-1, 1], 1
-        )
+        inputs = bench_inputs.build_inputs([[64, 64]], ["float32"], [-1, 1], 1)
         result = bench_inputs.to_device(inputs, "cpu")
         assert result[0].device == torch.device("cpu")
 
@@ -185,6 +206,7 @@ class TestInputsPy:
 
 
 # ==================== collect_baseline 核心逻辑测试 ====================
+
 
 class TestCollectBaselineUtils:
     """测试 collect_baseline.py 的辅助函数"""
@@ -271,36 +293,33 @@ class TestCollectBaselineUtils:
         assert result["_metadata"] == overlay["_metadata"]
         assert "old_field" not in result["_metadata"]
 
-    def test_metadata_json_format_compatible(self):
+    def test_metadata_json_format_compatible(self, tmp_path):
         """验证 metadata JSON 格式与 BaselineStore 兼容"""
-        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
-        from collect_baseline import _deep_merge
         from kernel_eval.utils.baseline_store import BaselineStore
 
         metadata = {
             "_metadata": {"hardware": "910b2"},
-            "level1": {"exp": {"1": {"baseline_perf_us": 13.78, "t_hw_us": 1.09}}}
+            "level1": {"exp": {"1": {"baseline_perf_us": 13.78, "t_hw_us": 1.09}}},
         }
 
-        # 写入临时文件
-        tmp = Path("/tmp/test_baseline_metadata.json")
-        with open(tmp, "w") as f:
+        # 按真实目录布局写入隔离临时文件，不依赖 POSIX /tmp 或私有字段注入。
+        metadata_dir = tmp_path / "metadata"
+        metadata_dir.mkdir()
+        tmp = metadata_dir / "910b2.json"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(metadata, f)
 
         # BaselineStore 应能加载
-        store = BaselineStore(bench_root=Path(PROJECT_ROOT / "tasks"),
-                              project_root=PROJECT_ROOT)
-        store._data = metadata
-        store._loaded = True
+        store = BaselineStore(
+            bench_root=tmp_path, project_root=tmp_path, hardware="910b2"
+        )
+        store.load()
 
         perf = store.get_perf("level1/exp", 1)
         assert perf == 13.78
 
         t_hw = store.get_t_hw("level1/exp", 1)
         assert t_hw == 1.09
-
-        # 清理
-        tmp.unlink(missing_ok=True)
 
 
 # 导入 math 供 test_normalize_attrs_inf_nan 使用

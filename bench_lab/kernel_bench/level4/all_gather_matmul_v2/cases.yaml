@@ -149,3 +149,1011 @@ cases:
   attrs: {"mc2_distributed": true, "world_size": 8, "gather_output": false, "is_trans_b": false, "is_bias": false, "out_dtype": "bfloat16", "x1_dtype": "int8", "x2_dtype": "int8", "x1_scale_dtype": "float32", "x2_scale_dtype": "float32", "block_size": 128, "group_sizes": [], "seed": 3020, "weight_same": 1, "platform": "Atlas A3"}
   value_range: [[-8, 8], [-8, 8], [0.001, 0.02], [0.001, 0.02]]
   note: "int8_agmm_v2_m512_k12288_n4096_bfloat16"
+- operator: AllGatherMatmulV2
+  case_id: 21
+  input_shape:
+  - - 1024
+    - 8192
+  - - 8192
+    - 1280
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float32
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 6
+    case_name: 4096_8192_1280_e4m3fn_e4m3fn_fp32_rank4_allgatherv2_david_ID000
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 4096_8192_1280_e4m3fn_e4m3fn_fp32_rank4_allgatherv2_david_ID000'
+- operator: AllGatherMatmulV2
+  case_id: 22
+  input_shape:
+  - - 1244
+    - 4256
+  - - 4256
+    - 1829
+  - - 1
+  - - 1
+  - - 1829
+  dtype:
+  - float8_e5m2
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 5065
+    source_sheet: level1
+    source_excel_row: 18
+    case_name: 1244_4256_1829_fp8_e5m2_rank4_allgatherv2_fanhua_ID086
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1244_4256_1829_fp8_e5m2_rank4_allgatherv2_fanhua_ID086'
+- operator: AllGatherMatmulV2
+  case_id: 23
+  input_shape:
+  - - 1840
+    - 438
+  - - 12761
+    - 438
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 609
+    source_sheet: level0_perf
+    source_excel_row: 27
+    case_name: 1840_438_12761_fp8_e4m3fn_fp8_e4m3fn_bf16_rank8_allgatherv2_fanhua_ID0081
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1840_438_12761_fp8_e4m3fn_fp8_e4m3fn_bf16_rank8_allgatherv2_fanhua_ID0081'
+- operator: AllGatherMatmulV2
+  case_id: 24
+  input_shape:
+  - - 1024
+    - 1536
+  - - 1536
+    - 3072
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 119
+    case_name: 1024_1536_3072_A2_293B_allgatherv2_pertensor_ID005
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1024_1536_3072_A2_293B_allgatherv2_pertensor_ID005'
+- operator: AllGatherMatmulV2
+  case_id: 25
+  input_shape:
+  - - 1384
+    - 6830
+  - - 744
+    - 6830
+  - - 1
+  - - 1
+  - - 744
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: float32
+    graph_type: 0
+    seed: 1069
+    source_sheet: level1
+    source_excel_row: 7
+    case_name: 1384_6830_744_fp8_e4m3fn_rank4_allgatherv2_fanhua_ID052
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1384_6830_744_fp8_e4m3fn_rank4_allgatherv2_fanhua_ID052'
+- operator: AllGatherMatmulV2
+  case_id: 26
+  input_shape:
+  - - 1024
+    - 8192
+  - - 8192
+    - 1280
+  - - 1
+  - - 1
+  - - 1280
+  dtype:
+  - float8_e5m2
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 7
+    case_name: 4096_8192_1280_e5m2_e5m2_fp16_rank4_allgatherv2_david_ID006
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 4096_8192_1280_e5m2_e5m2_fp16_rank4_allgatherv2_david_ID006'
+- operator: AllGatherMatmulV2
+  case_id: 27
+  input_shape:
+  - - 1024
+    - 8192
+  - - 1280
+    - 8192
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 24
+    case_name: 4096_8192_1280_e4m3fn_e4m3fn_fp16_rank4_allgatherv2_david_ID004
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 4096_8192_1280_e4m3fn_e4m3fn_fp16_rank4_allgatherv2_david_ID004'
+- operator: AllGatherMatmulV2
+  case_id: 28
+  input_shape:
+  - - 1868
+    - 324
+  - - 324
+    - 17399
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float32
+    graph_type: 0
+    seed: 828
+    source_sheet: level0_perf
+    source_excel_row: 26
+    case_name: 1868_324_17399_fp8_e4m3fn_fp8_e4m3fn_fp32_rank4_allgatherv2_fanhua_ID0000
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1868_324_17399_fp8_e4m3fn_fp8_e4m3fn_fp32_rank4_allgatherv2_fanhua_ID0000'
+- operator: AllGatherMatmulV2
+  case_id: 29
+  input_shape:
+  - - 1048
+    - 4181
+  - - 4181
+    - 2046
+  - - 1
+  - - 1
+  - - 2046
+  dtype:
+  - float8_e5m2
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 6
+    source_sheet: level0_perf
+    source_excel_row: 28
+    case_name: 1048_4181_2046_fp16_random_allgatherv2_rank4_ID0003
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1048_4181_2046_fp16_random_allgatherv2_rank4_ID0003'
+- operator: AllGatherMatmulV2
+  case_id: 30
+  input_shape:
+  - - 696
+    - 518
+  - - 1185
+    - 518
+  - - 1
+  - - 1
+  - - 1185
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 56
+    case_name: 696_518_1185_bf16_random_allgatherv2_rank4_ID0001
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 696_518_1185_bf16_random_allgatherv2_rank4_ID0001'
+- operator: AllGatherMatmulV2
+  case_id: 31
+  input_shape:
+  - - 1024
+    - 5120
+  - - 640
+    - 5120
+  - - 1
+  - - 1
+  - - 640
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: float16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 75
+    case_name: 4096_5120_640_e4m3fn_e4m3fn_fp16_rank4_allgatherv2_david_ID016
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 4096_5120_640_e4m3fn_e4m3fn_fp16_rank4_allgatherv2_david_ID016'
+- operator: AllGatherMatmulV2
+  case_id: 32
+  input_shape:
+  - - 1024
+    - 5120
+  - - 5120
+    - 640
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 76
+    case_name: 4096_5120_640_e5m2_e4m3fn_fp16_rank4_allgatherv2_david_ID017
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 4096_5120_640_e5m2_e4m3fn_fp16_rank4_allgatherv2_david_ID017'
+- operator: AllGatherMatmulV2
+  case_id: 33
+  input_shape:
+  - - 2048
+    - 2048
+  - - 2048
+    - 1024
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 115
+    case_name: 2048_2048_1024_A2_30B_allgatherv2_pertensor_ID001
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 2048_2048_1024_A2_30B_allgatherv2_pertensor_ID001'
+- operator: AllGatherMatmulV2
+  case_id: 34
+  input_shape:
+  - - 2048
+    - 2048
+  - - 2048
+    - 3072
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 117
+    case_name: 2048_2048_3072_A2_30B_allgatherv2_pertensor_ID003
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 2048_2048_3072_A2_30B_allgatherv2_pertensor_ID003'
+- operator: AllGatherMatmulV2
+  case_id: 35
+  input_shape:
+  - - 2048
+    - 512
+  - - 512
+    - 2048
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 118
+    case_name: 2048_512_2048_A2_30B_allgatherv2_pertensor_ID004
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 2048_512_2048_A2_30B_allgatherv2_pertensor_ID004'
+- operator: AllGatherMatmulV2
+  case_id: 36
+  input_shape:
+  - - 1024
+    - 6144
+  - - 6144
+    - 2048
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 1
+    source_sheet: level0_perf
+    source_excel_row: 121
+    case_name: 1024_6144_2048_A2_293B_allgatherv2_pertensor_ID007
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1024_6144_2048_A2_293B_allgatherv2_pertensor_ID007'
+- operator: AllGatherMatmulV2
+  case_id: 37
+  input_shape:
+  - - 256
+    - 256
+  - - 256
+    - 256
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e5m2
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float32
+    graph_type: 0
+    seed: 1
+    source_sheet: level1
+    source_excel_row: 6
+    case_name: 256_256_64_false_false_fp8_2p
+    source_graph_type: 0
+    x1_dtype: fp8_e5m2
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 256_256_64_false_false_fp8_2p'
+- operator: AllGatherMatmulV2
+  case_id: 38
+  input_shape:
+  - - 1044
+    - 5587
+  - - 1455
+    - 5587
+  - - 1
+  - - 1
+  - - 1455
+  dtype:
+  - float8_e4m3fn
+  - float8_e4m3fn
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 3390
+    source_sheet: level1
+    source_excel_row: 8
+    case_name: 1044_5587_1455_fp8_e4m3fn_rank4_allgatherv2_fanhua_ID053
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e4m3fn
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1044_5587_1455_fp8_e4m3fn_rank4_allgatherv2_fanhua_ID053'
+- operator: AllGatherMatmulV2
+  case_id: 39
+  input_shape:
+  - - 2004
+    - 4291
+  - - 1724
+    - 4291
+  - - 1
+  - - 1
+  - - 1724
+  dtype:
+  - float8_e4m3fn
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - - -0.1
+    - 0.1
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: true
+    is_bias: true
+    out_dtype: bfloat16
+    graph_type: 0
+    seed: 9563
+    source_sheet: level1
+    source_excel_row: 9
+    case_name: 2004_4291_1724_e4m3_e5m2_rank2_allgatherv2_fanhua_ID055
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: true
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 2004_4291_1724_e4m3_e5m2_rank2_allgatherv2_fanhua_ID055'
+- operator: AllGatherMatmulV2
+  case_id: 40
+  input_shape:
+  - - 1730
+    - 4694
+  - - 4694
+    - 1127
+  - - 1
+  - - 1
+  - null
+  dtype:
+  - float8_e4m3fn
+  - float8_e5m2
+  - float32
+  - float32
+  - float32
+  value_range:
+  - - -3
+    - 3
+  - - -3
+    - 3
+  - - 0.1
+    - 0.5
+  - - 0.1
+    - 0.5
+  - null
+  attrs:
+    mc2_distributed: true
+    mc2_accuracy_mode: three_way
+    platform: Ascend 950PR/950DT (A5)
+    world_size: 2
+    is_trans_b: false
+    is_bias: false
+    out_dtype: float16
+    graph_type: 0
+    seed: 631
+    source_sheet: level1
+    source_excel_row: 10
+    case_name: 1730_4694_1127_e4m3_e5m2_rank2_allgatherv2_fanhua_ID057
+    source_graph_type: 0
+    x1_dtype: fp8_e4m3fn
+    x2_dtype: fp8_e5m2
+    x1_scale_dtype: float32
+    x2_scale_dtype: float32
+    block_size: 0
+    group_sizes: []
+    gather_output: false
+    weight_same: 1
+  note: 'A5 FP8 per-tensor: source shapes/dtypes/ranks/options; bounded ranges avoid
+    overflow. 1730_4694_1127_e4m3_e5m2_rank2_allgatherv2_fanhua_ID057'

@@ -36,7 +36,7 @@ from typing import Dict, List, Optional
 from html import escape as _escape
 import re
 
-from .report_generator import EvalReport, OperatorReport
+from .report_generator import EvalReport, OperatorReport, format_baseline_source
 from .summary_generator import calculate_geometric_mean
 
 
@@ -44,70 +44,100 @@ from .summary_generator import calculate_geometric_mean
 # 格式化辅助
 # ---------------------------------------------------------------------------
 
+
 def _cls_rate(r: float) -> str:
-    if r >= 0.8: return "score-high"
-    if r >= 0.4: return "score-mid"
+    if r >= 0.8:
+        return "score-high"
+    if r >= 0.4:
+        return "score-mid"
     return "score-low"
+
 
 def _cls_score(s: float) -> str:
-    if s >= 80: return "score-high"
-    if s >= 50: return "score-mid"
+    if s >= 80:
+        return "score-high"
+    if s >= 50:
+        return "score-mid"
     return "score-low"
+
 
 def _cls_sp(sp: float) -> str:
-    if sp <= 0: return "score-low"
-    if sp >= 1.0: return "score-high"
-    if sp >= 0.8: return "score-mid"
+    if sp <= 0:
+        return "score-low"
+    if sp >= 1.0:
+        return "score-high"
+    if sp >= 0.8:
+        return "score-mid"
     return "score-low"
 
-def _fr(r: float) -> str: return f'{r:.0%}' if r > 0 else '0%'
-def _fsp(sp: float) -> str: return f'{sp:.2f}x' if sp > 0 else '—'
-def _fs(s: float) -> str: return f'{s:.0f}'
+
+def _fr(r: float) -> str:
+    return f"{r:.0%}" if r > 0 else "0%"
+
+
+def _fsp(sp: float) -> str:
+    return f"{sp:.2f}x" if sp > 0 else "—"
+
+
+def _fs(s: float) -> str:
+    return f"{s:.0f}"
+
 
 def _fmt_or_na(value, spec: str) -> str:
     # JSON 报告中的 null（如未运行精度阶段的 pass_rate）显示为 N/A，而不是抛 TypeError
-    return format(value, spec) if isinstance(value, (int, float)) else 'N/A'
+    return format(value, spec) if isinstance(value, (int, float)) else "N/A"
 
 
 # ---------------------------------------------------------------------------
 # Section 2: Experiment Setup
 # ---------------------------------------------------------------------------
 
+
 def _render_section2(setup: Dict) -> str:
     """渲染 Section 2 (评测配置)"""
-    md = setup.get('metadata', {})
-    env = setup.get('environment', {})
+    md = setup.get("metadata", {})
+    env = setup.get("environment", {})
 
     def _row(k, v, allow_empty=False):
-        if v is None or (v == '' and not allow_empty):
-            return ''
+        if v is None or (v == "" and not allow_empty):
+            return ""
         return f'            <tr><td class="kv-k">{k}</td><td>{_escape(str(v))}</td></tr>\n'
 
     # Metadata rows；Agent/Skill、Harness、BaseModel 为提交标签行，
     # 未填写时保留行但置空，不展示任何默认文案
-    meta_rows = ''
+    meta_rows = ""
     for key, label in [
-        ('framework', 'Framework'), ('date', 'Date'),
-        ('agent_skill', 'Agent/Skill'), ('harness', 'Harness'), ('base_model', 'BaseModel'),
-        ('benchmark', '评测集'), ('license', 'License'),
+        ("framework", "Framework"),
+        ("date", "Date"),
+        ("agent_skill", "Agent/Skill"),
+        ("harness", "Harness"),
+        ("base_model", "BaseModel"),
+        ("benchmark", "评测集"),
+        ("license", "License"),
     ]:
-        if key in ('agent_skill', 'harness', 'base_model'):
-            meta_rows += _row(label, md.get(key) or '', allow_empty=True)
+        if key in ("agent_skill", "harness", "base_model"):
+            meta_rows += _row(label, md.get(key) or "", allow_empty=True)
         elif key in md and md[key]:
             meta_rows += _row(label, md[key])
 
     # Environment rows
-    env_rows = ''
+    env_rows = ""
     for key, label in [
-        ('npu', 'NPU'), ('cpu', 'CPU'), ('cann', 'CANN'),
-        ('driver', 'Driver版本'), ('pytorch', 'PyTorch'),
-        ('pytorch_npu', 'PyTorch NPU'), ('torchvision', 'torchvision'),
-        ('python', 'Python'), ('os', 'OS'), ('docker', 'Docker'),
+        ("npu", "NPU"),
+        ("cpu", "CPU"),
+        ("cann", "CANN"),
+        ("driver", "Driver版本"),
+        ("pytorch", "PyTorch"),
+        ("pytorch_npu", "PyTorch NPU"),
+        ("torchvision", "torchvision"),
+        ("python", "Python"),
+        ("os", "OS"),
+        ("docker", "Docker"),
     ]:
         if key in env and env[key]:
             env_rows += _row(label, env[key])
 
-    return f'''  <!-- ============================================================ -->
+    return f"""  <!-- ============================================================ -->
   <!-- 2. EXPERIMENT SETUP                                            -->
   <!-- ============================================================ -->
   <div class="section">
@@ -126,34 +156,35 @@ def _render_section2(setup: Dict) -> str:
     </div>
   </div>
 
-'''
+"""
 
 
 # ---------------------------------------------------------------------------
 # Section 3: Results Analysis
 # ---------------------------------------------------------------------------
 
+
 def _render_kpi(report: EvalReport) -> str:
-    r = report.summary.get('pass_rate')
-    genuine_r = report.summary.get('genuine_pass_rate', r)
-    cascade = report.summary.get('cascade_cases', 0) or 0
+    r = report.summary.get("pass_rate")
+    genuine_r = report.summary.get("genuine_pass_rate", r)
+    cascade = report.summary.get("cascade_cases", 0) or 0
 
     # 级联失败提示块（仅在有级联失败时显示）
-    cascade_note = ''
+    cascade_note = ""
     if cascade > 0:
-        cascade_note = f'''      <div class="kpi-item kpi-note">
+        cascade_note = f"""      <div class="kpi-item kpi-note">
         <div class="kpi-value" style="color:var(--score-mid)">⚠️ {cascade}</div>
         <div class="kpi-label">级联失败（设备异常）</div>
         <div class="kpi-sub">不计入真实失败率</div>
       </div>
       <div class="kpi-item">
-        <div class="kpi-value">{_fmt_or_na(genuine_r, '.1%')}</div>
+        <div class="kpi-value">{_fmt_or_na(genuine_r, ".1%")}</div>
         <div class="kpi-label">Genuine Pass Rate / 真实通过率</div>
         <div class="kpi-sub">排除级联失败后</div>
-      </div>'''
+      </div>"""
 
-    return f'''      <div class="kpi-item">
-        <div class="kpi-value">{_fmt_or_na(r, '.1%')}</div>
+    return f"""      <div class="kpi-item">
+        <div class="kpi-value">{_fmt_or_na(r, ".1%")}</div>
         <div class="kpi-label">Pass Rate / 通过率</div>
         <div class="kpi-sub">{report.passed_cases} / {report.total_cases} cases</div>
       </div>
@@ -172,9 +203,9 @@ def _render_kpi(report: EvalReport) -> str:
         <div class="kpi-label">Error Case Number / 失败用例数量</div>
       </div>
 {cascade_note}      <div class="kpi-item">
-        <div class="kpi-value">{_fmt_or_na(report.overall_score, '.0f')}</div>
+        <div class="kpi-value">{_fmt_or_na(report.overall_score, ".0f")}</div>
         <div class="kpi-label">Total Score / 总得分</div>
-      </div>'''
+      </div>"""
 
 
 def _render_level_table(report: EvalReport) -> str:
@@ -182,39 +213,51 @@ def _render_level_table(report: EvalReport) -> str:
     # Group by level
     lv_groups = {}
     for op in report.operators:
-        lv = int(op.rel_path.split('/')[0][-1]) if op.rel_path else 1
+        lv = int(op.rel_path.split("/")[0][-1]) if op.rel_path else 1
         if lv not in lv_groups:
-            lv_groups[lv] = {'ops': 0, 'cases': 0, 'passed': 0, 'score': 0.0, 'speeds': []}
+            lv_groups[lv] = {
+                "ops": 0,
+                "cases": 0,
+                "passed": 0,
+                "score": 0.0,
+                "speeds": [],
+            }
         g = lv_groups[lv]
-        g['ops'] += 1
-        g['cases'] += op.total_cases
-        g['passed'] += op.passed_cases
-        g['score'] += op.score
+        g["ops"] += 1
+        g["cases"] += op.total_cases
+        g["passed"] += op.passed_cases
+        g["score"] += op.score
         if op.avg_speedup > 0:
-            g['speeds'].append(op.avg_speedup)
+            g["speeds"].append(op.avg_speedup)
 
-    labels = {1: 'Level 1 — 基础算子', 2: 'Level 2 — 中级算子',
-              3: 'Level 3 — 高级算子', 4: 'Level 4 — 复杂算子'}
+    labels = {
+        1: "Level 1 — 基础算子",
+        2: "Level 2 — 中级算子",
+        3: "Level 3 — 高级算子",
+        4: "Level 4 — 复杂算子",
+    }
 
-    rows = ''
+    rows = ""
     for lv in sorted(lv_groups):
         g = lv_groups[lv]
-        gr = g['passed'] / g['cases'] if g['cases'] > 0 else 0
-        gs = g['score']
-        gsp = sum(g['speeds']) / len(g['speeds']) if g['speeds'] else 0
-        rc = _cls_rate(gr); sc = _cls_score(gs); spc = _cls_sp(gsp)
+        gr = g["passed"] / g["cases"] if g["cases"] > 0 else 0
+        gs = g["score"]
+        gsp = sum(g["speeds"]) / len(g["speeds"]) if g["speeds"] else 0
+        rc = _cls_rate(gr)
+        sc = _cls_score(gs)
+        spc = _cls_sp(gsp)
         sp_val = _fsp(gsp) if gsp > 0 else '<td class="score-cell score-low">—</td>'
         if gsp > 0:
             sp_val = f'<td class="score-cell {spc}">{_fsp(gsp)}</td>'
-        rows += f'''          <tr>
-            <td class="col-name" style="white-space:nowrap">{labels.get(lv, f'Level {lv}')}</td>
-            <td>{g['ops']}</td><td>{g['cases']}</td><td>{g['passed']}</td>
+        rows += f"""          <tr>
+            <td class="col-name" style="white-space:nowrap">{labels.get(lv, f"Level {lv}")}</td>
+            <td>{g["ops"]}</td><td>{g["cases"]}</td><td>{g["passed"]}</td>
             <td class="score-cell {rc}">{_fr(gr)}</td>
             {sp_val}
             <td class="score-cell {sc}">{_fs(gs)}</td>
-          </tr>\n'''
+          </tr>\n"""
 
-    return f'''    <h4>3.2 等级分析</h4>
+    return f"""    <h4>3.2 等级分析</h4>
     <div class="table-wrap mt-16">
       <table>
         <caption>Table 2. Results by Difficulty Level</caption>
@@ -224,7 +267,7 @@ def _render_level_table(report: EvalReport) -> str:
         <tbody>
 {rows}        </tbody>
       </table>
-    </div>'''
+    </div>"""
 
 
 def _render_bars(report: EvalReport) -> str:
@@ -232,43 +275,69 @@ def _render_bars(report: EvalReport) -> str:
     # Group by level
     lv_groups = {}
     for op in report.operators:
-        lv = int(op.rel_path.split('/')[0][-1]) if op.rel_path else 1
+        lv = int(op.rel_path.split("/")[0][-1]) if op.rel_path else 1
         if lv not in lv_groups:
-            lv_groups[lv] = {'cases': 0, 'passed': 0, 'score': 0.0, 'speeds': [], 'ops': 0}
+            lv_groups[lv] = {
+                "cases": 0,
+                "passed": 0,
+                "score": 0.0,
+                "speeds": [],
+                "ops": 0,
+            }
         g = lv_groups[lv]
-        g['ops'] += 1
-        g['cases'] += op.total_cases
-        g['passed'] += op.passed_cases
-        g['score'] += op.score
-        g['speeds'].extend(
-            case.speedup for case in op.cases
-            if case.status == 'success' and case.speedup > 0
+        g["ops"] += 1
+        g["cases"] += op.total_cases
+        g["passed"] += op.passed_cases
+        g["score"] += op.score
+        g["speeds"].extend(
+            case.speedup
+            for case in op.cases
+            if case.status == "success" and case.speedup > 0
         )
 
-    names = {lv: f'Level {lv}' for lv in lv_groups}
-    lv_max = {lv: g['ops'] * 100 for lv, g in lv_groups.items()}
+    names = {lv: f"Level {lv}" for lv in lv_groups}
+    lv_max = {lv: g["ops"] * 100 for lv, g in lv_groups.items()}
 
     def _bar(lab, pct, val, is_sp=False):
-        c = 'var(--score-high)' if pct >= 80 else ('var(--score-mid)' if pct >= 40 else 'var(--score-low)')
-        if is_sp: c = 'var(--score-high)' if pct >= 100 else '#5b9bd5'
+        c = (
+            "var(--score-high)"
+            if pct >= 80
+            else ("var(--score-mid)" if pct >= 40 else "var(--score-low)")
+        )
+        if is_sp:
+            c = "var(--score-high)" if pct >= 100 else "#5b9bd5"
         return f'      <div class="bar-row"><span class="bar-label">{lab}</span><div class="bar-track"><div class="bar-fill" style="width:{min(pct, 100)}%;background:{c}"></div></div><span class="bar-val">{val}</span></div>\n'
 
-    bar_s = ''.join(_bar(names[lv], lv_groups[lv]['score'] / lv_max[lv] * 100, _fs(lv_groups[lv]['score'])) for lv in sorted(lv_groups))
-    bar_p = ''.join(_bar(names[lv], lv_groups[lv]['passed'] / lv_groups[lv]['cases'] * 100, _fr(lv_groups[lv]['passed'] / lv_groups[lv]['cases'])) for lv in sorted(lv_groups))
+    bar_s = "".join(
+        _bar(
+            names[lv],
+            lv_groups[lv]["score"] / lv_max[lv] * 100,
+            _fs(lv_groups[lv]["score"]),
+        )
+        for lv in sorted(lv_groups)
+    )
+    bar_p = "".join(
+        _bar(
+            names[lv],
+            lv_groups[lv]["passed"] / lv_groups[lv]["cases"] * 100,
+            _fr(lv_groups[lv]["passed"] / lv_groups[lv]["cases"]),
+        )
+        for lv in sorted(lv_groups)
+    )
     bar_sp_rows = []
     for lv in sorted(lv_groups):
-        speedup = calculate_geometric_mean(lv_groups[lv]['speeds'])
+        speedup = calculate_geometric_mean(lv_groups[lv]["speeds"])
         bar_sp_rows.append(
             _bar(
                 names[lv],
                 speedup * 100,
-                _fsp(speedup) if speedup > 0 else '—',
+                _fsp(speedup) if speedup > 0 else "—",
                 True,
             )
         )
-    bar_sp = ''.join(bar_sp_rows)
+    bar_sp = "".join(bar_sp_rows)
 
-    return f'''    <div class="bar-chart">
+    return f"""    <div class="bar-chart">
 {bar_s}    </div>
     <p class="note mt-12">Figure 1a. Total score by difficulty level.</p>
 
@@ -278,7 +347,7 @@ def _render_bars(report: EvalReport) -> str:
 
     <div class="bar-chart">
 {bar_sp}    </div>
-    <p class="note mt-12">Figure 1c. Average speedup by difficulty level (几何平均).</p>'''
+    <p class="note mt-12">Figure 1c. Average speedup by difficulty level (几何平均).</p>"""
 
 
 def _render_top_tables(ops: List[OperatorReport]) -> str:
@@ -286,22 +355,22 @@ def _render_top_tables(ops: List[OperatorReport]) -> str:
     top_sp = sorted(ops, key=lambda o: o.avg_speedup, reverse=True)
 
     def _prec_rows(items):
-        out = ''
+        out = ""
         for i, o in enumerate(items, 1):
             operator = _escape(str(o.operator))
             out += f'            <tr><td>{i}</td><td class="col-name">{operator}</td><td>L{o.rel_path[5:6] if o.rel_path else "1"}</td><td class="score-cell {_cls_rate(o.pass_rate)}">{_fr(o.pass_rate)}</td></tr>\n'
         return out
 
     def _sp_rows(items):
-        out = ''
+        out = ""
         for i, o in enumerate(items, 1):
             sp = o.avg_speedup
-            v, cls = (_fsp(sp), _cls_sp(sp)) if sp > 0 else ('—', 'score-low')
+            v, cls = (_fsp(sp), _cls_sp(sp)) if sp > 0 else ("—", "score-low")
             operator = _escape(str(o.operator))
             out += f'            <tr><td>{i}</td><td class="col-name">{operator}</td><td>L{o.rel_path[5:6] if o.rel_path else "1"}</td><td class="score-cell {cls}">{v}</td></tr>\n'
         return out
 
-    return f'''    <h4>3.3 算子分析</h4>
+    return f"""    <h4>3.3 算子分析</h4>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:14px 0">
       <div class="table-wrap" style="margin:0">
@@ -321,53 +390,57 @@ def _render_top_tables(ops: List[OperatorReport]) -> str:
         </table>
       </div>
     </div>
-    <p class="note">Table 3a-3b. Left: Operators by pass rate. Right: Operators by NPU speedup ratio.</p>'''
+    <p class="note">Table 3a-3b. Left: Operators by pass rate. Right: Operators by NPU speedup ratio.</p>"""
 
 
 # ---------------------------------------------------------------------------
 # Section 4: Operator Details
 # ---------------------------------------------------------------------------
 
+
 def _get_category(rel_path: str) -> str:
     """从 proto.yaml 获取算子 category"""
     if not rel_path:
-        return '—'
+        return "—"
     try:
         from kernel_eval.config import get_project_root
+
         proto = get_project_root() / "tasks" / rel_path / "proto.yaml"
         if proto.exists():
             import yaml
+
             with open(proto) as f:
                 data = yaml.safe_load(f)
-            return data.get('operator', {}).get('category', '—')
+            return data.get("operator", {}).get("category", "—")
     except Exception:
         pass
-    return '—'
+    return "—"
 
 
 def _render_operator_tables(ops: List[OperatorReport]) -> str:
     """按 Level 分组渲染算子详情表"""
     from collections import defaultdict
+
     levels = defaultdict(list)
     for o in ops:
         lv = int(o.rel_path[5:6]) if o.rel_path and len(o.rel_path) > 5 else 1
         levels[lv].append(o)
 
-    lv_labels = {1: '基础算子', 2: '中级算子', 3: '高级算子', 4: '复杂算子'}
-    result = ''
+    lv_labels = {1: "基础算子", 2: "中级算子", 3: "高级算子", 4: "复杂算子"}
+    result = ""
     table_idx = 4
     for lv in sorted(levels):
         lv_ops = levels[lv]
-        rows = ''
+        rows = ""
         for i, o in enumerate(lv_ops, 1):
             sp = o.avg_speedup
             operator = _escape(str(o.operator))
             cat = _escape(str(_get_category(o.rel_path)))
             lv_s = o.rel_path[5:6] if o.rel_path and len(o.rel_path) > 5 else str(lv)
-            rows += f'''          <tr><td>{i}</td><td class="col-name">{operator}</td><td>{cat}</td><td>L{lv_s}</td><td>{o.total_cases}</td><td>{o.passed_cases}</td><td class="score-cell {_cls_rate(o.pass_rate)}">{_fr(o.pass_rate)}</td><td class="score-cell {_cls_sp(sp)}">{_fsp(sp)}</td><td class="score-cell {_cls_score(o.score)}">{_fs(o.score)}</td></tr>\n'''
+            rows += f"""          <tr><td>{i}</td><td class="col-name">{operator}</td><td>{cat}</td><td>L{lv_s}</td><td>{o.total_cases}</td><td>{o.passed_cases}</td><td class="score-cell {_cls_rate(o.pass_rate)}">{_fr(o.pass_rate)}</td><td class="score-cell {_cls_sp(sp)}">{_fsp(sp)}</td><td class="score-cell {_cls_score(o.score)}">{_fs(o.score)}</td></tr>\n"""
 
-        label = lv_labels.get(lv, f'Level {lv}')
-        result += f'''    <h4>4.{lv} Level {lv} — {label}</h4>
+        label = lv_labels.get(lv, f"Level {lv}")
+        result += f"""    <h4>4.{lv} Level {lv} — {label}</h4>
     <div class="table-wrap">
       <table>
         <caption>Table {table_idx}. Level {lv} Operator Results</caption>
@@ -378,10 +451,10 @@ def _render_operator_tables(ops: List[OperatorReport]) -> str:
 {rows}        </tbody>
       </table>
     </div>
-'''
+"""
         table_idx += 1
 
-    return f'''  <!-- ============================================================ -->
+    return f"""  <!-- ============================================================ -->
   <!-- 4. OPERATOR DETAILS                                            -->
   <!-- ============================================================ -->
   <div class="section">
@@ -389,14 +462,14 @@ def _render_operator_tables(ops: List[OperatorReport]) -> str:
 
 {result}  </div>
 
-'''
+"""
 
 
 # ---------------------------------------------------------------------------
 # Certification Seal
 # ---------------------------------------------------------------------------
 
-SEAL_HTML_TEMPLATE = '''  <!-- ============================================================ -->
+SEAL_HTML_TEMPLATE = """  <!-- ============================================================ -->
   <!-- CERTIFICATION SEAL                                             -->
   <!-- ============================================================ -->
   <div class="seal-section">
@@ -430,12 +503,34 @@ SEAL_HTML_TEMPLATE = '''  <!-- =================================================
 
 </main>
 </body>
-</html>'''
+</html>"""
 
 
 # ---------------------------------------------------------------------------
 # 主渲染函数
 # ---------------------------------------------------------------------------
+
+
+def _render_baseline_sources(report):
+    rows = []
+    for op in report.operators:
+        for case in op.cases:
+            for name, source in case.baseline_source.items():
+                cells = (case.case_id, name, format_baseline_source(source))
+                rows.append(
+                    "<tr>"
+                    + "".join(f"<td>{_escape(str(cell))}</td>" for cell in cells)
+                    + "</tr>"
+                )
+    if not rows:
+        return ""
+    return (
+        '<div class="section"><h3>基线与理论下界来源</h3>'
+        "<p>以下记录不改变原评分规则；文件来源不等于实测声明，声明见对应 metadata。</p>"
+        '<div class="table-wrap"><table><thead><tr><th>用例ID</th><th>字段</th><th>来源</th>'
+        "</tr></thead><tbody>" + "".join(rows) + "</tbody></table></div></div>"
+    )
+
 
 def render_html_report(
     report: EvalReport,
@@ -454,71 +549,112 @@ def render_html_report(
     """
     # 1. 读取 index.html 前缀 (CSS + Header + Abstract + Section 1)
     if index_path and Path(index_path).exists():
-        with open(index_path) as f:
+        with open(index_path, encoding="utf-8") as f:
             html = f.read()
     else:
         from ..config import get_project_root
+
         tmpl = get_project_root() / "tasks" / "description.html"
         if tmpl.exists():
-            with open(tmpl) as f:
+            with open(tmpl, encoding="utf-8") as f:
                 html = f.read()
         else:
-            html = '<!DOCTYPE html><html><body>'
+            html = "<!DOCTYPE html><html><body>"
+
+    if report.summary.get("reference_invalid_cases", 0) or any(
+        op.score_error_code == "reference_invalid" for op in report.operators
+    ):
+        # An invalid benchmark reference has no candidate score or certificate.
+        rows = []
+        for op in report.operators:
+            score = "不可判定（参考失效）" if op.score is None else f"{op.score:.2f}"
+            rows.append(
+                f"<tr><td>{_escape(op.operator)}</td><td>{score}</td>"
+                f"<td>{_escape(op.score_error or '')}</td></tr>"
+            )
+        cases = []
+        for op in report.operators:
+            for case in op.cases:
+                if case.failure_type == "reference_invalid":
+                    cases.append(
+                        f"<li>{_escape(case.case_id)}: {_escape(case.error_msg or '参考失效')}</li>"
+                    )
+        return (
+            '<!DOCTYPE html><html lang="zh"><meta charset="utf-8"><title>评测参考失效</title><body>'
+            "<h1>参考失效：综合评分不可判定</h1><p>请修复参考后重新评测；本次结果不判定候选不合格。</p>"
+            "<table><thead><tr><th>算子</th><th>得分</th><th>原因</th></tr></thead><tbody>"
+            + "".join(rows)
+            + "</tbody></table><ul>"
+            + "".join(cases)
+            + "</ul>"
+            + _render_baseline_sources(report)
+            + "</body></html>"
+        )
 
     # 替换摘要中的动态字段
     if setup_info is None:
-        setup_info = report.setup_info if hasattr(report, 'setup_info') else {}
-    md = setup_info.get('metadata', {})
+        setup_info = report.setup_info if hasattr(report, "setup_info") else {}
+    md = setup_info.get("metadata", {})
 
     # Agent/Skill — 有值则替换，无值则置空（不给默认文案）
-    agent = md.get('agent_skill', '')
+    agent = md.get("agent_skill", "")
     if agent:
         agent_esc = _escape(str(agent))
-        html = re.sub(r'Agent/Skill为[一-鿿\w-]*', lambda m: f'Agent/Skill为{agent_esc}', html)
+        html = re.sub(
+            r"Agent/Skill为[一-鿿\w-]*", lambda m: f"Agent/Skill为{agent_esc}", html
+        )
     else:
-        html = re.sub(r'Agent/Skill为[一-鿿\w-]*', 'Agent/Skill为', html)
+        html = re.sub(r"Agent/Skill为[一-鿿\w-]*", "Agent/Skill为", html)
 
     # Harness — 同上
-    harness = md.get('harness', '')
+    harness = md.get("harness", "")
     if harness:
         harness_esc = _escape(str(harness))
-        html = re.sub(r'Harness为[一-鿿\w-]*', lambda m: f'Harness为{harness_esc}', html)
+        html = re.sub(
+            r"Harness为[一-鿿\w-]*", lambda m: f"Harness为{harness_esc}", html
+        )
     else:
-        html = re.sub(r'Harness为[一-鿿\w-]*', 'Harness为', html)
+        html = re.sub(r"Harness为[一-鿿\w-]*", "Harness为", html)
 
     # BaseModel — 同上
-    model = md.get('base_model', '')
+    model = md.get("base_model", "")
     if model:
         model_esc = _escape(str(model))
-        html = re.sub(r'BaseModel为[一-鿿\w\s]*', lambda m: f'BaseModel为{model_esc}', html)
+        html = re.sub(
+            r"BaseModel为[一-鿿\w\s]*", lambda m: f"BaseModel为{model_esc}", html
+        )
     else:
-        html = re.sub(r'BaseModel为[一-鿿\w\s]*', 'BaseModel为', html)
+        html = re.sub(r"BaseModel为[一-鿿\w\s]*", "BaseModel为", html)
 
     # 通过率 & 得分 — 从 report 获取
-    r = report.summary.get('pass_rate')
+    r = report.summary.get("pass_rate")
     html = re.sub(
-        r'整体通过率为 [\d.]+%（[\d,]+/[\d,]+），总得分为 [\d.]+（满分 [\d,]+）',
-        f'整体通过率为 {_fmt_or_na(r, ".1%")}（{report.passed_cases}/{report.total_cases}），'
-        f'总得分为 {_fmt_or_na(report.overall_score, ".0f")}（满分 {report.total_operators * 100}）',
-        html
+        r"整体通过率为 [\d.]+%（[\d,]+/[\d,]+），总得分为 [\d.]+（满分 [\d,]+）",
+        f"整体通过率为 {_fmt_or_na(r, '.1%')}（{report.passed_cases}/{report.total_cases}），"
+        f"总得分为 {_fmt_or_na(report.overall_score, '.0f')}（满分 {report.total_operators * 100}）",
+        html,
     )
 
     # 算子数/用例数/等级 — 从 report 获取
     levels_set = set()
     for op in report.operators:
         if op.rel_path:
-            levels_set.add(int(op.rel_path.split('/')[0][-1]))
+            levels_set.add(int(op.rel_path.split("/")[0][-1]))
     max_lv = max(levels_set) if levels_set else 1
     lv_count = len(levels_set)
-    lv_part = f'覆盖 Level 1 至 Level {max_lv} 共 {lv_count} 个难度等级' if lv_count > 1 else '共 1 个难度等级'
+    lv_part = (
+        f"覆盖 Level 1 至 Level {max_lv} 共 {lv_count} 个难度等级"
+        if lv_count > 1
+        else "共 1 个难度等级"
+    )
     html = re.sub(
-        r'针对 53 个算子进行了系统性评测，覆盖 Level 1 至 Level 4 共 4 个难度等级、\s*\n\s*1,060 个评测用例。',
-        f'本次对 {report.total_operators} 个算子进行了评测，{lv_part}，{report.total_cases} 个评测用例。',
-        html
+        r"针对 53 个算子进行了系统性评测，覆盖 Level 1 至 Level 4 共 4 个难度等级、\s*\n\s*1,060 个评测用例。",
+        f"本次对 {report.total_operators} 个算子进行了评测，{lv_part}，{report.total_cases} 个评测用例。",
+        html,
     )
 
     # 移除末尾的 INSERTION POINT 注释 (如果有)
-    ins_point = html.find('<!-- INSERTION POINT')
+    ins_point = html.find("<!-- INSERTION POINT")
     if ins_point >= 0:
         html = html[:ins_point]
 
@@ -526,29 +662,35 @@ def render_html_report(
     html = html.rstrip()
 
     # 2. Section 2: Experiment Setup
-    html += '\n\n' + _render_section2(setup_info)
+    html += "\n\n" + _render_section2(setup_info)
 
     # 3. Section 3: Results Analysis
-    html += '\n\n  <!-- ============================================================ -->\n'
-    html += '  <!-- 3. RESULTS ANALYSIS                                           -->\n'
-    html += '  <!-- ============================================================ -->\n'
+    html += (
+        "\n\n  <!-- ============================================================ -->\n"
+    )
+    html += "  <!-- 3. RESULTS ANALYSIS                                           -->\n"
+    html += "  <!-- ============================================================ -->\n"
     html += '  <div class="section">\n'
-    html += '    <h3><span class="sec-num">3.</span> Results Analysis / 结果分析</h3>\n\n'
-    html += '    <h4>3.1 结果总览</h4>\n'
+    html += (
+        '    <h3><span class="sec-num">3.</span> Results Analysis / 结果分析</h3>\n\n'
+    )
+    html += "    <h4>3.1 结果总览</h4>\n"
     html += '    <div class="kpi-strip">\n'
     html += _render_kpi(report)
-    html += '    </div>\n\n'
-    html += _render_level_table(report) + '\n'
-    html += _render_bars(report) + '\n'
-    html += _render_top_tables(report.operators) + '\n'
-    html += '  </div>\n'
+    html += "    </div>\n\n"
+    html += _render_level_table(report) + "\n"
+    html += _render_bars(report) + "\n"
+    html += _render_top_tables(report.operators) + "\n"
+    html += "  </div>\n"
 
     # 4. Section 4: Operator Details
-    html += '\n' + _render_operator_tables(report.operators)
+    html += "\n" + _render_operator_tables(report.operators)
+    html += "\n" + _render_baseline_sources(report)
 
     # 5. Certification Seal + closing tags
     from .._version import FRAMEWORK_VERSION, TASKS_VERSION
-    html += '\n' + SEAL_HTML_TEMPLATE.format(
+
+    html += "\n" + SEAL_HTML_TEMPLATE.format(
         framework_version=FRAMEWORK_VERSION,
         tasks_version=TASKS_VERSION,
         eval_object=_eval_object_label(md),
@@ -563,12 +705,12 @@ def _eval_object_label(md: Dict) -> str:
     组合 MODEL (AGENT / HARNESS)；标签全部未填写时置空，
     不回落到任何默认名称。
     """
-    agent = str(md.get('agent_skill') or '').strip()
-    harness = str(md.get('harness') or '').strip()
-    model = str(md.get('base_model') or '').strip()
-    tools = ' / '.join(p for p in (agent, harness) if p)
+    agent = str(md.get("agent_skill") or "").strip()
+    harness = str(md.get("harness") or "").strip()
+    model = str(md.get("base_model") or "").strip()
+    tools = " / ".join(p for p in (agent, harness) if p)
     if model and tools:
-        label = f'{model} ({tools})'
+        label = f"{model} ({tools})"
     elif model:
         label = model
     else:

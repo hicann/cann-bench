@@ -2,54 +2,37 @@
 
 ## 1. 算子简介
 
-MatmulReduceScatterV2 是一个 MC2 通算融合量化算子，用于将量化 MatMul 计算和 ReduceScatter 集合通信融合执行。该算子是 `aclnnMatmulReduceScatter` 的功能扩展，在支持 `x1`、`x2` 为 FLOAT16 / BFLOAT16 的基础上，新增了对 INT8 等低精度量化数据类型的支持。
+MatmulReduceScatterV2 将矩阵乘、可选反量化与 ReduceScatter 集合通信融合执行。各 rank 先计算本地结果，在通信域内逐元素求和，再沿行维等分，向每个 rank 返回相应切片，适用于张量并行中的线性变换与输出分片。
 
-**主要应用场景**：
-- 大模型张量并行（TP）场景中的量化矩阵乘后 ReduceScatter 通信
-- 需要将量化 MatMul 计算与集合通信流水并行的推理或训练任务
-- GPT、LLaMA 等模型中 TP 维度的 reduce-scatter 场景
-
-**算子特征**：
-- 难度等级：L4（FusedComposite）
-- 支持 FLOAT16、BFLOAT16、INT8 输入（当前 benchmark cases 使用 INT8）
-- `x1` 仅支持二维 ND 输入，不支持转置
-- `x2` 支持二维 ND 输入，支持转置 / 不转置场景
-- 支持 `x1Scale`、`x2Scale` 反量化参数
-- `reduce_op` 当前仅支持 `"sum"`
-- 需要 HCCL 通信域，benchmark 中每个 case 会启动一个 rank 对应的进程
+计算语义对应 `aclnnMatmulReduceScatterV2`。以下 Python 接口描述 FP16/BF16 非量化和 INT8 per-token/per-channel 形式；不包含原生接口的 FP8、per-block、MX、输出量化及 amax 输出。
 
 ## 2. 算子定义
 
-### 数学公式
+设通信域包含 `p = world_size` 个 rank，`r` 为当前 rank。各 rank 的输入 `X_r` 为 `[M, K]`，有效权重 `W_r` 为 `[K, N]`。`is_trans_b=True` 时 `W_r = x2_r.T`，否则 `W_r = x2_r`。
 
-**情形 1**：当 `x1`、`x2` 数据类型为 FLOAT16 / BFLOAT16 时，对 `x1`、`x2` 做 MatMul 计算后，进行 ReduceScatter 通信：
-
-$$
-output = ReduceScatter(x1 \times x2 + bias_{optional})
-$$
-
-**情形 2**：当 `x1`、`x2` 数据类型为 INT8 的 pertoken / perchannel 量化场景时，对 `x1`、`x2` 做 MatMul 计算和反量化后，再进行 ReduceScatter 通信：
+### 非量化
 
 $$
-output = ReduceScatter((x1Scale \times x2Scale) \times (x1 \times x2 + bias_{optional}))
+L_r = X_r W_r + b_r
 $$
 
-其中：
-- `x1` 为矩阵乘左矩阵，shape 为 `[M, K]`
-- `x2` 为矩阵乘右矩阵。不转置时 shape 为 `[K, N]`；转置时 shape 为 `[N, K]`
-- `x1Scale` 为 `x1` 的反量化参数，pertoken 场景下 shape 为 `[M]`，运算时 broadcast 为 `[M, 1]`
-- `x2Scale` 为 `x2` 的反量化参数，perchannel 场景下 shape 为 `[N]`，运算时 broadcast 为 `[1, N]`
-- `bias` 为可选一维偏置，shape 为 `[N]`；当前 benchmark cases 均不使用 bias
-- `ReduceScatter` 对各 rank 的矩阵乘结果做 sum 规约，并沿第 0 维切分输出，shape 为 `[M / rank_size, N]`
+### INT8 per-token/per-channel
 
-### 计算步骤
+$$
+L_r = (\operatorname{INT32}(X_r)\operatorname{INT32}(W_r))
+\odot s_r[:,\mathrm{None}] \odot t_r[\mathrm{None},:] + b_r
+$$
 
-1. 根据 `is_trans_b` 判断是否对 `x2` 做矩阵乘意义上的转置。
-2. 执行矩阵乘 `x1 @ x2`。
-3. 当 `bias` 非空时，对矩阵乘结果加上 bias。
-4. 量化场景下，乘以反量化尺度 `x1Scale * x2Scale`。
-5. 在 HCCL 通信域内对各 rank 的结果执行 ReduceScatter（`reduce_op="sum"`）。
-6. 返回当前 rank 对应的规约切片。
+`s_r` 为 `[M]` 的行尺度，`t_r` 为 `[N]` 的列尺度。偏置为浮点列偏置，按原生接口定义在反量化之后加入；与 INT32 累加偏置不同。省略偏置时取零。
+
+### 归约与切分
+
+$$
+R = \sum_{s=0}^{p-1}\operatorname{Cast}_{D}(L_s), \qquad
+Y_r = R[rM/p:(r+1)M/p,:]
+$$
+
+本地结果为 `[M, N]`，通信使用输出数据类型 `D`。ReduceScatter 先按元素求和，再按 rank 顺序沿第 0 维等分，当前 rank 的输出为 `[M/p, N]`。偏置在集合通信前加入，也会参与归约。
 
 ## 3. 接口规范
 
@@ -57,110 +40,84 @@ $$
 
 ```python
 cann_bench.matmul_reduce_scatter_v2(
-    x1: Tensor,
-    x2: Tensor,
-    hcomm_info: str,
-    world_size: int,
-    reduce_op: str = "sum",
-    bias: Optional[Tensor] = None,
-    x1_scale: Optional[Tensor] = None,
-    x2_scale: Optional[Tensor] = None,
-    is_trans_b: bool = False,
-    out_dtype: str = "float16",
-    x1_dtype: str = "int8",
-    x2_dtype: str = "int8",
-    x1_scale_dtype: str = "float32",
-    x2_scale_dtype: str = "float32",
-    block_size: int = 128,
-    group_sizes: List[int] = [],
-) -> Tensor
+    Tensor x1, Tensor x2, str hcomm_info, int world_size,
+    str reduce_op="sum", Tensor? bias=None, Tensor? x1_scale=None,
+    Tensor? x2_scale=None, bool is_trans_b=False, str out_dtype="float16",
+    str x1_dtype="int8", str x2_dtype="int8",
+    str x1_scale_dtype="float32", str x2_scale_dtype="float32",
+    int block_size=128, int[] group_sizes=[]
+) -> Tensor y
 ```
 
-### 输入参数说明
+### 输入与属性
 
-| 参数 | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| x1 | Tensor | 必选 | 矩阵乘左矩阵，shape 为 `[M, K]`。当前版本仅支持二维 ND 输入，不支持转置 |
-| x2 | Tensor | 必选 | 矩阵乘右矩阵。不转置时 shape 为 `[K, N]`；转置时 shape 为 `[N, K]`。支持二维 ND 输入，支持转置 / 不转置场景 |
-| hcomm_info | str | 必选 | HCCL 通信域名称，由通信库接口获取；benchmark runner 会在每个 rank 初始化后传入 |
-| world_size | int | 必选 | 通信域内 rank 数 |
-| reduce_op | str | `"sum"` | ReduceScatter 规约类型，当前仅支持 `"sum"` |
-| bias | Tensor? | None | 可选偏置，shape 为 `[N]`。当前 benchmark cases 不使用 |
-| x1_scale | Tensor? | None | `x1` 的反量化参数。pertoken 场景下 shape 为 `[M]`，数据类型为 float32 |
-| x2_scale | Tensor? | None | `x2` 的反量化参数。perchannel 场景下 shape 为 `[N]`，数据类型为 float32 |
-| is_trans_b | bool | False | 是否按转置形式使用 `x2` |
-| out_dtype | str | `"float16"` | 输出 dtype，取值为 `float16` 或 `bfloat16` |
-| x1_dtype | str | `"int8"` | `x1` 的逻辑量化 dtype，当前固定为 `int8` |
-| x2_dtype | str | `"int8"` | `x2` 的逻辑量化 dtype，当前固定为 `int8` |
-| x1_scale_dtype | str | `"float32"` | `x1_scale` 的 dtype，当前固定为 `float32` |
-| x2_scale_dtype | str | `"float32"` | `x2_scale` 的 dtype，当前固定为 `float32` |
-| block_size | int | 128 | 量化矩阵乘的 block size，当前 cases 使用默认值 128 |
-| group_sizes | List[int] | `[]` | 量化矩阵乘的 group sizes，当前 cases 使用空列表 |
+| 参数 | 类型 / 形状 | 说明 |
+| --- | --- | --- |
+| `x1` | Tensor，`[M, K]` | 本地矩阵乘左输入。 |
+| `x2` | Tensor，`[K, N]` 或 `[N, K]` | 本地权重，后一形状用于转置模式。 |
+| `hcomm_info` | str | 已初始化的 HCCL 通信域名称。 |
+| `world_size` | int | 通信域的 rank 数，须与实际大小一致。 |
+| `reduce_op` | str | 归约操作，仅支持 `"sum"`。 |
+| `bias` | 可选 Tensor，`[N]` | 非量化时与输入类型一致；INT8 形式可为 FP16/BF16/FP32，默认 `None`。 |
+| `x1_scale` | 可选 FP32 Tensor，`[M]` | INT8 的 per-token 尺度；非量化时为 `None`。 |
+| `x2_scale` | 可选 FP32 Tensor，`[N]` | INT8 的 per-channel 尺度；非量化时为 `None`。 |
+| `is_trans_b` | bool | 是否在矩阵乘中转置 `x2`，默认 `False`。 |
+| `out_dtype` | str | 输出类型，`float16` 或 `bfloat16`；非量化时须与 `x1` 一致。 |
+| `x1_dtype` | str | `x1` 的逻辑类型，须与张量实际类型匹配。 |
+| `x2_dtype` | str | `x2` 的逻辑类型，须与张量实际类型匹配。 |
+| `x1_scale_dtype` | str | 非空行尺度的类型为 `float32`，非量化时忽略。 |
+| `x2_scale_dtype` | str | 非空列尺度的类型为 `float32`，非量化时忽略。 |
+| `block_size` | int | 接口保留的量化块属性，声明默认值为 128；A5 非量化形式须显式传 0，不表示通信切分大小。 |
+| `group_sizes` | int[] | 量化分组属性，本文形式使用空列表 `[]`，不启用分块量化。 |
 
-### 输出
+### 数据类型与输出
 
-| 参数 | Shape | dtype | 描述 |
-|------|-------|-------|------|
-| y | `[M / world_size, N]` | float16 / bfloat16 | ReduceScatter 后当前 rank 的输出切片 |
+| 模式 | `x1` / `x2` | 反量化尺度 | `y` |
+| --- | --- | --- | --- |
+| 非量化 FP16 | 均为 `float16` | 均为 `None` | `float16` |
+| 非量化 BF16 | 均为 `bfloat16` | 均为 `None` | `bfloat16` |
+| INT8 per-token/per-channel | 均为 `int8` | FP32 行尺度和列尺度 | `float16` 或 `bfloat16` |
 
-### 数据类型
-
-| x1 dtype | x2 dtype | x1_scale dtype | x2_scale dtype | 输出 dtype |
-|----------|----------|----------------|----------------|------------|
-| int8 | int8 | float32 | float32 | float16 |
-| int8 | int8 | float32 | float32 | bfloat16 |
-
-> 当前 benchmark cases 仅覆盖 INT8 输入 + FLOAT16 / BFLOAT16 输出场景。
+返回单个张量 `y`，形状为 `[M/p, N]`，不返回全量归约结果。
 
 ### 规则与约束
 
-- `x1` 和 `x2` 必须是二维 Tensor，且 dtype 保持一致。
-- `x1` 仅支持不转置场景，`x2` 支持转置 / 不转置场景。
-- `x1` 的 shape 为 `[M, K]`，其中 `M` 必须能被 `world_size` 整除。
-- `x2` 的 K 轴必须与 `x1` 的 K 轴匹配。
-- `x1_scale` 在 pertoken 场景下 shape 为 `[M]`，`x2_scale` 在 perchannel 场景下 shape 为 `[N]`。
-- `reduce_op` 当前仅支持 `"sum"`。
-- `hcomm_info` 必须来自当前 HCCL 通信域，所有 rank 必须使用同一个通信域。
-- 当前 benchmark case 使用 `world_size=8`。
-- Atlas A2 / A3 支持 2、4、8 卡。
-
-### 支持范围
-
-| 维度 / 参数 | 范围 | 备注 |
-|---|---|---|
-| `M` | 512 ~ 8192 | cases.csv 实测范围，必须能被 `world_size` 整除 |
-| `K` | 4096 ~ 12288 | 典型 Transformer 模型隐藏层维度 |
-| `N` | 1024 ~ 4096 | cases.csv 实测范围 |
-| `world_size` | 8 | 当前 benchmark case 固定为 8 卡 |
-| `reduce_op` | `"sum"` | 当前版本唯一支持值 |
-| `out_dtype` | float16 / bfloat16 | 输出 dtype |
-| dtype | int8 (x1/x2), float32 (scale) | x1、x2 与 scale dtype 保持一致 |
+- `x1`、`x2` 均为二维 ND 张量；`x1` 不转置，`x2` 支持转置。有效权重的收缩维必须等于 `K`，且 `256 <= K < 65535`。
+- `M` 必须能被 `p` 整除。各 rank 的本地结果形状、数据类型和集合通信调用顺序必须一致。
+- INT8 per-token/per-channel 形式须同时提供两组尺度；尺度仅用于本地矩阵乘的反量化，不需要 AllGather。
+- 原生 ACLNN 的 INT8 行尺度、列尺度可用 `[M, 1]`、`[1, N]` 表示；此 Python 接口用一维向量表达相同广播语义。
+- Ascend 950PR/950DT 的本文接口形式为 FP16/BF16 非量化，须显式指定匹配的 `x1_dtype`、`x2_dtype`、`out_dtype` 和 `block_size=0`，两组尺度为 `None`。INT8 形式对应 Atlas A2/A3，不能使用默认 INT8 类型表示 A5 非量化输入。
+- Ascend 950PR/950DT 支持 2、4、8、16、32、64 卡以及 CCU/AICPU 通信。ReduceScatter 总数据量 `M*N*sizeof(y.dtype)` 不得超过 `16*256 MB`，实际可用上限还受形状影响。
+- Atlas A2/A3 的 INT8 形式支持 2、4、8 卡，不支持空张量，使用 AIV 通信且通信缓冲区至少 200 MB。
 
 ## 4. 精度要求
 
-本任务使用 cann-bench 的张量比较逻辑进行验证，并在 `proto.yaml` 中为 float16 / bfloat16 设置精度阈值 `0.01`。
+所有 rank 的输出均须满足形状、dtype 和可选输出契约。启用三方比较时，以相同输入的 CPU FP32 结果为参考：候选的大值域最大误差不超过设备级联的 10 倍，平均误差、误差总和及全量 RMSE 不超过级联的 2 倍。
 
-**误差指标**：
+另允许有限值逐元素满足 `abs(candidate-golden) <= atol + rtol*abs(golden)`，避免零级联误差退化为逐位相等要求。有效比较类型 FP16/BF16/FP32 的 `rtol` 分别为 `2^-10`、`2^-7`、`2^-23`，`atol` 分别为 `1e-5`、`1e-5`、`1e-9`。显式 FP32 比较和 FP8 辅助输出使用 FP32 容差，不能按输入 FP8 类型放宽。
 
-1. 平均相对误差（MERE）：
+FP16/BF16 的小值域分界为 `1e-3`，FP32 为 `1e-6`。小值元素不少于 100000 个时，候选的小值超差数不得超过级联的 2 倍；计数边界及绝对误差阈值保持不变。结构、NaN/正负无穷掩码及有限误差统计检查始终有效，容差分支不能绕过这些检查。
 
-   $$
-   \text{MERE} = \text{avg}\left(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+1e-7}\right)
-   $$
+级联参考先接受按真实输出类型的独立固定精度校验；参考失效时评分不可用，不归为候选编译错误。未启用三方模式的历史用例保持原相对误差流程。完整判定与比较类型规则见[三方精度指南](../../../../docs/guide/mc2_accuracy.md)。
 
-2. 最大相对误差（MARE）：
-
-   $$
-   \text{MARE} = \max\left(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+1e-7}\right)
-   $$
-
-当候选算子输出与 Golden 输出均满足阈值要求时，判定精度通过。
+两卡非量化级联的自检参考由 CPU 独立模拟 Matmul 输出、可选 bias 加法及两卡求和各阶段的 FP16/BF16 舍入，避免中间舍入在跨卡数值抵消时被误判。该参考仅用于级联健康检查；三方误差仍相对于全程 FP32 的数学 golden 计算，倍率、候选容差及评分公式不变。其他卡数不假定相同的归约顺序，继续使用原自检方式。
 
 ## 5. 标准 Golden 代码
 
 ```python
 #!/usr/bin/python3
 # coding=utf-8
+
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 
 from typing import Any, Dict, Optional
 
@@ -194,7 +151,9 @@ def matmul_reduce_scatter_v2(
     return out[:chunk].to(_torch_dtype(out_dtype))
 
 
-def mc2_make_rank_inputs(ctx: Dict[str, Any], case_payload: Dict[str, Any]) -> Dict[str, Any]:
+def mc2_make_rank_inputs(
+    ctx: Dict[str, Any], case_payload: Dict[str, Any]
+) -> Dict[str, Any]:
     device = ctx["device"]
     shapes = case_payload["input_shapes"]
     dtypes = case_payload["dtypes"]
@@ -203,6 +162,9 @@ def mc2_make_rank_inputs(ctx: Dict[str, Any], case_payload: Dict[str, Any]) -> D
     seed = int(attrs.get("seed", 1))
     weight_same = int(attrs.get("weight_same", 1))
     rank = int(ctx["rank"])
+    if not _is_quant_case(attrs):
+        # A5 TP slices must differ across ranks; x1/x2 share the rank seed.
+        seed += rank
 
     x1 = _make_tensor(shapes[0], dtypes[0], ranges[0], seed, device)
     x2_seed = seed if weight_same else seed + rank * 2
@@ -211,6 +173,9 @@ def mc2_make_rank_inputs(ctx: Dict[str, Any], case_payload: Dict[str, Any]) -> D
     bias = None
     if bool(attrs.get("is_bias", False)) and len(shapes) > 2 and shapes[2] is not None:
         bias = _make_tensor(shapes[2], dtypes[2], ranges[2], rank * 3, device)
+
+    if not _is_quant_case(attrs):
+        return {"x1": x1, "x2": x2, "bias": bias, "x1_scale": None, "x2_scale": None}
 
     x1_scale_index = 3 if bool(attrs.get("is_bias", False)) else 2
     x2_scale_index = x1_scale_index + 1
@@ -228,10 +193,18 @@ def mc2_make_rank_inputs(ctx: Dict[str, Any], case_payload: Dict[str, Any]) -> D
         seed * 13,
         device,
     )
-    return {"x1": x1, "x2": x2, "bias": bias, "x1_scale": x1_scale, "x2_scale": x2_scale}
+    return {
+        "x1": x1,
+        "x2": x2,
+        "bias": bias,
+        "x1_scale": x1_scale,
+        "x2_scale": x2_scale,
+    }
 
 
-def mc2_call_candidate(candidate, ctx: Dict[str, Any], inputs: Dict[str, Any], attrs: Dict[str, Any]):
+def mc2_call_candidate(
+    candidate, ctx: Dict[str, Any], inputs: Dict[str, Any], attrs: Dict[str, Any]
+):
     return candidate(
         inputs["x1"],
         inputs["x2"],
@@ -252,7 +225,9 @@ def mc2_call_candidate(candidate, ctx: Dict[str, Any], inputs: Dict[str, Any], a
     )
 
 
-def mc2_distributed_golden(ctx: Dict[str, Any], inputs: Dict[str, Any], attrs: Dict[str, Any]):
+def mc2_distributed_golden(
+    ctx: Dict[str, Any], inputs: Dict[str, Any], attrs: Dict[str, Any]
+):
     """Distributed CPU-semantic golden following mc2_test's get_cpu path.
 
     Compute matmul and dequant in float32 for precision, then cast to the
@@ -260,18 +235,89 @@ def mc2_distributed_golden(ctx: Dict[str, Any], inputs: Dict[str, Any], attrs: D
     matches the fused MC2 kernel (which communicates in fp16/bf16).
     """
     dist = ctx["dist"]
+    device = ctx["device"]
     x2_eff = inputs["x2"].t() if bool(attrs.get("is_trans_b", False)) else inputs["x2"]
-    mm_out = torch.matmul(inputs["x1"].float(), x2_eff.float())
-    if inputs.get("bias") is not None:
-        mm_out = mm_out + inputs["bias"].float()
+    # Compute matmul in float32 on CPU to avoid int8→float32 Cast kernel issues
+    if attrs.get("mc2_accuracy_mode") == "three_way":
+        if _is_quant_case(attrs):
+            raise ValueError(
+                "This three-way task currently covers non-quantized A5 cases only"
+            )
+        # Device cascade must actually execute matmul on NPU, not CPU.
+        local = torch.matmul(inputs["x1"], x2_eff)
+        if inputs.get("bias") is not None:
+            local = local + inputs["bias"]
+        chunk = local.shape[0] // int(ctx["world_size"])
+        result = torch.empty((chunk, local.shape[1]), dtype=local.dtype, device=device)
+        dist._reduce_scatter_base(result, local.contiguous(), op=dist.ReduceOp.SUM)
+        return result
+
+    # on machines where the CANN CastAiCore JSON config is not installed.
+    x1_cpu = inputs["x1"].cpu().float()
+    x2_cpu = x2_eff.cpu().float()
+    bias_cpu = (
+        inputs.get("bias").cpu().float() if inputs.get("bias") is not None else None
+    )
+    mm_out = torch.matmul(x1_cpu, x2_cpu)
+    if bias_cpu is not None:
+        mm_out = mm_out + bias_cpu
     if _is_quant_case(attrs):
-        mm_out = _apply_dequant_scale(mm_out, inputs.get("x1_scale"), inputs.get("x2_scale"))
+        x1_scale_cpu = (
+            inputs.get("x1_scale").cpu() if inputs.get("x1_scale") is not None else None
+        )
+        x2_scale_cpu = (
+            inputs.get("x2_scale").cpu() if inputs.get("x2_scale") is not None else None
+        )
+        mm_out = _apply_dequant_scale(mm_out, x1_scale_cpu, x2_scale_cpu)
     # Cast to output dtype before all_reduce to match candidate's communication precision
     out_dtype = _torch_dtype(str(attrs.get("out_dtype", "float16")))
-    mm_out = mm_out.to(out_dtype)
+    mm_out = mm_out.to(out_dtype).to(device)
     dist.all_reduce(mm_out, op=dist.ReduceOp.SUM)
     chunk = mm_out.shape[0] // int(ctx["world_size"])
     return mm_out.narrow(0, int(ctx["rank"]) * chunk, chunk)
+
+
+def mc2_cpu_golden(ctx, inputs, attrs):
+    return _cpu_references(ctx, inputs, attrs, staged=False)[0]
+
+
+def mc2_cpu_references(ctx, inputs, attrs):
+    """Return mathematical G and an independent, stage-rounded health reference.
+
+    Only two ranks have a single, unambiguous low-precision reduction step.
+    Other world sizes retain the generic health check; do not assume a reduction
+    tree/order for them. Neither result depends on NPU or candidate outputs.
+    """
+    return _cpu_references(ctx, inputs, attrs, staged=int(ctx["world_size"]) == 2)
+
+
+def _cpu_references(ctx, inputs, attrs, staged):
+    if _is_quant_case(attrs):
+        raise ValueError(
+            "CPU three-way reference currently covers A5 non-quantized cases"
+        )
+    if attrs.get("reduce_op", "sum") != "sum":
+        raise ValueError("CPU three-way reference only supports sum")
+    x2 = inputs["x2"].t() if attrs.get("is_trans_b", False) else inputs["x2"]
+    out = torch.matmul(inputs["x1"].float(), x2.float())
+    # Share the expensive FP32 matmul, not its rounded values, with mathematical G.
+    dtype = inputs["x1"].dtype
+    rounded = out.to(dtype).float() if staged else None
+    if inputs.get("bias") is not None:
+        out = out + inputs["bias"].float()
+        if staged:
+            rounded = (rounded + inputs["bias"].float()).to(dtype).float()
+    ctx["dist"].all_reduce(out, op=ctx["dist"].ReduceOp.SUM)
+    if staged:
+        # Communicate FP32 over Gloo, then emulate the one FP16/BF16 sum rounding.
+        ctx["dist"].all_reduce(rounded, op=ctx["dist"].ReduceOp.SUM)
+        rounded = rounded.to(dtype).float()
+    chunk = out.shape[0] // int(ctx["world_size"])
+    start = int(ctx["rank"]) * chunk
+    return (
+        out.narrow(0, start, chunk),
+        rounded.narrow(0, start, chunk) if staged else None,
+    )
 
 
 def _is_quant_case(attrs: Dict[str, Any]) -> bool:
@@ -314,7 +360,9 @@ def _apply_dequant_scale(
     return out * _truncate_hw_scale(scale)
 
 
-def _scale_tensor_or_ones(scale: Optional[torch.Tensor], size: int, device: torch.device) -> torch.Tensor:
+def _scale_tensor_or_ones(
+    scale: Optional[torch.Tensor], size: int, device: torch.device
+) -> torch.Tensor:
     if scale is None:
         return torch.ones(size, dtype=torch.float32, device=device)
     return scale.float().to(device)
@@ -348,7 +396,9 @@ def _broadcast_dequant_scale(
 
 def _truncate_hw_scale(scale: torch.Tensor) -> torch.Tensor:
     bits = scale.float().view(torch.int32)
-    bits &= torch.tensor(0xFFFFE000, dtype=torch.int32, device=scale.device)
+    bits &= torch.tensor(
+        -8192, dtype=torch.int32, device=scale.device
+    )  # 0xFFFFE000 as signed int32
     return bits.view(torch.float32)
 
 
@@ -357,7 +407,11 @@ def _make_tensor(shape, dtype_name: str, value_range, seed: int, device):
     dtype = _torch_dtype(dtype_name)
     lo, hi = value_range if value_range is not None else [0, 1]
     if dtype.is_floating_point:
-        tensor = torch.empty(shape, dtype=torch.float32).uniform_(float(lo), float(hi)).to(dtype)
+        tensor = (
+            torch.empty(shape, dtype=torch.float32)
+            .uniform_(float(lo), float(hi))
+            .to(dtype)
+        )
     else:
         tensor = torch.randint(int(lo), int(hi) + 1, shape, dtype=dtype)
     return tensor.to(device)
@@ -381,38 +435,23 @@ def _torch_dtype(dtype_name: str):
     return mapping[dtype]
 ```
 
-## 6. 额外信息
+## 6. 算子调用示例
 
-### 算子调用示例
+以下示例在 Ascend 950PR/950DT 上调用。假设通信域已初始化，`device` 为当前 rank 的 NPU 设备，`hcomm_info` 为该域名称，`world_size=2`；所有 rank 使用相同形状和调用顺序。
 
 ```python
 import torch
 import cann_bench
 
-world_size = 8
-M, K, N = 1024, 4096, 1024
-
-x1 = torch.randint(-8, 9, (M, K), dtype=torch.int8, device="npu")
-x2 = torch.randint(-8, 9, (K, N), dtype=torch.int8, device="npu")
-x1_scale = torch.empty(M, 1, dtype=torch.float32, device="npu").uniform_(0.001, 0.02)
-x2_scale = torch.empty(1, N, dtype=torch.float32, device="npu").uniform_(0.001, 0.02)
-hcomm_info = "<hccl-comm-name>"
-
+x1 = torch.randn(16, 256, dtype=torch.float16, device=device)
+x2 = torch.randn(256, 128, dtype=torch.float16, device=device)
 y = cann_bench.matmul_reduce_scatter_v2(
-    x1,
-    x2,
-    hcomm_info,
-    world_size,
-    reduce_op="sum",
-    x1_scale=x1_scale,
-    x2_scale=x2_scale,
-    is_trans_b=False,
-    out_dtype="float16",
+    x1, x2, hcomm_info, world_size,
+    reduce_op="sum", bias=None, x1_scale=None, x2_scale=None,
+    is_trans_b=False, out_dtype="float16",
+    x1_dtype="float16", x2_dtype="float16",
+    x1_scale_dtype="float32", x2_scale_dtype="float32",
+    block_size=0, group_sizes=[],
 )
-
-# y.shape: [M / world_size, N]
+# y: [16 // world_size, 128]
 ```
-
-### benchmark 说明
-
-该任务不是单进程算子用例。case 中设置了 `attrs.mc2_distributed: true`，cann-bench 会为每个 case 启动 `world_size` 个 rank 进程，初始化 HCCL 通信域后再调用候选实现。候选源码包需要暴露 `cann_bench.matmul_reduce_scatter_v2` 或 `torch.ops.cann_bench.matmul_reduce_scatter_v2`。当前 cases 目标平台为 Atlas A2 / A3。

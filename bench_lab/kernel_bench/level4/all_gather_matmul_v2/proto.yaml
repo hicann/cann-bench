@@ -14,11 +14,12 @@ operator:
   difficulty: L4
   formula: |
     gather_x = AllGather(x1) along dim 0
-    gather_scale = AllGather(x1_scale) along dim 0
-    y = QuantMatmul(gather_x, x2, gather_scale, x2_scale, bias)
+    A3_INT8: input_scale = AllGather(x1_scale) along dim 0
+    A5_FP8_per_tensor: input_scale = local x1_scale (scalar, not gathered)
+    y = QuantMatmul(gather_x, x2_eff, input_scale, x2_scale, bias)
     gather_out = gather_x when gather_output=True
-  description: MC2 all-gather and quantized matmul fused operator. INT8 cases require one HCCL process per rank and target Atlas A3.
-  shape_support: 'x1: [M_local, K], x2: [K, N], x1_scale: [M_local], x2_scale: [N]; y: [M_local * world_size, N]'
+  description: 'AllGather and quantized matmul fusion, supporting INT8 per-token/per-channel and FP8 per-tensor forms.'
+  shape_support: 'x1: [M_local, K], x2: [K, N] or [N, K]; A3 scales: [M_local], [N]; A5 scales: [1], [1]; y: [M_local * world_size, N]'
   precision_thresholds:
     float16: 0.005
     bfloat16: 0.005
@@ -50,30 +51,111 @@ operator:
     type: int
     default: 128
     description: Quant-mm block size passed through to torch_npu.
+  - name: is_trans_b
+    type: bool
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: is_bias
+    type: bool
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: x1_scale_dtype
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: x2_scale_dtype
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: group_sizes
+    type: list
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: seed
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: weight_same
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: platform
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: mc2_accuracy_mode
+    type: str
+    required: false
+    description: 'A5: CPU FP32 + device cascade + candidate; legacy cases keep existing comparison.'
+  - name: graph_type
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_sheet
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_excel_row
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: case_name
+    type: str
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
+  - name: source_graph_type
+    type: int
+    required: false
+    description: Case attribute; see docs/guide/mc2_accuracy.md for case selection.
   inputs:
   - name: x1
     description: Local rank quantized input tensor.
-    dtype: [int8]
+    dtype:
+    - int8
+    - float8_e4m3fn
+    - float8_e5m2
     shape: '[M_local, K]'
   - name: x2
     description: Quantized matmul weight tensor.
-    dtype: [int8]
+    dtype:
+    - int8
+    - float8_e4m3fn
+    - float8_e5m2
     shape: '[K, N]'
   - name: x1_scale
     description: Per-token scale for x1.
-    dtype: [float32]
-    shape: '[M_local]'
+    dtype:
+    - float32
+    shape: '[M_local] (A3) or [1] (A5 per-tensor)'
   - name: x2_scale
     description: Per-channel scale for x2.
-    dtype: [float32]
+    dtype:
+    - float32
+    shape: '[N] (A3) or [1] (A5 per-tensor)'
+  - name: bias
+    dtype:
+    - float32
     shape: '[N]'
+    optional: true
+    description: A5 optional bias in accumulator, before scaling.
   outputs:
   - name: y
     description: Quantized matmul result after all-gather.
-    dtype: [float16, bfloat16]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
     shape: '[M_local * world_size, N]'
   - name: gather_out
     description: Optional gathered x1 tensor.
-    dtype: [int8]
+    dtype:
+    - int8
+    - float8_e4m3fn
+    - float8_e5m2
     shape: '[M_local * world_size, K]'
-  schema: all_gather_matmul_v2(Tensor x1, Tensor x2, str hcomm_info, int world_size, Tensor? bias=None, Tensor? x1_scale=None, Tensor? x2_scale=None, bool gather_output=True, bool is_trans_b=False, str out_dtype="float16", str x1_dtype="int8", str x2_dtype="int8", str x1_scale_dtype="float32", str x2_scale_dtype="float32", int block_size=128, int[] group_sizes=[]) -> (Tensor y, Tensor gather_out)
+    optional: true
+  schema: all_gather_matmul_v2(Tensor x1, Tensor x2, str hcomm_info, int world_size, Tensor? bias=None, Tensor?
+    x1_scale=None, Tensor? x2_scale=None, bool gather_output=True, bool is_trans_b=False, str out_dtype="float16",
+    str x1_dtype="int8", str x2_dtype="int8", str x1_scale_dtype="float32", str x2_scale_dtype="float32", int block_size=128,
+    int[] group_sizes=[]) -> (Tensor y, Tensor gather_out)
+  platform: Atlas A3; Ascend 950PR / 950DT

@@ -1,0 +1,14 @@
+{
+  "_source": "Huawei Ascend 950 NPU Architecture White Paper (2026), table 3-1 (PDF pp. 13-14), interconnect pp. 11-13; fastest published family SKU; see mc2_a5.md",
+  "_units": {"hbm": "bytes/s", "link": "bytes/s", "cube": "FLOP/s"},
+  "950pr": {
+    "hbm": 1600000000000,
+    "link": 2000000000000,
+    "cube": {"float16": 432000000000000, "bfloat16": 432000000000000, "int8": 865000000000000, "float8_e4m3fn": 865000000000000, "float8_e5m2": 865000000000000}
+  },
+  "950dt": {
+    "hbm": 4000000000000,
+    "link": 2000000000000,
+    "cube": {"float16": 486000000000000, "bfloat16": 486000000000000, "int8": 973000000000000, "float8_e4m3fn": 973000000000000, "float8_e5m2": 973000000000000}
+  }
+}
