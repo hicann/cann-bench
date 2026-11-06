@@ -1,0 +1,117 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SKAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    U_i = ReLU(BN_i(Conv_{k_i, groups=group}(x)))        # i = 0..K-1, K = len(kernels)
+    U   = sum_i U_i
+    S   = mean_{H,W}(U)                                  # [B, C]
+    Z   = fc(S)                                          # [B, d], d = max(L, C // reduction)
+    w_i = softmax_i( fc_i(Z) )                           # [B, C]，softmax along the K kernel branches
+    y   = sum_i (w_i * U_i)                              # [B, C, H, W]
+  description: SKAttention (Selective Kernel Attention)：用 K 组不同核大小的卷积分别提取特征，经 BatchNorm（训练态批统计）与 ReLU 后求和、全局平均池化，再由两层全连接生成各分支 softmax 权重并加权融合
+  shape_support: 'x: [B, C, H, W]；conv_w: List（K 个 [C, C//group, k_i, k_i]）；conv_b: List（K 个 [C]）；bn_w/bn_b: List（K 个 [C]）；fc_w: [d, C]，fc_b: [d]；fcs_w: List（K 个 [C, d]）；fcs_b: List（K 个 [C]），d = max(L, C//reduction)；y: [B, C, H, W]'
+  attrs:
+  - name: channel
+    type: int
+    description: 输入通道数（等于 x 的 C）
+    required: true
+  - name: kernels
+    type: list
+    description: K 个卷积分支的核大小列表（如 [1, 3, 5, 7]），决定各 TensorList 的长度
+    required: true
+  - name: reduction
+    type: int
+    description: 全连接瓶颈的通道缩减比，d = max(L, channel // reduction)
+    required: true
+  - name: group
+    type: int
+    description: 卷积分组数（groups=group），须整除 channel
+    required: true
+  - name: L
+    type: int
+    description: 瓶颈维度 d 的下界，d = max(L, channel // reduction)
+    required: true
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv_w
+    description: K 组卷积分支权重，第 i 个为 [C, C//group, k_i, k_i]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C, C//group, k_0, k_0], ...]（共 K 个）'
+  - name: conv_b
+    description: K 组卷积分支偏置，每个 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C], ...]（共 K 个）'
+  - name: bn_w
+    description: K 组 BatchNorm 仿射权重，每个 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C], ...]（共 K 个）'
+  - name: bn_b
+    description: K 组 BatchNorm 仿射偏置，每个 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C], ...]（共 K 个）'
+  - name: fc_w
+    description: 降维全连接权重 [d, C]，d = max(L, C//reduction)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d, C]'
+  - name: fc_b
+    description: 降维全连接偏置 [d]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d]'
+  - name: fcs_w
+    description: K 个升维全连接权重，每个 [C, d]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C, d], ...]（共 K 个）'
+  - name: fcs_b
+    description: K 个升维全连接偏置，每个 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[C], ...]（共 K 个）'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: sk_attention(Tensor x, List[Tensor] conv_w, List[Tensor] conv_b, List[Tensor] bn_w, List[Tensor] bn_b, Tensor fc_w, Tensor fc_b, List[Tensor] fcs_w, List[Tensor] fcs_b, int channel, list kernels, int reduction, int group, int L) -> Tensor y

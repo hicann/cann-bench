@@ -1,0 +1,78 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: AxialAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    y_H = out_proj(softmax(q_H k_H^T / sqrt(d_h)) v_H)
+    y_W = out_proj(softmax(q_W k_W^T / sqrt(d_h)) v_W)
+    y   = reshape(y_H + y_W)  -> [B, C, H, W]
+  description: Axial Attention，沿特征图高度轴与宽度轴分别做多头自注意力并将两路结果相加，q/kv 投影在 H 轴与 W 轴间共享
+  shape_support: 'x: [B, C, H, W]；to_q_weight: [heads*d_h, C]；to_kv_weight: [2*heads*d_h, C]；to_out_weight: [C, heads*d_h]；to_out_bias: [C]；y: [B, C, H, W]，其中 d_h = dim_heads（未给出时为 dim/heads）'
+  attrs:
+  - name: dim
+    type: int
+    description: 特征维，须等于输入 x 的通道数 C
+    required: true
+  - name: heads
+    type: int
+    description: 注意力头数
+    required: true
+  - name: dim_heads
+    type: int
+    description: 每个头的维度 d_h；当未显式给出时取 dim // heads（本任务所有用例均显式给出）
+    required: true
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: to_q_weight
+    description: query 线性投影权重 [heads*d_h, C]（无 bias）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[heads*d_h, C]'
+  - name: to_kv_weight
+    description: key/value 线性投影权重 [2*heads*d_h, C]（无 bias，输出前后两半分别为 k 与 v）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[2*heads*d_h, C]'
+  - name: to_out_weight
+    description: 输出线性投影权重 [C, heads*d_h]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, heads*d_h]'
+  - name: to_out_bias
+    description: 输出线性投影偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: axial_attention(Tensor x, Tensor to_q_weight, Tensor to_kv_weight, Tensor to_out_weight, Tensor to_out_bias, int dim, int heads, int dim_heads) -> Tensor y

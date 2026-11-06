@@ -1,0 +1,543 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: SpatialTransformer
+  case_id: 1
+  input_shape:
+  - - 1
+    - 8
+    - 16
+    - 16
+  - - 1
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 16
+    - 16
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src0-1x8x16x16
+- operator: SpatialTransformer
+  case_id: 2
+  input_shape:
+  - - 1
+    - 8
+    - 24
+    - 24
+  - - 1
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 24
+    - 24
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src1-1x8x24x24
+- operator: SpatialTransformer
+  case_id: 3
+  input_shape:
+  - - 2
+    - 4
+    - 16
+    - 16
+  - - 2
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 16
+    - 16
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src2-B2
+- operator: SpatialTransformer
+  case_id: 4
+  input_shape:
+  - - 3
+    - 3
+    - 20
+    - 20
+  - - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 20
+    - 20
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src3-theta-2x3-broadcast-nonalign20
+- operator: SpatialTransformer
+  case_id: 5
+  input_shape:
+  - - 1
+    - 16
+    - 12
+    - 12
+  - - 1
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 12
+    - 12
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src4-1x16x12x12
+- operator: SpatialTransformer
+  case_id: 6
+  input_shape:
+  - - 8
+    - 64
+    - 40
+    - 40
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 40
+    - 40
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src5-B8C64-nonalign40
+- operator: SpatialTransformer
+  case_id: 7
+  input_shape:
+  - - 8
+    - 64
+    - 44
+    - 44
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 44
+    - 44
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src6-B8C64-nonalign44
+- operator: SpatialTransformer
+  case_id: 8
+  input_shape:
+  - - 8
+    - 64
+    - 48
+    - 48
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 48
+    - 48
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src7-B8C64
+- operator: SpatialTransformer
+  case_id: 9
+  input_shape:
+  - - 8
+    - 64
+    - 52
+    - 52
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 52
+    - 52
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src8-B8C64-nonalign52
+- operator: SpatialTransformer
+  case_id: 10
+  input_shape:
+  - - 8
+    - 64
+    - 56
+    - 56
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 56
+    - 56
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src9-B8C64
+- operator: SpatialTransformer
+  case_id: 11
+  input_shape:
+  - - 8
+    - 64
+    - 60
+    - 60
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - -1
+    - -1
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src10-out-minus1-nonalign60
+- operator: SpatialTransformer
+  case_id: 12
+  input_shape:
+  - - 8
+    - 64
+    - 64
+    - 64
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 64
+    - 64
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src11-B8C64-align
+- operator: SpatialTransformer
+  case_id: 13
+  input_shape:
+  - - 2
+    - 128
+    - 64
+    - 64
+  - - 2
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 64
+    - 64
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src13-2x128x64x64
+- operator: SpatialTransformer
+  case_id: 14
+  input_shape:
+  - - 8
+    - 64
+    - 48
+    - 48
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float32
+  - float32
+  attrs:
+    output_size:
+    - 48
+    - 48
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float32-src14-B8C64
+- operator: SpatialTransformer
+  case_id: 15
+  input_shape:
+  - - 2
+    - 128
+    - 96
+    - 96
+  - - 2
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 96
+    - 96
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src29-2x128x96x96
+- operator: SpatialTransformer
+  case_id: 16
+  input_shape:
+  - - 8
+    - 64
+    - 80
+    - 80
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float32
+  - float32
+  attrs:
+    output_size:
+    - 80
+    - 80
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float32-src31-B8C64-nonalign80
+- operator: SpatialTransformer
+  case_id: 17
+  input_shape:
+  - - 8
+    - 64
+    - 76
+    - 76
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 76
+    - 76
+    align_corners: false
+    default_theta:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    use_default_theta:
+    - 1
+    - 0
+    - 1
+    - 0
+    - 0
+    - 1
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src33-default-theta-mask-nonalign76
+- operator: SpatialTransformer
+  case_id: 18
+  input_shape:
+  - - 8
+    - 64
+    - 88
+    - 88
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - 88
+    - 88
+    align_corners: true
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src34-align-corners-true-nonalign88
+- operator: SpatialTransformer
+  case_id: 19
+  input_shape:
+  - - 8
+    - 64
+    - 152
+    - 152
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float16
+  - float32
+  attrs:
+    output_size:
+    - -1
+    - -1
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float16-src40-out-minus1-nonalign152
+- operator: SpatialTransformer
+  case_id: 20
+  input_shape:
+  - - 8
+    - 64
+    - 128
+    - 128
+  - - 8
+    - 2
+    - 3
+  dtype:
+  - float32
+  - float32
+  attrs:
+    output_size:
+    - 128
+    - 128
+    align_corners: false
+    default_theta: []
+    use_default_theta: []
+  value_range:
+  - - -1
+    - 1
+  - - -0.25
+    - 0.25
+  note: float32-src49-B8C64-align

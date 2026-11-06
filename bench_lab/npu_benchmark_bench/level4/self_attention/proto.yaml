@@ -1,0 +1,72 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SelfAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    q = x @ Wq^T,  k = x @ Wk^T,  v = x @ Wv^T
+    q, k, v = split_heads(q, k, v, n_heads)
+    scores  = (q / sqrt(D)) @ k^T
+    y       = softmax(scores, dim=-1) @ v
+    y       = merge_heads(y) @ Wo^T
+  description: 多头自注意力前向（Q=K=V=x），包含 Q/K/V 输入投影、按 sqrt(head_dim) 缩放的 softmax 注意力与输出投影
+  shape_support: 'x: [B, L, d_model]；四个投影权重: [d_model, d_model]；y: [B, L, d_model]；要求 d_model % n_heads == 0，head_dim = d_model // n_heads'
+  attrs:
+  - name: n_heads
+    type: int
+    description: 注意力头数，须整除 d_model
+    required: true
+  inputs:
+  - name: x
+    description: 输入序列特征 [B, L, d_model]，Q/K/V 共用同一输入（自注意力）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, L, d_model]'
+  - name: q_proj_weight
+    description: query 输入投影权重 [d_model, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, d_model]'
+  - name: k_proj_weight
+    description: key 输入投影权重 [d_model, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, d_model]'
+  - name: v_proj_weight
+    description: value 输入投影权重 [d_model, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, d_model]'
+  - name: out_proj_weight
+    description: 输出投影权重 [d_model, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, d_model]'
+  outputs:
+  - name: y
+    description: 自注意力输出 [B, L, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, L, d_model]'
+  schema: self_attention(Tensor x, Tensor q_proj_weight, Tensor k_proj_weight, Tensor v_proj_weight, Tensor out_proj_weight, int n_heads) -> Tensor y

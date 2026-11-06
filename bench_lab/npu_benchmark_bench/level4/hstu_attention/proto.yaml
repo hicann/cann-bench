@@ -1,0 +1,56 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: HstuAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    scores[i, j] = alpha * (q[i] . k[j])
+    w[i, j]      = SiLU(scores[i, j]) / max_seq_len, 仅保留 j <= i（因果）
+    y[i]         = sum_j w[i, j] * v[j]
+  description: HSTU（生成式推荐）的变长因果注意力，以 SiLU 取代 softmax 且不做归一化，逐位置加权求和 value
+  shape_support: 'q: [sum_L, H, D]，k: [sum_L, H, D]，v: [sum_L, H, Dv]，seq_offsets: [B+1]，y: [sum_L, H, Dv]'
+  attrs:
+  - name: seq_offsets
+    type: ListInt
+    description: 长度 B+1 的序列边界（cumsum），seq_offsets[0] == 0，末值等于 sum_L，相邻差为各序列长度
+    required: true
+  - name: max_seq_len
+    type: int
+    description: 序列最大长度，同时作为打分的缩放分母
+    required: true
+  - name: alpha
+    type: float
+    description: 打分缩放系数
+    required: true
+  inputs:
+  - name: q
+    description: query 张量，按序列拼接的 [sum_L, H, D]
+    dtype:
+    - bfloat16
+    shape: '[sum_L, H, D]'
+  - name: k
+    description: key 张量，按序列拼接的 [sum_L, H, D]
+    dtype:
+    - bfloat16
+    shape: '[sum_L, H, D]'
+  - name: v
+    description: value 张量，按序列拼接的 [sum_L, H, Dv]
+    dtype:
+    - bfloat16
+    shape: '[sum_L, H, Dv]'
+  outputs:
+  - name: y
+    description: 注意力输出，[sum_L, H, Dv]
+    dtype:
+    - bfloat16
+    shape: '[sum_L, H, Dv]'
+  schema: hstu_attention(Tensor q, Tensor k, Tensor v, int[] seq_offsets, int max_seq_len, float alpha) -> Tensor y

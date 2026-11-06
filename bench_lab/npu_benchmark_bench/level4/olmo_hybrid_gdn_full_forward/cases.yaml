@@ -1,0 +1,1192 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: OlmoHybridGdnFullForward
+  case_id: 1
+  input_shape:
+  - - 1
+    - 3840
+  - - 1
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T1C3840-nk30nv30-src1
+- operator: OlmoHybridGdnFullForward
+  case_id: 2
+  input_shape:
+  - - 2
+    - 3840
+  - - 2
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T2C3840-nk30nv30-src2
+- operator: OlmoHybridGdnFullForward
+  case_id: 3
+  input_shape:
+  - - 4
+    - 3840
+  - - 4
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T4C3840-nk30nv30-src3
+- operator: OlmoHybridGdnFullForward
+  case_id: 4
+  input_shape:
+  - - 8
+    - 3840
+  - - 8
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T8C3840-nk30nv30-src4
+- operator: OlmoHybridGdnFullForward
+  case_id: 5
+  input_shape:
+  - - 16
+    - 3840
+  - - 16
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T16C3840-nk30nv30-src5
+- operator: OlmoHybridGdnFullForward
+  case_id: 6
+  input_shape:
+  - - 32
+    - 3840
+  - - 32
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T32C3840-nk30nv30-src6
+- operator: OlmoHybridGdnFullForward
+  case_id: 7
+  input_shape:
+  - - 64
+    - 3840
+  - - 64
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T64C3840-nk30nv30-src7
+- operator: OlmoHybridGdnFullForward
+  case_id: 8
+  input_shape:
+  - - 128
+    - 3840
+  - - 128
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T128C3840-nk30nv30-src8
+- operator: OlmoHybridGdnFullForward
+  case_id: 9
+  input_shape:
+  - - 1024
+    - 3840
+  - - 1024
+    - 3840
+  - - 13440
+    - 3840
+  - - 30
+    - 3840
+  - - 30
+    - 3840
+  - - 9600
+    - 4
+  - - 30
+  - - 30
+  - - 128
+  - - 3840
+    - 3840
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 30
+    num_heads_v: 30
+    head_k_dim: 96
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T1024C3840-nk30nv30-src11
+- operator: OlmoHybridGdnFullForward
+  case_id: 10
+  input_shape:
+  - - 1
+    - 2048
+  - - 1
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float32-T1C2048-nk16nv32-src12
+- operator: OlmoHybridGdnFullForward
+  case_id: 11
+  input_shape:
+  - - 2
+    - 2048
+  - - 2
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float32-T2C2048-nk16nv32-src13
+- operator: OlmoHybridGdnFullForward
+  case_id: 12
+  input_shape:
+  - - 4
+    - 2048
+  - - 4
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T4C2048-nk16nv32-src14
+- operator: OlmoHybridGdnFullForward
+  case_id: 13
+  input_shape:
+  - - 8
+    - 2048
+  - - 8
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T8C2048-nk16nv32-src15
+- operator: OlmoHybridGdnFullForward
+  case_id: 14
+  input_shape:
+  - - 16
+    - 2048
+  - - 16
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T16C2048-nk16nv32-src16
+- operator: OlmoHybridGdnFullForward
+  case_id: 15
+  input_shape:
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T32C2048-nk16nv32-src17
+- operator: OlmoHybridGdnFullForward
+  case_id: 16
+  input_shape:
+  - - 64
+    - 2048
+  - - 64
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T64C2048-nk16nv32-src18
+- operator: OlmoHybridGdnFullForward
+  case_id: 17
+  input_shape:
+  - - 128
+    - 2048
+  - - 128
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T128C2048-nk16nv32-src19
+- operator: OlmoHybridGdnFullForward
+  case_id: 18
+  input_shape:
+  - - 256
+    - 2048
+  - - 256
+    - 2048
+  - - 8192
+    - 2048
+  - - 32
+    - 2048
+  - - 32
+    - 2048
+  - - 6144
+    - 4
+  - - 32
+  - - 32
+  - - 64
+  - - 2048
+    - 2048
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 64
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T256C2048-nk16nv32-src20
+- operator: OlmoHybridGdnFullForward
+  case_id: 19
+  input_shape:
+  - - 1
+    - 4096
+  - - 1
+    - 4096
+  - - 12288
+    - 4096
+  - - 32
+    - 4096
+  - - 32
+    - 4096
+  - - 8192
+    - 4
+  - - 32
+  - - 32
+  - - 128
+  - - 4096
+    - 4096
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  - bfloat16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-T1C4096-nk16nv32-src23
+- operator: OlmoHybridGdnFullForward
+  case_id: 20
+  input_shape:
+  - - 2
+    - 4096
+  - - 2
+    - 4096
+  - - 12288
+    - 4096
+  - - 32
+    - 4096
+  - - 32
+    - 4096
+  - - 8192
+    - 4
+  - - 32
+  - - 32
+  - - 128
+  - - 4096
+    - 4096
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  - float16
+  attrs:
+    num_heads_k: 16
+    num_heads_v: 32
+    head_k_dim: 128
+    head_v_dim: 128
+    conv_kernel_size: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.1
+    - 0.1
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.5
+    - 1.5
+  - - -0.05
+    - 0.05
+  note: float16-T2C4096-nk16nv32-src24

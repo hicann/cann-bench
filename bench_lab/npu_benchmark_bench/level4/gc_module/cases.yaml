@@ -1,0 +1,1142 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: GCModule
+  case_id: 1
+  input_shape:
+  - - 2
+    - 512
+    - 31
+    - 11
+  - &id002
+    - 1
+    - 512
+    - 1
+    - 1
+  - &id003
+    - 1
+  - &id004
+    - 256
+    - 512
+    - 1
+    - 1
+  - &id005
+    - 256
+  - &id001
+    - 256
+    - 1
+    - 1
+  - *id001
+  - &id006
+    - 512
+    - 256
+    - 1
+    - 1
+  - &id007
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 512
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B2C512H31W11-r2-src1
+- operator: GCModule
+  case_id: 2
+  input_shape:
+  - - 1
+    - 512
+    - 25
+    - 15
+  - *id002
+  - *id003
+  - *id004
+  - *id005
+  - *id001
+  - *id001
+  - *id006
+  - *id007
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 512
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C512H25W15-r2-src2
+- operator: GCModule
+  case_id: 3
+  input_shape:
+  - - 4
+    - 64
+    - 25
+    - 15
+  - - 1
+    - 64
+    - 1
+    - 1
+  - *id003
+  - - 8
+    - 64
+    - 1
+    - 1
+  - - 8
+  - &id008
+    - 8
+    - 1
+    - 1
+  - *id008
+  - - 64
+    - 8
+    - 1
+    - 1
+  - &id012
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 64
+    reduction: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B4C64H25W15-r8-src3
+- operator: GCModule
+  case_id: 4
+  input_shape:
+  - - 1
+    - 256
+    - 9
+    - 17
+  - &id011
+    - 1
+    - 256
+    - 1
+    - 1
+  - *id003
+  - - 128
+    - 256
+    - 1
+    - 1
+  - &id010
+    - 128
+  - &id009
+    - 128
+    - 1
+    - 1
+  - *id009
+  - - 256
+    - 128
+    - 1
+    - 1
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 256
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C256H9W17-r2-src4
+- operator: GCModule
+  case_id: 5
+  input_shape:
+  - - 1
+    - 512
+    - 7
+    - 11
+  - *id002
+  - *id003
+  - &id015
+    - 128
+    - 512
+    - 1
+    - 1
+  - *id010
+  - *id009
+  - *id009
+  - &id016
+    - 512
+    - 128
+    - 1
+    - 1
+  - *id007
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 512
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C512H7W11-r4-src5
+- operator: GCModule
+  case_id: 6
+  input_shape:
+  - - 4
+    - 256
+    - 31
+    - 11
+  - *id011
+  - *id003
+  - &id017
+    - 64
+    - 256
+    - 1
+    - 1
+  - *id012
+  - &id013
+    - 64
+    - 1
+    - 1
+  - *id013
+  - &id018
+    - 256
+    - 64
+    - 1
+    - 1
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 256
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B4C256H31W11-r4-src6
+- operator: GCModule
+  case_id: 7
+  input_shape:
+  - - 2
+    - 128
+    - 7
+    - 11
+  - &id019
+    - 1
+    - 128
+    - 1
+    - 1
+  - *id003
+  - - 16
+    - 128
+    - 1
+    - 1
+  - - 16
+  - &id014
+    - 16
+    - 1
+    - 1
+  - *id014
+  - - 128
+    - 16
+    - 1
+    - 1
+  - *id010
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 128
+    reduction: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C128H7W11-r8-src7
+- operator: GCModule
+  case_id: 8
+  input_shape:
+  - - 4
+    - 512
+    - 21
+    - 23
+  - *id002
+  - *id003
+  - *id015
+  - *id010
+  - *id009
+  - *id009
+  - *id016
+  - *id007
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    channel: 512
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C512H21W23-r4-src8
+- operator: GCModule
+  case_id: 9
+  input_shape:
+  - - 2
+    - 256
+    - 11
+    - 7
+  - *id011
+  - *id003
+  - *id017
+  - *id012
+  - *id013
+  - *id013
+  - *id018
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 256
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C256H11W7-r4-src9
+- operator: GCModule
+  case_id: 10
+  input_shape:
+  - - 1
+    - 128
+    - 7
+    - 11
+  - *id019
+  - *id003
+  - - 32
+    - 128
+    - 1
+    - 1
+  - - 32
+  - &id020
+    - 32
+    - 1
+    - 1
+  - *id020
+  - - 128
+    - 32
+    - 1
+    - 1
+  - *id010
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 128
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C128H7W11-r4-src10
+- operator: GCModule
+  case_id: 11
+  input_shape:
+  - - 1
+    - 8192
+    - 17
+    - 19
+  - &id022
+    - 1
+    - 8192
+    - 1
+    - 1
+  - *id003
+  - &id023
+    - 1024
+    - 8192
+    - 1
+    - 1
+  - &id024
+    - 1024
+  - &id021
+    - 1024
+    - 1
+    - 1
+  - *id021
+  - &id025
+    - 8192
+    - 1024
+    - 1
+    - 1
+  - &id026
+    - 8192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    channel: 8192
+    reduction: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8192H17W19-r8-src11
+- operator: GCModule
+  case_id: 12
+  input_shape:
+  - - 1
+    - 8192
+    - 11
+    - 7
+  - *id022
+  - *id003
+  - *id023
+  - *id024
+  - *id021
+  - *id021
+  - *id025
+  - *id026
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    channel: 8192
+    reduction: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8192H11W7-r8-src12
+- operator: GCModule
+  case_id: 13
+  input_shape:
+  - - 1
+    - 4312
+    - 9
+    - 17
+  - - 1
+    - 4312
+    - 1
+    - 1
+  - *id003
+  - - 2156
+    - 4312
+    - 1
+    - 1
+  - - 2156
+  - &id027
+    - 2156
+    - 1
+    - 1
+  - *id027
+  - - 4312
+    - 2156
+    - 1
+    - 1
+  - - 4312
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 4312
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C4312H9W17-r2-src13
+- operator: GCModule
+  case_id: 14
+  input_shape:
+  - - 1
+    - 1648
+    - 112
+    - 160
+  - - 1
+    - 1648
+    - 1
+    - 1
+  - *id003
+  - - 412
+    - 1648
+    - 1
+    - 1
+  - - 412
+  - &id028
+    - 412
+    - 1
+    - 1
+  - *id028
+  - - 1648
+    - 412
+    - 1
+    - 1
+  - - 1648
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 1648
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C1648H112W160-r4-src14
+- operator: GCModule
+  case_id: 15
+  input_shape:
+  - - 2
+    - 4096
+    - 25
+    - 15
+  - - 1
+    - 4096
+    - 1
+    - 1
+  - *id003
+  - - 2048
+    - 4096
+    - 1
+    - 1
+  - - 2048
+  - &id029
+    - 2048
+    - 1
+    - 1
+  - *id029
+  - - 4096
+    - 2048
+    - 1
+    - 1
+  - &id031
+    - 4096
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 4096
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C4096H25W15-r2-src16
+- operator: GCModule
+  case_id: 16
+  input_shape:
+  - - 1
+    - 4232
+    - 31
+    - 11
+  - - 1
+    - 4232
+    - 1
+    - 1
+  - *id003
+  - - 1058
+    - 4232
+    - 1
+    - 1
+  - - 1058
+  - &id030
+    - 1058
+    - 1
+    - 1
+  - *id030
+  - - 4232
+    - 1058
+    - 1
+    - 1
+  - - 4232
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 4232
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C4232H31W11-r4-src20
+- operator: GCModule
+  case_id: 17
+  input_shape:
+  - - 1
+    - 16384
+    - 5
+    - 7
+  - - 1
+    - 16384
+    - 1
+    - 1
+  - *id003
+  - - 4096
+    - 16384
+    - 1
+    - 1
+  - *id031
+  - &id032
+    - 4096
+    - 1
+    - 1
+  - *id032
+  - - 16384
+    - 4096
+    - 1
+    - 1
+  - - 16384
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    channel: 16384
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C16384H5W7-r4-src30
+- operator: GCModule
+  case_id: 18
+  input_shape:
+  - - 1
+    - 8192
+    - 25
+    - 15
+  - *id022
+  - *id003
+  - - 4096
+    - 8192
+    - 1
+    - 1
+  - *id031
+  - *id032
+  - *id032
+  - - 8192
+    - 4096
+    - 1
+    - 1
+  - *id026
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 8192
+    reduction: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C8192H25W15-r2-src40
+- operator: GCModule
+  case_id: 19
+  input_shape:
+  - - 1
+    - 256
+    - 13
+    - 13
+  - *id011
+  - *id003
+  - *id017
+  - *id012
+  - *id013
+  - *id013
+  - *id018
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 256
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C256H13W13-r4-src45
+- operator: GCModule
+  case_id: 20
+  input_shape:
+  - - 1
+    - 256
+    - 31
+    - 11
+  - *id011
+  - *id003
+  - *id017
+  - *id012
+  - *id013
+  - *id013
+  - *id018
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    channel: 256
+    reduction: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - 1.0
+    - 1.0
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C256H31W11-r4-src50

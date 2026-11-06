@@ -1,0 +1,98 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: DoubleAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    c_n   = max(1, C // 8)
+    A     = convA(x).view(B, C, N)                        # [B, C, N]
+    Bm    = softmax(convB(x).view(B, c_n, N), dim=-1)     # [B, c_n, N]
+    V     = softmax(convV(x).view(B, c_n, N), dim=-1)     # [B, c_n, N]
+    G     = bmm(A, Bm^T)                                  # [B, C, c_n]
+    Z     = bmm(G, V).view(B, C, H, W)
+    y     = convZ(Z)                                      # [B, C, H, W]
+  description: Double Attention 网络：1x1 卷积生成全局描述子，在通道维做二阶双线性特征交互后经 1x1 卷积重建；源 forward 的 a/v 外部参数未使用故省略
+  shape_support: 'x: [B, C, H, W]；conv_a_w/conv_z_w: [C, C, 1, 1]；conv_b_w/conv_v_w: [c_n, C, 1, 1]，c_n = max(1, C // 8)；各偏置分别为 [C] 或 [c_n]；y: [B, C, H, W]'
+  attrs: []
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv_a_w
+    description: 汇聚卷积 A 权重 [C, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, 1, 1]'
+  - name: conv_a_b
+    description: 汇聚卷积 A 偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv_b_w
+    description: 注意力卷积 B 权重 [c_n, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[c_n, C, 1, 1]'
+  - name: conv_b_b
+    description: 注意力卷积 B 偏置 [c_n]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[c_n]'
+  - name: conv_v_w
+    description: 注意力卷积 V 权重 [c_n, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[c_n, C, 1, 1]'
+  - name: conv_v_b
+    description: 注意力卷积 V 偏置 [c_n]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[c_n]'
+  - name: conv_z_w
+    description: 重建卷积 Z 权重 [C, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, 1, 1]'
+  - name: conv_z_b
+    description: 重建卷积 Z 偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]；B/C/H/W 任一为 0 时原样返回输入
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: double_attention(Tensor x, Tensor conv_a_w, Tensor conv_a_b, Tensor conv_b_w, Tensor conv_b_b, Tensor conv_v_w, Tensor conv_v_b, Tensor conv_z_w, Tensor conv_z_b) -> Tensor y

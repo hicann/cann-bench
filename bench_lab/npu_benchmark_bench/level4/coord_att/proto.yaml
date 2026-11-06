@@ -1,0 +1,111 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: CoordAtt
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    x_h = adaptive_avg_pool2d(x, (None, 1))
+    x_w = adaptive_avg_pool2d(x, (1, None)).permute(0, 1, 3, 2)
+    y = h_swish(BN(Conv1x1(cat([x_h, x_w], dim=2))))
+    x_h, x_w = split(y, [H, W], dim=2)
+    a_h = sigmoid(Conv1x1(x_h))
+    a_w = sigmoid(Conv1x1(x_w.permute(0, 1, 3, 2)))
+    y = x * a_w * a_h
+  description: 坐标注意力（Coordinate Attention）前向：H/W 方向池化拼接、1x1 卷积 + BatchNorm + h_swish、split 后两路 1x1 卷积 + sigmoid 生成坐标权重并与输入相乘
+  shape_support: 'x: [B, C, H, W]；mip = max(8, C // reduction)；conv1_weight: [mip, C, 1, 1]；conv_h/conv_w_weight: [C, mip, 1, 1]；y: [B, C, H, W]'
+  attrs:
+  - name: inp
+    type: int
+    description: 输入通道数，保留用于接口兼容，实际通道数由 x.shape[1] 推导
+    required: true
+  - name: oup
+    type: int
+    description: 输出通道数，保留用于接口兼容，不参与计算
+    required: true
+  - name: reduction
+    type: int
+    default: 32
+    description: 中间通道降维比，mip = max(8, C // reduction)
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv1_weight
+    description: 融合支路 1x1 卷积权重 [mip, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mip, C, 1, 1]'
+  - name: conv1_bias
+    description: 融合支路 1x1 卷积偏置 [mip]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mip]'
+  - name: bn_weight
+    description: BatchNorm 缩放参数 [mip]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mip]'
+  - name: bn_bias
+    description: BatchNorm 偏移参数 [mip]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mip]'
+  - name: conv_h_weight
+    description: H 方向注意力 1x1 卷积权重 [C, mip, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, mip, 1, 1]'
+  - name: conv_h_bias
+    description: H 方向注意力 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv_w_weight
+    description: W 方向注意力 1x1 卷积权重 [C, mip, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, mip, 1, 1]'
+  - name: conv_w_bias
+    description: W 方向注意力 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 坐标注意力加权后的特征图，shape 与 x 一致
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: coord_att(Tensor x, Tensor conv1_weight, Tensor conv1_bias, Tensor bn_weight, Tensor bn_bias, Tensor conv_h_weight, Tensor conv_h_bias, Tensor conv_w_weight, Tensor conv_w_bias, int inp, int oup, int reduction=32) -> Tensor y

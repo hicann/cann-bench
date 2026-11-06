@@ -1,0 +1,57 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SpatialTransformer
+  category: Vision
+  difficulty: L3
+  formula: |
+    grid = affine_grid(theta, [B, C, H_out, W_out], align_corners)
+    y = grid_sample(x, grid, align_corners)
+  description: STN 仿射空间变换，用 2x3 仿射矩阵 theta 生成采样网格并对输入做双线性采样
+  shape_support: 'x: [B, C, H, W], theta: [B, 2, 3] 或 [2, 3], y: [B, C, out_h, out_w]; out_h/out_w 由 output_size 给出（-1 表示沿用输入尺寸）'
+  attrs:
+  - name: output_size
+    type: ListInt
+    description: 目标输出尺寸 (out_h, out_w)，元素 <= 0 表示沿用输入尺寸
+    required: true
+  - name: align_corners
+    type: bool
+    default: false
+    description: 角像素中心对齐标志
+    required: false
+  - name: default_theta
+    type: ListFloat
+    default: []
+    description: 默认仿射参数（6 个），与 use_default_theta 配合使用
+    required: false
+  - name: use_default_theta
+    type: ListInt
+    default: []
+    description: 6 个 0/1 标志，1 表示 theta 对应位置取 default_theta，否则取输入 theta
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+  - name: theta
+    description: 仿射变换矩阵 [B, 2, 3] 或 [2, 3]（[2, 3] 时广播到 batch）
+    dtype:
+    - float32
+  outputs:
+  - name: y
+    description: 空间变换输出 [B, C, out_h, out_w]
+    dtype:
+    - float16
+    - float32
+  schema: spatial_transformer(Tensor x, Tensor theta, int[] output_size,
+    bool align_corners=False, float[] default_theta=[], int[] use_default_theta=[]) -> Tensor y

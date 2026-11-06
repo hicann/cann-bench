@@ -1,0 +1,772 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: NsaTopkSparseAttention
+  case_id: 1
+  input_shape:
+  - - 8192
+    - 4
+    - 32
+  - - 8192
+    - 1
+    - 32
+  - - 8192
+    - 1
+    - 32
+  - - 1
+    - 8192
+    - 5
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 8192
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 8192
+  note: float16-total8192-hq4-hk1-D32-blk32-topk5-B1-maxlen8192
+- operator: NsaTopkSparseAttention
+  case_id: 2
+  input_shape:
+  - - 8704
+    - 4
+    - 32
+  - - 8704
+    - 1
+    - 32
+  - - 8704
+    - 1
+    - 32
+  - - 1
+    - 8704
+    - 8
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 8704
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 8704
+  note: float16-total8704-hq4-hk1-D32-blk64-topk8-B1-maxlen8704
+- operator: NsaTopkSparseAttention
+  case_id: 3
+  input_shape:
+  - - 9216
+    - 4
+    - 32
+  - - 9216
+    - 1
+    - 32
+  - - 9216
+    - 1
+    - 32
+  - - 1
+    - 9216
+    - 16
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 9216
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 9216
+  note: float16-total9216-hq4-hk1-D32-blk128-topk16-B1-maxlen9216
+- operator: NsaTopkSparseAttention
+  case_id: 4
+  input_shape:
+  - - 9728
+    - 4
+    - 64
+  - - 9728
+    - 1
+    - 64
+  - - 9728
+    - 1
+    - 64
+  - - 1
+    - 9728
+    - 5
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 9728
+    sm_scale: 0.125
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 9728
+  note: float16-total9728-hq4-hk1-D64-blk64-topk5-B1-maxlen9728
+- operator: NsaTopkSparseAttention
+  case_id: 5
+  input_shape:
+  - - 10240
+    - 4
+    - 64
+  - - 10240
+    - 1
+    - 64
+  - - 10240
+    - 1
+    - 64
+  - - 1
+    - 10240
+    - 8
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 10240
+    sm_scale: 0.125
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 10240
+  note: float16-total10240-hq4-hk1-D64-blk128-topk8-B1-maxlen10240
+- operator: NsaTopkSparseAttention
+  case_id: 6
+  input_shape:
+  - - 11264
+    - 8
+    - 32
+  - - 11264
+    - 1
+    - 32
+  - - 11264
+    - 1
+    - 32
+  - - 1
+    - 11264
+    - 5
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 11264
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 11264
+  note: float16-total11264-hq8-hk1-D32-blk32-topk5-B1-maxlen11264
+- operator: NsaTopkSparseAttention
+  case_id: 7
+  input_shape:
+  - - 11648
+    - 8
+    - 64
+  - - 11648
+    - 2
+    - 64
+  - - 11648
+    - 2
+    - 64
+  - - 2
+    - 11648
+    - 8
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 11648
+    sm_scale: 0.125
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 11648
+  note: float16-total11648-hq8-hk2-D64-blk64-topk8-B1-maxlen11648
+- operator: NsaTopkSparseAttention
+  case_id: 8
+  input_shape:
+  - - 24320
+    - 8
+    - 64
+  - - 24320
+    - 1
+    - 64
+  - - 24320
+    - 1
+    - 64
+  - - 1
+    - 24320
+    - 16
+  - - 3
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 12160
+    sm_scale: 0.125
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 24320
+  note: bfloat16-total24320-hq8-hk1-D64-blk128-topk16-B2-maxlen12160
+- operator: NsaTopkSparseAttention
+  case_id: 9
+  input_shape:
+  - - 22784
+    - 4
+    - 128
+  - - 22784
+    - 1
+    - 128
+  - - 22784
+    - 1
+    - 128
+  - - 1
+    - 22784
+    - 5
+  - - 3
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 12672
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 22784
+  note: bfloat16-total22784-hq4-hk1-D128-blk64-topk5-B2-maxlen12672
+- operator: NsaTopkSparseAttention
+  case_id: 10
+  input_shape:
+  - - 46976
+    - 4
+    - 32
+  - - 46976
+    - 1
+    - 32
+  - - 46976
+    - 1
+    - 32
+  - - 1
+    - 46976
+    - 8
+  - - 9
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 6656
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 46976
+  note: bfloat16-total46976-hq4-hk1-D32-blk128-topk8-B8-maxlen6656
+- operator: NsaTopkSparseAttention
+  case_id: 11
+  input_shape:
+  - - 28224
+    - 8
+    - 32
+  - - 28224
+    - 2
+    - 32
+  - - 28224
+    - 2
+    - 32
+  - - 2
+    - 28224
+    - 16
+  - - 3
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 14720
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 28224
+  note: bfloat16-total28224-hq8-hk2-D32-blk64-topk16-B2-maxlen14720
+- operator: NsaTopkSparseAttention
+  case_id: 12
+  input_shape:
+  - - 30720
+    - 16
+    - 32
+  - - 30720
+    - 2
+    - 32
+  - - 30720
+    - 2
+    - 32
+  - - 2
+    - 30720
+    - 16
+  - - 9
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 3840
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 30720
+  note: bfloat16-total30720-hq16-hk2-D32-blk128-topk16-B8-maxlen3840
+- operator: NsaTopkSparseAttention
+  case_id: 13
+  input_shape:
+  - - 15616
+    - 16
+    - 128
+  - - 15616
+    - 2
+    - 128
+  - - 15616
+    - 2
+    - 128
+  - - 2
+    - 15616
+    - 8
+  - - 3
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 8192
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 15616
+  note: bfloat16-total15616-hq16-hk2-D128-blk128-topk8-B2-maxlen8192
+- operator: NsaTopkSparseAttention
+  case_id: 14
+  input_shape:
+  - - 8448
+    - 8
+    - 32
+  - - 8448
+    - 2
+    - 32
+  - - 8448
+    - 2
+    - 32
+  - - 2
+    - 8448
+    - 16
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 8448
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 8448
+  note: float16-total8448-hq8-hk2-D32-blk32-topk16-B1-maxlen8448
+- operator: NsaTopkSparseAttention
+  case_id: 15
+  input_shape:
+  - - 30592
+    - 16
+    - 32
+  - - 30592
+    - 2
+    - 32
+  - - 30592
+    - 2
+    - 32
+  - - 2
+    - 30592
+    - 8
+  - - 5
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 8704
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 30592
+  note: bfloat16-total30592-hq16-hk2-D32-blk32-topk8-B4-maxlen8704
+- operator: NsaTopkSparseAttention
+  case_id: 16
+  input_shape:
+  - - 35328
+    - 8
+    - 32
+  - - 35328
+    - 2
+    - 32
+  - - 35328
+    - 2
+    - 32
+  - - 2
+    - 35328
+    - 16
+  - - 5
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 8832
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 35328
+  note: bfloat16-total35328-hq8-hk2-D32-blk128-topk16-B4-maxlen8832
+- operator: NsaTopkSparseAttention
+  case_id: 17
+  input_shape:
+  - - 18432
+    - 16
+    - 64
+  - - 18432
+    - 4
+    - 64
+  - - 18432
+    - 4
+    - 64
+  - - 4
+    - 18432
+    - 5
+  - - 5
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 4864
+    sm_scale: 0.125
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 18432
+  note: bfloat16-total18432-hq16-hk4-D64-blk32-topk5-B4-maxlen4864
+- operator: NsaTopkSparseAttention
+  case_id: 18
+  input_shape:
+  - - 26112
+    - 16
+    - 32
+  - - 26112
+    - 4
+    - 32
+  - - 26112
+    - 4
+    - 32
+  - - 4
+    - 26112
+    - 5
+  - - 9
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    block_size: 128
+    max_seqlen: 3584
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 26112
+  note: bfloat16-total26112-hq16-hk4-D32-blk128-topk5-B8-maxlen3584
+- operator: NsaTopkSparseAttention
+  case_id: 19
+  input_shape:
+  - - 11776
+    - 8
+    - 32
+  - - 11776
+    - 2
+    - 32
+  - - 11776
+    - 2
+    - 32
+  - - 2
+    - 11776
+    - 5
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 64
+    max_seqlen: 11776
+    sm_scale: 0.17677669529663687
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 11776
+  note: float16-total11776-hq8-hk2-D32-blk64-topk5-B1-maxlen11776
+- operator: NsaTopkSparseAttention
+  case_id: 20
+  input_shape:
+  - - 15104
+    - 16
+    - 128
+  - - 15104
+    - 2
+    - 128
+  - - 15104
+    - 2
+    - 128
+  - - 2
+    - 15104
+    - 16
+  - - 2
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    block_size: 32
+    max_seqlen: 15104
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  - - 0
+    - 15104
+  note: float16-total15104-hq16-hk2-D128-blk32-topk16-B1-maxlen15104

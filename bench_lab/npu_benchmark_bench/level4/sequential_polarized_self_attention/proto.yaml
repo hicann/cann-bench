@@ -1,0 +1,141 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SequentialPolarizedSelfAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    C2 = max(1, C // 2)
+    ch_wv = conv1x1(x)_v.view(B, C2, HW)
+    ch_wq = softmax(conv1x1(x)_q.view(B, HW, 1), dim=1)
+    ch_z  = conv1x1_z(ch_wv @ ch_wq)                          # [B, C, 1, 1]
+    ch_w  = sigmoid(LayerNorm(ch_z)).view(B, C, 1, 1)
+    y_ch  = ch_w * x
+    sp_wv = conv1x1(y_ch)_v.view(B, C2, HW)
+    sp_wq = softmax(adaptive_avg_pool2d(conv1x1(y_ch)_q, 1).view(B, 1, C2), dim=-1)
+    sp_w  = sigmoid((sp_wq @ sp_wv).view(B, 1, H, W))
+    y     = sp_w * y_ch
+  description: 顺序极化自注意力（通道极化注意力 + 空间极化注意力，通道门控经 LayerNorm）；mix_weight/use_channel/scale_factor 为接口兼容属性，源实现对计算无影响
+  shape_support: 'x: [B, C, H, W]；C2 = max(1, C // 2)；ch_wv_weight/sp_wv_weight/sp_wq_weight: [C2, C, 1, 1]；ch_wq_weight: [1, C, 1, 1]；ch_wz_weight: [C, C2, 1, 1]；ln_weight/ln_bias: [C]；y: [B, C, H, W]'
+  attrs:
+  - name: mix_weight
+    type: float
+    description: 接口兼容属性，源实现未使用
+    required: false
+  - name: use_channel
+    type: bool
+    description: 接口兼容属性，源实现未使用
+    required: false
+  - name: scale_factor
+    type: float
+    description: 接口兼容属性，源实现未使用
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: ch_wv_weight
+    description: 通道注意力 value 1x1 卷积权重 [C2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2, C, 1, 1]'
+  - name: ch_wv_bias
+    description: 通道注意力 value 1x1 卷积偏置 [C2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2]'
+  - name: ch_wq_weight
+    description: 通道注意力 query 1x1 卷积权重 [1, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, C, 1, 1]'
+  - name: ch_wq_bias
+    description: 通道注意力 query 1x1 卷积偏置 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  - name: ch_wz_weight
+    description: 通道注意力 output 1x1 卷积权重 [C, C2, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C2, 1, 1]'
+  - name: ch_wz_bias
+    description: 通道注意力 output 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: ln_weight
+    description: LayerNorm 仿射权重 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: ln_bias
+    description: LayerNorm 仿射偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: sp_wv_weight
+    description: 空间注意力 value 1x1 卷积权重 [C2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2, C, 1, 1]'
+  - name: sp_wv_bias
+    description: 空间注意力 value 1x1 卷积偏置 [C2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2]'
+  - name: sp_wq_weight
+    description: 空间注意力 query 1x1 卷积权重 [C2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2, C, 1, 1]'
+  - name: sp_wq_bias
+    description: 空间注意力 query 1x1 卷积偏置 [C2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C2]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: sequential_polarized_self_attention(Tensor x, Tensor ch_wv_weight, Tensor ch_wv_bias, Tensor ch_wq_weight, Tensor ch_wq_bias, Tensor ch_wz_weight, Tensor ch_wz_bias, Tensor ln_weight, Tensor ln_bias, Tensor sp_wv_weight, Tensor sp_wv_bias, Tensor sp_wq_weight, Tensor sp_wq_bias, float mix_weight, bool use_channel, float scale_factor) -> Tensor y

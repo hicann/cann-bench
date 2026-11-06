@@ -1,0 +1,140 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: FusedRecurrentGatedDeltaRule
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    逐 token（按 t 递增，S 为 [B,HV,K,V] fp32）:
+      mode 1（标量门控）: S *= exp(g_t)
+        若 use_gate_in_kernel: g = -exp(A_log) * softplus(g + dt_bias)   # use_bias 控制 +dt_bias
+      mode 2: S *= exp(gk_t) 沿 K 通道
+      mode 4: S *= exp(gv_t) 沿 V 通道
+      门控按 g→gk→gv 连乘，均在 residual 之前（先衰减后读出）
+      beta: use_beta_sigmoid 时 sigmoid(beta)（allow_neg_eigval 时再 ×2）
+      residual = (v − kᵀS)·beta ; S += k⊗residual
+      o_t = (q·scale)ᵀS
+      GQA：i_h = i_hv // (HV/H)
+  description: GDN（Gated DeltaNet）fused recurrent 前向，逐 token 递推衰减状态与 delta-rule 写入，支持标量/key/value 三种门控、GQA、qk L2 归一化与初始/末状态
+  shape_support: 'q/k: [B,T,H,K]（HV % H == 0）；v: [B,T,HV,V]；g: [B,T,HV]；gk: [B,T,HV,K]；gv: [B,T,HV,V]；beta: [B,T,HV]；A_log/dt_bias: [HV]；initial_state: [B,HV,K,V]（state_v_first 时 [B,HV,V,K]）；o: [B,T,HV,V]；final_state: [B,HV,K,V]（state_v_first 时 [B,HV,V,K]）'
+  attrs:
+  - name: scale
+    type: float
+    description: query 缩放系数，通常为 1/sqrt(K)
+    required: true
+  - name: gate_mode
+    type: int
+    description: 位掩码，1=标量门控 / 2=key 通道门控 / 4=value 通道门控
+    required: true
+  - name: use_gate_in_kernel
+    type: bool
+    description: 是否在核内由 A_log/dt_bias 生成标量门控
+    required: true
+  - name: use_bias
+    type: bool
+    description: 标量门控是否加 dt_bias（仅 use_gate_in_kernel 时生效）
+    required: true
+  - name: use_initial_state
+    type: bool
+    description: 是否使用 initial_state
+    required: true
+  - name: output_final_state
+    type: bool
+    description: 是否输出 final_state；False 时返回空 tensor [0]
+    required: true
+  - name: use_qk_l2norm
+    type: bool
+    description: 是否对 q/k 做 L2 归一化（eps 在根号内）
+    required: true
+  - name: use_beta_sigmoid
+    type: bool
+    description: 是否对 beta 做 sigmoid
+    required: true
+  - name: allow_neg_eigval
+    type: bool
+    description: beta sigmoid 后是否再乘 2
+    required: true
+  - name: state_v_first
+    type: bool
+    description: 状态是否按 [.., V, K] 布局出入
+    required: true
+  inputs:
+  - name: q
+    description: query [B,T,H,K]
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, H, K]'
+  - name: k
+    description: key [B,T,H,K]
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, H, K]'
+  - name: v
+    description: value [B,T,HV,V]
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV, V]'
+  - name: g
+    description: 标量门控 [B,T,HV]（fuse 时为 pre-activation，否则 log 域衰减）
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV]'
+  - name: gk
+    description: key 通道门控 [B,T,HV,K]（log 域衰减）
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV, K]'
+  - name: gv
+    description: value 通道门控 [B,T,HV,V]（log 域衰减）
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV, V]'
+  - name: beta
+    description: beta 门 [B,T,HV]（use_beta_sigmoid 时 raw logits，否则已 sigmoid）
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV]'
+  - name: A_log
+    description: 标量门控参数 [HV] fp32
+    dtype:
+    - float32
+    shape: '[HV]'
+  - name: dt_bias
+    description: 标量门控偏置 [HV] fp32
+    dtype:
+    - float32
+    shape: '[HV]'
+  - name: initial_state
+    description: 初始状态 [B,HV,K,V]（state_v_first 时 [B,HV,V,K]）fp32
+    dtype:
+    - float32
+    shape: '[B, HV, K, V]'
+  outputs:
+  - name: o
+    description: 注意力输出 [B,T,HV,V]
+    dtype:
+    - bfloat16
+    - float16
+    shape: '[B, T, HV, V]'
+  - name: final_state
+    description: 末状态 [B,HV,K,V] fp32（state_v_first 时 [B,HV,V,K]）；output_final_state=False 时为空 tensor [0]（源实现返回 None）
+    dtype:
+    - float32
+    shape: '[B, HV, K, V]（output_final_state=False 时 [0]）'
+
+  schema: fused_recurrent_gated_delta_rule(Tensor q, Tensor k, Tensor v, Tensor g, Tensor gk, Tensor gv, Tensor beta, Tensor A_log, Tensor dt_bias, Tensor initial_state, float scale, int gate_mode, bool use_gate_in_kernel, bool use_bias, bool use_initial_state, bool output_final_state, bool use_qk_l2norm, bool use_beta_sigmoid, bool allow_neg_eigval, bool state_v_first) -> (Tensor o, Tensor final_state)

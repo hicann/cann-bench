@@ -1,0 +1,37 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: DeformableOffsets
+  category: Vision
+  difficulty: L3
+  formula: |
+    idx = offsets[b, p, h, w]
+    y[b, p, h, w, c] = images.reshape(B, H * W * C)[b, idx + c], c = 0..C-1
+  description: 偏移量驱动的图像采样（image warp offsets），按 offsets 中的线性索引从输入图像连续取 C 个通道值
+  shape_support: 'images: [B, H, W, C], offsets: [B, P, new_h, new_w], y: [B, P, new_h, new_w, C]'
+  inputs:
+  - name: images
+    description: 输入图像 [B, H, W, C]（NHWC，C 通常为 3）
+    dtype:
+    - float16
+    - float32
+  - name: offsets
+    description: 采样偏移 [B, P, new_h, new_w]，每个元素为 images[b] 按 [H*W*C] 展平后的线性索引
+    dtype:
+    - float32
+    - int32
+  outputs:
+  - name: y
+    description: 采样结果 [B, P, new_h, new_w, C]，dtype 与 images 一致
+    dtype:
+    - float16
+    - float32
+  schema: deformable_offsets(Tensor images, Tensor offsets) -> Tensor y

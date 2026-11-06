@@ -1,0 +1,692 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: JaggedDenseFlashAttention
+  case_id: 1
+  input_shape:
+  - - 512
+    - 64
+  - - 16
+    - 64
+    - 32
+  - - 512
+    - 64
+  - - 16
+    - 32
+    - 32
+  - - 17
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 32
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 512
+  note: bfloat16-T512-D64-B16-msl32-S32-aligned-EQ-src0
+- operator: JaggedDenseFlashAttention
+  case_id: 2
+  input_shape:
+  - - 512
+    - 128
+  - - 16
+    - 128
+    - 128
+  - - 512
+    - 128
+  - - 16
+    - 32
+    - 128
+  - - 17
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 32
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 512
+  note: bfloat16-T512-D128-B16-msl32-S128-aligned-EQ-src1
+- operator: JaggedDenseFlashAttention
+  case_id: 3
+  input_shape:
+  - - 2048
+    - 128
+  - - 16
+    - 128
+    - 32
+  - - 2048
+    - 128
+  - - 16
+    - 128
+    - 32
+  - - 17
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 2048
+  note: bfloat16-T2048-D128-B16-msl128-S32-aligned-EQ-src2
+- operator: JaggedDenseFlashAttention
+  case_id: 4
+  input_shape:
+  - - 2048
+    - 128
+  - - 64
+    - 128
+    - 32
+  - - 2048
+    - 128
+  - - 64
+    - 32
+    - 32
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 32
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 2048
+  note: bfloat16-T2048-D128-B64-msl32-S32-aligned-EQ-src3
+- operator: JaggedDenseFlashAttention
+  case_id: 5
+  input_shape:
+  - - 4096
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 4096
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 64
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 4096
+  note: bfloat16-T4096-D64-B64-msl64-S32-aligned-EQ-src4
+- operator: JaggedDenseFlashAttention
+  case_id: 6
+  input_shape:
+  - - 4899
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 4899
+    - 64
+  - - 64
+    - 128
+    - 32
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 4899
+  note: bfloat16-T4899-D64-B64-msl128-S32-unaligned-NEQ-src5
+- operator: JaggedDenseFlashAttention
+  case_id: 7
+  input_shape:
+  - - 4899
+    - 128
+  - - 64
+    - 128
+    - 64
+  - - 4899
+    - 128
+  - - 64
+    - 128
+    - 64
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 4899
+  note: bfloat16-T4899-D128-B64-msl128-S64-unaligned-NEQ-src6
+- operator: JaggedDenseFlashAttention
+  case_id: 8
+  input_shape:
+  - - 9984
+    - 128
+  - - 64
+    - 128
+    - 64
+  - - 9984
+    - 128
+  - - 64
+    - 256
+    - 64
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 9984
+  note: bfloat16-T9984-D128-B64-msl256-S64-aligned-NEQ-src7
+- operator: JaggedDenseFlashAttention
+  case_id: 9
+  input_shape:
+  - - 32768
+    - 64
+  - - 64
+    - 64
+    - 64
+  - - 32768
+    - 64
+  - - 64
+    - 512
+    - 64
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 32768
+  note: bfloat16-T32768-D64-B64-msl512-S64-aligned-EQ-src8
+- operator: JaggedDenseFlashAttention
+  case_id: 10
+  input_shape:
+  - - 19608
+    - 128
+  - - 64
+    - 128
+    - 64
+  - - 19608
+    - 128
+  - - 64
+    - 512
+    - 64
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 19608
+  note: bfloat16-T19608-D128-B64-msl512-S64-unaligned-NEQ-src9
+- operator: JaggedDenseFlashAttention
+  case_id: 11
+  input_shape:
+  - - 32768
+    - 128
+  - - 64
+    - 128
+    - 128
+  - - 32768
+    - 128
+  - - 64
+    - 512
+    - 128
+  - - 65
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 32768
+  note: bfloat16-T32768-D128-B64-msl512-S128-aligned-EQ-src10
+- operator: JaggedDenseFlashAttention
+  case_id: 12
+  input_shape:
+  - - 19454
+    - 64
+  - - 512
+    - 64
+    - 128
+  - - 19454
+    - 64
+  - - 512
+    - 64
+    - 128
+  - - 513
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 64
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 19454
+  note: bfloat16-T19454-D64-B512-msl64-S128-unaligned-NEQ-src11
+- operator: JaggedDenseFlashAttention
+  case_id: 13
+  input_shape:
+  - - 65536
+    - 64
+  - - 256
+    - 64
+    - 128
+  - - 65536
+    - 64
+  - - 256
+    - 256
+    - 128
+  - - 257
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 65536
+  note: bfloat16-T65536-D64-B256-msl256-S128-aligned-EQ-src12
+- operator: JaggedDenseFlashAttention
+  case_id: 14
+  input_shape:
+  - - 32768
+    - 128
+  - - 1024
+    - 128
+    - 128
+  - - 32768
+    - 128
+  - - 1024
+    - 32
+    - 128
+  - - 1025
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 32
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 32768
+  note: bfloat16-T32768-D128-B1024-msl32-S128-aligned-EQ-src13
+- operator: JaggedDenseFlashAttention
+  case_id: 15
+  input_shape:
+  - - 131072
+    - 64
+  - - 512
+    - 64
+    - 32
+  - - 131072
+    - 64
+  - - 512
+    - 256
+    - 32
+  - - 513
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 131072
+  note: bfloat16-T131072-D64-B512-msl256-S32-aligned-EQ-src14
+- operator: JaggedDenseFlashAttention
+  case_id: 16
+  input_shape:
+  - - 131072
+    - 128
+  - - 256
+    - 128
+    - 64
+  - - 131072
+    - 128
+  - - 256
+    - 512
+    - 64
+  - - 257
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 131072
+  note: bfloat16-T131072-D128-B256-msl512-S64-aligned-EQ-src15
+- operator: JaggedDenseFlashAttention
+  case_id: 17
+  input_shape:
+  - - 262144
+    - 64
+  - - 512
+    - 64
+    - 32
+  - - 262144
+    - 64
+  - - 512
+    - 512
+    - 32
+  - - 513
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 262144
+  note: bfloat16-T262144-D64-B512-msl512-S32-aligned-EQ-src16
+- operator: JaggedDenseFlashAttention
+  case_id: 18
+  input_shape:
+  - - 131072
+    - 128
+  - - 256
+    - 128
+    - 128
+  - - 131072
+    - 128
+  - - 256
+    - 512
+    - 128
+  - - 257
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 131072
+  note: bfloat16-T131072-D128-B256-msl512-S128-aligned-EQ-src17
+- operator: JaggedDenseFlashAttention
+  case_id: 19
+  input_shape:
+  - - 4096
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 4096
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 65
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - int32
+  attrs:
+    max_seq_len: 64
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 4096
+  note: float16-T4096-D64-B64-msl64-S32-aligned-EQ-src4-fp16
+- operator: JaggedDenseFlashAttention
+  case_id: 20
+  input_shape:
+  - - 4899
+    - 64
+  - - 64
+    - 64
+    - 32
+  - - 4899
+    - 64
+  - - 64
+    - 128
+    - 32
+  - - 65
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - -1
+    - 1
+  - - 0
+    - 4899
+  note: float32-T4899-D64-B64-msl128-S32-unaligned-NEQ-src5-fp32

@@ -1,0 +1,392 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: UpsampleNearest3D
+  case_id: 1
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 64
+    - 64
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 16
+    - 128
+    - 128
+  value_range:
+  - - -1
+    - 1
+  note: float16-src0-1x8x8x64x64-2x-align
+- operator: UpsampleNearest3D
+  case_id: 2
+  input_shape:
+  - - 1
+    - 16
+    - 8
+    - 64
+    - 64
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 16
+    - 128
+    - 128
+  value_range:
+  - - -1
+    - 1
+  note: float16-src1-1x16x8x64x64-2x
+- operator: UpsampleNearest3D
+  case_id: 3
+  input_shape:
+  - - 1
+    - 8
+    - 16
+    - 64
+    - 64
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 32
+    - 128
+    - 128
+  value_range:
+  - - -1
+    - 1
+  note: float16-src2-1x8x16x64x64-2x
+- operator: UpsampleNearest3D
+  case_id: 4
+  input_shape:
+  - - 1
+    - 4
+    - 16
+    - 128
+    - 128
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 32
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src3-1x4x16x128x128-2x
+- operator: UpsampleNearest3D
+  case_id: 5
+  input_shape:
+  - - 1
+    - 8
+    - 32
+    - 128
+    - 128
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 64
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src5-1x8x32x128x128-2x
+- operator: UpsampleNearest3D
+  case_id: 6
+  input_shape:
+  - - 1
+    - 8
+    - 16
+    - 128
+    - 128
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 32
+    - 128
+    - 128
+  value_range:
+  - - -1
+    - 1
+  note: float16-src4-1x8x16x128x128-2x-DHW-out128
+- operator: UpsampleNearest3D
+  case_id: 7
+  input_shape:
+  - - 1
+    - 16
+    - 10
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 20
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src7-D10-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 8
+  input_shape:
+  - - 4
+    - 8
+    - 16
+    - 128
+    - 128
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 32
+    - 128
+    - 128
+  value_range:
+  - - -1
+    - 1
+  note: float16-src8-B4-1x8x16x128x128-2x
+- operator: UpsampleNearest3D
+  case_id: 9
+  input_shape:
+  - - 1
+    - 16
+    - 13
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 26
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src9-D13-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 10
+  input_shape:
+  - - 1
+    - 16
+    - 15
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 30
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src10-D15-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 11
+  input_shape:
+  - - 1
+    - 4
+    - 32
+    - 256
+    - 256
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 64
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float32-src11-1x4x32x256x256-2x
+- operator: UpsampleNearest3D
+  case_id: 12
+  input_shape:
+  - - 1
+    - 16
+    - 18
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 36
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src12-D18-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 13
+  input_shape:
+  - - 1
+    - 16
+    - 21
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 42
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src13-D21-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 14
+  input_shape:
+  - - 1
+    - 16
+    - 23
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 46
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src14-D23-nonalign-2x
+- operator: UpsampleNearest3D
+  case_id: 15
+  input_shape:
+  - - 1
+    - 8
+    - 50
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 100
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src23-D50-2x-out256
+- operator: UpsampleNearest3D
+  case_id: 16
+  input_shape:
+  - - 1
+    - 16
+    - 29
+    - 192
+    - 192
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 58
+    - 192
+    - 192
+  value_range:
+  - - -1
+    - 1
+  note: float16-src26-D29-nonalign-2x-out192
+- operator: UpsampleNearest3D
+  case_id: 17
+  input_shape:
+  - - 1
+    - 4
+    - 68
+    - 256
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 136
+    - 100
+    - 100
+  value_range:
+  - - -1
+    - 1
+  note: float16-src30-D68-2x-nonalign-out100
+- operator: UpsampleNearest3D
+  case_id: 18
+  input_shape:
+  - - 1
+    - 4
+    - 35
+    - 512
+    - 512
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 70
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float16-src32-D35-2x-D-out256
+- operator: UpsampleNearest3D
+  case_id: 19
+  input_shape:
+  - - 1
+    - 16
+    - 24
+    - 256
+    - 256
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 48
+    - 256
+    - 256
+  value_range:
+  - - -1
+    - 1
+  note: float32-src34-1x16x24x256x256-2x
+- operator: UpsampleNearest3D
+  case_id: 20
+  input_shape:
+  - - 1
+    - 16
+    - 64
+    - 192
+    - 192
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 128
+    - 160
+    - 160
+  value_range:
+  - - -1
+    - 1
+  note: float16-src48-D64-2x-nonalign-out160

@@ -1,0 +1,37 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: UpsampleNearest3D
+  category: Vision
+  difficulty: L3
+  formula: |
+    y[n, c, i, j, k] = input[n, c, floor(i * D_in / D_out), floor(j * H_in / H_out),
+                              floor(k * W_in / W_out)]
+  description: 最近邻 3D 上采样，按目标尺寸逐元素取最近邻源坐标
+  shape_support: 'input: [N, C, D_in, H_in, W_in], y: [N, C, D_out, H_out, W_out]; 输出尺寸由 output_size 属性给出'
+  attrs:
+  - name: output_size
+    type: ListInt
+    description: 目标输出尺寸 (D_out, H_out, W_out)
+    required: true
+  inputs:
+  - name: input
+    description: 输入 5D 张量 [N, C, D_in, H_in, W_in]
+    dtype:
+    - float16
+    - float32
+  outputs:
+  - name: y
+    description: 上采样输出 [N, C, D_out, H_out, W_out]
+    dtype:
+    - float16
+    - float32
+  schema: upsample_nearest_3d(Tensor input, int[] output_size) -> Tensor y

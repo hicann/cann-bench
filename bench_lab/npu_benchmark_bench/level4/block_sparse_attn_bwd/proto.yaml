@@ -1,0 +1,125 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: BlockSparseAttnBwd
+  category: Attention
+  difficulty: L4
+  formula: |
+    S        = softmax_scale * Q K^T                      # 按头掩码置 -inf
+    P        = exp(S - softmax_max) / softmax_sum
+    delta    = rowsum(dY ⊙ O)
+    dV       = P^T dY
+    dP       = dY V^T
+    dS       = P ⊙ (dP - delta)
+    dQ       = dS K · softmax_scale
+    dK       = dS^T Q · softmax_scale
+    头掩码：head_mask_type = 0(dense) / 1(base_blockmask 块稀疏) / -1(streaming sink+local)
+    GQA：KV 头按 H // HK 扩展，dK/dV 在组内求和
+  description: MIT Han Lab Block-Sparse-Attention 反向，消费前向 saved tensor（softmax_max/softmax_sum/attention_in），按 dense / block-sparse / streaming 三种头掩码计算 varlen 打包输入的 q/k/v 梯度
+  shape_support: 'q/dout/attention_in: [total_q, H, D]；k/v: [total_k, HK, D]（H % HK == 0）；cu_seqlens_q/k: [B+1]；head_mask_type: [H]；streaming_info: [2H]；base_blockmask: [B, H//3, ceil(max_q/128), ceil(max_k/128)]；softmax_max/softmax_sum: [B, H, max_q]；dq: [total_q, H, D]；dk/dv: [total_k, HK, D]'
+  attrs:
+  - name: softmax_scale
+    type: float
+    description: 缩放因子；为空时取 D ** -0.5
+    required: true
+  - name: is_causal
+    type: bool
+    description: 是否使用因果掩码
+    required: true
+  - name: exact_streaming
+    type: bool
+    description: streaming 掩码是否使用 exact 语义（官方限制仅支持因果）
+    required: true
+  inputs:
+  - name: q
+    description: query [total_q, H, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_q, H, D]'
+  - name: k
+    description: key [total_k, HK, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_k, HK, D]'
+  - name: v
+    description: value [total_k, HK, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_k, HK, D]'
+  - name: cu_seqlens_q
+    description: query 序列前缀和 [B+1] int32
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: cu_seqlens_k
+    description: key 序列前缀和 [B+1] int32
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: head_mask_type
+    description: 每个头的掩码类型 [H] int32（0=dense，1=blocksparse，-1=streaming）
+    dtype:
+    - int32
+    shape: '[H]'
+  - name: streaming_info
+    description: streaming 头的 (sink, local) 参数，[2H] int32 成对重复
+    dtype:
+    - int32
+    shape: '[2H]'
+  - name: base_blockmask
+    description: 块稀疏掩码 [B, H//3, nrow, ncol] bool
+    dtype:
+    - bool
+    shape: '[B, H//3, ceil(max_q/128), ceil(max_k/128)]'
+  - name: dout
+    description: 输出梯度 [total_q, H, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_q, H, D]'
+  - name: softmax_max
+    description: 前向行最大值（saved tensor）[B, H, max_q] fp32
+    dtype:
+    - float32
+    shape: '[B, H, max_q]'
+  - name: softmax_sum
+    description: 前向行归一化因子（saved tensor）[B, H, max_q] fp32
+    dtype:
+    - float32
+    shape: '[B, H, max_q]'
+  - name: attention_in
+    description: 前向注意力输出（saved tensor）[total_q, H, D] fp32
+    dtype:
+    - float32
+    shape: '[total_q, H, D]'
+  outputs:
+  - name: dq
+    description: query 梯度 [total_q, H, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_q, H, D]'
+  - name: dk
+    description: key 梯度 [total_k, HK, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_k, HK, D]'
+  - name: dv
+    description: value 梯度 [total_k, HK, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_k, HK, D]'
+  schema: block_sparse_attn_bwd(Tensor q, Tensor k, Tensor v, Tensor cu_seqlens_q, Tensor cu_seqlens_k, Tensor head_mask_type, Tensor streaming_info, Tensor base_blockmask, Tensor dout, Tensor softmax_max, Tensor softmax_sum, Tensor attention_in, float softmax_scale, bool is_causal, bool exact_streaming) -> (Tensor dq, Tensor dk, Tensor dv)

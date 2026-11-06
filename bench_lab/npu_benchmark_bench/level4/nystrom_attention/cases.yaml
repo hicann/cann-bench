@@ -1,0 +1,592 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: NystromAttention
+  case_id: 1
+  input_shape:
+  - - 2
+    - 4
+    - 34
+    - 30
+  - - 2
+    - 4
+    - 34
+    - 30
+  - - 2
+    - 4
+    - 34
+    - 30
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_landmarks: 34
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: bfloat16-B2H4S34D30-land34-full-src1
+- operator: NystromAttention
+  case_id: 2
+  input_shape:
+  - - 2
+    - 23
+    - 6
+    - 64
+  - - 2
+    - 23
+    - 6
+    - 64
+  - - 2
+    - 23
+    - 6
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 11
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B2H23S6D64-land6-full-src2
+- operator: NystromAttention
+  case_id: 3
+  input_shape:
+  - - 2
+    - 7
+    - 67
+    - 60
+  - - 2
+    - 7
+    - 67
+    - 60
+  - - 2
+    - 7
+    - 67
+    - 60
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_landmarks: 67
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: bfloat16-B2H7S67D60-land67-full-src3
+- operator: NystromAttention
+  case_id: 4
+  input_shape:
+  - - 3
+    - 2
+    - 16
+    - 8
+  - - 3
+    - 2
+    - 16
+    - 8
+  - - 3
+    - 2
+    - 16
+    - 8
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 31
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B3H2S16D8-land16-full-src4
+- operator: NystromAttention
+  case_id: 5
+  input_shape:
+  - - 2
+    - 3
+    - 30
+    - 32
+  - - 2
+    - 3
+    - 30
+    - 32
+  - - 2
+    - 3
+    - 30
+    - 32
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 30
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B2H3S30D32-land30-full-src6
+- operator: NystromAttention
+  case_id: 6
+  input_shape:
+  - - 2
+    - 6
+    - 61
+    - 64
+  - - 2
+    - 6
+    - 61
+    - 64
+  - - 2
+    - 6
+    - 61
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 61
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B2H6S61D64-land61-full-src7
+- operator: NystromAttention
+  case_id: 7
+  input_shape:
+  - - 1
+    - 7
+    - 71
+    - 64
+  - - 1
+    - 7
+    - 71
+    - 64
+  - - 1
+    - 7
+    - 71
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 71
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B1H7S71D64-land71-full-src8
+- operator: NystromAttention
+  case_id: 8
+  input_shape:
+  - - 1
+    - 1
+    - 9
+    - 8
+  - - 1
+    - 1
+    - 9
+    - 8
+  - - 1
+    - 1
+    - 9
+    - 8
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 9
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B1H1S9D8-land9-full-src9
+- operator: NystromAttention
+  case_id: 9
+  input_shape:
+  - - 3
+    - 12
+    - 127
+    - 60
+  - - 3
+    - 12
+    - 127
+    - 60
+  - - 3
+    - 12
+    - 127
+    - 60
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 31
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B3H12S127D60-land31-approx-src10
+- operator: NystromAttention
+  case_id: 10
+  input_shape:
+  - - 2
+    - 23
+    - 383
+    - 64
+  - - 2
+    - 23
+    - 383
+    - 64
+  - - 2
+    - 23
+    - 383
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 11
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B2H23S383D64-land11-approx-src11
+- operator: NystromAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 5
+    - 13
+    - 24
+  - - 1
+    - 5
+    - 13
+    - 24
+  - - 1
+    - 5
+    - 13
+    - 24
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 2
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B1H5S13D24-land2-approx-src12
+- operator: NystromAttention
+  case_id: 12
+  input_shape:
+  - - 3
+    - 5
+    - 53
+    - 64
+  - - 3
+    - 5
+    - 53
+    - 64
+  - - 3
+    - 5
+    - 53
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 7
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B3H5S53D64-land7-approx-src13
+- operator: NystromAttention
+  case_id: 13
+  input_shape:
+  - - 3
+    - 3
+    - 29
+    - 64
+  - - 3
+    - 3
+    - 29
+    - 64
+  - - 3
+    - 3
+    - 29
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 3
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B3H3S29D64-land3-approx-src14
+- operator: NystromAttention
+  case_id: 14
+  input_shape:
+  - - 1
+    - 18
+    - 347
+    - 80
+  - - 1
+    - 18
+    - 347
+    - 80
+  - - 1
+    - 18
+    - 347
+    - 80
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_landmarks: 11
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: bfloat16-B1H18S347D80-land11-approx-src16
+- operator: NystromAttention
+  case_id: 15
+  input_shape:
+  - - 2
+    - 22
+    - 317
+    - 64
+  - - 2
+    - 22
+    - 317
+    - 64
+  - - 2
+    - 22
+    - 317
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 7
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B2H22S317D64-land7-approx-src17
+- operator: NystromAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 13
+    - 149
+    - 64
+  - - 1
+    - 13
+    - 149
+    - 64
+  - - 1
+    - 13
+    - 149
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 47
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B1H13S149D64-land47-approx-src18
+- operator: NystromAttention
+  case_id: 17
+  input_shape:
+  - - 2
+    - 16
+    - 257
+    - 78
+  - - 2
+    - 16
+    - 257
+    - 78
+  - - 2
+    - 16
+    - 257
+    - 78
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_landmarks: 5
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-B2H16S257D78-land5-approx-src20
+- operator: NystromAttention
+  case_id: 18
+  input_shape:
+  - - 2
+    - 16
+    - 1016
+    - 64
+  - - 2
+    - 16
+    - 1016
+    - 64
+  - - 2
+    - 16
+    - 1016
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_landmarks: 2
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-B2H16S1016D64-land2-approx-src30
+- operator: NystromAttention
+  case_id: 19
+  input_shape:
+  - - 4
+    - 12
+    - 1040
+    - 64
+  - - 4
+    - 12
+    - 1040
+    - 64
+  - - 4
+    - 12
+    - 1040
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_landmarks: 47
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: bfloat16-B4H12S1040D64-land47-approx-src35
+- operator: NystromAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 20
+    - 16384
+    - 64
+  - - 2
+    - 20
+    - 16384
+    - 64
+  - - 2
+    - 20
+    - 16384
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_landmarks: 7
+  value_range:
+  - - 0
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: bfloat16-B2H20S16384D64-land7-approx-src50

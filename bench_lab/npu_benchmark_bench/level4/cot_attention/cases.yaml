@@ -1,0 +1,1192 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: CoTAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 1
+    - 1
+    - 1
+  - - 1
+    - 1
+    - 1
+    - 1
+  - - 1
+  - - 1
+    - 1
+    - 1
+    - 1
+  - - 1
+  - - 1
+    - 2
+    - 1
+    - 1
+  - - 1
+  - - 1
+    - 1
+    - 1
+    - 1
+  - - 1
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B1C1H1W1-src1-K1
+- operator: CoTAttention
+  case_id: 2
+  input_shape:
+  - - 8
+    - 2048
+    - 1
+    - 1
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  - - 2048
+    - 2048
+    - 1
+    - 1
+  - - 2048
+  - - 512
+    - 4096
+    - 1
+    - 1
+  - - 512
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B8C2048H1W1-src4-K1
+- operator: CoTAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 384
+    - 27
+    - 23
+  - - 384
+    - 96
+    - 5
+    - 5
+  - - 384
+  - - 384
+    - 384
+    - 1
+    - 1
+  - - 384
+  - - 96
+    - 768
+    - 1
+    - 1
+  - - 96
+  - - 9600
+    - 96
+    - 1
+    - 1
+  - - 9600
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B1C384H27W23-src2-K5
+- operator: CoTAttention
+  case_id: 4
+  input_shape:
+  - - 2
+    - 96
+    - 73
+    - 83
+  - - 96
+    - 24
+    - 5
+    - 5
+  - - 96
+  - - 96
+    - 96
+    - 1
+    - 1
+  - - 96
+  - - 24
+    - 192
+    - 1
+    - 1
+  - - 24
+  - - 2400
+    - 24
+    - 1
+    - 1
+  - - 2400
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B2C96H73W83-src3-K5
+- operator: CoTAttention
+  case_id: 5
+  input_shape:
+  - - 6
+    - 384
+    - 33
+    - 73
+  - - 384
+    - 96
+    - 3
+    - 3
+  - - 384
+  - - 384
+    - 384
+    - 1
+    - 1
+  - - 384
+  - - 96
+    - 768
+    - 1
+    - 1
+  - - 96
+  - - 3456
+    - 96
+    - 1
+    - 1
+  - - 3456
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B6C384H33W73-src5-K3
+- operator: CoTAttention
+  case_id: 6
+  input_shape:
+  - - 8
+    - 512
+    - 33
+    - 41
+  - - 512
+    - 128
+    - 3
+    - 3
+  - - 512
+  - - 512
+    - 512
+    - 1
+    - 1
+  - - 512
+  - - 128
+    - 1024
+    - 1
+    - 1
+  - - 128
+  - - 4608
+    - 128
+    - 1
+    - 1
+  - - 4608
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: bfloat16-B8C512H33W41-src6-K3
+- operator: CoTAttention
+  case_id: 7
+  input_shape:
+  - - 6
+    - 384
+    - 223
+    - 21
+  - - 384
+    - 96
+    - 3
+    - 3
+  - - 384
+  - - 384
+    - 384
+    - 1
+    - 1
+  - - 384
+  - - 96
+    - 768
+    - 1
+    - 1
+  - - 96
+  - - 3456
+    - 96
+    - 1
+    - 1
+  - - 3456
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B6C384H223W21-src8-K3
+- operator: CoTAttention
+  case_id: 8
+  input_shape:
+  - - 6
+    - 256
+    - 125
+    - 173
+  - - 256
+    - 64
+    - 3
+    - 3
+  - - 256
+  - - 256
+    - 256
+    - 1
+    - 1
+  - - 256
+  - - 64
+    - 512
+    - 1
+    - 1
+  - - 64
+  - - 2304
+    - 64
+    - 1
+    - 1
+  - - 2304
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: bfloat16-B6C256H125W173-src13-K3
+- operator: CoTAttention
+  case_id: 9
+  input_shape:
+  - - 5
+    - 2048
+    - 29
+    - 19
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  - - 2048
+    - 2048
+    - 1
+    - 1
+  - - 2048
+  - - 512
+    - 4096
+    - 1
+    - 1
+  - - 512
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B5C2048H29W19-src7-K1
+- operator: CoTAttention
+  case_id: 10
+  input_shape:
+  - - 2
+    - 1280
+    - 101
+    - 47
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  - - 1280
+    - 1280
+    - 1
+    - 1
+  - - 1280
+  - - 320
+    - 2560
+    - 1
+    - 1
+  - - 320
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B2C1280H101W47-src9-K1
+- operator: CoTAttention
+  case_id: 11
+  input_shape:
+  - - 6
+    - 1024
+    - 61
+    - 53
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  - - 1024
+    - 1024
+    - 1
+    - 1
+  - - 1024
+  - - 256
+    - 2048
+    - 1
+    - 1
+  - - 256
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B6C1024H61W53-src11-K1
+- operator: CoTAttention
+  case_id: 12
+  input_shape:
+  - - 1
+    - 2048
+    - 125
+    - 55
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  - - 2048
+    - 2048
+    - 1
+    - 1
+  - - 2048
+  - - 512
+    - 4096
+    - 1
+    - 1
+  - - 512
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B1C2048H125W55-src10-K1
+- operator: CoTAttention
+  case_id: 13
+  input_shape:
+  - - 6
+    - 1024
+    - 111
+    - 79
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  - - 1024
+    - 1024
+    - 1
+    - 1
+  - - 1024
+  - - 256
+    - 2048
+    - 1
+    - 1
+  - - 256
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B6C1024H111W79-src23-K1
+- operator: CoTAttention
+  case_id: 14
+  input_shape:
+  - - 8
+    - 512
+    - 223
+    - 69
+  - - 512
+    - 128
+    - 1
+    - 1
+  - - 512
+  - - 512
+    - 512
+    - 1
+    - 1
+  - - 512
+  - - 128
+    - 1024
+    - 1
+    - 1
+  - - 128
+  - - 512
+    - 128
+    - 1
+    - 1
+  - - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B8C512H223W69-src31-K1
+- operator: CoTAttention
+  case_id: 15
+  input_shape:
+  - - 6
+    - 1024
+    - 79
+    - 73
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  - - 1024
+    - 1024
+    - 1
+    - 1
+  - - 1024
+  - - 256
+    - 2048
+    - 1
+    - 1
+  - - 256
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float32-B6C1024H79W73-src18-K1
+- operator: CoTAttention
+  case_id: 16
+  input_shape:
+  - - 6
+    - 2048
+    - 79
+    - 19
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  - - 2048
+    - 2048
+    - 1
+    - 1
+  - - 2048
+  - - 512
+    - 4096
+    - 1
+    - 1
+  - - 512
+  - - 2048
+    - 512
+    - 1
+    - 1
+  - - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B6C2048H79W19-src12-K1
+- operator: CoTAttention
+  case_id: 17
+  input_shape:
+  - - 5
+    - 896
+    - 113
+    - 89
+  - - 896
+    - 224
+    - 1
+    - 1
+  - - 896
+  - - 896
+    - 896
+    - 1
+    - 1
+  - - 896
+  - - 224
+    - 1792
+    - 1
+    - 1
+  - - 224
+  - - 896
+    - 224
+    - 1
+    - 1
+  - - 896
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B5C896H113W89-src17-K1
+- operator: CoTAttention
+  case_id: 18
+  input_shape:
+  - - 6
+    - 1024
+    - 111
+    - 61
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  - - 1024
+    - 1024
+    - 1
+    - 1
+  - - 1024
+  - - 256
+    - 2048
+    - 1
+    - 1
+  - - 256
+  - - 1024
+    - 256
+    - 1
+    - 1
+  - - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: bfloat16-B6C1024H111W61-src15-K1
+- operator: CoTAttention
+  case_id: 19
+  input_shape:
+  - - 3
+    - 1280
+    - 73
+    - 141
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  - - 1280
+    - 1280
+    - 1
+    - 1
+  - - 1280
+  - - 320
+    - 2560
+    - 1
+    - 1
+  - - 320
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: bfloat16-B3C1280H73W141-src14-K1
+- operator: CoTAttention
+  case_id: 20
+  input_shape:
+  - - 6
+    - 1280
+    - 111
+    - 49
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  - - 1280
+    - 1280
+    - 1
+    - 1
+  - - 1280
+  - - 320
+    - 2560
+    - 1
+    - 1
+  - - 320
+  - - 1280
+    - 320
+    - 1
+    - 1
+  - - 1280
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 1
+  value_range:
+  - - -2.0
+    - 2.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  note: float16-B6C1280H111W49-src16-K1

@@ -1,0 +1,96 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: NsaTopkSparseAttentionBwd
+  category: Attention
+  difficulty: L4
+  formula: |
+    S(i)     = { j | j // block_size ∈ topk_idx[h, i] } ∩ { j <= i }
+    p[i, j]  = exp2(q_i·k_j * sm_scale * log2(e) - lse[i])      (j ∈ S(i)，否则 0)
+    dv[j]    = sum_i p[i, j] * do[i]
+    dp[i, j] = do[i] · v[j]
+    delta[i] = sum_d o[i, d] * do[i, d]
+    ds[i, j] = p[i, j] * (dp[i, j] - delta[i])
+    dq[i]    = sm_scale * sum_j ds[i, j] * k[j]
+    dk[j]    = sm_scale * sum_i ds[i, j] * q[i]
+  description: DeepSeek Native Sparse Attention 的 TopK 选块注意力反向，消费前向保存的 o 与 log2 域 lse，按选块 + 因果允许集合重建概率并计算 q/k/v 梯度（支持 GQA 与变长批）
+  shape_support: 'q/o/do: [total_len, Hq, D]；k/v: [total_len, Hk, D]（Hq % Hk == 0）；topk_idx: [Hk, total_len, topk]；cu_seqlens: [B+1]；lse: [Hq, total_len]；dq: [total_len, Hq, D]；dk/dv: [total_len, Hk, D]'
+  attrs:
+  - name: block_size
+    type: int
+    description: KV 分块大小（32/64/128/256）
+    required: true
+  - name: max_seqlen
+    type: int
+    description: 批内最长序列长度（varlen 的形状提示）
+    required: true
+  - name: sm_scale
+    type: float
+    description: softmax 缩放因子，通常为 1/sqrt(D)
+    required: true
+  inputs:
+  - name: q
+    description: varlen 拼接的 query [total_len, Hq, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hq, D]'
+  - name: k
+    description: varlen 拼接的 key [total_len, Hk, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hk, D]'
+  - name: v
+    description: varlen 拼接的 value [total_len, Hk, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hk, D]'
+  - name: topk_idx
+    description: 每个 query 选中的 KV 块号 [Hk, total_len, topk]，-1 表示 padding
+    dtype:
+    - int32
+    shape: '[Hk, total_len, topk]'
+  - name: cu_seqlens
+    description: 序列前缀和 [B+1]，单调不减且末元素等于 total_len
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: o
+    description: 前向注意力输出（saved tensor）[total_len, Hq, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hq, D]'
+  - name: lse
+    description: 前向保存的 logsumexp（以 log2 为底，saved tensor）[Hq, total_len]
+    dtype:
+    - float32
+    shape: '[Hq, total_len]'
+  - name: do
+    description: 上游输出梯度 [total_len, Hq, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hq, D]'
+  outputs:
+  - name: dq
+    description: query 梯度 [total_len, Hq, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hq, D]'
+  - name: dk
+    description: key 梯度 [total_len, Hk, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hk, D]'
+  - name: dv
+    description: value 梯度 [total_len, Hk, D]
+    dtype:
+    - float32
+    shape: '[total_len, Hk, D]'
+  schema: nsa_topk_sparse_attention_bwd(Tensor q, Tensor k, Tensor v, Tensor topk_idx, Tensor cu_seqlens, Tensor o, Tensor lse, Tensor do, int block_size, int max_seqlen, float sm_scale) -> (Tensor dq, Tensor dk, Tensor dv)

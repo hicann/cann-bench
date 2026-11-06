@@ -1,0 +1,84 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: MultiHeadAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    q = Q query,  k = K key,  v = V value
+    P = softmax(q k^T / sqrt(head_dim))
+    y = O (P v)
+  description: 多头注意力前向（query/key/value 可不等长），四个无偏置投影权重显式输入
+  shape_support: 'query: [B, Lq, D]；key: [B, Lk, D]；value: [B, Lk, D]；q/k/v/out_proj_weight: [D, D]；y: [B, Lq, D]；约束 D % n_heads == 0'
+  attrs:
+  - name: n_heads
+    type: int
+    description: 注意力头数，须整除 d_model
+    required: true
+  inputs:
+  - name: query
+    description: query 张量，[B, Lq, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lq, D]'
+  - name: key
+    description: key 张量，[B, Lk, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lk, D]'
+  - name: value
+    description: value 张量，[B, Lk, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lk, D]'
+  - name: q_proj_weight
+    description: query 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: k_proj_weight
+    description: key 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: v_proj_weight
+    description: value 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: out_proj_weight
+    description: 输出投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  outputs:
+  - name: y
+    description: 注意力输出，[B, Lq, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lq, D]'
+  schema: multi_head_attention(Tensor query, Tensor key, Tensor value, Tensor q_proj_weight, Tensor k_proj_weight, Tensor v_proj_weight, Tensor out_proj_weight, int n_heads) -> Tensor y

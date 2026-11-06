@@ -1,0 +1,612 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: FlexAttentionFwd
+  case_id: 1
+  input_shape:
+  - - 1
+    - 4
+    - 512
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H4Sq512D64-Sk512-causal0-gqa0-src1
+- operator: FlexAttentionFwd
+  case_id: 2
+  input_shape:
+  - - 1
+    - 1
+    - 512
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H1Sq512D128-Sk256-causal0-gqa0-src2
+- operator: FlexAttentionFwd
+  case_id: 3
+  input_shape:
+  - - 1
+    - 4
+    - 896
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H4Sq896D64-Sk512-causal0-gqa0-src4
+- operator: FlexAttentionFwd
+  case_id: 4
+  input_shape:
+  - - 1
+    - 4
+    - 1024
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H4Sq1024D64-Sk512-causal0-gqa0-src5
+- operator: FlexAttentionFwd
+  case_id: 5
+  input_shape:
+  - - 2
+    - 2
+    - 128
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float16-B2H2Sq128D16-Sk128-causal0-gqa0-src6
+- operator: FlexAttentionFwd
+  case_id: 6
+  input_shape:
+  - - 1
+    - 1
+    - 256
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H1Sq256D128-Sk256-causal0-gqa0-src7
+- operator: FlexAttentionFwd
+  case_id: 7
+  input_shape:
+  - - 2
+    - 2
+    - 128
+    - 64
+  - - 2
+    - 2
+    - 128
+    - 64
+  - - 2
+    - 2
+    - 128
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: true
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B2H2Sq128D64-Sk128-causal1-gqa0-src8
+- operator: FlexAttentionFwd
+  case_id: 8
+  input_shape:
+  - - 1
+    - 2
+    - 6120
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float32-B1H2Sq6120D64-Sk4096-causal0-gqa0-src11
+- operator: FlexAttentionFwd
+  case_id: 9
+  input_shape:
+  - - 1
+    - 4
+    - 28672
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  - - 1
+    - 4
+    - 512
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H4Sq28672D64-Sk512-causal0-gqa0-src12
+- operator: FlexAttentionFwd
+  case_id: 10
+  input_shape:
+  - - 1
+    - 2
+    - 5640
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float32-B1H2Sq5640D64-Sk4096-causal0-gqa0-src14
+- operator: FlexAttentionFwd
+  case_id: 11
+  input_shape:
+  - - 8
+    - 8
+    - 1024
+    - 64
+  - - 8
+    - 8
+    - 1024
+    - 64
+  - - 8
+    - 8
+    - 1024
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: true
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B8H8Sq1024D64-Sk1024-causal1-gqa0-src15
+- operator: FlexAttentionFwd
+  case_id: 12
+  input_shape:
+  - - 1
+    - 1
+    - 131072
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  - - 1
+    - 1
+    - 256
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B1H1Sq131072D128-Sk256-causal0-gqa0-src16
+- operator: FlexAttentionFwd
+  case_id: 13
+  input_shape:
+  - - 4
+    - 4
+    - 2048
+    - 64
+  - - 4
+    - 4
+    - 2048
+    - 64
+  - - 4
+    - 4
+    - 2048
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float32-B4H4Sq2048D64-Sk2048-causal0-gqa0-src20
+- operator: FlexAttentionFwd
+  case_id: 14
+  input_shape:
+  - - 2
+    - 2
+    - 32768
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float16-B2H2Sq32768D16-Sk128-causal0-gqa0-src22
+- operator: FlexAttentionFwd
+  case_id: 15
+  input_shape:
+  - - 2
+    - 2
+    - 16384
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  - - 2
+    - 2
+    - 128
+    - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float16-B2H2Sq16384D16-Sk128-causal0-gqa0-src23
+- operator: FlexAttentionFwd
+  case_id: 16
+  input_shape:
+  - - 1
+    - 2
+    - 4096
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  - - 1
+    - 2
+    - 4096
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float32-B1H2Sq4096D64-Sk4096-causal0-gqa0-src25
+- operator: FlexAttentionFwd
+  case_id: 17
+  input_shape:
+  - - 4
+    - 4
+    - 4096
+    - 64
+  - - 4
+    - 4
+    - 4096
+    - 64
+  - - 4
+    - 4
+    - 4096
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B4H4Sq4096D64-Sk4096-causal0-gqa0-src26
+- operator: FlexAttentionFwd
+  case_id: 18
+  input_shape:
+  - - 2
+    - 4
+    - 8192
+    - 64
+  - - 2
+    - 1
+    - 8192
+    - 64
+  - - 2
+    - 1
+    - 8192
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    is_causal: true
+    enable_gqa: true
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: bfloat16-B2H4Sq8192D64-Sk8192-causal1-gqa1-src28
+- operator: FlexAttentionFwd
+  case_id: 19
+  input_shape:
+  - - 4
+    - 8
+    - 4096
+    - 64
+  - - 4
+    - 8
+    - 4096
+    - 64
+  - - 4
+    - 8
+    - 4096
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    is_causal: true
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float16-B4H8Sq4096D64-Sk4096-causal1-gqa0-src29
+- operator: FlexAttentionFwd
+  case_id: 20
+  input_shape:
+  - - 2
+    - 8
+    - 2048
+    - 128
+  - - 2
+    - 8
+    - 2048
+    - 128
+  - - 2
+    - 8
+    - 2048
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    is_causal: false
+    enable_gqa: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  note: float16-B2H8Sq2048D128-Sk2048-causal0-gqa0-src45

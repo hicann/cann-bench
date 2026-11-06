@@ -1,0 +1,188 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: MobileViTAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    y0 = Conv_{k}(Conv_{1x1}(x))                        # local representation, [B, dim, H, W]
+    p  = patch_size^2, n = (H / patch_size) * (W / patch_size)
+    t  = unfold(y0) -> [B, p, n, dim]
+    for l in 0..DEPTH-1 (DEPTH = 3):
+        t = t + out_w[l] · MHA(LN_att[l](t); qkv_w[l])   # 8 heads, head_dim = 64
+        t = t + ff2_w[l] · SiLU(ff1_w[l] · LN_ffn[l](t))
+    y1 = fold(t) -> [B, dim, H, W]
+    y  = Conv_{k}(cat([x, Conv_{1x1}(y1)], dim=1))
+  description: MobileViT Attention 块：局部卷积表征经 unfold 切成 patch token，做 3 层 PreNorm 多头自注意力与 PreNorm FFN（SiLU）后 fold 回特征图，再与输入拼接并经卷积融合
+  shape_support: 'x: [B, C, H, W]，H/W 可被 patch_size 整除；conv1_w: [C, C, k, k]；conv2_w: [dim, C, 1, 1]；ln_att_w/ln_att_b/ln_ffn_w/ln_ffn_b: List（DEPTH=3 个 [dim]）；qkv_w: List（DEPTH 个 [3*512, dim]，无 bias）；out_w: List（DEPTH 个 [dim, 512]）；out_b: List（DEPTH 个 [dim]）；ff1_w: List（DEPTH 个 [1024, dim]）；ff1_b: List（DEPTH 个 [1024]）；ff2_w: List（DEPTH 个 [dim, 1024]）；ff2_b: List（DEPTH 个 [dim]）；conv3_w: [C, dim, 1, 1]；conv4_w: [C, 2*C, k, k]；y: [B, C, H, W]'
+  attrs:
+  - name: patch_size
+    type: int
+    description: unfold/fold 的 patch 边长，H 与 W 须能被其整除
+    required: true
+  - name: kernel_size
+    type: int
+    description: 卷积 conv1/conv4 的核大小 k（same padding = k // 2）
+    required: true
+  - name: dim
+    type: int
+    description: Transformer 隐层维度，等于 conv2_w 的 out_channels
+    required: true
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv1_w
+    description: 局部表征第一层卷积权重 [C, C, k, k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, k, k]'
+  - name: conv1_b
+    description: 局部表征第一层卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv2_w
+    description: 局部表征第二层 1x1 卷积权重 [dim, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[dim, C, 1, 1]'
+  - name: conv2_b
+    description: 局部表征第二层 1x1 卷积偏置 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[dim]'
+  - name: ln_att_w
+    description: 各层注意力 PreNorm 的 LayerNorm 仿射权重列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: ln_att_b
+    description: 各层注意力 PreNorm 的 LayerNorm 仿射偏置列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: qkv_w
+    description: 各层 qkv 融合线性权重列表（无 bias），长度 DEPTH=3，每个 [3*512, dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[3*512, dim], [3*512, dim], [3*512, dim]]'
+  - name: out_w
+    description: 各层注意力输出投影权重列表，长度 DEPTH=3，每个 [dim, 512]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim, 512], [dim, 512], [dim, 512]]'
+  - name: out_b
+    description: 各层注意力输出投影偏置列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: ln_ffn_w
+    description: 各层 FFN PreNorm 的 LayerNorm 仿射权重列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: ln_ffn_b
+    description: 各层 FFN PreNorm 的 LayerNorm 仿射偏置列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: ff1_w
+    description: 各层 FFN 第一层线性权重列表，长度 DEPTH=3，每个 [1024, dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[1024, dim], [1024, dim], [1024, dim]]'
+  - name: ff1_b
+    description: 各层 FFN 第一层线性偏置列表，长度 DEPTH=3，每个 [1024]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[1024], [1024], [1024]]'
+  - name: ff2_w
+    description: 各层 FFN 第二层线性权重列表，长度 DEPTH=3，每个 [dim, 1024]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim, 1024], [dim, 1024], [dim, 1024]]'
+  - name: ff2_b
+    description: 各层 FFN 第二层线性偏置列表，长度 DEPTH=3，每个 [dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[dim], [dim], [dim]]'
+  - name: conv3_w
+    description: Fusion 前 1x1 卷积权重 [C, dim, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, dim, 1, 1]'
+  - name: conv3_b
+    description: Fusion 前 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv4_w
+    description: Fusion 融合卷积权重 [C, 2*C, k, k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, 2*C, k, k]'
+  - name: conv4_b
+    description: Fusion 融合卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: mobile_vit_attention(Tensor x, Tensor conv1_w, Tensor conv1_b, Tensor conv2_w, Tensor conv2_b, List[Tensor] ln_att_w, List[Tensor] ln_att_b, List[Tensor] qkv_w, List[Tensor] out_w, List[Tensor] out_b, List[Tensor] ln_ffn_w, List[Tensor] ln_ffn_b, List[Tensor] ff1_w, List[Tensor] ff1_b, List[Tensor] ff2_w, List[Tensor] ff2_b, Tensor conv3_w, Tensor conv3_b, Tensor conv4_w, Tensor conv4_b, int patch_size, int kernel_size, int dim) -> Tensor y

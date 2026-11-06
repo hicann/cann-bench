@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,note
+JaggedSoftmax,1,"[[65536, 8], [9]]","[""float32"", ""int32""]","{""max_seq_len"": 8192}","[[-1, 1], [0, 65536]]",float32-T65536-H8-B8-msl8192-aligned-EQ-src0
+JaggedSoftmax,2,"[[69632, 32], [9]]","[""float32"", ""int32""]","{""max_seq_len"": 8704}","[[-1, 1], [0, 69632]]",float32-T69632-H32-B8-msl8704-aligned-EQ-src1
+JaggedSoftmax,3,"[[147456, 16], [17]]","[""float32"", ""int32""]","{""max_seq_len"": 9216}","[[-1, 1], [0, 147456]]",float32-T147456-H16-B16-msl9216-aligned-EQ-src2
+JaggedSoftmax,4,"[[311296, 8], [33]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 9728}","[[-1, 1], [0, 311296]]",bfloat16-T311296-H8-B32-msl9728-aligned-EQ-src3
+JaggedSoftmax,5,"[[81920, 64], [9]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 10240}","[[-1, 1], [0, 81920]]",bfloat16-T81920-H64-B8-msl10240-aligned-EQ-src4
+JaggedSoftmax,6,"[[48896, 8], [9]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 8064}","[[-1, 1], [0, 48896]]",bfloat16-T48896-H8-B8-msl8064-aligned-NEQ-src5
+JaggedSoftmax,7,"[[408832, 8], [65]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 8064}","[[-1, 1], [0, 408832]]",bfloat16-T408832-H8-B64-msl8064-aligned-NEQ-src6
+JaggedSoftmax,8,"[[1490944, 8], [129]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 11648}","[[-1, 1], [0, 1490944]]",bfloat16-T1490944-H8-B128-msl11648-aligned-EQ-src7-H8
+JaggedSoftmax,9,"[[3112960, 8], [257]]","[""float32"", ""int32""]","{""max_seq_len"": 12160}","[[-1, 1], [0, 3112960]]",float32-T3112960-H8-B256-msl12160-aligned-EQ-src8-H8
+JaggedSoftmax,10,"[[4194304, 8], [8193]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 512}","[[-1, 1], [0, 4194304]]",bfloat16-T4194304-H8-B8192-msl512-aligned-EQ-src20-H8
+JaggedSoftmax,11,"[[4194304, 4], [4097]]","[""float16"", ""int32""]","{""max_seq_len"": 1024}","[[-1, 1], [0, 4194304]]",float16-T4194304-H4-B4096-msl1024-aligned-EQ-src22-H4-fp16
+JaggedSoftmax,12,"[[3932160, 8], [2049]]","[""float32"", ""int32""]","{""max_seq_len"": 1920}","[[-1, 1], [0, 3932160]]",float32-T3932160-H8-B2048-msl1920-aligned-EQ-src27-H8
+JaggedSoftmax,13,"[[799200, 33], [2049]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 512}","[[-1, 1], [0, 799200]]",bfloat16-T799200-H33-B2048-msl512-unaligned-NEQ-src29-scaled-H33
+JaggedSoftmax,14,"[[3261952, 16], [8193]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 512}","[[-1, 1], [0, 3261952]]",bfloat16-T3261952-H16-B8192-msl512-aligned-NEQ-src30-H16
+JaggedSoftmax,15,"[[28925312, 2], [2049]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 17792}","[[-1, 1], [0, 28925312]]",bfloat16-T28925312-H2-B2048-msl17792-aligned-NEQ-src31-H2
+JaggedSoftmax,16,"[[3196288, 8], [2049]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 1920}","[[-1, 1], [0, 3196288]]",bfloat16-T3196288-H8-B2048-msl1920-aligned-NEQ-src32-H8
+JaggedSoftmax,17,"[[12648448, 3], [513]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 24704}","[[-1, 1], [0, 12648448]]",bfloat16-T12648448-H3-B512-msl24704-aligned-EQ-src33-H3
+JaggedSoftmax,18,"[[3885440, 16], [257]]","[""float32"", ""int32""]","{""max_seq_len"": 19328}","[[-1, 1], [0, 3885440]]",float32-T3885440-H16-B256-msl19328-aligned-NEQ-src35-H16
+JaggedSoftmax,19,"[[3314048, 16], [2049]]","[""float32"", ""int32""]","{""max_seq_len"": 1920}","[[-1, 1], [0, 3314048]]",float32-T3314048-H16-B2048-msl1920-aligned-NEQ-src47-H16
+JaggedSoftmax,20,"[[13668544, 4], [1025]]","[""bfloat16"", ""int32""]","{""max_seq_len"": 16640}","[[-1, 1], [0, 13668544]]",bfloat16-T13668544-H4-B1024-msl16640-aligned-NEQ-src28-scaled-H4

@@ -1,0 +1,80 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: PSA
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    ci  = channel // S,  x_g = view(x, [B, S, ci, H, W])
+    U_g = Conv2d_{k_g}(x_g)                    # 第 g 组: k_g = 2(g+1)+1, padding = g+1
+    s_g = Sigmoid(Conv1x1(ReLU(Conv1x1(AvgPool(U_g)))))
+    a   = softmax_{g}(s_g)                     # softmax along the S group dimension
+    y   = sum_g (U_g * a_g) -> [B, C, H, W]
+  description: PSA (Pyramid Squeeze Attention)：将通道均分为 S 组，用逐组递增核大小的深度分组卷积提取多尺度特征，再以 SE 风格逐组生成通道权重并在组维度做 softmax 后加权求和
+  shape_support: 'x: [B, C, H, W]，C = S * ci；conv_w: List（S 个 [ci, ci, 2(g+1)+1, 2(g+1)+1]，g=0..S-1）；conv_b: List（S 个 [ci]）；se_w1: List（S 个 [ci//reduction, ci, 1, 1]，无 bias）；se_w2: List（S 个 [ci, ci//reduction, 1, 1]，无 bias）；y: [B, C, H, W]'
+  attrs:
+  - name: channel
+    type: int
+    description: 输入通道数参数，组内通道数 ci = channel // S
+    required: true
+  - name: reduction
+    type: int
+    description: SE 模块的通道缩减比，须整除 ci
+    required: true
+  - name: S
+    type: int
+    description: 分组数（并行卷积分支数），决定各 TensorList 的长度
+    required: true
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv_w
+    description: S 组深度分组卷积权重，第 g 个为 [ci, ci, 2(g+1)+1, 2(g+1)+1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[ci, ci, 3, 3], [ci, ci, 5, 5], ...]（共 S 个，核大小 2(g+1)+1）'
+  - name: conv_b
+    description: S 组深度分组卷积偏置，每个 [ci]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[ci], [ci], ...]（共 S 个）'
+  - name: se_w1
+    description: S 组 SE 模块第一层 1x1 卷积权重（无 bias），每个 [ci//reduction, ci, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[ci//reduction, ci, 1, 1], ...]（共 S 个）'
+  - name: se_w2
+    description: S 组 SE 模块第二层 1x1 卷积权重（无 bias），每个 [ci, ci//reduction, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'List[[ci, ci//reduction, 1, 1], ...]（共 S 个）'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: psa(Tensor x, List[Tensor] conv_w, List[Tensor] conv_b, List[Tensor] se_w1, List[Tensor] se_w2, int channel, int reduction, int S) -> Tensor y

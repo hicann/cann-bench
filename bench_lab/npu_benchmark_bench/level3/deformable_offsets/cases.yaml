@@ -1,0 +1,432 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: DeformableOffsets
+  case_id: 1
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 3
+  - - 1
+    - 1
+    - 8
+    - 8
+  dtype:
+  - float16
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3069
+  note: float16/int32-B1H32W32C3-off1x8x8
+- operator: DeformableOffsets
+  case_id: 2
+  input_shape:
+  - - 2
+    - 8
+    - 12
+    - 3
+  - - 2
+    - 4
+    - 8
+    - 8
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 285
+  note: float32/int32-B2H8W12C3-off4x8x8
+- operator: DeformableOffsets
+  case_id: 3
+  input_shape:
+  - - 1
+    - 64
+    - 64
+    - 3
+  - - 1
+    - 4
+    - 8
+    - 8
+  dtype:
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 12285
+  note: float32/float32-B1H64W64C3-off4x8x8
+- operator: DeformableOffsets
+  case_id: 4
+  input_shape:
+  - - 1
+    - 16
+    - 16
+    - 3
+  - - 1
+    - 4
+    - 4
+    - 4
+  dtype:
+  - float16
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 765
+  note: float16/int32-B1H16W16C3-off4x4x4
+- operator: DeformableOffsets
+  case_id: 5
+  input_shape:
+  - - 2
+    - 8
+    - 8
+    - 3
+  - - 2
+    - 4
+    - 4
+    - 4
+  dtype:
+  - float16
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 189
+  note: float16/int32-B2H8W8C3-off4x4x4
+- operator: DeformableOffsets
+  case_id: 6
+  input_shape:
+  - - 2
+    - 256
+    - 256
+    - 3
+  - - 2
+    - 4
+    - 40
+    - 40
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B2H256W256C3-off4x40x40
+- operator: DeformableOffsets
+  case_id: 7
+  input_shape:
+  - - 1
+    - 256
+    - 256
+    - 3
+  - - 1
+    - 4
+    - 64
+    - 64
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B1H256W256C3-off4x64x64
+- operator: DeformableOffsets
+  case_id: 8
+  input_shape:
+  - - 2
+    - 256
+    - 256
+    - 3
+  - - 2
+    - 4
+    - 48
+    - 48
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B2H256W256C3-off4x48x48
+- operator: DeformableOffsets
+  case_id: 9
+  input_shape:
+  - - 4
+    - 512
+    - 512
+    - 3
+  - - 4
+    - 4
+    - 32
+    - 48
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B4H512W512C3-off4x32x48
+- operator: DeformableOffsets
+  case_id: 10
+  input_shape:
+  - - 1
+    - 512
+    - 512
+    - 3
+  - - 1
+    - 4
+    - 56
+    - 112
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B1H512W512C3-off4x56x112
+- operator: DeformableOffsets
+  case_id: 11
+  input_shape:
+  - - 2
+    - 256
+    - 256
+    - 3
+  - - 2
+    - 4
+    - 64
+    - 64
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B2H256W256C3-off4x64x64
+- operator: DeformableOffsets
+  case_id: 12
+  input_shape:
+  - - 1
+    - 512
+    - 512
+    - 3
+  - - 1
+    - 8
+    - 64
+    - 72
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B1H512W512C3-off8x64x72
+- operator: DeformableOffsets
+  case_id: 13
+  input_shape:
+  - - 2
+    - 256
+    - 256
+    - 3
+  - - 2
+    - 4
+    - 72
+    - 72
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B2H256W256C3-off4x72x72
+- operator: DeformableOffsets
+  case_id: 14
+  input_shape:
+  - - 2
+    - 512
+    - 512
+    - 3
+  - - 2
+    - 4
+    - 80
+    - 80
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B2H512W512C3-off4x80x80
+- operator: DeformableOffsets
+  case_id: 15
+  input_shape:
+  - - 2
+    - 256
+    - 256
+    - 3
+  - - 2
+    - 4
+    - 88
+    - 88
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 196605
+  note: float32/int32-B2H256W256C3-off4x88x88
+- operator: DeformableOffsets
+  case_id: 16
+  input_shape:
+  - - 1
+    - 512
+    - 512
+    - 3
+  - - 1
+    - 4
+    - 64
+    - 260
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B1H512W512C3-off4x64x260
+- operator: DeformableOffsets
+  case_id: 17
+  input_shape:
+  - - 1
+    - 512
+    - 512
+    - 3
+  - - 1
+    - 4
+    - 64
+    - 308
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B1H512W512C3-off4x64x308
+- operator: DeformableOffsets
+  case_id: 18
+  input_shape:
+  - - 1
+    - 1024
+    - 1024
+    - 3
+  - - 1
+    - 4
+    - 128
+    - 178
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3145725
+  note: float32/int32-B1H1024W1024C3-off4x128x178
+- operator: DeformableOffsets
+  case_id: 19
+  input_shape:
+  - - 1
+    - 512
+    - 512
+    - 3
+  - - 1
+    - 4
+    - 256
+    - 256
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 786429
+  note: float32/int32-B1H512W512C3-off4x256x256
+- operator: DeformableOffsets
+  case_id: 20
+  input_shape:
+  - - 2
+    - 1024
+    - 1024
+    - 3
+  - - 2
+    - 4
+    - 512
+    - 512
+  dtype:
+  - float32
+  - int32
+  attrs: {}
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3145725
+  note: float32/int32-B2H1024W1024C3-off4x512x512

@@ -1,0 +1,751 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: DAModule
+  case_id: 1
+  input_shape:
+  - - 1
+    - 64
+    - 23
+    - 23
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C64H23W23-k3-src1
+- operator: DAModule
+  case_id: 2
+  input_shape:
+  - - 1
+    - 8
+    - 31
+    - 31
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8H31W31-k3-src2
+- operator: DAModule
+  case_id: 3
+  input_shape:
+  - - 1
+    - 512
+    - 7
+    - 7
+  - - 512
+    - 512
+    - 3
+    - 3
+  - - 512
+  - - 512
+    - 512
+    - 3
+    - 3
+  - - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C512H7W7-k3-src3
+- operator: DAModule
+  case_id: 4
+  input_shape:
+  - - 2
+    - 64
+    - 17
+    - 17
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B2C64H17W17-k3-src4
+- operator: DAModule
+  case_id: 5
+  input_shape:
+  - - 1
+    - 64
+    - 31
+    - 31
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C64H31W31-k3-src5
+- operator: DAModule
+  case_id: 6
+  input_shape:
+  - - 1
+    - 1024
+    - 7
+    - 7
+  - - 1024
+    - 1024
+    - 3
+    - 3
+  - - 1024
+  - - 1024
+    - 1024
+    - 3
+    - 3
+  - - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C1024H7W7-k3-src6
+- operator: DAModule
+  case_id: 7
+  input_shape:
+  - - 1
+    - 32
+    - 23
+    - 23
+  - - 32
+    - 32
+    - 3
+    - 3
+  - - 32
+  - - 32
+    - 32
+    - 3
+    - 3
+  - - 32
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C32H23W23-k3-src7
+- operator: DAModule
+  case_id: 8
+  input_shape:
+  - - 1
+    - 512
+    - 8
+    - 8
+  - - 512
+    - 512
+    - 3
+    - 3
+  - - 512
+  - - 512
+    - 512
+    - 3
+    - 3
+  - - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C512H8W8-k3-src8
+- operator: DAModule
+  case_id: 9
+  input_shape:
+  - - 1
+    - 32
+    - 7
+    - 7
+  - - 32
+    - 32
+    - 3
+    - 3
+  - - 32
+  - - 32
+    - 32
+    - 3
+    - 3
+  - - 32
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C32H7W7-k3-src9
+- operator: DAModule
+  case_id: 10
+  input_shape:
+  - - 2
+    - 64
+    - 7
+    - 7
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B2C64H7W7-k3-src10
+- operator: DAModule
+  case_id: 11
+  input_shape:
+  - - 1
+    - 64
+    - 19
+    - 19
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C64H19W19-k3-src11
+- operator: DAModule
+  case_id: 12
+  input_shape:
+  - - 1
+    - 16
+    - 31
+    - 31
+  - - 16
+    - 16
+    - 3
+    - 3
+  - - 16
+  - - 16
+    - 16
+    - 3
+    - 3
+  - - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C16H31W31-k3-src12
+- operator: DAModule
+  case_id: 13
+  input_shape:
+  - - 2
+    - 128
+    - 13
+    - 13
+  - - 128
+    - 128
+    - 3
+    - 3
+  - - 128
+  - - 128
+    - 128
+    - 3
+    - 3
+  - - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B2C128H13W13-k3-src13
+- operator: DAModule
+  case_id: 14
+  input_shape:
+  - - 1
+    - 256
+    - 11
+    - 11
+  - - 256
+    - 256
+    - 3
+    - 3
+  - - 256
+  - - 256
+    - 256
+    - 3
+    - 3
+  - - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C256H11W11-k3-src14
+- operator: DAModule
+  case_id: 15
+  input_shape:
+  - - 1
+    - 64
+    - 7
+    - 7
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B1C64H7W7-k3-src17
+- operator: DAModule
+  case_id: 16
+  input_shape:
+  - - 2
+    - 16
+    - 72
+    - 72
+  - - 16
+    - 16
+    - 3
+    - 3
+  - - 16
+  - - 16
+    - 16
+    - 3
+    - 3
+  - - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C16H72W72-k3-src21
+- operator: DAModule
+  case_id: 17
+  input_shape:
+  - - 1
+    - 8
+    - 60
+    - 60
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8H60W60-k3-src26
+- operator: DAModule
+  case_id: 18
+  input_shape:
+  - - 1
+    - 8
+    - 53
+    - 53
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  - - 8
+    - 8
+    - 3
+    - 3
+  - - 8
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8H53W53-k3-src31
+- operator: DAModule
+  case_id: 19
+  input_shape:
+  - - 1
+    - 256
+    - 4
+    - 4
+  - - 256
+    - 256
+    - 3
+    - 3
+  - - 256
+  - - 256
+    - 256
+    - 3
+    - 3
+  - - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C256H4W4-k3-src35
+- operator: DAModule
+  case_id: 20
+  input_shape:
+  - - 4
+    - 64
+    - 13
+    - 13
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  - - 64
+    - 64
+    - 3
+    - 3
+  - - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C64H13W13-k3-src47

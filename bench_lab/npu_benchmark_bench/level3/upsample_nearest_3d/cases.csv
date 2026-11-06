@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,note
+UpsampleNearest3D,1,"[[1, 8, 8, 64, 64]]","[""float16""]","{""output_size"": [16, 128, 128]}","[[-1, 1]]",float16-src0-1x8x8x64x64-2x-align
+UpsampleNearest3D,2,"[[1, 16, 8, 64, 64]]","[""float16""]","{""output_size"": [16, 128, 128]}","[[-1, 1]]",float16-src1-1x16x8x64x64-2x
+UpsampleNearest3D,3,"[[1, 8, 16, 64, 64]]","[""float16""]","{""output_size"": [32, 128, 128]}","[[-1, 1]]",float16-src2-1x8x16x64x64-2x
+UpsampleNearest3D,4,"[[1, 4, 16, 128, 128]]","[""float16""]","{""output_size"": [32, 256, 256]}","[[-1, 1]]",float16-src3-1x4x16x128x128-2x
+UpsampleNearest3D,5,"[[1, 8, 32, 128, 128]]","[""float16""]","{""output_size"": [64, 256, 256]}","[[-1, 1]]",float16-src5-1x8x32x128x128-2x
+UpsampleNearest3D,6,"[[1, 8, 16, 128, 128]]","[""float16""]","{""output_size"": [32, 128, 128]}","[[-1, 1]]",float16-src4-1x8x16x128x128-2x-DHW-out128
+UpsampleNearest3D,7,"[[1, 16, 10, 256, 256]]","[""float16""]","{""output_size"": [20, 256, 256]}","[[-1, 1]]",float16-src7-D10-nonalign-2x
+UpsampleNearest3D,8,"[[4, 8, 16, 128, 128]]","[""float16""]","{""output_size"": [32, 128, 128]}","[[-1, 1]]",float16-src8-B4-1x8x16x128x128-2x
+UpsampleNearest3D,9,"[[1, 16, 13, 256, 256]]","[""float16""]","{""output_size"": [26, 256, 256]}","[[-1, 1]]",float16-src9-D13-nonalign-2x
+UpsampleNearest3D,10,"[[1, 16, 15, 256, 256]]","[""float16""]","{""output_size"": [30, 256, 256]}","[[-1, 1]]",float16-src10-D15-nonalign-2x
+UpsampleNearest3D,11,"[[1, 4, 32, 256, 256]]","[""float32""]","{""output_size"": [64, 256, 256]}","[[-1, 1]]",float32-src11-1x4x32x256x256-2x
+UpsampleNearest3D,12,"[[1, 16, 18, 256, 256]]","[""float16""]","{""output_size"": [36, 256, 256]}","[[-1, 1]]",float16-src12-D18-nonalign-2x
+UpsampleNearest3D,13,"[[1, 16, 21, 256, 256]]","[""float16""]","{""output_size"": [42, 256, 256]}","[[-1, 1]]",float16-src13-D21-nonalign-2x
+UpsampleNearest3D,14,"[[1, 16, 23, 256, 256]]","[""float16""]","{""output_size"": [46, 256, 256]}","[[-1, 1]]",float16-src14-D23-nonalign-2x
+UpsampleNearest3D,15,"[[1, 8, 50, 256, 256]]","[""float16""]","{""output_size"": [100, 256, 256]}","[[-1, 1]]",float16-src23-D50-2x-out256
+UpsampleNearest3D,16,"[[1, 16, 29, 192, 192]]","[""float16""]","{""output_size"": [58, 192, 192]}","[[-1, 1]]",float16-src26-D29-nonalign-2x-out192
+UpsampleNearest3D,17,"[[1, 4, 68, 256, 256]]","[""float16""]","{""output_size"": [136, 100, 100]}","[[-1, 1]]",float16-src30-D68-2x-nonalign-out100
+UpsampleNearest3D,18,"[[1, 4, 35, 512, 512]]","[""float16""]","{""output_size"": [70, 256, 256]}","[[-1, 1]]",float16-src32-D35-2x-D-out256
+UpsampleNearest3D,19,"[[1, 16, 24, 256, 256]]","[""float32""]","{""output_size"": [48, 256, 256]}","[[-1, 1]]",float32-src34-1x16x24x256x256-2x
+UpsampleNearest3D,20,"[[1, 16, 64, 192, 192]]","[""float16""]","{""output_size"": [128, 160, 160]}","[[-1, 1]]",float16-src48-D64-2x-nonalign-out160

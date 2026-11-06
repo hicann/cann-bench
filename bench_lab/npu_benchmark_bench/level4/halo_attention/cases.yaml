@@ -1,0 +1,751 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: HaloAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 8
+    - 2
+    - 2
+  - - 512
+    - 8
+  - - 1024
+    - 8
+  - - 8
+    - 512
+  - - 8
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 2
+    halo_size: 1
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C8H2W2-bs2-hs1-src1
+- operator: HaloAttention
+  case_id: 2
+  input_shape:
+  - - 4
+    - 256
+    - 32
+    - 40
+  - - 512
+    - 256
+  - - 1024
+    - 256
+  - - 256
+    - 512
+  - - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 8
+    halo_size: 4
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C256H32W40-bs8-hs4-src2
+- operator: HaloAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 64
+    - 45
+    - 105
+  - - 512
+    - 64
+  - - 1024
+    - 64
+  - - 64
+    - 512
+  - - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    block_size: 5
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C64H45W105-bs5-hs2-src3
+- operator: HaloAttention
+  case_id: 4
+  input_shape:
+  - - 6
+    - 192
+    - 38
+    - 10
+  - - 512
+    - 192
+  - - 1024
+    - 192
+  - - 192
+    - 512
+  - - 192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 2
+    halo_size: 1
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B6C192H38W10-bs2-hs1-src4
+- operator: HaloAttention
+  case_id: 5
+  input_shape:
+  - - 4
+    - 192
+    - 68
+    - 44
+  - - 512
+    - 192
+  - - 1024
+    - 192
+  - - 192
+    - 512
+  - - 192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 4
+    halo_size: 1
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C192H68W44-bs4-hs1-src5
+- operator: HaloAttention
+  case_id: 6
+  input_shape:
+  - - 2
+    - 448
+    - 126
+    - 54
+  - - 512
+    - 448
+  - - 1024
+    - 448
+  - - 448
+    - 512
+  - - 448
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    block_size: 6
+    halo_size: 1
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B2C448H126W54-bs6-hs1-src6
+- operator: HaloAttention
+  case_id: 7
+  input_shape:
+  - - 4
+    - 384
+    - 152
+    - 40
+  - - 512
+    - 384
+  - - 1024
+    - 384
+  - - 384
+    - 512
+  - - 384
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 8
+    halo_size: 3
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C384H152W40-bs8-hs3-src7
+- operator: HaloAttention
+  case_id: 8
+  input_shape:
+  - - 4
+    - 640
+    - 56
+    - 88
+  - - 512
+    - 640
+  - - 1024
+    - 640
+  - - 640
+    - 512
+  - - 640
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 8
+    halo_size: 0
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B4C640H56W88-bs8-hs0-src8
+- operator: HaloAttention
+  case_id: 9
+  input_shape:
+  - - 2
+    - 160
+    - 184
+    - 120
+  - - 512
+    - 160
+  - - 1024
+    - 160
+  - - 160
+    - 512
+  - - 160
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 8
+    halo_size: 3
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C160H184W120-bs8-hs3-src9
+- operator: HaloAttention
+  case_id: 10
+  input_shape:
+  - - 3
+    - 1024
+    - 84
+    - 68
+  - - 512
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 512
+  - - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 4
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B3C1024H84W68-bs4-hs2-src10
+- operator: HaloAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 1024
+    - 119
+    - 147
+  - - 512
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 512
+  - - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 7
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B1C1024H119W147-bs7-hs2-src11
+- operator: HaloAttention
+  case_id: 12
+  input_shape:
+  - - 2
+    - 512
+    - 104
+    - 136
+  - - 512
+    - 512
+  - - 1024
+    - 512
+  - - 512
+    - 512
+  - - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    block_size: 8
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float16-B2C512H104W136-bs8-hs2-src12
+- operator: HaloAttention
+  case_id: 13
+  input_shape:
+  - - 4
+    - 512
+    - 72
+    - 136
+  - - 512
+    - 512
+  - - 1024
+    - 512
+  - - 512
+    - 512
+  - - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    block_size: 8
+    halo_size: 4
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B4C512H72W136-bs8-hs4-src13
+- operator: HaloAttention
+  case_id: 14
+  input_shape:
+  - - 1
+    - 1280
+    - 120
+    - 168
+  - - 512
+    - 1280
+  - - 1024
+    - 1280
+  - - 1280
+    - 512
+  - - 1280
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    block_size: 8
+    halo_size: 1
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B1C1280H120W168-bs8-hs1-src14
+- operator: HaloAttention
+  case_id: 15
+  input_shape:
+  - - 2
+    - 1024
+    - 174
+    - 66
+  - - 512
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 512
+  - - 1024
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    block_size: 6
+    halo_size: 3
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: float32-B2C1024H174W66-bs6-hs3-src16
+- operator: HaloAttention
+  case_id: 16
+  input_shape:
+  - - 5
+    - 496
+    - 120
+    - 104
+  - - 512
+    - 496
+  - - 1024
+    - 496
+  - - 496
+    - 512
+  - - 496
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 8
+    halo_size: 4
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B5C496H120W104-bs8-hs4-src21
+- operator: HaloAttention
+  case_id: 17
+  input_shape:
+  - - 3
+    - 2048
+    - 102
+    - 66
+  - - 512
+    - 2048
+  - - 1024
+    - 2048
+  - - 2048
+    - 512
+  - - 2048
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 6
+    halo_size: 3
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B3C2048H102W66-bs6-hs3-src32
+- operator: HaloAttention
+  case_id: 18
+  input_shape:
+  - - 8
+    - 160
+    - 136
+    - 168
+  - - 512
+    - 160
+  - - 1024
+    - 160
+  - - 160
+    - 512
+  - - 160
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 8
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B8C160H136W168-bs8-hs2-src39
+- operator: HaloAttention
+  case_id: 19
+  input_shape:
+  - - 4
+    - 384
+    - 216
+    - 184
+  - - 512
+    - 384
+  - - 1024
+    - 384
+  - - 384
+    - 512
+  - - 384
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 8
+    halo_size: 2
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B4C384H216W184-bs8-hs2-src46
+- operator: HaloAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 1536
+    - 128
+    - 128
+  - - 512
+    - 1536
+  - - 1024
+    - 1536
+  - - 1536
+    - 512
+  - - 1536
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    block_size: 8
+    halo_size: 3
+    dim_head: 64
+    heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - -0.05
+    - 0.05
+  - - 0.0
+    - 0.0
+  note: bfloat16-B2C1536H128W128-bs8-hs3-src50

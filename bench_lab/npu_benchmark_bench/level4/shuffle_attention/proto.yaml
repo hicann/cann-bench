@@ -1,0 +1,95 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: ShuffleAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    x -> view(B*G, C//G, H, W) -> chunk(2)  =>  x0, x1     # 各 [B*G, C//(2G), H, W]
+    x_ch  = x0 * sigmoid(cw * GAP(x0) + cb)
+    x_sp  = x1 * sigmoid(sw * GroupNorm(x1, channel // (2G), gw, gb) + sb)
+    out   = channel_shuffle(cat([x_ch, x_sp], dim=1), groups=2)
+  description: Shuffle Attention 前向：组内通道注意力与空间注意力（GroupNorm + 逐组仿射）双分支拼接后做 channel shuffle；reduction 为接口兼容属性
+  shape_support: 'x: [B, C, H, W]；P = channel // (2 * G)；gn_weight/gn_bias: [P]；channel_weight/channel_bias/spatial_weight/spatial_bias: [1, P, 1, 1]；y: [B, C, H, W]；要求 G 整除 C 且 C // G 为偶数'
+  attrs:
+  - name: channel
+    type: int
+    description: 通道数属性，决定 GroupNorm 组数 channel // (2 * G)，须使该值等于 x 的 C // (2 * G)
+    required: true
+  - name: reduction
+    type: int
+    default: 16
+    description: 接口兼容属性，源实现未使用
+    required: false
+  - name: G
+    type: int
+    default: 8
+    description: 分组数，须整除 C 且 C // G 为偶数
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: gn_weight
+    description: GroupNorm 仿射权重 [channel // (2G)]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[channel // (2 * G)]'
+  - name: gn_bias
+    description: GroupNorm 仿射偏置 [channel // (2G)]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[channel // (2 * G)]'
+  - name: channel_weight
+    description: 通道注意力缩放参数 [1, channel // (2G), 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, channel // (2 * G), 1, 1]'
+  - name: channel_bias
+    description: 通道注意力偏移参数 [1, channel // (2G), 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, channel // (2 * G), 1, 1]'
+  - name: spatial_weight
+    description: 空间注意力缩放参数 [1, channel // (2G), 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, channel // (2 * G), 1, 1]'
+  - name: spatial_bias
+    description: 空间注意力偏移参数 [1, channel // (2G), 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, channel // (2 * G), 1, 1]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: shuffle_attention(Tensor x, Tensor gn_weight, Tensor gn_bias, Tensor channel_weight, Tensor channel_bias, Tensor spatial_weight, Tensor spatial_bias, int channel, int reduction, int G) -> Tensor y

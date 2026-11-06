@@ -1,0 +1,652 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: ViTAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 50
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 14
+  value_range:
+  - - -1
+    - 1
+  - &id001
+    - -0.03340765523905305
+    - 0.03340765523905305
+  - *id001
+  - *id001
+  - *id001
+  note: bfloat16-B1-S50-D896-H14-src1
+- operator: ViTAttention
+  case_id: 2
+  input_shape:
+  - - 3
+    - 65
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1
+    - 1
+  - &id002
+    - -0.03125
+    - 0.03125
+  - *id002
+  - *id002
+  - *id002
+  note: float32-B3-S65-D1024-H16-src2
+- operator: ViTAttention
+  case_id: 3
+  input_shape:
+  - - 2
+    - 901
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 3
+  value_range:
+  - - -1
+    - 1
+  - &id003
+    - -0.07216878364870323
+    - 0.07216878364870323
+  - *id003
+  - *id003
+  - *id003
+  note: float16-B2-S901-D192-H3-src3
+- operator: ViTAttention
+  case_id: 4
+  input_shape:
+  - - 3
+    - 26
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 8
+  value_range:
+  - - -1
+    - 1
+  - &id004
+    - -0.044194173824159216
+    - 0.044194173824159216
+  - *id004
+  - *id004
+  - *id004
+  note: float32-B3-S26-D512-H8-src4
+- operator: ViTAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 730
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 3
+  value_range:
+  - - -1
+    - 1
+  - &id005
+    - -0.07216878364870323
+    - 0.07216878364870323
+  - *id005
+  - *id005
+  - *id005
+  note: float16-B1-S730-D192-H3-src5
+- operator: ViTAttention
+  case_id: 6
+  input_shape:
+  - - 4
+    - 197
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 8
+  value_range:
+  - - -1
+    - 1
+  - &id006
+    - -0.044194173824159216
+    - 0.044194173824159216
+  - *id006
+  - *id006
+  - *id006
+  note: float32-B4-S197-D512-H8-src6
+- operator: ViTAttention
+  case_id: 7
+  input_shape:
+  - - 1
+    - 17
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 6
+  value_range:
+  - - -1
+    - 1
+  - &id007
+    - -0.051031036307982884
+    - 0.051031036307982884
+  - *id007
+  - *id007
+  - *id007
+  note: bfloat16-B1-S17-D384-H6-src7
+- operator: ViTAttention
+  case_id: 8
+  input_shape:
+  - - 2
+    - 401
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  - - 192
+    - 192
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 3
+  value_range:
+  - - -1
+    - 1
+  - &id008
+    - -0.07216878364870323
+    - 0.07216878364870323
+  - *id008
+  - *id008
+  - *id008
+  note: float32-B2-S401-D192-H3-src8
+- operator: ViTAttention
+  case_id: 9
+  input_shape:
+  - - 1
+    - 530
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 8
+  value_range:
+  - - -1
+    - 1
+  - &id009
+    - -0.044194173824159216
+    - 0.044194173824159216
+  - *id009
+  - *id009
+  - *id009
+  note: float32-B1-S530-D512-H8-src9
+- operator: ViTAttention
+  case_id: 10
+  input_shape:
+  - - 3
+    - 1208
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1
+    - 1
+  - &id010
+    - -0.03952847075210474
+    - 0.03952847075210474
+  - *id010
+  - *id010
+  - *id010
+  note: bfloat16-B3-S1208-D640-H10-src10
+- operator: ViTAttention
+  case_id: 11
+  input_shape:
+  - - 3
+    - 1192
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1
+    - 1
+  - &id011
+    - -0.03952847075210474
+    - 0.03952847075210474
+  - *id011
+  - *id011
+  - *id011
+  note: bfloat16-B3-S1192-D640-H10-src11
+- operator: ViTAttention
+  case_id: 12
+  input_shape:
+  - - 3
+    - 1088
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1
+    - 1
+  - &id012
+    - -0.03952847075210474
+    - 0.03952847075210474
+  - *id012
+  - *id012
+  - *id012
+  note: bfloat16-B3-S1088-D640-H10-src12
+- operator: ViTAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 1640
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1
+    - 1
+  - &id013
+    - -0.036084391824351615
+    - 0.036084391824351615
+  - *id013
+  - *id013
+  - *id013
+  note: float32-B1-S1640-D768-H12-src13
+- operator: ViTAttention
+  case_id: 14
+  input_shape:
+  - - 3
+    - 677
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  - - 896
+    - 896
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 14
+  value_range:
+  - - -1
+    - 1
+  - &id014
+    - -0.03340765523905305
+    - 0.03340765523905305
+  - *id014
+  - *id014
+  - *id014
+  note: float32-B3-S677-D896-H14-src14
+- operator: ViTAttention
+  case_id: 15
+  input_shape:
+  - - 3
+    - 1522
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 6
+  value_range:
+  - - -1
+    - 1
+  - &id015
+    - -0.051031036307982884
+    - 0.051031036307982884
+  - *id015
+  - *id015
+  - *id015
+  note: float16-B3-S1522-D384-H6-src15
+- operator: ViTAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 1416
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1
+    - 1
+  - &id016
+    - -0.036084391824351615
+    - 0.036084391824351615
+  - *id016
+  - *id016
+  - *id016
+  note: float32-B1-S1416-D768-H12-src16
+- operator: ViTAttention
+  case_id: 17
+  input_shape:
+  - - 1
+    - 1226
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 18
+  value_range:
+  - - -1
+    - 1
+  - &id017
+    - -0.029462782549439483
+    - 0.029462782549439483
+  - *id017
+  - *id017
+  - *id017
+  note: float32-B1-S1226-D1152-H18-src17
+- operator: ViTAttention
+  case_id: 18
+  input_shape:
+  - - 4
+    - 730
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1
+    - 1
+  - &id018
+    - -0.03125
+    - 0.03125
+  - *id018
+  - *id018
+  - *id018
+  note: float16-B4-S730-D1024-H16-src18
+- operator: ViTAttention
+  case_id: 19
+  input_shape:
+  - - 1
+    - 1664
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1
+    - 1
+  - &id019
+    - -0.036084391824351615
+    - 0.036084391824351615
+  - *id019
+  - *id019
+  - *id019
+  note: float32-B1-S1664-D768-H12-src19
+- operator: ViTAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 785
+    - 2304
+  - - 2304
+    - 2304
+  - - 2304
+    - 2304
+  - - 2304
+    - 2304
+  - - 2304
+    - 2304
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 18
+  value_range:
+  - - -1
+    - 1
+  - &id020
+    - -0.020833333333333332
+    - 0.020833333333333332
+  - *id020
+  - *id020
+  - *id020
+  note: bfloat16-B2-S785-D2304-H18-src20

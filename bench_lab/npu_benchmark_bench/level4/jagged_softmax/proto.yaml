@@ -1,0 +1,47 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: JaggedSoftmax
+  category: NumericalStable
+  difficulty: L4
+  formula: |
+    N_b = min(offsets[b+1] - offsets[b], max_seq_len)
+    y[start_b + i, h] = exp(x[start_b + i, h] - m_b) / sum_{j=0}^{N_b-1} exp(x[start_b + j, h] - m_b),  i < N_b
+    y[start_b + i, h] = 0,  i >= N_b
+  description: 变长序列（jagged）softmax，对每条序列在拼接维上的前 max_seq_len 行沿序列维做归一化，超出部分输出 0
+  shape_support: 'x: [sum_L, H], x_offsets: [B+1], y: [sum_L, H]；B = len(x_offsets) - 1'
+  attrs:
+  - name: max_seq_len
+    type: int
+    description: 每条序列参与归一化的最大行数
+    required: true
+  inputs:
+  - name: x
+    description: 变长序列拼接后的打分/特征，形状 [sum_L, H]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, H]'
+  - name: x_offsets
+    description: 各序列在 sum_L 维上的起止偏移，单调不减，形状 [B+1]
+    dtype:
+    - int32
+    shape: '[B+1]'
+  outputs:
+  - name: y
+    description: 与 x 同形同 dtype 的 softmax 结果，超出 max_seq_len 的行保持 0
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, H]'
+  schema: jagged_softmax(Tensor x, Tensor x_offsets, int max_seq_len) -> Tensor y

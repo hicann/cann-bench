@@ -1,0 +1,55 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: NystromAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    y = softmax(q @ k^T * scale) @ v                              (landmarks >= sequence)
+    y = K1 @ K2^+ @ K3 @ v                                        (landmarks <  sequence)
+  description: Nyström 近似注意力，以 landmarks 个地标对注意力矩阵做低秩近似，K2 的伪逆由 6 次 Newton-Schulz 迭代近似
+  shape_support: 'q/k/v: [B, H, S, D]，y: [B, S, H*D]；landmarks = min(S, num_landmarks)'
+  attrs:
+  - name: num_landmarks
+    type: int
+    description: landmark 数量，实际使用 min(S, num_landmarks)；不小于 S 时退化为完整 softmax 注意力
+    required: true
+  inputs:
+  - name: q
+    description: query 张量 [B, H, S, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, S, D]'
+  - name: k
+    description: key 张量 [B, H, S, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, S, D]'
+  - name: v
+    description: value 张量 [B, H, S, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, S, D]'
+  outputs:
+  - name: y
+    description: 注意力输出 [B, S, H*D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, S, H*D]'
+  schema: nystrom_attention(Tensor q, Tensor k, Tensor v, int num_landmarks) -> Tensor y

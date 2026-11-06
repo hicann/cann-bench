@@ -1,0 +1,74 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: SlaFwd
+  category: SparseAttention
+  difficulty: L4
+  formula: |
+    arg_k = k - mean(k, dim=-2)
+    qm = block_mean(q, BLKQ), km = block_mean(arg_k, BLKK)
+    score = qm @ km^T, 每个 query 块选 topk_ratio 比例的最高分 key 块
+    o_s = softmax(sparse(q @ k^T * D^-0.5)) @ v
+    o_l = (phi(q) @ (phi(k)^T @ v)) / (1e-5 + (phi(q) * sum(phi(k))).sum(-1)) @ W_l^T
+    y = o_s + o_l
+  description: SparseLinearAttention 前向，块稀疏注意力与线性注意力融合
+  shape_support: 'q/k/v: [B, H, L, D], W_l: [D, D], y: [B, H, L, D]'
+  attrs:
+  - name: topk
+    type: float
+    description: key 块选择比例，0 < topk <= 1
+    required: true
+  - name: feature_map
+    type: string
+    description: 线性分支特征图，"elu" / "relu" / "softmax"
+    required: true
+  - name: BLKQ
+    type: int
+    description: query 分块大小
+    required: true
+  - name: BLKK
+    type: int
+    description: key 分块大小
+    required: true
+  inputs:
+  - name: q
+    description: query
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, L, D]'
+  - name: k
+    description: key
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, L, D]'
+  - name: v
+    description: value
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, L, D]'
+  - name: W_l
+    description: 线性分支输出投影权重
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[D, D]'
+  outputs:
+  - name: y
+    description: 融合输出
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, L, D]'
+  schema: sla_fwd(Tensor q, Tensor k, Tensor v, Tensor W_l, float topk, str feature_map, int BLKQ, int BLKK) -> Tensor y
+

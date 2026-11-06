@@ -1,0 +1,712 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: ScaledDotProductAttentionBackward
+  case_id: 1
+  input_shape:
+  - &id001
+    - 1
+    - 8
+    - 256
+    - 64
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - - 1
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id002
+    - -1.0
+    - 1.0
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - - 0.0
+    - 10.0
+  note: float16-B1H8S256D64-causal0-src1
+- operator: ScaledDotProductAttentionBackward
+  case_id: 2
+  input_shape:
+  - &id003
+    - 1
+    - 16
+    - 256
+    - 64
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - - 1
+    - 16
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id004
+    - -1.0
+    - 1.0
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - - 0.0
+    - 10.0
+  note: float16-B1H16S256D64-causal0-src2
+- operator: ScaledDotProductAttentionBackward
+  case_id: 3
+  input_shape:
+  - &id005
+    - 4
+    - 8
+    - 256
+    - 64
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - - 4
+    - 8
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id006
+    - -1.0
+    - 1.0
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - - 0.0
+    - 10.0
+  note: float16-B4H8S256D64-causal0-src3
+- operator: ScaledDotProductAttentionBackward
+  case_id: 4
+  input_shape:
+  - &id007
+    - 1
+    - 16
+    - 256
+    - 128
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - - 1
+    - 16
+    - 256
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id008
+    - -1.0
+    - 1.0
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - - 0.0
+    - 10.0
+  note: float16-B1H16S256D128-causal0-src4
+- operator: ScaledDotProductAttentionBackward
+  case_id: 5
+  input_shape:
+  - &id009
+    - 2
+    - 16
+    - 256
+    - 128
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - - 2
+    - 16
+    - 256
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id010
+    - -1.0
+    - 1.0
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - - 0.0
+    - 10.0
+  note: bfloat16-B2H16S256D128-causal0-src5
+- operator: ScaledDotProductAttentionBackward
+  case_id: 6
+  input_shape:
+  - &id011
+    - 1
+    - 16
+    - 384
+    - 128
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - - 1
+    - 16
+    - 384
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id012
+    - -1.0
+    - 1.0
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - - 0.0
+    - 10.0
+  note: float32-B1H16S384D128-causal0-src6
+- operator: ScaledDotProductAttentionBackward
+  case_id: 7
+  input_shape:
+  - &id013
+    - 1
+    - 8
+    - 512
+    - 64
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - - 1
+    - 8
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id014
+    - -1.0
+    - 1.0
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - - 0.0
+    - 10.0
+  note: float32-B1H8S512D64-causal0-src7
+- operator: ScaledDotProductAttentionBackward
+  case_id: 8
+  input_shape:
+  - &id015
+    - 4
+    - 16
+    - 512
+    - 64
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - - 4
+    - 16
+    - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id016
+    - -1.0
+    - 1.0
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - - 0.0
+    - 10.0
+  note: float16-B4H16S512D64-causal0-src8
+- operator: ScaledDotProductAttentionBackward
+  case_id: 9
+  input_shape:
+  - &id017
+    - 2
+    - 12
+    - 1024
+    - 64
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - - 2
+    - 12
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id018
+    - -1.0
+    - 1.0
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - - 0.0
+    - 10.0
+  note: float16-B2H12S1024D64-causal0-src9
+- operator: ScaledDotProductAttentionBackward
+  case_id: 10
+  input_shape:
+  - &id019
+    - 1
+    - 28
+    - 1024
+    - 128
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - - 1
+    - 28
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id020
+    - -1.0
+    - 1.0
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - - 0.0
+    - 10.0
+  note: bfloat16-B1H28S1024D128-causal0-src10
+- operator: ScaledDotProductAttentionBackward
+  case_id: 11
+  input_shape:
+  - &id021
+    - 2
+    - 8
+    - 1500
+    - 64
+  - *id021
+  - *id021
+  - *id021
+  - *id021
+  - - 2
+    - 8
+    - 1500
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id022
+    - -1.0
+    - 1.0
+  - *id022
+  - *id022
+  - *id022
+  - *id022
+  - - 0.0
+    - 10.0
+  note: float16-B2H8S1500D64-causal0-src11
+- operator: ScaledDotProductAttentionBackward
+  case_id: 12
+  input_shape:
+  - &id023
+    - 1
+    - 32
+    - 1024
+    - 128
+  - *id023
+  - *id023
+  - *id023
+  - *id023
+  - - 1
+    - 32
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id024
+    - -1.0
+    - 1.0
+  - *id024
+  - *id024
+  - *id024
+  - *id024
+  - - 0.0
+    - 10.0
+  note: bfloat16-B1H32S1024D128-causal0-src12
+- operator: ScaledDotProductAttentionBackward
+  case_id: 13
+  input_shape:
+  - &id025
+    - 3
+    - 16
+    - 1024
+    - 64
+  - *id025
+  - *id025
+  - *id025
+  - *id025
+  - - 3
+    - 16
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id026
+    - -1.0
+    - 1.0
+  - *id026
+  - *id026
+  - *id026
+  - *id026
+  - - 0.0
+    - 10.0
+  note: float16-B3H16S1024D64-causal0-src13
+- operator: ScaledDotProductAttentionBackward
+  case_id: 14
+  input_shape:
+  - &id027
+    - 1
+    - 40
+    - 1024
+    - 128
+  - *id027
+  - *id027
+  - *id027
+  - *id027
+  - - 1
+    - 40
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id028
+    - -1.0
+    - 1.0
+  - *id028
+  - *id028
+  - *id028
+  - *id028
+  - - 0.0
+    - 10.0
+  note: bfloat16-B1H40S1024D128-causal0-src14
+- operator: ScaledDotProductAttentionBackward
+  case_id: 15
+  input_shape:
+  - &id029
+    - 2
+    - 32
+    - 768
+    - 128
+  - *id029
+  - *id029
+  - *id029
+  - *id029
+  - - 2
+    - 32
+    - 768
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id030
+    - -1.0
+    - 1.0
+  - *id030
+  - *id030
+  - *id030
+  - *id030
+  - - 0.0
+    - 10.0
+  note: bfloat16-B2H32S768D128-causal0-src15
+- operator: ScaledDotProductAttentionBackward
+  case_id: 16
+  input_shape:
+  - &id031
+    - 3
+    - 16
+    - 768
+    - 128
+  - *id031
+  - *id031
+  - *id031
+  - *id031
+  - - 3
+    - 16
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id032
+    - -1.0
+    - 1.0
+  - *id032
+  - *id032
+  - *id032
+  - *id032
+  - - 0.0
+    - 10.0
+  note: float32-B3H16S768D128-causal0-src20
+- operator: ScaledDotProductAttentionBackward
+  case_id: 17
+  input_shape:
+  - &id033
+    - 2
+    - 32
+    - 768
+    - 128
+  - *id033
+  - *id033
+  - *id033
+  - *id033
+  - - 2
+    - 32
+    - 768
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  attrs:
+    is_causal: true
+  value_range:
+  - &id034
+    - -1.0
+    - 1.0
+  - *id034
+  - *id034
+  - *id034
+  - *id034
+  - - 0.0
+    - 10.0
+  note: bfloat16-B2H32S768D128-causal1-src22
+- operator: ScaledDotProductAttentionBackward
+  case_id: 18
+  input_shape:
+  - &id035
+    - 2
+    - 8
+    - 1568
+    - 128
+  - *id035
+  - *id035
+  - *id035
+  - *id035
+  - - 2
+    - 8
+    - 1568
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id036
+    - -1.0
+    - 1.0
+  - *id036
+  - *id036
+  - *id036
+  - *id036
+  - - 0.0
+    - 10.0
+  note: float32-B2H8S1568D128-causal0-src24
+- operator: ScaledDotProductAttentionBackward
+  case_id: 19
+  input_shape:
+  - &id037
+    - 2
+    - 40
+    - 640
+    - 128
+  - *id037
+  - *id037
+  - *id037
+  - *id037
+  - - 2
+    - 40
+    - 640
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id038
+    - -1.0
+    - 1.0
+  - *id038
+  - *id038
+  - *id038
+  - *id038
+  - - 0.0
+    - 10.0
+  note: float32-B2H40S640D128-causal0-src27
+- operator: ScaledDotProductAttentionBackward
+  case_id: 20
+  input_shape:
+  - &id039
+    - 2
+    - 32
+    - 1024
+    - 80
+  - *id039
+  - *id039
+  - *id039
+  - *id039
+  - - 2
+    - 32
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  attrs:
+    is_causal: false
+  value_range:
+  - &id040
+    - -1.0
+    - 1.0
+  - *id040
+  - *id040
+  - *id040
+  - *id040
+  - - 0.0
+    - 10.0
+  note: float16-B2H32S1024D80-causal0-src28

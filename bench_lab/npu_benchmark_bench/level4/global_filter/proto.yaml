@@ -1,0 +1,57 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: GlobalFilter
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    x_s = x.view(B, H, W, C).float()                                  # 内部上转 fp32
+    X_f = rfft2(x_s, dim=(1, 2), norm='ortho')                        # [B, H, W//2+1, C] complex64
+    W_c = view_as_complex(weight)                                     # weight: [H, W//2+1, C, 2] fp32
+    Y_f = X_f * W_c
+    y   = irfft2(Y_f, s=(H, W), dim=(1, 2), norm='ortho').reshape(B, H*W, C).to(x.dtype)
+  description: 全局频域滤波（GFNet）：把 token 序列 reshape 成二维网格做 rfft2，与可学习复数滤波器逐元素相乘后再 irfft2 变换回空间域
+  shape_support: 'x: [B, N, C]，N = H*W；weight: [H, W//2+1, C, 2]，float32；y: [B, N, C]，dtype 与 x 一致'
+  attrs:
+  - name: dim
+    type: int
+    description: 通道维大小（源实现仅用于缓存键，不参与数学计算）
+    required: true
+  - name: h
+    type: int
+    description: 频域网格高度，须满足 h * w == N
+    required: true
+  - name: w
+    type: int
+    description: 频域网格宽度，须满足 h * w == N
+    required: true
+  inputs:
+  - name: x
+    description: 输入 token 序列 [B, N, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, N, C]'
+  - name: weight
+    description: 频域滤波器（实部/虚部堆叠）[H, W//2+1, C, 2]
+    dtype:
+    - float32
+    shape: '[H, W // 2 + 1, C, 2]'
+  outputs:
+  - name: y
+    description: 输出 token 序列 [B, N, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, N, C]'
+  schema: global_filter(Tensor x, Tensor weight, int dim, int h, int w) -> Tensor y

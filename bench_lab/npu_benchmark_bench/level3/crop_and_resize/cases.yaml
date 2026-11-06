@@ -1,0 +1,572 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: CropAndResize
+  case_id: 1
+  input_shape:
+  - - 2
+    - 8
+    - 8
+    - 3
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 4
+    - 4
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-x[2, 8, 8, 3]-nb4-crop4x4-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 2
+  input_shape:
+  - - 1
+    - 16
+    - 16
+    - 3
+  - - 3
+    - 4
+  - - 3
+  dtype:
+  - float16
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 7
+    - 5
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float16-x[1, 16, 16, 3]-nb3-crop7x5-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 3
+  input_shape:
+  - - 2
+    - 12
+    - 12
+    - 4
+  - - 5
+    - 4
+  - - 5
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 6
+    - 6
+    extrapolation_value: 0.5
+    method: nearest
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float32-x[2, 12, 12, 4]-nb5-crop6x6-nearest-ext0.5
+- operator: CropAndResize
+  case_id: 4
+  input_shape:
+  - - 1
+    - 24
+    - 24
+    - 2
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float16
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 8
+    - 8
+    extrapolation_value: -1.0
+    method: bilinear_v2
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float16-x[1, 24, 24, 2]-nb4-crop8x8-bilinear_v2-ext-1.0
+- operator: CropAndResize
+  case_id: 5
+  input_shape:
+  - - 3
+    - 8
+    - 8
+    - 3
+  - - 2
+    - 4
+  - - 2
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 1
+    - 4
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 2
+  note: float32-x[3, 8, 8, 3]-nb2-crop1x4-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 6
+  input_shape:
+  - - 2
+    - 16
+    - 16
+    - 3
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float16
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 3
+    - 5
+    extrapolation_value: 0.0
+    method: nearest
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1
+  note: float16-x[2, 16, 16, 3]-nb4-crop3x5-nearest-ext0.0
+- operator: CropAndResize
+  case_id: 7
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 3
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 16
+    - 8
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 8, 8, 3]-nb4-crop16x8-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 8
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 3
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 3
+    - 5
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 8, 8, 3]-nb4-crop3x5-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 9
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 3
+  - - 4
+    - 4
+  - - 4
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 2
+    - 2
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 8, 8, 3]-nb4-crop2x2-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 10
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 3
+  - - 5
+    - 4
+  - - 5
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 4
+    - 4
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 8, 8, 3]-nb5-crop4x4-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 11
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 3
+  - - 5
+    - 4
+  - - 5
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 7
+    - 7
+    extrapolation_value: 0.0
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 8, 8, 3]-nb5-crop7x7-bilinear-ext0.0
+- operator: CropAndResize
+  case_id: 12
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 4
+    - 4
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop4x4-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 13
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 7
+    - 7
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop7x7-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 14
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 1
+    - 1
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop1x1-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 15
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 16
+    - 8
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop16x8-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 16
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 3
+    - 5
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop3x5-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 17
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 16
+    - 4
+  - - 16
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 2
+    - 2
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb16-crop2x2-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 18
+  input_shape:
+  - - 1
+    - 32
+    - 32
+    - 1
+  - - 17
+    - 4
+  - - 17
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 4
+    - 4
+    extrapolation_value: 0.5
+    method: bilinear
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 0
+  note: float32-x[1, 32, 32, 1]-nb17-crop4x4-bilinear-ext0.5
+- operator: CropAndResize
+  case_id: 19
+  input_shape:
+  - - 4
+    - 8
+    - 12
+    - 4
+  - - 6
+    - 4
+  - - 6
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 4
+    - 4
+    extrapolation_value: 0.0
+    method: nearest
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 3
+  note: float32-x[4, 8, 12, 4]-nb6-crop4x4-nearest-ext0.0
+- operator: CropAndResize
+  case_id: 20
+  input_shape:
+  - - 4
+    - 8
+    - 12
+    - 4
+  - - 6
+    - 4
+  - - 6
+  dtype:
+  - float32
+  - float32
+  - int32
+  attrs:
+    crop_size:
+    - 7
+    - 7
+    extrapolation_value: 0.0
+    method: nearest
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 3
+  note: float32-x[4, 8, 12, 4]-nb6-crop7x7-nearest-ext0.0

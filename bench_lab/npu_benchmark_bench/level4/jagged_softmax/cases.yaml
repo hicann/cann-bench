@@ -1,0 +1,352 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: JaggedSoftmax
+  case_id: 1
+  input_shape:
+  - - 65536
+    - 8
+  - - 9
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 8192
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 65536
+  note: float32-T65536-H8-B8-msl8192-aligned-EQ-src0
+- operator: JaggedSoftmax
+  case_id: 2
+  input_shape:
+  - - 69632
+    - 32
+  - - 9
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 8704
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 69632
+  note: float32-T69632-H32-B8-msl8704-aligned-EQ-src1
+- operator: JaggedSoftmax
+  case_id: 3
+  input_shape:
+  - - 147456
+    - 16
+  - - 17
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 9216
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 147456
+  note: float32-T147456-H16-B16-msl9216-aligned-EQ-src2
+- operator: JaggedSoftmax
+  case_id: 4
+  input_shape:
+  - - 311296
+    - 8
+  - - 33
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 9728
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 311296
+  note: bfloat16-T311296-H8-B32-msl9728-aligned-EQ-src3
+- operator: JaggedSoftmax
+  case_id: 5
+  input_shape:
+  - - 81920
+    - 64
+  - - 9
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 10240
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 81920
+  note: bfloat16-T81920-H64-B8-msl10240-aligned-EQ-src4
+- operator: JaggedSoftmax
+  case_id: 6
+  input_shape:
+  - - 48896
+    - 8
+  - - 9
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 8064
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 48896
+  note: bfloat16-T48896-H8-B8-msl8064-aligned-NEQ-src5
+- operator: JaggedSoftmax
+  case_id: 7
+  input_shape:
+  - - 408832
+    - 8
+  - - 65
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 8064
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 408832
+  note: bfloat16-T408832-H8-B64-msl8064-aligned-NEQ-src6
+- operator: JaggedSoftmax
+  case_id: 8
+  input_shape:
+  - - 1490944
+    - 8
+  - - 129
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 11648
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1490944
+  note: bfloat16-T1490944-H8-B128-msl11648-aligned-EQ-src7-H8
+- operator: JaggedSoftmax
+  case_id: 9
+  input_shape:
+  - - 3112960
+    - 8
+  - - 257
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 12160
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3112960
+  note: float32-T3112960-H8-B256-msl12160-aligned-EQ-src8-H8
+- operator: JaggedSoftmax
+  case_id: 10
+  input_shape:
+  - - 4194304
+    - 8
+  - - 8193
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 4194304
+  note: bfloat16-T4194304-H8-B8192-msl512-aligned-EQ-src20-H8
+- operator: JaggedSoftmax
+  case_id: 11
+  input_shape:
+  - - 4194304
+    - 4
+  - - 4097
+  dtype:
+  - float16
+  - int32
+  attrs:
+    max_seq_len: 1024
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 4194304
+  note: float16-T4194304-H4-B4096-msl1024-aligned-EQ-src22-H4-fp16
+- operator: JaggedSoftmax
+  case_id: 12
+  input_shape:
+  - - 3932160
+    - 8
+  - - 2049
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 1920
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3932160
+  note: float32-T3932160-H8-B2048-msl1920-aligned-EQ-src27-H8
+- operator: JaggedSoftmax
+  case_id: 13
+  input_shape:
+  - - 799200
+    - 33
+  - - 2049
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 799200
+  note: bfloat16-T799200-H33-B2048-msl512-unaligned-NEQ-src29-scaled-H33
+- operator: JaggedSoftmax
+  case_id: 14
+  input_shape:
+  - - 3261952
+    - 16
+  - - 8193
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3261952
+  note: bfloat16-T3261952-H16-B8192-msl512-aligned-NEQ-src30-H16
+- operator: JaggedSoftmax
+  case_id: 15
+  input_shape:
+  - - 28925312
+    - 2
+  - - 2049
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 17792
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 28925312
+  note: bfloat16-T28925312-H2-B2048-msl17792-aligned-NEQ-src31-H2
+- operator: JaggedSoftmax
+  case_id: 16
+  input_shape:
+  - - 3196288
+    - 8
+  - - 2049
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 1920
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3196288
+  note: bfloat16-T3196288-H8-B2048-msl1920-aligned-NEQ-src32-H8
+- operator: JaggedSoftmax
+  case_id: 17
+  input_shape:
+  - - 12648448
+    - 3
+  - - 513
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 24704
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 12648448
+  note: bfloat16-T12648448-H3-B512-msl24704-aligned-EQ-src33-H3
+- operator: JaggedSoftmax
+  case_id: 18
+  input_shape:
+  - - 3885440
+    - 16
+  - - 257
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 19328
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3885440
+  note: float32-T3885440-H16-B256-msl19328-aligned-NEQ-src35-H16
+- operator: JaggedSoftmax
+  case_id: 19
+  input_shape:
+  - - 3314048
+    - 16
+  - - 2049
+  dtype:
+  - float32
+  - int32
+  attrs:
+    max_seq_len: 1920
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 3314048
+  note: float32-T3314048-H16-B2048-msl1920-aligned-NEQ-src47-H16
+- operator: JaggedSoftmax
+  case_id: 20
+  input_shape:
+  - - 13668544
+    - 4
+  - - 1025
+  dtype:
+  - bfloat16
+  - int32
+  attrs:
+    max_seq_len: 16640
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 13668544
+  note: bfloat16-T13668544-H4-B1024-msl16640-aligned-NEQ-src28-scaled-H4

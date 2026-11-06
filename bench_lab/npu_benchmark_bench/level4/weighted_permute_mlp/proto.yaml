@@ -1,0 +1,115 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: WeightedPermuteMLP
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    c_embed = x @ Wc^T + bc
+    h_embed = permute(mlp_h(permute(x)))
+    w_embed = permute(mlp_w(permute(x)))
+    z = (c_embed + h_embed + w_embed).mean(H, W)
+    a = softmax(reshape(fc2(GELU(fc1(z))), C, 3), dim=0)
+    y = (c_embed * a[0] + w_embed * a[1] + h_embed * a[2]) @ Wp^T + bp
+  description: Weighted Permute MLP（ViP），沿 channel / height / width 三方向分别线性投影后 softmax 重加权融合
+  shape_support: 'x: [B, H, W, C], mlp_c_weight: [C, C], mlp_h_weight: [H*S, H*S], mlp_w_weight: [W*S, W*S] (S = C/seg_dim), mlp_fc1_weight: [C//4, C], mlp_fc2_weight: [3C, C//4], proj_weight: [C, C], y: [B, H, W, C]'
+  attrs:
+  - name: dim
+    type: int
+    description: 特征维度（实现以实际输入 channel 为准）
+    required: true
+  - name: seg_dim
+    type: int
+    description: 分组大小，需整除 C 与 H*W（不整除时实现向下调整）
+    required: true
+  - name: qkv_bias
+    type: bool
+    default: "false"
+    description: 三个方向投影是否使用偏置
+    required: false
+  - name: proj_drop
+    type: float
+    default: 0.0
+    description: 输出 dropout 概率（推理路径恒为 identity）
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图
+    dtype:
+    - float32
+    shape: '[B, H, W, C]'
+  - name: mlp_c_weight
+    description: channel 方向投影权重
+    dtype:
+    - float32
+    shape: '[C, C]'
+  - name: mlp_c_bias
+    description: channel 方向投影偏置，qkv_bias 为 True 时使用
+    dtype:
+    - float32
+    shape: '[C]'
+  - name: mlp_h_weight
+    description: height 方向投影权重
+    dtype:
+    - float32
+    shape: '[H*S, H*S]'
+  - name: mlp_h_bias
+    description: height 方向投影偏置，qkv_bias 为 True 时使用
+    dtype:
+    - float32
+    shape: '[H*S]'
+  - name: mlp_w_weight
+    description: width 方向投影权重
+    dtype:
+    - float32
+    shape: '[W*S, W*S]'
+  - name: mlp_w_bias
+    description: width 方向投影偏置，qkv_bias 为 True 时使用
+    dtype:
+    - float32
+    shape: '[W*S]'
+  - name: mlp_fc1_weight
+    description: 重加权 MLP 第一层权重
+    dtype:
+    - float32
+    shape: '[C//4, C]'
+  - name: mlp_fc1_bias
+    description: 重加权 MLP 第一层偏置
+    dtype:
+    - float32
+    shape: '[C//4]'
+  - name: mlp_fc2_weight
+    description: 重加权 MLP 第二层权重
+    dtype:
+    - float32
+    shape: '[3*C, C//4]'
+  - name: mlp_fc2_bias
+    description: 重加权 MLP 第二层偏置
+    dtype:
+    - float32
+    shape: '[3*C]'
+  - name: proj_weight
+    description: 输出投影权重
+    dtype:
+    - float32
+    shape: '[C, C]'
+  - name: proj_bias
+    description: 输出投影偏置
+    dtype:
+    - float32
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图
+    dtype:
+    - float32
+    shape: '[B, H, W, C]'
+  schema: weighted_permute_mlp(Tensor x, Tensor mlp_c_weight, Tensor mlp_c_bias, Tensor mlp_h_weight, Tensor mlp_h_bias, Tensor mlp_w_weight, Tensor mlp_w_bias, Tensor mlp_fc1_weight, Tensor mlp_fc1_bias, Tensor mlp_fc2_weight, Tensor mlp_fc2_bias, Tensor proj_weight, Tensor proj_bias, int dim, int seg_dim, bool qkv_bias=False, float proj_drop=0.0) -> Tensor y

@@ -1,0 +1,75 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: DAModule
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    y_pos     = conv_pos(x).view(B, C, N).permute(0, 2, 1)              # [B, N, C]
+    attn_pos  = softmax(bmm(y_pos_f, y_pos_f^T) * C^-0.5, dim=-1)       # y_pos_f = y_pos.float()
+    out_pos   = bmm(attn_pos, y_pos_f).permute(0, 2, 1).view(B, C, H, W).to(x.dtype)
+    y_ch      = conv_ch(x).view(B, C, N)                                # [B, C, N]
+    attn_ch   = softmax(bmm(y_ch_f, y_ch_f^T) * (H*W)^-0.5, dim=-1)     # y_ch_f = y_ch.float()
+    out_ch    = bmm(attn_ch, y_ch_f).view(B, C, H, W).to(x.dtype)
+    y         = out_pos + out_ch
+  description: 双重注意力模块：位置分支在空间维度做 self-attention、通道分支在通道维度做 self-attention，两路结果相加；注意力分数在 fp32 下计算后转回输入 dtype
+  shape_support: 'x: [B, C, H, W]；conv_pos_w/conv_ch_w: [C, C, K, K]；conv_pos_b/conv_ch_b: [C]；y: [B, C, H, W]，其中 N = H*W'
+  attrs:
+  - name: kernel_size
+    type: int
+    default: 3
+    description: 两个分支卷积的核大小，padding = kernel_size // 2
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv_pos_w
+    description: 位置注意力分支卷积权重 [C, C, K, K]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, K, K]'
+  - name: conv_pos_b
+    description: 位置注意力分支卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv_ch_w
+    description: 通道注意力分支卷积权重 [C, C, K, K]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, K, K]'
+  - name: conv_ch_b
+    description: 通道注意力分支卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: da_module(Tensor x, Tensor conv_pos_w, Tensor conv_pos_b, Tensor conv_ch_w, Tensor conv_ch_b, int kernel_size) -> Tensor y

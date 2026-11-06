@@ -1,0 +1,1258 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: ParallelPolarizedSelfAttention
+  case_id: 1
+  input_shape:
+  - - 2
+    - 64
+    - 23
+    - 41
+  - &id002
+    - 32
+    - 64
+    - 1
+    - 1
+  - &id003
+    - 32
+  - - 1
+    - 64
+    - 1
+    - 1
+  - &id006
+    - 1
+  - - 64
+    - 32
+    - 1
+    - 1
+  - &id001
+    - 64
+  - *id001
+  - *id001
+  - *id002
+  - *id003
+  - *id002
+  - *id003
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - &id009
+    - -1.0
+    - 1.0
+  - &id004
+    - -0.05
+    - 0.05
+  - &id005
+    - 0.0
+    - 0.0
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - &id010
+    - 1.0
+    - 1.0
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B2C64H23W41-src1
+- operator: ParallelPolarizedSelfAttention
+  case_id: 2
+  input_shape:
+  - - 6
+    - 32
+    - 61
+    - 101
+  - &id007
+    - 16
+    - 32
+    - 1
+    - 1
+  - &id008
+    - 16
+  - &id011
+    - 1
+    - 32
+    - 1
+    - 1
+  - *id006
+  - &id012
+    - 32
+    - 16
+    - 1
+    - 1
+  - *id003
+  - *id003
+  - *id003
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float32-B6C32H61W101-src2
+- operator: ParallelPolarizedSelfAttention
+  case_id: 3
+  input_shape:
+  - - 8
+    - 32
+    - 73
+    - 53
+  - *id007
+  - *id008
+  - *id011
+  - *id006
+  - *id012
+  - *id003
+  - *id003
+  - *id003
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.7
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B8C32H73W53-src3
+- operator: ParallelPolarizedSelfAttention
+  case_id: 4
+  input_shape:
+  - &id013
+    - 1
+    - 1
+    - 1
+    - 1
+  - *id013
+  - *id006
+  - *id013
+  - *id006
+  - *id013
+  - *id006
+  - *id006
+  - *id006
+  - *id013
+  - *id006
+  - *id013
+  - *id006
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B1C1H1W1-src4
+- operator: ParallelPolarizedSelfAttention
+  case_id: 5
+  input_shape:
+  - - 5
+    - 96
+    - 55
+    - 57
+  - &id015
+    - 48
+    - 96
+    - 1
+    - 1
+  - &id016
+    - 48
+  - - 1
+    - 96
+    - 1
+    - 1
+  - *id006
+  - - 96
+    - 48
+    - 1
+    - 1
+  - &id014
+    - 96
+  - *id014
+  - *id014
+  - *id015
+  - *id016
+  - *id015
+  - *id016
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 2.0
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B5C96H55W57-src5
+- operator: ParallelPolarizedSelfAttention
+  case_id: 6
+  input_shape:
+  - - 5
+    - 128
+    - 33
+    - 113
+  - &id018
+    - 64
+    - 128
+    - 1
+    - 1
+  - *id001
+  - &id019
+    - 1
+    - 128
+    - 1
+    - 1
+  - *id006
+  - &id020
+    - 128
+    - 64
+    - 1
+    - 1
+  - &id017
+    - 128
+  - *id017
+  - *id017
+  - *id018
+  - *id001
+  - *id018
+  - *id001
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 1.0
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B5C128H33W113-src6
+- operator: ParallelPolarizedSelfAttention
+  case_id: 7
+  input_shape:
+  - - 2
+    - 128
+    - 97
+    - 101
+  - *id018
+  - *id001
+  - *id019
+  - *id006
+  - *id020
+  - *id017
+  - *id017
+  - *id017
+  - *id018
+  - *id001
+  - *id018
+  - *id001
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B2C128H97W101-src7
+- operator: ParallelPolarizedSelfAttention
+  case_id: 8
+  input_shape:
+  - - 8
+    - 448
+    - 9
+    - 29
+  - &id022
+    - 224
+    - 448
+    - 1
+    - 1
+  - &id023
+    - 224
+  - &id045
+    - 1
+    - 448
+    - 1
+    - 1
+  - *id006
+  - &id046
+    - 448
+    - 224
+    - 1
+    - 1
+  - &id021
+    - 448
+  - *id021
+  - *id021
+  - *id022
+  - *id023
+  - *id022
+  - *id023
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.3
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float32-B8C448H9W29-src8
+- operator: ParallelPolarizedSelfAttention
+  case_id: 9
+  input_shape:
+  - - 5
+    - 32
+    - 79
+    - 73
+  - *id007
+  - *id008
+  - *id011
+  - *id006
+  - *id012
+  - *id003
+  - *id003
+  - *id003
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B5C32H79W73-src9
+- operator: ParallelPolarizedSelfAttention
+  case_id: 10
+  input_shape:
+  - - 6
+    - 192
+    - 19
+    - 55
+  - &id025
+    - 96
+    - 192
+    - 1
+    - 1
+  - *id014
+  - - 1
+    - 192
+    - 1
+    - 1
+  - *id006
+  - - 192
+    - 96
+    - 1
+    - 1
+  - &id024
+    - 192
+  - *id024
+  - *id024
+  - *id025
+  - *id014
+  - *id025
+  - *id014
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B6C192H19W55-src10
+- operator: ParallelPolarizedSelfAttention
+  case_id: 11
+  input_shape:
+  - - 3
+    - 640
+    - 79
+    - 49
+  - &id027
+    - 320
+    - 640
+    - 1
+    - 1
+  - &id028
+    - 320
+  - - 1
+    - 640
+    - 1
+    - 1
+  - *id006
+  - - 640
+    - 320
+    - 1
+    - 1
+  - &id026
+    - 640
+  - *id026
+  - *id026
+  - *id027
+  - *id028
+  - *id027
+  - *id028
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B3C640H79W49-src11
+- operator: ParallelPolarizedSelfAttention
+  case_id: 12
+  input_shape:
+  - - 2
+    - 2048
+    - 7
+    - 23
+  - &id030
+    - 1024
+    - 2048
+    - 1
+    - 1
+  - &id031
+    - 1024
+  - - 1
+    - 2048
+    - 1
+    - 1
+  - *id006
+  - - 2048
+    - 1024
+    - 1
+    - 1
+  - &id029
+    - 2048
+  - *id029
+  - *id029
+  - *id030
+  - *id031
+  - *id030
+  - *id031
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B2C2048H7W23-src12
+- operator: ParallelPolarizedSelfAttention
+  case_id: 13
+  input_shape:
+  - - 3
+    - 160
+    - 31
+    - 125
+  - &id033
+    - 80
+    - 160
+    - 1
+    - 1
+  - &id034
+    - 80
+  - - 1
+    - 160
+    - 1
+    - 1
+  - *id006
+  - - 160
+    - 80
+    - 1
+    - 1
+  - &id032
+    - 160
+  - *id032
+  - *id032
+  - *id033
+  - *id034
+  - *id033
+  - *id034
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.0
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B3C160H31W125-src13
+- operator: ParallelPolarizedSelfAttention
+  case_id: 14
+  input_shape:
+  - - 5
+    - 512
+    - 14
+    - 21
+  - &id036
+    - 256
+    - 512
+    - 1
+    - 1
+  - &id037
+    - 256
+  - - 1
+    - 512
+    - 1
+    - 1
+  - *id006
+  - - 512
+    - 256
+    - 1
+    - 1
+  - &id035
+    - 512
+  - *id035
+  - *id035
+  - *id036
+  - *id037
+  - *id036
+  - *id037
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 1.0
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B5C512H14W21-src14
+- operator: ParallelPolarizedSelfAttention
+  case_id: 15
+  input_shape:
+  - - 4
+    - 256
+    - 79
+    - 43
+  - &id038
+    - 128
+    - 256
+    - 1
+    - 1
+  - *id017
+  - - 1
+    - 256
+    - 1
+    - 1
+  - *id006
+  - - 256
+    - 128
+    - 1
+    - 1
+  - *id037
+  - *id037
+  - *id037
+  - *id038
+  - *id017
+  - *id038
+  - *id017
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float32-B4C256H79W43-src15
+- operator: ParallelPolarizedSelfAttention
+  case_id: 16
+  input_shape:
+  - - 2
+    - 768
+    - 41
+    - 25
+  - &id040
+    - 384
+    - 768
+    - 1
+    - 1
+  - &id041
+    - 384
+  - - 1
+    - 768
+    - 1
+    - 1
+  - *id006
+  - - 768
+    - 384
+    - 1
+    - 1
+  - &id039
+    - 768
+  - *id039
+  - *id039
+  - *id040
+  - *id041
+  - *id040
+  - *id041
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.05
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float32-B2C768H41W25-src20
+- operator: ParallelPolarizedSelfAttention
+  case_id: 17
+  input_shape:
+  - - 3
+    - 384
+    - 33
+    - 111
+  - &id042
+    - 192
+    - 384
+    - 1
+    - 1
+  - *id024
+  - - 1
+    - 384
+    - 1
+    - 1
+  - *id006
+  - - 384
+    - 192
+    - 1
+    - 1
+  - *id041
+  - *id041
+  - *id041
+  - *id042
+  - *id024
+  - *id042
+  - *id024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B3C384H33W111-src25
+- operator: ParallelPolarizedSelfAttention
+  case_id: 18
+  input_shape:
+  - - 5
+    - 1280
+    - 11
+    - 21
+  - &id044
+    - 640
+    - 1280
+    - 1
+    - 1
+  - *id026
+  - - 1
+    - 1280
+    - 1
+    - 1
+  - *id006
+  - - 1280
+    - 640
+    - 1
+    - 1
+  - &id043
+    - 1280
+  - *id043
+  - *id043
+  - *id044
+  - *id026
+  - *id044
+  - *id026
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float32-B5C1280H11W21-src30
+- operator: ParallelPolarizedSelfAttention
+  case_id: 19
+  input_shape:
+  - - 5
+    - 448
+    - 29
+    - 47
+  - *id022
+  - *id023
+  - *id045
+  - *id006
+  - *id046
+  - *id021
+  - *id021
+  - *id021
+  - *id022
+  - *id023
+  - *id022
+  - *id023
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: bfloat16-B5C448H29W47-src35
+- operator: ParallelPolarizedSelfAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 320
+    - 69
+    - 61
+  - &id047
+    - 160
+    - 320
+    - 1
+    - 1
+  - *id032
+  - - 1
+    - 320
+    - 1
+    - 1
+  - *id006
+  - - 320
+    - 160
+    - 1
+    - 1
+  - *id028
+  - *id028
+  - *id028
+  - *id047
+  - *id032
+  - *id047
+  - *id032
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    use_channel: false
+    use_spatial: false
+    mix_weight: 0.5
+    scale_factor: 0.1
+  value_range:
+  - *id009
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - *id010
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B2C320H69W61-src49

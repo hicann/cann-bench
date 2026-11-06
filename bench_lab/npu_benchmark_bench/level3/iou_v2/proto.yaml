@@ -1,0 +1,53 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: IouV2
+  category: Vision
+  difficulty: L3
+  formula: |
+    inter = max(0, min(x2, x4) - max(x1, x3)) * max(0, min(y2, y4) - max(y1, y3))
+    area1 = (x2 - x1) * (y2 - y1), area2 = (x4 - x3) * (y4 - y3)
+    iou: y = inter / (area1 + area2 - inter + eps)
+    iof: y = inter / (area2 + eps)
+  description: 计算预测框与真实框之间的 IoU 或 IOF，支持 aligned 逐行配对与全对配对两种模式
+  shape_support: 'bboxes: [N, 4], gtboxes: [M, 4]（aligned=True 时 M=N）, y: [N, M] 或 [N, 1]'
+  attrs:
+  - name: mode
+    type: string
+    description: 计算模式，"iou" 表示交并比，"iof" 表示交占前景比
+    default: iou
+    required: false
+  - name: eps
+    type: float
+    description: 分母保护项
+    default: 1e-05
+    required: false
+  - name: aligned
+    type: bool
+    description: 是否按行对应计算；True 时输出 [N, 1]，否则输出 [N, M]
+    default: "false"
+    required: false
+  inputs:
+  - name: bboxes
+    description: 预测框 [N, 4]，每行为 (x1, y1, x2, y2)
+    dtype:
+    - float32
+  - name: gtboxes
+    description: 真实框 [M, 4]，每行为 (x3, y3, x4, y4)；aligned=True 时 shape 为 [N, 4]
+    dtype:
+    - float32
+  outputs:
+  - name: y
+    description: IoU/IOF 结果，aligned=False 时为 [N, M]，aligned=True 时为 [N, 1]
+    dtype:
+    - float32
+  schema: iou_v2(Tensor bboxes, Tensor gtboxes, string mode="iou", float eps=1e-05,
+    bool aligned=False) -> Tensor y

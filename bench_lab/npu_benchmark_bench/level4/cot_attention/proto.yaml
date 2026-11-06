@@ -1,0 +1,102 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: CoTAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    k1  = ReLU(DepthWiseConv_{K}(x))
+    v   = Conv1x1(x)
+    att = Conv1x1(ReLU(Conv1x1(cat([k1, x]))))
+    att = mean_{K x K}(reshape(att, [B, C, K*K, H, W]))
+    k2  = softmax_{H*W}(att) * v
+    y   = k1 + k2
+  description: Contextual Transformer（CoT）注意力前向：key 分支用分组卷积提取 KxK 邻域上下文，与输入拼接后经两层 1x1 卷积生成邻域注意力，再对 value 加权求和并与 key 分支残差相加
+  shape_support: 'x: [B, C, H, W]；groups = 4/2/1（由 C 是否被 4/2 整除决定）；mid = max(1, C // 4)；key_embed_weight: [C, C//groups, K, K]；value_embed_weight: [C, C, 1, 1]；att_w1_weight: [mid, 2C, 1, 1]；att_w2_weight: [K*K*C, mid, 1, 1]；y: [B, C, H, W]'
+  attrs:
+  - name: kernel_size
+    type: int
+    default: 3
+    description: key 分支分组卷积的核大小 K（奇数），padding = K // 2
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: key_embed_weight
+    description: key 分支分组卷积权重 [C, C // groups, K, K]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C // groups, K, K]'
+  - name: key_embed_bias
+    description: key 分支分组卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: value_embed_weight
+    description: value 分支 1x1 卷积权重 [C, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, 1, 1]'
+  - name: value_embed_bias
+    description: value 分支 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: att_w1_weight
+    description: 注意力生成第一层 1x1 卷积权重 [mid, 2C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mid, 2C, 1, 1]'
+  - name: att_b1_bias
+    description: 注意力生成第一层 1x1 卷积偏置 [mid]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[mid]'
+  - name: att_w2_weight
+    description: 注意力生成第二层 1x1 卷积权重 [K*K*C, mid, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[K*K*C, mid, 1, 1]'
+  - name: att_b2_bias
+    description: 注意力生成第二层 1x1 卷积偏置 [K*K*C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[K*K*C]'
+  outputs:
+  - name: y
+    description: CoT 注意力输出，shape 与 x 一致 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: cot_attention(Tensor x, Tensor key_embed_weight, Tensor key_embed_bias, Tensor value_embed_weight, Tensor value_embed_bias, Tensor att_w1_weight, Tensor att_b1_bias, Tensor att_w2_weight, Tensor att_b2_bias, int kernel_size=3) -> Tensor y

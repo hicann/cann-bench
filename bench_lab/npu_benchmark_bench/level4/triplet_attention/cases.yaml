@@ -1,0 +1,1251 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: TripletAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 256
+    - 9
+    - 13
+  - &id002
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id001
+    - 1
+  - *id001
+  - *id001
+  - *id002
+  - *id001
+  - *id001
+  - *id001
+  - *id002
+  - *id001
+  - *id001
+  - *id001
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id004
+    - -0.05
+    - 0.05
+  - &id003
+    - 0.0
+    - 0.0
+  - &id005
+    - 1.0
+    - 1.0
+  - *id003
+  - *id004
+  - *id003
+  - *id005
+  - *id003
+  - *id004
+  - *id003
+  - *id005
+  - *id003
+  note: float32-B1C256H9W13-k7-src1
+- operator: TripletAttention
+  case_id: 2
+  input_shape:
+  - - 4
+    - 32
+    - 9
+    - 13
+  - &id007
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id006
+    - 1
+  - *id006
+  - *id006
+  - *id007
+  - *id006
+  - *id006
+  - *id006
+  - *id007
+  - *id006
+  - *id006
+  - *id006
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id009
+    - -0.05
+    - 0.05
+  - &id008
+    - 0.0
+    - 0.0
+  - &id010
+    - 1.0
+    - 1.0
+  - *id008
+  - *id009
+  - *id008
+  - *id010
+  - *id008
+  - *id009
+  - *id008
+  - *id010
+  - *id008
+  note: float32-B4C32H9W13-k7-src2
+- operator: TripletAttention
+  case_id: 3
+  input_shape:
+  - - 4
+    - 256
+    - 9
+    - 13
+  - &id012
+    - 1
+    - 2
+    - 3
+    - 3
+  - &id011
+    - 1
+  - *id011
+  - *id011
+  - *id012
+  - *id011
+  - *id011
+  - *id011
+  - *id012
+  - *id011
+  - *id011
+  - *id011
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id014
+    - -0.05
+    - 0.05
+  - &id013
+    - 0.0
+    - 0.0
+  - &id015
+    - 1.0
+    - 1.0
+  - *id013
+  - *id014
+  - *id013
+  - *id015
+  - *id013
+  - *id014
+  - *id013
+  - *id015
+  - *id013
+  note: float16-B4C256H9W13-k3-src3
+- operator: TripletAttention
+  case_id: 4
+  input_shape:
+  - - 4
+    - 64
+    - 7
+    - 11
+  - &id017
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id016
+    - 1
+  - *id016
+  - *id016
+  - *id017
+  - *id016
+  - *id016
+  - *id016
+  - *id017
+  - *id016
+  - *id016
+  - *id016
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id019
+    - -0.05
+    - 0.05
+  - &id018
+    - 0.0
+    - 0.0
+  - &id020
+    - 1.0
+    - 1.0
+  - *id018
+  - *id019
+  - *id018
+  - *id020
+  - *id018
+  - *id019
+  - *id018
+  - *id020
+  - *id018
+  note: float32-B4C64H7W11-k5-src4
+- operator: TripletAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 128
+    - 7
+    - 11
+  - &id022
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id021
+    - 1
+  - *id021
+  - *id021
+  - *id022
+  - *id021
+  - *id021
+  - *id021
+  - *id022
+  - *id021
+  - *id021
+  - *id021
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id024
+    - -0.05
+    - 0.05
+  - &id023
+    - 0.0
+    - 0.0
+  - &id025
+    - 1.0
+    - 1.0
+  - *id023
+  - *id024
+  - *id023
+  - *id025
+  - *id023
+  - *id024
+  - *id023
+  - *id025
+  - *id023
+  note: float32-B1C128H7W11-k5-src5
+- operator: TripletAttention
+  case_id: 6
+  input_shape:
+  - - 1
+    - 512
+    - 13
+    - 9
+  - &id027
+    - 1
+    - 2
+    - 3
+    - 3
+  - &id026
+    - 1
+  - *id026
+  - *id026
+  - *id027
+  - *id026
+  - *id026
+  - *id026
+  - *id027
+  - *id026
+  - *id026
+  - *id026
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id029
+    - -0.05
+    - 0.05
+  - &id028
+    - 0.0
+    - 0.0
+  - &id030
+    - 1.0
+    - 1.0
+  - *id028
+  - *id029
+  - *id028
+  - *id030
+  - *id028
+  - *id029
+  - *id028
+  - *id030
+  - *id028
+  note: bfloat16-B1C512H13W9-k3-src6
+- operator: TripletAttention
+  case_id: 7
+  input_shape:
+  - - 2
+    - 512
+    - 11
+    - 7
+  - &id032
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id031
+    - 1
+  - *id031
+  - *id031
+  - *id032
+  - *id031
+  - *id031
+  - *id031
+  - *id032
+  - *id031
+  - *id031
+  - *id031
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id034
+    - -0.05
+    - 0.05
+  - &id033
+    - 0.0
+    - 0.0
+  - &id035
+    - 1.0
+    - 1.0
+  - *id033
+  - *id034
+  - *id033
+  - *id035
+  - *id033
+  - *id034
+  - *id033
+  - *id035
+  - *id033
+  note: float32-B2C512H11W7-k5-src7
+- operator: TripletAttention
+  case_id: 8
+  input_shape:
+  - - 4
+    - 32
+    - 7
+    - 11
+  - &id037
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id036
+    - 1
+  - *id036
+  - *id036
+  - *id037
+  - *id036
+  - *id036
+  - *id036
+  - *id037
+  - *id036
+  - *id036
+  - *id036
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id039
+    - -0.05
+    - 0.05
+  - &id038
+    - 0.0
+    - 0.0
+  - &id040
+    - 1.0
+    - 1.0
+  - *id038
+  - *id039
+  - *id038
+  - *id040
+  - *id038
+  - *id039
+  - *id038
+  - *id040
+  - *id038
+  note: float32-B4C32H7W11-k7-src8
+- operator: TripletAttention
+  case_id: 9
+  input_shape:
+  - - 2
+    - 256
+    - 7
+    - 11
+  - &id042
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id041
+    - 1
+  - *id041
+  - *id041
+  - *id042
+  - *id041
+  - *id041
+  - *id041
+  - *id042
+  - *id041
+  - *id041
+  - *id041
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id044
+    - -0.05
+    - 0.05
+  - &id043
+    - 0.0
+    - 0.0
+  - &id045
+    - 1.0
+    - 1.0
+  - *id043
+  - *id044
+  - *id043
+  - *id045
+  - *id043
+  - *id044
+  - *id043
+  - *id045
+  - *id043
+  note: float32-B2C256H7W11-k7-src9
+- operator: TripletAttention
+  case_id: 10
+  input_shape:
+  - - 2
+    - 32
+    - 15
+    - 15
+  - &id047
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id046
+    - 1
+  - *id046
+  - *id046
+  - *id047
+  - *id046
+  - *id046
+  - *id046
+  - *id047
+  - *id046
+  - *id046
+  - *id046
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id049
+    - -0.05
+    - 0.05
+  - &id048
+    - 0.0
+    - 0.0
+  - &id050
+    - 1.0
+    - 1.0
+  - *id048
+  - *id049
+  - *id048
+  - *id050
+  - *id048
+  - *id049
+  - *id048
+  - *id050
+  - *id048
+  note: float16-B2C32H15W15-k5-src10
+- operator: TripletAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 128
+    - 13
+    - 9
+  - &id052
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id051
+    - 1
+  - *id051
+  - *id051
+  - *id052
+  - *id051
+  - *id051
+  - *id051
+  - *id052
+  - *id051
+  - *id051
+  - *id051
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id054
+    - -0.05
+    - 0.05
+  - &id053
+    - 0.0
+    - 0.0
+  - &id055
+    - 1.0
+    - 1.0
+  - *id053
+  - *id054
+  - *id053
+  - *id055
+  - *id053
+  - *id054
+  - *id053
+  - *id055
+  - *id053
+  note: float32-B1C128H13W9-k5-src11
+- operator: TripletAttention
+  case_id: 12
+  input_shape:
+  - - 1
+    - 64
+    - 21
+    - 23
+  - &id057
+    - 1
+    - 2
+    - 3
+    - 3
+  - &id056
+    - 1
+  - *id056
+  - *id056
+  - *id057
+  - *id056
+  - *id056
+  - *id056
+  - *id057
+  - *id056
+  - *id056
+  - *id056
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id059
+    - -0.05
+    - 0.05
+  - &id058
+    - 0.0
+    - 0.0
+  - &id060
+    - 1.0
+    - 1.0
+  - *id058
+  - *id059
+  - *id058
+  - *id060
+  - *id058
+  - *id059
+  - *id058
+  - *id060
+  - *id058
+  note: float32-B1C64H21W23-k3-src12
+- operator: TripletAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 512
+    - 9
+    - 13
+  - &id062
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id061
+    - 1
+  - *id061
+  - *id061
+  - *id062
+  - *id061
+  - *id061
+  - *id061
+  - *id062
+  - *id061
+  - *id061
+  - *id061
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id064
+    - -0.05
+    - 0.05
+  - &id063
+    - 0.0
+    - 0.0
+  - &id065
+    - 1.0
+    - 1.0
+  - *id063
+  - *id064
+  - *id063
+  - *id065
+  - *id063
+  - *id064
+  - *id063
+  - *id065
+  - *id063
+  note: float32-B1C512H9W13-k7-src13
+- operator: TripletAttention
+  case_id: 14
+  input_shape:
+  - - 4
+    - 128
+    - 7
+    - 11
+  - &id067
+    - 1
+    - 2
+    - 3
+    - 3
+  - &id066
+    - 1
+  - *id066
+  - *id066
+  - *id067
+  - *id066
+  - *id066
+  - *id066
+  - *id067
+  - *id066
+  - *id066
+  - *id066
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id069
+    - -0.05
+    - 0.05
+  - &id068
+    - 0.0
+    - 0.0
+  - &id070
+    - 1.0
+    - 1.0
+  - *id068
+  - *id069
+  - *id068
+  - *id070
+  - *id068
+  - *id069
+  - *id068
+  - *id070
+  - *id068
+  note: float32-B4C128H7W11-k3-src14
+- operator: TripletAttention
+  case_id: 15
+  input_shape:
+  - - 1
+    - 64
+    - 15
+    - 15
+  - &id072
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id071
+    - 1
+  - *id071
+  - *id071
+  - *id072
+  - *id071
+  - *id071
+  - *id071
+  - *id072
+  - *id071
+  - *id071
+  - *id071
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id074
+    - -0.05
+    - 0.05
+  - &id073
+    - 0.0
+    - 0.0
+  - &id075
+    - 1.0
+    - 1.0
+  - *id073
+  - *id074
+  - *id073
+  - *id075
+  - *id073
+  - *id074
+  - *id073
+  - *id075
+  - *id073
+  note: float32-B1C64H15W15-k7-src17
+- operator: TripletAttention
+  case_id: 16
+  input_shape:
+  - - 4
+    - 512
+    - 7
+    - 11
+  - &id077
+    - 1
+    - 2
+    - 7
+    - 7
+  - &id076
+    - 1
+  - *id076
+  - *id076
+  - *id077
+  - *id076
+  - *id076
+  - *id076
+  - *id077
+  - *id076
+  - *id076
+  - *id076
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 7
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id079
+    - -0.05
+    - 0.05
+  - &id078
+    - 0.0
+    - 0.0
+  - &id080
+    - 1.0
+    - 1.0
+  - *id078
+  - *id079
+  - *id078
+  - *id080
+  - *id078
+  - *id079
+  - *id078
+  - *id080
+  - *id078
+  note: bfloat16-B4C512H7W11-k7-src22
+- operator: TripletAttention
+  case_id: 17
+  input_shape:
+  - - 4
+    - 128
+    - 9
+    - 13
+  - &id082
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id081
+    - 1
+  - *id081
+  - *id081
+  - *id082
+  - *id081
+  - *id081
+  - *id081
+  - *id082
+  - *id081
+  - *id081
+  - *id081
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id084
+    - -0.05
+    - 0.05
+  - &id083
+    - 0.0
+    - 0.0
+  - &id085
+    - 1.0
+    - 1.0
+  - *id083
+  - *id084
+  - *id083
+  - *id085
+  - *id083
+  - *id084
+  - *id083
+  - *id085
+  - *id083
+  note: float32-B4C128H9W13-k5-src27
+- operator: TripletAttention
+  case_id: 18
+  input_shape:
+  - - 1
+    - 512
+    - 21
+    - 23
+  - &id087
+    - 1
+    - 2
+    - 3
+    - 3
+  - &id086
+    - 1
+  - *id086
+  - *id086
+  - *id087
+  - *id086
+  - *id086
+  - *id086
+  - *id087
+  - *id086
+  - *id086
+  - *id086
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id089
+    - -0.05
+    - 0.05
+  - &id088
+    - 0.0
+    - 0.0
+  - &id090
+    - 1.0
+    - 1.0
+  - *id088
+  - *id089
+  - *id088
+  - *id090
+  - *id088
+  - *id089
+  - *id088
+  - *id090
+  - *id088
+  note: float16-B1C512H21W23-k3-src33
+- operator: TripletAttention
+  case_id: 19
+  input_shape:
+  - - 2
+    - 256
+    - 15
+    - 15
+  - &id092
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id091
+    - 1
+  - *id091
+  - *id091
+  - *id092
+  - *id091
+  - *id091
+  - *id091
+  - *id092
+  - *id091
+  - *id091
+  - *id091
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id094
+    - -0.05
+    - 0.05
+  - &id093
+    - 0.0
+    - 0.0
+  - &id095
+    - 1.0
+    - 1.0
+  - *id093
+  - *id094
+  - *id093
+  - *id095
+  - *id093
+  - *id094
+  - *id093
+  - *id095
+  - *id093
+  note: bfloat16-B2C256H15W15-k5-src41
+- operator: TripletAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 128
+    - 11
+    - 7
+  - &id097
+    - 1
+    - 2
+    - 5
+    - 5
+  - &id096
+    - 1
+  - *id096
+  - *id096
+  - *id097
+  - *id096
+  - *id096
+  - *id096
+  - *id097
+  - *id096
+  - *id096
+  - *id096
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    kernel_size: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id099
+    - -0.05
+    - 0.05
+  - &id098
+    - 0.0
+    - 0.0
+  - &id100
+    - 1.0
+    - 1.0
+  - *id098
+  - *id099
+  - *id098
+  - *id100
+  - *id098
+  - *id099
+  - *id098
+  - *id100
+  - *id098
+  note: float16-B2C128H11W7-k5-src47

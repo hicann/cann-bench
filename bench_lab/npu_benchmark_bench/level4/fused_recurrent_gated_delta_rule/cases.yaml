@@ -1,0 +1,1591 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 1
+  input_shape:
+  - - 1
+    - 640
+    - 1
+    - 32
+  - - 1
+    - 640
+    - 1
+    - 32
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T640H1HV2K32V32-gm7-src1
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 2
+  input_shape:
+  - - 2
+    - 160
+    - 1
+    - 32
+  - - 2
+    - 160
+    - 1
+    - 32
+  - - 2
+    - 160
+    - 2
+    - 32
+  - - 2
+    - 160
+    - 2
+  - - 2
+    - 160
+    - 2
+    - 32
+  - - 2
+    - 160
+    - 2
+    - 32
+  - - 2
+    - 160
+    - 2
+  - - 2
+  - - 2
+  - - 2
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B2T160H1HV2K32V32-gm7-src4
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 3
+  input_shape:
+  - - 1
+    - 240
+    - 1
+    - 64
+  - - 1
+    - 240
+    - 1
+    - 64
+  - - 1
+    - 240
+    - 8
+    - 64
+  - - 1
+    - 240
+    - 8
+  - - 1
+    - 240
+    - 8
+    - 64
+  - - 1
+    - 240
+    - 8
+    - 64
+  - - 1
+    - 240
+    - 8
+  - - 8
+  - - 8
+  - - 1
+    - 8
+    - 64
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.125
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T240H1HV8K64V64-gm7-src5
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 4
+  input_shape:
+  - - 1
+    - 80
+    - 1
+    - 128
+  - - 1
+    - 80
+    - 1
+    - 128
+  - - 1
+    - 80
+    - 2
+    - 64
+  - - 1
+    - 80
+    - 2
+  - - 1
+    - 80
+    - 2
+    - 128
+  - - 1
+    - 80
+    - 2
+    - 64
+  - - 1
+    - 80
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 128
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.0883883
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T80H1HV2K128V64-gm7-src6
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 5
+  input_shape:
+  - - 1
+    - 120
+    - 1
+    - 32
+  - - 1
+    - 120
+    - 1
+    - 32
+  - - 1
+    - 120
+    - 4
+    - 32
+  - - 1
+    - 120
+    - 4
+  - - 1
+    - 120
+    - 4
+    - 32
+  - - 1
+    - 120
+    - 4
+    - 32
+  - - 1
+    - 120
+    - 4
+  - - 4
+  - - 4
+  - - 1
+    - 4
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T120H1HV4K32V32-gm7-src7
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 6
+  input_shape:
+  - - 1
+    - 320
+    - 1
+    - 32
+  - - 1
+    - 320
+    - 1
+    - 32
+  - - 1
+    - 320
+    - 4
+    - 32
+  - - 1
+    - 320
+    - 4
+  - - 1
+    - 320
+    - 4
+    - 32
+  - - 1
+    - 320
+    - 4
+    - 32
+  - - 1
+    - 320
+    - 4
+  - - 4
+  - - 4
+  - - 1
+    - 4
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T320H1HV4K32V32-gm7-src9
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 7
+  input_shape:
+  - - 2
+    - 120
+    - 1
+    - 32
+  - - 2
+    - 120
+    - 1
+    - 32
+  - - 2
+    - 120
+    - 2
+    - 32
+  - - 2
+    - 120
+    - 2
+  - - 2
+    - 120
+    - 2
+    - 32
+  - - 2
+    - 120
+    - 2
+    - 32
+  - - 2
+    - 120
+    - 2
+  - - 2
+  - - 2
+  - - 2
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B2T120H1HV2K32V32-gm7-src31
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 8
+  input_shape:
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 1
+    use_gate_in_kernel: true
+    use_bias: true
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T40H1HV2K32V32-gm1-src33-gm1-ug1-ub1
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 9
+  input_shape:
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 3
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T40H1HV2K32V32-gm3-src34-gm3-ug0-ub0
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 10
+  input_shape:
+  - - 1
+    - 140
+    - 1
+    - 32
+  - - 1
+    - 140
+    - 1
+    - 32
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T140H1HV2K32V32-gm7-src35
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 11
+  input_shape:
+  - - 1
+    - 20
+    - 1
+    - 32
+  - - 1
+    - 20
+    - 1
+    - 32
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T20H1HV2K32V32-gm7-src36
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 12
+  input_shape:
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 1
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+    - 32
+  - - 1
+    - 40
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 1
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T40H1HV2K32V32-gm1-src37-gm1-ug0-ub0
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 13
+  input_shape:
+  - - 4
+    - 160
+    - 1
+    - 32
+  - - 4
+    - 160
+    - 1
+    - 32
+  - - 4
+    - 160
+    - 2
+    - 32
+  - - 4
+    - 160
+    - 2
+  - - 4
+    - 160
+    - 2
+    - 32
+  - - 4
+    - 160
+    - 2
+    - 32
+  - - 4
+    - 160
+    - 2
+  - - 2
+  - - 2
+  - - 4
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B4T160H1HV2K32V32-gm7-src38
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 14
+  input_shape:
+  - - 8
+    - 40
+    - 1
+    - 32
+  - - 8
+    - 40
+    - 1
+    - 32
+  - - 8
+    - 40
+    - 2
+    - 32
+  - - 8
+    - 40
+    - 2
+  - - 8
+    - 40
+    - 2
+    - 32
+  - - 8
+    - 40
+    - 2
+    - 32
+  - - 8
+    - 40
+    - 2
+  - - 2
+  - - 2
+  - - 8
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B8T40H1HV2K32V32-gm7-src40
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 15
+  input_shape:
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+  - - 1
+  - - 1
+  - - 1
+    - 1
+    - 16
+    - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.25
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: float16-B1T200H1HV1K16V16-gm7-src43
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 16
+  input_shape:
+  - - 1
+    - 640
+    - 1
+    - 32
+  - - 1
+    - 640
+    - 1
+    - 32
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+    - 32
+  - - 1
+    - 640
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: true
+    output_final_state: true
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T640H1HV2K32V32-gm7-syn1-init+finalstate
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 17
+  input_shape:
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+    - 16
+  - - 1
+    - 200
+    - 1
+  - - 1
+  - - 1
+  - - 1
+    - 1
+    - 16
+    - 16
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.25
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: true
+    output_final_state: true
+    use_qk_l2norm: true
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: true
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: float16-B1T200H1HV1K16V16-gm7-syn2-vf-first+init+finalstate+l2norm
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 18
+  input_shape:
+  - - 1
+    - 140
+    - 1
+    - 32
+  - - 1
+    - 140
+    - 1
+    - 32
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+    - 32
+  - - 1
+    - 140
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 7
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: false
+    use_qk_l2norm: true
+    use_beta_sigmoid: true
+    allow_neg_eigval: true
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -1.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T140H1HV2K32V32-gm7-syn3-betasig+neg+l2norm
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 19
+  input_shape:
+  - - 1
+    - 20
+    - 1
+    - 32
+  - - 1
+    - 20
+    - 1
+    - 32
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+    - 32
+  - - 1
+    - 20
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 2
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: true
+    output_final_state: true
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T20H1HV2K32V32-gm2-syn4-gatekey+init+finalstate
+- operator: FusedRecurrentGatedDeltaRule
+  case_id: 20
+  input_shape:
+  - - 1
+    - 5
+    - 1
+    - 32
+  - - 1
+    - 5
+    - 1
+    - 32
+  - - 1
+    - 5
+    - 2
+    - 32
+  - - 1
+    - 5
+    - 2
+  - - 1
+    - 5
+    - 2
+    - 32
+  - - 1
+    - 5
+    - 2
+    - 32
+  - - 1
+    - 5
+    - 2
+  - - 2
+  - - 2
+  - - 1
+    - 2
+    - 32
+    - 32
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    scale: 0.1767767
+    gate_mode: 4
+    use_gate_in_kernel: false
+    use_bias: false
+    use_initial_state: false
+    output_final_state: true
+    use_qk_l2norm: false
+    use_beta_sigmoid: false
+    allow_neg_eigval: false
+    state_v_first: false
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - -0.05
+    - 0.0
+  - - 0.0
+    - 1.0
+  - - -0.5
+    - 0.5
+  - - -0.5
+    - 0.5
+  - - -0.05
+    - 0.05
+  note: bfloat16-B1T5H1HV2K32V32-gm4-syn5-gatevalue+finalstate

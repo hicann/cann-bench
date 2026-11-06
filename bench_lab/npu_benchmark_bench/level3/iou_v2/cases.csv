@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,note
+IouV2,1,"[[8, 4], [8, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": true}","[[0, 16], [0, 16]]",float32-N8M8-iou-alignedTrue
+IouV2,2,"[[16, 4], [16, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": true}","[[0, 16], [0, 16]]",float32-N16M16-iof-alignedTrue
+IouV2,3,"[[1, 4], [1, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1M1-iou-alignedFalse
+IouV2,4,"[[64, 4], [64, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N64M64-iou-alignedFalse
+IouV2,5,"[[256, 4], [256, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N256M256-iof-alignedFalse
+IouV2,6,"[[768, 4], [768, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N768M768-iou-alignedFalse
+IouV2,7,"[[1024, 4], [1024, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1024M1024-iou-alignedFalse
+IouV2,8,"[[1536, 4], [1536, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1536M1536-iou-alignedFalse
+IouV2,9,"[[1536, 4], [3072, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1536M3072-iof-alignedFalse
+IouV2,10,"[[1024, 4], [4096, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1024M4096-iof-alignedFalse
+IouV2,11,"[[2048, 4], [2048, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N2048M2048-iof-alignedFalse
+IouV2,12,"[[1152, 4], [8192, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1152M8192-iou-alignedFalse
+IouV2,13,"[[1280, 4], [8192, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1280M8192-iof-alignedFalse
+IouV2,14,"[[2048, 4], [4096, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N2048M4096-iof-alignedFalse
+IouV2,15,"[[2048, 4], [5120, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N2048M5120-iof-alignedFalse
+IouV2,16,"[[2048, 4], [6144, 4]]","[""float32"", ""float32""]","{""mode"": ""iou"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N2048M6144-iou-alignedFalse
+IouV2,17,"[[1408, 4], [8192, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1408M8192-iof-alignedFalse
+IouV2,18,"[[2560, 4], [4096, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N2560M4096-iof-alignedFalse
+IouV2,19,"[[1024, 4], [14336, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N1024M14336-iof-alignedFalse
+IouV2,20,"[[5120, 4], [5120, 4]]","[""float32"", ""float32""]","{""mode"": ""iof"", ""eps"": 1e-05, ""aligned"": false}","[[0, 16], [0, 16]]",float32-N5120M5120-iof-alignedFalse

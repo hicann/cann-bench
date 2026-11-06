@@ -1,0 +1,102 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: GCModule
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    attn    = conv1x1(x)                                  # [B, 1, H, W] raw logits（源实现未调用 softmax）
+    context = x_flat @ attn^T                             # [B, C, 1, 1]
+    y       = x + conv1x1(ReLU(LayerNorm(conv1x1(context))))
+  description: GCNet Global Context 模块：1x1 卷积生成全局注意力 logits，对全局上下文做 bottleneck 变换后残差回加；严格遵循源实现，不对 logits 做 softmax
+  shape_support: 'x: [B, C, H, W]；conv1_w: [1, C, 1, 1]；t_w1: [C//reduction, C, 1, 1]；t_w2: [C, C//reduction, 1, 1]；ln_w/ln_b: [C//reduction, 1, 1]；y: [B, C, H, W]'
+  attrs:
+  - name: channel
+    type: int
+    description: 输入通道数，须等于 x 的 C
+    required: true
+  - name: reduction
+    type: int
+    description: bottleneck 缩减比，须整除 C
+    required: true
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv1_w
+    description: 注意力 1x1 卷积权重 [1, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, C, 1, 1]'
+  - name: conv1_b
+    description: 注意力 1x1 卷积偏置 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  - name: t_w1
+    description: Transform 第一层 1x1 卷积权重 [C//reduction, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, C, 1, 1]'
+  - name: t_b1
+    description: Transform 第一层 1x1 卷积偏置 [C//reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction]'
+  - name: ln_w
+    description: LayerNorm 仿射权重 [C//reduction, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, 1, 1]'
+  - name: ln_b
+    description: LayerNorm 仿射偏置 [C//reduction, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, 1, 1]'
+  - name: t_w2
+    description: Transform 第二层 1x1 卷积权重 [C, C//reduction, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C // reduction, 1, 1]'
+  - name: t_b2
+    description: Transform 第二层 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: gc_module(Tensor x, Tensor conv1_w, Tensor conv1_b, Tensor t_w1, Tensor t_b1, Tensor ln_w, Tensor ln_b, Tensor t_w2, Tensor t_b2, int channel, int reduction) -> Tensor y

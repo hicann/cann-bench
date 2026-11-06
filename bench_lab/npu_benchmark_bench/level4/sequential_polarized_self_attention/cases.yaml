@@ -1,0 +1,1411 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: SequentialPolarizedSelfAttention
+  case_id: 1
+  input_shape:
+  - - 3
+    - 956
+    - 16
+    - 44
+  - &id002
+    - 478
+    - 956
+    - 1
+    - 1
+  - &id003
+    - 478
+  - - 1
+    - 956
+    - 1
+    - 1
+  - - 1
+  - - 956
+    - 478
+    - 1
+    - 1
+  - - 956
+  - &id001
+    - 956
+  - *id001
+  - *id002
+  - *id003
+  - *id002
+  - *id003
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 0.1
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id004
+    - -0.05
+    - 0.05
+  - &id005
+    - 0.0
+    - 0.0
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  - - 1.0
+    - 1.0
+  - *id005
+  - *id004
+  - *id005
+  - *id004
+  - *id005
+  note: float16-B3C956H16W44-sf0.1-src1
+- operator: SequentialPolarizedSelfAttention
+  case_id: 2
+  input_shape:
+  - - 3
+    - 1536
+    - 14
+    - 53
+  - &id007
+    - 768
+    - 1536
+    - 1
+    - 1
+  - &id008
+    - 768
+  - - 1
+    - 1536
+    - 1
+    - 1
+  - - 1
+  - - 1536
+    - 768
+    - 1
+    - 1
+  - - 1536
+  - &id006
+    - 1536
+  - *id006
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: 0.3
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id009
+    - -0.05
+    - 0.05
+  - &id010
+    - 0.0
+    - 0.0
+  - *id009
+  - *id010
+  - *id009
+  - *id010
+  - - 1.0
+    - 1.0
+  - *id010
+  - *id009
+  - *id010
+  - *id009
+  - *id010
+  note: float16-B3C1536H14W53-mw0.3-src2
+- operator: SequentialPolarizedSelfAttention
+  case_id: 3
+  input_shape:
+  - - 6
+    - 160
+    - 83
+    - 43
+  - &id012
+    - 80
+    - 160
+    - 1
+    - 1
+  - &id013
+    - 80
+  - - 1
+    - 160
+    - 1
+    - 1
+  - - 1
+  - - 160
+    - 80
+    - 1
+    - 1
+  - - 160
+  - &id011
+    - 160
+  - *id011
+  - *id012
+  - *id013
+  - *id012
+  - *id013
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: 0.7
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id014
+    - -0.05
+    - 0.05
+  - &id015
+    - 0.0
+    - 0.0
+  - *id014
+  - *id015
+  - *id014
+  - *id015
+  - - 1.0
+    - 1.0
+  - *id015
+  - *id014
+  - *id015
+  - *id014
+  - *id015
+  note: bfloat16-B6C160H83W43-mw0.7-src3
+- operator: SequentialPolarizedSelfAttention
+  case_id: 4
+  input_shape:
+  - - 6
+    - 640
+    - 125
+    - 15
+  - &id017
+    - 320
+    - 640
+    - 1
+    - 1
+  - &id018
+    - 320
+  - - 1
+    - 640
+    - 1
+    - 1
+  - - 1
+  - - 640
+    - 320
+    - 1
+    - 1
+  - - 640
+  - &id016
+    - 640
+  - *id016
+  - *id017
+  - *id018
+  - *id017
+  - *id018
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 0.01
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id019
+    - -0.05
+    - 0.05
+  - &id020
+    - 0.0
+    - 0.0
+  - *id019
+  - *id020
+  - *id019
+  - *id020
+  - - 1.0
+    - 1.0
+  - *id020
+  - *id019
+  - *id020
+  - *id019
+  - *id020
+  note: bfloat16-B6C640H125W15-sf0.01-src4
+- operator: SequentialPolarizedSelfAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 1280
+    - 65
+    - 15
+  - &id022
+    - 640
+    - 1280
+    - 1
+    - 1
+  - &id023
+    - 640
+  - - 1
+    - 1280
+    - 1
+    - 1
+  - - 1
+  - - 1280
+    - 640
+    - 1
+    - 1
+  - - 1280
+  - &id021
+    - 1280
+  - *id021
+  - *id022
+  - *id023
+  - *id022
+  - *id023
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    mix_weight: 0.7
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id024
+    - -0.05
+    - 0.05
+  - &id025
+    - 0.0
+    - 0.0
+  - *id024
+  - *id025
+  - *id024
+  - *id025
+  - - 1.0
+    - 1.0
+  - *id025
+  - *id024
+  - *id025
+  - *id024
+  - *id025
+  note: float32-B1C1280H65W15-mw0.7-src5
+- operator: SequentialPolarizedSelfAttention
+  case_id: 6
+  input_shape:
+  - - 2
+    - 896
+    - 41
+    - 101
+  - &id027
+    - 448
+    - 896
+    - 1
+    - 1
+  - &id028
+    - 448
+  - - 1
+    - 896
+    - 1
+    - 1
+  - - 1
+  - - 896
+    - 448
+    - 1
+    - 1
+  - - 896
+  - &id026
+    - 896
+  - *id026
+  - *id027
+  - *id028
+  - *id027
+  - *id028
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: 0.0
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id029
+    - -0.05
+    - 0.05
+  - &id030
+    - 0.0
+    - 0.0
+  - *id029
+  - *id030
+  - *id029
+  - *id030
+  - - 1.0
+    - 1.0
+  - *id030
+  - *id029
+  - *id030
+  - *id029
+  - *id030
+  note: bfloat16-B2C896H41W101-mw0.0-src6
+- operator: SequentialPolarizedSelfAttention
+  case_id: 7
+  input_shape:
+  - - 6
+    - 1912
+    - 19
+    - 89
+  - &id032
+    - 956
+    - 1912
+    - 1
+    - 1
+  - &id033
+    - 956
+  - - 1
+    - 1912
+    - 1
+    - 1
+  - - 1
+  - - 1912
+    - 956
+    - 1
+    - 1
+  - - 1912
+  - &id031
+    - 1912
+  - *id031
+  - *id032
+  - *id033
+  - *id032
+  - *id033
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: 0.5
+    use_channel: null
+    scale_factor: 0.05
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id034
+    - -0.05
+    - 0.05
+  - &id035
+    - 0.0
+    - 0.0
+  - *id034
+  - *id035
+  - *id034
+  - *id035
+  - - 1.0
+    - 1.0
+  - *id035
+  - *id034
+  - *id035
+  - *id034
+  - *id035
+  note: bfloat16-B6C1912H19W89-mw0.5-sf0.05-src7
+- operator: SequentialPolarizedSelfAttention
+  case_id: 8
+  input_shape:
+  - - 1
+    - 3824
+    - 25
+    - 113
+  - &id037
+    - 1912
+    - 3824
+    - 1
+    - 1
+  - &id038
+    - 1912
+  - - 1
+    - 3824
+    - 1
+    - 1
+  - - 1
+  - - 3824
+    - 1912
+    - 1
+    - 1
+  - - 3824
+  - &id036
+    - 3824
+  - *id036
+  - *id037
+  - *id038
+  - *id037
+  - *id038
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: 0.0
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id039
+    - -0.05
+    - 0.05
+  - &id040
+    - 0.0
+    - 0.0
+  - *id039
+  - *id040
+  - *id039
+  - *id040
+  - - 1.0
+    - 1.0
+  - *id040
+  - *id039
+  - *id040
+  - *id039
+  - *id040
+  note: float16-B1C3824H25W113-mw0.0-src8
+- operator: SequentialPolarizedSelfAttention
+  case_id: 9
+  input_shape:
+  - - 3
+    - 1912
+    - 33
+    - 89
+  - &id042
+    - 956
+    - 1912
+    - 1
+    - 1
+  - &id043
+    - 956
+  - - 1
+    - 1912
+    - 1
+    - 1
+  - - 1
+  - - 1912
+    - 956
+    - 1
+    - 1
+  - - 1912
+  - &id041
+    - 1912
+  - *id041
+  - *id042
+  - *id043
+  - *id042
+  - *id043
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 0.1
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id044
+    - -0.05
+    - 0.05
+  - &id045
+    - 0.0
+    - 0.0
+  - *id044
+  - *id045
+  - *id044
+  - *id045
+  - - 1.0
+    - 1.0
+  - *id045
+  - *id044
+  - *id045
+  - *id044
+  - *id045
+  note: float16-B3C1912H33W89-sf0.1-src9
+- operator: SequentialPolarizedSelfAttention
+  case_id: 10
+  input_shape:
+  - - 6
+    - 1672
+    - 37
+    - 47
+  - &id047
+    - 836
+    - 1672
+    - 1
+    - 1
+  - &id048
+    - 836
+  - - 1
+    - 1672
+    - 1
+    - 1
+  - - 1
+  - - 1672
+    - 836
+    - 1
+    - 1
+  - - 1672
+  - &id046
+    - 1672
+  - *id046
+  - *id047
+  - *id048
+  - *id047
+  - *id048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: 0.3
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id049
+    - -0.05
+    - 0.05
+  - &id050
+    - 0.0
+    - 0.0
+  - *id049
+  - *id050
+  - *id049
+  - *id050
+  - - 1.0
+    - 1.0
+  - *id050
+  - *id049
+  - *id050
+  - *id049
+  - *id050
+  note: float16-B6C1672H37W47-mw0.3-src10
+- operator: SequentialPolarizedSelfAttention
+  case_id: 11
+  input_shape:
+  - - 4
+    - 2048
+    - 89
+    - 21
+  - &id052
+    - 1024
+    - 2048
+    - 1
+    - 1
+  - &id053
+    - 1024
+  - - 1
+    - 2048
+    - 1
+    - 1
+  - - 1
+  - - 2048
+    - 1024
+    - 1
+    - 1
+  - - 2048
+  - &id051
+    - 2048
+  - *id051
+  - *id052
+  - *id053
+  - *id052
+  - *id053
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: false
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id054
+    - -0.05
+    - 0.05
+  - &id055
+    - 0.0
+    - 0.0
+  - *id054
+  - *id055
+  - *id054
+  - *id055
+  - - 1.0
+    - 1.0
+  - *id055
+  - *id054
+  - *id055
+  - *id054
+  - *id055
+  note: float16-B4C2048H89W21-ucFalse-src11
+- operator: SequentialPolarizedSelfAttention
+  case_id: 12
+  input_shape:
+  - - 3
+    - 3144
+    - 43
+    - 13
+  - &id057
+    - 1572
+    - 3144
+    - 1
+    - 1
+  - &id058
+    - 1572
+  - - 1
+    - 3144
+    - 1
+    - 1
+  - - 1
+  - - 3144
+    - 1572
+    - 1
+    - 1
+  - - 3144
+  - &id056
+    - 3144
+  - *id056
+  - *id057
+  - *id058
+  - *id057
+  - *id058
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: 0.7
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id059
+    - -0.05
+    - 0.05
+  - &id060
+    - 0.0
+    - 0.0
+  - *id059
+  - *id060
+  - *id059
+  - *id060
+  - - 1.0
+    - 1.0
+  - *id060
+  - *id059
+  - *id060
+  - *id059
+  - *id060
+  note: bfloat16-B3C3144H43W13-mw0.7-src12
+- operator: SequentialPolarizedSelfAttention
+  case_id: 13
+  input_shape:
+  - - 8
+    - 504
+    - 31
+    - 125
+  - &id062
+    - 252
+    - 504
+    - 1
+    - 1
+  - &id063
+    - 252
+  - - 1
+    - 504
+    - 1
+    - 1
+  - - 1
+  - - 504
+    - 252
+    - 1
+    - 1
+  - - 504
+  - &id061
+    - 504
+  - *id061
+  - *id062
+  - *id063
+  - *id062
+  - *id063
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id064
+    - -0.05
+    - 0.05
+  - &id065
+    - 0.0
+    - 0.0
+  - *id064
+  - *id065
+  - *id064
+  - *id065
+  - - 1.0
+    - 1.0
+  - *id065
+  - *id064
+  - *id065
+  - *id064
+  - *id065
+  note: float16-B8C504H31W125-default-src13
+- operator: SequentialPolarizedSelfAttention
+  case_id: 14
+  input_shape:
+  - - 5
+    - 896
+    - 23
+    - 97
+  - &id067
+    - 448
+    - 896
+    - 1
+    - 1
+  - &id068
+    - 448
+  - - 1
+    - 896
+    - 1
+    - 1
+  - - 1
+  - - 896
+    - 448
+    - 1
+    - 1
+  - - 896
+  - &id066
+    - 896
+  - *id066
+  - *id067
+  - *id068
+  - *id067
+  - *id068
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    mix_weight: null
+    use_channel: false
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id069
+    - -0.05
+    - 0.05
+  - &id070
+    - 0.0
+    - 0.0
+  - *id069
+  - *id070
+  - *id069
+  - *id070
+  - - 1.0
+    - 1.0
+  - *id070
+  - *id069
+  - *id070
+  - *id069
+  - *id070
+  note: float32-B5C896H23W97-ucFalse-src14
+- operator: SequentialPolarizedSelfAttention
+  case_id: 15
+  input_shape:
+  - - 2
+    - 192
+    - 97
+    - 101
+  - &id072
+    - 96
+    - 192
+    - 1
+    - 1
+  - &id073
+    - 96
+  - - 1
+    - 192
+    - 1
+    - 1
+  - - 1
+  - - 192
+    - 96
+    - 1
+    - 1
+  - - 192
+  - &id071
+    - 192
+  - *id071
+  - *id072
+  - *id073
+  - *id072
+  - *id073
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id074
+    - -0.05
+    - 0.05
+  - &id075
+    - 0.0
+    - 0.0
+  - *id074
+  - *id075
+  - *id074
+  - *id075
+  - - 1.0
+    - 1.0
+  - *id075
+  - *id074
+  - *id075
+  - *id074
+  - *id075
+  note: float16-B2C192H97W101-default-src18
+- operator: SequentialPolarizedSelfAttention
+  case_id: 16
+  input_shape:
+  - - 2
+    - 768
+    - 13
+    - 13
+  - &id077
+    - 384
+    - 768
+    - 1
+    - 1
+  - &id078
+    - 384
+  - - 1
+    - 768
+    - 1
+    - 1
+  - - 1
+  - - 768
+    - 384
+    - 1
+    - 1
+  - - 768
+  - &id076
+    - 768
+  - *id076
+  - *id077
+  - *id078
+  - *id077
+  - *id078
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 0.1
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id079
+    - -0.05
+    - 0.05
+  - &id080
+    - 0.0
+    - 0.0
+  - *id079
+  - *id080
+  - *id079
+  - *id080
+  - - 1.0
+    - 1.0
+  - *id080
+  - *id079
+  - *id080
+  - *id079
+  - *id080
+  note: float16-B2C768H13W13-sf0.1-src24
+- operator: SequentialPolarizedSelfAttention
+  case_id: 17
+  input_shape:
+  - - 3
+    - 448
+    - 33
+    - 101
+  - &id082
+    - 224
+    - 448
+    - 1
+    - 1
+  - &id083
+    - 224
+  - - 1
+    - 448
+    - 1
+    - 1
+  - - 1
+  - - 448
+    - 224
+    - 1
+    - 1
+  - - 448
+  - &id081
+    - 448
+  - *id081
+  - *id082
+  - *id083
+  - *id082
+  - *id083
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id084
+    - -0.05
+    - 0.05
+  - &id085
+    - 0.0
+    - 0.0
+  - *id084
+  - *id085
+  - *id084
+  - *id085
+  - - 1.0
+    - 1.0
+  - *id085
+  - *id084
+  - *id085
+  - *id084
+  - *id085
+  note: bfloat16-B3C448H33W101-sf1.0-src30
+- operator: SequentialPolarizedSelfAttention
+  case_id: 18
+  input_shape:
+  - - 6
+    - 512
+    - 43
+    - 33
+  - &id087
+    - 256
+    - 512
+    - 1
+    - 1
+  - &id088
+    - 256
+  - - 1
+    - 512
+    - 1
+    - 1
+  - - 1
+  - - 512
+    - 256
+    - 1
+    - 1
+  - - 512
+  - &id086
+    - 512
+  - *id086
+  - *id087
+  - *id088
+  - *id087
+  - *id088
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: 0.5
+    use_channel: null
+    scale_factor: 0.05
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id089
+    - -0.05
+    - 0.05
+  - &id090
+    - 0.0
+    - 0.0
+  - *id089
+  - *id090
+  - *id089
+  - *id090
+  - - 1.0
+    - 1.0
+  - *id090
+  - *id089
+  - *id090
+  - *id089
+  - *id090
+  note: float16-B6C512H43W33-mw0.5-sf0.05-src36
+- operator: SequentialPolarizedSelfAttention
+  case_id: 19
+  input_shape:
+  - - 6
+    - 896
+    - 3
+    - 97
+  - &id092
+    - 448
+    - 896
+    - 1
+    - 1
+  - &id093
+    - 448
+  - - 1
+    - 896
+    - 1
+    - 1
+  - - 1
+  - - 896
+    - 448
+    - 1
+    - 1
+  - - 896
+  - &id091
+    - 896
+  - *id091
+  - *id092
+  - *id093
+  - *id092
+  - *id093
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    mix_weight: 2.0
+    use_channel: null
+    scale_factor: null
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id094
+    - -0.05
+    - 0.05
+  - &id095
+    - 0.0
+    - 0.0
+  - *id094
+  - *id095
+  - *id094
+  - *id095
+  - - 1.0
+    - 1.0
+  - *id095
+  - *id094
+  - *id095
+  - *id094
+  - *id095
+  note: float16-B6C896H3W97-mw2.0-src43
+- operator: SequentialPolarizedSelfAttention
+  case_id: 20
+  input_shape:
+  - - 5
+    - 1536
+    - 5
+    - 73
+  - &id097
+    - 768
+    - 1536
+    - 1
+    - 1
+  - &id098
+    - 768
+  - - 1
+    - 1536
+    - 1
+    - 1
+  - - 1
+  - - 1536
+    - 768
+    - 1
+    - 1
+  - - 1536
+  - &id096
+    - 1536
+  - *id096
+  - *id097
+  - *id098
+  - *id097
+  - *id098
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    mix_weight: null
+    use_channel: null
+    scale_factor: 0.01
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id099
+    - -0.05
+    - 0.05
+  - &id100
+    - 0.0
+    - 0.0
+  - *id099
+  - *id100
+  - *id099
+  - *id100
+  - - 1.0
+    - 1.0
+  - *id100
+  - *id099
+  - *id100
+  - *id099
+  - *id100
+  note: bfloat16-B5C1536H5W73-sf0.01-src44

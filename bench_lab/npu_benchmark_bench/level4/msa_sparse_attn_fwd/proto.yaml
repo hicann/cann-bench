@@ -1,0 +1,103 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: MsaSparseAttnFwd
+  category: SparseAttention
+  difficulty: L4
+  formula: |
+    S(g, b, i) = k2q CSR 还原的 KV 块集合
+    scores[t] = softmax_scale * q[b, i, h] . k[b, t, g], t in S, t < seqused_k[b]
+                and t <= i + (seqused_k[b] - qlen_b)
+    out[b, i, h] = softmax(scores) @ v[b, :, g]
+    无可见 token 的行输出 0
+  description: MiniMax-M3 block-sparse attention prefill 前向，paged KV cache + k2q CSR 块选择 + GQA
+  shape_support: 'q: [total_q, Hq, D], k/v: [num_pages, Hkv, blk_kv, D], k2q_row_ptr: [Hkv, total_rows+1], k2q_q_indices: [Hkv, total_q*topK], cu_seqlens_q/k: [B+1], seqused_k: [B], page_table: [B, max_pages], out: [total_q, Hq, D]'
+  attrs:
+  - name: topK
+    type: int
+    description: 每 query 选中的 KV 块数（4/8/16/32）
+    required: true
+  - name: max_seqlen_q
+    type: int
+    description: 最长 query 长度（形状提示）
+    required: true
+  - name: max_seqlen_k
+    type: int
+    description: 最长 kv 长度（形状提示）
+    required: true
+  - name: blk_kv
+    type: int
+    description: 稀疏块大小（等于页大小）
+    required: true
+  - name: causal
+    type: int
+    description: 是否启用 bottom-right 因果掩码（0/1）
+    required: true
+  - name: softmax_scale
+    type: float
+    description: softmax 缩放因子
+    required: true
+  inputs:
+  - name: q
+    description: varlen 拼接的 query
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_q, Hq, D]'
+  - name: k
+    description: paged KV cache 的 key
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[num_pages, Hkv, blk_kv, D]'
+  - name: v
+    description: paged KV cache 的 value
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[num_pages, Hkv, blk_kv, D]'
+  - name: k2q_row_ptr
+    description: k2q CSR 行指针
+    dtype:
+    - int32
+    shape: '[Hkv, total_rows+1]'
+  - name: k2q_q_indices
+    description: k2q CSR query 索引，尾部 -1 填充
+    dtype:
+    - int32
+    shape: '[Hkv, total_q*topK]'
+  - name: cu_seqlens_q
+    description: q 前缀和
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: cu_seqlens_k
+    description: kv 前缀和
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: seqused_k
+    description: 每请求有效 kv 长度
+    dtype:
+    - int32
+    shape: '[B]'
+  - name: page_table
+    description: 页表
+    dtype:
+    - int32
+    shape: '[B, max_pages]'
+  outputs:
+  - name: out
+    description: 注意力输出
+    dtype:
+    - bfloat16
+    shape: '[total_q, Hq, D]'
+  schema: msa_sparse_attn_fwd(Tensor q, Tensor k, Tensor v, Tensor k2q_row_ptr, Tensor k2q_q_indices, Tensor cu_seqlens_q, Tensor cu_seqlens_k, Tensor seqused_k, Tensor page_table, int topK, int max_seqlen_q, int max_seqlen_k, int blk_kv, int causal, float softmax_scale) -> Tensor out

@@ -1,0 +1,712 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: DecoderMhaAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 4
+    - 64
+  - - 11264
+    - 4
+    - 64
+  - - 11264
+    - 4
+    - 64
+  - - 2
+  - - 8192
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 8192
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 8191
+  - - 0
+    - 11263
+  note: src case 0
+- operator: DecoderMhaAttention
+  case_id: 2
+  input_shape:
+  - - 2
+    - 8
+    - 64
+  - - 26112
+    - 8
+    - 64
+  - - 26112
+    - 8
+    - 64
+  - - 3
+  - - 17408
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 8704
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 17407
+  - - 0
+    - 26111
+  note: src case 1
+- operator: DecoderMhaAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 16
+    - 64
+  - - 16128
+    - 16
+    - 64
+  - - 16128
+    - 16
+    - 64
+  - - 2
+  - - 9216
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 9216
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 9215
+  - - 0
+    - 16127
+  note: src case 2
+- operator: DecoderMhaAttention
+  case_id: 4
+  input_shape:
+  - - 1
+    - 8
+    - 64
+  - - 14336
+    - 8
+    - 64
+  - - 14336
+    - 8
+    - 64
+  - - 2
+  - - 9728
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 9728
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 9727
+  - - 0
+    - 14335
+  note: src case 3
+- operator: DecoderMhaAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 4
+    - 64
+  - - 34432
+    - 4
+    - 64
+  - - 34432
+    - 4
+    - 64
+  - - 2
+  - - 10240
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 10240
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 10239
+  - - 0
+    - 34431
+  note: src case 4
+- operator: DecoderMhaAttention
+  case_id: 6
+  input_shape:
+  - - 16
+    - 4
+    - 64
+  - - 203136
+    - 4
+    - 64
+  - - 203136
+    - 4
+    - 64
+  - - 17
+  - - 154752
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 10752
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 154751
+  - - 0
+    - 203135
+  note: src case 5
+- operator: DecoderMhaAttention
+  case_id: 7
+  input_shape:
+  - - 1
+    - 32
+    - 128
+  - - 15872
+    - 32
+    - 128
+  - - 15872
+    - 32
+    - 128
+  - - 2
+  - - 12160
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 12160
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 12159
+  - - 0
+    - 15871
+  note: src case 8
+- operator: DecoderMhaAttention
+  case_id: 8
+  input_shape:
+  - - 1
+    - 8
+    - 128
+  - - 16512
+    - 8
+    - 128
+  - - 16512
+    - 8
+    - 128
+  - - 2
+  - - 13184
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 13184
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 13183
+  - - 0
+    - 16511
+  note: src case 10
+- operator: DecoderMhaAttention
+  case_id: 9
+  input_shape:
+  - - 1
+    - 16
+    - 128
+  - - 17280
+    - 16
+    - 128
+  - - 17280
+    - 16
+    - 128
+  - - 2
+  - - 13696
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 13696
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 13695
+  - - 0
+    - 17279
+  note: src case 11
+- operator: DecoderMhaAttention
+  case_id: 10
+  input_shape:
+  - - 4
+    - 8
+    - 64
+  - - 92544
+    - 8
+    - 64
+  - - 92544
+    - 8
+    - 64
+  - - 5
+  - - 52608
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 14720
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 52607
+  - - 0
+    - 92543
+  note: src case 13
+- operator: DecoderMhaAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 16
+    - 128
+  - - 21760
+    - 16
+    - 128
+  - - 21760
+    - 16
+    - 128
+  - - 2
+  - - 17280
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 17280
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 17279
+  - - 0
+    - 21759
+  note: src case 18
+- operator: DecoderMhaAttention
+  case_id: 12
+  input_shape:
+  - - 2
+    - 8
+    - 128
+  - - 57088
+    - 8
+    - 128
+  - - 57088
+    - 8
+    - 128
+  - - 3
+  - - 45568
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 22784
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 45567
+  - - 0
+    - 57087
+  note: src case 29
+- operator: DecoderMhaAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 16
+    - 128
+  - - 29184
+    - 16
+    - 128
+  - - 29184
+    - 16
+    - 128
+  - - 2
+  - - 23296
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 23296
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 23295
+  - - 0
+    - 29183
+  note: src case 30
+- operator: DecoderMhaAttention
+  case_id: 14
+  input_shape:
+  - - 1
+    - 16
+    - 64
+  - - 38912
+    - 16
+    - 64
+  - - 38912
+    - 16
+    - 64
+  - - 2
+  - - 30720
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 30720
+    sm_scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 30719
+  - - 0
+    - 38911
+  note: src case 45
+- operator: DecoderMhaAttention
+  case_id: 15
+  input_shape:
+  - - 12
+    - 8
+    - 128
+  - - 16944
+    - 8
+    - 128
+  - - 16944
+    - 8
+    - 128
+  - - 13
+  - - 16896
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 1408
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 16895
+  - - 0
+    - 16943
+  note: shrunk case 6
+- operator: DecoderMhaAttention
+  case_id: 16
+  input_shape:
+  - - 8
+    - 16
+    - 128
+  - - 11680
+    - 16
+    - 128
+  - - 11680
+    - 16
+    - 128
+  - - 9
+  - - 11648
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 1456
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 11647
+  - - 0
+    - 11679
+  note: shrunk case 7
+- operator: DecoderMhaAttention
+  case_id: 17
+  input_shape:
+  - - 2
+    - 32
+    - 128
+  - - 3560
+    - 32
+    - 128
+  - - 3560
+    - 32
+    - 128
+  - - 3
+  - - 3552
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 1776
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 3551
+  - - 0
+    - 3559
+  note: shrunk case 12
+- operator: DecoderMhaAttention
+  case_id: 18
+  input_shape:
+  - - 2
+    - 16
+    - 128
+  - - 3816
+    - 16
+    - 128
+  - - 3816
+    - 16
+    - 128
+  - - 3
+  - - 3808
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 1904
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 3807
+  - - 0
+    - 3815
+  note: shrunk case 14
+- operator: DecoderMhaAttention
+  case_id: 19
+  input_shape:
+  - - 2
+    - 16
+    - 128
+  - - 4680
+    - 16
+    - 128
+  - - 4680
+    - 16
+    - 128
+  - - 3
+  - - 4672
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 2336
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 4671
+  - - 0
+    - 4679
+  note: shrunk case 21
+- operator: DecoderMhaAttention
+  case_id: 20
+  input_shape:
+  - - 12
+    - 8
+    - 128
+  - - 31920
+    - 8
+    - 128
+  - - 31920
+    - 8
+    - 128
+  - - 13
+  - - 31872
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  attrs:
+    max_kv_len: 2656
+    sm_scale: 0.08838834764831843
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 1.0
+  - - 0
+    - 31871
+  - - 0
+    - 31919
+  note: shrunk case 26

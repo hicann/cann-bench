@@ -1,0 +1,96 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Gdn2Fwd
+  category: LinearAttention
+  difficulty: L4
+  formula: |
+    S <- S * exp(g_t)                       # K 轴逐通道衰减
+    erase = (b_t * k_t)^T S
+    v_new = w_t * v_t - erase
+    S <- S + k_t ⊗ v_new
+    o_t = (scale * q_t)^T S
+  description: GDN-2（Gated DeltaNet 2）chunkwise 前向：分块实现逐 token 的逐通道衰减、擦除门读状态、写入门 delta 规则与秩一状态更新，输出每步读出与末状态
+  shape_support: 'q/k/g/b: [B, T, H, K]；v/w: [B, T, H, V]；initial_state: [N, H, K, V]（shape[0]==0 表示无）；varlen 时 B==1 且 N==len(cu_seqlens)-1，否则 N==B；o: [B, T, H, V]，final_state: [N, H, K, V]'
+  attrs:
+  - name: scale
+    type: float
+    description: 输出缩放系数，通常为 1/sqrt(K)
+    required: true
+  - name: use_qk_l2norm_in_kernel
+    type: int
+    description: 是否在核内对 q/k 做 L2 归一化（1 启用，0 关闭）
+    required: true
+  - name: cu_seqlens
+    type: ListInt
+    description: varlen 前缀和，长度 N+1；为空表示等长 [B, T]
+    required: false
+    default: []
+  inputs:
+  - name: q
+    description: query [B, T, H, K]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: k
+    description: key [B, T, H, K]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: v
+    description: value [B, T, H, V]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: g
+    description: 对数域逐通道衰减 [B, T, H, K]，负值
+    dtype:
+    - float32
+    shape: '[B, T, H, K]'
+  - name: b
+    description: 擦除门 [B, T, H, K]，取值 (0, 1)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: w
+    description: 写入门 [B, T, H, V]，取值 (0, 1)
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: initial_state
+    description: 初始状态 [N, H, K, V]，shape[0] == 0 表示无初始状态
+    dtype:
+    - float32
+    shape: '[N, H, K, V]'
+  outputs:
+  - name: o
+    description: 每步输出 [B, T, H, V]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: final_state
+    description: 末状态 [N, H, K, V]
+    dtype:
+    - float32
+    shape: '[N, H, K, V]'
+  schema: gdn2_fwd(Tensor q, Tensor k, Tensor v, Tensor g, Tensor b, Tensor w, Tensor initial_state, float scale, int use_qk_l2norm_in_kernel, int[] cu_seqlens=[]) -> (Tensor o, Tensor final_state)

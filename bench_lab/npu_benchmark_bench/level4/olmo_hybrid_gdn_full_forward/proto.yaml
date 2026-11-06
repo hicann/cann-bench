@@ -1,0 +1,117 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: OlmoHybridGdnFullForward
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    qkv_gate = X W_qkvg^T,  b = X W_b^T,  a = X W_a^T
+    mixed = SiLU(causal_depthwise_conv1d(qkv_gate))
+    g = -exp(A_log) * softplus(a + dt_bias),  beta = sigmoid(b) * 2
+    chunkwise gated delta rule over (q, k, v, g, beta) -> o
+    o = RMSNorm(o) * SiLU(gate) ,  y = o W_o
+  description: OLMo 混合 Gated Delta Net（GDN）全前向：QKV/门控投影 + 因果 depthwise 卷积 + 门控 delta rule 分块递推 + per-head 门控 RMSNorm + 输出投影
+  shape_support: 'hidden_states/output_buffer: [T, C]；w_qkvg: [2*nk*hk+2*nv*hv, C]；w_b/w_a: [nv, C]；w_conv1d: [2*nk*hk+nv*hv, conv_kernel_size]；dt_bias/A_log: [nv]；w_o_norm: [hv]；w_o_proj: [C, nv*hv]；output: [T, C]'
+  attrs:
+  - name: num_heads_k
+    type: int
+    description: key/query 头数
+    required: true
+  - name: num_heads_v
+    type: int
+    description: value 头数，GQA 时大于 num_heads_k
+    required: true
+  - name: head_k_dim
+    type: int
+    description: 每个 key/query 头的维度
+    required: true
+  - name: head_v_dim
+    type: int
+    description: 每个 value 头的维度
+    required: true
+  - name: conv_kernel_size
+    type: int
+    description: 因果 depthwise 卷积核长度
+    required: true
+  inputs:
+  - name: hidden_states
+    description: 输入隐藏状态 [T, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[T, C]'
+  - name: output_buffer
+    description: 输出缓冲区 [T, C]，内容会被结果覆盖
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[T, C]'
+  - name: w_qkvg
+    description: QKV 与门控融合投影权重 [2*nk*hk + 2*nv*hv, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[2*nk*hk + 2*nv*hv, C]'
+  - name: w_b
+    description: 擦除门投影权重 [nv, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[nv, C]'
+  - name: w_a
+    description: 衰减投影权重 [nv, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[nv, C]'
+  - name: w_conv1d
+    description: 因果 depthwise 卷积权重 [2*nk*hk + nv*hv, conv_kernel_size]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[2*nk*hk + nv*hv, conv_kernel_size]'
+  - name: dt_bias
+    description: 时间步偏置 [nv]
+    dtype:
+    - float32
+    shape: '[nv]'
+  - name: A_log
+    description: 衰减参数的对数值 [nv]
+    dtype:
+    - float32
+    shape: '[nv]'
+  - name: w_o_norm
+    description: 输出 RMSNorm 权重 [hv]
+    dtype:
+    - float32
+    shape: '[hv]'
+  - name: w_o_proj
+    description: 输出投影权重 [C, nv*hv]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, nv*hv]'
+  outputs:
+  - name: output
+    description: 全前向输出 [T, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[T, C]'
+  schema: olmo_hybrid_gdn_full_forward(Tensor hidden_states, Tensor output_buffer, Tensor w_qkvg, Tensor w_b, Tensor w_a, Tensor w_conv1d, Tensor dt_bias, Tensor A_log, Tensor w_o_norm, Tensor w_o_proj, int num_heads_k, int num_heads_v, int head_k_dim, int head_v_dim, int conv_kernel_size) -> Tensor output

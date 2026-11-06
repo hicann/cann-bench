@@ -1,0 +1,572 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: Col2Im
+  case_id: 1
+  input_shape:
+  - - 1
+    - 512
+    - 90
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 10
+    - 11
+    kernel_size:
+    - 2
+    - 2
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C128L90-out10x11-k2x2-s1-d1-p0
+- operator: Col2Im
+  case_id: 2
+  input_shape:
+  - - 1
+    - 288
+    - 16
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 4
+    - 4
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C32L16-out4x4-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 3
+  input_shape:
+  - - 1
+    - 1024
+    - 9
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 6
+    - 6
+    kernel_size:
+    - 4
+    - 4
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C64L9-out6x6-k4x4-s1-d1-p0
+- operator: Col2Im
+  case_id: 4
+  input_shape:
+  - - 2
+    - 512
+    - 16
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 7
+    - 7
+    kernel_size:
+    - 4
+    - 4
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N2C32L16-out7x7-k4x4-s1-d1-p0
+- operator: Col2Im
+  case_id: 5
+  input_shape:
+  - - 1
+    - 576
+    - 42
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 6
+    - 7
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C64L42-out6x7-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 6
+  input_shape:
+  - - 1
+    - 1152
+    - 49
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 13
+    - 13
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 2
+    - 2
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C128L49-out13x13-k3x3-s2-d1-p1
+- operator: Col2Im
+  case_id: 7
+  input_shape:
+  - - 2
+    - 192
+    - 506
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 23
+    - 24
+    kernel_size:
+    - 2
+    - 2
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N2C48L506-out23x24-k2x2-s1-d1-p0
+- operator: Col2Im
+  case_id: 8
+  input_shape:
+  - - 1
+    - 576
+    - 110
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 10
+    - 11
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C64L110-out10x11-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 9
+  input_shape:
+  - - 1
+    - 288
+    - 144
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 12
+    - 12
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 2
+    - 2
+    padding:
+    - 2
+    - 2
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C32L144-out12x12-k3x3-s1-d2-p2
+- operator: Col2Im
+  case_id: 10
+  input_shape:
+  - - 1
+    - 256
+    - 81
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 10
+    - 10
+    kernel_size:
+    - 4
+    - 4
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C16L81-out10x10-k4x4-s1-d1-p1
+- operator: Col2Im
+  case_id: 11
+  input_shape:
+  - - 2
+    - 288
+    - 192
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 12
+    - 16
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N2C32L192-out12x16-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 12
+  input_shape:
+  - - 1
+    - 1152
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 32
+    - 32
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 2
+    - 2
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C128L256-out32x32-k3x3-s2-d1-p1
+- operator: Col2Im
+  case_id: 13
+  input_shape:
+  - - 1
+    - 1152
+    - 200
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 10
+    - 20
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C128L200-out10x20-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 14
+  input_shape:
+  - - 1
+    - 256
+    - 1521
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 40
+    - 40
+    kernel_size:
+    - 2
+    - 2
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C64L1521-out40x40-k2x2-s1-d1-p0
+- operator: Col2Im
+  case_id: 15
+  input_shape:
+  - - 1
+    - 768
+    - 143
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 12
+    - 14
+    kernel_size:
+    - 4
+    - 4
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C48L143-out12x14-k4x4-s1-d1-p1
+- operator: Col2Im
+  case_id: 16
+  input_shape:
+  - - 1
+    - 288
+    - 256
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 16
+    - 16
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 2
+    - 2
+    padding:
+    - 2
+    - 2
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C32L256-out16x16-k3x3-s1-d2-p2
+- operator: Col2Im
+  case_id: 17
+  input_shape:
+  - - 1
+    - 576
+    - 225
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 15
+    - 15
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C64L225-out15x15-k3x3-s1-d1-p1
+- operator: Col2Im
+  case_id: 18
+  input_shape:
+  - - 1
+    - 256
+    - 2916
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 55
+    - 55
+    kernel_size:
+    - 2
+    - 2
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 0
+    - 0
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C64L2916-out55x55-k2x2-s1-d1-p0
+- operator: Col2Im
+  case_id: 19
+  input_shape:
+  - - 1
+    - 1024
+    - 289
+  dtype:
+  - float32
+  attrs:
+    output_size:
+    - 18
+    - 18
+    kernel_size:
+    - 4
+    - 4
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float32-N1C64L289-out18x18-k4x4-s1-d1-p1
+- operator: Col2Im
+  case_id: 20
+  input_shape:
+  - - 1
+    - 576
+    - 900
+  dtype:
+  - float16
+  attrs:
+    output_size:
+    - 30
+    - 30
+    kernel_size:
+    - 3
+    - 3
+    dilation:
+    - 1
+    - 1
+    padding:
+    - 1
+    - 1
+    stride:
+    - 1
+    - 1
+  value_range:
+  - - -1
+    - 1
+  note: float16-N1C64L900-out30x30-k3x3-s1-d1-p1

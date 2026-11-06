@@ -1,0 +1,572 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: JaggedJaggedBmmBwd
+  case_id: 1
+  input_shape:
+  - - 1024
+    - 32
+  - - 1024
+    - 32
+  - - 17
+  - - 16
+    - 32
+    - 32
+  dtype:
+  - float32
+  - float32
+  - int32
+  - float32
+  attrs:
+    max_seq_len: 64
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1024
+  - - -1
+    - 1
+  note: float32-T1024-D32-C32-B16-msl64-aligned-EQ-src0
+- operator: JaggedJaggedBmmBwd
+  case_id: 2
+  input_shape:
+  - - 4096
+    - 64
+  - - 4096
+    - 64
+  - - 65
+  - - 64
+    - 64
+    - 64
+  dtype:
+  - float16
+  - float16
+  - int32
+  - float16
+  attrs:
+    max_seq_len: 64
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 4096
+  - - -1
+    - 1
+  note: float16-T4096-D64-C64-B64-msl64-aligned-EQ-src1
+- operator: JaggedJaggedBmmBwd
+  case_id: 3
+  input_shape:
+  - - 16384
+    - 64
+  - - 16384
+    - 64
+  - - 129
+  - - 128
+    - 64
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 16384
+  - - -1
+    - 1
+  note: bfloat16-T16384-D64-C64-B128-msl128-aligned-EQ-src2
+- operator: JaggedJaggedBmmBwd
+  case_id: 4
+  input_shape:
+  - - 131072
+    - 64
+  - - 131072
+    - 64
+  - - 513
+  - - 512
+    - 64
+    - 64
+  dtype:
+  - float32
+  - float32
+  - int32
+  - float32
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 131072
+  - - -1
+    - 1
+  note: float32-T131072-D64-C64-B512-msl256-aligned-EQ-src3
+- operator: JaggedJaggedBmmBwd
+  case_id: 5
+  input_shape:
+  - - 65536
+    - 16
+  - - 65536
+    - 16
+  - - 2049
+  - - 2048
+    - 16
+    - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 32
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 65536
+  - - -1
+    - 1
+  note: bfloat16-T65536-D16-C16-B2048-msl32-aligned-EQ-src4
+- operator: JaggedJaggedBmmBwd
+  case_id: 6
+  input_shape:
+  - - 7719
+    - 64
+  - - 7719
+    - 64
+  - - 65
+  - - 64
+    - 64
+    - 64
+  dtype:
+  - float32
+  - float32
+  - int32
+  - float32
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 7719
+  - - -1
+    - 1
+  note: float32-T7719-D64-C64-B64-msl128-unaligned-NEQ-src5
+- operator: JaggedJaggedBmmBwd
+  case_id: 7
+  input_shape:
+  - - 65536
+    - 128
+  - - 65536
+    - 128
+  - - 257
+  - - 256
+    - 128
+    - 128
+  dtype:
+  - float16
+  - float16
+  - int32
+  - float16
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 65536
+  - - -1
+    - 1
+  note: float16-T65536-D128-C128-B256-msl256-aligned-EQ-src6
+- operator: JaggedJaggedBmmBwd
+  case_id: 8
+  input_shape:
+  - - 65536
+    - 256
+  - - 65536
+    - 16
+  - - 129
+  - - 128
+    - 256
+    - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 65536
+  - - -1
+    - 1
+  note: bfloat16-T65536-D256-C16-B128-msl512-aligned-EQ-src7
+- operator: JaggedJaggedBmmBwd
+  case_id: 9
+  input_shape:
+  - - 262144
+    - 128
+  - - 262144
+    - 16
+  - - 513
+  - - 512
+    - 128
+    - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 262144
+  - - -1
+    - 1
+  note: bfloat16-T262144-D128-C16-B512-msl512-aligned-EQ-src8
+- operator: JaggedJaggedBmmBwd
+  case_id: 10
+  input_shape:
+  - - 30634
+    - 128
+  - - 30634
+    - 128
+  - - 129
+  - - 128
+    - 128
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 30634
+  - - -1
+    - 1
+  note: bfloat16-T30634-D128-C128-B128-msl256-unaligned-NEQ-src9
+- operator: JaggedJaggedBmmBwd
+  case_id: 11
+  input_shape:
+  - - 122330
+    - 128
+  - - 122330
+    - 128
+  - - 257
+  - - 256
+    - 128
+    - 128
+  dtype:
+  - float16
+  - float16
+  - int32
+  - float16
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 122330
+  - - -1
+    - 1
+  note: float16-T122330-D128-C128-B256-msl512-unaligned-NEQ-src10
+- operator: JaggedJaggedBmmBwd
+  case_id: 12
+  input_shape:
+  - - 22099
+    - 128
+  - - 22099
+    - 128
+  - - 9
+  - - 8
+    - 128
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 4096
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 22099
+  - - -1
+    - 1
+  note: bfloat16-T22099-D128-C128-B8-msl4096-unaligned-NEQ-src26
+- operator: JaggedJaggedBmmBwd
+  case_id: 13
+  input_shape:
+  - - 19366
+    - 256
+  - - 19366
+    - 128
+  - - 17
+  - - 16
+    - 256
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 2048
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 19366
+  - - -1
+    - 1
+  note: bfloat16-T19366-D256-C128-B16-msl2048-unaligned-NEQ-src28
+- operator: JaggedJaggedBmmBwd
+  case_id: 14
+  input_shape:
+  - - 65536
+    - 256
+  - - 65536
+    - 64
+  - - 17
+  - - 16
+    - 256
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 4096
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 65536
+  - - -1
+    - 1
+  note: bfloat16-T65536-D256-C64-B16-msl4096-aligned-EQ-src29
+- operator: JaggedJaggedBmmBwd
+  case_id: 15
+  input_shape:
+  - - 1048576
+    - 16
+  - - 1048576
+    - 16
+  - - 1025
+  - - 1024
+    - 16
+    - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 1024
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 1048576
+  - - -1
+    - 1
+  note: bfloat16-T1048576-D16-C16-B1024-msl1024-aligned-EQ-src31
+- operator: JaggedJaggedBmmBwd
+  case_id: 16
+  input_shape:
+  - - 156652
+    - 128
+  - - 156652
+    - 16
+  - - 513
+  - - 512
+    - 128
+    - 16
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 512
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 156652
+  - - -1
+    - 1
+  note: bfloat16-T156652-D128-C16-B512-msl512-unaligned-NEQ-src38
+- operator: JaggedJaggedBmmBwd
+  case_id: 17
+  input_shape:
+  - - 77484
+    - 128
+  - - 77484
+    - 64
+  - - 1025
+  - - 1024
+    - 128
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 128
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 77484
+  - - -1
+    - 1
+  note: bfloat16-T77484-D128-C64-B1024-msl128-unaligned-NEQ-src39
+- operator: JaggedJaggedBmmBwd
+  case_id: 18
+  input_shape:
+  - - 79104
+    - 256
+  - - 79104
+    - 128
+  - - 65
+  - - 64
+    - 256
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 2048
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 79104
+  - - -1
+    - 1
+  note: bfloat16-T79104-D256-C128-B64-msl2048-aligned-NEQ-src42
+- operator: JaggedJaggedBmmBwd
+  case_id: 19
+  input_shape:
+  - - 78009
+    - 128
+  - - 78009
+    - 128
+  - - 513
+  - - 512
+    - 128
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 256
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 78009
+  - - -1
+    - 1
+  note: bfloat16-T78009-D128-C128-B512-msl256-unaligned-NEQ-src43
+- operator: JaggedJaggedBmmBwd
+  case_id: 20
+  input_shape:
+  - - 262144
+    - 64
+  - - 262144
+    - 256
+  - - 65
+  - - 64
+    - 64
+    - 256
+  dtype:
+  - bfloat16
+  - bfloat16
+  - int32
+  - bfloat16
+  attrs:
+    max_seq_len: 4096
+  value_range:
+  - - -1
+    - 1
+  - - 0
+    - 1
+  - - 0
+    - 262144
+  - - -1
+    - 1
+  note: bfloat16-T262144-D64-C256-B64-msl4096-aligned-EQ-src48

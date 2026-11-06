@@ -1,0 +1,209 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: MUSEAttention
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    q = W_q queries, k = W_k keys, v = W_v values            # [B, nq|nk, h*d_k|h*d_v]
+    att = softmax(q k^T / sqrt(d_k))                          # [B, h, nq, nk]
+    o = W_o (att v)                                           # [B, nq, d_model]
+    v2 = reshape(v)                                           # [B, h*d_v, nk]
+    c1 = Conv1d_{1x1}(v2)
+    c3 = Conv1d_{1x1}(DWConv1d_{3,groups=h*d_v}(v2))
+    c5 = Conv1d_{1x1}(DWConv1d_{5,groups=h*d_v}(v2))
+    w = softmax(dy_paras)                                     # [3]
+    o2 = w0*c1 + w1*c3 + w2*c5                                # [B, d_model, nk]
+    o2 = adaptive_avg_pool1d(o2, nq) if nk != nq
+    y = o + o2^T                                              # [B, nq, d_model]
+  description: MUSE 多尺度注意力前向：多头缩放点积自注意力与 kernel 1/3/5 的 depthwise+pointwise 一维卷积分支并联，三路卷积由可学习 softmax 动态参数加权后与注意力输出相加
+  shape_support: 'queries: [B, nq, d_model]；keys/values: [B, nk, d_model]；fc_q/fc_k 权重 [h*d_k, d_model]、偏置 [h*d_k]；fc_v 权重 [h*d_v, d_model]、偏置 [h*d_v]；fc_o 权重 [d_model, h*d_v]、偏置 [d_model]；conv1_pointwise 权重 [d_model, h*d_v, 1]、偏置 [d_model]；conv3/conv5 depthwise 权重 [h*d_v, 1, 3|5]、偏置 [h*d_v]；conv3/conv5 pointwise 权重 [d_model, h*d_v, 1]、偏置 [d_model]；dy_paras [3]；y: [B, nq, d_model]'
+  attrs:
+  - name: d_model
+    type: int
+    description: 模型维度，须等于 queries/keys/values 的最后一维
+    required: true
+  - name: d_k
+    type: int
+    description: 每个 head 的 query/key 维度，影响缩放因子与权重形状
+    required: true
+  - name: d_v
+    type: int
+    description: 每个 head 的 value 维度，决定卷积分支通道数 h*d_v
+    required: true
+  - name: h
+    type: int
+    description: head 数
+    required: true
+  inputs:
+  - name: queries
+    description: 查询 [B, nq, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, nq, d_model]'
+  - name: keys
+    description: 键 [B, nk, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, nk, d_model]'
+  - name: values
+    description: 值 [B, nk, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, nk, d_model]'
+  - name: fc_q_weight
+    description: Q 投影权重 [h*d_k, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_k, d_model]'
+  - name: fc_q_bias
+    description: Q 投影偏置 [h*d_k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_k]'
+  - name: fc_k_weight
+    description: K 投影权重 [h*d_k, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_k, d_model]'
+  - name: fc_k_bias
+    description: K 投影偏置 [h*d_k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_k]'
+  - name: fc_v_weight
+    description: V 投影权重 [h*d_v, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v, d_model]'
+  - name: fc_v_bias
+    description: V 投影偏置 [h*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v]'
+  - name: fc_o_weight
+    description: 输出投影权重 [d_model, h*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, h * d_v]'
+  - name: fc_o_bias
+    description: 输出投影偏置 [d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: conv1_weight
+    description: 1 核 pointwise Conv1d 权重 [d_model, h*d_v, 1]（kernel=1 的 depthwise 退化为恒等）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, h * d_v, 1]'
+  - name: conv1_bias
+    description: 1 核 pointwise Conv1d 偏置 [d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: conv3_depth_weight
+    description: 3 核 depthwise Conv1d 权重 [h*d_v, 1, 3]（groups=h*d_v）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v, 1, 3]'
+  - name: conv3_depth_bias
+    description: 3 核 depthwise Conv1d 偏置 [h*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v]'
+  - name: conv3_point_weight
+    description: 3 核分支的 pointwise Conv1d 权重 [d_model, h*d_v, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, h * d_v, 1]'
+  - name: conv3_point_bias
+    description: 3 核分支的 pointwise Conv1d 偏置 [d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: conv5_depth_weight
+    description: 5 核 depthwise Conv1d 权重 [h*d_v, 1, 5]（groups=h*d_v）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v, 1, 5]'
+  - name: conv5_depth_bias
+    description: 5 核 depthwise Conv1d 偏置 [h*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[h * d_v]'
+  - name: conv5_point_weight
+    description: 5 核分支的 pointwise Conv1d 权重 [d_model, h*d_v, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, h * d_v, 1]'
+  - name: conv5_point_bias
+    description: 5 核分支的 pointwise Conv1d 偏置 [d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: dy_paras
+    description: 多尺度动态参数 [3]，源实现初始化为全 1
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[3]'
+  outputs:
+  - name: y
+    description: 融合输出 [B, nq, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, nq, d_model]'
+  schema: muse_attention(Tensor queries, Tensor keys, Tensor values, Tensor fc_q_weight, Tensor fc_q_bias, Tensor fc_k_weight, Tensor fc_k_bias, Tensor fc_v_weight, Tensor fc_v_bias, Tensor fc_o_weight, Tensor fc_o_bias, Tensor conv1_weight, Tensor conv1_bias, Tensor conv3_depth_weight, Tensor conv3_depth_bias, Tensor conv3_point_weight, Tensor conv3_point_bias, Tensor conv5_depth_weight, Tensor conv5_depth_bias, Tensor conv5_point_weight, Tensor conv5_point_bias, Tensor dy_paras, int d_model, int d_k, int d_v, int h) -> Tensor y

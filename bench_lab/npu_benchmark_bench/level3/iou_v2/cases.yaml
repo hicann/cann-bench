@@ -1,0 +1,412 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: IouV2
+  case_id: 1
+  input_shape:
+  - - 8
+    - 4
+  - - 8
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: true
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N8M8-iou-alignedTrue
+- operator: IouV2
+  case_id: 2
+  input_shape:
+  - - 16
+    - 4
+  - - 16
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: true
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N16M16-iof-alignedTrue
+- operator: IouV2
+  case_id: 3
+  input_shape:
+  - - 1
+    - 4
+  - - 1
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1M1-iou-alignedFalse
+- operator: IouV2
+  case_id: 4
+  input_shape:
+  - - 64
+    - 4
+  - - 64
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N64M64-iou-alignedFalse
+- operator: IouV2
+  case_id: 5
+  input_shape:
+  - - 256
+    - 4
+  - - 256
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N256M256-iof-alignedFalse
+- operator: IouV2
+  case_id: 6
+  input_shape:
+  - - 768
+    - 4
+  - - 768
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N768M768-iou-alignedFalse
+- operator: IouV2
+  case_id: 7
+  input_shape:
+  - - 1024
+    - 4
+  - - 1024
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1024M1024-iou-alignedFalse
+- operator: IouV2
+  case_id: 8
+  input_shape:
+  - - 1536
+    - 4
+  - - 1536
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1536M1536-iou-alignedFalse
+- operator: IouV2
+  case_id: 9
+  input_shape:
+  - - 1536
+    - 4
+  - - 3072
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1536M3072-iof-alignedFalse
+- operator: IouV2
+  case_id: 10
+  input_shape:
+  - - 1024
+    - 4
+  - - 4096
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1024M4096-iof-alignedFalse
+- operator: IouV2
+  case_id: 11
+  input_shape:
+  - - 2048
+    - 4
+  - - 2048
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N2048M2048-iof-alignedFalse
+- operator: IouV2
+  case_id: 12
+  input_shape:
+  - - 1152
+    - 4
+  - - 8192
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1152M8192-iou-alignedFalse
+- operator: IouV2
+  case_id: 13
+  input_shape:
+  - - 1280
+    - 4
+  - - 8192
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1280M8192-iof-alignedFalse
+- operator: IouV2
+  case_id: 14
+  input_shape:
+  - - 2048
+    - 4
+  - - 4096
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N2048M4096-iof-alignedFalse
+- operator: IouV2
+  case_id: 15
+  input_shape:
+  - - 2048
+    - 4
+  - - 5120
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N2048M5120-iof-alignedFalse
+- operator: IouV2
+  case_id: 16
+  input_shape:
+  - - 2048
+    - 4
+  - - 6144
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iou
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N2048M6144-iou-alignedFalse
+- operator: IouV2
+  case_id: 17
+  input_shape:
+  - - 1408
+    - 4
+  - - 8192
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1408M8192-iof-alignedFalse
+- operator: IouV2
+  case_id: 18
+  input_shape:
+  - - 2560
+    - 4
+  - - 4096
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N2560M4096-iof-alignedFalse
+- operator: IouV2
+  case_id: 19
+  input_shape:
+  - - 1024
+    - 4
+  - - 14336
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N1024M14336-iof-alignedFalse
+- operator: IouV2
+  case_id: 20
+  input_shape:
+  - - 5120
+    - 4
+  - - 5120
+    - 4
+  dtype:
+  - float32
+  - float32
+  attrs:
+    mode: iof
+    eps: 1.0e-05
+    aligned: false
+  value_range:
+  - - 0
+    - 16
+  - - 0
+    - 16
+  note: float32-N5120M5120-iof-alignedFalse

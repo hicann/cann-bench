@@ -1,0 +1,148 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: ParallelPolarizedSelfAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    c2 = max(1, C // 2)
+    ch_wv = conv1x1_{C->c2}(x).flatten(2)                    # [B, c2, H*W]
+    ch_wq = softmax(conv1x1_{C->1}(x).flatten(2), dim=1)     # [B, H*W, 1]
+    ch_wz = conv1x1_{c2->C}(ch_wv @ ch_wq)                   # [B, C, 1, 1]
+    ch_w  = sigmoid(LayerNorm_C(ch_wz))                      # [B, C, 1, 1]
+    sp_wv = conv1x1_{C->c2}(x).flatten(2)                    # [B, c2, H*W]
+    sp_wq = softmax(avgpool(conv1x1_{C->c2}(x)), dim=-1)     # [B, 1, c2]
+    sp_w  = sigmoid(sp_wq @ sp_wv)                           # [B, 1, H, W]
+    y = sp_w * x + ch_w * x
+  description: Parallel Polarized Self-Attention 前向：通道支路（1x1 卷积 + 空间 softmax 池化 + 1x1 卷积 + LayerNorm）与空间支路（1x1 卷积 + 全局池化 softmax + 矩阵乘）并行产生 sigmoid 门控，两路加权结果相加
+  shape_support: 'x: [B, C, H, W]；c2 = max(1, C//2)；ch_wv/sp_wv 权重 [c2, C, 1, 1]、偏置 [c2]；ch_wq 权重 [1, C, 1, 1]、偏置 [1]；ch_wz 权重 [C, c2, 1, 1]、偏置 [C]；ln_weight/ln_bias [C]；sp_wq 权重 [c2, C, 1, 1]、偏置 [c2]；y: [B, C, H, W]'
+  attrs:
+  - name: use_channel
+    type: bool
+    default: false
+    description: 源 json 中存在，但源 forward 未接收也未使用（接口兼容占位，不影响输出）
+    required: false
+  - name: use_spatial
+    type: bool
+    default: false
+    description: 源 json 中存在，但源 forward 未接收也未使用（接口兼容占位，不影响输出）
+    required: false
+  - name: mix_weight
+    type: float
+    default: 0.5
+    description: 源 json 中存在，但源 forward 未接收也未使用（接口兼容占位，不影响输出）
+    required: false
+  - name: scale_factor
+    type: float
+    default: 0.1
+    description: 源 forward 的形参，但函数体内未使用（接口兼容占位，不影响输出）
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: ch_wv_weight
+    description: 通道支路 value 1x1 卷积权重 [c2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2), C, 1, 1]'
+  - name: ch_wv_bias
+    description: 通道支路 value 1x1 卷积偏置 [c2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2)]'
+  - name: ch_wq_weight
+    description: 通道支路 query 1x1 卷积权重 [1, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, C, 1, 1]'
+  - name: ch_wq_bias
+    description: 通道支路 query 1x1 卷积偏置 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  - name: ch_wz_weight
+    description: 通道支路输出 1x1 卷积权重 [C, c2, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, max(1, C // 2), 1, 1]'
+  - name: ch_wz_bias
+    description: 通道支路输出 1x1 卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: ln_weight
+    description: 通道支路 LayerNorm 仿射权重 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: ln_bias
+    description: 通道支路 LayerNorm 仿射偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: sp_wv_weight
+    description: 空间支路 value 1x1 卷积权重 [c2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2), C, 1, 1]'
+  - name: sp_wv_bias
+    description: 空间支路 value 1x1 卷积偏置 [c2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2)]'
+  - name: sp_wq_weight
+    description: 空间支路 query 1x1 卷积权重 [c2, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2), C, 1, 1]'
+  - name: sp_wq_bias
+    description: 空间支路 query 1x1 卷积偏置 [c2]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[max(1, C // 2)]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: parallel_polarized_self_attention(Tensor x, Tensor ch_wv_weight, Tensor ch_wv_bias, Tensor ch_wq_weight, Tensor ch_wq_bias, Tensor ch_wz_weight, Tensor ch_wz_bias, Tensor ln_weight, Tensor ln_bias, Tensor sp_wv_weight, Tensor sp_wv_bias, Tensor sp_wq_weight, Tensor sp_wq_bias, bool use_channel, bool use_spatial, float mix_weight, float scale_factor) -> Tensor y

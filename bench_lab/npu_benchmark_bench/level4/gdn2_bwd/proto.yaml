@@ -1,0 +1,139 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Gdn2Bwd
+  category: LinearAttention
+  difficulty: L4
+  formula: |
+    S_dec = Diag(exp(g_t)) · S_{t-1}
+    erase = (b_t · k_t)^T · S_dec
+    v_new = w_t · v_t − erase
+    S_t   = S_dec + k_t ⊗ v_new
+    o_t   = (scale · q_t)^T · S_t
+    反向（dS 从 dht 初始化，逆序传播）:
+    dq_t = scale · (S_t @ do_t)
+    dS  += (scale · q_t) ⊗ do_t
+    dk_t = dS @ v_new_t ;  dv_new = dS^T @ k_t
+    dw_t = dv_new · v_t ;  dv_t = dv_new · w_t
+    derase = −dv_new ;  dbk = S_dec_t @ derase
+    dS_dec = dS + (b_t · k_t) ⊗ derase
+    db_t = dbk · k_t ;  dk_t += dbk · b_t
+    dg_t = Σ_V(dS_dec · S_dec_t)
+    dS  <- dS_dec · exp(g_t) ;  dh0 = 递推结束时的 dS
+  description: GDN-2（Gated DeltaNet 2）反向，基于前向预计算的逐步衰减状态与新写入向量，从 dht 逆序逐 token 传播伴随状态并产出 q/k/v/g/b/w 梯度与初始状态梯度
+  shape_support: 'q/k: [B, T, H, K]，v/w/do: [B, T, H, V]，g/b: [B, T, H, K]，initial_state/dht: [N, H, K, V]（shape[0]==0 表示无），S_dec_stack: [T, B, H, K, V]，v_new_stack: [T, B, H, V]；varlen 时 B==1、N==len(cu_seqlens)-1，否则 N==B'
+  attrs:
+  - name: scale
+    type: float
+    description: 输出缩放系数，通常为 1/sqrt(K)
+    required: true
+  - name: use_qk_l2norm_in_kernel
+    type: int
+    description: 是否在核内对 q/k 做 L2 归一化（1 启用，0 关闭）
+    required: true
+  - name: cu_seqlens
+    type: ListInt
+    description: varlen 前缀和，长度 N+1；为空表示等长 [B, T]
+    required: false
+    default: []
+  inputs:
+  - name: q
+    description: query [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: k
+    description: key [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: v
+    description: value [B, T, H, V]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: g
+    description: 对数衰减 [B, T, H, K]，负值
+    dtype:
+    - float32
+    shape: '[B, T, H, K]'
+  - name: b
+    description: 擦除门 [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: w
+    description: 写入门 [B, T, H, V]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: initial_state
+    description: 初始状态 [N, H, K, V]，shape[0] == 0 表示无
+    dtype:
+    - float32
+    shape: '[N, H, K, V]'
+  - name: do
+    description: 输出梯度 [B, T, H, V]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: dht
+    description: 末状态梯度 [N, H, K, V]，shape[0] == 0 表示无
+    dtype:
+    - float32
+    shape: '[N, H, K, V]'
+  - name: S_dec_stack
+    description: 前向每步衰减状态 [T, B, H, K, V]
+    dtype:
+    - float32
+    shape: '[T, B, H, K, V]'
+  - name: v_new_stack
+    description: 前向每步新写入向量 [T, B, H, V]
+    dtype:
+    - float32
+    shape: '[T, B, H, V]'
+  outputs:
+  - name: dq
+    description: query 梯度 [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: dk
+    description: key 梯度 [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: dv
+    description: value 梯度 [B, T, H, V]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: dg
+    description: 对数衰减梯度 [B, T, H, K]
+    dtype:
+    - float32
+    shape: '[B, T, H, K]'
+  - name: db
+    description: 擦除门梯度 [B, T, H, K]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, K]'
+  - name: dw
+    description: 写入门梯度 [B, T, H, V]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, V]'
+  - name: dh0
+    description: 初始状态梯度 [N, H, K, V]
+    dtype:
+    - float32
+    shape: '[N, H, K, V]'
+  schema: gdn2_bwd(Tensor q, Tensor k, Tensor v, Tensor g, Tensor b, Tensor w, Tensor initial_state, Tensor do, Tensor dht, Tensor S_dec_stack, Tensor v_new_stack, float scale, int use_qk_l2norm_in_kernel, int[] cu_seqlens=[]) -> (Tensor dq, Tensor dk, Tensor dv, Tensor dg, Tensor db, Tensor dw, Tensor dh0)

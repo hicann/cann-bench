@@ -1,0 +1,70 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: NsaTopkSparseAttention
+  category: SparseAttention
+  difficulty: L4
+  formula: |
+    allow(i, h) = { j | (j // block_size) in topk_idx[h, i] and j <= i }
+    p = softmax_{j in allow(i, h)}(sm_scale * q_i . k_j)
+    y_i = sum_{j in allow(i, h)} p_j * v_j
+  description: DeepSeek Native Sparse Attention 的 TopK 选块注意力前向，GQA 组内共享选块结果
+  shape_support: 'q: [total_len, Hq, D], k/v: [total_len, Hk, D], topk_idx: [Hk, total_len, topk], cu_seqlens: [B+1], y: [total_len, Hq, D]'
+  attrs:
+  - name: block_size
+    type: int
+    description: KV 分块大小（32/64/128/256）
+    required: true
+  - name: max_seqlen
+    type: int
+    description: 批内最长序列长度（varlen 的形状提示）
+    required: true
+  - name: sm_scale
+    type: float
+    description: softmax 缩放因子，通常为 1/sqrt(D)
+    required: true
+  inputs:
+  - name: q
+    description: varlen 拼接的 query
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_len, Hq, D]'
+  - name: k
+    description: varlen 拼接的 key
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_len, Hk, D]'
+  - name: v
+    description: varlen 拼接的 value
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_len, Hk, D]'
+  - name: topk_idx
+    description: 每个 query 选中的 KV 块号，-1 表示 padding
+    dtype:
+    - int32
+    shape: '[Hk, total_len, topk]'
+  - name: cu_seqlens
+    description: 序列前缀和
+    dtype:
+    - int32
+    shape: '[B+1]'
+  outputs:
+  - name: y
+    description: 稀疏注意力输出
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[total_len, Hq, D]'
+  schema: nsa_topk_sparse_attention(Tensor q, Tensor k, Tensor v, Tensor topk_idx, Tensor cu_seqlens, int block_size, int max_seqlen, float sm_scale) -> Tensor y

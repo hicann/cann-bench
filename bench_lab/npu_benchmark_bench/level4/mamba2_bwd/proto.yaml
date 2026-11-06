@@ -1,0 +1,192 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Mamba2Bwd
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    前向（记 a_t = exp(A_h·dt'_t)）:
+      S_t = a_t ⊙ S_{t-1} + dt'_t·x_t ⊗ B_t
+      y_t = C_t^T·S_t (+ D·x_t)；z 门控 silu(z)·y_t
+    反向（dS 从 dfinal_states 初始化，逆序传播）:
+      dy    = dout_t·silu(z_t) ; dz_t = dout_t·y_t·silu'(z_t)
+      dC_t  = S_t^T·dy ; dS += dy ⊗ C_t
+      dD   += dy ⊙ x_t ; dx_t = D ⊙ dy
+      dx_t += dt'_t·(dS·B_t) ; dB_t = dt'_t·(dS^T·x_t)
+      ddt'_t += Σ dS·(x_t⊗B_t)
+      ddA_t = a_t·Σ(dS ⊙ S_{t-1}) ; dA_h += ddA_t·dt'_t ; ddt'_t += ddA_t·A_h
+      dS   <- a_t ⊙ dS
+    dt 预处理链反传:
+      d(raw) = ddt'·[lo≤sp≤hi]·(σ(raw) 若 raw≤20 否则 1)
+      ddt = d(raw) ; ddt_bias[h] = Σ_{b,t} d(raw)
+    GQA：dB/dC 组内各头求和恢复 [B,T,G,N]
+  description: Mamba-2 SSD chunk-scan 反向（逐 token 精确伴随），基于前向预计算的状态序列与 dt 预处理中间量逆序传播伴随状态，产出 x/dt/A/B/C/D/z/dt_bias/initial_states 梯度
+  shape_support: 'x/dout: [B,T,H,P]；dt: [B,T,H]；A/dt_bias: [H]；B/C: [B,T,G,N]；D: [H] 或 [B,H,P]（numel==0 表示无）；z: [B,T,H,P]（shape[0]==0 表示无）；initial_states/dfinal_states: [B,H,P,N]（shape[0]==0 表示无）；S_all: [T,B,H,P,N]；y_all: [B,T,H,P]；a/dtr/raw/sp: [B,T,H]；sil/dsil: [B,T,H,P]（shape[0]==0 表示无）；dx: [B,T,H,P]；ddt: [B,T,H]；dA: [H]；dB/dC: [B,T,G,N]；dD: [H] 或 [0]；dz: [B,T,H,P] 或 [0]；ddt_bias: [H]；dinitial_states: [B,H,P,N] 或 [0,H,P,N]'
+  attrs:
+  - name: chunk_size
+    type: int
+    description: chunk 大小（仅记录，不参与反向递推）
+    required: true
+  - name: dt_softplus
+    type: int
+    description: 1 表示 dt 预处理使用 softplus
+    required: true
+  - name: dt_limit_lo
+    type: float
+    description: dt' 下界
+    required: true
+  - name: dt_limit_hi
+    type: float
+    description: dt' 上界
+    required: true
+  inputs:
+  - name: x
+    description: 输入 [B,T,H,P]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, P]'
+  - name: dt
+    description: 步长原始值 [B,T,H]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H]'
+  - name: A
+    description: 衰减参数 [H]
+    dtype:
+    - float32
+    shape: '[H]'
+  - name: B
+    description: SSM B [B,T,G,N]
+    dtype:
+    - bfloat16
+    shape: '[B, T, G, N]'
+  - name: C
+    description: SSM C [B,T,G,N]
+    dtype:
+    - bfloat16
+    shape: '[B, T, G, N]'
+  - name: D
+    description: 跳连参数 [H] 或 [B,H,P]；numel()==0 表示无
+    dtype:
+    - float32
+    shape: '[H] 或 [B, H, P]'
+  - name: z
+    description: 门控 silu 输入 [B,T,H,P]；shape[0]==0 表示无
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, P]'
+  - name: dt_bias
+    description: 步长偏置 [H]
+    dtype:
+    - float32
+    shape: '[H]'
+  - name: initial_states
+    description: 初始状态 [B,H,P,N]；shape[0]==0 表示无
+    dtype:
+    - float32
+    shape: '[B, H, P, N]'
+  - name: dout
+    description: 输出梯度 [B,T,H,P]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, P]'
+  - name: dfinal_states
+    description: 末状态梯度 [B,H,P,N]；shape[0]==0 表示无
+    dtype:
+    - float32
+    shape: '[B, H, P, N]'
+  - name: S_all
+    description: 前向每步状态（saved）[T,B,H,P,N] fp32
+    dtype:
+    - float32
+    shape: '[T, B, H, P, N]'
+  - name: y_all
+    description: 前向每步输出（含 D 跳连，saved）[B,T,H,P] fp32
+    dtype:
+    - float32
+    shape: '[B, T, H, P]'
+  - name: a
+    description: 每步衰减 exp(dt'·A)（saved）[B,T,H] fp32
+    dtype:
+    - float32
+    shape: '[B, T, H]'
+  - name: dtr
+    description: clamp 后 dt'（saved）[B,T,H] fp32
+    dtype:
+    - float32
+    shape: '[B, T, H]'
+  - name: raw
+    description: dt + dt_bias（saved）[B,T,H] fp32
+    dtype:
+    - float32
+    shape: '[B, T, H]'
+  - name: sp
+    description: softplus(raw) 或 raw（saved）[B,T,H] fp32
+    dtype:
+    - float32
+    shape: '[B, T, H]'
+  - name: sil
+    description: silu(z)（saved）[B,T,H,P] fp32；shape[0]==0 表示无
+    dtype:
+    - float32
+    shape: '[B, T, H, P]'
+  - name: dsil
+    description: silu'(z)（saved）[B,T,H,P] fp32；shape[0]==0 表示无
+    dtype:
+    - float32
+    shape: '[B, T, H, P]'
+  outputs:
+  - name: dx
+    description: x 梯度 [B,T,H,P]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, P]'
+  - name: ddt
+    description: dt 梯度 [B,T,H]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H]'
+  - name: dA
+    description: A 梯度 [H]
+    dtype:
+    - float32
+    shape: '[H]'
+  - name: dB
+    description: B 梯度 [B,T,G,N]
+    dtype:
+    - bfloat16
+    shape: '[B, T, G, N]'
+  - name: dC
+    description: C 梯度 [B,T,G,N]
+    dtype:
+    - bfloat16
+    shape: '[B, T, G, N]'
+  - name: dD
+    description: D 梯度 [H] 或 [B,H,P]；D.numel()==0 时为空 tensor [0]
+    dtype:
+    - float32
+    shape: '[H] 或 [B, H, P]（无 D 时 [0]）'
+  - name: dz
+    description: z 梯度 [B,T,H,P]；无 z 时为空 tensor [0]
+    dtype:
+    - bfloat16
+    shape: '[B, T, H, P]（无 z 时 [0]）'
+  - name: ddt_bias
+    description: dt_bias 梯度 [H]
+    dtype:
+    - float32
+    shape: '[H]'
+  - name: dinitial_states
+    description: initial_states 梯度 [B,H,P,N]；无初始状态时为空 tensor [0,H,P,N]
+    dtype:
+    - float32
+    shape: '[B, H, P, N]（无初始状态时 [0, H, P, N]）'
+  schema: mamba2_bwd(Tensor x, Tensor dt, Tensor A, Tensor B, Tensor C, Tensor D, Tensor z, Tensor dt_bias, Tensor initial_states, Tensor dout, Tensor dfinal_states, Tensor S_all, Tensor y_all, Tensor a, Tensor dtr, Tensor raw, Tensor sp, Tensor sil, Tensor dsil, int chunk_size, int dt_softplus, float dt_limit_lo, float dt_limit_hi) -> (Tensor dx, Tensor ddt, Tensor dA, Tensor dB, Tensor dC, Tensor dD, Tensor dz, Tensor ddt_bias, Tensor dinitial_states)

@@ -1,0 +1,551 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: SpatialGroupEnhance
+  case_id: 1
+  input_shape:
+  - - 4
+    - 2048
+    - 21
+    - 13
+  - &id001
+    - 1
+    - 4
+    - 1
+    - 1
+  - *id001
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id002
+    - 0.0
+    - 0.0
+  - *id002
+  note: float32-B4C2048H21W13-g4-src1
+- operator: SpatialGroupEnhance
+  case_id: 2
+  input_shape:
+  - - 2
+    - 7648
+    - 17
+    - 19
+  - &id003
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id003
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id004
+    - 0.0
+    - 0.0
+  - *id004
+  note: float32-B2C7648H17W19-g16-src2
+- operator: SpatialGroupEnhance
+  case_id: 3
+  input_shape:
+  - - 2
+    - 14368
+    - 9
+    - 7
+  - &id005
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id005
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id006
+    - 0.0
+    - 0.0
+  - *id006
+  note: float32-B2C14368H9W7-g16-src3
+- operator: SpatialGroupEnhance
+  case_id: 4
+  input_shape:
+  - - 4
+    - 3824
+    - 17
+    - 17
+  - &id007
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id007
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id008
+    - 0.0
+    - 0.0
+  - *id008
+  note: float16-B4C3824H17W17-g16-src4
+- operator: SpatialGroupEnhance
+  case_id: 5
+  input_shape:
+  - - 4
+    - 3600
+    - 19
+    - 21
+  - &id009
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id009
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id010
+    - 0.0
+    - 0.0
+  - *id010
+  note: bfloat16-B4C3600H19W21-g16-src5
+- operator: SpatialGroupEnhance
+  case_id: 6
+  input_shape:
+  - - 4
+    - 2960
+    - 19
+    - 17
+  - &id011
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id011
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id012
+    - 0.0
+    - 0.0
+  - *id012
+  note: float16-B4C2960H19W17-g16-src6
+- operator: SpatialGroupEnhance
+  case_id: 7
+  input_shape:
+  - - 2
+    - 8192
+    - 9
+    - 7
+  - &id013
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id013
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id014
+    - 0.0
+    - 0.0
+  - *id014
+  note: float32-B2C8192H9W7-g16-src7
+- operator: SpatialGroupEnhance
+  case_id: 8
+  input_shape:
+  - - 4
+    - 808
+    - 17
+    - 11
+  - &id015
+    - 1
+    - 2
+    - 1
+    - 1
+  - *id015
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id016
+    - 0.0
+    - 0.0
+  - *id016
+  note: float16-B4C808H17W11-g2-src8
+- operator: SpatialGroupEnhance
+  case_id: 9
+  input_shape:
+  - - 2
+    - 3824
+    - 17
+    - 19
+  - &id017
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id017
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id018
+    - 0.0
+    - 0.0
+  - *id018
+  note: float32-B2C3824H17W19-g16-src9
+- operator: SpatialGroupEnhance
+  case_id: 10
+  input_shape:
+  - - 4
+    - 2048
+    - 19
+    - 17
+  - &id019
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id019
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id020
+    - 0.0
+    - 0.0
+  - *id020
+  note: float16-B4C2048H19W17-g16-src10
+- operator: SpatialGroupEnhance
+  case_id: 11
+  input_shape:
+  - - 4
+    - 32768
+    - 11
+    - 21
+  - &id021
+    - 1
+    - 8
+    - 1
+    - 1
+  - *id021
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id022
+    - 0.0
+    - 0.0
+  - *id022
+  note: float32-B4C32768H11W21-g8-src11
+- operator: SpatialGroupEnhance
+  case_id: 12
+  input_shape:
+  - - 2
+    - 49520
+    - 17
+    - 19
+  - &id023
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id023
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id024
+    - 0.0
+    - 0.0
+  - *id024
+  note: float32-B2C49520H17W19-g16-src12
+- operator: SpatialGroupEnhance
+  case_id: 13
+  input_shape:
+  - - 1
+    - 16384
+    - 9
+    - 17
+  - &id025
+    - 1
+    - 2
+    - 1
+    - 1
+  - *id025
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    groups: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id026
+    - 0.0
+    - 0.0
+  - *id026
+  note: bfloat16-B1C16384H9W17-g2-src13
+- operator: SpatialGroupEnhance
+  case_id: 14
+  input_shape:
+  - - 1
+    - 32768
+    - 15
+    - 7
+  - &id027
+    - 1
+    - 4
+    - 1
+    - 1
+  - *id027
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id028
+    - 0.0
+    - 0.0
+  - *id028
+  note: float32-B1C32768H15W7-g4-src14
+- operator: SpatialGroupEnhance
+  case_id: 15
+  input_shape:
+  - - 2
+    - 110800
+    - 15
+    - 15
+  - &id029
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id029
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id030
+    - 0.0
+    - 0.0
+  - *id030
+  note: bfloat16-B2C110800H15W15-g16-src18
+- operator: SpatialGroupEnhance
+  case_id: 16
+  input_shape:
+  - - 2
+    - 114880
+    - 9
+    - 7
+  - &id031
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id031
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id032
+    - 0.0
+    - 0.0
+  - *id032
+  note: float32-B2C114880H9W7-g16-src22
+- operator: SpatialGroupEnhance
+  case_id: 17
+  input_shape:
+  - - 4
+    - 16384
+    - 17
+    - 11
+  - &id033
+    - 1
+    - 2
+    - 1
+    - 1
+  - *id033
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id034
+    - 0.0
+    - 0.0
+  - *id034
+  note: float16-B4C16384H17W11-g2-src26
+- operator: SpatialGroupEnhance
+  case_id: 18
+  input_shape:
+  - - 4
+    - 131072
+    - 7
+    - 11
+  - &id035
+    - 1
+    - 4
+    - 1
+    - 1
+  - *id035
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    groups: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id036
+    - 0.0
+    - 0.0
+  - *id036
+  note: float16-B4C131072H7W11-g4-src31
+- operator: SpatialGroupEnhance
+  case_id: 19
+  input_shape:
+  - - 4
+    - 32768
+    - 21
+    - 13
+  - &id037
+    - 1
+    - 4
+    - 1
+    - 1
+  - *id037
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    groups: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id038
+    - 0.0
+    - 0.0
+  - *id038
+  note: float32-B4C32768H21W13-g4-src37
+- operator: SpatialGroupEnhance
+  case_id: 20
+  input_shape:
+  - - 2
+    - 180320
+    - 15
+    - 15
+  - &id039
+    - 1
+    - 16
+    - 1
+    - 1
+  - *id039
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    groups: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - &id040
+    - 0.0
+    - 0.0
+  - *id040
+  note: bfloat16-B2C180320H15W15-g16-src45

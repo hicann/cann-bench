@@ -1,0 +1,179 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: EMSA
+  category: Attention
+  difficulty: L4
+  formula: |
+    q = W_q @ queries^T + b_q
+    ratio > 1 时: kv_in = LayerNorm(Conv2d(queries, sr_weight, stride=ratio, groups=d_model))
+    A = softmax(q @ k^T / sqrt(d_k))
+    y = W_out @ (A @ v)^T + b_out
+  description: 高效多头自注意力（EMSA），支持空间缩减（分组卷积 + LayerNorm 生成 key/value）以及注意力图 1x1 卷积变换与 instance norm
+  shape_support: 'queries: [B, Lq, d_model]；keys/values: [B, Lk, d_model]；q/k_weight: [H*d_k, d_model]；q/k_bias: [H*d_k]；v_weight: [H*d_v, d_model]；v_bias: [H*d_v]；out_weight: [d_model, H*d_v]；out_bias: [d_model]；sr_weight: [d_model, 1, ratio+1, ratio+1]；sr_bias/sr_norm_weight/sr_norm_bias: [d_model]；transform_weight: [H, H, 1, 1]；transform_bias: [H]；y: [B, Lq, H*d_v]。ratio<=1 时 sr_* 为 shape [0] 的空 tensor，apply_transform=false 时 transform_* 为 shape [0] 的空 tensor'
+  attrs:
+  - name: n_heads
+    type: int
+    description: 注意力头数 H
+    required: true
+  - name: height
+    type: int
+    description: query 空间高度，须满足 height * width == Lq
+    required: true
+  - name: width
+    type: int
+    description: query 空间宽度，须满足 height * width == Lq
+    required: true
+  - name: ratio
+    type: int
+    description: 空间缩减倍率；>1 时对 query 做分组卷积 + LayerNorm 得到 key/value 输入，<=1 时直接使用 keys/values
+    required: true
+  - name: d_k
+    type: int
+    description: 每个头的 query/key 维度
+    required: true
+  - name: d_v
+    type: int
+    description: 每个头的 value 维度
+    required: true
+  - name: apply_transform
+    type: bool
+    description: 是否在 softmax 前对注意力图做 1x1 卷积变换、并在之后做 instance norm（仅 n_heads > 1 时生效）
+    required: true
+  inputs:
+  - name: queries
+    description: query 张量 [B, Lq, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lq, d_model]'
+  - name: keys
+    description: key 张量 [B, Lk, d_model]（ratio>1 时不参与计算）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lk, d_model]'
+  - name: values
+    description: value 张量 [B, Lk, d_model]（ratio>1 时不参与计算）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lk, d_model]'
+  - name: q_weight
+    description: query 线性投影权重 [H*d_k, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_k, d_model]'
+  - name: q_bias
+    description: query 线性投影偏置 [H*d_k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_k]'
+  - name: k_weight
+    description: key 线性投影权重 [H*d_k, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_k, d_model]'
+  - name: k_bias
+    description: key 线性投影偏置 [H*d_k]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_k]'
+  - name: v_weight
+    description: value 线性投影权重 [H*d_v, d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_v, d_model]'
+  - name: v_bias
+    description: value 线性投影偏置 [H*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H*d_v]'
+  - name: out_weight
+    description: 输出线性投影权重 [d_model, H*d_v]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, H*d_v]'
+  - name: out_bias
+    description: 输出线性投影偏置 [d_model]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: sr_weight
+    description: 空间缩减分组卷积权重 [d_model, 1, ratio+1, ratio+1]；ratio<=1 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model, 1, ratio+1, ratio+1]'
+  - name: sr_bias
+    description: 空间缩减分组卷积偏置 [d_model]；ratio<=1 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: sr_norm_weight
+    description: 空间缩减后 LayerNorm 权重 [d_model]；ratio<=1 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: sr_norm_bias
+    description: 空间缩减后 LayerNorm 偏置 [d_model]；ratio<=1 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[d_model]'
+  - name: transform_weight
+    description: 注意力图 1x1 卷积权重 [H, H, 1, 1]；apply_transform=false 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H, H, 1, 1]'
+  - name: transform_bias
+    description: 注意力图 1x1 卷积偏置 [H]；apply_transform=false 时为 shape [0] 的空 tensor
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[H]'
+  outputs:
+  - name: y
+    description: 输出张量 [B, Lq, H*d_v]，dtype 与 queries 相同
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, Lq, H*d_v]'
+  schema: emsa(Tensor queries, Tensor keys, Tensor values, Tensor q_weight, Tensor q_bias, Tensor k_weight, Tensor k_bias, Tensor v_weight, Tensor v_bias, Tensor out_weight, Tensor out_bias, Tensor sr_weight, Tensor sr_bias, Tensor sr_norm_weight, Tensor sr_norm_bias, Tensor transform_weight, Tensor transform_bias, int n_heads, int height, int width, int ratio, int d_k, int d_v, bool apply_transform) -> Tensor y

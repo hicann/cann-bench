@@ -1,0 +1,64 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: FlexAttentionFwd
+  category: Attention
+  difficulty: L4
+  formula: |
+    S = Q @ K^T * (1 / sqrt(D))
+    if is_causal: S[i, j] = -inf，当 j > i + (S_k - S_q)
+    P = exp(S - logsumexp(S, dim=-1))
+    O = P @ V
+    GQA: enable_gqa 时按 H / H_kv 复制 KV 头后再计算
+  description: FlexAttention 前向（score_mod 为空、可选因果掩码与 GQA）：缩放点积注意力，因果掩码按右下角对齐，支持 query/key 长度不等与 KV 头广播
+  shape_support: 'query: [B, H, S_q, D]；key/value: [B, H_kv, S_k, D]；enable_gqa 时 H % H_kv == 0；y: [B, H, S_q, D]'
+  attrs:
+  - name: is_causal
+    type: bool
+    default: 'false'
+    description: 是否使用右下角对齐的因果掩码，屏蔽 j > i + (S_k - S_q) 的位置
+    required: false
+  - name: enable_gqa
+    type: bool
+    default: 'false'
+    description: 是否启用 GQA，把 KV 头按 H // H_kv 复制到 Q 头数
+    required: false
+  inputs:
+  - name: query
+    description: query 张量 [B, H, S_q, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, S_q, D]'
+  - name: key
+    description: key 张量 [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H_kv, S_k, D]'
+  - name: value
+    description: value 张量 [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H_kv, S_k, D]'
+  outputs:
+  - name: y
+    description: 注意力输出 [B, H, S_q, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, S_q, D]'
+  schema: flex_attention_fwd(Tensor query, Tensor key, Tensor value, bool is_causal=false, bool enable_gqa=false) -> Tensor y

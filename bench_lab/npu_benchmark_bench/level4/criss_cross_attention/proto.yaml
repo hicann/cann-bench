@@ -1,0 +1,91 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: CrissCrossAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    Q = Conv1x1_q(x), K = Conv1x1_k(x), V = Conv1x1_v(x)   # Q,K 通道数 C//8，V 通道数 C
+    e_H[b, y, x, j] = sum_c Q[b, c, y, x] * K[b, c, j, x]，j == y 时置 -inf
+    e_W[b, y, x, j] = sum_c Q[b, c, y, x] * K[b, c, y, j]
+    a = softmax(cat([e_H, e_W], dim=-1))
+    o_H[b, c, y, x] = sum_j V[b, c, j, x] * a_H[b, y, x, j]
+    o_W[b, c, y, x] = sum_j V[b, c, y, j] * a_W[b, y, x, j]
+    y = gamma * (o_H + o_W) + x
+  description: Criss-Cross 注意力前向：在特征图的每一行和每一列上分别计算横向/纵向十字交叉注意力，两路输出相加后按可学习标量 gamma 缩放并做残差连接
+  shape_support: 'x: [B, C, H, W]；conv_q/conv_k 权重: [C//8, C, 1, 1]；conv_v 权重: [C, C, 1, 1]；gamma: [1]；y: [B, C, H, W]'
+  attrs: []
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: conv_q_weight
+    description: query 1x1 投影卷积权重 [C//8, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C//8, C, 1, 1]'
+  - name: conv_q_bias
+    description: query 1x1 投影卷积偏置 [C//8]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C//8]'
+  - name: conv_k_weight
+    description: key 1x1 投影卷积权重 [C//8, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C//8, C, 1, 1]'
+  - name: conv_k_bias
+    description: key 1x1 投影卷积偏置 [C//8]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C//8]'
+  - name: conv_v_weight
+    description: value 1x1 投影卷积权重 [C, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C, 1, 1]'
+  - name: conv_v_bias
+    description: value 1x1 投影卷积偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: gamma
+    description: 注意力支路的可学习缩放标量 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  outputs:
+  - name: y
+    description: Criss-Cross 注意力输出 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: criss_cross_attention(Tensor x, Tensor conv_q_weight, Tensor conv_q_bias, Tensor conv_k_weight, Tensor conv_k_bias, Tensor conv_v_weight, Tensor conv_v_bias, Tensor gamma) -> Tensor y

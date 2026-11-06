@@ -1,0 +1,611 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: FusionAttention
+  case_id: 1
+  input_shape:
+  - - 2
+    - 16
+    - 1024
+    - 128
+  - - 2
+    - 16
+    - 1024
+    - 128
+  - - 2
+    - 16
+    - 1024
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 16
+    input_layout: BNSD
+    scale: 0.0625
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src2-float16-BNSD-2x16x1024x128
+- operator: FusionAttention
+  case_id: 2
+  input_shape:
+  - - 1
+    - 256
+    - 4096
+  - - 1
+    - 256
+    - 1024
+  - - 1
+    - 256
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src4-bfloat16-BSH-1x256x4096
+- operator: FusionAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 512
+    - 4096
+  - - 1
+    - 512
+    - 1024
+  - - 1
+    - 512
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 0.08838
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src5-float16-BSH-1x512x4096
+- operator: FusionAttention
+  case_id: 4
+  input_shape:
+  - - 1
+    - 1024
+    - 2048
+  - - 1
+    - 1024
+    - 2048
+  - - 1
+    - 1024
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 16
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src8-float16-BSH-1x1024x2048
+- operator: FusionAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 0.08838
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src10-float16-BNSD-1x8x2048x128
+- operator: FusionAttention
+  case_id: 6
+  input_shape:
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 32
+    input_layout: BNSD
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src11-float16-BNSD-4x32x2048x64
+- operator: FusionAttention
+  case_id: 7
+  input_shape:
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 32
+    input_layout: BNSD
+    scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src12-bfloat16-BNSD-4x32x2048x64
+- operator: FusionAttention
+  case_id: 8
+  input_shape:
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 32
+    input_layout: BNSD
+    scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src13-float16-BNSD-4x32x2048x64
+- operator: FusionAttention
+  case_id: 9
+  input_shape:
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  - - 4
+    - 32
+    - 2048
+    - 64
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 32
+    input_layout: BNSD
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src14-bfloat16-BNSD-4x32x2048x64
+- operator: FusionAttention
+  case_id: 10
+  input_shape:
+  - - 1
+    - 8
+    - 2048
+    - 64
+  - - 1
+    - 8
+    - 2048
+    - 64
+  - - 1
+    - 8
+    - 2048
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src19-float16-BNSD-1x8x2048x64
+- operator: FusionAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 0.08838
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src20-float16-BNSD-1x8x2048x128
+- operator: FusionAttention
+  case_id: 12
+  input_shape:
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src22-bfloat16-BSH-1x2048x1024
+- operator: FusionAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src23-float16-BSH-1x2048x1024
+- operator: FusionAttention
+  case_id: 14
+  input_shape:
+  - - 1
+    - 8
+    - 1024
+    - 128
+  - - 1
+    - 8
+    - 1024
+    - 128
+  - - 1
+    - 8
+    - 1024
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 0.08838
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src24-float16-BNSD-1x8x1024x128
+- operator: FusionAttention
+  case_id: 15
+  input_shape:
+  - - 1
+    - 512
+    - 1024
+  - - 1
+    - 512
+    - 1024
+  - - 1
+    - 512
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src26-float16-BSH-1x512x1024
+- operator: FusionAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 8
+    - 512
+    - 64
+  - - 1
+    - 8
+    - 512
+    - 64
+  - - 1
+    - 8
+    - 512
+    - 64
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 0.125
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src27-float16-BNSD-1x8x512x64
+- operator: FusionAttention
+  case_id: 17
+  input_shape:
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src29-bfloat16-BNSD-1x8x2048x128
+- operator: FusionAttention
+  case_id: 18
+  input_shape:
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  - - 1
+    - 8
+    - 2048
+    - 128
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 0.08838
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src30-float16-BNSD-1x8x2048x128
+- operator: FusionAttention
+  case_id: 19
+  input_shape:
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  - - 1
+    - 2048
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  attrs:
+    head_num: 8
+    input_layout: BSH
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src33-float16-BSH-1x2048x1024
+- operator: FusionAttention
+  case_id: 20
+  input_shape:
+  - - 1
+    - 8
+    - 256
+    - 64
+  - - 1
+    - 8
+    - 256
+    - 64
+  - - 1
+    - 8
+    - 256
+    - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  attrs:
+    head_num: 8
+    input_layout: BNSD
+    scale: 1.0
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  note: src35-float32-BNSD-1x8x256x64

@@ -1,0 +1,692 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: SelfAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 828
+    - 256
+  - - 256
+    - 256
+  - - 256
+    - 256
+  - - 256
+    - 256
+  - - 256
+    - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src17-float32-B1L828D256-H4
+- operator: SelfAttention
+  case_id: 2
+  input_shape:
+  - - 2
+    - 701
+    - 288
+  - - 288
+    - 288
+  - - 288
+    - 288
+  - - 288
+    - 288
+  - - 288
+    - 288
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 6
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src18-float16-B2L701D288-H6
+- operator: SelfAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 1396
+    - 480
+  - - 480
+    - 480
+  - - 480
+    - 480
+  - - 480
+    - 480
+  - - 480
+    - 480
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src19-bfloat16-B1L1396D480-H12
+- operator: SelfAttention
+  case_id: 4
+  input_shape:
+  - - 4
+    - 1367
+    - 160
+  - - 160
+    - 160
+  - - 160
+    - 160
+  - - 160
+    - 160
+  - - 160
+    - 160
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src20-float16-B4L1367D160-H5
+- operator: SelfAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 2048
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  - - 384
+    - 384
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 3
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src21-bfloat16-B1L2048D384-H3
+- operator: SelfAttention
+  case_id: 6
+  input_shape:
+  - - 1
+    - 1024
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src22-float32-B1L1024D512-H4
+- operator: SelfAttention
+  case_id: 7
+  input_shape:
+  - - 1
+    - 4143
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src26-float16-B1L4143D640-H10
+- operator: SelfAttention
+  case_id: 8
+  input_shape:
+  - - 2
+    - 2766
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src27-bfloat16-B2L2766D768-H12
+- operator: SelfAttention
+  case_id: 9
+  input_shape:
+  - - 1
+    - 5182
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src28-bfloat16-B1L5182D1024-H16
+- operator: SelfAttention
+  case_id: 10
+  input_shape:
+  - - 3
+    - 1694
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src29-float32-B3L1694D640-H10
+- operator: SelfAttention
+  case_id: 11
+  input_shape:
+  - - 1
+    - 3760
+    - 1008
+  - - 1008
+    - 1008
+  - - 1008
+    - 1008
+  - - 1008
+    - 1008
+  - - 1008
+    - 1008
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 9
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src30-float16-B1L3760D1008-H9
+- operator: SelfAttention
+  case_id: 12
+  input_shape:
+  - - 4
+    - 2320
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src33-float16-B4L2320D768-H12
+- operator: SelfAttention
+  case_id: 13
+  input_shape:
+  - - 2
+    - 2599
+    - 1280
+  - - 1280
+    - 1280
+  - - 1280
+    - 1280
+  - - 1280
+    - 1280
+  - - 1280
+    - 1280
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 20
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src34-bfloat16-B2L2599D1280-H20
+- operator: SelfAttention
+  case_id: 14
+  input_shape:
+  - - 5
+    - 2035
+    - 704
+  - - 704
+    - 704
+  - - 704
+    - 704
+  - - 704
+    - 704
+  - - 704
+    - 704
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 11
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src40-float16-B5L2035D704-H11
+- operator: SelfAttention
+  case_id: 15
+  input_shape:
+  - - 1
+    - 3552
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src43-float32-B1L3552D768-H12
+- operator: SelfAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 5164
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src45-float16-B1L5164D1024-H8
+- operator: SelfAttention
+  case_id: 17
+  input_shape:
+  - - 3
+    - 3564
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src46-bfloat16-B3L3564D768-H12
+- operator: SelfAttention
+  case_id: 18
+  input_shape:
+  - - 4
+    - 4059
+    - 576
+  - - 576
+    - 576
+  - - 576
+    - 576
+  - - 576
+    - 576
+  - - 576
+    - 576
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 9
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src50-float16-B4L4059D576-H9
+- operator: SelfAttention
+  case_id: 19
+  input_shape:
+  - - 1
+    - 1646
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src24-float16-B1L1646D2048-H16
+- operator: SelfAttention
+  case_id: 20
+  input_shape:
+  - - 1
+    - 2048
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  - - 2048
+    - 2048
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  - - -0.02
+    - 0.02
+  note: src12-float16-B1L2048D2048-H16

@@ -1,0 +1,59 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: Col2Im
+  category: Vision
+  difficulty: L3
+  formula: |
+    y[n, c, h, w] = sum_{kh, kw} x[n, c * kH * kW + kh * kW + kw, l]
+    l = h_col * Lw + w_col
+    h = h_col * strideH - padH + kh * dilH
+    w = w_col * strideW - padW + kw * dilW
+  description: 滑窗列重排回图像（col2im / fold），把 im2col 得到的列按输出位置累加重叠块的贡献
+  shape_support: 'x: [N, C*kH*kW, L], y: [N, C, H_out, W_out], L = Lh * Lw'
+  attrs:
+  - name: output_size
+    type: ListInt
+    description: 输出图像尺寸 [H_out, W_out]
+    required: true
+  - name: kernel_size
+    type: ListInt
+    description: 滑窗核尺寸 [kH, kW]
+    required: true
+  - name: dilation
+    type: ListInt
+    description: 膨胀系数 [dilH, dilW]
+    default: [1, 1]
+    required: false
+  - name: padding
+    type: ListInt
+    description: 填充大小 [padH, padW]
+    default: [0, 0]
+    required: false
+  - name: stride
+    type: ListInt
+    description: 滑窗步长 [strideH, strideW]
+    default: [1, 1]
+    required: false
+  inputs:
+  - name: x
+    description: 滑窗列张量 [N, C*kH*kW, L]，由 im2col 得到
+    dtype:
+    - float16
+    - float32
+  outputs:
+  - name: y
+    description: 重排回图像的结果 [N, C, H_out, W_out]
+    dtype:
+    - float16
+    - float32
+  schema: col2im(Tensor x, int[] output_size, int[] kernel_size, int[] dilation=[1,1],
+    int[] padding=[0,0], int[] stride=[1,1]) -> Tensor y

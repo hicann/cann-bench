@@ -1,0 +1,98 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: S2Attention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    u = Linear(C -> 3C)(permute(x, B,W,H,C))                 # [B, W, H, 3C]
+    u1 = shift1(u[..., :C]); u2 = shift2(u[..., C:2C]); u3 = u[..., 2C:]
+    a = mean(u1, u2, u3)                                     # [B, C]
+    a = Linear(C -> 3C)(GELU(Linear(3C -> C)(a)))            # [B, 3C] -> [B, 3, C]
+    a = softmax(a, dim=1)                                    # [B, 3, C]
+    y = Linear(C -> C)(sum_i a_i * u_i)                      # [B, W, H, C]
+    y = permute(y, B,C,H,W)
+  description: S2（Spatial Shift + Split）注意力前向：通道扩展为 3 倍后按两个方向做 spatial shift 得到三分支，Split Attention 生成逐分支逐通道 softmax 权重后加权融合，最后经通道投影还原
+  shape_support: 'x: [B, C, H, W]；mlp1 权重 [3C, C]、偏置 [3C]；mlp2 权重 [C, C]、偏置 [C]；mlp3 权重 [C, C]、偏置 [C]；mlp4 权重 [3C, C]、偏置 [3C]；y: [B, C, H, W]'
+  attrs: []
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: mlp1_weight
+    description: 通道扩展投影权重 [3C, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[3 * C, C]'
+  - name: mlp1_bias
+    description: 通道扩展投影偏置 [3C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[3 * C]'
+  - name: mlp2_weight
+    description: 输出投影权重 [C, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C]'
+  - name: mlp2_bias
+    description: 输出投影偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: mlp3_weight
+    description: Split Attention 第一层权重 [C, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C]'
+  - name: mlp3_bias
+    description: Split Attention 第一层偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: mlp4_weight
+    description: Split Attention 第二层权重 [3C, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[3 * C, C]'
+  - name: mlp4_bias
+    description: Split Attention 第二层偏置 [3C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[3 * C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: s2_attention(Tensor x, Tensor mlp1_weight, Tensor mlp1_bias, Tensor mlp2_weight, Tensor mlp2_bias, Tensor mlp3_weight, Tensor mlp3_bias, Tensor mlp4_weight, Tensor mlp4_bias) -> Tensor y

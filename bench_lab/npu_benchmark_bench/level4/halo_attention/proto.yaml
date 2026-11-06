@@ -1,0 +1,88 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: HaloAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    num_blocks = (H // b) * (W // b)
+    q_inp  = blockify(x)                                          # [B*num_blocks, b*b, C]
+    kv_inp = unfold(x, kernel=b+2*halo, stride=b, padding=halo)   # [B*num_blocks, (b+2*halo)^2, C]
+    q      = to_q(q_inp)                                          # [B*num_blocks, b*b, dh*heads]
+    k, v   = chunk(to_kv(kv_inp), 2, dim=-1)                      # 各 [B*num_blocks, (b+2*halo)^2, dh*heads]
+    attn   = softmax(bmm(q * dh^-0.5, k^T), dim=-1)
+    y      = to_out(merge(bmm(attn, v)))                          # [B, C, H, W]
+  description: Halo Attention：把特征图切成不重叠 block，用 unfold 提取每个 block 周围带 halo 的邻域作为 KV，做基于 block 的局部多头自注意力后再还原为特征图
+  shape_support: 'x: [B, C, H, W]，H/W 须能被 block_size 整除；q_w: [dim_head*heads, C]；kv_w: [2*dim_head*heads, C]；out_w: [C, dim_head*heads]；out_b: [C]；y: [B, C, H, W]'
+  attrs:
+  - name: block_size
+    type: int
+    description: 分块边长 b，H 与 W 须能被其整除
+    required: true
+  - name: halo_size
+    type: int
+    description: halo 半径，KV 提取时 kernel = b + 2*halo、padding = halo
+    required: true
+  - name: dim_head
+    type: int
+    default: 64
+    description: 每个 head 的维度 dh
+    required: false
+  - name: heads
+    type: int
+    default: 8
+    description: head 数
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: q_w
+    description: query 线性层权重 [dim_head * heads, C]（无偏置）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[dim_head * heads, C]'
+  - name: kv_w
+    description: key/value 线性层权重 [2 * dim_head * heads, C]（无偏置）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[2 * dim_head * heads, C]'
+  - name: out_w
+    description: 输出线性层权重 [C, dim_head * heads]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, dim_head * heads]'
+  - name: out_b
+    description: 输出线性层偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, C, H, W]；B/C/H/W 任一为 0 时原样返回输入
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: halo_attention(Tensor x, Tensor q_w, Tensor kv_w, Tensor out_w, Tensor out_b, int block_size, int halo_size, int dim_head, int heads) -> Tensor y

@@ -1,0 +1,66 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: DecoderMhaAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    idx[b] = kv_indices[kv_indptr[b] : kv_indptr[b+1]]
+    scores[b, h, j] = sm_scale * q[b, h, :] . k_buffer[idx[b][j], h, :]
+    o[b, h, :] = softmax(scores[b, h, :]) @ v_buffer[idx[b], h, :]
+  description: SGLang 风格 decode 阶段 MHA 注意力，按 kv_indptr/kv_indices 从全局 KV pool 取数后做全局 softmax（split-KV 两段式归并的等价实现）
+  shape_support: 'q: [B, H, D]，k_buffer: [P, H, D]，v_buffer: [P, H, Dv]，kv_indptr: [B+1]，kv_indices: [nnz]，o: [B, H, Dv]'
+  attrs:
+  - name: max_kv_len
+    type: int
+    description: 批内最长 KV 长度（形状提示），决定 KV 侧 padding 行数
+    required: true
+  - name: sm_scale
+    type: float
+    description: 打分缩放因子，通常为 1/sqrt(D)
+    required: true
+  inputs:
+  - name: q
+    description: 每条序列一个新 token 的 query [B, H, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, D]'
+  - name: k_buffer
+    description: 全局 KV pool 中的 key [P, H, D]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[P, H, D]'
+  - name: v_buffer
+    description: 全局 KV pool 中的 value [P, H, Dv]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[P, H, Dv]'
+  - name: kv_indptr
+    description: 每条序列在 kv_indices 上的起止 [B + 1]
+    dtype:
+    - int32
+    shape: '[B + 1]'
+  - name: kv_indices
+    description: 每条序列命中的 KV pool token 号 [nnz]
+    dtype:
+    - int32
+    shape: '[nnz]'
+  outputs:
+  - name: o
+    description: 注意力输出 [B, H, Dv]
+    dtype:
+    - float16
+    - bfloat16
+    shape: '[B, H, Dv]'
+  schema: decoder_mha_attention(Tensor q, Tensor k_buffer, Tensor v_buffer, Tensor kv_indptr, Tensor kv_indices, int max_kv_len, float sm_scale) -> Tensor o

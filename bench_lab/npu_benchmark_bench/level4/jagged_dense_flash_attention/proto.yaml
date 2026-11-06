@@ -1,0 +1,68 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: JaggedDenseFlashAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    L_b = min(jagged_offsets[b+1] - jagged_offsets[b], max_seq_len)
+    S_b = Q_b @ K_b^T + attn_bias[b, :L_b]
+    out[b] = softmax(S_b, dim=0)^T @ V_b
+  description: 变长 query（jagged）× dense key/value 的 flash attention 前向，softmax 沿 jagged 序列维归一化
+  shape_support: 'q: [sum_L, D], k: [B, D, T], v: [sum_L, D], attn_bias: [B, max_seq_len, T], jagged_offsets: [B+1], out: [B, T, D]'
+  attrs:
+  - name: max_seq_len
+    type: int
+    description: 每条序列参与计算的最大行数（attn_bias 的第 1 维）
+    required: true
+  inputs:
+  - name: q
+    description: 变长 query，形状 [sum_L, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, D]'
+  - name: k
+    description: dense key，形状 [B, D, T]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, D, T]'
+  - name: v
+    description: 变长 value，形状 [sum_L, D]，与 q 共用 offsets
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, D]'
+  - name: attn_bias
+    description: 每个 batch 的加性 attention bias，形状 [B, max_seq_len, T]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, max_seq_len, T]'
+  - name: jagged_offsets
+    description: 各 batch 在 sum_L 维上的起止偏移，单调不减，形状 [B+1]
+    dtype:
+    - int32
+    shape: '[B+1]'
+  outputs:
+  - name: out
+    description: 每个 batch 的 attention 输出，形状 [B, T, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, T, D]'
+  schema: jagged_dense_flash_attention(Tensor q, Tensor k, Tensor v, Tensor attn_bias, Tensor jagged_offsets, int max_seq_len) -> Tensor out

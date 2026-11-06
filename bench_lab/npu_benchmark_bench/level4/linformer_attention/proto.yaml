@@ -1,0 +1,89 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: LinformerAttention
+  category: LinearAttention
+  difficulty: L4
+  formula: |
+    q = Q x,  k = K x,  v = V x
+    k' = E k,  v' = F v                      # E, F: S -> projection_dim 低秩序列投影
+    P = softmax(q k'^T / sqrt(head_dim))
+    y = O (P v')
+  description: Linformer 低秩线性注意力前向，key/value 经序列维低秩投影后做注意力，四个投影层与两个序列投影权重均显式输入
+  shape_support: 'x: [B, S, D]；q/k/v/out_proj_weight: [D, D]；key/value_reduce_weight: [projection_dim, S]；y: [B, S, D]；约束 D % n_heads == 0，1 <= projection_dim <= S'
+  attrs:
+  - name: n_heads
+    type: int
+    description: 注意力头数，须整除 d_model
+    required: true
+  - name: projection_dim
+    type: int
+    description: 序列维低秩投影后的维度，取值 [1, S]
+    required: true
+  inputs:
+  - name: x
+    description: 输入序列特征，[B, S, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, S, D]'
+  - name: q_proj_weight
+    description: query 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: k_proj_weight
+    description: key 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: v_proj_weight
+    description: value 投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: out_proj_weight
+    description: 输出投影权重，[D, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[D, D]'
+  - name: key_reduce_weight
+    description: key 序列维低秩投影权重，[projection_dim, S]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[projection_dim, S]'
+  - name: value_reduce_weight
+    description: value 序列维低秩投影权重，[projection_dim, S]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[projection_dim, S]'
+  outputs:
+  - name: y
+    description: 注意力输出，[B, S, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, S, D]'
+  schema: linformer_attention(Tensor x, Tensor q_proj_weight, Tensor k_proj_weight, Tensor v_proj_weight, Tensor out_proj_weight, Tensor key_reduce_weight, Tensor value_reduce_weight, int n_heads, int projection_dim) -> Tensor y

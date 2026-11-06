@@ -1,0 +1,1673 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE IN the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+cases:
+- operator: BlockSparseAttnBwd
+  case_id: 1
+  input_shape:
+  - &id001
+    - 121
+    - 20
+    - 64
+  - - 175
+    - 5
+    - 64
+  - - 175
+    - 5
+    - 64
+  - - 2
+  - - 2
+  - - 20
+  - - 40
+  - - 1
+    - 6
+    - 1
+    - 2
+  - - 121
+    - 20
+    - 64
+  - - 1
+    - 20
+    - 121
+  - - 1
+    - 20
+    - 121
+  - *id001
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 121
+    k_lens:
+    - 175
+    hk: 5
+    sparsity: 0.5
+    sink: 1
+    local: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H20-HK5-D64-causal1-exact0-spr0.5-src1
+- operator: BlockSparseAttnBwd
+  case_id: 2
+  input_shape:
+  - &id002
+    - 97
+    - 32
+    - 32
+  - - 239
+    - 16
+    - 32
+  - - 239
+    - 16
+    - 32
+  - - 2
+  - - 2
+  - - 32
+  - - 64
+  - - 1
+    - 10
+    - 1
+    - 2
+  - - 97
+    - 32
+    - 32
+  - - 1
+    - 32
+    - 97
+  - - 1
+    - 32
+    - 97
+  - *id002
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: false
+    exact_streaming: false
+    q_lens:
+    - 97
+    k_lens:
+    - 239
+    hk: 16
+    sparsity: 1.0
+    sink: 2
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B1-H32-HK16-D32-causal0-exact0-spr1.0-src2
+- operator: BlockSparseAttnBwd
+  case_id: 3
+  input_shape:
+  - &id003
+    - 113
+    - 24
+    - 64
+  - - 97
+    - 8
+    - 64
+  - - 97
+    - 8
+    - 64
+  - - 2
+  - - 2
+  - - 24
+  - - 48
+  - - 1
+    - 8
+    - 1
+    - 1
+  - - 113
+    - 24
+    - 64
+  - - 1
+    - 24
+    - 113
+  - - 1
+    - 24
+    - 113
+  - *id003
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 113
+    k_lens:
+    - 97
+    hk: 8
+    sparsity: 0.7
+    sink: 1
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B1-H24-HK8-D64-causal1-exact0-spr0.7-src3
+- operator: BlockSparseAttnBwd
+  case_id: 4
+  input_shape:
+  - &id004
+    - 113
+    - 8
+    - 32
+  - - 201
+    - 2
+    - 32
+  - - 201
+    - 2
+    - 32
+  - - 2
+  - - 2
+  - - 8
+  - - 16
+  - - 1
+    - 2
+    - 1
+    - 2
+  - - 113
+    - 8
+    - 32
+  - - 1
+    - 8
+    - 113
+  - - 1
+    - 8
+    - 113
+  - *id004
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 113
+    k_lens:
+    - 201
+    hk: 2
+    sparsity: 0.3
+    sink: 1
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H8-HK2-D32-causal1-exact0-spr0.3-src4
+- operator: BlockSparseAttnBwd
+  case_id: 5
+  input_shape:
+  - &id005
+    - 97
+    - 16
+    - 32
+  - - 157
+    - 4
+    - 32
+  - - 157
+    - 4
+    - 32
+  - - 2
+  - - 2
+  - - 16
+  - - 32
+  - - 1
+    - 5
+    - 1
+    - 2
+  - - 97
+    - 16
+    - 32
+  - - 1
+    - 16
+    - 97
+  - - 1
+    - 16
+    - 97
+  - *id005
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    k_lens:
+    - 157
+    hk: 4
+    sparsity: 0.5
+    sink: 2
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H16-HK4-D32-causal1-exact0-spr0.5-src5
+- operator: BlockSparseAttnBwd
+  case_id: 6
+  input_shape:
+  - &id006
+    - 65
+    - 12
+    - 64
+  - - 129
+    - 3
+    - 64
+  - - 129
+    - 3
+    - 64
+  - - 2
+  - - 2
+  - - 12
+  - - 24
+  - - 1
+    - 4
+    - 1
+    - 2
+  - - 65
+    - 12
+    - 64
+  - - 1
+    - 12
+    - 65
+  - - 1
+    - 12
+    - 65
+  - *id006
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 65
+    k_lens:
+    - 129
+    hk: 3
+    sparsity: 0.5
+    sink: 1
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H12-HK3-D64-causal1-exact0-spr0.5-src6
+- operator: BlockSparseAttnBwd
+  case_id: 7
+  input_shape:
+  - &id007
+    - 300
+    - 28
+    - 128
+  - - 121
+    - 7
+    - 128
+  - - 121
+    - 7
+    - 128
+  - - 3
+  - - 3
+  - - 28
+  - - 56
+  - - 2
+    - 9
+    - 2
+    - 1
+  - - 300
+    - 28
+    - 128
+  - - 2
+    - 28
+    - 203
+  - - 2
+    - 28
+    - 203
+  - *id007
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.08838835
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    - 203
+    k_lens:
+    - 67
+    - 54
+    hk: 7
+    sparsity: 0.5
+    sink: 1
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H28-HK7-D128-causal1-exact0-spr0.5-src7
+- operator: BlockSparseAttnBwd
+  case_id: 8
+  input_shape:
+  - &id008
+    - 360
+    - 48
+    - 64
+  - - 121
+    - 12
+    - 64
+  - - 121
+    - 12
+    - 64
+  - - 3
+  - - 3
+  - - 48
+  - - 96
+  - - 2
+    - 16
+    - 2
+    - 1
+  - - 360
+    - 48
+    - 64
+  - - 2
+    - 48
+    - 203
+  - - 2
+    - 48
+    - 203
+  - *id008
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 203
+    - 157
+    k_lens:
+    - 116
+    - 5
+    hk: 12
+    sparsity: 0.6
+    sink: 1
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H48-HK12-D64-causal1-exact0-spr0.6-src8
+- operator: BlockSparseAttnBwd
+  case_id: 9
+  input_shape:
+  - &id009
+    - 89
+    - 16
+    - 64
+  - - 145
+    - 4
+    - 64
+  - - 145
+    - 4
+    - 64
+  - - 2
+  - - 2
+  - - 16
+  - - 32
+  - - 1
+    - 5
+    - 1
+    - 2
+  - - 89
+    - 16
+    - 64
+  - - 1
+    - 16
+    - 89
+  - - 1
+    - 16
+    - 89
+  - *id009
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: false
+    exact_streaming: false
+    q_lens:
+    - 89
+    k_lens:
+    - 145
+    hk: 4
+    sparsity: 0.8
+    sink: 2
+    local: 4
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H16-HK4-D64-causal0-exact0-spr0.8-src9
+- operator: BlockSparseAttnBwd
+  case_id: 10
+  input_shape:
+  - &id010
+    - 223
+    - 60
+    - 64
+  - - 368
+    - 15
+    - 64
+  - - 368
+    - 15
+    - 64
+  - - 3
+  - - 3
+  - - 60
+  - - 120
+  - - 2
+    - 20
+    - 1
+    - 2
+  - - 223
+    - 60
+    - 64
+  - - 2
+    - 60
+    - 126
+  - - 2
+    - 60
+    - 126
+  - *id010
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    - 126
+    k_lens:
+    - 202
+    - 166
+    hk: 15
+    sparsity: 0.5
+    sink: 1
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H60-HK15-D64-causal1-exact0-spr0.5-src10
+- operator: BlockSparseAttnBwd
+  case_id: 11
+  input_shape:
+  - &id011
+    - 97
+    - 10
+    - 64
+  - - 257
+    - 2
+    - 64
+  - - 257
+    - 2
+    - 64
+  - - 2
+  - - 2
+  - - 10
+  - - 20
+  - - 1
+    - 3
+    - 1
+    - 3
+  - - 97
+    - 10
+    - 64
+  - - 1
+    - 10
+    - 97
+  - - 1
+    - 10
+    - 97
+  - *id011
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    k_lens:
+    - 257
+    hk: 2
+    sparsity: 0.3
+    sink: 2
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B1-H10-HK2-D64-causal1-exact0-spr0.3-src11
+- operator: BlockSparseAttnBwd
+  case_id: 12
+  input_shape:
+  - &id012
+    - 762
+    - 20
+    - 64
+  - - 97
+    - 5
+    - 64
+  - - 97
+    - 5
+    - 64
+  - - 3
+  - - 3
+  - - 20
+  - - 40
+  - - 2
+    - 6
+    - 4
+    - 1
+  - - 762
+    - 20
+    - 64
+  - - 2
+    - 20
+    - 444
+  - - 2
+    - 20
+    - 444
+  - *id012
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 318
+    - 444
+    k_lens:
+    - 86
+    - 11
+    hk: 5
+    sparsity: 0.3
+    sink: 1
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B2-H20-HK5-D64-causal1-exact0-spr0.3-src12
+- operator: BlockSparseAttnBwd
+  case_id: 13
+  input_shape:
+  - &id013
+    - 254
+    - 32
+    - 64
+  - - 324
+    - 8
+    - 64
+  - - 324
+    - 8
+    - 64
+  - - 3
+  - - 3
+  - - 32
+  - - 64
+  - - 2
+    - 10
+    - 2
+    - 2
+  - - 254
+    - 32
+    - 64
+  - - 2
+    - 32
+    - 157
+  - - 2
+    - 32
+    - 157
+  - *id013
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    - 157
+    k_lens:
+    - 248
+    - 76
+    hk: 8
+    sparsity: 0.4
+    sink: 2
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H32-HK8-D64-causal1-exact0-spr0.4-src13
+- operator: BlockSparseAttnBwd
+  case_id: 14
+  input_shape:
+  - &id014
+    - 239
+    - 24
+    - 128
+  - - 300
+    - 6
+    - 128
+  - - 300
+    - 6
+    - 128
+  - - 3
+  - - 3
+  - - 24
+  - - 48
+  - - 2
+    - 8
+    - 1
+    - 3
+  - - 239
+    - 24
+    - 128
+  - - 2
+    - 24
+    - 126
+  - - 2
+    - 24
+    - 126
+  - *id014
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.08838835
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 113
+    - 126
+    k_lens:
+    - 264
+    - 36
+    hk: 6
+    sparsity: 0.9
+    sink: 2
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H24-HK6-D128-causal1-exact0-spr0.9-src14
+- operator: BlockSparseAttnBwd
+  case_id: 15
+  input_shape:
+  - &id015
+    - 300
+    - 40
+    - 64
+  - - 580
+    - 10
+    - 64
+  - - 580
+    - 10
+    - 64
+  - - 3
+  - - 3
+  - - 40
+  - - 80
+  - - 2
+    - 13
+    - 2
+    - 5
+  - - 300
+    - 40
+    - 64
+  - - 2
+    - 40
+    - 203
+  - - 2
+    - 40
+    - 203
+  - *id015
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    - 203
+    k_lens:
+    - 36
+    - 544
+    hk: 10
+    sparsity: 0.8
+    sink: 4
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B2-H40-HK10-D64-causal1-exact0-spr0.8-src21
+- operator: BlockSparseAttnBwd
+  case_id: 16
+  input_shape:
+  - &id016
+    - 97
+    - 44
+    - 32
+  - - 762
+    - 11
+    - 32
+  - - 762
+    - 11
+    - 32
+  - - 2
+  - - 2
+  - - 44
+  - - 88
+  - - 1
+    - 14
+    - 1
+    - 6
+  - - 97
+    - 44
+    - 32
+  - - 1
+    - 44
+    - 97
+  - - 1
+    - 44
+    - 97
+  - *id016
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: true
+    exact_streaming: true
+    q_lens:
+    - 97
+    k_lens:
+    - 762
+    hk: 11
+    sparsity: 0.6
+    sink: 5
+    local: 5
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B1-H44-HK11-D32-causal1-exact1-spr0.6-src28
+- operator: BlockSparseAttnBwd
+  case_id: 17
+  input_shape:
+  - &id017
+    - 580
+    - 48
+    - 64
+  - - 324
+    - 12
+    - 64
+  - - 324
+    - 12
+    - 64
+  - - 3
+  - - 3
+  - - 48
+  - - 96
+  - - 2
+    - 16
+    - 3
+    - 2
+  - - 580
+    - 48
+    - 64
+  - - 2
+    - 48
+    - 323
+  - - 2
+    - 48
+    - 323
+  - *id017
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.125
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 257
+    - 323
+    k_lens:
+    - 187
+    - 137
+    hk: 12
+    sparsity: 0.6
+    sink: 1
+    local: 2
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B2-H48-HK12-D64-causal1-exact0-spr0.6-src34
+- operator: BlockSparseAttnBwd
+  case_id: 18
+  input_shape:
+  - &id018
+    - 762
+    - 64
+    - 128
+  - - 618
+    - 16
+    - 128
+  - - 618
+    - 16
+    - 128
+  - - 3
+  - - 3
+  - - 64
+  - - 128
+  - - 2
+    - 21
+    - 4
+    - 4
+  - - 762
+    - 64
+    - 128
+  - - 2
+    - 64
+    - 444
+  - - 2
+    - 64
+    - 444
+  - *id018
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.08838835
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 318
+    - 444
+    k_lens:
+    - 426
+    - 192
+    hk: 16
+    sparsity: 0.6
+    sink: 2
+    local: 1
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B2-H64-HK16-D128-causal1-exact0-spr0.6-src37
+- operator: BlockSparseAttnBwd
+  case_id: 19
+  input_shape:
+  - &id019
+    - 300
+    - 128
+    - 32
+  - - 1025
+    - 16
+    - 32
+  - - 1025
+    - 16
+    - 32
+  - - 3
+  - - 3
+  - - 128
+  - - 256
+  - - 2
+    - 42
+    - 2
+    - 8
+  - - 300
+    - 128
+    - 32
+  - - 2
+    - 128
+    - 203
+  - - 2
+    - 128
+    - 203
+  - *id019
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - bfloat16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 97
+    - 203
+    k_lens:
+    - 78
+    - 947
+    hk: 16
+    sparsity: 0.2
+    sink: 7
+    local: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: bfloat16-B2-H128-HK16-D32-causal1-exact0-spr0.2-src46
+- operator: BlockSparseAttnBwd
+  case_id: 20
+  input_shape:
+  - &id020
+    - 580
+    - 96
+    - 32
+  - - 1508
+    - 16
+    - 32
+  - - 1508
+    - 16
+    - 32
+  - - 3
+  - - 3
+  - - 96
+  - - 192
+  - - 2
+    - 32
+    - 3
+    - 10
+  - - 580
+    - 96
+    - 32
+  - - 2
+    - 96
+    - 323
+  - - 2
+    - 96
+    - 323
+  - *id020
+  dtype:
+  - float16
+  - float16
+  - float16
+  - int32
+  - int32
+  - int32
+  - int32
+  - bool
+  - float16
+  - float32
+  - float32
+  - float32
+  attrs:
+    softmax_scale: 0.1767767
+    is_causal: true
+    exact_streaming: false
+    q_lens:
+    - 257
+    - 323
+    k_lens:
+    - 1190
+    - 318
+    hk: 16
+    sparsity: 0.4
+    sink: 5
+    local: 8
+  value_range:
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - -1.0
+    - 1.0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 0
+  - - 0
+    - 1
+  - - -1.0
+    - 1.0
+  - - 0.0
+    - 10.0
+  - - 1.0
+    - 10.0
+  - - -1.0
+    - 1.0
+  note: float16-B2-H96-HK16-D32-causal1-exact0-spr0.4-src50

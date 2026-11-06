@@ -1,0 +1,784 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: OutlookAttention
+  case_id: 1
+  input_shape:
+  - - 8
+    - 14
+    - 8
+    - 448
+  - &id001
+    - 448
+    - 448
+  - &id002
+    - 448
+  - &id019
+    - 16
+    - 448
+  - &id012
+    - 16
+  - *id001
+  - *id002
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 2
+    padding: 1
+    stride: 2
+  value_range:
+  - &id007
+    - -1.0
+    - 1.0
+  - &id003
+    - -0.05
+    - 0.05
+  - &id004
+    - 0.0
+    - 0.0
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B8H14W8C448-k2-p1-s2-src1
+- operator: OutlookAttention
+  case_id: 2
+  input_shape:
+  - - 2
+    - 8
+    - 15
+    - 1280
+  - &id005
+    - 1280
+    - 1280
+  - &id006
+    - 1280
+  - - 81
+    - 1280
+  - &id015
+    - 81
+  - *id005
+  - *id006
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B2H8W15C1280-k3-p1-s2-src2
+- operator: OutlookAttention
+  case_id: 3
+  input_shape:
+  - - 2
+    - 57
+    - 43
+    - 640
+  - &id008
+    - 640
+    - 640
+  - &id009
+    - 640
+  - - 256
+    - 640
+  - &id016
+    - 256
+  - *id008
+  - *id009
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 4
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B2H57W43C640-k4-p1-s2-src3
+- operator: OutlookAttention
+  case_id: 4
+  input_shape:
+  - - 1
+    - 1
+    - 1
+    - 8
+  - &id010
+    - 8
+    - 8
+  - &id011
+    - 8
+  - - 1
+    - 8
+  - - 1
+  - *id010
+  - *id011
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 1
+    padding: 0
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B1H1W1C8-k1-p0-s1-src4
+- operator: OutlookAttention
+  case_id: 5
+  input_shape:
+  - - 8
+    - 57
+    - 25
+    - 64
+  - &id013
+    - 64
+    - 64
+  - &id014
+    - 64
+  - - 16
+    - 64
+  - *id012
+  - *id013
+  - *id014
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 2
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B8H57W25C64-k2-p1-s2-src5
+- operator: OutlookAttention
+  case_id: 6
+  input_shape:
+  - - 6
+    - 53
+    - 27
+    - 448
+  - *id001
+  - *id002
+  - &id022
+    - 81
+    - 448
+  - *id015
+  - *id001
+  - *id002
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B6H53W27C448-k3-p1-s1-src6
+- operator: OutlookAttention
+  case_id: 7
+  input_shape:
+  - - 4
+    - 23
+    - 25
+    - 1280
+  - *id005
+  - *id006
+  - - 625
+    - 1280
+  - &id023
+    - 625
+  - *id005
+  - *id006
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 5
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B4H23W25C1280-k5-p1-s2-src7
+- operator: OutlookAttention
+  case_id: 8
+  input_shape:
+  - - 5
+    - 33
+    - 23
+    - 1024
+  - &id017
+    - 1024
+    - 1024
+  - &id018
+    - 1024
+  - - 256
+    - 1024
+  - *id016
+  - *id017
+  - *id018
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 4
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B5H33W23C1024-k4-p1-s2-src8
+- operator: OutlookAttention
+  case_id: 9
+  input_shape:
+  - - 6
+    - 73
+    - 97
+    - 448
+  - *id001
+  - *id002
+  - *id019
+  - *id012
+  - *id001
+  - *id002
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 2
+    padding: 0
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B6H73W97C448-k2-p0-s1-src9
+- operator: OutlookAttention
+  case_id: 10
+  input_shape:
+  - - 6
+    - 53
+    - 27
+    - 736
+  - &id020
+    - 736
+    - 736
+  - &id021
+    - 736
+  - - 81
+    - 736
+  - *id015
+  - *id020
+  - *id021
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B6H53W27C736-k3-p1-s1-src10
+- operator: OutlookAttention
+  case_id: 11
+  input_shape:
+  - - 3
+    - 97
+    - 89
+    - 448
+  - *id001
+  - *id002
+  - *id022
+  - *id015
+  - *id001
+  - *id002
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B3H97W89C448-k3-p1-s1-src11
+- operator: OutlookAttention
+  case_id: 12
+  input_shape:
+  - - 3
+    - 113
+    - 47
+    - 560
+  - &id024
+    - 560
+    - 560
+  - &id025
+    - 560
+  - - 625
+    - 560
+  - *id023
+  - *id024
+  - *id025
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_heads: 1
+    kernel_size: 5
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: bfloat16-B3H113W47C560-k5-p1-s2-src12
+- operator: OutlookAttention
+  case_id: 13
+  input_shape:
+  - - 2
+    - 89
+    - 77
+    - 624
+  - &id026
+    - 624
+    - 624
+  - &id027
+    - 624
+  - - 81
+    - 624
+  - *id015
+  - *id026
+  - *id027
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B2H89W77C624-k3-p1-s2-src13
+- operator: OutlookAttention
+  case_id: 14
+  input_shape:
+  - - 1
+    - 125
+    - 113
+    - 512
+  - &id028
+    - 512
+    - 512
+  - &id029
+    - 512
+  - - 81
+    - 512
+  - *id015
+  - *id028
+  - *id029
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B1H125W113C512-k3-p1-s2-src14
+- operator: OutlookAttention
+  case_id: 15
+  input_shape:
+  - - 5
+    - 33
+    - 23
+    - 1184
+  - &id030
+    - 1184
+    - 1184
+  - &id031
+    - 1184
+  - - 256
+    - 1184
+  - *id016
+  - *id030
+  - *id031
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 4
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B5H33W23C1184-k4-p1-s2-src15
+- operator: OutlookAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 8
+    - 61
+    - 640
+  - *id008
+  - *id009
+  - - 4096
+    - 640
+  - - 4096
+  - *id008
+  - *id009
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_heads: 1
+    kernel_size: 9
+    padding: 4
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: bfloat16-B1H8W61C640-k9-p4-s1-src16
+- operator: OutlookAttention
+  case_id: 17
+  input_shape:
+  - - 2
+    - 8
+    - 15
+    - 3400
+  - &id032
+    - 3400
+    - 3400
+  - &id033
+    - 3400
+  - - 81
+    - 3400
+  - *id015
+  - *id032
+  - *id033
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 3
+    padding: 1
+    stride: 2
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B2H8W15C3400-k3-p1-s2-src21
+- operator: OutlookAttention
+  case_id: 18
+  input_shape:
+  - - 4
+    - 69
+    - 13
+    - 192
+  - &id034
+    - 192
+    - 192
+  - &id035
+    - 192
+  - - 256
+    - 192
+  - *id016
+  - *id034
+  - *id035
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    num_heads: 1
+    kernel_size: 4
+    padding: 2
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: bfloat16-B4H69W13C192-k4-p2-s1-src28
+- operator: OutlookAttention
+  case_id: 19
+  input_shape:
+  - - 3
+    - 89
+    - 25
+    - 96
+  - &id036
+    - 96
+    - 96
+  - &id037
+    - 96
+  - - 256
+    - 96
+  - *id016
+  - *id036
+  - *id037
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    num_heads: 1
+    kernel_size: 4
+    padding: 2
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float16-B3H89W25C96-k4-p2-s1-src35
+- operator: OutlookAttention
+  case_id: 20
+  input_shape:
+  - - 2
+    - 41
+    - 15
+    - 448
+  - *id001
+  - *id002
+  - - 2401
+    - 448
+  - - 2401
+  - *id001
+  - *id002
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    num_heads: 1
+    kernel_size: 7
+    padding: 3
+    stride: 1
+  value_range:
+  - *id007
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  note: float32-B2H41W15C448-k7-p3-s1-src49

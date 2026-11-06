@@ -1,0 +1,892 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: MultiHeadAttention
+  case_id: 1
+  input_shape:
+  - - 1
+    - 59
+    - 360
+  - - 1
+    - 89
+    - 360
+  - - 1
+    - 89
+    - 360
+  - - 360
+    - 360
+  - - 360
+    - 360
+  - - 360
+    - 360
+  - - 360
+    - 360
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 6
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id001
+    - -0.05270462766947299
+    - 0.05270462766947299
+  - *id001
+  - *id001
+  - *id001
+  note: bfloat16-B1-Lq59-Lk89-D360-H6-src1
+- operator: MultiHeadAttention
+  case_id: 2
+  input_shape:
+  - - 3
+    - 17
+    - 128
+  - - 3
+    - 53
+    - 128
+  - - 3
+    - 53
+    - 128
+  - - 128
+    - 128
+  - - 128
+    - 128
+  - - 128
+    - 128
+  - - 128
+    - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 4
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id002
+    - -0.08838834764831843
+    - 0.08838834764831843
+  - *id002
+  - *id002
+  - *id002
+  note: float32-B3-Lq17-Lk53-D128-H4-src2
+- operator: MultiHeadAttention
+  case_id: 3
+  input_shape:
+  - - 1
+    - 157
+    - 864
+  - - 1
+    - 169
+    - 864
+  - - 1
+    - 169
+    - 864
+  - - 864
+    - 864
+  - - 864
+    - 864
+  - - 864
+    - 864
+  - - 864
+    - 864
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id003
+    - -0.034020690871988585
+    - 0.034020690871988585
+  - *id003
+  - *id003
+  - *id003
+  note: float32-B1-Lq157-Lk169-D864-H12-src3
+- operator: MultiHeadAttention
+  case_id: 4
+  input_shape:
+  - - 1
+    - 79
+    - 512
+  - - 1
+    - 89
+    - 512
+  - - 1
+    - 89
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  - - 512
+    - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 8
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id004
+    - -0.044194173824159216
+    - 0.044194173824159216
+  - *id004
+  - *id004
+  - *id004
+  note: float32-B1-Lq79-Lk89-D512-H8-src4
+- operator: MultiHeadAttention
+  case_id: 5
+  input_shape:
+  - - 1
+    - 83
+    - 540
+  - - 1
+    - 95
+    - 540
+  - - 1
+    - 95
+    - 540
+  - - 540
+    - 540
+  - - 540
+    - 540
+  - - 540
+    - 540
+  - - 540
+    - 540
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 9
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id005
+    - -0.04303314829119352
+    - 0.04303314829119352
+  - *id005
+  - *id005
+  - *id005
+  note: float16-B1-Lq83-Lk95-D540-H9-src5
+- operator: MultiHeadAttention
+  case_id: 6
+  input_shape:
+  - - 2
+    - 71
+    - 448
+  - - 2
+    - 75
+    - 448
+  - - 2
+    - 75
+    - 448
+  - - 448
+    - 448
+  - - 448
+    - 448
+  - - 448
+    - 448
+  - - 448
+    - 448
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 7
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id006
+    - -0.0472455591261534
+    - 0.0472455591261534
+  - *id006
+  - *id006
+  - *id006
+  note: float16-B2-Lq71-Lk75-D448-H7-src6
+- operator: MultiHeadAttention
+  case_id: 7
+  input_shape:
+  - - 3
+    - 223
+    - 1152
+  - - 3
+    - 235
+    - 1152
+  - - 3
+    - 235
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  - - 1152
+    - 1152
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 18
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id007
+    - -0.029462782549439483
+    - 0.029462782549439483
+  - *id007
+  - *id007
+  - *id007
+  note: bfloat16-B3-Lq223-Lk235-D1152-H18-src7
+- operator: MultiHeadAttention
+  case_id: 8
+  input_shape:
+  - - 2
+    - 131
+    - 768
+  - - 2
+    - 135
+    - 768
+  - - 2
+    - 135
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  - - 768
+    - 768
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 12
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id008
+    - -0.036084391824351615
+    - 0.036084391824351615
+  - *id008
+  - *id008
+  - *id008
+  note: float32-B2-Lq131-Lk135-D768-H12-src8
+- operator: MultiHeadAttention
+  case_id: 9
+  input_shape:
+  - - 2
+    - 19
+    - 144
+  - - 2
+    - 21
+    - 144
+  - - 2
+    - 21
+    - 144
+  - - 144
+    - 144
+  - - 144
+    - 144
+  - - 144
+    - 144
+  - - 144
+    - 144
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 3
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id009
+    - -0.08333333333333333
+    - 0.08333333333333333
+  - *id009
+  - *id009
+  - *id009
+  note: float16-B2-Lq19-Lk21-D144-H3-src9
+- operator: MultiHeadAttention
+  case_id: 10
+  input_shape:
+  - - 3
+    - 317
+    - 2816
+  - - 3
+    - 353
+    - 2816
+  - - 3
+    - 353
+    - 2816
+  - - 2816
+    - 2816
+  - - 2816
+    - 2816
+  - - 2816
+    - 2816
+  - - 2816
+    - 2816
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 22
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id010
+    - -0.018844459036110227
+    - 0.018844459036110227
+  - *id010
+  - *id010
+  - *id010
+  note: float16-B3-Lq317-Lk353-D2816-H22-src10
+- operator: MultiHeadAttention
+  case_id: 11
+  input_shape:
+  - - 4
+    - 43
+    - 400
+  - - 4
+    - 59
+    - 400
+  - - 4
+    - 59
+    - 400
+  - - 400
+    - 400
+  - - 400
+    - 400
+  - - 400
+    - 400
+  - - 400
+    - 400
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 4
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id011
+    - -0.05
+    - 0.05
+  - *id011
+  - *id011
+  - *id011
+  note: bfloat16-B4-Lq43-Lk59-D400-H4-src11
+- operator: MultiHeadAttention
+  case_id: 12
+  input_shape:
+  - - 1
+    - 383
+    - 1472
+  - - 1
+    - 403
+    - 1472
+  - - 1
+    - 403
+    - 1472
+  - - 1472
+    - 1472
+  - - 1472
+    - 1472
+  - - 1472
+    - 1472
+  - - 1472
+    - 1472
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 23
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id012
+    - -0.026064301757134346
+    - 0.026064301757134346
+  - *id012
+  - *id012
+  - *id012
+  note: float32-B1-Lq383-Lk403-D1472-H23-src12
+- operator: MultiHeadAttention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 463
+    - 2560
+  - - 1
+    - 493
+    - 2560
+  - - 1
+    - 493
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id013
+    - -0.01976423537605237
+    - 0.01976423537605237
+  - *id013
+  - *id013
+  - *id013
+  note: bfloat16-B1-Lq463-Lk493-D2560-H16-src13
+- operator: MultiHeadAttention
+  case_id: 14
+  input_shape:
+  - - 3
+    - 769
+    - 640
+  - - 3
+    - 775
+    - 640
+  - - 3
+    - 775
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  - - 640
+    - 640
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 10
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id014
+    - -0.03952847075210474
+    - 0.03952847075210474
+  - *id014
+  - *id014
+  - *id014
+  note: float32-B3-Lq769-Lk775-D640-H10-src14
+- operator: MultiHeadAttention
+  case_id: 15
+  input_shape:
+  - - 1
+    - 179
+    - 960
+  - - 1
+    - 199
+    - 960
+  - - 1
+    - 199
+    - 960
+  - - 960
+    - 960
+  - - 960
+    - 960
+  - - 960
+    - 960
+  - - 960
+    - 960
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 15
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id015
+    - -0.03227486121839514
+    - 0.03227486121839514
+  - *id015
+  - *id015
+  - *id015
+  note: bfloat16-B1-Lq179-Lk199-D960-H15-src15
+- operator: MultiHeadAttention
+  case_id: 16
+  input_shape:
+  - - 1
+    - 293
+    - 2688
+  - - 1
+    - 323
+    - 2688
+  - - 1
+    - 323
+    - 2688
+  - - 2688
+    - 2688
+  - - 2688
+    - 2688
+  - - 2688
+    - 2688
+  - - 2688
+    - 2688
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 21
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id016
+    - -0.01928791874526149
+    - 0.01928791874526149
+  - *id016
+  - *id016
+  - *id016
+  note: float32-B1-Lq293-Lk323-D2688-H21-src16
+- operator: MultiHeadAttention
+  case_id: 17
+  input_shape:
+  - - 2
+    - 23
+    - 5120
+  - - 2
+    - 27
+    - 5120
+  - - 2
+    - 27
+    - 5120
+  - - 5120
+    - 5120
+  - - 5120
+    - 5120
+  - - 5120
+    - 5120
+  - - 5120
+    - 5120
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 5
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id017
+    - -0.013975424859373685
+    - 0.013975424859373685
+  - *id017
+  - *id017
+  - *id017
+  note: bfloat16-B2-Lq23-Lk27-D5120-H5-src17
+- operator: MultiHeadAttention
+  case_id: 18
+  input_shape:
+  - - 3
+    - 509
+    - 1024
+  - - 3
+    - 545
+    - 1024
+  - - 3
+    - 545
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  - - 1024
+    - 1024
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 16
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id018
+    - -0.03125
+    - 0.03125
+  - *id018
+  - *id018
+  - *id018
+  note: float32-B3-Lq509-Lk545-D1024-H16-src18
+- operator: MultiHeadAttention
+  case_id: 19
+  input_shape:
+  - - 3
+    - 277
+    - 2560
+  - - 3
+    - 301
+    - 2560
+  - - 3
+    - 301
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  - - 2560
+    - 2560
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 20
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id019
+    - -0.01976423537605237
+    - 0.01976423537605237
+  - *id019
+  - *id019
+  - *id019
+  note: bfloat16-B3-Lq277-Lk301-D2560-H20-src19
+- operator: MultiHeadAttention
+  case_id: 20
+  input_shape:
+  - - 3
+    - 419
+    - 1752
+  - - 3
+    - 443
+    - 1752
+  - - 3
+    - 443
+    - 1752
+  - - 1752
+    - 1752
+  - - 1752
+    - 1752
+  - - 1752
+    - 1752
+  - - 1752
+    - 1752
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 24
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id020
+    - -0.02389092412837483
+    - 0.02389092412837483
+  - *id020
+  - *id020
+  - *id020
+  note: float16-B3-Lq419-Lk443-D1752-H24-src20

@@ -1,0 +1,81 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: CBAMBlock
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    ca = sigmoid(MLP(avgpool(x)) + MLP(maxpool(x)))
+    out = x * ca
+    sa = sigmoid(Conv2d(cat([max_c(out), mean_c(out)])))
+    y = out * sa + x
+  description: 卷积块注意力模块（CBAM）前向：通道注意力（共享 MLP 的 avg/max 双路）与空间注意力（通道 mean/max 拼接后 2->1 卷积）顺序加权并加残差
+  shape_support: 'x: [B, C, H, W]；hidden = max(1, C // reduction)；ca_fc1_weight: [hidden, C, 1, 1]；ca_fc2_weight: [C, hidden, 1, 1]；sa_conv_weight: [1, 2, kernel_size, kernel_size]；y: [B, C, H, W]'
+  attrs:
+  - name: channel
+    type: int
+    description: 输入通道数，保留用于接口兼容，实际通道数取自 x.shape[1]
+    required: true
+  - name: reduction
+    type: int
+    default: 16
+    description: 通道注意力 MLP 的瓶颈降维比，hidden = max(1, C // reduction)
+    required: false
+  - name: kernel_size
+    type: int
+    default: 7
+    description: 空间注意力 2->1 卷积核大小（padding 取 kernel_size // 2）
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: ca_fc1_weight
+    description: 通道注意力第一层 1x1 卷积权重 [hidden, C, 1, 1]，无 bias
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[hidden, C, 1, 1]'
+  - name: ca_fc2_weight
+    description: 通道注意力第二层 1x1 卷积权重 [C, hidden, 1, 1]，无 bias
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, hidden, 1, 1]'
+  - name: sa_conv_weight
+    description: 空间注意力 2->1 卷积权重 [1, 2, kernel_size, kernel_size]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, 2, kernel_size, kernel_size]'
+  - name: sa_conv_bias
+    description: 空间注意力 2->1 卷积偏置 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  outputs:
+  - name: y
+    description: 注意力细化后的特征图，shape 与 x 一致
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: cbam_block(Tensor x, Tensor ca_fc1_weight, Tensor ca_fc2_weight, Tensor sa_conv_weight, Tensor sa_conv_bias, int channel, int reduction=16, int kernel_size=7) -> Tensor y

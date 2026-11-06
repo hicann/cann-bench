@@ -1,0 +1,80 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: FusionAttention
+  category: Attention
+  difficulty: L4
+  formula: |
+    q, k, v = layout_to_bnsd(query, key, value)
+    k, v    = repeat_kv(k, v, num_q_heads // num_kv_heads)
+    scores  = (q @ k^T) * scale
+    p       = softmax(scores, dim=-1)
+    out     = p @ v
+    attention_out = bnsd_to_layout(out)
+    softmax_max[i] = max_j scores[i, j]
+    softmax_sum[i] = sum_j exp(scores[i, j] - softmax_max[i])
+  description: 融合注意力前向，支持 BNSD/BSH 布局、MHA/GQA 头扩展与可配置缩放系数，同时返回每行 softmax 的最大值与归一化分母
+  shape_support: 'BNSD: query [B, N, Sq, D], key/value [B, Nkv, Skv, Dkv]；BSH: query [B, Sq, N*D], key/value [B, Skv, Nkv*Dkv]；attention_out 与 query 同布局同 shape（末维为 Dv）；softmax_max/softmax_sum: [B, N, Sq, 8]'
+  attrs:
+  - name: head_num
+    type: int
+    description: query 头数 N；BNSD 下须等于 query.shape[1]
+    required: true
+  - name: input_layout
+    type: string
+    description: 输入布局，支持 "BNSD" 与 "BSH"
+    required: true
+  - name: scale
+    type: float
+    default: 1.0
+    description: QK^T 的打分缩放系数
+    required: false
+  inputs:
+  - name: query
+    description: query 张量，BNSD 为 [B, N, Sq, D]，BSH 为 [B, Sq, N*D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'BNSD: [B, N, Sq, D]；BSH: [B, Sq, N*D]'
+  - name: key
+    description: key 张量，BNSD 为 [B, Nkv, Skv, Dkv]，BSH 为 [B, Skv, Nkv*Dkv]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'BNSD: [B, Nkv, Skv, Dkv]；BSH: [B, Skv, Nkv*Dkv]'
+  - name: value
+    description: value 张量，BNSD 为 [B, Nkv, Skv, Dv]，BSH 为 [B, Skv, Nkv*Dv]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'BNSD: [B, Nkv, Skv, Dv]；BSH: [B, Skv, Nkv*Dv]'
+  outputs:
+  - name: attention_out
+    description: 注意力输出，布局与 query 一致，末维为 Dv
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: 'BNSD: [B, N, Sq, Dv]；BSH: [B, Sq, N*Dv]'
+  - name: softmax_max
+    description: 每行 scores 的最大值，float32，8 个 lane 广播同一值
+    dtype:
+    - float32
+    shape: '[B, N, Sq, 8]'
+  - name: softmax_sum
+    description: 每行 softmax 的指数和，float32，8 个 lane 广播同一值
+    dtype:
+    - float32
+    shape: '[B, N, Sq, 8]'
+  schema: fusion_attention(Tensor query, Tensor key, Tensor value, int head_num, str input_layout, float scale=1.0) -> (Tensor attention_out, Tensor softmax_max, Tensor softmax_sum)

@@ -1,0 +1,841 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: S2Attention
+  case_id: 1
+  input_shape:
+  - - 8
+    - 255
+    - 14
+    - 32
+  - &id003
+    - 765
+    - 255
+  - &id004
+    - 765
+  - &id001
+    - 255
+    - 255
+  - &id002
+    - 255
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - &id011
+    - -1.0
+    - 1.0
+  - &id005
+    - -0.05
+    - 0.05
+  - &id006
+    - 0.0
+    - 0.0
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B8C255H14W32-src1
+- operator: S2Attention
+  case_id: 2
+  input_shape:
+  - - 1
+    - 48
+    - 7
+    - 14
+  - &id009
+    - 144
+    - 48
+  - &id010
+    - 144
+  - &id007
+    - 48
+    - 48
+  - &id008
+    - 48
+  - *id007
+  - *id008
+  - *id009
+  - *id010
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B1C48H7W14-src2
+- operator: S2Attention
+  case_id: 3
+  input_shape:
+  - - 2
+    - 6
+    - 14
+    - 28
+  - &id014
+    - 18
+    - 6
+  - &id015
+    - 18
+  - &id012
+    - 6
+    - 6
+  - &id013
+    - 6
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B2C6H14W28-src3
+- operator: S2Attention
+  case_id: 4
+  input_shape:
+  - - 4
+    - 12
+    - 28
+    - 7
+  - &id018
+    - 36
+    - 12
+  - &id019
+    - 36
+  - &id016
+    - 12
+    - 12
+  - &id017
+    - 12
+  - *id016
+  - *id017
+  - *id018
+  - *id019
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: bfloat16-B4C12H28W7-src4
+- operator: S2Attention
+  case_id: 5
+  input_shape:
+  - - 4
+    - 7
+    - 14
+    - 32
+  - &id022
+    - 21
+    - 7
+  - &id023
+    - 21
+  - &id020
+    - 7
+    - 7
+  - &id021
+    - 7
+  - *id020
+  - *id021
+  - *id022
+  - *id023
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B4C7H14W32-src5
+- operator: S2Attention
+  case_id: 6
+  input_shape:
+  - - 16
+    - 127
+    - 7
+    - 7
+  - &id026
+    - 381
+    - 127
+  - &id027
+    - 381
+  - &id024
+    - 127
+    - 127
+  - &id025
+    - 127
+  - *id024
+  - *id025
+  - *id026
+  - *id027
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B16C127H7W7-src6
+- operator: S2Attention
+  case_id: 7
+  input_shape:
+  - - 2
+    - 52
+    - 14
+    - 28
+  - &id030
+    - 156
+    - 52
+  - &id031
+    - 156
+  - &id028
+    - 52
+    - 52
+  - &id029
+    - 52
+  - *id028
+  - *id029
+  - *id030
+  - *id031
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B2C52H14W28-src7
+- operator: S2Attention
+  case_id: 8
+  input_shape:
+  - - 2
+    - 9
+    - 7
+    - 56
+  - &id034
+    - 27
+    - 9
+  - &id035
+    - 27
+  - &id032
+    - 9
+    - 9
+  - &id033
+    - 9
+  - *id032
+  - *id033
+  - *id034
+  - *id035
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B2C9H7W56-src8
+- operator: S2Attention
+  case_id: 9
+  input_shape:
+  - - 8
+    - 255
+    - 112
+    - 7
+  - *id003
+  - *id004
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B8C255H112W7-src9
+- operator: S2Attention
+  case_id: 10
+  input_shape:
+  - - 1
+    - 192
+    - 14
+    - 32
+  - &id038
+    - 576
+    - 192
+  - &id039
+    - 576
+  - &id036
+    - 192
+    - 192
+  - &id037
+    - 192
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B1C192H14W32-src10
+- operator: S2Attention
+  case_id: 11
+  input_shape:
+  - - 4
+    - 192
+    - 112
+    - 56
+  - *id038
+  - *id039
+  - *id036
+  - *id037
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B4C192H112W56-src11
+- operator: S2Attention
+  case_id: 12
+  input_shape:
+  - - 2
+    - 192
+    - 28
+    - 64
+  - *id038
+  - *id039
+  - *id036
+  - *id037
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float16-B2C192H28W64-src12
+- operator: S2Attention
+  case_id: 13
+  input_shape:
+  - - 1
+    - 6
+    - 7
+    - 14
+  - *id014
+  - *id015
+  - *id012
+  - *id013
+  - *id012
+  - *id013
+  - *id014
+  - *id015
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B1C6H7W14-src13
+- operator: S2Attention
+  case_id: 14
+  input_shape:
+  - - 4
+    - 24
+    - 28
+    - 7
+  - &id042
+    - 72
+    - 24
+  - &id043
+    - 72
+  - &id040
+    - 24
+    - 24
+  - &id041
+    - 24
+  - *id040
+  - *id041
+  - *id042
+  - *id043
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: bfloat16-B4C24H28W7-src14
+- operator: S2Attention
+  case_id: 15
+  input_shape:
+  - - 2
+    - 511
+    - 14
+    - 128
+  - &id046
+    - 1533
+    - 511
+  - &id047
+    - 1533
+  - &id044
+    - 511
+    - 511
+  - &id045
+    - 511
+  - *id044
+  - *id045
+  - *id046
+  - *id047
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B2C511H14W128-src15
+- operator: S2Attention
+  case_id: 16
+  input_shape:
+  - - 16
+    - 13
+    - 128
+    - 32
+  - &id050
+    - 39
+    - 13
+  - &id051
+    - 39
+  - &id048
+    - 13
+    - 13
+  - &id049
+    - 13
+  - *id048
+  - *id049
+  - *id050
+  - *id051
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B16C13H128W32-src20
+- operator: S2Attention
+  case_id: 17
+  input_shape:
+  - - 4
+    - 25
+    - 256
+    - 112
+  - &id054
+    - 75
+    - 25
+  - &id055
+    - 75
+  - &id052
+    - 25
+    - 25
+  - &id053
+    - 25
+  - *id052
+  - *id053
+  - *id054
+  - *id055
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B4C25H256W112-src26
+- operator: S2Attention
+  case_id: 18
+  input_shape:
+  - - 4
+    - 3
+    - 28
+    - 7
+  - &id058
+    - 9
+    - 3
+  - *id033
+  - &id056
+    - 3
+    - 3
+  - &id057
+    - 3
+  - *id056
+  - *id057
+  - *id058
+  - *id033
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: bfloat16-B4C3H28W7-src32
+- operator: S2Attention
+  case_id: 19
+  input_shape:
+  - - 4
+    - 192
+    - 224
+    - 7
+  - *id038
+  - *id039
+  - *id036
+  - *id037
+  - *id036
+  - *id037
+  - *id038
+  - *id039
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B4C192H224W7-src37
+- operator: S2Attention
+  case_id: 20
+  input_shape:
+  - - 8
+    - 25
+    - 112
+    - 28
+  - *id054
+  - *id055
+  - *id052
+  - *id053
+  - *id052
+  - *id053
+  - *id054
+  - *id055
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs: {}
+  value_range:
+  - *id011
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  note: float32-B8C25H112W28-src38

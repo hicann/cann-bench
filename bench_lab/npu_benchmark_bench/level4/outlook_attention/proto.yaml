@@ -1,0 +1,105 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: OutlookAttention
+  category: VisionAttention
+  difficulty: L4
+  formula: |
+    keff = min(kernel_size, H, W)  (当 kernel_size > min(H, W) 时收缩)
+    A = (C // num_heads) * num_heads
+    V = Linear(C -> A)(x)                                      # [B, A, H, W]
+    V_u = Unfold_{keff, padding, stride}(V)                    # [B, A*keff^2, L]
+    attn = Linear(C -> keff^4*num_heads)(avg_pool(x))          # [B, L, num_heads, keff^2, keff^2]
+    attn = softmax(attn / sqrt(A / num_heads), dim=-1)
+    out = Fold((attn @ V_u))                                   # [B, A, H, W]
+    y = Linear(A -> C)(out)                                    # [B, H, W, C]
+  description: Outlook Attention 前向：对每个像素用 unfold 展开其局部 k×k 邻域得到 value，线性层预测该邻域的注意力权重（softmax 归一化），加权聚合后 fold 回原空间尺寸并做输出投影
+  shape_support: 'x: [B, H, W, C]（NHWC）；v_pj 权重 [attn_dim, C]、偏置 [attn_dim]，attn_dim = (C // num_heads) * num_heads；attn_pj 权重 [keff^4 * num_heads, C]、偏置 [keff^4 * num_heads]；proj 权重 [C, attn_dim]、偏置 [C]；y: [B, H, W, C]。其中 keff 为按 H/W 收缩后的有效核大小'
+  attrs:
+  - name: num_heads
+    type: int
+    default: 1
+    description: 注意力 head 数；源 json 未给出，按源 forward 默认值 1 处理
+    required: false
+  - name: kernel_size
+    type: int
+    default: 3
+    description: 局部窗口核大小；大于 min(H, W) 时收缩为 min(H, W)
+    required: false
+  - name: padding
+    type: int
+    default: 1
+    description: 窗口 padding；padding >= kernel_size 时收缩为 kernel_size // 2
+    required: false
+  - name: stride
+    type: int
+    default: 1
+    description: 窗口步长；大于 H 或 W 时回退为 1
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, H, W, C]（NHWC）
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, W, C]'
+  - name: v_pj_weight
+    description: value 投影权重 [attn_dim, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[attn_dim, C]'
+  - name: v_pj_bias
+    description: value 投影偏置 [attn_dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[attn_dim]'
+  - name: attn_pj_weight
+    description: 注意力投影权重 [keff^4 * num_heads, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[keff**4 * num_heads, C]'
+  - name: attn_pj_bias
+    description: 注意力投影偏置 [keff^4 * num_heads]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[keff**4 * num_heads]'
+  - name: proj_weight
+    description: 输出投影权重 [C, attn_dim]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, attn_dim]'
+  - name: proj_bias
+    description: 输出投影偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  outputs:
+  - name: y
+    description: 输出特征图 [B, H, W, C]，dtype 与输入一致
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, H, W, C]'
+  schema: outlook_attention(Tensor x, Tensor v_pj_weight, Tensor v_pj_bias, Tensor attn_pj_weight, Tensor attn_pj_bias, Tensor proj_weight, Tensor proj_bias, int num_heads, int kernel_size, int padding, int stride) -> Tensor y

@@ -1,0 +1,1707 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: EMSA
+  case_id: 1
+  input_shape:
+  - - 1
+    - 1
+    - 1
+  - - 1
+    - 1
+    - 1
+  - - 1
+    - 1
+    - 1
+  - - 384
+    - 1
+  - - 384
+  - - 384
+    - 1
+  - - 384
+  - - 256
+    - 1
+  - - 256
+  - - 1
+    - 256
+  - - 1
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 8
+    height: 1
+    width: 1
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id001
+    - -0.05
+    - 0.05
+  - &id002
+    - 0
+    - 0
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id001
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  note: float16-B1L1D1-H8-r1-nt-src1
+- operator: EMSA
+  case_id: 2
+  input_shape:
+  - - 4
+    - 99
+    - 160
+  - - 4
+    - 99
+    - 160
+  - - 4
+    - 99
+    - 160
+  - - 240
+    - 160
+  - - 240
+  - - 240
+    - 160
+  - - 240
+  - - 160
+    - 160
+  - - 160
+  - - 160
+    - 160
+  - - 160
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 5
+    height: 9
+    width: 11
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id003
+    - -0.05
+    - 0.05
+  - &id004
+    - 0
+    - 0
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id003
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  note: bfloat16-B4L99D160-H5-r1-nt-src3
+- operator: EMSA
+  case_id: 3
+  input_shape:
+  - - 2
+    - 25
+    - 120
+  - - 2
+    - 25
+    - 120
+  - - 2
+    - 25
+    - 120
+  - - 240
+    - 120
+  - - 240
+  - - 240
+    - 120
+  - - 240
+  - - 160
+    - 120
+  - - 160
+  - - 120
+    - 160
+  - - 120
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 5
+    height: 5
+    width: 5
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id005
+    - -0.05
+    - 0.05
+  - &id006
+    - 0
+    - 0
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id005
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  note: float32-B2L25D120-H5-r1-nt-src4
+- operator: EMSA
+  case_id: 4
+  input_shape:
+  - - 1
+    - 221
+    - 704
+  - - 1
+    - 221
+    - 704
+  - - 1
+    - 221
+    - 704
+  - - 528
+    - 704
+  - - 528
+  - - 528
+    - 704
+  - - 528
+  - - 352
+    - 704
+  - - 352
+  - - 704
+    - 352
+  - - 704
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 11
+    height: 13
+    width: 17
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id007
+    - -0.05
+    - 0.05
+  - &id008
+    - 0
+    - 0
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  - *id007
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  note: float16-B1L221D704-H11-r1-nt-src6
+- operator: EMSA
+  case_id: 5
+  input_shape:
+  - - 2
+    - 391
+    - 1024
+  - - 2
+    - 391
+    - 1024
+  - - 2
+    - 391
+    - 1024
+  - - 768
+    - 1024
+  - - 768
+  - - 768
+    - 1024
+  - - 768
+  - - 512
+    - 1024
+  - - 512
+  - - 1024
+    - 512
+  - - 1024
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 16
+    height: 17
+    width: 23
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id009
+    - -0.05
+    - 0.05
+  - &id010
+    - 0
+    - 0
+  - *id009
+  - *id010
+  - *id009
+  - *id010
+  - *id009
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  note: float32-B2L391D1024-H16-r1-nt-src10
+- operator: EMSA
+  case_id: 6
+  input_shape:
+  - - 2
+    - 667
+    - 1440
+  - - 2
+    - 667
+    - 1440
+  - - 2
+    - 667
+    - 1440
+  - - 864
+    - 1440
+  - - 864
+  - - 864
+    - 1440
+  - - 864
+  - - 576
+    - 1440
+  - - 576
+  - - 1440
+    - 576
+  - - 1440
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 18
+    height: 23
+    width: 29
+    ratio: 1
+    d_k: 48
+    d_v: 32
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id011
+    - -0.05
+    - 0.05
+  - &id012
+    - 0
+    - 0
+  - *id011
+  - *id012
+  - *id011
+  - *id012
+  - *id011
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  note: bfloat16-B2L667D1440-H18-r1-nt-src11
+- operator: EMSA
+  case_id: 7
+  input_shape:
+  - - 2
+    - 1056
+    - 1200
+  - - 2
+    - 1056
+    - 1200
+  - - 2
+    - 1056
+    - 1200
+  - - 1200
+    - 1200
+  - - 1200
+  - - 1200
+    - 1200
+  - - 1200
+  - - 240
+    - 1200
+  - - 240
+  - - 1200
+    - 240
+  - - 1200
+  - - 1200
+    - 1
+    - 4
+    - 4
+  - - 1200
+  - - 1200
+  - - 1200
+  - - 0
+  - - 0
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 15
+    height: 32
+    width: 33
+    ratio: 3
+    d_k: 80
+    d_v: 16
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id013
+    - -0.05
+    - 0.05
+  - &id014
+    - 0
+    - 0
+  - *id013
+  - *id014
+  - *id013
+  - *id014
+  - *id013
+  - *id014
+  - *id013
+  - *id014
+  - - 1
+    - 1
+  - *id014
+  - *id014
+  - *id014
+  note: float32-B2L1056D1200-H15-r3-nt-src12
+- operator: EMSA
+  case_id: 8
+  input_shape:
+  - - 2
+    - 754
+    - 1536
+  - - 2
+    - 754
+    - 1536
+  - - 2
+    - 754
+    - 1536
+  - - 1920
+    - 1536
+  - - 1920
+  - - 1920
+    - 1536
+  - - 1920
+  - - 384
+    - 1536
+  - - 384
+  - - 1536
+    - 384
+  - - 1536
+  - - 1536
+    - 1
+    - 4
+    - 4
+  - - 1536
+  - - 1536
+  - - 1536
+  - - 0
+  - - 0
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 24
+    height: 26
+    width: 29
+    ratio: 3
+    d_k: 80
+    d_v: 16
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id015
+    - -0.05
+    - 0.05
+  - &id016
+    - 0
+    - 0
+  - *id015
+  - *id016
+  - *id015
+  - *id016
+  - *id015
+  - *id016
+  - *id015
+  - *id016
+  - - 1
+    - 1
+  - *id016
+  - *id016
+  - *id016
+  note: float16-B2L754D1536-H24-r3-nt-src13
+- operator: EMSA
+  case_id: 9
+  input_shape:
+  - - 2
+    - 156
+    - 576
+  - - 2
+    - 156
+    - 576
+  - - 2
+    - 156
+    - 576
+  - - 144
+    - 576
+  - - 144
+  - - 144
+    - 576
+  - - 144
+  - - 216
+    - 576
+  - - 216
+  - - 576
+    - 216
+  - - 576
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 9
+    - 9
+    - 1
+    - 1
+  - - 9
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 9
+    height: 12
+    width: 13
+    ratio: 1
+    d_k: 16
+    d_v: 24
+    apply_transform: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id017
+    - -0.05
+    - 0.05
+  - &id018
+    - 0
+    - 0
+  - *id017
+  - *id018
+  - *id017
+  - *id018
+  - *id017
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id017
+  - *id018
+  note: float32-B2L156D576-H9-r1-tf-src14
+- operator: EMSA
+  case_id: 10
+  input_shape:
+  - - 1
+    - 506
+    - 448
+  - - 1
+    - 506
+    - 448
+  - - 1
+    - 506
+    - 448
+  - - 112
+    - 448
+  - - 112
+  - - 112
+    - 448
+  - - 112
+  - - 168
+    - 448
+  - - 168
+  - - 448
+    - 168
+  - - 448
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 7
+    - 7
+    - 1
+    - 1
+  - - 7
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 7
+    height: 22
+    width: 23
+    ratio: 1
+    d_k: 16
+    d_v: 24
+    apply_transform: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id019
+    - -0.05
+    - 0.05
+  - &id020
+    - 0
+    - 0
+  - *id019
+  - *id020
+  - *id019
+  - *id020
+  - *id019
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id019
+  - *id020
+  note: float16-B1L506D448-H7-r1-tf-src15
+- operator: EMSA
+  case_id: 11
+  input_shape:
+  - - 1
+    - 783
+    - 1280
+  - - 1
+    - 783
+    - 1280
+  - - 1
+    - 783
+    - 1280
+  - - 2048
+    - 1280
+  - - 2048
+  - - 2048
+    - 1280
+  - - 2048
+  - - 1280
+    - 1280
+  - - 1280
+  - - 1280
+    - 1280
+  - - 1280
+  - - 1280
+    - 1
+    - 5
+    - 5
+  - - 1280
+  - - 1280
+  - - 1280
+  - - 0
+  - - 0
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 16
+    height: 27
+    width: 29
+    ratio: 4
+    d_k: 128
+    d_v: 80
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id021
+    - -0.05
+    - 0.05
+  - &id022
+    - 0
+    - 0
+  - *id021
+  - *id022
+  - *id021
+  - *id022
+  - *id021
+  - *id022
+  - *id021
+  - *id022
+  - - 1
+    - 1
+  - *id022
+  - *id022
+  - *id022
+  note: bfloat16-B1L783D1280-H16-r4-nt-src16
+- operator: EMSA
+  case_id: 12
+  input_shape:
+  - - 1
+    - 675
+    - 1472
+  - - 1
+    - 675
+    - 1472
+  - - 1
+    - 675
+    - 1472
+  - - 1472
+    - 1472
+  - - 1472
+  - - 1472
+    - 1472
+  - - 1472
+  - - 2944
+    - 1472
+  - - 2944
+  - - 1472
+    - 2944
+  - - 1472
+  - - 1472
+    - 1
+    - 3
+    - 3
+  - - 1472
+  - - 1472
+  - - 1472
+  - - 0
+  - - 0
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 23
+    height: 25
+    width: 27
+    ratio: 2
+    d_k: 64
+    d_v: 128
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id023
+    - -0.05
+    - 0.05
+  - &id024
+    - 0
+    - 0
+  - *id023
+  - *id024
+  - *id023
+  - *id024
+  - *id023
+  - *id024
+  - *id023
+  - *id024
+  - - 1
+    - 1
+  - *id024
+  - *id024
+  - *id024
+  note: float32-B1L675D1472-H23-r2-nt-src17
+- operator: EMSA
+  case_id: 13
+  input_shape:
+  - - 1
+    - 6
+    - 48
+  - - 1
+    - 6
+    - 48
+  - - 1
+    - 6
+    - 48
+  - - 32
+    - 48
+  - - 32
+  - - 32
+    - 48
+  - - 32
+  - - 48
+    - 48
+  - - 48
+  - - 48
+    - 48
+  - - 48
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 2
+    - 2
+    - 1
+    - 1
+  - - 2
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 2
+    height: 2
+    width: 3
+    ratio: 1
+    d_k: 16
+    d_v: 24
+    apply_transform: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id025
+    - -0.05
+    - 0.05
+  - &id026
+    - 0
+    - 0
+  - *id025
+  - *id026
+  - *id025
+  - *id026
+  - *id025
+  - *id026
+  - *id026
+  - *id026
+  - *id026
+  - *id026
+  - *id025
+  - *id026
+  note: bfloat16-B1L6D48-H2-r1-tf-src18
+- operator: EMSA
+  case_id: 14
+  input_shape:
+  - - 2
+    - 63
+    - 320
+  - - 2
+    - 63
+    - 320
+  - - 2
+    - 63
+    - 320
+  - - 80
+    - 320
+  - - 80
+  - - 80
+    - 320
+  - - 80
+  - - 120
+    - 320
+  - - 120
+  - - 320
+    - 120
+  - - 320
+  - - 0
+  - - 0
+  - - 0
+  - - 0
+  - - 5
+    - 5
+    - 1
+    - 1
+  - - 5
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 5
+    height: 7
+    width: 9
+    ratio: 1
+    d_k: 16
+    d_v: 24
+    apply_transform: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id027
+    - -0.05
+    - 0.05
+  - &id028
+    - 0
+    - 0
+  - *id027
+  - *id028
+  - *id027
+  - *id028
+  - *id027
+  - *id028
+  - *id028
+  - *id028
+  - *id028
+  - *id028
+  - *id027
+  - *id028
+  note: float16-B2L63D320-H5-r1-tf-src19
+- operator: EMSA
+  case_id: 15
+  input_shape:
+  - - 3
+    - 420
+    - 1088
+  - - 3
+    - 420
+    - 1088
+  - - 3
+    - 420
+    - 1088
+  - - 1088
+    - 1088
+  - - 1088
+  - - 1088
+    - 1088
+  - - 1088
+  - - 2176
+    - 1088
+  - - 2176
+  - - 1088
+    - 2176
+  - - 1088
+  - - 1088
+    - 1
+    - 3
+    - 3
+  - - 1088
+  - - 1088
+  - - 1088
+  - - 0
+  - - 0
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 17
+    height: 20
+    width: 21
+    ratio: 2
+    d_k: 64
+    d_v: 128
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id029
+    - -0.05
+    - 0.05
+  - &id030
+    - 0
+    - 0
+  - *id029
+  - *id030
+  - *id029
+  - *id030
+  - *id029
+  - *id030
+  - *id029
+  - *id030
+  - - 1
+    - 1
+  - *id030
+  - *id030
+  - *id030
+  note: float16-B3L420D1088-H17-r2-nt-src20
+- operator: EMSA
+  case_id: 16
+  input_shape:
+  - - 1
+    - 475
+    - 420
+  - - 1
+    - 475
+    - 420
+  - - 1
+    - 475
+    - 420
+  - - 896
+    - 420
+  - - 896
+  - - 896
+    - 420
+  - - 896
+  - - 560
+    - 420
+  - - 560
+  - - 420
+    - 560
+  - - 420
+  - - 420
+    - 1
+    - 5
+    - 5
+  - - 420
+  - - 420
+  - - 420
+  - - 0
+  - - 0
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 7
+    height: 19
+    width: 25
+    ratio: 4
+    d_k: 128
+    d_v: 80
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id031
+    - -0.05
+    - 0.05
+  - &id032
+    - 0
+    - 0
+  - *id031
+  - *id032
+  - *id031
+  - *id032
+  - *id031
+  - *id032
+  - *id031
+  - *id032
+  - - 1
+    - 1
+  - *id032
+  - *id032
+  - *id032
+  note: float32-B1L475D420-H7-r4-nt-src22
+- operator: EMSA
+  case_id: 17
+  input_shape:
+  - - 4
+    - 143
+    - 540
+  - - 4
+    - 143
+    - 540
+  - - 4
+    - 143
+    - 540
+  - - 1152
+    - 540
+  - - 1152
+  - - 1152
+    - 540
+  - - 1152
+  - - 720
+    - 540
+  - - 720
+  - - 540
+    - 720
+  - - 540
+  - - 540
+    - 1
+    - 5
+    - 5
+  - - 540
+  - - 540
+  - - 540
+  - - 0
+  - - 0
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 9
+    height: 11
+    width: 13
+    ratio: 4
+    d_k: 128
+    d_v: 80
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id033
+    - -0.05
+    - 0.05
+  - &id034
+    - 0
+    - 0
+  - *id033
+  - *id034
+  - *id033
+  - *id034
+  - *id033
+  - *id034
+  - *id033
+  - *id034
+  - - 1
+    - 1
+  - *id034
+  - *id034
+  - *id034
+  note: bfloat16-B4L143D540-H9-r4-nt-src24
+- operator: EMSA
+  case_id: 18
+  input_shape:
+  - - 1
+    - 121
+    - 224
+  - - 1
+    - 121
+    - 224
+  - - 1
+    - 121
+    - 224
+  - - 320
+    - 224
+  - - 320
+  - - 320
+    - 224
+  - - 320
+  - - 64
+    - 224
+  - - 64
+  - - 224
+    - 64
+  - - 224
+  - - 224
+    - 1
+    - 4
+    - 4
+  - - 224
+  - - 224
+  - - 224
+  - - 0
+  - - 0
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    n_heads: 4
+    height: 11
+    width: 11
+    ratio: 3
+    d_k: 80
+    d_v: 16
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id035
+    - -0.05
+    - 0.05
+  - &id036
+    - 0
+    - 0
+  - *id035
+  - *id036
+  - *id035
+  - *id036
+  - *id035
+  - *id036
+  - *id035
+  - *id036
+  - - 1
+    - 1
+  - *id036
+  - *id036
+  - *id036
+  note: float16-B1L121D224-H4-r3-nt-src26
+- operator: EMSA
+  case_id: 19
+  input_shape:
+  - - 2
+    - 1015
+    - 2152
+  - - 2
+    - 1015
+    - 1152
+  - - 2
+    - 1015
+    - 1152
+  - - 1152
+    - 2152
+  - - 1152
+  - - 1152
+    - 2152
+  - - 1152
+  - - 2304
+    - 2152
+  - - 2304
+  - - 2152
+    - 2304
+  - - 2152
+  - - 2152
+    - 1
+    - 3
+    - 3
+  - - 2152
+  - - 2152
+  - - 2152
+  - - 0
+  - - 0
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    n_heads: 18
+    height: 29
+    width: 35
+    ratio: 2
+    d_k: 64
+    d_v: 128
+    apply_transform: false
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id037
+    - -0.05
+    - 0.05
+  - &id038
+    - 0
+    - 0
+  - *id037
+  - *id038
+  - *id037
+  - *id038
+  - *id037
+  - *id038
+  - *id037
+  - *id038
+  - - 1
+    - 1
+  - *id038
+  - *id038
+  - *id038
+  note: bfloat16-B2L1015D2152-H18-r2-nt-src31
+- operator: EMSA
+  case_id: 20
+  input_shape:
+  - - 1
+    - 81
+    - 4096
+  - - 1
+    - 81
+    - 128
+  - - 1
+    - 81
+    - 128
+  - - 128
+    - 4096
+  - - 128
+  - - 128
+    - 4096
+  - - 128
+  - - 160
+    - 4096
+  - - 160
+  - - 4096
+    - 160
+  - - 4096
+  - - 4096
+    - 1
+    - 4
+    - 4
+  - - 4096
+  - - 4096
+  - - 4096
+  - - 4
+    - 4
+    - 1
+    - 1
+  - - 4
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    n_heads: 4
+    height: 9
+    width: 9
+    ratio: 3
+    d_k: 32
+    d_v: 40
+    apply_transform: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - &id039
+    - -0.05
+    - 0.05
+  - &id040
+    - 0
+    - 0
+  - *id039
+  - *id040
+  - *id039
+  - *id040
+  - *id039
+  - *id040
+  - *id039
+  - *id040
+  - - 1
+    - 1
+  - *id040
+  - *id039
+  - *id040
+  note: float32-B1L81D4096-H4-r3-tf-src41

@@ -1,0 +1,21 @@
+operator,case_id,input_shape,dtype,attrs,value_range,note
+DeformableOffsets,1,"[[1, 32, 32, 3], [1, 1, 8, 8]]","[""float16"", ""int32""]",{},"[[-1, 1], [0, 3069]]",float16/int32-B1H32W32C3-off1x8x8
+DeformableOffsets,2,"[[2, 8, 12, 3], [2, 4, 8, 8]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 285]]",float32/int32-B2H8W12C3-off4x8x8
+DeformableOffsets,3,"[[1, 64, 64, 3], [1, 4, 8, 8]]","[""float32"", ""float32""]",{},"[[-1, 1], [0, 12285]]",float32/float32-B1H64W64C3-off4x8x8
+DeformableOffsets,4,"[[1, 16, 16, 3], [1, 4, 4, 4]]","[""float16"", ""int32""]",{},"[[-1, 1], [0, 765]]",float16/int32-B1H16W16C3-off4x4x4
+DeformableOffsets,5,"[[2, 8, 8, 3], [2, 4, 4, 4]]","[""float16"", ""int32""]",{},"[[-1, 1], [0, 189]]",float16/int32-B2H8W8C3-off4x4x4
+DeformableOffsets,6,"[[2, 256, 256, 3], [2, 4, 40, 40]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B2H256W256C3-off4x40x40
+DeformableOffsets,7,"[[1, 256, 256, 3], [1, 4, 64, 64]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B1H256W256C3-off4x64x64
+DeformableOffsets,8,"[[2, 256, 256, 3], [2, 4, 48, 48]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B2H256W256C3-off4x48x48
+DeformableOffsets,9,"[[4, 512, 512, 3], [4, 4, 32, 48]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B4H512W512C3-off4x32x48
+DeformableOffsets,10,"[[1, 512, 512, 3], [1, 4, 56, 112]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B1H512W512C3-off4x56x112
+DeformableOffsets,11,"[[2, 256, 256, 3], [2, 4, 64, 64]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B2H256W256C3-off4x64x64
+DeformableOffsets,12,"[[1, 512, 512, 3], [1, 8, 64, 72]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B1H512W512C3-off8x64x72
+DeformableOffsets,13,"[[2, 256, 256, 3], [2, 4, 72, 72]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B2H256W256C3-off4x72x72
+DeformableOffsets,14,"[[2, 512, 512, 3], [2, 4, 80, 80]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B2H512W512C3-off4x80x80
+DeformableOffsets,15,"[[2, 256, 256, 3], [2, 4, 88, 88]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 196605]]",float32/int32-B2H256W256C3-off4x88x88
+DeformableOffsets,16,"[[1, 512, 512, 3], [1, 4, 64, 260]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B1H512W512C3-off4x64x260
+DeformableOffsets,17,"[[1, 512, 512, 3], [1, 4, 64, 308]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B1H512W512C3-off4x64x308
+DeformableOffsets,18,"[[1, 1024, 1024, 3], [1, 4, 128, 178]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 3145725]]",float32/int32-B1H1024W1024C3-off4x128x178
+DeformableOffsets,19,"[[1, 512, 512, 3], [1, 4, 256, 256]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 786429]]",float32/int32-B1H512W512C3-off4x256x256
+DeformableOffsets,20,"[[2, 1024, 1024, 3], [2, 4, 512, 512]]","[""float32"", ""int32""]",{},"[[-1, 1], [0, 3145725]]",float32/int32-B2H1024W1024C3-off4x512x512

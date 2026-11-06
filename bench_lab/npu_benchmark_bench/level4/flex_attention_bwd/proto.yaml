@@ -1,0 +1,99 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: FlexAttentionBwd
+  category: Attention
+  difficulty: L4
+  formula: |
+    P   = exp(scale * Q K^T - logsumexp)          # causal 时上三角置 0
+    dV  = P^T dO
+    dP  = dO V^T
+    D   = rowsum(dO ⊙ O)
+    dS  = P ⊙ (dP - D)
+    dQ  = dS K · scale
+    dK  = dS^T Q · scale
+    GQA：KV 头 repeat_interleave 到 Q 头；dK/dV 在组内求和恢复 KV 头数
+  description: FlexAttention 反向，由前向保存的 attn_output 与 logsumexp 重建 softmax 概率，计算 query/key/value 梯度，支持可选因果掩码与 GQA
+  shape_support: 'grad_output/query/attn_output: [B, H, S_q, D]；key/value: [B, H_kv, S_k, D]（enable_gqa 时 H_kv < H 且 H % H_kv == 0，否则 H_kv == H）；logsumexp: [B, H, S_q]；grad_query: [B, H, S_q, D]；grad_key/grad_value: [B, H_kv, S_k, D]'
+  attrs:
+  - name: is_causal
+    type: bool
+    description: 是否使用因果掩码（上三角置 -inf）
+    required: true
+  - name: enable_gqa
+    type: bool
+    description: 是否启用 GQA（KV 头扩展 + 梯度组内求和）
+    required: false
+    default: false
+  inputs:
+  - name: grad_output
+    description: 输出梯度 dO [B, H, S_q, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H, S_q, D]'
+  - name: query
+    description: 前向 query [B, H, S_q, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H, S_q, D]'
+  - name: key
+    description: 前向 key [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H_kv, S_k, D]'
+  - name: value
+    description: 前向 value [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H_kv, S_k, D]'
+  - name: attn_output
+    description: 前向注意力输出（saved tensor）[B, H, S_q, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H, S_q, D]'
+  - name: logsumexp
+    description: 前向 softmax 的 logsumexp（saved tensor）[B, H, S_q]
+    dtype:
+    - float32
+    shape: '[B, H, S_q]'
+  outputs:
+  - name: grad_query
+    description: query 梯度 [B, H, S_q, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H, S_q, D]'
+  - name: grad_key
+    description: key 梯度 [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H_kv, S_k, D]'
+  - name: grad_value
+    description: value 梯度 [B, H_kv, S_k, D]
+    dtype:
+    - float16
+    - bfloat16
+    - float32
+    shape: '[B, H_kv, S_k, D]'
+  schema: flex_attention_bwd(Tensor grad_output, Tensor query, Tensor key, Tensor value, Tensor attn_output, Tensor logsumexp, bool is_causal=False, bool enable_gqa=False) -> (Tensor grad_query, Tensor grad_key, Tensor grad_value)

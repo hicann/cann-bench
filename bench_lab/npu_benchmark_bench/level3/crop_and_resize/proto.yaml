@@ -1,0 +1,56 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: CropAndResize
+  category: Vision
+  difficulty: L3
+  formula: |
+    in_y = y1 * (H - 1) + py * (y2 - y1) * (H - 1) / (crop_h - 1)
+    in_x = x1 * (W - 1) + px * (x2 - x1) * (W - 1) / (crop_w - 1)
+    y = bilinear(x[b], in_y, in_x)  (越界位置取 extrapolation_value)
+  description: 按归一化框从 NHWC 输入中裁剪并 resize 到指定大小，支持 bilinear / nearest / bilinear_v2 三种插值
+  shape_support: 'x: [N, H, W, C], boxes: [num_boxes, 4], box_index: [num_boxes], y: [num_boxes, crop_h, crop_w, C]'
+  attrs:
+  - name: crop_size
+    type: ListInt
+    description: 裁剪输出尺寸 [crop_h, crop_w]
+    required: true
+  - name: extrapolation_value
+    type: float
+    description: 采样位置越界时使用的外插值
+    default: 0.0
+    required: false
+  - name: method
+    type: string
+    description: 插值方式，"bilinear" / "nearest" / "bilinear_v2"
+    default: bilinear
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [N, H, W, C]（NHWC）
+    dtype:
+    - float16
+    - float32
+  - name: boxes
+    description: 归一化裁剪框 [num_boxes, 4]，每行为 (y1, x1, y2, x2)，取值范围 [0, 1]
+    dtype:
+    - float32
+  - name: box_index
+    description: 每个框对应的 batch 索引 [num_boxes]，取值范围 [0, N)
+    dtype:
+    - int32
+  outputs:
+  - name: y
+    description: 裁剪并 resize 后的结果 [num_boxes, crop_h, crop_w, C]，dtype 与 boxes 一致
+    dtype:
+    - float32
+  schema: crop_and_resize(Tensor x, Tensor boxes, Tensor box_index, int[] crop_size,
+    float extrapolation_value=0.0, string method="bilinear") -> Tensor y

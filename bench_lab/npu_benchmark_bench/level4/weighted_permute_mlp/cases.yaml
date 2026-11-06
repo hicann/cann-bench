@@ -1,0 +1,1252 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+
+cases:
+- operator: WeightedPermuteMLP
+  case_id: 1
+  input_shape:
+  - - 4
+    - 9
+    - 9
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 2304
+    - 2304
+  - - 2304
+  - - 2304
+    - 2304
+  - - 2304
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id001
+    - -0.05
+    - 0.05
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  - *id001
+  note: float32-B4H9W9C256-seg2->1-HS2304-WS2304-qb0
+- operator: WeightedPermuteMLP
+  case_id: 2
+  input_shape:
+  - - 2
+    - 9
+    - 9
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 2304
+    - 2304
+  - - 2304
+  - - 2304
+    - 2304
+  - - 2304
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id002
+    - -0.05
+    - 0.05
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  - *id002
+  note: float32-B2H9W9C256-seg2->1-HS2304-WS2304-qb0
+- operator: WeightedPermuteMLP
+  case_id: 3
+  input_shape:
+  - - 4
+    - 9
+    - 9
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 2304
+    - 2304
+  - - 2304
+  - - 2304
+    - 2304
+  - - 2304
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id003
+    - -0.05
+    - 0.05
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  - *id003
+  note: float32-B4H9W9C256-seg8->1-HS2304-WS2304-qb0
+- operator: WeightedPermuteMLP
+  case_id: 4
+  input_shape:
+  - - 4
+    - 7
+    - 7
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 1792
+    - 1792
+  - - 1792
+  - - 1792
+    - 1792
+  - - 1792
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id004
+    - -0.05
+    - 0.05
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  - *id004
+  note: float32-B4H7W7C256-seg8->1-HS1792-WS1792-qb0
+- operator: WeightedPermuteMLP
+  case_id: 5
+  input_shape:
+  - - 2
+    - 11
+    - 11
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 1408
+    - 1408
+  - - 1408
+  - - 1408
+    - 1408
+  - - 1408
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id005
+    - -0.05
+    - 0.05
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  - *id005
+  note: float32-B2H11W11C128-seg8->1-HS1408-WS1408-qb0
+- operator: WeightedPermuteMLP
+  case_id: 6
+  input_shape:
+  - - 1
+    - 5
+    - 7
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 1280
+    - 1280
+  - - 1280
+  - - 1792
+    - 1792
+  - - 1792
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 4
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id006
+    - -0.05
+    - 0.05
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  - *id006
+  note: float32-B1H5W7C256-seg4->1-HS1280-WS1792-qb0
+- operator: WeightedPermuteMLP
+  case_id: 7
+  input_shape:
+  - - 4
+    - 7
+    - 7
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 896
+    - 896
+  - - 896
+  - - 896
+    - 896
+  - - 896
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 4
+    qkv_bias: true
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id007
+    - -0.05
+    - 0.05
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  - *id007
+  note: float32-B4H7W7C128-seg4->1-HS896-WS896-qb1
+- operator: WeightedPermuteMLP
+  case_id: 8
+  input_shape:
+  - - 2
+    - 7
+    - 7
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 896
+    - 896
+  - - 896
+  - - 896
+    - 896
+  - - 896
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id008
+    - -0.05
+    - 0.05
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  - *id008
+  note: float32-B2H7W7C128-seg2->1-HS896-WS896-qb0
+- operator: WeightedPermuteMLP
+  case_id: 9
+  input_shape:
+  - - 4
+    - 9
+    - 9
+    - 512
+  - - 512
+    - 512
+  - - 512
+  - - 4608
+    - 4608
+  - - 4608
+  - - 4608
+    - 4608
+  - - 4608
+  - - 128
+    - 512
+  - - 128
+  - - 1536
+    - 128
+  - - 1536
+  - - 512
+    - 512
+  - - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 512
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id009
+    - -0.05
+    - 0.05
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  - *id009
+  note: float32-B4H9W9C512-seg2->1-HS4608-WS4608-qb0
+- operator: WeightedPermuteMLP
+  case_id: 10
+  input_shape:
+  - - 1
+    - 5
+    - 7
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 640
+    - 640
+  - - 640
+  - - 896
+    - 896
+  - - 896
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 4
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id010
+    - -0.05
+    - 0.05
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  - *id010
+  note: float32-B1H5W7C128-seg4->1-HS640-WS896-qb0
+- operator: WeightedPermuteMLP
+  case_id: 11
+  input_shape:
+  - - 1
+    - 7
+    - 11
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 896
+    - 896
+  - - 896
+  - - 1408
+    - 1408
+  - - 1408
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id011
+    - -0.05
+    - 0.05
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  - *id011
+  note: float32-B1H7W11C128-seg8->1-HS896-WS1408-qb0
+- operator: WeightedPermuteMLP
+  case_id: 12
+  input_shape:
+  - - 2
+    - 9
+    - 9
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 1152
+    - 1152
+  - - 1152
+  - - 1152
+    - 1152
+  - - 1152
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id012
+    - -0.05
+    - 0.05
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  - *id012
+  note: float32-B2H9W9C128-seg8->1-HS1152-WS1152-qb0
+- operator: WeightedPermuteMLP
+  case_id: 13
+  input_shape:
+  - - 4
+    - 9
+    - 9
+    - 512
+  - - 512
+    - 512
+  - - 512
+  - - 4608
+    - 4608
+  - - 4608
+  - - 4608
+    - 4608
+  - - 4608
+  - - 128
+    - 512
+  - - 128
+  - - 1536
+    - 128
+  - - 1536
+  - - 512
+    - 512
+  - - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 512
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id013
+    - -0.05
+    - 0.05
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  - *id013
+  note: float32-B4H9W9C512-seg8->1-HS4608-WS4608-qb0
+- operator: WeightedPermuteMLP
+  case_id: 14
+  input_shape:
+  - - 4
+    - 4
+    - 8
+    - 64
+  - - 64
+    - 64
+  - - 64
+  - - 128
+    - 128
+  - - 128
+  - - 256
+    - 256
+  - - 256
+  - - 16
+    - 64
+  - - 16
+  - - 192
+    - 16
+  - - 192
+  - - 64
+    - 64
+  - - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 64
+    seg_dim: 2
+    qkv_bias: true
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id014
+    - -0.05
+    - 0.05
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  - *id014
+  note: float32-B4H4W8C64-seg2->2-HS128-WS256-qb1
+- operator: WeightedPermuteMLP
+  case_id: 15
+  input_shape:
+  - - 1
+    - 11
+    - 11
+    - 512
+  - - 512
+    - 512
+  - - 512
+  - - 5632
+    - 5632
+  - - 5632
+  - - 5632
+    - 5632
+  - - 5632
+  - - 128
+    - 512
+  - - 128
+  - - 1536
+    - 128
+  - - 1536
+  - - 512
+    - 512
+  - - 512
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 512
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id015
+    - -0.05
+    - 0.05
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  - *id015
+  note: float32-B1H11W11C512-seg2->1-HS5632-WS5632-qb0
+- operator: WeightedPermuteMLP
+  case_id: 16
+  input_shape:
+  - - 4
+    - 11
+    - 11
+    - 64
+  - - 64
+    - 64
+  - - 64
+  - - 704
+    - 704
+  - - 704
+  - - 704
+    - 704
+  - - 704
+  - - 16
+    - 64
+  - - 16
+  - - 192
+    - 16
+  - - 192
+  - - 64
+    - 64
+  - - 64
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 64
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id016
+    - -0.05
+    - 0.05
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  - *id016
+  note: float32-B4H11W11C64-seg2->1-HS704-WS704-qb0
+- operator: WeightedPermuteMLP
+  case_id: 17
+  input_shape:
+  - - 4
+    - 9
+    - 9
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 1152
+    - 1152
+  - - 1152
+  - - 1152
+    - 1152
+  - - 1152
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id017
+    - -0.05
+    - 0.05
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  - *id017
+  note: float32-B4H9W9C128-seg2->1-HS1152-WS1152-qb0
+- operator: WeightedPermuteMLP
+  case_id: 18
+  input_shape:
+  - - 1
+    - 8
+    - 8
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 1024
+    - 1024
+  - - 1024
+  - - 1024
+    - 1024
+  - - 1024
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 2
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id018
+    - -0.05
+    - 0.05
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  - *id018
+  note: float32-B1H8W8C256-seg2->2-HS1024-WS1024-qb0
+- operator: WeightedPermuteMLP
+  case_id: 19
+  input_shape:
+  - - 4
+    - 8
+    - 8
+    - 256
+  - - 256
+    - 256
+  - - 256
+  - - 512
+    - 512
+  - - 512
+  - - 512
+    - 512
+  - - 512
+  - - 64
+    - 256
+  - - 64
+  - - 768
+    - 64
+  - - 768
+  - - 256
+    - 256
+  - - 256
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 256
+    seg_dim: 4
+    qkv_bias: true
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id019
+    - -0.05
+    - 0.05
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  - *id019
+  note: float32-B4H8W8C256-seg4->4-HS512-WS512-qb1
+- operator: WeightedPermuteMLP
+  case_id: 20
+  input_shape:
+  - - 4
+    - 7
+    - 11
+    - 128
+  - - 128
+    - 128
+  - - 128
+  - - 896
+    - 896
+  - - 896
+  - - 1408
+    - 1408
+  - - 1408
+  - - 32
+    - 128
+  - - 32
+  - - 384
+    - 32
+  - - 384
+  - - 128
+    - 128
+  - - 128
+  dtype:
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  - float32
+  attrs:
+    dim: 128
+    seg_dim: 8
+    qkv_bias: false
+    proj_drop: 0.0
+  value_range:
+  - - -1
+    - 1
+  - &id020
+    - -0.05
+    - 0.05
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  - *id020
+  note: float32-B4H7W11C128-seg8->1-HS896-WS1408-qb0

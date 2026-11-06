@@ -1,0 +1,68 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: JaggedJaggedBmmBwd
+  category: Contraction
+  difficulty: L4
+  formula: |
+    L_b = min(offsets[b+1] - offsets[b], max_seq_len)
+    dX_b = Y_b @ dZ_b^T
+    dY_b = X_b @ dZ_b
+  description: 变长序列批量矩阵乘 Z_b = X_b^T @ Y_b 的反向，返回 dX 与 dY，超出 max_seq_len 的行梯度为 0
+  shape_support: 'x: [sum_L, D], y: [sum_L, T], x_offsets: [B+1], grad_output: [B, D, T], grad_x: [sum_L, D], grad_y: [sum_L, T]'
+  attrs:
+  - name: max_seq_len
+    type: int
+    description: 每条序列参与计算的最大行数
+    required: true
+  inputs:
+  - name: x
+    description: 前向左矩阵，形状 [sum_L, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, D]'
+  - name: y
+    description: 前向右矩阵，形状 [sum_L, T]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, T]'
+  - name: x_offsets
+    description: 各序列在 sum_L 维上的起止偏移，单调不减，形状 [B+1]
+    dtype:
+    - int32
+    shape: '[B+1]'
+  - name: grad_output
+    description: 上游梯度 dZ，形状 [B, D, T]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, D, T]'
+  outputs:
+  - name: grad_x
+    description: x 的梯度，形状 [sum_L, D]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, D]'
+  - name: grad_y
+    description: y 的梯度，形状 [sum_L, T]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[sum_L, T]'
+  schema: jagged_jagged_bmm_bwd(Tensor x, Tensor y, Tensor x_offsets, Tensor grad_output, int max_seq_len) -> (Tensor grad_x, Tensor grad_y)

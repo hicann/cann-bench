@@ -1,0 +1,142 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------
+
+operator:
+  name: BAM
+  category: FusedComposite
+  difficulty: L4
+  formula: |
+    c_attn = MLP(avgpool(x))
+    s_attn = Conv1x1(Conv_kd(ReLU(Conv_kd(ReLU(Conv1x1(x))))))
+    s_attn = adaptive_avg_pool2d(s_attn, (H, W))
+    y = x + x * sigmoid(c_attn + s_attn)
+  description: 瓶颈注意力模块（BAM）前向：通道 MLP 与扩张空间卷积双支路注意力相加后 sigmoid 门控，并做残差连接
+  shape_support: 'x: [B, C, H, W]；hidden = C // reduction；keff = dilation_val 收缩后的有效核（见规则约束）；y: [B, C, H, W]'
+  attrs:
+  - name: channel
+    type: int
+    description: 输入通道数 C，须等于 x.shape[1]，用于推导各权重形状
+    required: true
+  - name: reduction
+    type: int
+    default: 16
+    description: 通道瓶颈降维比，hidden = C // reduction
+    required: false
+  - name: kernel_size
+    type: int
+    default: 3
+    description: 空间支路扩张卷积核大小
+    required: false
+  - name: dilation_val
+    type: int
+    default: 4
+    description: 空间支路扩张卷积的扩张率
+    required: false
+  inputs:
+  - name: x
+    description: 输入特征图 [B, C, H, W]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  - name: mlp_fc1_weight
+    description: 通道 MLP 第一层权重 [C // reduction, C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, C]'
+  - name: mlp_fc1_bias
+    description: 通道 MLP 第一层偏置 [C // reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction]'
+  - name: mlp_fc2_weight
+    description: 通道 MLP 第二层权重 [C, C // reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C, C // reduction]'
+  - name: mlp_fc2_bias
+    description: 通道 MLP 第二层偏置 [C]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C]'
+  - name: conv1_weight
+    description: 空间支路 1x1 降维卷积权重 [C // reduction, C, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, C, 1, 1]'
+  - name: conv1_bias
+    description: 空间支路 1x1 降维卷积偏置 [C // reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction]'
+  - name: conv2a_weight
+    description: 第一层扩张卷积权重 [C // reduction, C // reduction, keff, keff]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, C // reduction, keff, keff]'
+  - name: conv2a_bias
+    description: 第一层扩张卷积偏置 [C // reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction]'
+  - name: conv2b_weight
+    description: 第二层扩张卷积权重 [C // reduction, C // reduction, keff, keff]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction, C // reduction, keff, keff]'
+  - name: conv2b_bias
+    description: 第二层扩张卷积偏置 [C // reduction]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[C // reduction]'
+  - name: conv3_weight
+    description: 空间支路 1x1 升维卷积权重 [1, C // reduction, 1, 1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1, C // reduction, 1, 1]'
+  - name: conv3_bias
+    description: 空间支路 1x1 升维卷积偏置 [1]
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[1]'
+  outputs:
+  - name: y
+    description: 注意力细化后的特征图，shape 与 x 一致
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    shape: '[B, C, H, W]'
+  schema: bam(Tensor x, Tensor mlp_fc1_weight, Tensor mlp_fc1_bias, Tensor mlp_fc2_weight, Tensor mlp_fc2_bias, Tensor conv1_weight, Tensor conv1_bias, Tensor conv2a_weight, Tensor conv2a_bias, Tensor conv2b_weight, Tensor conv2b_bias, Tensor conv3_weight, Tensor conv3_bias, int channel, int reduction=16, int kernel_size=3, int dilation_val=4) -> Tensor y
