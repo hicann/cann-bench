@@ -301,8 +301,10 @@ export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/opp/vendors/custom_ops/op_api/lib/:${LD
 
 ### wheel包安装
 ```bash
-pip install dist/cann_bench-*.whl
+python -m pip install dist/cann_bench-*.whl --no-deps
 ```
+
+> 构建前请按仓库根目录 `requirements.txt` 安装匹配的 `torch` / `torch_npu`，并在同一环境中构建、安装和运行。wheel 复用该环境的原生 ABI，不自行安装这两个依赖；重装时也请保留 `--no-deps`，避免替换已匹配的版本。
 
 > ⚠️ **包名冲突提示**：本示例构建的 wheel 与仓库 golden 自验证 wheel（`scripts/utils/build_golden_wheel.sh` 产物）同名，都叫 `cann_bench`，二者互斥、不能同时安装。若当前环境已安装 golden wheel，调用 `cann_bench.add()` 会报 `module 'cann_bench' has no attribute 'add'`，请先 `pip uninstall -y cann_bench` 卸载后再安装本示例 wheel；或将本工程目录加入 `PYTHONPATH` 以优先导入本包。
 

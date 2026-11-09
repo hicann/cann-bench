@@ -64,7 +64,9 @@ def resolve_score_weight_profile(
     if profile not in WEIGHT_PROFILES:
         raise ValueError(
             f"unknown score weight profile {profile!r}; "
-            f"expected one of {VALID_SCORE_WEIGHT_PROFILES}"
+            f"expected one of {VALID_SCORE_WEIGHT_PROFILES}. "
+            f"Set {SCORE_WEIGHTS_ENV} to a supported profile to override "
+            "the metadata/VERSION major version"
         )
     return profile
 

@@ -343,3 +343,22 @@ def test_complete_explicit_weights_work_without_default():
             )
     for calculator in (BenchCalc, ReportCalc):
         assert calculator(**explicit)._effective_weights() == (0.2, 0.3, 0.5, 0.0)
+
+
+def test_example_fixture_has_supported_default_profile():
+    from pathlib import Path
+    from kernel_eval.base.score_weights import score_weights_context
+
+    root = Path(__file__).resolve().parents[2] / "examples" / "tasks"
+    with score_weights_context(root) as profile:
+        assert profile == "1"
+        assert resolve_score_weights() == WEIGHT_PROFILES[profile]
+
+
+def test_unknown_profile_explains_override(tmp_path):
+    from kernel_eval.base.score_weights import score_weights_context
+
+    root = _bench_root(tmp_path, "0.1.0")
+    with pytest.raises(ValueError, match=SCORE_WEIGHTS_ENV):
+        with score_weights_context(root):
+            pytest.fail("unsupported version must not start evaluation")

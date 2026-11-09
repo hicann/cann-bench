@@ -155,9 +155,10 @@ pip install -r requirements.txt
    装好的 CANN/torch_npu 环境。只挂提交源码和报告目录：
 
    ```bash
+   # OPERATOR_NAME 填写当前评测集 proto.yaml 中的 operator.name
    bash docker/eval/build.sh                              # 首次：构建评测镜像
    bash docker/eval/run.sh generated_project              # 评测
-   bash docker/eval/run.sh generated_project --operator Exp --no-perf
+   bash docker/eval/run.sh generated_project --operator "$OPERATOR_NAME" --no-perf
    ```
 
    详见 [docker/eval/README.md](docker/eval/README.md)。
@@ -229,7 +230,7 @@ result = cann_bench.add(x, y)
 
 > ⚠️ **注意：`cann_bench` 包名冲突**。仓库中存在两个同名的 `cann_bench` Python 包，二者**互斥**，同时只应安装其一：
 >
-> - **Golden 参考 wheel**：由 `./scripts/utils/build_golden_wheel.sh` 构建，将 `tasks/` 下的 golden.py 打包为纯 Python 包（提供 exp/gelu/sigmoid 等 golden 算子，注册到 `torch.ops.cann_bench`），仅用于 golden 自验证；
+> - **Golden 参考 wheel**：由 `./scripts/utils/build_golden_wheel.sh` 构建，将 `tasks/` 下的 golden.py 打包为纯 Python 包（提供当前评测集的 golden 算子，注册到 `torch.ops.cann_bench`），仅用于 golden 自验证；
 > - **ACLNN 示例 wheel**：由 [examples/aclnn_launch_example/](examples/aclnn_launch_example/) 构建（`dist/cann_bench-*.whl`），提供 `cann_bench.add` / `cann_bench.sqrt` 等自定义算子。
 >
 > 若安装了 golden wheel，再调用 `cann_bench.add()` 会报 `module 'cann_bench' has no attribute 'add'`。此时需先卸载 golden wheel，再安装 ACLNN 示例 wheel；或将示例工程目录加入 `PYTHONPATH` 以导入正确的包：

@@ -39,6 +39,11 @@ examples/tasks/
 
 ## 使用方式
 
+样例的 `metadata/VERSION` 为 `1.0.0`，默认使用评分权重档 `1`。
+权重档取自评测集大版本；对旧版或自定义 fixture，可在命令前设置
+`CANN_BENCH_SCORE_WEIGHTS=1` 显式选择档位。样例性能数据为占位值，
+仅用于 `--no-perf` 流程验证，不用于衡量性能。
+
 ### 1. 通过评测脚本
 
 ```bash

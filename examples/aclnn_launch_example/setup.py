@@ -135,10 +135,9 @@ setup(
     distclass=BinaryDistribution,
     cmdclass=cmdclass,
     zip_safe=False,
-    install_requires=[
-        "torch",
-        "torch_npu"
-    ],
+    # The CANN environment supplies the ABI-matched torch/torch_npu pair used
+    # to build this extension. Reinstalling this wheel must not replace it.
+    install_requires=[],
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

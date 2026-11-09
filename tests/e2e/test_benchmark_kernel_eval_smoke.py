@@ -10,6 +10,39 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_kernel_eval_cpu_no_perf_smoke_with_source_dir(tmp_path):
+    # Keep the pipeline smoke independent of the changing public task suite.
+    bench_root = tmp_path / "tasks"
+    task_dir = bench_root / "level1" / "gelu"
+    task_dir.mkdir(parents=True)
+    (bench_root / "metadata").mkdir()
+    (bench_root / "metadata" / "VERSION").write_text("1.0.0\n", encoding="utf-8")
+    task_dir.joinpath("proto.yaml").write_text(
+        "operator:\n"
+        "  name: Gelu\n"
+        "  category: Elementwise\n"
+        "  difficulty: L1\n"
+        "  inputs: [{name: x, dtype: [float32]}]\n"
+        "  outputs: [{name: y, dtype: [float32]}]\n"
+        "  schema: gelu(Tensor x) -> Tensor y\n",
+        encoding="utf-8",
+    )
+    task_dir.joinpath("cases.yaml").write_text(
+        "cases:\n"
+        "- operator: Gelu\n"
+        "  case_id: 1\n"
+        "  input_shape: [[16, 16]]\n"
+        "  dtype: [float32]\n"
+        "  attrs: {}\n"
+        "  value_range: [-1, 1]\n",
+        encoding="utf-8",
+    )
+    task_dir.joinpath("golden.py").write_text(
+        "import torch\n\n"
+        "def gelu(x: torch.Tensor) -> torch.Tensor:\n"
+        "    return torch.nn.functional.gelu(x)\n",
+        encoding="utf-8",
+    )
+
     source_dir = tmp_path / "submission"
     package_dir = source_dir / "cann_bench"
     package_dir.mkdir(parents=True)
@@ -43,7 +76,7 @@ def test_kernel_eval_cpu_no_perf_smoke_with_source_dir(tmp_path):
     result = client.eval_submission(
         bench_name="cann",
         source_dir=source_dir,
-        task_selector="tasks/level1/gelu",
+        task_selector=str(task_dir),
         reports_dir=tmp_path / "reports",
         extra_args=[
             "--device",

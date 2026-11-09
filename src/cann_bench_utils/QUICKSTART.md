@@ -38,8 +38,13 @@ bash build.sh --soc=ascend950
 
 ### Install
 
+Install the matching `torch` / `torch_npu` pair from the repository's
+`requirements.txt` before building. Keep that same environment for installation
+and execution: these native wheels use its ABI. `--no-deps` prevents reinstalling
+an operator wheel from replacing that pair (also use it for the ACLNN example).
+
 ```bash
-pip install dist/*.whl --force-reinstall
+python -m pip install dist/*.whl --force-reinstall --no-deps
 ```
 
 ### Test
@@ -143,7 +148,7 @@ bash build.sh --soc=ascend910_93
 
 ```bash
 # Reinstall
-pip install dist/*.whl --force-reinstall
+python -m pip install dist/*.whl --force-reinstall --no-deps
 
 # Verify
 python3 -c "from cann_bench_utils import cann_bench_warmup; print('✓ OK')"

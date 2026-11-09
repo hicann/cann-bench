@@ -56,6 +56,11 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
     --task-dir examples/tasks --no-perf
 ```
 
+样例的 `metadata/VERSION` 为 `1.0.0`，默认使用评分权重档 `1`。
+权重档取自评测集大版本；对旧版或自定义 fixture，可在命令前设置
+`CANN_BENCH_SCORE_WEIGHTS=1` 显式选择档位。样例性能数据为占位值，
+仅用于 `--no-perf` 流程验证，不用于衡量性能。
+
 详见 [examples/tasks/README.md](../../examples/tasks/README.md)。
 
 ### 从源码目录评测（推荐）
@@ -68,24 +73,28 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 
 ### 评测指定算子
 
+正式评测集会随版本变化，先运行 `./scripts/run_evaluation.sh -a list` 查看当前算子。
+以下命令中的 `TASK_DIR` 填写实际的 `tasks/levelN/<op>` 目录，`OPERATOR_NAME`
+填写该目录 `proto.yaml` 中的 `operator.name`；后续命令沿用这两个变量。
+
 ```bash
 # 评测指定目录
 ./scripts/run_evaluation.sh --task-dir tasks/level1
 
 # 评测单个算子目录
-./scripts/run_evaluation.sh --task-dir tasks/level1/exp
+./scripts/run_evaluation.sh --task-dir "$TASK_DIR"
 
 # 按算子名称筛选
-./scripts/run_evaluation.sh --operator Exp
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME"
 
 # 评测单个用例
-./scripts/run_evaluation.sh --operator Exp --case-id 1
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME" --case-id 1
 
 # 仅精度验证（不采集性能）
-./scripts/run_evaluation.sh --operator Exp --no-perf
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME" --no-perf
 
 # 设置 warmup/repeat 参数
-./scripts/run_evaluation.sh --operator Exp --warmup 5 --repeat 10
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME" --warmup 5 --repeat 10
 ```
 
 ### 多卡并行评测
@@ -94,20 +103,20 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 
 ```bash
 # 多卡并行（自动检测）
-./scripts/run_evaluation.sh --operator Exp
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME"
 
 # 指定每卡进程数
-./scripts/run_evaluation.sh --operator Exp --processes-per-card 4
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME" --processes-per-card 4
 
 # 指定进程超时
-./scripts/run_evaluation.sh --operator Exp --timeout-per-process 600
+./scripts/run_evaluation.sh --operator "$OPERATOR_NAME" --timeout-per-process 600
 ```
 
 ### 单卡评测
 
 ```bash
 # 单卡模式（指定设备 ID）
-./scripts/run_evaluation.sh --device-id 0 --operator Exp
+./scripts/run_evaluation.sh --device-id 0 --operator "$OPERATOR_NAME"
 ```
 
 ### 查看算子信息
@@ -117,7 +126,7 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 ./scripts/run_evaluation.sh -a list
 
 # 查看算子详情
-./scripts/run_evaluation.sh -a info --operator Exp
+./scripts/run_evaluation.sh -a info --operator "$OPERATOR_NAME"
 
 # 查看配置
 ./scripts/run_evaluation.sh -a config
@@ -157,10 +166,10 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 ./scripts/utils/build_golden_wheel.sh --install
 
 # 2. 评测（golden 作为 AI 算子，golden(CPU fp64) 作为参考）
-./scripts/run_evaluation.sh --task-dir tasks/level1/exp --no-perf
+./scripts/run_evaluation.sh --task-dir "$TASK_DIR" --no-perf
 ```
 
-> ⚠️ **`cann_bench` 包名冲突**：golden whl 与 [examples/aclnn_launch_example](../../examples/aclnn_launch_example/) 构建的 wheel 同名（都叫 `cann_bench`），二者互斥。golden wheel 是纯 Python 包，只提供 `torch.ops.cann_bench` 下的 golden 算子（exp/gelu/sigmoid 等），**不包含**示例的 `cann_bench.add` / `cann_bench.sqrt`。golden 自验证完成后如需使用示例算子，请先卸载 golden wheel，再安装示例 wheel 或将示例目录加入 `PYTHONPATH`：
+> ⚠️ **`cann_bench` 包名冲突**：golden whl 与 [examples/aclnn_launch_example](../../examples/aclnn_launch_example/) 构建的 wheel 同名（都叫 `cann_bench`），二者互斥。golden wheel 是纯 Python 包，只提供 `torch.ops.cann_bench` 下的 golden 算子（取决于当前评测集），**不包含**示例的 `cann_bench.add` / `cann_bench.sqrt`。golden 自验证完成后如需使用示例算子，请先卸载 golden wheel，再安装示例 wheel 或将示例目录加入 `PYTHONPATH`：
 >
 > ```bash
 > pip uninstall -y cann_bench
