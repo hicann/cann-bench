@@ -95,7 +95,7 @@ auto-pipeline 必须产出可复现的标准源码提交，因此比评测器接
 - `SUB-BEH-006`：不得篡改 profiler、同步或 timing API。
 - `SUB-BEH-007`：必须返回真实 `torch.Tensor`。
 
-完整解释和示例见[算子提交行为与禁止规则](../guide/submission_rules.md)。
+检测范围、完整提交约束、违规处理及行为示例统一见[算子提交行为与禁止规则](../guide/submission_rules.md)。
 
 ## 6. 规则变更要求
 

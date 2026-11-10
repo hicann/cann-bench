@@ -53,7 +53,7 @@
 | [contributing.md](guide/contributing.md) | 算子贡献指南：如何提交新算子评测任务（含 proto.yaml schema） |
 | [quick_start.md](guide/quick_start.md) | 快速入门：评测流程和命令行使用 |
 | [triton_ascend_quick_start.md](guide/triton_ascend_quick_start.md) | Triton-Ascend 环境、构建和真机验证快速指南 |
-| [submission_rules.md](guide/submission_rules.md) | 算子提交行为与禁止规则：说明哪些实现方式会被视为无效或作弊 |
+| [submission_rules.md](guide/submission_rules.md) | 算子提交行为与禁止规则：提交前必读，统一说明检测范围、提交约束、违规处理、规则编号及示例 |
 | [version_policy.md](guide/version_policy.md) | 版本策略：VERSION / tasks 版本与兼容性 |
 | [custom_benchmark_integration.md](guide/custom_benchmark_integration.md) | 自定义评测集接入指南 |
 | [auto_pipeline_usage.md](guide/auto_pipeline_usage.md) | auto_pipeline 使用指南：CLI、配置、环境变量、输出目录 |

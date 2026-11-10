@@ -40,7 +40,7 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 
 ## 评测命令
 
-评测前请先阅读[评测输入与接口规范](../spec/submission_spec.md)。该规范列出解包后 `source_dir`、`build.sh`/wheel 约束、接口发现方式以及 auto-pipeline 校验规则编号。代码行为和反作弊边界见[算子提交行为与禁止规则](submission_rules.md)；通过 `cannbench.com` 网站提交时还需满足网站自身的 ZIP 上传规则。
+编写或生成算子前，请先阅读[评测输入与接口规范](../spec/submission_spec.md)，了解解包后 `source_dir`、`build.sh`/wheel 约束、接口发现方式及 auto-pipeline 校验规则编号，再阅读[算子提交行为与禁止规则](submission_rules.md)，了解检测范围、提交约束、违规处理及行为示例。通过 `cannbench.com` 网站提交时还需满足网站自身的 ZIP 上传规则。
 
 ### 快速体验（评测任务样例）
 
@@ -189,7 +189,7 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 ## 下一步
 
 - [评测输入与接口规范](../spec/submission_spec.md)：解包后的目录、构建、接口和校验规则编号
-- [算子提交行为与禁止规则](submission_rules.md)：哪些实现方式会被视为无效或作弊
+- [算子提交行为与禁止规则](submission_rules.md)：检测范围、提交约束、违规处理及行为示例
 - [贡献指南](contributing.md)：如何提交新算子评测任务
 - [评测基准规范](../spec/benchmark_spec.md)：算子定义和精度标准
 - [评测工程设计](../design/evaluator_design.md)：评测器架构设计

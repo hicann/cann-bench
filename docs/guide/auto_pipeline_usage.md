@@ -5,6 +5,8 @@
 新增 agent 接入见
 [`docs/guide/auto_pipeline_agent_integration.md`](auto_pipeline_agent_integration.md)。
 
+为 CANN Bench 自动生成算子前，请先阅读[评测输入与接口规范](../spec/submission_spec.md)，了解目录、构建和接口要求，再阅读[算子提交行为与禁止规则](submission_rules.md)。生成结果与手工实现遵守相同的检测范围、提交约束和违规处理规则。
+
 ## 快速入口
 
 ```bash
