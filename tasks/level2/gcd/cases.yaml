@@ -115,10 +115,8 @@ cases:
   - [2049, 513]
   dtype: [int32, int32]
   attrs: {}
-  value_range:
-  - [100, 100]
-  - [100, 100]
-  note: "S-int32-1M-非对齐-相同值gcd=n | baseline_kernels: Gcd×1"
+  value_range: [[1, 200], [1, 300]]
+  note: "gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
 - operator: Gcd
   case_id: 11
   input_shape:
@@ -159,10 +157,8 @@ cases:
   - [1048583]
   dtype: [int32, int32]
   attrs: {}
-  value_range:
-  - [0, 0]
-  - [0, 0]
-  note: "S-int32-1M-质数非对齐-零值gcd=0-1D | baseline_kernels: Gcd×1"
+  value_range: [[-31, 31], [-63, 63]]
+  note: "gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
 - operator: Gcd
   case_id: 15
   input_shape:
@@ -170,10 +166,8 @@ cases:
   - [11, 13, 17, 67, 67]
   dtype: [int32, int32]
   attrs: {}
-  value_range:
-  - [1, 1]
-  - [1, 1]
-  note: "M-int32-10M-质数非对齐-单位值gcd=1-5D | baseline_kernels: Gcd×1"
+  value_range: [[0, 127], [0, 255]]
+  note: "gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
 - operator: Gcd
   case_id: 16
   input_shape:

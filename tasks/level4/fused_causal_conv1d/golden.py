@@ -11,6 +11,56 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
+# Portions of causal_conv1d_golden were adapted from Ascend/op-plugin.
+# Reference source (comparison revision):
+# https://github.com/Ascend/op-plugin/blob/3d6726621b6fc15cb1972522d9e3ec0b770bf03f/test/test_custom_ops/test_npu_fused_causal_conv1d.py
+# The original adaptation revision was not recorded.
+# This project adapts the wrapper, input preparation and reference integration.
+# The upstream file has no separate license header; its repository LICENSE follows.
+# Upstream license: https://github.com/Ascend/op-plugin/blob/3d6726621b6fc15cb1972522d9e3ec0b770bf03f/LICENSE
+#
+# rom PyTorch:
+#
+# Copyright (c) 2020, Huawei Technologies Co., Ltd
+# Copyright (c) 2016-     Facebook, Inc            (Adam Paszke)
+# Copyright (c) 2014-     Facebook, Inc            (Soumith Chintala)
+# Copyright (c) 2011-2014 Idiap Research Institute (Ronan Collobert)
+# Copyright (c) 2012-2014 Deepmind Technologies    (Koray Kavukcuoglu)
+# Copyright (c) 2011-2012 NEC Laboratories America (Koray Kavukcuoglu)
+# Copyright (c) 2011-2013 NYU                      (Clement Farabet)
+# Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
+# Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
+# Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the names of Facebook, Deepmind Technologies, NYU, NEC Laboratories America
+#    and IDIAP Research Institute nor the names of its contributors may be
+#    used to endorse or promote products derived from this software without
+#    specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------
@@ -35,6 +85,7 @@ import torch.nn.functional as F
 # ============================================================
 # cann-bench Golden 入口
 # ============================================================
+
 
 def fused_causal_conv1d(
     x: torch.Tensor,
@@ -110,6 +161,7 @@ def fused_causal_conv1d(
 # 前置处理辅助：设置随机种子
 # ============================================================
 
+
 def set_seed(seed: int):
     """
     设置全局随机种子，保证跨机器确定性。
@@ -127,6 +179,7 @@ def set_seed(seed: int):
 # ============================================================
 # 前置处理辅助：生成 query_start_loc
 # ============================================================
+
 
 def generate_query_start_loc(
     batch_size: int,
@@ -162,10 +215,29 @@ def generate_query_start_loc(
     lengths = torch.zeros(batch_size, dtype=torch.int32)
     available_indices = torch.arange(nonzero_slots)
 
-    # Step 1: 随机选一个位置放 max_query_len
-    idx = available_indices[torch.randint(0, len(available_indices), (1,))].item()
+    # Zero-length batches must sit at the tail (assertion below). Choose
+    # the max-length batch from the non-tail slots only, and recompute the
+    # factual zero count: tokens left after Step 1 may be fewer than the
+    # remaining nonzero slots, and those slots stay zero (e.g. total_tokens
+    # == max_query_len with contain_zero estimated as 0).
+    head_slots = max(nonzero_slots - contain_zero_seqlen_batch_num, 1)
+    idx = int(torch.randint(0, head_slots, (1,)).item())
     lengths[idx] = max_query_len
     remaining = total_tokens - max_query_len
+    contain_zero_seqlen_batch_num = batch_size - (1 + min(remaining, nonzero_slots - 1))
+    # The recomputed zero count may exceed the caller estimate; if the
+    # chosen idx now falls inside the (larger) tail-zero region, swap it
+    # with the first non-tail slot so zero batches stay at the tail.
+    if (
+        contain_zero_seqlen_batch_num > 0
+        and idx >= batch_size - contain_zero_seqlen_batch_num
+    ):
+        swap = available_indices[0].item()
+        if swap == idx and len(available_indices) > 1:
+            swap = available_indices[1].item()
+        lengths[swap] = lengths[idx]
+        lengths[idx] = 0
+        idx = swap
 
     # Step 2: 其余非零 batch 先各放 1
     for i in available_indices.tolist():
@@ -202,6 +274,7 @@ def generate_query_start_loc(
 # ============================================================
 # 前置处理主函数（对应原 executor L477-488 + L542-726）
 # ============================================================
+
 
 def prepare_inputs(
     x: torch.Tensor,
@@ -285,11 +358,18 @@ def prepare_inputs(
         if max_query_len is None or max_query_len == -1:
             max_query_len_act = (x.shape[0] + batch_size - 1) // batch_size
         else:
-            max_query_len_act = max(max_query_len, (total_tokens + batch_size - 1) // batch_size)
+            max_query_len_act = max(
+                max_query_len, (total_tokens + batch_size - 1) // batch_size
+            )
 
         if run_mode == 0:
             # 连续 prefill：固定 total_tokens，不规整分配各 batch seqLen
-            zero_num = 0 if batch_size <= 5 else 2
+            # Zero-length tail batches are only possible when the remaining
+            # batches can still hold every token: keep the capacity
+            # invariant total_tokens <= nonzero_slots * max_query_len.
+            zero_num = 0
+            if batch_size > 5 and (batch_size - 2) * max_query_len_act >= total_tokens:
+                zero_num = 2
             query_start_loc = generate_query_start_loc(
                 batch_size=batch_size,
                 total_tokens=total_tokens,
@@ -303,8 +383,10 @@ def prepare_inputs(
                 seq_lens = torch.tensor([max_query_len_act], dtype=torch.int32)
             else:
                 seq_lens = torch.randint(
-                    low=1, high=max_query_len_act + 1,
-                    size=(batch_size,), dtype=torch.int32
+                    low=1,
+                    high=max_query_len_act + 1,
+                    size=(batch_size,),
+                    dtype=torch.int32,
                 )
             num_zero_tail = torch.randint(0, min(3, batch_size), ()).item()
             if num_zero_tail > 0:
@@ -313,25 +395,30 @@ def prepare_inputs(
             query_start_loc[1:] = torch.cumsum(seq_lens, dim=0)
             cu_seq_len = query_start_loc[-1].item()
             # 重新生成 x（形状随 seqLen 变化）
-            x = torch.empty(
-                (cu_seq_len, x.shape[1]), dtype=x.dtype
-            ).uniform_(-5.0, 5.0)
+            x = torch.empty((cu_seq_len, x.shape[1]), dtype=x.dtype).uniform_(-5.0, 5.0)
     else:
         # 3D 输入：每个 batch seqLen 固定
-        seq_lens = torch.full(
-            (batch_size,), fill_value=x.shape[1], dtype=torch.int32
-        )
+        seq_lens = torch.full((batch_size,), fill_value=x.shape[1], dtype=torch.int32)
 
     enAPC = cache_indices is not None and cache_indices.ndim == 2
 
-    # ── L608-617: 约束化 cache_indices ───────────────────────────────────
-    if cache_indices is not None and cache_indices.ndim == 1:
-        perm = torch.randperm(conv_states.shape[0], dtype=torch.int32)
-        cache_indices = perm[:batch_size]
-    elif cache_indices is not None and cache_indices.ndim == 2:
-        total_block_num = cache_indices.shape[0] * cache_indices.shape[1]
-        perm = torch.randperm(total_block_num, dtype=torch.int32)
-        cache_indices = perm.reshape(batch_size, -1)
+    # Non-pad cache slots must be distinct across the complete block table.
+    # Sharing across sequences would introduce order-dependent state writes.
+    if cache_indices is not None:
+        num_slots = conv_states.shape[0]
+        required_slots = batch_size
+        if cache_indices.ndim == 2:
+            required_slots *= cache_indices.shape[1]
+        elif cache_indices.ndim != 1:
+            raise ValueError("cache_indices must have one or two dimensions")
+        if num_slots < required_slots:
+            raise ValueError(
+                f"conv_states has {num_slots} slots but cache_indices requires "
+                f"{required_slots} globally distinct slots"
+            )
+        cache_indices = torch.randperm(num_slots, dtype=torch.int32)[:required_slots]
+        if enAPC:
+            cache_indices = cache_indices.reshape(batch_size, -1)
 
     # ── L619-627: 约束化 num_accepted_tokens ─────────────────────────────
     if num_accepted_tokens is not None:
@@ -374,9 +461,7 @@ def prepare_inputs(
     if batch_size > 4 and use_pad_slot_id and cache_indices is not None:
         invalid_batch_choice = random.choice([0, 1, 2])
         batch_invalid_num = random.randint(0, batch_size // 4)
-        batch_invalid_num_tail = random.randint(
-            3 * batch_size // 4, batch_size - 1
-        )
+        batch_invalid_num_tail = random.randint(3 * batch_size // 4, batch_size - 1)
         if invalid_batch_choice == 0:
             cache_indices[:batch_invalid_num] = pad_slot_id
         elif invalid_batch_choice == 1:
@@ -390,26 +475,27 @@ def prepare_inputs(
         return t.to(device) if t is not None else None
 
     return {
-        "x":                               to_dev(x),
-        "weight":                          to_dev(weight),
-        "conv_states":                     to_dev(conv_states),
-        "query_start_loc":                 to_dev(query_start_loc),
-        "cache_indices":                   to_dev(cache_indices),
-        "num_accepted_tokens":             to_dev(num_accepted_tokens),
-        "num_computed_tokens":             to_dev(num_computed_tokens),
+        "x": to_dev(x),
+        "weight": to_dev(weight),
+        "conv_states": to_dev(conv_states),
+        "query_start_loc": to_dev(query_start_loc),
+        "cache_indices": to_dev(cache_indices),
+        "num_accepted_tokens": to_dev(num_accepted_tokens),
+        "num_computed_tokens": to_dev(num_computed_tokens),
         "block_idx_first_scheduled_token": to_dev(block_idx_first_scheduled_token),
-        "block_idx_last_scheduled_token":  to_dev(block_idx_last_scheduled_token),
-        "initial_state_idx":               to_dev(initial_state_idx),
-        "pad_slot_id":                     pad_slot_id,
-        "batch_size":                      batch_size,
-        "xdim":                            xdim,
-        "m":                               m,
+        "block_idx_last_scheduled_token": to_dev(block_idx_last_scheduled_token),
+        "initial_state_idx": to_dev(initial_state_idx),
+        "pad_slot_id": pad_slot_id,
+        "batch_size": batch_size,
+        "xdim": xdim,
+        "m": m,
     }
 
 
 # ============================================================
 # cann-bench 输入预处理（get_input）
 # ============================================================
+
 
 def get_input(
     x: torch.Tensor,
@@ -475,6 +561,7 @@ def get_input(
 # Golden 实现：因果卷积
 # ============================================================
 
+
 def causal_conv1d_golden(
     x: torch.Tensor,
     weight: torch.Tensor,
@@ -525,7 +612,13 @@ def causal_conv1d_golden(
         bsz, seq_len, dim = x.shape
         x = x.view(-1, dim)
         if query_start_loc is None:
-            query_start_loc = torch.arange(start=0, end=(bsz+1) * seq_len, step=seq_len, dtype=torch.int32, device=x.device)
+            query_start_loc = torch.arange(
+                start=0,
+                end=(bsz + 1) * seq_len,
+                step=seq_len,
+                dtype=torch.int32,
+                device=x.device,
+            )
     else:
         flattened = False
 
@@ -539,9 +632,9 @@ def causal_conv1d_golden(
 
     for batch_idx in range(batch_size):
         start_idx = query_start_loc[batch_idx].item()
-        end_idx   = query_start_loc[batch_idx + 1].item()
-        seq_len   = end_idx - start_idx
-        seq_x     = x[start_idx:end_idx]
+        end_idx = query_start_loc[batch_idx + 1].item()
+        seq_len = end_idx - start_idx
+        seq_x = x[start_idx:end_idx]
 
         if seq_len == 0:
             continue
@@ -555,18 +648,20 @@ def causal_conv1d_golden(
             if seq_end_offset == 0:
                 last_full_block_token_index -= B_size
             idx_first = block_idx_first_scheduled_token[batch_idx].item()
-            idx_last  = block_idx_last_scheduled_token[batch_idx].item()
+            idx_last = block_idx_last_scheduled_token[batch_idx].item()
             n_block_to_fill = idx_last - idx_first
 
             assert cache_indices is not None and cache_indices.ndim == 2
-            read_cache_line  = cache_indices[batch_idx, initial_state_idx[batch_idx]].item()
+            read_cache_line = cache_indices[
+                batch_idx, initial_state_idx[batch_idx]
+            ].item()
             write_cache_line = cache_indices[batch_idx, idx_last].item()
         else:
             if cache_indices is not None:
-                read_cache_line  = cache_indices[batch_idx].item()
+                read_cache_line = cache_indices[batch_idx].item()
                 write_cache_line = cache_indices[batch_idx].item()
             else:
-                read_cache_line  = batch_idx
+                read_cache_line = batch_idx
                 write_cache_line = batch_idx
 
         if read_cache_line == pad_slot_id:
@@ -583,7 +678,7 @@ def causal_conv1d_golden(
                 offset = accepted_tokens - 1
             else:
                 offset = conv_states.size(1) - (width - 1)
-            cached_state = conv_states[read_cache_line][:offset + width - 1]
+            cached_state = conv_states[read_cache_line][: offset + width - 1]
 
         padded_input = torch.cat([cached_state, seq_x], dim=0)
 
@@ -599,16 +694,22 @@ def causal_conv1d_golden(
                 boundary_idx = (
                     last_full_block_token_index - (n_block_to_fill - chunk - 1) * B_size
                 )
-                assert boundary_idx > 0, \
+                assert boundary_idx > 0, (
                     "Sequence length, block_idx_first/last_scheduled_token mismatched. "
-                write_cache_line = cache_indices[batch_idx, idx_first+chunk]
-                conv_states[write_cache_line][-(width-1):] = padded_input[boundary_idx: boundary_idx + width-1]
+                )
+                write_cache_line = cache_indices[batch_idx, idx_first + chunk]
+                conv_states[write_cache_line][-(width - 1) :] = padded_input[
+                    boundary_idx : boundary_idx + width - 1
+                ]
 
         # Step 3: 因果卷积
         result = F.conv1d(
-            padded_input.transpose(0, 1).unsqueeze(0),   # (1, dim, width-1+seq_len)
-            weight.transpose(0, 1).unsqueeze(1),          # (dim, 1, width)
-            bias=None, stride=1, padding=0, groups=dim,
+            padded_input.transpose(0, 1).unsqueeze(0),  # (1, dim, width-1+seq_len)
+            weight.transpose(0, 1).unsqueeze(1),  # (dim, 1, width)
+            bias=None,
+            stride=1,
+            padding=0,
+            groups=dim,
         )
         result = result.squeeze(0).transpose(0, 1)
         # Pangu v2：将初始填充段置零

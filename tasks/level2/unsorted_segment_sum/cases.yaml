@@ -34,36 +34,33 @@ cases:
 - operator: UnsortedSegmentSum
   case_id: 3
   input_shape:
-  - [4096, 4096]
-  - [4096]
+    [[4096, 2048], [4096]]
   dtype: [bfloat16, int64]
   attrs: {num_segments: 4096}
   value_range:
   - [-3, 3]
   - [0, 4095]
-  note: "M-bfloat16-int64_ids-16M-对齐-对称小值域 | baseline_kernels: ZerosLike×1 + Cast×1 + Sort×1 + InplaceIndexAddWithSorted×1"
+  note: "bfloat16 / int64; shapes=[[4096,2048],[4096]]"
 - operator: UnsortedSegmentSum
   case_id: 4
   input_shape:
-  - [8192, 8192]
-  - [8192]
+    [[8192, 1024], [8192]]
   dtype: [int32, int32]
   attrs: {num_segments: 8192}
   value_range:
   - [-1000, 1000]
   - [0, 8191]
-  note: "L-int32-int32_ids-67M-对齐-对称中值域 | baseline_kernels: ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
+  note: "int32; shapes=[[8192,1024],[8192]]"
 - operator: UnsortedSegmentSum
   case_id: 5
   input_shape:
-  - [4096, 8192]
-  - [4096]
+    [[4096, 1024], [4096]]
   dtype: [int64, int64]
   attrs: {num_segments: 16384}
   value_range:
   - [-100000, 100000]
   - [0, 16383]
-  note: "L-int64-int64_ids-268M-对齐-对称大值域 | baseline_kernels: ZerosLike×1 + InplaceIndexAdd×1"
+  note: "int64; shapes=[[4096,1024],[4096]]"
 - operator: UnsortedSegmentSum
   case_id: 6
   input_shape:
@@ -100,14 +97,13 @@ cases:
 - operator: UnsortedSegmentSum
   case_id: 9
   input_shape:
-  - [363, 367, 373]
-  - [363]
+    [[363, 183, 93], [363]]
   dtype: [float16, int32]
   attrs: {num_segments: 363}
   value_range:
   - [-50, 100]
   - [0, 362]
-  note: "M-float16-int32_ids-50M-质数非对齐-非对称大值域-3D | baseline_kernels: ZerosLike×1 + Cast×1 + InplaceIndexAdd×1"
+  note: "float16 / int32; shapes=[[363,183,93],[363]]"
 - operator: UnsortedSegmentSum
   case_id: 10
   input_shape:
@@ -144,14 +140,13 @@ cases:
 - operator: UnsortedSegmentSum
   case_id: 13
   input_shape:
-  - [11, 13, 17, 67, 67]
-  - [11]
+    [[11, 13, 17, 33, 67], [11]]
   dtype: [float32, int32]
   attrs: {num_segments: 11}
   value_range:
   - [.nan, .nan]
   - [0, 10]
-  note: "M-float32-int32_ids-10M-质数非对齐-nan特殊值-5D | baseline_kernels: ZerosLike×1 + Cast×1 + InplaceScatterAdd×1"
+  note: "float32 / int32; shapes=[[11,13,17,33,67],[11]]"
 - operator: UnsortedSegmentSum
   case_id: 14
   input_shape:

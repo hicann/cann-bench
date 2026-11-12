@@ -20,9 +20,10 @@ Unique 算子 Torch Golden 参考实现
 去除张量中的重复元素
 公式：y, inverse = unique(x, return_inverse)
 """
+
+
 def unique(
-    x: torch.Tensor,
-    return_inverse: bool = False
+    x: torch.Tensor, return_inverse: bool = False
 ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
     """
     去除张量中的重复元素
@@ -38,7 +39,4 @@ def unique(
         return_inverse=False: y             仅唯一值
     """
 
-    y, inverse = torch.unique(x, return_inverse=True)
-    if return_inverse:
-        return y, inverse
-    return y
+    return torch.unique(x, return_inverse=return_inverse)

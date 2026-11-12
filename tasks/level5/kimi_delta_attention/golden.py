@@ -35,8 +35,12 @@ def _check_inputs(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue):
     allowed_dtypes = (torch.float16, torch.bfloat16, torch.float32, torch.float64)
     if q.dtype not in allowed_dtypes or k.dtype != q.dtype or v.dtype != q.dtype:
         raise TypeError("q, k and v must share a supported floating-point dtype")
-    if any(t.dtype not in (torch.float32, torch.float64) for t in (g, beta, initial_state)):
-        raise TypeError("g, beta and initial_state must be FP32 (or FP64 for oracle checks)")
+    if any(
+        t.dtype not in (torch.float32, torch.float64) for t in (g, beta, initial_state)
+    ):
+        raise TypeError(
+            "g, beta and initial_state must be FP32 (or FP64 for oracle checks)"
+        )
     if any(t.device != q.device for t in (k, v, g, beta, initial_state)):
         raise ValueError("all tensor inputs must be on the same device")
     if not isinstance(use_qk_l2norm, bool):
@@ -45,7 +49,7 @@ def _check_inputs(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue):
         raise TypeError("scaleValue must be a finite number")
     if not math.isfinite(scaleValue):
         raise ValueError("scaleValue must be finite")
-    return key_dim ** -0.5 if scaleValue <= 0 else float(scaleValue)
+    return key_dim**-0.5 if scaleValue <= 0 else float(scaleValue)
 
 
 def kimi_delta_attention(
@@ -85,12 +89,14 @@ def kimi_delta_attention(
         faded_memory = memory * decay[:, token].unsqueeze(-1)
         token_key = key[:, token]
         predicted_value = torch.sum(faded_memory * token_key.unsqueeze(-1), dim=-2)
-        correction = (value[:, token] - predicted_value) * update_strength[:, token].unsqueeze(-1)
+        correction = (value[:, token] - predicted_value) * update_strength[
+            :, token
+        ].unsqueeze(-1)
         memory = faded_memory + token_key.unsqueeze(-1) * correction.unsqueeze(-2)
         output[:, token] = torch.sum(memory * query[:, token].unsqueeze(-1), dim=-2)
 
     state_dtype = torch.float64 if q.dtype == torch.float64 else torch.float32
-    return output.to(q.dtype), memory.to(state_dtype)
+    return output.to(q.dtype).contiguous(), memory.to(state_dtype).contiguous()
 
 
 def kimi_delta_attention_oracle(
@@ -129,11 +135,14 @@ def kimi_delta_attention_oracle(
         projected = np.squeeze(memory_vk @ kt[..., None], axis=-1)
         residual = (vt - projected) * strength[:, token, :, None]
         memory_vk = memory_vk + residual[..., :, None] @ kt[..., None, :]
-        output[:, token] = np.squeeze(memory_vk @ (query[:, token] * scale)[..., None], axis=-1)
+        output[:, token] = np.squeeze(
+            memory_vk @ (query[:, token] * scale)[..., None], axis=-1
+        )
 
     y = torch.from_numpy(output.copy()).to(device=q.device, dtype=q.dtype)
+    state_dtype = torch.float64 if q.dtype == torch.float64 else torch.float32
     final_state = torch.from_numpy(np.swapaxes(memory_vk, -1, -2).copy()).to(
-        device=q.device, dtype=q.dtype
+        device=q.device, dtype=state_dtype
     )
     return y, final_state
 
@@ -149,4 +158,6 @@ def kimi_delta_attention_bench(
     scaleValue: float = -1.0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Functional placeholder only; not an optimized or NPU-validated baseline."""
-    return kimi_delta_attention(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue)
+    return kimi_delta_attention(
+        q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue
+    )

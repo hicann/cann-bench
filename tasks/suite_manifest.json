@@ -1,6 +1,6 @@
 {
   "suite": "season2",
-  "tasks_version": "2.0.0",
+  "tasks_version": "2.1.0",
   "source_pr": "https://gitcode.com/canndev/cann-bench-dev/pull/235",
   "source_commit": "d5f55e7318cb72660187d6a5e4ca5ac92c022b58",
   "previous_mainline_commit": "524885b",
@@ -21,7 +21,7 @@
   "missing_baseline_policy": {
     "formula": "3 * t_hw_us",
     "meaning": "One third of theoretical performance expressed as duration, rounded to three decimal places using ROUND_HALF_UP; estimated, not measured.",
-    "scope": "Missing, non-positive, or degenerate (equal to t_hw_us) baselines in existing supported platform records only. Cap all baselines at 3 * t_hw_us, then round to at most three decimal places using ROUND_HALF_UP; preserve all t_hw_us.",
+    "scope": "Missing, non-positive, or degenerate baselines in supported platform records. Round imputed durations to three decimal places using ROUND_HALF_UP. Revised public cases carry separate platform-specific reference estimates.",
     "provenance": "Each metadata file lists imputed_baseline_cases under _metadata. Unsupported or absent platform records are not synthesized."
   },
   "public_adjustments": [
@@ -31,7 +31,8 @@
     "Retain explicit returned output tensors for kv_cache_append; returned buffers may alias inputs.",
     "Project metadata to selected public records only; include submitted 950PR/950DT capped baselines and preserve their theoretical values.",
     "Normalize aggregate_hidden CSV boolean value ranges to match YAML types.",
-    "Validate MoE indices against softmax top-k with finished sentinels, and compare deterministic row_idx outputs."
+    "Validate MoE indices against softmax top-k with finished sentinels, and compare deterministic row_idx outputs.",
+    "Refresh public case coverage, reference precision and workspace bounds; retain published entrypoints and twenty cases per operator."
   ],
   "operators": [
     {
@@ -54,7 +55,7 @@
         "desc.md": "9f7ba8bb4cd7600ecc0c0279a1947340afc76efe37adf8cde26285cfb831b840",
         "proto.yaml": "36be240b07746e5222165afdcd8a072bc89173e7d3e8f8e7253259eca98763c4",
         "golden.py": "3417cc27927f4e64f07b800ea06e857e03eedd08e442f3840598296658a8d8a3",
-        "cases.yaml": "7858173c15326c4a24c2e42cab7965184ea4b00d022aeb083dbcefb6a72583d8",
+        "cases.yaml": "f52c72d1c46606917dbd03bff4e7899548c93b37464a5a818ba9512aef64a0aa",
         "cases.csv": "189964f4a2a050f86c016a5a326ae859d678dec42d9f592c374ecc1128a0f04f"
       }
     },
@@ -102,8 +103,8 @@
         "desc.md": "0145b2426e90da19894d4a600d64e7a4f90f9bc6f3c370949c7044fe39fdec7b",
         "proto.yaml": "badbd0366ced3a58071716fd3ba0912c2974a36e401cb6cd205286a2f064a810",
         "golden.py": "16c789abbaf63c0c626a60e0f3a2ff76c3f24d4a9f24c19c1b196e6d874049a7",
-        "cases.yaml": "563b8459d5119ea07b0250015009d4f00fd9c9d51ebb7b84fcc81628c4917631",
-        "cases.csv": "c956b3acd526daf7bb46ff03bb043ee6b3cdd6828f8387428b7395d52f9fd2c1"
+        "cases.yaml": "897685d981517ce27de2b1f6616303c4a2ca64b49ada27266d9e17d2d940fa33",
+        "cases.csv": "21b185dc7e233756774dd964bc675e0eb187f8457399f8d78351ab09b26dafa8"
       }
     },
     {
@@ -126,8 +127,8 @@
         "desc.md": "3012cc47b8d3761fd6bf86258e9142c7a64c63ca4519d82f4b1c5f2f152f36dd",
         "proto.yaml": "3caccd3f92e5ce257c6883b07cb3c256e7cbed19a48478dc8d4d5a3ee7bbef7b",
         "golden.py": "0da274cd2b668ce9728e3fab5215299a46e0c148028b55526588887b8c6f62fa",
-        "cases.yaml": "96ed210059aa0a58bd7590d0e7d128f9c85642249b6792561310b58dc3d10432",
-        "cases.csv": "417534dc3636de8d14dc5a60398b64286778d8292799ea59eba07c2a27db18ed"
+        "cases.yaml": "872b01042617661f23a9e38b8cd9eddecfaff0f52633d90cd316972a334ff64b",
+        "cases.csv": "abadf94d4e91c5741173b60ff37158c64fe0fb71a1c2de0945e19bcd024f9a56"
       }
     },
     {
@@ -135,11 +136,11 @@
       "level": "L2",
       "path": "tasks/level2/gcd",
       "files_sha256": {
-        "desc.md": "69a2bd83bf9de41d1de98771668c8997baa34c577b6fe3458d15623eef5d130f",
+        "desc.md": "c583b43f3972026d9c089aa58baf4e8eb881c413bed8978ac42332b8aa495f88",
         "proto.yaml": "32c4f9966e29975a448fe4bcfa913b1ae0897815c91baf89d2dfa33a7db0b725",
-        "golden.py": "7d1417d91378cd5d7e2cb0716e56e7d11dcc131adca4d245e4c4bc5a94daf979",
-        "cases.yaml": "8be5d7c639076c858439f81a5e55281384b0e31d79f973b78238b97088050877",
-        "cases.csv": "1409cfbbed2e7ed9cfbbd59ebab7e7a21f8dce1c1ac273b1d3610d89e1e65810"
+        "golden.py": "a3618f46bc9b76b4fa5abc29201255a51f74ec7c0747189bfa31d9ced6357505",
+        "cases.yaml": "735322bca50a0cdb907eb21d4a18044a7af1e465842c7282b73f21fbf1130287",
+        "cases.csv": "1a9ea22443e67e997dd7e37f95159a0a3f2b5ee0b7c20daa183e339cd93ddf4f"
       }
     },
     {
@@ -150,8 +151,8 @@
         "desc.md": "4e8f9086022609d780bc9da0cdfafecf87df104c07fed81f6ba8ec813a390978",
         "proto.yaml": "f7c93e1f5993c3ca44fd6282d6ce442d5e2b3892c14cf81fa7874c906ad190ab",
         "golden.py": "0937fca42db07345f0925cb1e6414857e520f508a4ccbcd6d9d82cec7275d8bc",
-        "cases.yaml": "fcafbb5acd68910267a30de4b4246341e807b8ea08de4eaf9adf9af0ec8015cc",
-        "cases.csv": "85ba968364e6809bddcccee8130cf77e3cc35c2498b95cdfcd755723b47cb07e"
+        "cases.yaml": "737b0d173b39ce3cd1d7568cccbfb542414f4bb8762934cce4454e17e79600a0",
+        "cases.csv": "d70143e9e38e663e3b931b6c4f0fbeaf4c853cd6b4f01148d7960c3edf564d34"
       }
     },
     {
@@ -159,9 +160,9 @@
       "level": "L2",
       "path": "tasks/level2/image_resize_normalize",
       "files_sha256": {
-        "desc.md": "fcb6022133be86924613aed5229e0bf85240aa124e05a55a666a55f409d4a6a3",
+        "desc.md": "4975cfbfa01d6a20bc73deae90731e84606006d11fa6b98e280c9928ab1a4e99",
         "proto.yaml": "2b36e8e42271767cd618b8b57baba4d4dba0b237fcdb67a43cc207b5541d56e7",
-        "golden.py": "35c8e030ea27e38ebba0c1b4f7330fa0f86e85705c7a2faa6550f5e6bded65b8",
+        "golden.py": "6daed26c5184d2686cf5518a3eb023fe7e970d1d0ad309ddedddad69ec926d43",
         "cases.yaml": "f64ee4a65674b21cb2f83112518ae3ad99860559df1d56cbeaa4c744a34eca80",
         "cases.csv": "b26e9a8a4b0f41bf6fb0f6c5a7252392204693195925d5e184cbca8d02342727"
       }
@@ -183,11 +184,11 @@
       "level": "L2",
       "path": "tasks/level2/scatter",
       "files_sha256": {
-        "desc.md": "54ab7bc6bf70ffcdf3b21a348782317a13046de2b74633faa70e453b293db220",
+        "desc.md": "4065c4e403fccb73e398dee12f1a7dddde7c01d3cf0df048ee79c2983a132f4c",
         "proto.yaml": "af3c1b03210eea811dda05c8032f55e2678eea4ae0883dc6b5af3cb10deb4d70",
-        "golden.py": "b94be53f66a0d31d08def4e0ea5dac472c6c3bc6b4e1cd21adc60851659e269a",
-        "cases.yaml": "f27ff9fdbcb5999736a21be84b3c646a5424ee19a4ac2652917aa7f4271167fb",
-        "cases.csv": "a6adf3c4fd2169fd9df9b67da8a9e17d7abe32fa80421bb5452788efc637e92d"
+        "golden.py": "f7df2d2f3042b6c064d269d8867d6e75c3d2ad41aaf5cdb628c1b7929c4f6b37",
+        "cases.yaml": "58d574584a28415ddcf6de816b241b3b2ea43e2c03ba3950dbb726321e65462a",
+        "cases.csv": "afd9eb67a1111c0290c241e8a39b836b0fe2f270807da4d2626aa72cae3754cc"
       }
     },
     {
@@ -198,8 +199,8 @@
         "desc.md": "5f3897802b73a81119ee79ba80c345748314b981be2f5429c7179c3240ff1fb3",
         "proto.yaml": "32d1a2fdd5be8c4c5e21fc6fdc000bc4ecc8b97c2209d23e10aceb6116768ab6",
         "golden.py": "0e45afe95f5548d9fd8c14d1f99c7db734413458d720356a0fd646636f290966",
-        "cases.yaml": "3100c3f8bd66944d2f1c844ca5dd0245ba6150809789d458d58f5a2ec77cb042",
-        "cases.csv": "dc253b8b5be03bbae9d52218db9e83ed3b0ef4853444794ed9d7d5b3a2415962"
+        "cases.yaml": "5926bddf3b9cef625f8784b996900ea617998ecdc85fa4ec75da92d05a6fee0b",
+        "cases.csv": "2ed2ccc1ba950cdfc0a433229b3ddfa4f5ab32c7995cc81e96e4e88d5cb59b03"
       }
     },
     {
@@ -210,8 +211,8 @@
         "desc.md": "c71ec2ade6efc4709217e84b5fd767d5475dc1abf640ba2b8ec7201bc964872d",
         "proto.yaml": "5a1987a7d2059fcfbbd9044f6e88e35ad4b8e16e10a6750d82d0533120b6ff65",
         "golden.py": "2da8ddf8359b687210c2117639bf97aecae32f2bdd81acba4a7a0248c69f5601",
-        "cases.yaml": "79e9e7c2237386ff27ec4a4851dfbda7394f30e078eca07a74010a6966d02952",
-        "cases.csv": "4faa38df98a24e270bc18c7db40c983e0e619f7af9edd111e67b5e6c35240352"
+        "cases.yaml": "ad4c85687302344bc5423c401da9a69f84f2f6723a7279398cdf1f9240562c83",
+        "cases.csv": "dedd5c1d48900ae6e6a67290551e280f16496d2bf7fb494bfa8f6a954dcfad78"
       }
     },
     {
@@ -246,8 +247,8 @@
         "desc.md": "3c012ca5303643d1039ec8d5f7c4835bfcf0efdd94033c01ad2a183d3d02a022",
         "proto.yaml": "8594222a16e328bb133a2b4add47636f880f48b48906b7161725e0d878532a7d",
         "golden.py": "ce706f1b97c8f1689c3180b16a812b00977d912d129ce24ef18203c378faf437",
-        "cases.yaml": "53ca2715e738dd4c59daf522e7fc174f2400faaa6390050c6af0fc4a0502bfbd",
-        "cases.csv": "515c25df7e29e227dba83513430d2c6043ccf35b1ed2bf9efe20ec2c02c7da7d"
+        "cases.yaml": "f9939004e992dd88ff0d36e5d9fdcf18661d5a471d9458525534fbf878769205",
+        "cases.csv": "801aa58530def256f93073d4d146220ce2d58ef4d24227ffbf5527eaf3ef99e9"
       }
     },
     {
@@ -258,8 +259,8 @@
         "desc.md": "4a4124a5fdd4ccce2cdb2b3a6357ed9cc622d5c7a85bfe3e5b178defb7c385ae",
         "proto.yaml": "946c313c701c7ac8d850d180a827222c5b3de2cf2a887845f750771b9aa60b0e",
         "golden.py": "2bd260a699238a3b26245ee11bec2ad64bf6e637f1774a25c6b7c4ac986ff940",
-        "cases.yaml": "77b82ee0b3462ee87ec5859e59dc3bb2168623821ff29e172cf127ae2911407e",
-        "cases.csv": "1845e0b4c6a78915b36427ef94a23226e766a6a4bfdb0d1c245b513cb0f440cf"
+        "cases.yaml": "a0dadbcf164cb276ec9b068b2312129ef1b78fac0649d68c9f4b85b3df9a4952",
+        "cases.csv": "9c3c5e3062958a064320c84db3c7b1c89ff64528520d739ec1735a05b959c85c"
       }
     },
     {
@@ -267,11 +268,11 @@
       "level": "L3",
       "path": "tasks/level3/conv_2d",
       "files_sha256": {
-        "desc.md": "8cdaac90f2ae92702177a99994398d1cf7fa0e1e25cadc4761802164e2171fb4",
+        "desc.md": "6e8b479a89c79f8966f09c3c7d80da80dfa4bb1a1fbb9341883218e12bc26c02",
         "proto.yaml": "014b97bc4ebb6d0ba3f8178f5fe177318139d4efe9f99d97c149fe996f2daf91",
-        "golden.py": "1ec5d64d19d21fe79568dee347e15cbfe64b35d4617da19183169b9288d232c2",
-        "cases.yaml": "d6d3e13153b303b006acd2508a7ae1bf58a2b61c7e0fbd299ebbbe7409ae5985",
-        "cases.csv": "4b67f418307bffdbe96ae9e6adb9c86d198673f45ae83e7a4ceb1734ac3b65e8"
+        "golden.py": "dc451a1fb1094c9ec8cb2b055e93ecc9eb629f9558ee987926373c46f55acae9",
+        "cases.yaml": "0d68bdd4162462b5c9358b23407d32b960f1d5eb50d182b810ff3cfd664436d1",
+        "cases.csv": "8c02375ad79b04a6c676058116a13e4a6a623f59ca63e8e08f9ac681a4ac0f05"
       }
     },
     {
@@ -459,11 +460,11 @@
       "level": "L3",
       "path": "tasks/level3/roi_align",
       "files_sha256": {
-        "desc.md": "fdf32cc162fe39a2d2945fc6f378d83d0e78ba57688dbf705f93919f8ed3472b",
+        "desc.md": "2fc05dc651aef12eb392c461d7c4a229fdeb7d6842c2e8d0836d00ef679d60bf",
         "proto.yaml": "5850828024c937fa2a26d6f8a23af8178aaf06afe5a8a70c99e36195febf88e7",
-        "golden.py": "d343cb6a08c0be4be06667c89b99c53180edf105cf5d99e960bf807b9be45b23",
-        "cases.yaml": "e5c928d7bfd8dde63f0f5c3258f1f2b2ed0391b85db144486ed8821907600f25",
-        "cases.csv": "974793dc17328c498f28c1e8b8a2b31de3aea9c0bd9dc0fedb0262e548704478"
+        "golden.py": "47487b9e51f0d346de0c1da1c62e046d0f5ff504804e74de5d5c52a691ee007e",
+        "cases.yaml": "ae698d3b262bcc2b8669328f98ae090e97b2ef6560a4e9554eaebe122faa4325",
+        "cases.csv": "5c4ef075ce8d0040b8d5cbaa806af9c25a614867184da80af276c8e811b3713d"
       }
     },
     {
@@ -471,9 +472,9 @@
       "level": "L3",
       "path": "tasks/level3/scatter_block_update",
       "files_sha256": {
-        "desc.md": "6e585b494ed816287dabbe76ebce4ef3e987ce1e62f66dc78fab4b8695fc6a9b",
+        "desc.md": "d82e86806d7d6d5a12fd6159cee9f20b2610bb6817b983898a541645e73e3bca",
         "proto.yaml": "6267639d4737ee3fadf40f76bb731e05ce1ff70a876dd48660ff12b5bea65548",
-        "golden.py": "19a060aeb74233e9012db60ece3f1f3b5995b4efffe0d84c16fab4eebb0bc475",
+        "golden.py": "bd0ec9b40ea9b9f38b3de0a04485ad93299c749a9a3db92a3cb37ce0e1e33bda",
         "cases.yaml": "2385c613f3433e25f237151fd636ed24a353a4e44f57d1f0e1e5beb989d9cb84",
         "cases.csv": "ce4e9239eb4fcf466c4f741f6d10172b1059ad6907f92afab9a51bfe1057d227"
       }
@@ -519,9 +520,9 @@
       "level": "L3",
       "path": "tasks/level3/unique",
       "files_sha256": {
-        "desc.md": "c582b104d44345bd1aacf6dcd94846b2e2c8c0ebab32d2e61f86f45bef9caba6",
+        "desc.md": "2bdef54a61c3b826e61ecfa67bb06590e818a9273bf10624413d52efeb580436",
         "proto.yaml": "1a0e53939fa221c885691f6830089e678a74be938b14b96293e7f20d2bc51274",
-        "golden.py": "1bcb0b9f1f8293687d985bd2175ceb8eeb11ab1d15d00ae8e5e8d0f4808c6633",
+        "golden.py": "f35f689d46eaac830dfa4c77b071023e2eff12734942857fe9326cbed2373372",
         "cases.yaml": "f887e7bb32d08d78757788e6aca5daade3404f97fefdcb1d89a60bb63b08b695",
         "cases.csv": "024c83db1950d148d6d6bf8716cf771ab1c0bb1611f4972ca7980a8c02544d6a"
       }
@@ -579,11 +580,11 @@
       "level": "L4",
       "path": "tasks/level4/flash_attention_score_grad_enhance",
       "files_sha256": {
-        "desc.md": "eb1713bf74007b7575d72461ac48d912614cc622296da1587d9511501759b062",
-        "proto.yaml": "0dcb5c45267ac85bd65dcbd0e3fa7e52e079638095c6ca12dd0f90e376ae46b8",
-        "golden.py": "29e9f171137d683e7baed71232e56024f0da28f438b6ce0769a1ec5eb1d5e0b9",
-        "cases.yaml": "d61f8f55bd50bc48129be00d61267b1a550d9c8f09b55b03c6bf4911c82f8b63",
-        "cases.csv": "25c6cb9daef9e21768bb80eee85b01f741f02392a055ed51fc11be58189cd643"
+        "desc.md": "0d0b1bcc3e3e3bdd9678eec162abfd9defcf1425e19731120aa39a9ac0cbef27",
+        "proto.yaml": "1aa5baf91a295842b8f021078fdf7ae5f2292dc0a522463c1586617afb25214a",
+        "golden.py": "f61b93caa6e004c0fc7356ab3a83405d5b1130baccacb1a8ef3ac5b6160c543d",
+        "cases.yaml": "aba301a96038fc3003ec89fc3f700f268d372dec2f2df4462a4d0c09e60f27a5",
+        "cases.csv": "7b4b645a18a73fad19163eb3cc3ac36062f55481aaefbcade1938cbb3cc58226"
       }
     },
     {
@@ -591,9 +592,9 @@
       "level": "L4",
       "path": "tasks/level4/fused_causal_conv1d",
       "files_sha256": {
-        "desc.md": "4fe7b85b12c0374494429fd73ee56e50caad4915c323762164f0d6075a6ceb2b",
+        "desc.md": "c716ad276923e5fc96e37da8604b6117523ee3b8a996355840193a3e7a1cb918",
         "proto.yaml": "6660f0f848e80f1106c14678a0a2c8d02544b4331a31c700d5be90a7f52991bb",
-        "golden.py": "705be0fc7305e896e95105887d9b3e42151a058cf3ff344a05fe6ec67471c81c",
+        "golden.py": "5800284b42ed247a590d98f6a523aaad69c6398e9847d5e6cc10a08042cdadba",
         "cases.yaml": "76729f2883992b8f599921d41b199053710836badfb83acf493db3ef59d7ea66",
         "cases.csv": "1d1721b53b984ce02a1f096a9217364d3bbbbed94c2936e0fce2b47553daeda4"
       }
@@ -603,11 +604,11 @@
       "level": "L4",
       "path": "tasks/level4/gqa",
       "files_sha256": {
-        "desc.md": "8b94349587799c9074cd8f7bb38e960be2e0973c4617c70d60b5019971bf24ac",
-        "proto.yaml": "0f6831b9a9aa0d5c7749dfb6d0fb61ce99eaca16c5eee7f54a48721829b548ab",
-        "golden.py": "802d5450ae8d145f3d27f1d33820fc7a10f3cd609f01af4687eb2f67908a9d6d",
-        "cases.yaml": "1f6a4e1a2fb3c2484295852781f58ed63511d4068de7ce386116dc4184220e0d",
-        "cases.csv": "1da2e8cf8c8e19b8047fcde91d4ea56250dd6f2a19be329f05170c31dccfee35"
+        "desc.md": "f4e181de4bb4fdb9957b0b4c4c7aa9ba3b7ebb08c356d8c3950037c8e1f9294d",
+        "proto.yaml": "a91a0567820b22dc375d40979b4188c4f85e5724d80d55ff6794c04b6145a109",
+        "golden.py": "c86aaa0bd0c24bc73fe53058a17a6cabfae853e97bcf9259a9e4aeec646381df",
+        "cases.yaml": "789926348e3ac8c64fe8333a9893d295c9996f986c1558ff3f13683883611b6f",
+        "cases.csv": "d7921df5a8aadded32536fd7c78893dfc623df5254e6132eae25ef0362e23c20"
       }
     },
     {
@@ -627,11 +628,11 @@
       "level": "L4",
       "path": "tasks/level4/linear_cross_entropy",
       "files_sha256": {
-        "desc.md": "0c2d397917f67422ad06129b6bc978896d426581d117c557356275bbd070c1c7",
+        "desc.md": "aa3cce855fe339a71684255a070cc39adb914b66f119cc6cc0bbe457b1eb64a5",
         "proto.yaml": "b0a27c2204726c0b7f9d3e7c01412f33d320f05e41bede209f644c24f1ff7d5a",
-        "golden.py": "036ef8854e675f1441ff5bd8e88b77d5e8889627559e7b51b58a4c05838ef237",
-        "cases.yaml": "661bb9c29cf100405696998250793d40c4145003b438fea008000d60cd3b34c8",
-        "cases.csv": "905f7351e83a86fd8e3101cf3a070d2b1b2db52c52405028aa165e6b08f97af0"
+        "golden.py": "cbdc225efda66e755db9f4b4aa302a964e192d0fc4dd6a05e814d64eb345cb1d",
+        "cases.yaml": "de3a16acae41d8da55c8cca7bc0bb1b89e632362b5ed07e7edea9a54001c293b",
+        "cases.csv": "1b63518a8583830b79d1adf0b8dc663963dbaaf62364919bac267034a9c1373f"
       }
     },
     {
@@ -639,7 +640,7 @@
       "level": "L4",
       "path": "tasks/level4/lstm",
       "files_sha256": {
-        "desc.md": "de74a200dc9e56a32b0f8fa7f82afa94a2b030507fc44226a61ea6aa5188e904",
+        "desc.md": "c437683298fac495dec82d02624a5c4a3298cdd4d6ebb97e9e6c235a508b046e",
         "proto.yaml": "2247281b063725b5b1d24cb2b87b1cef2618a25f06db1cc41865ea2e113f375f",
         "golden.py": "909434597ffd91708a7316017eaa1203ca0e6f72babb3dcc717409b2c05ab0b2",
         "cases.yaml": "d79c03ce5fafd6e4ecf41d15213be81b5e79a3af287433786572da34cfc6e357",
@@ -651,11 +652,11 @@
       "level": "L4",
       "path": "tasks/level4/mla",
       "files_sha256": {
-        "desc.md": "433b8eaff3231700cb2fe0ecbba8cc91cb2ae65902517d1a4aa66daf48d10362",
+        "desc.md": "983d0cb05c34810405955850bc6d9da1e5258cf92c7a521a722b6b86751faaf7",
         "proto.yaml": "70cd11633ebad052058cc33606f4fa4e004fc1e9b2a9251a73f28a697a1910f4",
-        "golden.py": "3996ec1a4bcf142db4f311dd72510d0420269691e1efccbd72a00e53a2bc8cdc",
-        "cases.yaml": "57e742e5f14680996c348cdfcb462852e64750066b4d4f4c852c4403dfbdf46d",
-        "cases.csv": "85648d43619c1a38c5730231baa20308dc5166c76d3cbbb8fe0f53ab7d2045a8"
+        "golden.py": "c6bd4ee2ab707b6e8222dcdbb2c07981888b2bb964c2335e9dbb632db4251a97",
+        "cases.yaml": "6d81fdc79ee992e8d2eb15a453087d55964079fea158396c877f32c00a8a8686",
+        "cases.csv": "9141a2373dc79bd3acc0126d4caaa4dbbca72796ccda7ff9f63794c881178573"
       }
     },
     {
@@ -663,11 +664,11 @@
       "level": "L4",
       "path": "tasks/level4/mla_prolog",
       "files_sha256": {
-        "desc.md": "95ad391315f4b11ab1a761cbe8eb186943657f0c98dd1b5c15fb0e1a86b01c7f",
+        "desc.md": "e42972c74e24fa323780dd0c0eb2e01ea1bfc99e304b51bac9a394c93eba4549",
         "proto.yaml": "c8828221bb9a56ae25e674b3a7d4ad358c06c376a48649bb1fe60efbe3787d27",
-        "golden.py": "6e31b91abb937b2ca08ce81273891fa2a8343ba10174395c3dbcdd3e0714103c",
-        "cases.yaml": "04f5733840d0a45164ff4c77ee49bcf37ecc502e79816f86b769439c9c7c067e",
-        "cases.csv": "76d8ef9d7b916467042dff019302b39e14fe88aed11d90c9cfb4a9e8c5fb928f"
+        "golden.py": "52bc6db86d69ef42b8815adc21f337270b8c09f2558b92d24da88c5169dac18d",
+        "cases.yaml": "bbb78a052868aea37693f16774699a5b92dbe6e572880faeb14dbc213710b1c7",
+        "cases.csv": "c1c3640f41b4b037e98e0940bb2c1adab5e834a1cbb97d4229b8a8bd20e3bc2b"
       }
     },
     {
@@ -687,11 +688,11 @@
       "level": "L4",
       "path": "tasks/level4/sparse_flash_attention",
       "files_sha256": {
-        "desc.md": "f4bb46f7149093b414fb48e07e3c2252866298c6d055531c7e059465da8403aa",
-        "proto.yaml": "92909703e38697ac1a7f7df16eea412358f9e4721e045a8cac12f211a78e8ee9",
-        "golden.py": "681e561102a6be46ac4264d48d5545b6309982b39ed4088cbf566aaf38f749e9",
-        "cases.yaml": "277177cb8c0fa44897105d7f47fb3c4edfb41a15c3b0bddb74268131be723d5b",
-        "cases.csv": "42b1edee28e38c82e80d6f465e5e551c0ab4df65ddda72ac1b84a732fda35dd2"
+        "desc.md": "888cd36e53cf561505d7ed5a6e42975f3b43e33dc7e82b286f1a71ea3181d7d2",
+        "proto.yaml": "efa98c7dcdfdaaefb6b322f8b2b6eba163d4aa17d6bc0df50bb57e320b781856",
+        "golden.py": "8c6a97202f28fd9ed1c8542c3832d609928f78e3ad841f01fa358bcc40eca50e",
+        "cases.yaml": "41f80633ff0d4c694455d4ae2e386a3664bd2292818decadb0416ab355b9c528",
+        "cases.csv": "b5319a3260c59142a19173a63f78ca8d242b904d58f7d7465a06bca9013fbccb"
       }
     },
     {
@@ -699,11 +700,11 @@
       "level": "L5",
       "path": "tasks/level5/compressed_sparse_attention_core",
       "files_sha256": {
-        "desc.md": "8b702a0b238752ef9019a1bea4547a16457559998d56647ab1178150c5ca5605",
+        "desc.md": "f103f27e34a1b560737a7fe00f6c2eff22cda5f9b064ba120cc3a4ed2b9db295",
         "proto.yaml": "b9c195fae0cfbeb8f3cbca7380e0c8b25f9331a2974873cb36ff4aab13e71a62",
-        "golden.py": "babd611da3ea4c758515ab6f6deb36d6ef702b2549213144fa57c79e632deb4d",
-        "cases.yaml": "74bafe1c4227dc63b2457a671f1129514af9bc29b2c6be1c026fca5a869fd533",
-        "cases.csv": "f49c751ef8889f81e99ee14ff6102ccdaf7c89a98638ba22f3f612b30e6c3b55"
+        "golden.py": "62fef3c9436fc86b814381780fed6d271e4189c851f81651968af87eb817c763",
+        "cases.yaml": "6ded5f32e5b0d925fd4d66530dedbc7632e88ce4ed4a129d32889d4e1e067090",
+        "cases.csv": "6a88338eff1226028de9297f4362aa13f96866ce721728e50eea45567edab1ab"
       }
     },
     {
@@ -711,11 +712,11 @@
       "level": "L5",
       "path": "tasks/level5/kimi_delta_attention",
       "files_sha256": {
-        "desc.md": "1dff78c6e1c8e7d5d72d4971dac544c391cc0f4533480275c4b413d6b70ad0c5",
+        "desc.md": "17247556e17dabc986b8ffcc9ef65b2315f02dd551dcb65ada91a6992031b585",
         "proto.yaml": "2d8844a2e50bcb1d96167c468c0f3b3d81d25c7ba483bff9c7769bd8b0bd5f79",
-        "golden.py": "efaeefea209a34bec6c6cfb616e46334b1f424699b7c2d3942d2154c5b0de7e8",
-        "cases.yaml": "e790889b4c68ba7d70a16ee3be881fcebc117f63fff1ab7654a88b1d4b2b4729",
-        "cases.csv": "412dc2486a1022a0b9ac5c741c62a7de8678053d067e88938bc3c2fde727ba35"
+        "golden.py": "8ceeb5ab4c228fc0efaeb8cb8a5655abc75e00933e2fa012c8bbcaaafd2c8443",
+        "cases.yaml": "42c703ce8fbca229a50aec60841d73f7d185de9c0b0c09d45adef047a21eb668",
+        "cases.csv": "d8a194e059af53fdddf07c87abfbd0486d8b74162160a54eccb010ffbfcfd6a7"
       }
     },
     {
@@ -723,11 +724,11 @@
       "level": "L5",
       "path": "tasks/level5/lact_ttt_chunk",
       "files_sha256": {
-        "desc.md": "e2c32175cb596505bac8aefc6198062e423375a5027ac1e9dbcc771800798fdf",
+        "desc.md": "1b5ff50a44902fc9356cc18d260bc4a9c448020499017a7e089425d5d59778ef",
         "proto.yaml": "7617a4868ccf7be6a246c6ba38bbba876a5694c723f336a1dcb9c8d2b3db329f",
-        "golden.py": "1173c70a08a52b09e84c817b9abd04294b5ac82b7ba3814317c8161c27588ce6",
-        "cases.yaml": "ee4e48db73645a3bec406041aad88b933c73b922af91d8a8e53958c46a813e6d",
-        "cases.csv": "49aa8f9d745a78af5dd0e3e02a9546a2a2be91975326fdc1e07c091af16029d8"
+        "golden.py": "be14d8e9cc2f41acd926db155b290f45263d072edaa2626ab1b7ef96f2d4705c",
+        "cases.yaml": "447dbbbff0d408584f2510fde0410b15b43e22d15d2102d9b4193389a90ae80a",
+        "cases.csv": "b057afc0960713770a2d7e1d92ef84112314a8b65276a51e4f84ee6516401d14"
       }
     },
     {
@@ -735,11 +736,11 @@
       "level": "L5",
       "path": "tasks/level5/sparse_lightning_indexer_grad_kl_loss_enhance",
       "files_sha256": {
-        "desc.md": "48c4cb6c4d6b8c6b1a114d6162083b41526a7415f08ed610ae8dd36247592b08",
-        "proto.yaml": "e51c47e1888a47cfda5312a11e2ad8eecd7ff370efb9d6321e846a7b72fe016d",
-        "golden.py": "b2702fb1a6727e025f4c56d4e8ec1f598e7e864d694e3a7075b7c9f7dbdbbd55",
-        "cases.yaml": "4dff5c0b52c8000b0667c71e5938471e3854469a5a93544e5b7d3dcfa563f8c9",
-        "cases.csv": "001531163497b3e08d78c0ee41cafb2073a818d31b877ce1c15a371c1a4d4e83"
+        "desc.md": "2b0fe7e1f1c774a495b034b00a33e7ed84cf78855e5bf2f2f43930272795f256",
+        "proto.yaml": "456d945c958a6ce744836f70a122e19e7a25cc6dd05db8c0fa1edf87ce30eed2",
+        "golden.py": "fe4fa0caca843c13e7b940f571d463551b340a0c6ee1b611b2e28d0e1cf490f8",
+        "cases.yaml": "79ac417d625fd3dfd74660af8d5ac426f58f7a67fa181691f72c8a0c539845a2",
+        "cases.csv": "9f8ee28fb0fe0061121d8b107a926325bde6c947387d07a01ee1b22ebe47c82e"
       }
     },
     {
@@ -747,17 +748,18 @@
       "level": "L5",
       "path": "tasks/level5/tensor_program_vm",
       "files_sha256": {
-        "desc.md": "b99ad79ecda4a3c173c247f2e6a104b433569f8ac43b15793808f7d26f564092",
-        "proto.yaml": "caa9328128de857ab9d474e83d910640c958ce3698e45939b1552be917ecba01",
-        "golden.py": "0c6f908f7fdad0bd486771fcd06a640401fa464cf1e2aa554e569e6f60c1d567",
-        "cases.yaml": "78a42bd9ec95063d1d253d254e6d0cacf2f8ff667c17e4294d21d6f524a062f0",
-        "cases.csv": "7c48359c4d72672f4cae67ce53b2ef29c4160796e9468c6ea13fe6ed7194a055"
+        "desc.md": "044b99d8b52ba129c0d714adccc72e7d7677a5d0935b1956a3692f8afcdba8e9",
+        "proto.yaml": "feae6801f2997228cd8fda4d9711368438610746c40b1edab0596089a42fc4d2",
+        "golden.py": "35104232f985cfeda91d70fbc95b9a5d5c5ebaeb33fa7d9a311d15a4fb55bacf",
+        "cases.yaml": "0bf9890b461540527b74a7e4972b44de0bef4029e1c065e46e510657bcda1456",
+        "cases.csv": "d84fff46170a493b05912ba4d88df4aed363e83413e55f4118979b296c3e7652"
       }
     }
   ],
   "metadata_fallback_policy": "same_platform_only",
   "unsupported_operators_by_platform": {
     "910b2": [
+      "dynamic_mx_quant",
       "embedding_hash_table_lookup_or_insert"
     ],
     "910c": [

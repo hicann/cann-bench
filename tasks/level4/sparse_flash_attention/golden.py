@@ -11,26 +11,134 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
+"""Sparse attention reference with bounded sparse gathers.
+
+The public reference accumulates float16/bfloat16 inputs in float32 and returns
+the query dtype. Float64 inputs remain float64 throughout the reference, so the
+CPU evaluator can obtain a genuine float64 oracle after converting its inputs.
+There is no dense S1-by-S2 score tensor or materialized GQA head repetition.
+"""
+
+import hashlib
+import math
+
 import torch
 
-"""
-SparseFlashAttention算子Torch Golden参考实现
 
-稀疏注意力，支持 GQA（N1 != N2）、不同 head dim（Dk != Dv）和 BSND/BNSD 布局
-query 仅与 sparseIndices 指定的 KV 子集计算注意力
+def _as_bnsd(query, key, value, sparse_indices, layout):
+    if layout == "BSND":
+        return tuple(x.permute(0, 2, 1, 3) for x in (query, key, value, sparse_indices))
+    if layout == "BNSD":
+        return query, key, value, sparse_indices
+    raise ValueError("inputLayout must be BSND or BNSD")
 
-语义约束:
-    value 与 key 在数值上同源 (MLA latent KV cache):
-      - Dk == Dv 时: value == key (完全相同)
-      - Dk >  Dv 时: value == key[..., :Dv] (前缀切片，典型 MLA Dk=576 Dv=512)
-    接口保留独立入参以兼容通用 attention API；调用方需保证此关系，
-    本 Golden 实现不做强制检查。
 
-公式: mask = scatter(sparseIndices) -> bool[B, N2, S1, S2]
-      scores = Q @ K^T * scaleValue，mask 外位置置 -inf
-      y = softmax(scores) @ V          (V 语义上等于 K[..., :Dv])
-假定 sparseIndices 在同一 (b, n2, s1) 下无重复值
-"""
+def _validate(q, k, v, indices, scale, causal):
+    if any(x.ndim != 4 for x in (q, k, v, indices)):
+        raise ValueError("all four inputs must have rank four")
+    b, n1, s1, dk = q.shape
+    if min(q.shape) <= 0 or min(k.shape) <= 0 or min(v.shape) <= 0:
+        raise ValueError("tensor dimensions must be positive")
+    n2, s2, dv = k.shape[1], k.shape[2], v.shape[-1]
+    if b > 64 or s1 > 2048 or s2 > 16384 or n1 > 256 or n2 > 64:
+        raise ValueError("B/S1/S2/N1/N2 exceed the documented support range")
+    if k.shape[0] != b or k.shape[-1] != dk or v.shape[:3] != k.shape[:3]:
+        raise ValueError("query/key/value shapes are inconsistent")
+    if n1 % n2 or dv > dk or dk % 64 or dv % 64:
+        raise ValueError(
+            "N1 must be divisible by N2; Dk/Dv must be 64-aligned, Dv <= Dk"
+        )
+    if indices.shape[:3] != (b, n2, s1) or not 1 <= indices.shape[-1] <= min(2048, s2):
+        raise ValueError(
+            "sparseIndices must have shape [B,N2,S1,topK], 1 <= topK <= min(2048,S2)"
+        )
+    if causal and s1 > s2:
+        raise ValueError("causal attention requires S1 <= S2")
+    if not math.isfinite(float(scale)) or scale <= 0:
+        raise ValueError("scaleValue must be positive and finite")
+    if q.dtype != k.dtype or q.dtype != v.dtype:
+        raise ValueError("query/key/value dtypes must match")
+    if indices.dtype not in (torch.int32, torch.int64):
+        raise ValueError("sparseIndices must be integer")
+    if bool((indices < 0).any()) or bool((indices >= s2).any()):
+        raise ValueError("sparseIndices entries must lie in [0,S2)")
+
+
+def _attention(
+    query,
+    key,
+    value,
+    sparse_indices,
+    scale,
+    layout,
+    causal,
+    force_fp64=False,
+    native_precision=False,
+):
+    q, k, v, indices = _as_bnsd(query, key, value, sparse_indices, layout)
+    _validate(q, k, v, indices, scale, causal)
+    b, n1, s1, dk = q.shape
+    n2, s2, dv, topk = k.shape[1], k.shape[2], v.shape[-1], indices.shape[-1]
+    group = n1 // n2
+    if force_fp64 or q.dtype == torch.float64:
+        work_dtype = torch.float64
+    else:
+        # The compatibility bench stores each arithmetic stage in the input
+        # dtype, as the historical reference did. Public/FP64 paths keep their
+        # existing arithmetic policy; all paths retain sparse bounded gathers.
+        work_dtype = q.dtype if native_precision else torch.float32
+    out = torch.empty((b, n1, s1, dv), device=q.device, dtype=work_dtype)
+    # Bound selected-KV tensors plus scores to about 16 MiB. Tile size follows
+    # shape/dtype only and never changes the attention definition.
+    bytes_per_row = (topk * (dk + dv) + group * (dk + topk + dv)) * torch.empty(
+        (), dtype=work_dtype
+    ).element_size()
+    rows_per_tile = max(1, min(64, (16 * 1024 * 1024) // bytes_per_row))
+    for batch in range(b):
+        for head in range(n2):
+            # Convert each KV source head once, rather than repeating it G times.
+            key_head = k[batch, head].to(work_dtype)
+            value_head = v[batch, head].to(work_dtype)
+            head_start = head * group
+            for start in range(0, s1, rows_per_tile):
+                stop = min(s1, start + rows_per_tile)
+                ids = indices[batch, head, start:stop].long()
+                selected_key = key_head.index_select(0, ids.reshape(-1)).reshape(
+                    stop - start, topk, dk
+                )
+                selected_value = value_head.index_select(0, ids.reshape(-1)).reshape(
+                    stop - start, topk, dv
+                )
+                query_tile = (
+                    q[batch, head_start : head_start + group, start:stop]
+                    .transpose(0, 1)
+                    .to(work_dtype)
+                )
+                scores = torch.bmm(query_tile, selected_key.transpose(1, 2)) * scale
+                if causal:
+                    limit = (
+                        torch.arange(start, stop, device=q.device).unsqueeze(-1)
+                        + s2
+                        - s1
+                    )
+                    scores.masked_fill_(~(ids <= limit).unsqueeze(1), float("-inf"))
+                # Avoid -inf - -inf and zero division for fully masked rows.
+                row_max = scores.amax(-1, keepdim=True)
+                empty = torch.isneginf(row_max)
+                scores.sub_(
+                    torch.where(empty, torch.zeros_like(row_max), row_max)
+                ).exp_()
+                denominator = scores.sum(-1, keepdim=True)
+                scores.div_(
+                    torch.where(empty, torch.ones_like(denominator), denominator)
+                )
+                output_tile = torch.bmm(scores, selected_value)
+                out[batch, head_start : head_start + group, start:stop] = (
+                    output_tile.transpose(0, 1)
+                )
+    if layout == "BSND":
+        out = out.permute(0, 2, 1, 3)
+    return out.to(torch.float64 if force_fp64 else query.dtype).contiguous()
 
 
 def sparse_flash_attention(
@@ -42,79 +150,87 @@ def sparse_flash_attention(
     inputLayout: str = "BSND",
     is_causal: bool = False,
 ) -> torch.Tensor:
+    """Sparse GQA/MLA attention; value must equal key[..., :Dv].
+
+    Indices must be unique within each (batch, KV head, query row). Causal
+    masking is bottom-right aligned; fully masked rows return exact zeros.
+    The output has the input layout, query dtype, and contiguous storage.
     """
-    稀疏 FlashAttention，支持 GQA、不同 head dim 和 BSND/BNSD 布局
+    return _attention(
+        query, key, value, sparseIndices, scaleValue, inputLayout, is_causal
+    )
 
-    语义约束: value 与 key 在数值上同源 (MLA latent KV cache):
-        - Dk == Dv 时: value == key
-        - Dk >  Dv 时: value == key[..., :Dv]   (典型 MLA: Dk=576, Dv=512)
-        本 Golden 不做强制检查，调用方需保证此关系。
 
-    Args:
-        query: 查询张量，BSND: [B, S1, N1, Dk]，BNSD: [B, N1, S1, Dk]
-        key: 键张量，BSND: [B, S2, N2, Dk]，BNSD: [B, N2, S2, Dk]
-        value: 值张量，BSND: [B, S2, N2, Dv]，BNSD: [B, N2, S2, Dv]；语义上等于 key[..., :Dv]
-        sparseIndices: 稀疏索引（int32），BSND: [B, S1, N2, topK]，BNSD: [B, N2, S1, topK]
-        scaleValue: 缩放因子
-        inputLayout: 张量布局，"BSND" 或 "BNSD"
-        is_causal: 是否启用因果掩码（右下角对齐），True 时在稀疏选择之上额外屏蔽
-            KV 序列位置 idx > s1 + (S2 - S1) 的条目。要求 S1 <= S2。
+def sparse_flash_attention_oracle(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    sparseIndices: torch.Tensor,
+    scaleValue: float,
+    inputLayout: str = "BSND",
+    is_causal: bool = False,
+) -> torch.Tensor:
+    """CPU audit entry point: float64 arithmetic and float64 output."""
+    return _attention(
+        query,
+        key,
+        value,
+        sparseIndices,
+        scaleValue,
+        inputLayout,
+        is_causal,
+        force_fp64=True,
+    )
 
-    Returns:
-        注意力输出，布局与输入一致
+
+def sparse_flash_attention_bench(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    sparseIndices: torch.Tensor,
+    scaleValue: float,
+    inputLayout: str = "BSND",
+    is_causal: bool = False,
+) -> torch.Tensor:
+    """Historical native-stage precision, with bounded sparse storage.
+
+    This is a compatibility reference for the existing three-input checker,
+    not a requirement that NPU implementations use an identical reduction
+    tree. It does not change thresholds or the FP64 mathematical oracle.
     """
-    # 统一转为 BNSD 内部计算
-    if inputLayout == "BSND":
-        q = query.permute(0, 2, 1, 3)              # [B, N1, S1, Dk]
-        k = key.permute(0, 2, 1, 3)                 # [B, N2, S2, Dk]
-        v = value.permute(0, 2, 1, 3)               # [B, N2, S2, Dv]
-        si = sparseIndices.permute(0, 2, 1, 3)      # [B, N2, S1, topK]
-    else:  # BNSD
-        q, k, v, si = query, key, value, sparseIndices
+    return _attention(
+        query,
+        key,
+        value,
+        sparseIndices,
+        scaleValue,
+        inputLayout,
+        is_causal,
+        native_precision=True,
+    )
 
-    B, N1, S1, Dk = q.shape
-    N2 = k.shape[1]
-    S2 = k.shape[2]
-    G = N1 // N2
 
-    # 用 scatter 把稀疏索引转成 bool mask: [B, N2, S1, S2]
-    mask = torch.zeros(B, N2, S1, S2, dtype=torch.bool, device=q.device)
-    mask.scatter_(-1, si.long(), True)
+def _structural_seed(query, key, sparse_indices):
+    """Hash bounded samples, independent of the caller's global RNG state.
 
-    # 因果掩码（右下角对齐）：j > i + (S2 - S1) 的列从可选集合中剔除
-    if is_causal:
-        s1_idx = torch.arange(S1, device=q.device).unsqueeze(-1)  # [S1, 1]
-        s2_idx = torch.arange(S2, device=q.device).unsqueeze(0)   # [1, S2]
-        causal_keep = s2_idx <= (s1_idx + (S2 - S1))               # [S1, S2]
-        mask = mask & causal_keep  # 广播到 [B, N2, S1, S2]
-
-    # GQA: 通过 reshape 把 N1 拆成 (N2, G)，避免物化 K/V 的 head 扩展
-    q_g = q.reshape(B, N2, G, S1, Dk)
-
-    # 计算完整 scores 后用 mask 屏蔽未选位置: [B, N2, G, S1, S2]
-    # 在同一 (b, n2, s1) 下 sparseIndices 无重复，mask 与 gather 语义等价
-    scores = torch.einsum('bngsd,bnkd->bngsk', q_g, k) * scaleValue
-    scores.masked_fill_(~mask.unsqueeze(2), float('-inf'))
-
-    # 原地 softmax，避免同时持有 scores 和 attn_weights 两份张量
-    # 处理全 mask 行：当某行全被 mask 时，max 为 -inf，需要特殊处理
-    scores_max = scores.max(dim=-1, keepdim=True).values
-    all_masked = torch.isinf(scores_max) & (scores_max < 0)  # 检测全 -inf 行
-    scores -= scores_max
-    scores.exp_()
-    scores_sum = scores.sum(dim=-1, keepdim=True)
-    # 全 mask 行保持为 0，不进行除法
-    scores = torch.where(all_masked, torch.zeros_like(scores), scores / scores_sum)
-
-    # 加权求和: [B, N2, G, S1, Dv] -> [B, N1, S1, Dv]
-    out = torch.einsum('bngsk,bnkd->bngsd', scores, v)
-    out = out.reshape(B, N1, S1, -1)
-
-    # 转回原始布局
-    if inputLayout == "BSND":
-        return out.permute(0, 2, 1, 3)   # [B, S1, N1, Dv]
-    else:
-        return out                        # [B, N1, S1, Dv]
+    Only 256 source indices and 32 Q/K elements each are copied to CPU. The
+    coordinates address the original tensor directly, including strided input,
+    so sampling never flattens/copies a complete noncontiguous payload.
+    """
+    digest = hashlib.sha256()
+    for tensor, sample_count in ((sparse_indices, 256), (query, 32), (key, 32)):
+        count = min(sample_count, tensor.numel())
+        positions = torch.arange(count, device=tensor.device, dtype=torch.int64)
+        if count > 1:
+            positions = positions * (tensor.numel() - 1) // (count - 1)
+        coordinates = []
+        for size in reversed(tensor.shape):
+            coordinates.insert(0, positions.remainder(size))
+            positions = positions.div(size, rounding_mode="floor")
+        sample = tensor[tuple(coordinates)].detach().cpu().contiguous()
+        digest.update(str((tuple(tensor.shape), tensor.dtype)).encode("ascii"))
+        digest.update(bytes(sample.view(torch.uint8).tolist()))
+    return int.from_bytes(digest.digest()[:8], "little") % (2**63)
 
 
 def get_input(
@@ -127,43 +243,36 @@ def get_input(
     is_causal: bool = False,
     **kwargs,
 ):
-    """重建两个结构化输入，满足本算子的契约（同时替换 golden 与候选输入，比较公平）。
+    """Construct V=K prefix and reproducible, unique sparse index sets.
 
-    单区间 value_range 无法表达两条契约：
-      1. sparseIndices 在同一 (b, n2, s1) 下必须是 [0, S2) 内**无重复**的 topK 个索引
-         （golden 用 scatter 建 mask，重复会塌缩成更少的 True；见 golden 注释 L32/L95）。
-         通用生成器按 value_range 填随机 int，既越界又大量重复 -> mask 与 kernel 的
-         gather 语义不一致 -> 整体发散。
-      2. value 与 key 数值同源：value == key[..., :Dv]（同一份 latent KV cache 的前缀
-         视图，proto L? 明示；Dk==Dv 时退化为 value==key）。通用生成器给的是无关随机张量。
-
-    这里据 key/value/sparseIndices 的实际形状（不写死，覆盖 BSND/BNSD、GQA、Dk!=Dv）
-    重生成这两者；query、key 原样保留。索引不做排序（保持与 golden 的 scatter 语义一致，
-    无序无重复即可）。
-
-    Returns:
-        [query, key, value, sparseIndices]，顺序与 sparse_flash_attention 签名一致。
+    A stable hash of bounded input samples controls the structural input. A
+    local generator avoids global RNG dependence or consuming its stream; a
+    bounded random-priority block uses topk rather than sorting all groups.
+    No duplicate padding is permitted when topK exceeds S2: that is invalid.
     """
-    # S2 sits on a different axis per layout (BSND key dim1, BNSD key dim2)
-    S2 = int(key.shape[1] if inputLayout == "BSND" else key.shape[2])
-    Dv = int(value.shape[-1])
-
-    # contract 2: value must be key's [:Dv] prefix view (same latent KV cache, not independent)
-    new_value = key[..., :Dv].clone().to(dtype=value.dtype, device=value.device)
-
-    # contract 1: golden's scatter mask collapses duplicate indices -> they must be distinct
-    lead = list(sparseIndices.shape[:-1])
-    topK = int(sparseIndices.shape[-1])
-    num_groups = 1
-    for d in lead:
-        num_groups *= int(d)
-    k = min(topK, S2)
-    g = torch.Generator().manual_seed(0)  # fixed seed: must be reproducible across eval runs
-    # argsort of random == permutation; first k are distinct (order irrelevant to scatter)
-    perm = torch.rand(num_groups, S2, generator=g).argsort(dim=1)
-    sel = perm[:, :k]
-    if k < topK:  # topK > S2 (degenerate): can't draw enough distinct -> pad with last col
-        sel = torch.cat([sel, sel[:, -1:].expand(num_groups, topK - k)], dim=1)
-    new_si = sel.reshape(*lead, topK).to(dtype=sparseIndices.dtype, device=sparseIndices.device)
-
-    return [query, key, new_value, new_si]
+    if inputLayout not in ("BSND", "BNSD"):
+        raise ValueError("inputLayout must be BSND or BNSD")
+    s2 = int(key.shape[1] if inputLayout == "BSND" else key.shape[2])
+    topk = int(sparseIndices.shape[-1])
+    if not 1 <= topk <= min(2048, s2):
+        raise ValueError("unique sparse indices require 1 <= topK <= min(2048,S2)")
+    if value.shape[-1] > key.shape[-1]:
+        raise ValueError("Dv must not exceed Dk")
+    new_value = (
+        key[..., : value.shape[-1]].clone().to(dtype=value.dtype, device=value.device)
+    )
+    groups = math.prod(sparseIndices.shape[:-1])
+    selection = torch.empty((groups, topk), dtype=sparseIndices.dtype, device="cpu")
+    generator = torch.Generator(device="cpu").manual_seed(
+        _structural_seed(query, key, sparseIndices)
+    )
+    groups_per_block = max(1, (1024 * 1024) // s2)
+    for start in range(0, groups, groups_per_block):
+        stop = min(groups, start + groups_per_block)
+        priorities = torch.rand((stop - start, s2), generator=generator)
+        # Every returned column index is distinct, even when priorities tie.
+        selection[start:stop] = priorities.topk(
+            topk, dim=-1, largest=False, sorted=False
+        ).indices
+    new_indices = selection.reshape(sparseIndices.shape).to(sparseIndices.device)
+    return [query, key, new_value, new_indices]

@@ -9,9 +9,9 @@
       20
     ],
     "release_status": "pending_npu_revalidation",
-    "baseline_policy": "Missing baseline durations, and degenerate ones equal to t_hw_us (zero scoring span), are estimated as 3 * t_hw_us, corresponding to one third of theoretical performance; these are not hardware measurements. Cap all baselines at 3 * t_hw_us, then round to at most three decimal places using ROUND_HALF_UP; preserve all t_hw_us.",
+    "baseline_policy": "Missing or degenerate baseline durations are model estimates, rounded to three decimal places using ROUND_HALF_UP. Revised public cases use platform-specific reference estimates identified by task_revision_cases.",
     "imputed_baseline_formula": "3 * t_hw_us",
-    "imputed_baseline_count": 70,
+    "imputed_baseline_count": 54,
     "imputed_baseline_cases": [
       "level2/gather/1",
       "level2/gather/10",
@@ -19,7 +19,6 @@
       "level2/gather/12",
       "level2/gather/13",
       "level2/gather/14",
-      "level2/gather/15",
       "level2/gather/16",
       "level2/gather/17",
       "level2/gather/18",
@@ -40,10 +39,8 @@
       "level2/gcd/20",
       "level2/gcd/8",
       "level2/gcd/9",
-      "level2/grid_sampler_3d/12",
       "level2/grid_sampler_3d/15",
       "level2/grid_sampler_3d/16",
-      "level2/grid_sampler_3d/5",
       "level2/grid_sampler_3d/8",
       "level3/moe_re_routing/3",
       "level4/attention_residual/1",
@@ -69,21 +66,195 @@
       "level4/lstm/10",
       "level4/lstm/16",
       "level4/lstm/5",
-      "level4/lstm/9",
+      "level4/lstm/9"
+    ],
+    "task_revision_cases": [
+      "level2/cummin/4",
+      "level2/cummin/5",
+      "level2/cummin/6",
+      "level2/cummin/10",
+      "level2/grid_sampler_3d/5",
+      "level2/grid_sampler_3d/6",
+      "level2/grid_sampler_3d/10",
+      "level2/grid_sampler_3d/12",
+      "level2/grid_sampler_3d/17",
+      "level2/grid_sampler_3d/20",
+      "level2/scatter/2",
+      "level2/scatter/3",
+      "level2/scatter/10",
+      "level2/scatter/15",
+      "level2/scatter/16",
+      "level2/unsorted_segment_sum/3",
+      "level2/unsorted_segment_sum/4",
+      "level2/unsorted_segment_sum/5",
+      "level2/unsorted_segment_sum/9",
+      "level2/unsorted_segment_sum/13",
+      "level3/aggregate_hidden_grad/19",
+      "level3/categorical_embedding_bag/5",
+      "level3/categorical_embedding_bag/7",
+      "level3/categorical_embedding_bag/9",
+      "level3/categorical_embedding_bag/11",
+      "level3/conv_2d/3",
+      "level3/conv_2d/18",
+      "level3/roi_align/6",
+      "level4/flash_attention_score_grad_enhance/1",
+      "level4/flash_attention_score_grad_enhance/4",
+      "level4/flash_attention_score_grad_enhance/6",
+      "level4/flash_attention_score_grad_enhance/7",
+      "level4/flash_attention_score_grad_enhance/12",
+      "level4/flash_attention_score_grad_enhance/14",
+      "level4/flash_attention_score_grad_enhance/17",
+      "level4/flash_attention_score_grad_enhance/18",
+      "level4/gqa/1",
+      "level4/gqa/2",
+      "level4/gqa/3",
+      "level4/gqa/4",
+      "level4/gqa/5",
+      "level4/gqa/6",
+      "level4/gqa/7",
+      "level4/gqa/8",
+      "level4/gqa/9",
+      "level4/gqa/10",
+      "level4/gqa/11",
+      "level4/gqa/12",
+      "level4/gqa/13",
+      "level4/gqa/14",
+      "level4/gqa/15",
+      "level4/gqa/16",
+      "level4/gqa/17",
+      "level4/gqa/18",
+      "level4/gqa/19",
+      "level4/gqa/20",
+      "level4/linear_cross_entropy/1",
+      "level4/linear_cross_entropy/2",
+      "level4/linear_cross_entropy/3",
+      "level4/linear_cross_entropy/4",
+      "level4/linear_cross_entropy/5",
+      "level4/linear_cross_entropy/6",
+      "level4/linear_cross_entropy/7",
+      "level4/linear_cross_entropy/8",
+      "level4/linear_cross_entropy/9",
+      "level4/linear_cross_entropy/10",
+      "level4/linear_cross_entropy/11",
+      "level4/linear_cross_entropy/12",
+      "level4/linear_cross_entropy/13",
+      "level4/linear_cross_entropy/14",
+      "level4/linear_cross_entropy/15",
+      "level4/linear_cross_entropy/16",
+      "level4/linear_cross_entropy/17",
+      "level4/linear_cross_entropy/18",
+      "level4/linear_cross_entropy/19",
+      "level4/linear_cross_entropy/20",
+      "level4/mla/1",
+      "level4/mla/2",
+      "level4/mla/3",
+      "level4/mla/4",
+      "level4/mla/5",
+      "level4/mla/6",
+      "level4/mla/7",
+      "level4/mla/8",
+      "level4/mla/9",
+      "level4/mla/10",
+      "level4/mla/11",
+      "level4/mla/12",
+      "level4/mla/13",
+      "level4/mla/14",
       "level4/mla/15",
+      "level4/mla/16",
+      "level4/mla/17",
       "level4/mla/18",
+      "level4/mla/19",
+      "level4/mla/20",
+      "level4/mla_prolog/1",
+      "level4/mla_prolog/2",
+      "level4/mla_prolog/3",
       "level4/mla_prolog/4",
+      "level4/mla_prolog/5",
+      "level4/mla_prolog/6",
+      "level4/mla_prolog/7",
+      "level4/mla_prolog/8",
+      "level4/mla_prolog/9",
+      "level4/mla_prolog/10",
+      "level4/mla_prolog/11",
+      "level4/mla_prolog/12",
+      "level4/mla_prolog/13",
+      "level4/mla_prolog/14",
+      "level4/mla_prolog/15",
+      "level4/mla_prolog/16",
+      "level4/mla_prolog/17",
+      "level4/mla_prolog/18",
+      "level4/mla_prolog/19",
+      "level4/mla_prolog/20",
       "level4/sparse_flash_attention/1",
-      "level4/sparse_flash_attention/15",
-      "level4/sparse_flash_attention/17",
-      "level4/sparse_flash_attention/19",
       "level4/sparse_flash_attention/2",
-      "level4/sparse_flash_attention/20",
+      "level4/sparse_flash_attention/3",
       "level4/sparse_flash_attention/4",
+      "level4/sparse_flash_attention/5",
       "level4/sparse_flash_attention/6",
       "level4/sparse_flash_attention/7",
-      "level4/sparse_flash_attention/8"
-    ]
+      "level4/sparse_flash_attention/8",
+      "level4/sparse_flash_attention/9",
+      "level4/sparse_flash_attention/10",
+      "level4/sparse_flash_attention/11",
+      "level4/sparse_flash_attention/12",
+      "level4/sparse_flash_attention/13",
+      "level4/sparse_flash_attention/14",
+      "level4/sparse_flash_attention/15",
+      "level4/sparse_flash_attention/16",
+      "level4/sparse_flash_attention/17",
+      "level4/sparse_flash_attention/18",
+      "level4/sparse_flash_attention/19",
+      "level4/sparse_flash_attention/20",
+      "level5/compressed_sparse_attention_core/19",
+      "level5/kimi_delta_attention/17",
+      "level5/kimi_delta_attention/19",
+      "level5/lact_ttt_chunk/20",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/2",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/3",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/4",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/5",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/6",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/7",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/9",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/10",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/11",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/12",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/13",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/14",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/15",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/16",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/17",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/18",
+      "level5/sparse_lightning_indexer_grad_kl_loss_enhance/19",
+      "level5/tensor_program_vm/1",
+      "level5/tensor_program_vm/2",
+      "level5/tensor_program_vm/3",
+      "level5/tensor_program_vm/4",
+      "level5/tensor_program_vm/5",
+      "level5/tensor_program_vm/6",
+      "level5/tensor_program_vm/7",
+      "level5/tensor_program_vm/8",
+      "level5/tensor_program_vm/9",
+      "level5/tensor_program_vm/10",
+      "level5/tensor_program_vm/11",
+      "level5/tensor_program_vm/12",
+      "level5/tensor_program_vm/13",
+      "level5/tensor_program_vm/14",
+      "level5/tensor_program_vm/15",
+      "level5/tensor_program_vm/16",
+      "level5/tensor_program_vm/17",
+      "level5/tensor_program_vm/18",
+      "level5/tensor_program_vm/19",
+      "level5/tensor_program_vm/20",
+      "level2/gather/15",
+      "level2/gcd/10",
+      "level2/gcd/14",
+      "level2/gcd/15",
+      "level2/softmax/15"
+    ],
+    "task_revision_status": "reference_values_pending_npu_revalidation",
+    "baseline_source": "Per-case status identifies revised model estimates; other records retain their published provenance.",
+    "t_hw_source": "Published hardware reference values, updated for revised task definitions."
   },
   "level1": {
     "exp": {
@@ -136,11 +307,11 @@
         "t_hw_us": 1.3072
       },
       "13": {
-        "baseline_perf_us": 79.850,
+        "baseline_perf_us": 79.85,
         "t_hw_us": 26.6165
       },
       "14": {
-        "baseline_perf_us": 11.930,
+        "baseline_perf_us": 11.93,
         "t_hw_us": 3.9765
       },
       "15": {
@@ -302,7 +473,7 @@
         "t_hw_us": 6.0251
       },
       "13": {
-        "baseline_perf_us": 351.220,
+        "baseline_perf_us": 351.22,
         "t_hw_us": 117.0734
       },
       "14": {
@@ -434,7 +605,7 @@
         "t_hw_us": 175.4551
       },
       "5": {
-        "baseline_perf_us": 491.100,
+        "baseline_perf_us": 491.1,
         "t_hw_us": 163.7001
       },
       "6": {
@@ -512,16 +683,22 @@
         "t_hw_us": 43.862
       },
       "4": {
-        "baseline_perf_us": 1251.665,
-        "t_hw_us": 417.2215
+        "t_hw_us": 48.941194897577596,
+        "baseline_perf_us": 146.8235846927328,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 4102.72,
-        "t_hw_us": 1562.9826
+        "t_hw_us": 28.58128790459966,
+        "baseline_perf_us": 85.74386371379897,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 1251.665,
-        "t_hw_us": 417.2215
+        "t_hw_us": 48.941194897577596,
+        "baseline_perf_us": 146.8235846927328,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
         "baseline_perf_us": 6.84,
@@ -536,8 +713,10 @@
         "t_hw_us": 2.8828
       },
       "10": {
-        "baseline_perf_us": 687.533,
-        "t_hw_us": 229.1776
+        "t_hw_us": 24.356566666666666,
+        "baseline_perf_us": 73.0697,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
         "baseline_perf_us": 5.372,
@@ -568,7 +747,7 @@
         "t_hw_us": 3.6413
       },
       "18": {
-        "baseline_perf_us": 10.700,
+        "baseline_perf_us": 10.7,
         "t_hw_us": 3.5666
       },
       "19": {
@@ -680,7 +859,7 @@
         "t_hw_us": 146.2462
       },
       "5": {
-        "baseline_perf_us": 400.730,
+        "baseline_perf_us": 400.73,
         "t_hw_us": 133.5765
       },
       "6": {
@@ -700,7 +879,7 @@
         "t_hw_us": 3.4523
       },
       "10": {
-        "baseline_perf_us": 238.380,
+        "baseline_perf_us": 238.38,
         "t_hw_us": 79.4601
       },
       "11": {
@@ -720,15 +899,20 @@
         "t_hw_us": 22.028
       },
       "15": {
-        "baseline_perf_us": 35.666,
-        "t_hw_us": 11.8886
+        "baseline_perf_us": 35.665876442838496,
+        "t_hw_us": 11.888625480946166,
+        "bottleneck": "hbm_read",
+        "confidence": "Confirmed",
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation",
+        "input_revision": "nonconstant-values-20261111"
       },
       "16": {
         "baseline_perf_us": 5.349,
         "t_hw_us": 1.7831
       },
       "17": {
-        "baseline_perf_us": 18.230,
+        "baseline_perf_us": 18.23,
         "t_hw_us": 6.0766
       },
       "18": {
@@ -746,7 +930,7 @@
     },
     "gcd": {
       "1": {
-        "baseline_perf_us": 25.700,
+        "baseline_perf_us": 25.7,
         "t_hw_us": 8.5668
       },
       "2": {
@@ -758,7 +942,7 @@
         "t_hw_us": 879.1554
       },
       "4": {
-        "baseline_perf_us": 2412.410,
+        "baseline_perf_us": 2412.41,
         "t_hw_us": 804.1367
       },
       "5": {
@@ -782,8 +966,13 @@
         "t_hw_us": 811.5428
       },
       "10": {
-        "baseline_perf_us": 17.175,
-        "t_hw_us": 5.7251
+        "baseline_perf_us": 41.22105882352941,
+        "t_hw_us": 13.74035294117647,
+        "bottleneck": "vector",
+        "confidence": "Confirmed",
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation",
+        "input_revision": "nonconstant-values-20261111"
       },
       "11": {
         "baseline_perf_us": 34.234,
@@ -798,12 +987,22 @@
         "t_hw_us": 257.5651
       },
       "14": {
-        "baseline_perf_us": 17.134,
-        "t_hw_us": 5.7112
+        "baseline_perf_us": 27.413934640522875,
+        "t_hw_us": 9.137978213507624,
+        "bottleneck": "vector",
+        "confidence": "Confirmed",
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation",
+        "input_revision": "nonconstant-values-20261111"
       },
       "15": {
-        "baseline_perf_us": 178.313,
-        "t_hw_us": 59.4377
+        "baseline_perf_us": 392.2887222222223,
+        "t_hw_us": 130.76290740740743,
+        "bottleneck": "vector",
+        "confidence": "Confirmed",
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation",
+        "input_revision": "nonconstant-values-20261111"
       },
       "16": {
         "baseline_perf_us": 49.706,
@@ -844,12 +1043,16 @@
         "t_hw_us": 42.9482
       },
       "5": {
-        "baseline_perf_us": 160.953,
-        "t_hw_us": 53.651
+        "t_hw_us": 9.325102446790014,
+        "baseline_perf_us": 27.975307340370044,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 515.378,
-        "t_hw_us": 171.7928
+        "t_hw_us": 85.89642178649238,
+        "baseline_perf_us": 257.68926535947713,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
         "baseline_perf_us": 21.777,
@@ -864,16 +1067,20 @@
         "t_hw_us": 4.4949
       },
       "10": {
-        "baseline_perf_us": 592.275,
-        "t_hw_us": 197.4251
+        "t_hw_us": 47.08731862745098,
+        "baseline_perf_us": 141.26195588235294,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
         "baseline_perf_us": 18.643,
         "t_hw_us": 6.2144
       },
       "12": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.11291889347445423,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
         "baseline_perf_us": 14.518,
@@ -888,12 +1095,14 @@
         "t_hw_us": 2.5579
       },
       "16": {
-        "baseline_perf_us": 53.660,
+        "baseline_perf_us": 53.66,
         "t_hw_us": 17.8865
       },
       "17": {
-        "baseline_perf_us": 1509.548,
-        "t_hw_us": 503.1825
+        "t_hw_us": 29.98068209606987,
+        "baseline_perf_us": 89.94204628820961,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
         "baseline_perf_us": 3.0,
@@ -904,8 +1113,10 @@
         "t_hw_us": 9.6788
       },
       "20": {
-        "baseline_perf_us": 975.510,
-        "t_hw_us": 325.1701
+        "t_hw_us": 79.37221764705882,
+        "baseline_perf_us": 238.11665294117645,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "image_resize_normalize": {
@@ -1012,7 +1223,7 @@
         "t_hw_us": 81.8601
       },
       "6": {
-        "baseline_perf_us": 65.750,
+        "baseline_perf_us": 65.75,
         "t_hw_us": 21.9167
       },
       "7": {
@@ -1048,7 +1259,7 @@
         "t_hw_us": 3.6736
       },
       "15": {
-        "baseline_perf_us": 9.150,
+        "baseline_perf_us": 9.15,
         "t_hw_us": 3.0501
       },
       "16": {
@@ -1078,12 +1289,16 @@
         "t_hw_us": 3.1969
       },
       "2": {
-        "baseline_perf_us": 61.38,
-        "t_hw_us": 20.46
+        "t_hw_us": 10.230009756097562,
+        "baseline_perf_us": 30.690029268292687,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 214.830,
-        "t_hw_us": 71.6101
+        "t_hw_us": 15.345014634146342,
+        "baseline_perf_us": 46.03504390243903,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
         "baseline_perf_us": 613.801,
@@ -1110,8 +1325,10 @@
         "t_hw_us": 5.7675
       },
       "10": {
-        "baseline_perf_us": 453.744,
-        "t_hw_us": 151.2479
+        "t_hw_us": 6.393712195121951,
+        "baseline_perf_us": 19.181136585365856,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
         "baseline_perf_us": 9.611,
@@ -1130,12 +1347,16 @@
         "t_hw_us": 2.5626
       },
       "15": {
-        "baseline_perf_us": 166.958,
-        "t_hw_us": 55.6527
+        "t_hw_us": 10.694912195121951,
+        "baseline_perf_us": 32.08473658536585,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 51.937,
-        "t_hw_us": 17.3124
+        "t_hw_us": 8.951251219512194,
+        "baseline_perf_us": 26.853753658536583,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
         "baseline_perf_us": 9.591,
@@ -1164,7 +1385,7 @@
         "t_hw_us": 10.23
       },
       "3": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "4": {
@@ -1208,12 +1429,17 @@
         "t_hw_us": 3.9216
       },
       "14": {
-        "baseline_perf_us": 79.850,
+        "baseline_perf_us": 79.85,
         "t_hw_us": 26.6165
       },
       "15": {
-        "baseline_perf_us": 17.894,
-        "t_hw_us": 5.9648
+        "baseline_perf_us": 17.894347058823527,
+        "t_hw_us": 5.964782352941176,
+        "bottleneck": "vector",
+        "confidence": "Confirmed",
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation",
+        "input_revision": "nonconstant-values-20261111"
       },
       "16": {
         "baseline_perf_us": 6.171,
@@ -1232,7 +1458,7 @@
         "t_hw_us": 4.098
       },
       "20": {
-        "baseline_perf_us": 77.190,
+        "baseline_perf_us": 77.19,
         "t_hw_us": 25.7299
       }
     },
@@ -1246,16 +1472,22 @@
         "t_hw_us": 10.235
       },
       "3": {
-        "baseline_perf_us": 61.44,
-        "t_hw_us": 20.48
+        "t_hw_us": 10.249990243902438,
+        "baseline_perf_us": 30.749970731707315,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 491.100,
-        "t_hw_us": 163.7001
+        "t_hw_us": 20.48,
+        "baseline_perf_us": 61.44,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 1742.705,
-        "t_hw_us": 580.9017
+        "t_hw_us": 22.865030323679726,
+        "baseline_perf_us": 68.59509097103918,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
         "baseline_perf_us": 3.836,
@@ -1270,8 +1502,10 @@
         "t_hw_us": 1.4452
       },
       "9": {
-        "baseline_perf_us": 181.801,
-        "t_hw_us": 60.6002
+        "t_hw_us": 7.534906097560976,
+        "baseline_perf_us": 22.604718292682925,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
         "baseline_perf_us": 7.721,
@@ -1286,8 +1520,10 @@
         "t_hw_us": 3.8363
       },
       "13": {
-        "baseline_perf_us": 79.850,
-        "t_hw_us": 26.6165
+        "t_hw_us": 13.109639024390244,
+        "baseline_perf_us": 39.32891707317073,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
         "baseline_perf_us": 11.129,
@@ -1334,7 +1570,7 @@
         "t_hw_us": 204.6983
       },
       "4": {
-        "baseline_perf_us": 537.330,
+        "baseline_perf_us": 537.33,
         "t_hw_us": 179.1099
       },
       "5": {
@@ -1346,7 +1582,7 @@
         "t_hw_us": 205.1463
       },
       "7": {
-        "baseline_perf_us": 153.530,
+        "baseline_perf_us": 153.53,
         "t_hw_us": 51.1768
       },
       "8": {
@@ -1354,7 +1590,7 @@
         "t_hw_us": 51.1759
       },
       "9": {
-        "baseline_perf_us": 153.540,
+        "baseline_perf_us": 153.54,
         "t_hw_us": 51.1799
       },
       "10": {
@@ -1362,7 +1598,7 @@
         "t_hw_us": 51.201
       },
       "11": {
-        "baseline_perf_us": 153.530,
+        "baseline_perf_us": 153.53,
         "t_hw_us": 51.1768
       },
       "12": {
@@ -1374,7 +1610,7 @@
         "t_hw_us": 25.6339
       },
       "14": {
-        "baseline_perf_us": 153.540,
+        "baseline_perf_us": 153.54,
         "t_hw_us": 51.1799
       },
       "15": {
@@ -1534,7 +1770,7 @@
         "t_hw_us": 1.0
       },
       "13": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "14": {
@@ -1558,8 +1794,10 @@
         "t_hw_us": 1.0
       },
       "19": {
-        "baseline_perf_us": 1150.889,
-        "t_hw_us": 383.6298
+        "t_hw_us": 191.8170731707317,
+        "baseline_perf_us": 575.4512195121952,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
         "baseline_perf_us": 3.0,
@@ -1584,32 +1822,40 @@
         "t_hw_us": 1.0
       },
       "5": {
-        "baseline_perf_us": 219.914,
-        "t_hw_us": 73.3048
+        "t_hw_us": 36.73148186180834,
+        "baseline_perf_us": 110.19444558542503,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
         "baseline_perf_us": 3.0,
         "t_hw_us": 1.0
       },
       "7": {
-        "baseline_perf_us": 10.727,
-        "t_hw_us": 3.5758
+        "t_hw_us": 1.2226407018172947,
+        "baseline_perf_us": 3.667922105451884,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
         "baseline_perf_us": 3.0,
         "t_hw_us": 1.0
       },
       "9": {
-        "baseline_perf_us": 28.694,
-        "t_hw_us": 9.5645
+        "t_hw_us": 1.6806830595051685,
+        "baseline_perf_us": 5.042049178515505,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
         "baseline_perf_us": 3.0,
         "t_hw_us": 1.0
       },
       "11": {
-        "baseline_perf_us": 111.576,
-        "t_hw_us": 37.1919
+        "t_hw_us": 14.710313281244506,
+        "baseline_perf_us": 44.130939843733515,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
         "baseline_perf_us": 14.166,
@@ -1632,7 +1878,7 @@
         "t_hw_us": 1.0
       },
       "17": {
-        "baseline_perf_us": 22.280,
+        "baseline_perf_us": 22.28,
         "t_hw_us": 7.4266
       },
       "18": {
@@ -1658,8 +1904,10 @@
         "t_hw_us": 71.498
       },
       "3": {
-        "baseline_perf_us": 581.82,
-        "t_hw_us": 397.182
+        "t_hw_us": 99.29550048087593,
+        "baseline_perf_us": 297.8865014426278,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
         "baseline_perf_us": 308.14,
@@ -1718,8 +1966,10 @@
         "t_hw_us": 36.659
       },
       "18": {
-        "baseline_perf_us": 283.42,
-        "t_hw_us": 131.0035
+        "t_hw_us": 65.50173133831471,
+        "baseline_perf_us": 196.50519401494415,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
         "baseline_perf_us": 3.0,
@@ -1780,7 +2030,7 @@
         "t_hw_us": 1.0
       },
       "13": {
-        "baseline_perf_us": 33.740,
+        "baseline_perf_us": 33.74,
         "t_hw_us": 11.2468
       },
       "14": {
@@ -1920,7 +2170,7 @@
         "t_hw_us": 15.5345
       },
       "7": {
-        "baseline_perf_us": 21.920,
+        "baseline_perf_us": 21.92,
         "t_hw_us": 7.3068
       },
       "8": {
@@ -1960,7 +2210,7 @@
         "t_hw_us": 5.1269
       },
       "17": {
-        "baseline_perf_us": 4.760,
+        "baseline_perf_us": 4.76,
         "t_hw_us": 1.5866
       },
       "18": {
@@ -2054,7 +2304,7 @@
         "t_hw_us": 1.0
       },
       "20": {
-        "baseline_perf_us": 22.810,
+        "baseline_perf_us": 22.81,
         "t_hw_us": 7.6032
       }
     },
@@ -2124,7 +2374,7 @@
         "t_hw_us": 1.0
       },
       "17": {
-        "baseline_perf_us": 4.980,
+        "baseline_perf_us": 4.98,
         "t_hw_us": 1.6601
       },
       "18": {
@@ -2334,7 +2584,7 @@
         "t_hw_us": 2.8749
       },
       "8": {
-        "baseline_perf_us": 6.900,
+        "baseline_perf_us": 6.9,
         "t_hw_us": 2.2999
       },
       "9": {
@@ -2342,7 +2592,7 @@
         "t_hw_us": 2.8749
       },
       "10": {
-        "baseline_perf_us": 6.900,
+        "baseline_perf_us": 6.9,
         "t_hw_us": 2.2999
       },
       "11": {
@@ -2404,7 +2654,7 @@
         "t_hw_us": 1.0
       },
       "5": {
-        "baseline_perf_us": 8.610,
+        "baseline_perf_us": 8.61,
         "t_hw_us": 2.8699
       },
       "6": {
@@ -2424,7 +2674,7 @@
         "t_hw_us": 1.6143
       },
       "10": {
-        "baseline_perf_us": 8.610,
+        "baseline_perf_us": 8.61,
         "t_hw_us": 2.8699
       },
       "11": {
@@ -2486,7 +2736,7 @@
         "t_hw_us": 1.5991
       },
       "5": {
-        "baseline_perf_us": 19.190,
+        "baseline_perf_us": 19.19,
         "t_hw_us": 6.3965
       },
       "6": {
@@ -2518,7 +2768,7 @@
         "t_hw_us": 2.736
       },
       "13": {
-        "baseline_perf_us": 9.380,
+        "baseline_perf_us": 9.38,
         "t_hw_us": 3.1268
       },
       "14": {
@@ -2588,7 +2838,7 @@
         "t_hw_us": 1.0
       },
       "10": {
-        "baseline_perf_us": 30.930,
+        "baseline_perf_us": 30.93,
         "t_hw_us": 10.3099
       },
       "11": {
@@ -2638,23 +2888,23 @@
         "t_hw_us": 2.056
       },
       "2": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "3": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "4": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "5": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "6": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "7": {
@@ -2686,11 +2936,11 @@
         "t_hw_us": 17.6588
       },
       "14": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "15": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "16": {
@@ -2706,11 +2956,11 @@
         "t_hw_us": 32.8804
       },
       "19": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       },
       "20": {
-        "baseline_perf_us": 98.690,
+        "baseline_perf_us": 98.69,
         "t_hw_us": 32.8965
       }
     },
@@ -2900,8 +3150,10 @@
         "t_hw_us": 10.2316
       },
       "6": {
-        "baseline_perf_us": 4379.151,
-        "t_hw_us": 1459.7171
+        "t_hw_us": 33.331982135076245,
+        "baseline_perf_us": 99.99594640522874,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
         "baseline_perf_us": 29.743,
@@ -3056,11 +3308,11 @@
         "t_hw_us": 1.2788
       },
       "4": {
-        "baseline_perf_us": 245.490,
+        "baseline_perf_us": 245.49,
         "t_hw_us": 81.8301
       },
       "5": {
-        "baseline_perf_us": 245.520,
+        "baseline_perf_us": 245.52,
         "t_hw_us": 81.8401
       },
       "6": {
@@ -3280,7 +3532,7 @@
         "t_hw_us": 2.5478
       },
       "19": {
-        "baseline_perf_us": 3.830,
+        "baseline_perf_us": 3.83,
         "t_hw_us": 1.2766
       },
       "20": {
@@ -3290,7 +3542,7 @@
     },
     "unique": {
       "1": {
-        "baseline_perf_us": 7.210,
+        "baseline_perf_us": 7.21,
         "t_hw_us": 2.4032
       },
       "2": {
@@ -3342,7 +3594,7 @@
         "t_hw_us": 4.1619
       },
       "14": {
-        "baseline_perf_us": 13.690,
+        "baseline_perf_us": 13.69,
         "t_hw_us": 4.5633
       },
       "15": {
@@ -3362,7 +3614,7 @@
         "t_hw_us": 10.0177
       },
       "19": {
-        "baseline_perf_us": 63.130,
+        "baseline_perf_us": 63.13,
         "t_hw_us": 21.0432
       },
       "20": {
@@ -3456,7 +3708,7 @@
   "level4": {
     "attention_residual": {
       "1": {
-        "baseline_perf_us": 4.810,
+        "baseline_perf_us": 4.81,
         "t_hw_us": 1.6034
       },
       "2": {
@@ -3468,7 +3720,7 @@
         "t_hw_us": 8.9563
       },
       "4": {
-        "baseline_perf_us": 9.990,
+        "baseline_perf_us": 9.99,
         "t_hw_us": 3.3301
       },
       "5": {
@@ -3496,7 +3748,7 @@
         "t_hw_us": 58.1919
       },
       "11": {
-        "baseline_perf_us": 214.860,
+        "baseline_perf_us": 214.86,
         "t_hw_us": 71.6201
       },
       "12": {
@@ -3546,7 +3798,7 @@
         "t_hw_us": 106.573
       },
       "3": {
-        "baseline_perf_us": 504.780,
+        "baseline_perf_us": 504.78,
         "t_hw_us": 168.2599
       },
       "4": {
@@ -3590,7 +3842,7 @@
         "t_hw_us": 49.0041
       },
       "14": {
-        "baseline_perf_us": 1346.080,
+        "baseline_perf_us": 1346.08,
         "t_hw_us": 448.6932
       },
       "15": {
@@ -3614,14 +3866,16 @@
         "t_hw_us": 141.306
       },
       "20": {
-        "baseline_perf_us": 301.180,
+        "baseline_perf_us": 301.18,
         "t_hw_us": 100.3932
       }
     },
     "flash_attention_score_grad_enhance": {
       "1": {
-        "baseline_perf_us": 309.953,
-        "t_hw_us": 103.3177
+        "t_hw_us": 26.80393673152327,
+        "baseline_perf_us": 80.41181019456981,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
         "baseline_perf_us": 38.801,
@@ -3632,20 +3886,26 @@
         "t_hw_us": 30.6575
       },
       "4": {
-        "baseline_perf_us": 242.315,
-        "t_hw_us": 80.7718
+        "t_hw_us": 15.889098231856181,
+        "baseline_perf_us": 47.66729469556854,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
         "baseline_perf_us": 58.239,
         "t_hw_us": 19.413
       },
       "6": {
-        "baseline_perf_us": 70.835,
-        "t_hw_us": 23.6118
+        "t_hw_us": 9.722734926388991,
+        "baseline_perf_us": 29.168204779166974,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 387.555,
-        "t_hw_us": 129.185
+        "t_hw_us": 32.787514862765406,
+        "baseline_perf_us": 98.36254458829622,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
         "baseline_perf_us": 38.801,
@@ -3664,32 +3924,40 @@
         "t_hw_us": 19.8591
       },
       "12": {
-        "baseline_perf_us": 155.052,
-        "t_hw_us": 51.6841
+        "t_hw_us": 21.62967995857069,
+        "baseline_perf_us": 64.88903987571207,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 16.800,
+        "baseline_perf_us": 16.8,
         "t_hw_us": 5.5999
       },
       "14": {
-        "baseline_perf_us": 309.953,
-        "t_hw_us": 103.3177
+        "t_hw_us": 26.80393673152327,
+        "baseline_perf_us": 80.41181019456981,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
         "baseline_perf_us": 38.801,
         "t_hw_us": 12.9336
       },
       "16": {
-        "baseline_perf_us": 53.620,
+        "baseline_perf_us": 53.62,
         "t_hw_us": 17.8732
       },
       "17": {
-        "baseline_perf_us": 178.732,
-        "t_hw_us": 59.5773
+        "t_hw_us": 39.33032714359695,
+        "baseline_perf_us": 117.99098143079087,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 155.052,
-        "t_hw_us": 51.6841
+        "t_hw_us": 21.62967995857069,
+        "baseline_perf_us": 64.88903987571207,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
         "baseline_perf_us": 8.4,
@@ -3784,84 +4052,124 @@
     },
     "gqa": {
       "1": {
-        "baseline_perf_us": 5.754,
-        "t_hw_us": 1.9181
+        "t_hw_us": 1.9181268292682927,
+        "baseline_perf_us": 5.7543804878048785,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 8.937,
-        "t_hw_us": 2.9789
+        "t_hw_us": 2.9788650144262783,
+        "baseline_perf_us": 8.936595043278835,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 17.263,
-        "t_hw_us": 5.7544
+        "t_hw_us": 5.7543804878048785,
+        "baseline_perf_us": 17.263141463414634,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 95.324,
-        "t_hw_us": 31.7746
+        "t_hw_us": 31.774560153880294,
+        "baseline_perf_us": 95.32368046164089,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 11.509,
-        "t_hw_us": 3.8363
+        "t_hw_us": 3.8362536585365854,
+        "baseline_perf_us": 11.508760975609757,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 95.696,
-        "t_hw_us": 31.8987
+        "t_hw_us": 31.898679529481395,
+        "baseline_perf_us": 95.69603858844418,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 11.915,
-        "t_hw_us": 3.9718
+        "t_hw_us": 3.971820019235037,
+        "baseline_perf_us": 11.915460057705111,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 381.667,
-        "t_hw_us": 127.2224
+        "t_hw_us": 15.918309920840425,
+        "baseline_perf_us": 47.75492976252127,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 301.5,
-        "t_hw_us": 127.0982
+        "t_hw_us": 15.887280076940147,
+        "baseline_perf_us": 47.661840230820445,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 382.040,
-        "t_hw_us": 127.3465
+        "t_hw_us": 15.949339764740698,
+        "baseline_perf_us": 47.84801929422209,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 156.64,
-        "t_hw_us": 81.92
+        "t_hw_us": 20.539941463414635,
+        "baseline_perf_us": 61.619824390243906,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 161.52,
-        "t_hw_us": 82.0798
+        "t_hw_us": 20.69978536585366,
+        "baseline_perf_us": 62.099356097560985,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 526.18,
-        "t_hw_us": 307.2
+        "t_hw_us": 19.480975609756097,
+        "baseline_perf_us": 58.44292682926829,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 313.2,
-        "t_hw_us": 166.2377
+        "t_hw_us": 23.017521951219514,
+        "baseline_perf_us": 69.05256585365854,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 466.88,
-        "t_hw_us": 307.4997
+        "t_hw_us": 19.780682926829268,
+        "baseline_perf_us": 59.3420487804878,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 468.32,
-        "t_hw_us": 307.4997
+        "t_hw_us": 19.780682926829268,
+        "baseline_perf_us": 59.3420487804878,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 416.04,
-        "t_hw_us": 173.9102
+        "t_hw_us": 30.690029268292683,
+        "baseline_perf_us": 92.07008780487806,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 5.958,
-        "t_hw_us": 1.9859
+        "t_hw_us": 1.9859100096175184,
+        "baseline_perf_us": 5.957730028852556,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 11.509,
-        "t_hw_us": 3.8363
+        "t_hw_us": 3.8362536585365854,
+        "baseline_perf_us": 11.508760975609757,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 5.754,
-        "t_hw_us": 1.9181
+        "t_hw_us": 1.9181268292682927,
+        "baseline_perf_us": 5.7543804878048785,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "grouped_matmul_swiglu_quant": {
@@ -3926,7 +4234,7 @@
         "t_hw_us": 3.9137
       },
       "16": {
-        "baseline_perf_us": 8.800,
+        "baseline_perf_us": 8.8,
         "t_hw_us": 2.9334
       },
       "17": {
@@ -3948,84 +4256,124 @@
     },
     "linear_cross_entropy": {
       "1": {
-        "baseline_perf_us": 11939.291,
-        "t_hw_us": 3979.7637
+        "t_hw_us": 10.270048780487805,
+        "baseline_perf_us": 30.810146341463415,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 23878.582,
-        "t_hw_us": 7959.5273
+        "t_hw_us": 10.390165853658537,
+        "baseline_perf_us": 31.170497560975612,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 47757.164,
-        "t_hw_us": 15919.0546
+        "t_hw_us": 63.54912030776059,
+        "baseline_perf_us": 190.64736092328178,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 23878.582,
-        "t_hw_us": 7959.5273
+        "t_hw_us": 1.2988878048780488,
+        "baseline_perf_us": 3.8966634146341463,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 12386.121,
-        "t_hw_us": 4128.7069
+        "t_hw_us": 1.2988878048780488,
+        "baseline_perf_us": 3.8966634146341463,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 24772.241,
-        "t_hw_us": 8257.4138
+        "t_hw_us": 62.05968780054746,
+        "baseline_perf_us": 186.17906340164237,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 28311.133,
-        "t_hw_us": 9437.0444
+        "t_hw_us": 160.32374634146342,
+        "baseline_perf_us": 480.97123902439023,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 56622.266,
-        "t_hw_us": 18874.0887
+        "t_hw_us": 248.7352287045942,
+        "baseline_perf_us": 746.2056861137826,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 21060.576,
-        "t_hw_us": 7020.1919
+        "t_hw_us": 161.6024975609756,
+        "baseline_perf_us": 484.80749268292675,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 42121.151,
-        "t_hw_us": 14040.3838
+        "t_hw_us": 250.72113871421175,
+        "baseline_perf_us": 752.1634161426352,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 84248.535,
-        "t_hw_us": 28082.8451
+        "t_hw_us": 248.25711749038177,
+        "baseline_perf_us": 744.7713524711453,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 23830.92,
-        "t_hw_us": 7943.64
+        "t_hw_us": 248.23875120218983,
+        "baseline_perf_us": 744.7162536065695,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 47665.367,
-        "t_hw_us": 15888.4555
+        "t_hw_us": 1986.0569399230542,
+        "baseline_perf_us": 5958.170819769162,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 12386.121,
-        "t_hw_us": 4128.7069
+        "t_hw_us": 10.39141707317073,
+        "baseline_perf_us": 31.174251219512193,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 42121.151,
-        "t_hw_us": 14040.3838
+        "t_hw_us": 877.5239854997411,
+        "baseline_perf_us": 2632.5719564992232,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 113244.533,
-        "t_hw_us": 37748.1775
+        "t_hw_us": 589.8152728564031,
+        "baseline_perf_us": 1769.4458185692092,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 47760.697,
-        "t_hw_us": 15920.2324
+        "t_hw_us": 15.888455519384435,
+        "baseline_perf_us": 47.6653665581533,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 2978.865,
-        "t_hw_us": 992.955
+        "t_hw_us": 2.597619512195122,
+        "baseline_perf_us": 7.792858536585367,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 23830.92,
-        "t_hw_us": 7943.64
+        "t_hw_us": 10.382517073170732,
+        "baseline_perf_us": 31.147551219512195,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 84242.303,
-        "t_hw_us": 28080.7675
+        "t_hw_us": 746.2056861137827,
+        "baseline_perf_us": 2238.617058341348,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "lstm": {
@@ -4112,166 +4460,246 @@
     },
     "mla": {
       "1": {
-        "baseline_perf_us": 69.592,
-        "t_hw_us": 23.1973
+        "t_hw_us": 12.726114729599765,
+        "baseline_perf_us": 38.178344188799294,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 406.708,
-        "t_hw_us": 135.5694
+        "t_hw_us": 31.716379196567285,
+        "baseline_perf_us": 95.14913758970185,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 31.170,
-        "t_hw_us": 10.3899
+        "t_hw_us": 10.389853658536586,
+        "baseline_perf_us": 31.169560975609755,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 178.6,
-        "t_hw_us": 67.5209
+        "t_hw_us": 8.440117540874454,
+        "baseline_perf_us": 25.32035262262336,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 203.354,
-        "t_hw_us": 67.7847
+        "t_hw_us": 29.60634981134867,
+        "baseline_perf_us": 88.81904943404601,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 357.464,
-        "t_hw_us": 119.1546
+        "t_hw_us": 14.894325072131391,
+        "baseline_perf_us": 44.68297521639417,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 6.33,
-        "t_hw_us": 2.11
+        "t_hw_us": 2.1100293852186134,
+        "baseline_perf_us": 6.33008815565584,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 101.282,
-        "t_hw_us": 33.7605
+        "t_hw_us": 16.880235081748907,
+        "baseline_perf_us": 50.64070524524672,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 202.563,
-        "t_hw_us": 67.5209
+        "t_hw_us": 16.880235081748907,
+        "baseline_perf_us": 50.64070524524672,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 320.56,
-        "t_hw_us": 126.6018
+        "t_hw_us": 16.18419512195122,
+        "baseline_perf_us": 48.55258536585366,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 351.86,
-        "t_hw_us": 135.0419
+        "t_hw_us": 23.017521951219514,
+        "baseline_perf_us": 69.05256585365854,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 267.039,
-        "t_hw_us": 89.0131
+        "t_hw_us": 13.486829268292682,
+        "baseline_perf_us": 40.46048780487805,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 69.592,
-        "t_hw_us": 23.1973
+        "t_hw_us": 12.726114729599765,
+        "baseline_perf_us": 38.178344188799294,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 61.860,
-        "t_hw_us": 20.6199
+        "t_hw_us": 11.228924761411555,
+        "baseline_perf_us": 33.686774284234666,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 47.525,
-        "t_hw_us": 15.8417
+        "t_hw_us": 15.841704993711621,
+        "baseline_perf_us": 47.52511498113486,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 310.82,
-        "t_hw_us": 126.6018
+        "t_hw_us": 16.18419512195122,
+        "baseline_perf_us": 48.55258536585366,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 147.68,
-        "t_hw_us": 67.5045
+        "t_hw_us": 33.75222786121181,
+        "baseline_perf_us": 101.25668358363542,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 4.855,
-        "t_hw_us": 1.6184
+        "t_hw_us": 1.618419512195122,
+        "baseline_perf_us": 4.8552585365853655,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 143.34,
-        "t_hw_us": 67.5209
+        "t_hw_us": 33.760470163497814,
+        "baseline_perf_us": 101.28141049049344,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 101.677,
-        "t_hw_us": 33.8923
+        "t_hw_us": 25.386291040911445,
+        "baseline_perf_us": 76.15887312273433,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "mla_prolog": {
       "1": {
-        "baseline_perf_us": 224.215,
-        "t_hw_us": 74.7384
+        "t_hw_us": 74.73841951219512,
+        "baseline_perf_us": 224.21525853658537,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 224.295,
-        "t_hw_us": 74.7651
+        "t_hw_us": 74.76511219512194,
+        "baseline_perf_us": 224.29533658536582,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 225.043,
-        "t_hw_us": 75.0142
+        "t_hw_us": 75.01424390243903,
+        "baseline_perf_us": 225.0427317073171,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 141.499,
-        "t_hw_us": 47.1664
+        "t_hw_us": 47.16643902439024,
+        "baseline_perf_us": 141.49931707317074,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 227.605,
-        "t_hw_us": 75.8684
+        "t_hw_us": 75.86840975609755,
+        "baseline_perf_us": 227.60522926829265,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 224.295,
-        "t_hw_us": 74.7651
+        "t_hw_us": 74.76511219512194,
+        "baseline_perf_us": 224.29533658536582,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 224.616,
-        "t_hw_us": 74.8719
+        "t_hw_us": 74.87188292682927,
+        "baseline_perf_us": 224.61564878048782,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 224.616,
-        "t_hw_us": 74.8719
+        "t_hw_us": 75.29896585365854,
+        "baseline_perf_us": 225.89689756097562,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 225.897,
-        "t_hw_us": 75.299
+        "t_hw_us": 75.29896585365854,
+        "baseline_perf_us": 225.89689756097562,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 225.043,
-        "t_hw_us": 75.0142
+        "t_hw_us": 75.01424390243903,
+        "baseline_perf_us": 225.0427317073171,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 216.299,
-        "t_hw_us": 72.0997
+        "t_hw_us": 72.09974634146342,
+        "baseline_perf_us": 216.29923902439026,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 217.011,
-        "t_hw_us": 72.3369
+        "t_hw_us": 72.33685853658537,
+        "baseline_perf_us": 217.0105756097561,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 219.213,
-        "t_hw_us": 73.0711
+        "t_hw_us": 73.07114146341463,
+        "baseline_perf_us": 219.21342439024392,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 216.644,
-        "t_hw_us": 72.2145
+        "t_hw_us": 72.21447804878049,
+        "baseline_perf_us": 216.64343414634146,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 217.745,
-        "t_hw_us": 72.5816
+        "t_hw_us": 72.58161951219513,
+        "baseline_perf_us": 217.7448585365854,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 227.392,
-        "t_hw_us": 75.7972
+        "t_hw_us": 75.79722926829268,
+        "baseline_perf_us": 227.39168780487805,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 696.310,
-        "t_hw_us": 232.1032
+        "t_hw_us": 116.05161618702374,
+        "baseline_perf_us": 348.1548485610712,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 251.900,
-        "t_hw_us": 83.9668
+        "t_hw_us": 83.96675759414072,
+        "baseline_perf_us": 251.90027278242215,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 224.215,
-        "t_hw_us": 74.7384
+        "t_hw_us": 74.73841951219512,
+        "baseline_perf_us": 224.21525853658537,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 229.059,
-        "t_hw_us": 76.3529
+        "t_hw_us": 76.35293658536585,
+        "baseline_perf_us": 229.05880975609756,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "selective_scan": {
@@ -4324,7 +4752,7 @@
         "t_hw_us": 685.3438
       },
       "13": {
-        "baseline_perf_us": 1030.260,
+        "baseline_perf_us": 1030.26,
         "t_hw_us": 343.4201
       },
       "14": {
@@ -4358,84 +4786,124 @@
     },
     "sparse_flash_attention": {
       "1": {
-        "baseline_perf_us": 60.310,
-        "t_hw_us": 20.1034
+        "t_hw_us": 20.10341786492375,
+        "baseline_perf_us": 60.31025359477125,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 72.889,
-        "t_hw_us": 24.2963
+        "t_hw_us": 19.82064332301287,
+        "baseline_perf_us": 59.46192996903861,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 482.482,
-        "t_hw_us": 160.8273
+        "t_hw_us": 26.853774837187895,
+        "baseline_perf_us": 80.56132451156368,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 119.155,
-        "t_hw_us": 39.7182
+        "t_hw_us": 19.82064332301287,
+        "baseline_perf_us": 59.46192996903861,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 60.310,
-        "t_hw_us": 20.1034
+        "t_hw_us": 20.10341786492375,
+        "baseline_perf_us": 60.31025359477125,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 3.956,
-        "t_hw_us": 1.3187
+        "t_hw_us": 1.3187121951219511,
+        "baseline_perf_us": 3.9561365853658534,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 5.904,
-        "t_hw_us": 1.9681
+        "t_hw_us": 1.9680780487804876,
+        "baseline_perf_us": 5.904234146341463,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 63.298,
-        "t_hw_us": 21.0994
+        "t_hw_us": 17.572839024390245,
+        "baseline_perf_us": 52.71851707317073,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 132.84,
-        "t_hw_us": 63.5491
+        "t_hw_us": 63.54912030776059,
+        "baseline_perf_us": 190.64736092328178,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 162.78,
-        "t_hw_us": 67.5209
+        "t_hw_us": 67.52094032699563,
+        "baseline_perf_us": 202.56282098098688,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 564.73,
-        "t_hw_us": 254.1965
+        "t_hw_us": 127.09824061552118,
+        "baseline_perf_us": 381.29472184656356,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 277.27,
-        "t_hw_us": 135.0419
+        "t_hw_us": 135.04188065399126,
+        "baseline_perf_us": 405.12564196197377,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 129.94,
-        "t_hw_us": 63.5491
+        "t_hw_us": 63.54912030776059,
+        "baseline_perf_us": 190.64736092328178,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 23.831,
-        "t_hw_us": 7.9436
+        "t_hw_us": 7.943640038470074,
+        "baseline_perf_us": 23.830920115410223,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.9016195121951219,
+        "baseline_perf_us": 2.7048585365853657,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 47.662,
-        "t_hw_us": 15.8873
+        "t_hw_us": 15.887280076940147,
+        "baseline_perf_us": 47.661840230820445,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 77.924,
-        "t_hw_us": 25.9746
+        "t_hw_us": 11.952624390243901,
+        "baseline_perf_us": 35.85787317073171,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 47.662,
-        "t_hw_us": 15.8873
+        "t_hw_us": 15.887280076940147,
+        "baseline_perf_us": 47.661840230820445,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 31.409,
-        "t_hw_us": 10.4698
+        "t_hw_us": 9.8304,
+        "baseline_perf_us": 29.4912,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 54.827,
-        "t_hw_us": 18.2758
+        "t_hw_us": 0.0018692882030861126,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     }
   },
@@ -4514,8 +4982,10 @@
         "t_hw_us": 1.0
       },
       "19": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.018663414634146343,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
         "baseline_perf_us": 8.937,
@@ -4588,16 +5058,20 @@
         "t_hw_us": 1.0
       },
       "17": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.0036292682926829267,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
         "baseline_perf_us": 3.0,
         "t_hw_us": 1.0
       },
       "19": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.022309756097560973,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
         "baseline_perf_us": 11.539,
@@ -4682,8 +5156,10 @@
         "t_hw_us": 35.7464
       },
       "20": {
-        "baseline_perf_us": 5040.240,
-        "t_hw_us": 1680.0799
+        "t_hw_us": 420.0199670341052,
+        "baseline_perf_us": 1260.0599011023155,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     },
     "sparse_lightning_indexer_grad_kl_loss_enhance": {
@@ -4692,76 +5168,110 @@
         "t_hw_us": 87.5507
       },
       "2": {
-        "baseline_perf_us": 4.679,
-        "t_hw_us": 1.5597
+        "t_hw_us": 1.659629268292683,
+        "baseline_perf_us": 4.978887804878049,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.8467121951219512,
+        "baseline_perf_us": 2.5401365853658535,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 4.945,
-        "t_hw_us": 1.6484
+        "t_hw_us": 1.6484292682926829,
+        "baseline_perf_us": 4.945287804878049,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 7.350,
-        "t_hw_us": 2.4501
+        "t_hw_us": 2.4501463414634146,
+        "baseline_perf_us": 7.350439024390244,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 9.756,
-        "t_hw_us": 3.2519
+        "t_hw_us": 3.2518634146341463,
+        "baseline_perf_us": 9.75559024390244,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 19.376,
-        "t_hw_us": 6.4587
+        "t_hw_us": 6.458731707317073,
+        "baseline_perf_us": 19.37619512195122,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
         "baseline_perf_us": 5.247,
         "t_hw_us": 1.7491
       },
       "9": {
-        "baseline_perf_us": 294.908,
-        "t_hw_us": 98.3025
+        "t_hw_us": 98.19627432122512,
+        "baseline_perf_us": 294.58882296367534,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 51.017,
-        "t_hw_us": 17.0055
+        "t_hw_us": 25.376965853658536,
+        "baseline_perf_us": 76.13089756097561,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 458.745,
-        "t_hw_us": 152.9151
+        "t_hw_us": 152.04646238070578,
+        "baseline_perf_us": 456.13938714211736,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 15.108,
-        "t_hw_us": 5.036
+        "t_hw_us": 5.036039024390244,
+        "baseline_perf_us": 15.108117073170732,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 786.420,
-        "t_hw_us": 262.1401
+        "t_hw_us": 174.516175364356,
+        "baseline_perf_us": 523.548526093068,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 313.340,
-        "t_hw_us": 104.4465
+        "t_hw_us": 104.35363775985796,
+        "baseline_perf_us": 313.06091327957387,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 37.433,
-        "t_hw_us": 12.4778
+        "t_hw_us": 13.277034146341464,
+        "baseline_perf_us": 39.83110243902439,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 3159.343,
-        "t_hw_us": 1053.1144
+        "t_hw_us": 60.29112195121951,
+        "baseline_perf_us": 180.87336585365853,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 4.679,
-        "t_hw_us": 1.5597
+        "t_hw_us": 1.659629268292683,
+        "baseline_perf_us": 4.978887804878049,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 54.951,
-        "t_hw_us": 18.3171
+        "t_hw_us": 18.71672195121951,
+        "baseline_perf_us": 56.150165853658535,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 97.659,
-        "t_hw_us": 32.553
+        "t_hw_us": 32.635971650514165,
+        "baseline_perf_us": 97.9079149515425,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
         "baseline_perf_us": 8.576,
@@ -4770,84 +5280,124 @@
     },
     "tensor_program_vm": {
       "1": {
-        "baseline_perf_us": 5.568,
-        "t_hw_us": 1.8561
+        "t_hw_us": 2.180963834422658,
+        "baseline_perf_us": 6.542891503267974,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "2": {
-        "baseline_perf_us": 43.948,
-        "t_hw_us": 14.6492
+        "t_hw_us": 17.32991721132898,
+        "baseline_perf_us": 51.98975163398694,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "3": {
-        "baseline_perf_us": 22.102,
-        "t_hw_us": 7.3674
+        "t_hw_us": 8.615878431372549,
+        "baseline_perf_us": 25.847635294117644,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "4": {
-        "baseline_perf_us": 11.651,
-        "t_hw_us": 3.8836
+        "t_hw_us": 4.529694117647058,
+        "baseline_perf_us": 13.589082352941176,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "5": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.5528261437908496,
+        "baseline_perf_us": 1.658478431372549,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "6": {
-        "baseline_perf_us": 5.568,
-        "t_hw_us": 1.8561
+        "t_hw_us": 2.1506230936819173,
+        "baseline_perf_us": 6.451869281045752,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "7": {
-        "baseline_perf_us": 3.427,
-        "t_hw_us": 1.1422
+        "t_hw_us": 1.2957281045751636,
+        "baseline_perf_us": 3.887184313725491,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "8": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.14411851851851853,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "9": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.03653202614379085,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "10": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.3426718954248366,
+        "baseline_perf_us": 1.0280156862745098,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "11": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.008927233115468409,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "12": {
-        "baseline_perf_us": 44.547,
-        "t_hw_us": 14.8491
+        "t_hw_us": 17.297791721132896,
+        "baseline_perf_us": 51.89337516339869,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "13": {
-        "baseline_perf_us": 5.568,
-        "t_hw_us": 1.8561
+        "t_hw_us": 2.1519616557734205,
+        "baseline_perf_us": 6.455884967320261,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "14": {
-        "baseline_perf_us": 5.654,
-        "t_hw_us": 1.8847
+        "t_hw_us": 2.1907803921568623,
+        "baseline_perf_us": 6.572341176470587,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "15": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 1.1101141612200436,
+        "baseline_perf_us": 3.3303424836601305,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "16": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.008034858387799564,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "17": {
-        "baseline_perf_us": 5.568,
-        "t_hw_us": 1.8561
+        "t_hw_us": 2.1519616557734205,
+        "baseline_perf_us": 6.455884967320261,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "18": {
-        "baseline_perf_us": 11.137,
-        "t_hw_us": 3.7123
+        "t_hw_us": 4.195946405228759,
+        "baseline_perf_us": 12.587839215686277,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "19": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.524716339869281,
+        "baseline_perf_us": 1.5741490196078431,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       },
       "20": {
-        "baseline_perf_us": 3.0,
-        "t_hw_us": 1.0
+        "t_hw_us": 0.08566797385620915,
+        "baseline_perf_us": 1.0,
+        "baseline_status": "model_estimate",
+        "baseline_validation": "pending_npu_revalidation"
       }
     }
   }

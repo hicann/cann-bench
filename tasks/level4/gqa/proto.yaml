@@ -16,12 +16,12 @@ operator:
     扩展 KV heads 匹配 Q heads（每个 KV head 重复 N_q/N_kv 次）
     y = softmax(Q @ K_expanded^T * scaleValue) @ V_expanded
   description: 分组查询注意力 (Grouped Query Attention)，多个 query head 共享一组 KV head，对已分头的 Q/K/V 执行注意力计算
-  shape_support: "query [B, S, N_q, D]，key/value [B, S_kv, N_kv, D]，N_q 整除 N_kv"
+  shape_support: "query [B, S, N_q, D]，key/value [B, S_kv, N_kv, D]，N_q % N_kv == 0；is_causal=True 要求 S <= S_kv"
   attrs:
   - name: scaleValue
     type: float
     default: -1.0
-    description: 缩放因子，<=0 时自动使用 1/sqrt(D)
+    description: 有限缩放因子，<=0 时自动使用 1/sqrt(D)
     required: false
   - name: is_causal
     type: bool

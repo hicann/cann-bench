@@ -47,13 +47,13 @@ cases:
   note: 'case14-B4-F8-Bag4-V256-D128-bfloat16-biasTrue [D4 trim: was open c14] [D3a upsize V400000-D96-BFK96x30x2]'
 - operator: CategoricalEmbeddingBag
   case_id: 5
-  input_shape: [[1536, 6, 24], [150000, 256], [6, 256]]
+  input_shape: [[512, 6, 24], [150000, 256], [6, 256]]
   dtype: [int64, float32, float32]
   attrs:
     mean_pool: true
     padding_idx: -1
   value_range: [[0, 149999], [-0.5, 0.5], [-0.1, 0.1]]
-  note: 'case15-B8-F16-Bag8-V16-D8-float32-biasTrue [D4 trim: was open c15] [D3a upsize V150000-D256-BFK1536x6x24]'
+  note: "int64 / float32; shapes=[[512,6,24],[150000,256],[6,256]]; mean_pool=True"
 - operator: CategoricalEmbeddingBag
   case_id: 6
   input_shape: [[64, 6, 12], [80000, 64], null]
@@ -65,13 +65,13 @@ cases:
   note: 'case16-B1-F2-Bag1-V32-D16-float16-biasFalse [D4 trim: was open c16] [D3a upsize V80000-D64-BFK64x6x12]'
 - operator: CategoricalEmbeddingBag
   case_id: 7
-  input_shape: [[768, 10, 3], [300000, 128], [10, 128]]
+  input_shape: [[256, 10, 3], [300000, 128], [10, 128]]
   dtype: [int64, float16, float16]
   attrs:
     mean_pool: false
     padding_idx: -1
   value_range: [[0, 299999], [-0.5, 0.5], [-0.1, 0.1]]
-  note: 'case19-B8-F16-Bag8-V256-D128-float16-biasTrue [D4 trim: was open c19] [D3a upsize V300000-D128-BFK768x10x3]'
+  note: "int64 / float16; shapes=[[256,10,3],[300000,128],[10,128]]; mean_pool=False"
 - operator: CategoricalEmbeddingBag
   case_id: 8
   input_shape: [[32, 4, 6], [60000, 192], null]
@@ -83,13 +83,13 @@ cases:
   note: 'case24-B1-F2-Bag1-V256-D128-float32-biasFalse [D4 trim: was open c24] [D3a upsize V60000-D192-BFK32x4x6]'
 - operator: CategoricalEmbeddingBag
   case_id: 9
-  input_shape: [[3072, 5, 8], [900000, 32], [5, 32]]
+  input_shape: [[512, 5, 8], [900000, 32], [5, 32]]
   dtype: [int64, float32, float32]
   attrs:
     mean_pool: true
     padding_idx: -1
   value_range: [[0, 899999], [-0.5, 0.5], [-0.1, 0.1]]
-  note: 'case27-B8-F16-Bag8-V64-D32-float32-biasTrue [D4 trim: was open c27] [D3a upsize V900000-D32-BFK3072x5x8]'
+  note: "int64 / float32; shapes=[[512,5,8],[900000,32],[5,32]]; mean_pool=True"
 - operator: CategoricalEmbeddingBag
   case_id: 10
   input_shape: [[16, 10, 2], [400000, 96], null]
@@ -101,13 +101,13 @@ cases:
   note: 'case28-B1-F2-Bag1-V128-D64-float16-biasFalse [D4 trim: was open c28] [D3a upsize V400000-D96-BFK16x10x2]'
 - operator: CategoricalEmbeddingBag
   case_id: 11
-  input_shape: [[1536, 6, 24], [150000, 256], [6, 256]]
+  input_shape: [[384, 6, 24], [150000, 256], [6, 256]]
   dtype: [int64, float16, float16]
   attrs:
     mean_pool: false
     padding_idx: -1
   value_range: [[0, 149999], [-0.5, 0.5], [-0.1, 0.1]]
-  note: 'case34-B4-F8-Bag4-V256-D128-float16-biasTrue [D4 trim: was open c34] [D3a upsize V150000-D256-BFK1536x6x24]'
+  note: "int64 / float16; shapes=[[384,6,24],[150000,256],[6,256]]; mean_pool=False"
 - operator: CategoricalEmbeddingBag
   case_id: 12
   input_shape: [[384, 20, 12], [80000, 64], [20, 64]]

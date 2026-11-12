@@ -8,12 +8,12 @@ Gcd,6,"[[1023, 1023], [1023, 1023]]","[""int64"", ""int64""]",{},"[[-100, 100], 
 Gcd,7,"[[1009, 1021], [1009, 1021]]","[""int32"", ""int32""]",{},"[[-1, 1], [-1, 1]]",S-int32-1M-质数非对齐-单位值gcd=1 | baseline_kernels: Gcd×1
 Gcd,8,"[[1537, 769], [1537, 769]]","[""int16"", ""int16""]",{},"[[-50, 50], [-10, 10]]",S-int16-1M-非对齐-非对称小值域 | baseline_kernels: Gcd×1
 Gcd,9,"[[363, 367, 186], [363, 367, 186]]","[""int64"", ""int64""]",{},"[[-10000, 10000], [-1000, 1000]]",L-int64-50M-质数非对齐-非对称大值域-3D | baseline_kernels: Gcd×1
-Gcd,10,"[[2049, 513], [2049, 513]]","[""int32"", ""int32""]",{},"[[100, 100], [100, 100]]",S-int32-1M-非对齐-相同值gcd=n | baseline_kernels: Gcd×1
+Gcd,10,"[[2049, 513], [2049, 513]]","[""int32"", ""int32""]",{},"[[1, 200], [1, 300]]","gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
 Gcd,11,"[[1023, 1024], [1, 1024]]","[""int32"", ""int32""]",{},"[[-10000, 10000], [-100, 100]]",S-int32-1M-非对齐-尾轴Broadcast | baseline_kernels: Gcd×1
 Gcd,12,"[[3, 127, 687, 37], [1, 1, 687, 1]]","[""int16"", ""int16""]",{},"[[-100, 100], [-10, 10]]",M-int16-31M-非对齐-多轴Broadcast-4D | baseline_kernels: Gcd×1
 Gcd,13,"[[2, 3, 5, 1024, 256], [1, 1, 1, 1024, 1]]","[""int64"", ""int64""]",{},"[[-10000, 10000], [-1000, 1000]]",M-int64-7M-非对齐-5D-多轴Broadcast | baseline_kernels: Gcd×1
-Gcd,14,"[[1048583], [1048583]]","[""int32"", ""int32""]",{},"[[0, 0], [0, 0]]",S-int32-1M-质数非对齐-零值gcd=0-1D | baseline_kernels: Gcd×1
-Gcd,15,"[[11, 13, 17, 67, 67], [11, 13, 17, 67, 67]]","[""int32"", ""int32""]",{},"[[1, 1], [1, 1]]",M-int32-10M-质数非对齐-单位值gcd=1-5D | baseline_kernels: Gcd×1
+Gcd,14,"[[1048583], [1048583]]","[""int32"", ""int32""]",{},"[[-31, 31], [-63, 63]]","gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
+Gcd,15,"[[11, 13, 17, 67, 67], [11, 13, 17, 67, 67]]","[""int32"", ""int32""]",{},"[[0, 127], [0, 255]]","gcd nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Gcd×1"
 Gcd,16,"[[3, 7, 11, 13, 1013], [1]]","[""int16"", ""int16""]",{},"[[-100, 100], [1, 100]]",S-int16-3M-质数非对齐-标量Broadcast-5D | baseline_kernels: Gcd×1
 Gcd,17,"[[512, 2049], [512, 2049]]","[""int64"", ""int64""]",{},"[[-10000, 10000], [-1000, 1000]]",M-int64-1M-非对齐-对称中值域 | baseline_kernels: Gcd×1
 Gcd,18,"[[255, 8193], [1, 8193]]","[""int32"", ""int32""]",{},"[[-1000, 1000], [-100, 100]]",S-int32-2M-非对齐-Broadcast | baseline_kernels: Gcd×1

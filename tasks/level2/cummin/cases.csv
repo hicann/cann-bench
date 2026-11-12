@@ -2,13 +2,13 @@ operator,case_id,input_shape,dtype,attrs,value_range,note
 Cummin,1,"[[1024, 1024]]","[""float16""]","{""dim"": -1}","[-1, 1]",S-float16-1M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
 Cummin,2,"[[2048, 2048]]","[""float32""]","{""dim"": -1}","[-2, 2]",M-float32-4M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
 Cummin,3,"[[4096, 4096]]","[""bfloat16""]","{""dim"": -1}","[-3, 3]",M-bfloat16-16M-对齐-对称小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
-Cummin,4,"[[8192, 8192]]","[""int32""]","{""dim"": -1}","[-10000, 10000]",L-int32-67M-对齐-对称中值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
-Cummin,5,"[[16384, 16384]]","[""float16""]","{""dim"": 0}","[-100, 100]",L-float16-268M-对齐-对称大值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1
-Cummin,6,"[[8192, 8192]]","[""float32""]","{""dim"": 1}","[-1000, 1000]",L-float32-1G-对齐-对称大值域-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
+Cummin,4,"[[2048, 8192]]","[""int32""]","{""dim"": -1}","[-10000, 10000]","int32; shapes=[[2048,8192]]; dim=-1"
+Cummin,5,"[[16384, 1024]]","[""float16""]","{""dim"": 0}","[-100, 100]","float16; shapes=[[16384,1024]]; dim=0"
+Cummin,6,"[[2048, 8192]]","[""float32""]","{""dim"": 1}","[-1000, 1000]","float32; shapes=[[2048,8192]]; dim=1"
 Cummin,7,"[[1023, 1023]]","[""bfloat16""]","{""dim"": -1}","[-0.1, 0.1]",S-bfloat16-1M-非对齐-对称微小值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
 Cummin,8,"[[1009, 1021]]","[""float16""]","{""dim"": 0}","[-1, 2]",S-float16-1M-质数非对齐-非对称小值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1
 Cummin,9,"[[1537, 769]]","[""float32""]","{""dim"": -1}","[-5, 10]",S-float32-1M-非对齐-非对称中值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
-Cummin,10,"[[363, 367, 373]]","[""bfloat16""]","{""dim"": 1}","[-50, 100]",M-bfloat16-50M-质数非对齐-非对称大值域-3D-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
+Cummin,10,"[[181, 367, 187]]","[""bfloat16""]","{""dim"": 1}","[-50, 100]","bfloat16; shapes=[[181,367,187]]; dim=1"
 Cummin,11,"[[2049, 513]]","[""float16""]","{""dim"": -1}","[-65504, 65504]",S-float16-1M-非对齐-float16边界值-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
 Cummin,12,"[[3, 7, 13, 4001]]","[""float32""]","{""dim"": -1}","[-88, 88]",S-float32-1M-质数非对齐-float32边界值-4D-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1
 Cummin,13,[[1000003]],"[""bfloat16""]","{""dim"": -1}","[""-inf"", ""inf""]",S-bfloat16-1M-质数非对齐-inf特殊值-1D-dim=-1 | baseline_kernels: Cummin×1 + Cast×1

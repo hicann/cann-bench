@@ -12,9 +12,9 @@ operator:
   name: FlashAttentionScoreGradEnhance
   category: FusedComposite
   difficulty: L4
-  formula: Computes query, key, value and rope gradients for FlashAttentionScoreEnhance.
-  description: Computes query, key, value and rope gradients for FlashAttentionScoreEnhance.
-  shape_support: See migrated CSV cases for supported TND/BSND/PA_BSND shapes.
+  formula: Computes original query, key and value gradients; optional rope channels affect attention scores only.
+  description: Computes original query, key and value gradients; optional rope channels affect attention scores only.
+  shape_support: TND [T,N,D] and BSND [B,S,N,D], including packed variable lengths, GQA, optional rope and TND sink rows; see desc.md.
   attrs:
   - name: head_num
     type: int
@@ -117,14 +117,14 @@ operator:
     optional: true
     shape: case dependent
   - name: query_rope
-    description: Optional query rope
+    description: Optional query rope; shape follows original Q/K prefix dimensions
     dtype:
     - float16
     - bfloat16
     optional: true
     shape: case dependent
   - name: key_rope
-    description: Optional key rope
+    description: Optional key rope; shape follows original Q/K prefix dimensions
     dtype:
     - float16
     - bfloat16
@@ -152,4 +152,8 @@ operator:
     - bfloat16
     - float32
     shape: case dependent
-  schema: flash_attention_score_grad_enhance(Tensor query, Tensor key, Tensor value, Tensor dy, int head_num, str input_layout="TND", *, Tensor? pse=None, Tensor? padding_mask=None, Tensor? atten_mask=None, Tensor? softmax_max=None, Tensor? softmax_sum=None, Tensor? softmax_in=None, Tensor? attention_in=None, Tensor? sink_tensor=None, Tensor? query_rope=None, Tensor? key_rope=None, float scale_value=1.0, float? scale=None, float keep_prob=1.0, int pre_tokens=2147483647, int next_tokens=2147483647, int inner_precise=0, Tensor? prefix=None, SymInt[]? actual_seq_qlen=None, SymInt[]? actual_seq_kvlen=None, int sparse_mode=0, int sink_num=0, int pse_type=1, str softmaxInLayout="", Tensor? q_start_idx=None, Tensor? kv_start_idx=None) -> (Tensor dq, Tensor dk, Tensor dv)
+  schema: flash_attention_score_grad_enhance(Tensor query, Tensor key, Tensor value, Tensor dy, int head_num, str input_layout="TND", *, Tensor? pse=None, Tensor? padding_mask=None,
+    Tensor? atten_mask=None, Tensor? softmax_max=None, Tensor? softmax_sum=None, Tensor? softmax_in=None, Tensor? attention_in=None, Tensor? sink_tensor=None, Tensor? query_rope=None,
+    Tensor? key_rope=None, float scale_value=1.0, float? scale=None, float keep_prob=1.0, int pre_tokens=2147483647, int next_tokens=2147483647, int inner_precise=0, Tensor? prefix=None,
+    SymInt[]? actual_seq_qlen=None, SymInt[]? actual_seq_kvlen=None, int sparse_mode=0, int sink_num=0, int pse_type=1, str softmaxInLayout="", Tensor? q_start_idx=None, Tensor? kv_start_idx=None)
+    -> (Tensor dq, Tensor dk, Tensor dv)

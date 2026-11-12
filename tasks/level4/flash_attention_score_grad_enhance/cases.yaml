@@ -1,19 +1,11 @@
 cases:
 - operator: FlashAttentionScoreGradEnhance
   case_id: 1
-  input_shape:
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - null
-  - null
-  - [4096, 8, 64]
-  - [4096, 8, 64]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, null, null, bfloat16, bfloat16]
-  attrs: {head_num: 8, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 511, next_tokens: 0, actual_seq_qlen: [1024, 1024, 1024, 1024], actual_seq_kvlen: [992, 992, 992, 992], sparse_mode: 4, sink_num: 2}
+  input_shape: [[2048, 8, 128], [2112, 8, 128], [2112, 8, 128], [2048, 8, 128], null, null, [2048, 8, 64], [2112, 8, 64]]
+  dtype: ["bfloat16", "bfloat16", "bfloat16", "bfloat16", null, null, "bfloat16", "bfloat16"]
+  attrs: {"head_num": 8, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 259, "next_tokens": 0, "actual_seq_qlen": [512, 512, 512, 512], "actual_seq_kvlen": [496, 496, 496, 496], "sparse_mode": 4, "sink_num": 2}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "TND-sink2-akv=ΣTkv−128 [B:sink carve-out fixed per desc(F5)] | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "bfloat16; shapes=[[2048,8,128],[2112,8,128],[2112,8,128],[2048,8,128],null,null,[2048,8,64],[2112,8,64]]; input_layout=TND, sparse_mode=4"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 2
   input_shape:
@@ -39,10 +31,10 @@ cases:
 - operator: FlashAttentionScoreGradEnhance
   case_id: 4
   input_shape: [[2048, 4, 128], [2048, 4, 128], [2048, 4, 128], [2048, 4, 128], null, null, [2048, 4, 64], [2048, 4, 64]]
-  dtype: [float32, float32, float32, float32, null, null, float32, float32]
-  attrs: {head_num: 4, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 511, next_tokens: 0, actual_seq_qlen: [768, 512, 512, 256], actual_seq_kvlen: [768, 512, 384, 256], sparse_mode: 4, sink_num: 2}
+  dtype: ["float16", "float16", "float16", "float16", null, null, "float16", "float16"]
+  attrs: {"head_num": 4, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 511, "next_tokens": 0, "actual_seq_qlen": [768, 512, 512, 256], "actual_seq_kvlen": [768, 512, 384, 256], "sparse_mode": 4, "sink_num": 2}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "M-float32-TND-变长分段+sink2(akv和=1920=2048-128)-sparse4-rope [R:replaced exact dup of c2] | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "float16; shapes=[[2048,4,128],[2048,4,128],[2048,4,128],[2048,4,128],null,null,[2048,4,64],[2048,4,64]]; input_layout=TND, sparse_mode=4"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 5
   input_shape:
@@ -60,26 +52,18 @@ cases:
   note: "TND-sink2-akv=ΣTkv−128 [B:sink carve-out fixed per desc(F5)] | baseline_kernels: FlashAttentionScoreGrad×1"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 6
-  input_shape: [[3072, 8, 64], [3072, 8, 64], [3072, 8, 64], [3072, 8, 64], null, null, null, null]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, null, null, bfloat16, bfloat16]
-  attrs: {head_num: 8, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 2147483647, next_tokens: 0, actual_seq_qlen: [1024, 768, 768, 512], actual_seq_kvlen: [1024, 768, 768, 512], sparse_mode: 3, sink_num: 0}
+  input_shape: [[1968, 8, 64], [1968, 8, 64], [1968, 8, 64], [1968, 8, 64], null, null, null, null]
+  dtype: ["bfloat16", "bfloat16", "bfloat16", "bfloat16", null, null, "bfloat16", "bfloat16"]
+  attrs: {"head_num": 8, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 2147483647, "next_tokens": 0, "actual_seq_qlen": [656, 496, 496, 320], "actual_seq_kvlen": [656, 496, 496, 320], "sparse_mode": 3, "sink_num": 0}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "M-bfloat16-TND-D64-变长分段-causal-无rope [R:replaced exact dup of c5] | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "bfloat16; shapes=[[1968,8,64],[1968,8,64],[1968,8,64],[1968,8,64],null,null,null,null]; input_layout=TND, sparse_mode=3"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 7
-  input_shape:
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - null
-  - null
-  - [4096, 8, 64]
-  - [4096, 8, 64]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, null, null, bfloat16, bfloat16]
-  attrs: {head_num: 8, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 65536, next_tokens: 0, actual_seq_qlen: [1024, 1024, 1024, 1024], actual_seq_kvlen: [992, 992, 992, 992], sparse_mode: 2, sink_num: 2}
+  input_shape: [[2048, 8, 128], [2112, 8, 128], [2112, 8, 128], [2048, 8, 128], null, null, [2048, 8, 64], [2112, 8, 64]]
+  dtype: ["bfloat16", "bfloat16", "bfloat16", "bfloat16", null, null, "bfloat16", "bfloat16"]
+  attrs: {"head_num": 8, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 65536, "next_tokens": 0, "actual_seq_qlen": [512, 512, 512, 512], "actual_seq_kvlen": [496, 496, 496, 496], "sparse_mode": 2, "sink_num": 2}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "TND-sink2-akv=ΣTkv−128 [B:sink carve-out fixed per desc(F5)] | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "bfloat16; shapes=[[2048,8,128],[2112,8,128],[2112,8,128],[2048,8,128],null,null,[2048,8,64],[2112,8,64]]; input_layout=TND, sparse_mode=2"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 8
   input_shape:
@@ -142,19 +126,11 @@ cases:
   note: "M-bfloat16-BSND-Q2x512x8x128-K2x512x8x128-sparse0 | baseline_kernels: FlashAttentionScoreGrad×1"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 12
-  input_shape:
-  - [2, 1024, 8, 128]
-  - [2, 1024, 8, 128]
-  - [2, 1024, 8, 128]
-  - [2, 1024, 8, 128]
-  - null
-  - null
-  - [2, 1024, 8, 64]
-  - [2, 1024, 8, 64]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, null, null, bfloat16, bfloat16]
-  attrs: {head_num: 8, input_layout: BSND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 2147483647, next_tokens: 2147483647, sparse_mode: 3, sink_num: 0}
+  input_shape: [[2, 720, 8, 128], [2, 720, 8, 128], [2, 720, 8, 128], [2, 720, 8, 128], null, null, [2, 720, 8, 64], [2, 720, 8, 64]]
+  dtype: ["bfloat16", "bfloat16", "bfloat16", "bfloat16", null, null, "bfloat16", "bfloat16"]
+  attrs: {"head_num": 8, "input_layout": "BSND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 2147483647, "next_tokens": 2147483647, "sparse_mode": 3, "sink_num": 0}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "M-bfloat16-BSND-Q2x1024x8x128-K2x1024x8x128-sparse3-sink1-rope | baseline_kernels: FlashAttentionScoreGrad×1 [B:BSND sink_num dead->0 per audit]"
+  note: "bfloat16; shapes=[[2,720,8,128],[2,720,8,128],[2,720,8,128],[2,720,8,128],null,null,[2,720,8,64],[2,720,8,64]]; input_layout=BSND, sparse_mode=3"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 13
   input_shape:
@@ -172,19 +148,11 @@ cases:
   note: "M-bfloat16-TND-Q1536x8x64-K1536x8x64-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 14
-  input_shape:
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - [4096, 8, 128]
-  - null
-  - null
-  - [4096, 8, 64]
-  - [4096, 8, 64]
-  dtype: [float16, float16, float16, float16, null, null, float16, float16]
-  attrs: {head_num: 8, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 511, next_tokens: 0, actual_seq_qlen: [1024, 1024, 1024, 1024], actual_seq_kvlen: [992, 992, 992, 992], sparse_mode: 4, sink_num: 2}
+  input_shape: [[2048, 8, 128], [2112, 8, 128], [2112, 8, 128], [2048, 8, 128], null, null, [2048, 8, 64], [2112, 8, 64]]
+  dtype: ["float16", "float16", "float16", "float16", null, null, "float16", "float16"]
+  attrs: {"head_num": 8, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 259, "next_tokens": 0, "actual_seq_qlen": [512, 512, 512, 512], "actual_seq_kvlen": [496, 496, 496, 496], "sparse_mode": 4, "sink_num": 2}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "TND-sink2-akv=ΣTkv−128 [B:sink carve-out fixed per desc(F5)] | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "float16; shapes=[[2048,8,128],[2112,8,128],[2112,8,128],[2048,8,128],null,null,[2048,8,64],[2112,8,64]]; input_layout=TND, sparse_mode=4"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 15
   input_shape:
@@ -217,34 +185,18 @@ cases:
   note: "M-bfloat16-BSND-Q1x768x8x64-K1x768x8x64-sparse0-rope | baseline_kernels: FlashAttentionScoreGrad×1"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 17
-  input_shape:
-  - [3072, 4, 128]
-  - [3072, 4, 128]
-  - [3072, 4, 128]
-  - [3072, 4, 128]
-  - null
-  - null
-  - null
-  - null
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, null, null, null, null]
-  attrs: {head_num: 4, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 2147483647, next_tokens: 2147483647, sparse_mode: 0, sink_num: 0, actual_seq_qlen: [1024, 1024, 1024], actual_seq_kvlen: [1024, 1024, 1024]}
+  input_shape: [[2496, 4, 128], [2496, 4, 128], [2496, 4, 128], [2496, 4, 128], null, null, null, null]
+  dtype: ["bfloat16", "bfloat16", "bfloat16", "bfloat16", null, null, null, null]
+  attrs: {"head_num": 4, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 2147483647, "next_tokens": 2147483647, "sparse_mode": 0, "sink_num": 0, "actual_seq_qlen": [832, 832, 832], "actual_seq_kvlen": [832, 832, 832]}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, null, null]
-  note: "M-bfloat16-TND-Q3072x4x128-K3072x4x128-sparse0 | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "bfloat16; shapes=[[2496,4,128],[2496,4,128],[2496,4,128],[2496,4,128],null,null,null,null]; input_layout=TND, sparse_mode=0"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 18
-  input_shape:
-  - [1024, 16, 128]
-  - [1024, 16, 128]
-  - [1024, 16, 128]
-  - [1024, 16, 128]
-  - null
-  - null
-  - [1024, 16, 64]
-  - [1024, 16, 64]
-  dtype: [float16, float16, float16, float16, null, null, float16, float16]
-  attrs: {head_num: 16, input_layout: TND, scale: 0.07216878364870323, scale_value: 0.07216878364870323, keep_prob: 1.0, pre_tokens: 2147483647, next_tokens: 2147483647, sparse_mode: 3, sink_num: 0, actual_seq_qlen: [1024], actual_seq_kvlen: [1024]}
+  input_shape: [[720, 16, 128], [720, 16, 128], [720, 16, 128], [720, 16, 128], null, null, [720, 16, 64], [720, 16, 64]]
+  dtype: ["float16", "float16", "float16", "float16", null, null, "float16", "float16"]
+  attrs: {"head_num": 16, "input_layout": "TND", "scale": 0.07216878364870323, "scale_value": 0.07216878364870323, "keep_prob": 1.0, "pre_tokens": 2147483647, "next_tokens": 2147483647, "sparse_mode": 3, "sink_num": 0, "actual_seq_qlen": [720], "actual_seq_kvlen": [720]}
   value_range: [[-1, 1], [-1, 1], [-1, 1], [-1, 1], null, null, [-1, 1], [-1, 1]]
-  note: "M-float16-TND-Q1024x16x128-K1024x16x128-sparse3-rope | baseline_kernels: FlashAttentionScoreGrad×1"
+  note: "float16; shapes=[[720,16,128],[720,16,128],[720,16,128],[720,16,128],null,null,[720,16,64],[720,16,64]]; input_layout=TND, sparse_mode=3"
 - operator: FlashAttentionScoreGradEnhance
   case_id: 19
   input_shape:

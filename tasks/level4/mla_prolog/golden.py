@@ -26,7 +26,7 @@ def rms_norm(x, gamma, epsilon):
     RMSNorm: gamma * x / sqrt(mean(x^2) + epsilon).
     """
     x_f = x.float()
-    rms = torch.sqrt(torch.mean(x_f ** 2, dim=-1, keepdim=True) + epsilon)
+    rms = torch.sqrt(torch.mean(x_f**2, dim=-1, keepdim=True) + epsilon)
     return (gamma.float() * x_f / rms).to(x.dtype)
 
 
@@ -105,7 +105,7 @@ def mla_prolog(
     qr = qr.reshape(B, S, N, D + Dr)
     q_c = qr[..., :D]
     q_r_raw = qr[..., D:]
-    query = torch.einsum('bsnd,ndh->bsnh', q_c, w_uk)
+    query = torch.einsum("bsnd,ndh->bsnh", q_c, w_uk)
     cos_exp = rope_cos.unsqueeze(2).expand(-1, -1, N, -1)
     sin_exp = rope_sin.unsqueeze(2).expand(-1, -1, N, -1)
     query_rope = apply_rope(q_r_raw, cos_exp, sin_exp)
@@ -123,7 +123,14 @@ def mla_prolog(
         c_kv = c_kv.to(original_dtype)
         k_rope = k_rope.to(original_dtype)
 
-    return query, query_rope, c_kv, k_rope
+    # einsum / slice 可能留下 view, 而输出契约要求 contiguous (issue #146)；
+    # 已连续时 .contiguous() 原样返回, 无额外拷贝
+    return (
+        query.contiguous(),
+        query_rope.contiguous(),
+        c_kv.contiguous(),
+        k_rope.contiguous(),
+    )
 
 
 def get_input(
@@ -182,8 +189,17 @@ def get_input(
         [token_x, w_dq, w_uq_qr, w_uk, w_dkv_kr, rmsnorm_gamma_cq, rmsnorm_gamma_ckv,
          rope_sin, rope_cos]，顺序与 mla_prolog 签名一致。
     """
-    unchanged = [token_x, w_dq, w_uq_qr, w_uk, w_dkv_kr, rmsnorm_gamma_cq,
-                 rmsnorm_gamma_ckv, rope_sin, rope_cos]
+    unchanged = [
+        token_x,
+        w_dq,
+        w_uq_qr,
+        w_uk,
+        w_dkv_kr,
+        rmsnorm_gamma_cq,
+        rmsnorm_gamma_ckv,
+        rope_sin,
+        rope_cos,
+    ]
     if not isinstance(rope_sin, torch.Tensor) or not isinstance(rope_cos, torch.Tensor):
         return unchanged
     if rope_sin.shape != rope_cos.shape:
@@ -191,10 +207,13 @@ def get_input(
 
     # 特殊值压力用例原样放行：含 NaN/Inf 或恒为常数（c20 value_range=[0,0]）时，本就
     # 不是"某个位置角的正弦/余弦"，其用意是特殊值与零值边界覆盖，不应被重建抹掉。
-    if not bool(torch.isfinite(rope_sin).all()) or not bool(torch.isfinite(rope_cos).all()):
+    if not bool(torch.isfinite(rope_sin).all()) or not bool(
+        torch.isfinite(rope_cos).all()
+    ):
         return unchanged
-    if (bool((rope_sin == rope_sin.reshape(-1)[0]).all())
-            and bool((rope_cos == rope_cos.reshape(-1)[0]).all())):
+    if bool((rope_sin == rope_sin.reshape(-1)[0]).all()) and bool(
+        (rope_cos == rope_cos.reshape(-1)[0]).all()
+    ):
         return unchanged
 
     dr = int(rope_sin.shape[-1])
@@ -205,11 +224,22 @@ def get_input(
 
     g = torch.Generator().manual_seed(0)  # 固定种子：跨 eval 运行必须可复现
     half_shape = list(rope_sin.shape[:-1]) + [dr // 2]
-    theta = (torch.rand(half_shape, generator=g, dtype=torch.float64) * 2 - 1) * torch.pi
+    theta = (
+        torch.rand(half_shape, generator=g, dtype=torch.float64) * 2 - 1
+    ) * torch.pi
     # 前后半复制同一角度：apply_rope 无内部 repeat，靠输入自身满足配对约定
     sin_full = torch.cat([torch.sin(theta), torch.sin(theta)], dim=-1)
     cos_full = torch.cat([torch.cos(theta), torch.cos(theta)], dim=-1)
     new_sin = sin_full.to(dtype=rope_sin.dtype, device=rope_sin.device)
     new_cos = cos_full.to(dtype=rope_cos.dtype, device=rope_cos.device)
-    return [token_x, w_dq, w_uq_qr, w_uk, w_dkv_kr, rmsnorm_gamma_cq,
-            rmsnorm_gamma_ckv, new_sin, new_cos]
+    return [
+        token_x,
+        w_dq,
+        w_uq_qr,
+        w_uk,
+        w_dkv_kr,
+        rmsnorm_gamma_cq,
+        rmsnorm_gamma_ckv,
+        new_sin,
+        new_cos,
+    ]

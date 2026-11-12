@@ -56,7 +56,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: 0}
   value_range: [-0.1, 0.1]
-  note: "S-bfloat16-2M-非对齐-对称微小值域-dim=0 (split 行轴 1022) | baseline_kernels: SwiGlu×1"
+  note: "S-bfloat16-2M-非对齐-对称微小值域-dim=0 (split 行轴 1022) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 7
   input_shape:
@@ -72,7 +72,7 @@ cases:
   dtype: [float32]
   attrs: {dim: 0}
   value_range: [-5, 10]
-  note: "S-float32-2M-非对齐-非对称中值域-dim=0 (split 行轴 1538) | baseline_kernels: SwiGlu×1"
+  note: "S-float32-2M-非对齐-非对称中值域-dim=0 (split 行轴 1538) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 9
   input_shape:
@@ -112,7 +112,7 @@ cases:
   dtype: [float32]
   attrs: {dim: 2}
   value_range: [.nan, .nan]
-  note: "S-float32-150K-质数非对齐-nan 特殊值-4D-dim=2 (split 第三维 16) | baseline_kernels: SwiGlu×1"
+  note: "S-float32-150K-质数非对齐-nan 特殊值-4D-dim=2 (split 第三维 16) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 14
   input_shape:
@@ -136,7 +136,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: 0}
   value_range: [-1, 3]
-  note: "S-bfloat16-4M-非对齐-非对称小值域-dim=0 (split 行轴 254) | baseline_kernels: SwiGlu×1"
+  note: "S-bfloat16-4M-非对齐-非对称小值域-dim=0 (split 行轴 254) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 17
   input_shape:
@@ -144,7 +144,7 @@ cases:
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-1000, 1000]
-  note: "S-float16-4M-非对齐-对称大值域-dim=0 (split 行轴 4096) | baseline_kernels: SwiGlu×1"
+  note: "S-float16-4M-非对齐-对称大值域-dim=0 (split 行轴 4096) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 18
   input_shape:
@@ -160,7 +160,7 @@ cases:
   dtype: [bfloat16]
   attrs: {dim: 1}
   value_range: [-3, 6]
-  note: "M-bfloat16-8M-非对齐-非对称中值域-3D-dim=1 (split 第二维 510) | baseline_kernels: SwiGlu×1"
+  note: "M-bfloat16-8M-非对齐-非对称中值域-3D-dim=1 (split 第二维 510) | baseline_kernels: Slice×1 + SwiGlu×1"
 - operator: SwiGlu
   case_id: 20
   input_shape:

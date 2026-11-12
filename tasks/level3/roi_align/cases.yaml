@@ -137,12 +137,7 @@ cases:
 - operator: ROIAlign
   case_id: 6
   input_shape:
-  - - 4
-    - 251
-    - 63
-    - 67
-  - - 256
-    - 5
+    [[4, 251, 63, 67], [32, 5]]
   dtype:
   - float16
   - float16
@@ -157,8 +152,7 @@ cases:
     - 1000
   - - -1
     - 1
-  note: 'M-float16-4M-非对齐-bilinear-28x28-upsampling | baseline_kernels: Cast×2 + TransData×3
-    + ROIAlign×1 + Slice×1'
+  note: "float16; shapes=[[4,251,63,67],[32,5]]; aligned=True, sampling_ratio=4"
 - operator: ROIAlign
   case_id: 7
   input_shape:

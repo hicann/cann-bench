@@ -1,21 +1,21 @@
 operator,case_id,input_shape,dtype,attrs,value_range,note
-TensorProgramVm,1,"[[4096, 4], [64, 1024]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P4096-R64-W1024-long-program
-TensorProgramVm,2,"[[4096, 4], [8, 8192]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P4096-R8-W8192-wide-regs
-TensorProgramVm,3,"[[4096, 4], [32, 4096]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P4096-R32-W4096
-TensorProgramVm,4,"[[1024, 4], [64, 8192]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P1024-R64-W8192-max-regfile
-TensorProgramVm,5,"[[1024, 4], [32, 1024]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P1024-R32-W1024
-TensorProgramVm,6,"[[1024, 4], [16, 4096]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P1024-R16-W4096
-TensorProgramVm,7,"[[256, 4], [64, 8192]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P256-R64-W8192
-TensorProgramVm,8,"[[256, 4], [16, 1024]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P256-R16-W1024
-TensorProgramVm,9,"[[256, 4], [32, 256]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P256-R32-W256
-TensorProgramVm,10,"[[64, 4], [8, 8192]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P64-R8-W8192-short-program
-TensorProgramVm,11,"[[64, 4], [16, 256]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P64-R16-W256-small
-TensorProgramVm,12,"[[4096, 4], [64, 8192]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [-1, 1]]",bfloat16-TPV-P4096-R64-W8192-max-all
-TensorProgramVm,13,"[[4096, 4], [64, 1024]]","[""int32"", ""float16""]",{},"[[0, 1073741823], [-1, 1]]",float16-TPV-P4096-R64-W1024
-TensorProgramVm,14,"[[1024, 4], [32, 4096]]","[""int32"", ""float16""]",{},"[[0, 1073741823], [-1, 1]]",float16-TPV-P1024-R32-W4096
-TensorProgramVm,15,"[[256, 4], [16, 8192]]","[""int32"", ""float16""]",{},"[[0, 1073741823], [-1, 1]]",float16-TPV-P256-R16-W8192
-TensorProgramVm,16,"[[64, 4], [8, 256]]","[""int32"", ""float16""]",{},"[[0, 1073741823], [-1, 1]]",float16-TPV-P64-R8-W256
-TensorProgramVm,17,"[[4096, 4], [64, 1024]]","[""int32"", ""float32""]",{},"[[0, 1073741823], [-1, 1]]",float32-TPV-P4096-R64-W1024-highprec
-TensorProgramVm,18,"[[1024, 4], [16, 8192]]","[""int32"", ""float32""]",{},"[[0, 1073741823], [-1, 1]]",float32-TPV-P1024-R16-W8192-highprec
-TensorProgramVm,19,"[[256, 4], [32, 4096]]","[""int32"", ""float32""]",{},"[[0, 1073741823], [-1, 1]]",float32-TPV-P256-R32-W4096-highprec
-TensorProgramVm,20,"[[1024, 4], [16, 1024]]","[""int32"", ""bfloat16""]",{},"[[0, 1073741823], [0, 0]]",bfloat16-TPV-P1024-R16-W1024-zero-init
+TensorProgramVm,1,"[[4096, 4], [64, 1024]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[4096,4],[64,1024]]; program_pattern=affine_mix"
+TensorProgramVm,2,"[[4096, 4], [8, 8192]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_dep""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[4096,4],[8,8192]]; program_pattern=affine_dep"
+TensorProgramVm,3,"[[4096, 4], [32, 4096]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_reduce""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[4096,4],[32,4096]]; program_pattern=affine_reduce"
+TensorProgramVm,4,"[[1024, 4], [64, 8192]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[1024,4],[64,8192]]; program_pattern=affine_mix"
+TensorProgramVm,5,"[[1024, 4], [32, 1024]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_alias""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[1024,4],[32,1024]]; program_pattern=affine_alias"
+TensorProgramVm,6,"[[1024, 4], [16, 4096]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_dep""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[1024,4],[16,4096]]; program_pattern=affine_dep"
+TensorProgramVm,7,"[[256, 4], [64, 8192]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[256,4],[64,8192]]; program_pattern=affine_mix"
+TensorProgramVm,8,"[[256, 4], [16, 1024]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[256,4],[16,1024]]; program_pattern=affine_mix"
+TensorProgramVm,9,"[[256, 4], [32, 256]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_reduce""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[256,4],[32,256]]; program_pattern=affine_reduce"
+TensorProgramVm,10,"[[64, 4], [8, 8192]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""dependency""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[64,4],[8,8192]]; program_pattern=dependency"
+TensorProgramVm,11,"[[64, 4], [16, 256]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""mixed""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[64,4],[16,256]]; program_pattern=mixed"
+TensorProgramVm,12,"[[4096, 4], [64, 8192]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / bfloat16; shapes=[[4096,4],[64,8192]]; program_pattern=affine_mix"
+TensorProgramVm,13,"[[4096, 4], [64, 1024]]","[""int32"", ""float16""]","{""program_pattern"": ""affine_alias""}","[[0, 1073741823], [-1, 1]]","int32 / float16; shapes=[[4096,4],[64,1024]]; program_pattern=affine_alias"
+TensorProgramVm,14,"[[1024, 4], [32, 4096]]","[""int32"", ""float16""]","{""program_pattern"": ""affine_reduce""}","[[0, 1073741823], [-1, 1]]","int32 / float16; shapes=[[1024,4],[32,4096]]; program_pattern=affine_reduce"
+TensorProgramVm,15,"[[256, 4], [16, 8192]]","[""int32"", ""float16""]","{""program_pattern"": ""affine_dep""}","[[0, 1073741823], [-1, 1]]","int32 / float16; shapes=[[256,4],[16,8192]]; program_pattern=affine_dep"
+TensorProgramVm,16,"[[64, 4], [8, 256]]","[""int32"", ""float16""]","{""program_pattern"": ""mixed""}","[[0, 1073741823], [-1, 1]]","int32 / float16; shapes=[[64,4],[8,256]]; program_pattern=mixed"
+TensorProgramVm,17,"[[4096, 4], [64, 1024]]","[""int32"", ""float32""]","{""program_pattern"": ""affine_mix""}","[[0, 1073741823], [-1, 1]]","int32 / float32; shapes=[[4096,4],[64,1024]]; program_pattern=affine_mix"
+TensorProgramVm,18,"[[1024, 4], [16, 8192]]","[""int32"", ""float32""]","{""program_pattern"": ""affine_reduce""}","[[0, 1073741823], [-1, 1]]","int32 / float32; shapes=[[1024,4],[16,8192]]; program_pattern=affine_reduce"
+TensorProgramVm,19,"[[256, 4], [32, 4096]]","[""int32"", ""float32""]","{""program_pattern"": ""affine_alias""}","[[0, 1073741823], [-1, 1]]","int32 / float32; shapes=[[256,4],[32,4096]]; program_pattern=affine_alias"
+TensorProgramVm,20,"[[128, 4], [16, 1024]]","[""int32"", ""bfloat16""]","{""program_pattern"": ""mixed_small""}","[[0, 1073741823], [-0.001, 0.001]]","int32 / bfloat16; shapes=[[128,4],[16,1024]]; program_pattern=mixed_small"

@@ -40,11 +40,15 @@ $$
 3. **Softmax 归一化**：$\text{attn\_weights} = \text{softmax}(\text{scores}, \text{dim}=-1)$
 4. **加权求和**：$y[b, :, h_q, :] = \text{attn\_weights} \times V[b, :, g, :]$，形状 $[S, D]$
 
+### 参考计算与资源预算
+
+CPU 参考保留生成器已量化的 fp16/bf16 输入值，以 fp32 执行 matmul 和 softmax，最终转换回输入 dtype；评测器送入 fp64 时保留 fp64 oracle。参考按 batch/query 分块，每块 softmax 始终遍历完整 KV 轴，不改变数学结果；每块 scores 目标不超过约 4M 元素（极端维度下最少一行）。测试集将大 batch、长序列、大 head 数与大 D 分别承重，避免无必要地组合所有上界。用例仍覆盖 prefill、decode、MTP、MQA/MHA、分组比、矩形右下角因果掩码和显式 scale。
+
 ### 实现建议
 
 > 本节为参考建议，**不是算子语义约束**。任何与上文数学公式等价、满足 §4 精度要求的实现均符合 benchmark 要求；本节仅就常见性能陷阱与误读 §5 Golden 代码的风险给出提示。
 
-- §5 Golden 代码把分组维 `G = N_q / N_kv` 折叠进 matmul 的 M 维（`Q` 变形为 `[B, N_kv, G*S, D]`），`K`/`V` 保持 `N_kv` 头随 batched matmul 复用、不物化到 `N_q` 头；该写法即下条建议的实现，可直接参考。
+- §5 Golden 代码在各 query 块内把分组维 `G = N_q / N_kv` 折叠进 matmul 的 M 维（`Q` 变形为 `[B, N_kv, G*S, D]`），`K`/`V` 保持 `N_kv` 头随 batched matmul 复用、不物化到 `N_q` 头；该写法即下条建议的实现，可直接参考。
 - 建议按头索引 `g(h_q)` 直接复用 N_kv 个 KV head；若在算子内部或调用前将 K/V 在头维度物化复制 G 份扩展到 N_q，会抹掉 GQA 相对 MHA 的 KV cache 内存收益（占用变为 $N_q \cdot S_{kv} \cdot D$ 而非 $N_{kv} \cdot S_{kv} \cdot D$），并引入冗余访存。
 - CANN 原生 GQA 算子（如 `FusedInferAttentionScore`、`npu_fusion_attention`）通过 `num_key_value_heads` 属性告知 kernel 分组比、内部按索引复用 KV，可作为参考实现路径。
 
@@ -95,13 +99,13 @@ cann_bench.gqa(Tensor query, Tensor key, Tensor value, float scaleValue=-1.0, bo
 
 | 维度 / 参数 | 范围 | 备注 |
 |---|---|---|
-| `B`（batch） | 1 ~ 256 | cases.csv 实测 2 ~ 128 |
-| `S`（query 序列长度） | 1 ~ 4096 | cases.csv 实测 1 ~ 1024；S=1 / 2 / 4 对应 decode / MTP 场景 |
-| `S_kv`（key/value 序列长度） | 1 ~ 8192 | cases.csv 实测 128 ~ 2048；`is_causal=True` 要求 $S \le S_{kv}$ |
+| `B`（batch） | 1 ~ 256 | 公开用例实测 2 ~ 128 |
+| `S`（query 序列长度） | 1 ~ 4096 | 公开用例实测 1 ~ 512；S=1 / 2 / 4 对应 decode / MTP 场景 |
+| `S_kv`（key/value 序列长度） | 1 ~ 8192 | 公开用例实测 64 ~ 512；`is_causal=True` 要求 $S \le S_{kv}$ |
 | `N_q`（query 头数） | 1 ~ 256 | cases.csv 实测 32 ~ 128；必须满足 `N_q % N_kv == 0` |
 | `N_kv`（KV 头数） | 1 ~ 256 | cases.csv 实测 1 / 4 / 8 / 32；`N_kv==N_q` 退化为 MHA，`N_kv==1` 退化为 MQA |
 | `D`（每头维度） | 64 ~ 512，64 对齐 | cases.csv 实测 128 / 256 |
-| `scaleValue` | 任意 float | cases.csv 实测 -1.0（自动 $1/\sqrt{D}$）和 0.08838（显式 $1/\sqrt{128}$）；<=0 时自动使用 $1/\sqrt{D}$ |
+| `scaleValue` | 有限 float | cases.csv 实测 -1.0（自动 $1/\sqrt{D}$）和 0.08838（显式 $1/\sqrt{128}$）；<=0 时自动使用 $1/\sqrt{D}$ |
 | `is_causal` | {False, True} | cases.csv 两者皆覆盖；True 时按右下角对齐生成 [S, S_kv] 因果掩码 |
 | 输入 dtype | float16 / bfloat16 | cases.csv 两者皆覆盖；query / key / value 三者 dtype 必须一致 |
 
@@ -140,14 +144,8 @@ cann_bench.gqa(Tensor query, Tensor key, Tensor value, float scaleValue=-1.0, bo
 ## 5. 标准 Golden 代码
 
 ```python
+
 import torch
-
-"""
-GQA算子Torch Golden参考实现
-
-分组查询注意力 (Grouped Query Attention)，多个 query head 共享一组 KV head
-公式: 扩展 KV heads 匹配 Q heads，y = softmax(Q @ K^T * scaleValue) @ V
-"""
 
 
 def gqa(
@@ -157,55 +155,120 @@ def gqa(
     scaleValue: float = -1.0,
     is_causal: bool = False,
 ) -> torch.Tensor:
+    """BSND GQA; bottom-right causal alignment; output has query dtype.
+
+    Half/bfloat16 values are already quantized by the generator. Promote them to
+    FP32 for CPU matmul/softmax; preserve FP64 input for the judge's oracle path.
+    Query tiling changes workspace, never the softmax/key reduction domain.
     """
-    分组查询注意力 (Grouped Query Attention)
+    dtype = query.dtype
+    work_dtype = torch.float64 if dtype == torch.float64 else torch.float32
+    q, k, v = (t.to(work_dtype) for t in (query, key, value))
+    B, S, Nq, D = q.shape
+    Sk, Nk = k.shape[1:3]
+    if Nq % Nk:
+        raise ValueError("N_q must be divisible by N_kv")
+    if is_causal and S > Sk:
+        raise ValueError("causal GQA requires S <= S_kv")
+    scale = 1.0 / D**0.5 if scaleValue <= 0 else scaleValue
+    G = Nq // Nk
+    out = torch.empty((B, S, Nq, D), dtype=work_dtype, device=q.device)
+    # No expanded K/V. Bound scores to ~4M entries even for large batches.
+    batch_tile = min(B, max(1, (4 * 1024**2) // max(1, Nq * Sk)))
+    for b0 in range(0, B, batch_tile):
+        b1 = min(B, b0 + batch_tile)
+        nb = b1 - b0
+        q_step = max(1, min(S, (4 * 1024**2) // (nb * Nq * Sk)))
+        kb = k[b0:b1].permute(0, 2, 1, 3)
+        vb = v[b0:b1].permute(0, 2, 1, 3)
+        for i0 in range(0, S, q_step):
+            i1 = min(S, i0 + q_step)
+            si = i1 - i0
+            qb = (
+                q[b0:b1, i0:i1]
+                .reshape(nb, si, Nk, G, D)
+                .permute(0, 2, 3, 1, 4)
+                .reshape(nb, Nk, G * si, D)
+            )
+            scores = torch.matmul(qb, kb.transpose(-1, -2))
+            scores.mul_(scale)
+            scores = scores.reshape(nb, Nk, G, si, Sk)
+            if is_causal:
+                rows = torch.arange(i0, i1, device=q.device).unsqueeze(-1)
+                cols = torch.arange(Sk, device=q.device).unsqueeze(0)
+                scores.masked_fill_(cols > rows + (Sk - S), float("-inf"))
+            weights = torch.nn.functional.softmax(scores, dim=-1).reshape(
+                nb, Nk, G * si, Sk
+            )
+            block = torch.matmul(weights, vb)
+            out[b0:b1, i0:i1] = (
+                block.reshape(nb, Nk, G, si, D)
+                .permute(0, 3, 1, 2, 4)
+                .reshape(nb, si, Nq, D)
+            )
+    return out.to(dtype)
 
-    Args:
-        query: 查询张量 [B, S, N_q, D]（已分头）
-        key: 键张量 [B, S_kv, N_kv, D]（已分头）
-        value: 值张量 [B, S_kv, N_kv, D]（已分头）
-        scaleValue: 缩放因子，<=0 时自动使用 1/sqrt(D)
-        is_causal: 是否启用因果掩码（右下角对齐），True 时 scores[..., i, j] 满足
-            j > i + (S_kv - S) 的位置在 softmax 前置为 -inf。要求 S <= S_kv。
 
-    Returns:
-        输出张量 [B, S, N_q, D]
-    """
-    B, S, N_q, D = query.shape
-    S_kv = key.shape[1]
-    N_kv = key.shape[2]
+# Native reference only: round stage outputs to the input dtype, as in the
+# published Torch reference. The public Golden above remains FP32/FP64.
+_NATIVE_SCORE_ELEMENTS = 4 * 1024**2
 
-    if scaleValue <= 0:
-        scaleValue = 1.0 / (D ** 0.5)
 
-    # GQA: G = N_q // N_kv 个 Q head 共享一组 KV head。不把 K/V 物化到 N_q 头
-    # (fp64 oracle 下大 batch 用例会物化上百 GiB → OOM)，而是把 group 维折叠进
-    # matmul 的 M 维: Q -> [B, N_kv, G*S, D]，K/V 保持 N_kv 头随 batched matmul 复用。
-    # 数值上与展开完全等价，峰值内存由 scores 决定而非物化后的 K/V。
-    G = N_q // N_kv
-    q = query.reshape(B, S, N_kv, G, D).permute(0, 2, 3, 1, 4).reshape(B, N_kv, G * S, D)
-    k = key.permute(0, 2, 1, 3)    # [B, N_kv, S_kv, D]
-    v = value.permute(0, 2, 1, 3)  # [B, N_kv, S_kv, D]
+def _native_attention(q, k, v, scale, is_causal):
+    """BSND grouped attention; full KV softmax, bounded query-row workspace."""
+    batch, query_length, query_heads, width = q.shape
+    key_length, kv_heads = k.shape[1:3]
+    if query_heads % kv_heads:
+        raise ValueError("query heads must be divisible by KV heads")
+    if is_causal and query_length > key_length:
+        raise ValueError("right-bottom causal attention requires S <= S_kv")
+    group = query_heads // kv_heads
+    value_width = v.shape[-1]
+    out = torch.empty(
+        (batch, query_length, query_heads, value_width), dtype=q.dtype, device=q.device
+    )
+    row_tile = max(1, min(group * query_length, _NATIVE_SCORE_ELEMENTS // key_length))
+    keys = torch.arange(key_length, device=q.device)
+    for b in range(batch):
+        for h in range(kv_heads):
+            rows = (
+                q[b, :, h * group : (h + 1) * group].transpose(0, 1).reshape(-1, width)
+            )
+            destination = torch.empty(
+                (group * query_length, value_width), dtype=q.dtype, device=q.device
+            )
+            for start in range(0, group * query_length, row_tile):
+                end = min(group * query_length, start + row_tile)
+                # Each operation stores an input-dtype result; do not replace
+                # this path with the promoted public Golden.
+                scores = torch.matmul(rows[start:end], k[b, :, h].transpose(0, 1))
+                scores = scores * scale
+                if is_causal:
+                    query_rows = (
+                        torch.arange(start, end, device=q.device) % query_length
+                    )
+                    scores = scores.masked_fill(
+                        keys[None] > query_rows[:, None] + key_length - query_length,
+                        -torch.inf,
+                    )
+                probabilities = torch.nn.functional.softmax(scores, dim=-1)
+                destination[start:end] = torch.matmul(probabilities, v[b, :, h])
+            out[b, :, h * group : (h + 1) * group] = destination.reshape(
+                group, query_length, value_width
+            ).transpose(0, 1)
+    return out
 
-    # 缩放点积注意力: scores [B, N_kv, G*S, S_kv]，还原 G/S 两维以便掩码与 softmax
-    scores = torch.matmul(q, k.transpose(-2, -1)) * scaleValue
-    scores = scores.reshape(B, N_kv, G, S, S_kv)
-    if is_causal:
-        i = torch.arange(S, device=scores.device).unsqueeze(-1)
-        j = torch.arange(S_kv, device=scores.device).unsqueeze(0)
-        causal_mask = j > (i + (S_kv - S))  # 右下角对齐：上三角置 -inf；[S, S_kv] 广播到各 group
-        scores = scores.masked_fill(causal_mask, float('-inf'))
-    # F217: 全 mask 行 (整行 = -inf) 在 softmax 时得 0/0 = NaN，对齐
-    # sparse_flash_attention 加显式保护 → 全 mask 行权重置 0。
-    scores_max = scores.max(dim=-1, keepdim=True).values
-    all_masked = torch.isinf(scores_max) & (scores_max < 0)
-    attn_weights = torch.nn.functional.softmax(scores, dim=-1)
-    attn_weights = torch.where(all_masked, torch.zeros_like(attn_weights), attn_weights)
-    attn_weights = attn_weights.reshape(B, N_kv, G * S, S_kv)
-    attn_output = torch.matmul(attn_weights, v)  # [B, N_kv, G*S, D]
 
-    # 转回 [B, S, N_q, D]（N_q 头序 = n_kv * G + g，与展开路径一致）
-    return attn_output.reshape(B, N_kv, G, S, D).permute(0, 3, 1, 2, 4).reshape(B, S, N_q, D)
+def gqa_bench(
+    query: torch.Tensor,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    scaleValue: float = -1.0,
+    is_causal: bool = False,
+) -> torch.Tensor:
+    """Independent input-dtype reference; not the high-precision oracle."""
+    scale = query.shape[-1] ** -0.5 if scaleValue <= 0 else scaleValue
+    return _native_attention(query, key, value, scale, is_causal)
 ```
 
 ## 6. 额外信息

@@ -12,163 +12,78 @@ cases:
 - operator: SparseFlashAttention
   case_id: 1
   input_shape:
-  - - 2
-    - 256
-    - 32
-    - 128
-  - - 2
-    - 4096
-    - 8
-    - 128
-  - - 2
-    - 4096
-    - 8
-    - 128
-  - - 2
-    - 256
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BSND
-    is_causal: true
+  - [2, 256, 32, 128]
+  - [2, 4096, 8, 128]
+  - [2, 4096, 8, 128]
+  - [2, 256, 8, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.08838, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-GQA-B2S256Skv4096N32Nkv8Dk128-top512-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[2,256,32,128],[2,4096,8,128],[2,4096,8,128],[2,256,8,512]]"
 - operator: SparseFlashAttention
   case_id: 2
   input_shape:
-  - - 2
-    - 256
-    - 32
-    - 192
-  - - 2
-    - 4096
-    - 8
-    - 192
-  - - 2
-    - 4096
-    - 8
-    - 128
-  - - 2
-    - 256
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.07217
-    inputLayout: BSND
-    is_causal: false
+  - [2, 128, 32, 192]
+  - [2, 4096, 8, 192]
+  - [2, 4096, 8, 128]
+  - [2, 128, 8, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.07217, inputLayout: BSND, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-GQA-Dk192Dv128-top512"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[2,128,32,192],[2,4096,8,192],[2,4096,8,128],[2,128,8,512]]"
 - operator: SparseFlashAttention
   case_id: 3
   input_shape:
-  - - 2
-    - 32
-    - 1024
-    - 128
-  - - 2
-    - 8
-    - 8192
-    - 128
-  - - 2
-    - 8
-    - 8192
-    - 128
-  - - 2
-    - 8
-    - 1024
-    - 1024
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BNSD
-    is_causal: true
+  - [2, 32, 128, 128]
+  - [2, 8, 8192, 128]
+  - [2, 8, 8192, 128]
+  - [2, 8, 128, 1024]
+  dtype: [bfloat16, bfloat16, bfloat16, int32]
+  attrs: {scaleValue: 0.08838, inputLayout: BNSD, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "bfloat16-BNSD-GQA-top1024-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 8191]
+  note: "bfloat16 / int32; shapes=[[2,32,128,128],[2,8,8192,128],[2,8,8192,128],[2,8,128,1024]]"
 - operator: SparseFlashAttention
   case_id: 4
   input_shape:
-  - - 2
-    - 32
-    - 512
-    - 192
-  - - 2
-    - 8
-    - 4096
-    - 192
-  - - 2
-    - 8
-    - 4096
-    - 128
-  - - 2
-    - 8
-    - 512
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.07217
-    inputLayout: BNSD
-    is_causal: false
+  - [2, 32, 128, 192]
+  - [2, 8, 4096, 192]
+  - [2, 8, 4096, 128]
+  - [2, 8, 128, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.07217, inputLayout: BNSD, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BNSD-GQA-Dk192-top512"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[2,32,128,192],[2,8,4096,192],[2,8,4096,128],[2,8,128,512]]"
 - operator: SparseFlashAttention
   case_id: 5
   input_shape:
-  - - 1
-    - 256
-    - 64
-    - 128
-  - - 1
-    - 4096
-    - 8
-    - 128
-  - - 1
-    - 4096
-    - 8
-    - 128
-  - - 1
-    - 256
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BSND
-    is_causal: true
+  - [1, 256, 64, 128]
+  - [1, 4096, 8, 128]
+  - [1, 4096, 8, 128]
+  - [1, 256, 8, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.08838, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-GQA-N64Nkv8-top512-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[1,256,64,128],[1,4096,8,128],[1,4096,8,128],[1,256,8,512]]"
 - operator: SparseFlashAttention
   case_id: 6
   input_shape:
@@ -178,8 +93,12 @@ cases:
   - [4, 1, 8, 256]
   dtype: [float16, float16, float16, int32]
   attrs: {scaleValue: 0.08838, inputLayout: BSND, is_causal: false}
-  value_range: [-1, 1]
-  note: "[R:bounded-resource] dtype=float16/float16/float16/int32; shapes=4x1x32x128/4x2048x8x128/4x2048x8x128/4x1x8x256; inputLayout=BSND,is_causal=False"
+  value_range:
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "float16 / int32; shapes=[[4,1,32,128],[4,2048,8,128],[4,2048,8,128],[4,1,8,256]]"
 - operator: SparseFlashAttention
   case_id: 7
   input_shape:
@@ -189,207 +108,117 @@ cases:
   - [4, 8, 1, 256]
   dtype: [bfloat16, bfloat16, bfloat16, int32]
   attrs: {scaleValue: 0.07217, inputLayout: BNSD, is_causal: false}
-  value_range: [-1, 1]
-  note: "[R:bounded-resource] dtype=bfloat16/bfloat16/bfloat16/int32; shapes=4x32x1x192/4x8x2048x192/4x8x2048x128/4x8x1x256; inputLayout=BNSD,is_causal=False"
+  value_range:
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "bfloat16 / int32; shapes=[[4,32,1,192],[4,8,2048,192],[4,8,2048,128],[4,8,1,256]]"
 - operator: SparseFlashAttention
   case_id: 8
   input_shape:
-  - - 8
-    - 4
-    - 64
-    - 128
-  - - 8
-    - 4096
-    - 8
-    - 128
-  - - 8
-    - 4096
-    - 8
-    - 128
-  - - 8
-    - 4
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BSND
-    is_causal: true
+  - [8, 4, 64, 128]
+  - [8, 4096, 8, 128]
+  - [8, 4096, 8, 128]
+  - [8, 4, 8, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.08838, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-GQA-B8S4-MTP-top512-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[8,4,64,128],[8,4096,8,128],[8,4096,8,128],[8,4,8,512]]"
 - operator: SparseFlashAttention
   case_id: 9
   input_shape:
-  - - 1
-    - 128
-    - 128
-    - 512
-  - - 1
-    - 2048
-    - 1
-    - 512
-  - - 1
-    - 2048
-    - 1
-    - 512
-  - - 1
-    - 128
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04419
-    inputLayout: BSND
-    is_causal: true
+  - [1, 128, 128, 512]
+  - [1, 2048, 1, 512]
+  - [1, 2048, 1, 512]
+  - [1, 128, 1, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04419, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-MLA-Dk512Dv512-top512-causal | baseline_kernels: SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "float16 / int32; shapes=[[1,128,128,512],[1,2048,1,512],[1,2048,1,512],[1,128,1,512]]"
 - operator: SparseFlashAttention
   case_id: 10
   input_shape:
-  - - 1
-    - 128
-    - 128
-    - 576
-  - - 1
-    - 2048
-    - 1
-    - 576
-  - - 1
-    - 2048
-    - 1
-    - 512
-  - - 1
-    - 128
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04167
-    inputLayout: BSND
-    is_causal: true
+  - [1, 128, 128, 576]
+  - [1, 2048, 1, 576]
+  - [1, 2048, 1, 512]
+  - [1, 128, 1, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04167, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-MLA-Dk576Dv512-top512-causal | baseline_kernels: Slice×4 + SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "float16 / int32; shapes=[[1,128,128,576],[1,2048,1,576],[1,2048,1,512],[1,128,1,512]]"
 - operator: SparseFlashAttention
   case_id: 11
   input_shape:
-  - - 2
-    - 128
-    - 256
-    - 512
-  - - 2
-    - 1
-    - 2048
-    - 512
-  - - 2
-    - 1
-    - 2048
-    - 512
-  - - 2
-    - 1
-    - 256
-    - 512
-  dtype:
-  - bfloat16
-  - bfloat16
-  - bfloat16
-  - int32
-  attrs:
-    scaleValue: 0.04419
-    inputLayout: BNSD
-    is_causal: true
+  - [2, 128, 128, 512]
+  - [2, 1, 2048, 512]
+  - [2, 1, 2048, 512]
+  - [2, 1, 128, 512]
+  dtype: [bfloat16, bfloat16, bfloat16, int32]
+  attrs: {scaleValue: 0.04419, inputLayout: BNSD, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "bfloat16-BNSD-MLA-Dk512-top512-causal | baseline_kernels: Transpose×2 + SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "bfloat16 / int32; shapes=[[2,128,128,512],[2,1,2048,512],[2,1,2048,512],[2,1,128,512]]"
 - operator: SparseFlashAttention
   case_id: 12
   input_shape:
-  - - 2
-    - 128
-    - 128
-    - 576
-  - - 2
-    - 1
-    - 1024
-    - 576
-  - - 2
-    - 1
-    - 1024
-    - 512
-  - - 2
-    - 1
-    - 128
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04167
-    inputLayout: BNSD
-    is_causal: false
+  - [2, 128, 128, 576]
+  - [2, 1, 1024, 576]
+  - [2, 1, 1024, 512]
+  - [2, 1, 128, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04167, inputLayout: BNSD, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BNSD-MLA-Dk576-top512 | baseline_kernels: Transpose×2 + Slice×4 + SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 1023]
+  note: "float16 / int32; shapes=[[2,128,128,576],[2,1,1024,576],[2,1,1024,512],[2,1,128,512]]"
 - operator: SparseFlashAttention
   case_id: 13
-  input_shape: [[2, 64, 128, 512], [2, 1536, 1, 512], [2, 1536, 1, 512], [2, 64, 1, 512]]
+  input_shape:
+  - [2, 64, 128, 512]
+  - [2, 1536, 1, 512]
+  - [2, 1536, 1, 512]
+  - [2, 64, 1, 512]
   dtype: [float16, float16, float16, int32]
   attrs: {scaleValue: 0.04419, inputLayout: BSND, is_causal: true}
-  value_range: [-1, 1]
-  note: "M-float16-B2-Sq64-Skv1536-去重替换 [R:replaced exact dup of c9]"
+  value_range:
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 1535]
+  note: "float16 / int32; shapes=[[2,64,128,512],[2,1536,1,512],[2,1536,1,512],[2,64,1,512]]"
 - operator: SparseFlashAttention
   case_id: 14
   input_shape:
-  - - 16
-    - 1
-    - 128
-    - 512
-  - - 16
-    - 8192
-    - 1
-    - 512
-  - - 16
-    - 8192
-    - 1
-    - 512
-  - - 16
-    - 1
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04419
-    inputLayout: BSND
-    is_causal: false
+  - [16, 1, 128, 512]
+  - [16, 8192, 1, 512]
+  - [16, 8192, 1, 512]
+  - [16, 1, 1, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04419, inputLayout: BSND, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-MLA-B16S1-decode-top512 | baseline_kernels: SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 8191]
+  note: "float16 / int32; shapes=[[16,1,128,512],[16,8192,1,512],[16,8192,1,512],[16,1,1,512]]"
 - operator: SparseFlashAttention
   case_id: 15
   input_shape:
@@ -399,165 +228,84 @@ cases:
   - [4, 1, 1, 256]
   dtype: [bfloat16, bfloat16, bfloat16, int32]
   attrs: {scaleValue: 0.04167, inputLayout: BNSD, is_causal: false}
-  value_range: [-1, 1]
-  note: "[R:bounded-resource] dtype=bfloat16/bfloat16/bfloat16/int32; shapes=4x64x1x576/4x1x2048x576/4x1x2048x512/4x1x1x256; inputLayout=BNSD,is_causal=False"
+  value_range:
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 2047]
+  note: "bfloat16 / int32; shapes=[[4,64,1,576],[4,1,2048,576],[4,1,2048,512],[4,1,1,256]]"
 - operator: SparseFlashAttention
   case_id: 16
   input_shape:
-  - - 8
-    - 4
-    - 128
-    - 512
-  - - 8
-    - 4096
-    - 1
-    - 512
-  - - 8
-    - 4096
-    - 1
-    - 512
-  - - 8
-    - 4
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04419
-    inputLayout: BSND
-    is_causal: false
+  - [8, 4, 128, 512]
+  - [8, 4096, 1, 512]
+  - [8, 4096, 1, 512]
+  - [8, 4, 1, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04419, inputLayout: BSND, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-MLA-B8S4-MTP-top512 | baseline_kernels: SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[8,4,128,512],[8,4096,1,512],[8,4096,1,512],[8,4,1,512]]"
 - operator: SparseFlashAttention
   case_id: 17
   input_shape:
-  - - 16
-    - 64
-    - 4
-    - 576
-  - - 16
-    - 1
-    - 8192
-    - 576
-  - - 16
-    - 1
-    - 8192
-    - 512
-  - - 16
-    - 1
-    - 4
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04167
-    inputLayout: BNSD
-    is_causal: true
+  - [8, 64, 4, 576]
+  - [8, 1, 8192, 576]
+  - [8, 1, 8192, 512]
+  - [8, 1, 4, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04167, inputLayout: BNSD, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BNSD-MLA-B16S4-MTP-Dk576-top512-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 8191]
+  note: "float16 / int32; shapes=[[8,64,4,576],[8,1,8192,576],[8,1,8192,512],[8,1,4,512]]"
 - operator: SparseFlashAttention
   case_id: 18
   input_shape:
-  - - 32
-    - 1
-    - 128
-    - 512
-  - - 32
-    - 4096
-    - 1
-    - 512
-  - - 32
-    - 4096
-    - 1
-    - 512
-  - - 32
-    - 1
-    - 1
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.04419
-    inputLayout: BSND
-    is_causal: false
+  - [32, 1, 128, 512]
+  - [32, 4096, 1, 512]
+  - [32, 4096, 1, 512]
+  - [32, 1, 1, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.04419, inputLayout: BSND, is_causal: false}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-MLA-B32S1-decode-large-batch | baseline_kernels: SparseFlashAttention×1"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[32,1,128,512],[32,4096,1,512],[32,4096,1,512],[32,1,1,512]]"
 - operator: SparseFlashAttention
   case_id: 19
   input_shape:
-  - - 8
-    - 2
-    - 32
-    - 128
-  - - 8
-    - 4096
-    - 8
-    - 128
-  - - 8
-    - 4096
-    - 8
-    - 128
-  - - 8
-    - 2
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BSND
-    is_causal: true
+  - [8, 2, 32, 128]
+  - [8, 4096, 8, 128]
+  - [8, 4096, 8, 128]
+  - [8, 2, 8, 512]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.08838, inputLayout: BSND, is_causal: true}
   value_range:
-  - -1
-  - 1
-  note: "float16-BSND-GQA-B8S2-MTP-large-batch-causal"
+  - [-1, 1]
+  - [0, 1]
+  - [0, 1]
+  - [0, 4095]
+  note: "float16 / int32; shapes=[[8,2,32,128],[8,4096,8,128],[8,4096,8,128],[8,2,8,512]]"
 - operator: SparseFlashAttention
   case_id: 20
   input_shape:
-  - - 2
-    - 256
-    - 32
-    - 128
-  - - 2
-    - 4096
-    - 8
-    - 128
-  - - 2
-    - 4096
-    - 8
-    - 128
-  - - 2
-    - 256
-    - 8
-    - 512
-  dtype:
-  - float16
-  - float16
-  - float16
-  - int32
-  attrs:
-    scaleValue: 0.08838
-    inputLayout: BSND
-    is_causal: false
+  - [1, 3, 4, 64]
+  - [1, 7, 2, 64]
+  - [1, 7, 2, 64]
+  - [1, 3, 2, 3]
+  dtype: [float16, float16, float16, int32]
+  attrs: {scaleValue: 0.125, inputLayout: BSND, is_causal: false}
   value_range:
-  - 0
-  - 0
-  note: "float16-BSND-GQA-zero-input"
+  - [0, 0]
+  - [0, 0]
+  - [0, 0]
+  - [0, 6]
+  note: "float16 / int32; shapes=[[1,3,4,64],[1,7,2,64],[1,7,2,64],[1,3,2,3]]"

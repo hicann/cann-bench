@@ -47,7 +47,7 @@ def _muon_zeropower(g):
     x = g / (g.norm(dim=(-2, -1), keepdim=True) + 1e-7)
     transposed = x.shape[-2] > x.shape[-1]
     if transposed:
-        x = x.transpose(-2, -1)                                    # 保证 rows <= cols，A = X Xᵀ 更小
+        x = x.transpose(-2, -1)  # 保证 rows <= cols，A = X Xᵀ 更小
     for _ in range(_NS_STEPS):
         a_mat = x @ x.transpose(-2, -1)
         b_mat = _NS_B * a_mat + _NS_C * (a_mat @ a_mat)
@@ -57,7 +57,9 @@ def _muon_zeropower(g):
     return x
 
 
-def _lact_ttt_chunk_core(q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first, compute_dtype):
+def _lact_ttt_chunk_core(
+    q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first, compute_dtype
+):
     """核心计算：以 compute_dtype 精度执行块循环（apply / update），返回 (y, w1, w2, w3)。"""
     Bsz, L, H, D = q.shape
 
@@ -66,39 +68,39 @@ def _lact_ttt_chunk_core(q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_f
     # 沿 D 做 L2 归一化后转为 [B, H, L, D]，便于逐 (b, h) 做 batched matmul
     q_hat = (q_f / (q_f.norm(dim=-1, keepdim=True) + 1e-6)).permute(0, 2, 1, 3)
     k_hat = (k_f / (k_f.norm(dim=-1, keepdim=True) + 1e-6)).permute(0, 2, 1, 3)
-    v_bh = v.to(compute_dtype).permute(0, 2, 1, 3)                 # [B, H, L, D]
-    lr_bh = lr.to(compute_dtype).permute(0, 2, 1).unsqueeze(-1)    # [B, H, L, 1]
-    W1 = w1.to(compute_dtype).clone()                              # [B, H, Dh, D]
-    W2 = w2.to(compute_dtype).clone()                              # [B, H, D, Dh]
-    W3 = w3.to(compute_dtype).clone()                              # [B, H, Dh, D]
+    v_bh = v.to(compute_dtype).permute(0, 2, 1, 3)  # [B, H, L, D]
+    lr_bh = lr.to(compute_dtype).permute(0, 2, 1).unsqueeze(-1)  # [B, H, L, 1]
+    W1 = w1.to(compute_dtype).clone()  # [B, H, Dh, D]
+    W2 = w2.to(compute_dtype).clone()  # [B, H, D, Dh]
+    W3 = w3.to(compute_dtype).clone()  # [B, H, Dh, D]
 
     y = torch.empty(Bsz, H, L, D, dtype=compute_dtype, device=q.device)
 
     def _apply(s, e):
         # y_t = W2 [SiLU(W1 q̂_t) ⊙ (W3 q̂_t)]，t ∈ [s, e)
-        x = q_hat[:, :, s:e]                                       # [B, H, Lc, D]
-        h1 = x @ W1.transpose(-2, -1)                              # [B, H, Lc, Dh]
+        x = q_hat[:, :, s:e]  # [B, H, Lc, D]
+        h1 = x @ W1.transpose(-2, -1)  # [B, H, Lc, Dh]
         h3 = x @ W3.transpose(-2, -1)
         u = torch.nn.functional.silu(h1) * h3
-        y[:, :, s:e] = u @ W2.transpose(-2, -1)                    # [B, H, Lc, D]
+        y[:, :, s:e] = u @ W2.transpose(-2, -1)  # [B, H, Lc, D]
 
     def _update(s, e):
         nonlocal W1, W2, W3
-        x = k_hat[:, :, s:e]                                       # [B, H, Lc, D]
+        x = k_hat[:, :, s:e]  # [B, H, Lc, D]
         # 前向：h1 = W1 k̂, h3 = W3 k̂, u = SiLU(h1) ⊙ h3, out = W2 u
-        h1 = x @ W1.transpose(-2, -1)                              # [B, H, Lc, Dh]
+        h1 = x @ W1.transpose(-2, -1)  # [B, H, Lc, Dh]
         h3 = x @ W3.transpose(-2, -1)
         sig = torch.sigmoid(h1)
-        s1 = h1 * sig                                              # SiLU(h1)
+        s1 = h1 * sig  # SiLU(h1)
         u = s1 * h3
         # ℒ = Σ_i lr_i · (−outᵢᵀ vᵢ) 的闭式梯度：∂out = −lr ⊙ v
-        d_out = -lr_bh[:, :, s:e] * v_bh[:, :, s:e]                # [B, H, Lc, D]
-        d_w2 = d_out.transpose(-2, -1) @ u                         # dW2 = Σ ∂out uᵀ   [B, H, D, Dh]
-        d_u = d_out @ W2                                           # du = W2ᵀ ∂out     [B, H, Lc, Dh]
-        d_h3 = d_u * s1                                            # dh3 = du ⊙ SiLU(h1)
-        d_h1 = d_u * h3 * (sig * (1.0 + h1 * (1.0 - sig)))         # dh1 = du ⊙ h3 ⊙ SiLU'(h1)
-        d_w1 = d_h1.transpose(-2, -1) @ x                          # dW1 = Σ dh1 k̂ᵀ    [B, H, Dh, D]
-        d_w3 = d_h3.transpose(-2, -1) @ x                          # dW3 = Σ dh3 k̂ᵀ    [B, H, Dh, D]
+        d_out = -lr_bh[:, :, s:e] * v_bh[:, :, s:e]  # [B, H, Lc, D]
+        d_w2 = d_out.transpose(-2, -1) @ u  # dW2 = Σ ∂out uᵀ   [B, H, D, Dh]
+        d_u = d_out @ W2  # du = W2ᵀ ∂out     [B, H, Lc, Dh]
+        d_h3 = d_u * s1  # dh3 = du ⊙ SiLU(h1)
+        d_h1 = d_u * h3 * (sig * (1.0 + h1 * (1.0 - sig)))  # dh1 = du ⊙ h3 ⊙ SiLU'(h1)
+        d_w1 = d_h1.transpose(-2, -1) @ x  # dW1 = Σ dh1 k̂ᵀ    [B, H, Dh, D]
+        d_w3 = d_h3.transpose(-2, -1) @ x  # dW3 = Σ dh3 k̂ᵀ    [B, H, Dh, D]
         if use_muon:
             d_w1 = _muon_zeropower(d_w1)
             d_w2 = _muon_zeropower(d_w2)
@@ -109,7 +111,7 @@ def _lact_ttt_chunk_core(q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_f
         W3 = _row_l2_normalize(W3 - d_w3)
 
     for s in range(0, L, chunk_size):
-        e = min(s + chunk_size, L)                                 # 末块可残缺
+        e = min(s + chunk_size, L)  # 末块可残缺
         if update_first:
             _update(s, e)
             _apply(s, e)
@@ -153,7 +155,18 @@ def lact_ttt_chunk(
         w1_out / w2_out / w3_out: 序列末尾的快权重，shape 与输入同、dtype 与 q 一致
     """
     y, w1_o, w2_o, w3_o = _lact_ttt_chunk_core(
-        q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first, torch.float32)
+        q,
+        k,
+        v,
+        w1,
+        w2,
+        w3,
+        lr,
+        chunk_size,
+        use_muon,
+        update_first,
+        torch.float64 if q.dtype == torch.float64 else torch.float32,
+    )
     return y.to(q.dtype), w1_o.to(q.dtype), w2_o.to(q.dtype), w3_o.to(q.dtype)
 
 
@@ -170,4 +183,22 @@ def lact_ttt_chunk_oracle(
     update_first: bool = False,
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Oracle (g)：dtype-agnostic，计算精度跟随输入（fp64_cpu 下为 fp64 真值），不硬编码 .float()。"""
-    return _lact_ttt_chunk_core(q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first, q.dtype)
+    return _lact_ttt_chunk_core(
+        q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first, q.dtype
+    )
+
+
+def lact_ttt_chunk_bench(
+    q: torch.Tensor,
+    k: torch.Tensor,
+    v: torch.Tensor,
+    w1: torch.Tensor,
+    w2: torch.Tensor,
+    w3: torch.Tensor,
+    lr: torch.Tensor,
+    chunk_size: int = 2048,
+    use_muon: bool = False,
+    update_first: bool = False,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """FP32 working math for quantized inputs; same output dtype as the API."""
+    return lact_ttt_chunk(q, k, v, w1, w2, w3, lr, chunk_size, use_muon, update_first)

@@ -27,15 +27,7 @@ operator:
     final_regs = 全部 P 条指令执行完后的寄存器堆
   description: 张量程序虚拟机——kernel 即解释器，程序即数据；指令序列存在真依赖，逐条驱动寄存器堆的行向量运算
   shape_support: "program [P, 4] int32（任意非负整数合法），init_regs [R, W] float32/float16/bfloat16，输出 final_regs [R, W] 同 init_regs dtype"
-  # 阈值用仓库 checker (kernel_eval.utils.compare.compare_tensors, native=plain golden)
-  # 实测确定：plain(fp32 寄存器堆) vs fp64 oracle。测点覆盖最大公开规模（P=4096,
-  # R=64, W=1024 / R=8, W=8192 全域随机程序）、最坏构造（4096 条同寄存器 MULADD 最长
-  # 依赖链、program 窄值域 [2,5]/[0,7]/[3,3] 的非饱和指令混合 4096 深链、fp16 边界
-  # init [-1000,1000]、W=17 非对齐）。实测 bf16/fp16 全部测点 MERE=MARE=0（误差不跨
-  # 低精度量化格），fp32 最坏 MERE=3.7e-7（非饱和链）/ MARE=3.4e-5（MULADD 链）。
-  # 取与框架默认一致量级的显式阈值 float32 0.0001 / float16 0.001 / bfloat16 0.008，
-  # MERE 留 >=270x、MARE 判据(10x)留 >=30x 裕量，覆盖独立 fp32 实现（不同归约顺序/
-  # FMA）的合理差异。
+  # 阈值保持不变；量化输入以FP32执行，裁判高精度参考保留FP64。
   precision_thresholds:
     float32: 0.0001
     float16: 0.001
@@ -47,7 +39,7 @@ operator:
     - int32
     shape: "[P, 4]"
   - name: init_regs
-    description: 寄存器堆初值，R 个宽 W 的行向量寄存器（评测取值范围 [-1, 1]）
+    description: 寄存器堆初值，有限值在 [-1, 1]；IEEE NaN/Inf 边界见 desc；量化输入按 FP32 ISA 执行
     dtype:
     - float32
     - float16

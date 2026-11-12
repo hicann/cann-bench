@@ -19,14 +19,23 @@ def image_resize_normalize(
     channels = x.shape[1]
     if mean.shape != (channels,) or std.shape != (channels,):
         raise ValueError("mean/std must be [C]")
-    if not torch.isfinite(x).all() or not torch.isfinite(mean).all() or not torch.isfinite(std).all():
+    if (
+        not torch.isfinite(x).all()
+        or not torch.isfinite(mean).all()
+        or not torch.isfinite(std).all()
+    ):
         raise ValueError("x/mean/std must contain finite values")
     if torch.any(std <= 0):
         raise ValueError("std must be strictly positive")
     out_dtype = x.dtype
+    # The FP64 oracle must preserve feature, mean and scale precision.
+    calc_dtype = torch.float64 if x.dtype == torch.float64 else torch.float32
     resized = torch.nn.functional.interpolate(
-        x.float(), size=(out_h, out_w), mode="bilinear", align_corners=align_corners
+        x.to(calc_dtype),
+        size=(out_h, out_w),
+        mode="bilinear",
+        align_corners=align_corners,
     )
-    denom = std.float().reshape(1, channels, 1, 1)
-    y = (resized - mean.float().reshape(1, channels, 1, 1)) / denom
+    denom = std.to(calc_dtype).reshape(1, channels, 1, 1)
+    y = (resized - mean.to(calc_dtype).reshape(1, channels, 1, 1)) / denom
     return y.to(out_dtype)

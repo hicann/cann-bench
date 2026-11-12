@@ -1,231 +1,361 @@
-# ----------------------------------------------------------------------------
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
-# CANN Open Software License Agreement Version 2.0 (the "License").
-# Please refer to the License for details. You may not use this file except in compliance with the License.
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
-# See LICENSE in the root of the software repository for the full text of the License.
-# ----------------------------------------------------------------------------
-
 cases:
 - operator: TensorProgramVm
   case_id: 1
   input_shape:
-  - [4096, 4]
-  - [64, 1024]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 64
+    - 1024
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P4096-R64-W1024-long-program
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[4096,4],[64,1024]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 2
   input_shape:
-  - [4096, 4]
-  - [8, 8192]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 8
+    - 8192
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_dep
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P4096-R8-W8192-wide-regs
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[4096,4],[8,8192]]; program_pattern=affine_dep"
 - operator: TensorProgramVm
   case_id: 3
   input_shape:
-  - [4096, 4]
-  - [32, 4096]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 32
+    - 4096
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_reduce
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P4096-R32-W4096
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[4096,4],[32,4096]]; program_pattern=affine_reduce"
 - operator: TensorProgramVm
   case_id: 4
   input_shape:
-  - [1024, 4]
-  - [64, 8192]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 1024
+    - 4
+  - - 64
+    - 8192
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P1024-R64-W8192-max-regfile
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[1024,4],[64,8192]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 5
   input_shape:
-  - [1024, 4]
-  - [32, 1024]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 1024
+    - 4
+  - - 32
+    - 1024
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_alias
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P1024-R32-W1024
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[1024,4],[32,1024]]; program_pattern=affine_alias"
 - operator: TensorProgramVm
   case_id: 6
   input_shape:
-  - [1024, 4]
-  - [16, 4096]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 1024
+    - 4
+  - - 16
+    - 4096
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_dep
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P1024-R16-W4096
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[1024,4],[16,4096]]; program_pattern=affine_dep"
 - operator: TensorProgramVm
   case_id: 7
   input_shape:
-  - [256, 4]
-  - [64, 8192]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 256
+    - 4
+  - - 64
+    - 8192
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P256-R64-W8192
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[256,4],[64,8192]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 8
   input_shape:
-  - [256, 4]
-  - [16, 1024]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 256
+    - 4
+  - - 16
+    - 1024
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P256-R16-W1024
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[256,4],[16,1024]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 9
   input_shape:
-  - [256, 4]
-  - [32, 256]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 256
+    - 4
+  - - 32
+    - 256
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_reduce
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P256-R32-W256
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[256,4],[32,256]]; program_pattern=affine_reduce"
 - operator: TensorProgramVm
   case_id: 10
   input_shape:
-  - [64, 4]
-  - [8, 8192]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 64
+    - 4
+  - - 8
+    - 8192
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: dependency
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P64-R8-W8192-short-program
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[64,4],[8,8192]]; program_pattern=dependency"
 - operator: TensorProgramVm
   case_id: 11
   input_shape:
-  - [64, 4]
-  - [16, 256]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 64
+    - 4
+  - - 16
+    - 256
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: mixed
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P64-R16-W256-small
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[64,4],[16,256]]; program_pattern=mixed"
 - operator: TensorProgramVm
   case_id: 12
   input_shape:
-  - [4096, 4]
-  - [64, 8192]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 64
+    - 8192
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: bfloat16-TPV-P4096-R64-W8192-max-all
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / bfloat16; shapes=[[4096,4],[64,8192]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 13
   input_shape:
-  - [4096, 4]
-  - [64, 1024]
-  dtype: [int32, float16]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 64
+    - 1024
+  dtype:
+  - int32
+  - float16
+  attrs:
+    program_pattern: affine_alias
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float16-TPV-P4096-R64-W1024
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float16; shapes=[[4096,4],[64,1024]]; program_pattern=affine_alias"
 - operator: TensorProgramVm
   case_id: 14
   input_shape:
-  - [1024, 4]
-  - [32, 4096]
-  dtype: [int32, float16]
-  attrs: {}
+  - - 1024
+    - 4
+  - - 32
+    - 4096
+  dtype:
+  - int32
+  - float16
+  attrs:
+    program_pattern: affine_reduce
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float16-TPV-P1024-R32-W4096
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float16; shapes=[[1024,4],[32,4096]]; program_pattern=affine_reduce"
 - operator: TensorProgramVm
   case_id: 15
   input_shape:
-  - [256, 4]
-  - [16, 8192]
-  dtype: [int32, float16]
-  attrs: {}
+  - - 256
+    - 4
+  - - 16
+    - 8192
+  dtype:
+  - int32
+  - float16
+  attrs:
+    program_pattern: affine_dep
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float16-TPV-P256-R16-W8192
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float16; shapes=[[256,4],[16,8192]]; program_pattern=affine_dep"
 - operator: TensorProgramVm
   case_id: 16
   input_shape:
-  - [64, 4]
-  - [8, 256]
-  dtype: [int32, float16]
-  attrs: {}
+  - - 64
+    - 4
+  - - 8
+    - 256
+  dtype:
+  - int32
+  - float16
+  attrs:
+    program_pattern: mixed
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float16-TPV-P64-R8-W256
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float16; shapes=[[64,4],[8,256]]; program_pattern=mixed"
 - operator: TensorProgramVm
   case_id: 17
   input_shape:
-  - [4096, 4]
-  - [64, 1024]
-  dtype: [int32, float32]
-  attrs: {}
+  - - 4096
+    - 4
+  - - 64
+    - 1024
+  dtype:
+  - int32
+  - float32
+  attrs:
+    program_pattern: affine_mix
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float32-TPV-P4096-R64-W1024-highprec
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float32; shapes=[[4096,4],[64,1024]]; program_pattern=affine_mix"
 - operator: TensorProgramVm
   case_id: 18
   input_shape:
-  - [1024, 4]
-  - [16, 8192]
-  dtype: [int32, float32]
-  attrs: {}
+  - - 1024
+    - 4
+  - - 16
+    - 8192
+  dtype:
+  - int32
+  - float32
+  attrs:
+    program_pattern: affine_reduce
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float32-TPV-P1024-R16-W8192-highprec
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float32; shapes=[[1024,4],[16,8192]]; program_pattern=affine_reduce"
 - operator: TensorProgramVm
   case_id: 19
   input_shape:
-  - [256, 4]
-  - [32, 4096]
-  dtype: [int32, float32]
-  attrs: {}
+  - - 256
+    - 4
+  - - 32
+    - 4096
+  dtype:
+  - int32
+  - float32
+  attrs:
+    program_pattern: affine_alias
   value_range:
-  - [0, 1073741823]
-  - [-1, 1]
-  note: float32-TPV-P256-R32-W4096-highprec
+  - - 0
+    - 1073741823
+  - - -1
+    - 1
+  note: "int32 / float32; shapes=[[256,4],[32,4096]]; program_pattern=affine_alias"
 - operator: TensorProgramVm
   case_id: 20
   input_shape:
-  - [1024, 4]
-  - [16, 1024]
-  dtype: [int32, bfloat16]
-  attrs: {}
+  - - 128
+    - 4
+  - - 16
+    - 1024
+  dtype:
+  - int32
+  - bfloat16
+  attrs:
+    program_pattern: mixed_small
   value_range:
-  - [0, 1073741823]
-  - [0, 0]
-  note: bfloat16-TPV-P1024-R16-W1024-zero-init
+  - - 0
+    - 1073741823
+  - - -0.001
+    - 0.001
+  note: "int32 / bfloat16; shapes=[[128,4],[16,1024]]; program_pattern=mixed_small"

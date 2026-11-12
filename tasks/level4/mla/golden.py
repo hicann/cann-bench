@@ -13,25 +13,6 @@
 
 import torch
 
-"""
-MLA算子Torch Golden参考实现
-
-多头潜在注意力 (Multi-Head Latent Attention)，仅包含注意力计算部分
-Q 和 K 均分为 nope 和 rope 两部分传入，内部拼接后计算注意力
-支持 BSND 和 BNSD 两种输入 layout
-
-语义约束:
-    v 与 k_nope 在数值上完全相同 (共享同一份 latent KV cache)。
-    算子接口为兼容通用 attention API 保留独立入参；get_input 会将 v
-    规整为 k_nope 的副本，确保 Golden 与被测算子接收相同的合法输入。
-
-公式:
-    Q = concat(Q_nope, Q_rope)   dim: d_nope + d_rope
-    K = concat(K_nope, K_rope)   dim: d_nope + d_rope
-    V = K_nope                    dim: d_nope     (语义上等价)
-    y = softmax(Q @ K^T * scaleValue) @ V
-"""
-
 
 def get_input(
     q_nope: torch.Tensor,
@@ -41,7 +22,7 @@ def get_input(
     v: torch.Tensor,
     **kwargs,
 ) -> list:
-    """强制满足 MLA 共享 latent KV cache 的 v == k_nope 语义约束。"""
+    """Preserve the shared-latent contract for both first and fresh-input attempts."""
     return [q_nope, q_rope, k_nope, k_rope, k_nope.clone()]
 
 
@@ -56,78 +37,131 @@ def mla(
     inputLayout: str = "BSND",
     is_causal: bool = False,
 ) -> torch.Tensor:
-    """
-    多头潜在注意力 (Multi-Head Latent Attention)
+    """Attention-only MLA; bounded score storage and full-KV-axis softmax.
 
-    Args:
-        q_nope: query 的 nope 部分，BSND: [B, S, N_q, d_nope]，BNSD: [B, N_q, S, d_nope]
-        q_rope: query 的 rope 部分，BSND: [B, S, N_q, d_rope]，BNSD: [B, N_q, S, d_rope]
-        k_nope: key 的 nope 部分，BSND: [B, S_kv, N_kv, d_nope]，BNSD: [B, N_kv, S_kv, d_nope]
-        k_rope: key 的 rope 部分，BSND: [B, S_kv, N_kv, d_rope]，BNSD: [B, N_kv, S_kv, d_rope]
-        v: 值张量，BSND: [B, S_kv, N_kv, d_nope]，BNSD: [B, N_kv, S_kv, d_nope]
-        numKVHeads: KV 头数
-        scaleValue: 缩放因子，<=0 时自动使用 1/sqrt(d_nope + d_rope)
-        inputLayout: 输入 layout，"BSND" 或 "BNSD"
-        is_causal: 是否启用因果掩码（右下角对齐），True 时 scores[..., i, j] 满足
-            j > i + (S_kv - S) 的位置在 softmax 前置为 -inf。要求 S <= S_kv。
-
-    Returns:
-        输出张量，与输入 layout 一致，head dim 为 d_nope
+    Input quantization is retained. FP16/BF16 CPU arithmetic uses FP32; a
+    FP64 input remains FP64 for the judge oracle. Only the final output is
+    converted back to the input dtype. Query tiling does not approximate or
+    truncate the attention matrix, and KV heads are never expanded to N_q.
     """
-    # 统一转为 BSND 内部计算
+    if inputLayout not in ("BSND", "BNSD"):
+        raise ValueError("inputLayout must be BSND or BNSD")
+    output_dtype = q_nope.dtype
+    compute_dtype = torch.float64 if output_dtype == torch.float64 else torch.float32
+    tensors = (q_nope, q_rope, k_nope, k_rope, v)
+    qn, qr, kn, kr, vv = [x.to(compute_dtype) for x in tensors]
     if inputLayout == "BNSD":
-        q_nope = q_nope.permute(0, 2, 1, 3)
-        q_rope = q_rope.permute(0, 2, 1, 3)
-        k_nope = k_nope.permute(0, 2, 1, 3)
-        k_rope = k_rope.permute(0, 2, 1, 3)
-        v = v.permute(0, 2, 1, 3)
-
-    B, S, N_q, d_nope = q_nope.shape
-    d_rope = q_rope.shape[-1]
-    D_qk = d_nope + d_rope
-    S_kv = k_nope.shape[1]
-    N_kv = numKVHeads
-
-    if scaleValue <= 0:
-        scaleValue = 1.0 / (D_qk ** 0.5)
-
-    # 拼接 Q = [Q_nope, Q_rope]: [B, S, N_q, d_nope + d_rope]
-    q = torch.cat([q_nope, q_rope], dim=-1)
-
-    # 拼接 K = [K_nope, K_rope]: [B, S_kv, N_kv, d_nope + d_rope]
-    k = torch.cat([k_nope, k_rope], dim=-1)
-
-    # GQA: 每个 KV head 被 G = N_q // N_kv 个 Q head 共享。不把 K/V 物化到 N_q 头
-    # (fp64 oracle 下大 batch 用例会物化上百 GiB → OOM)，而是把 group 维折叠进
-    # matmul 的 M 维: Q -> [B, N_kv, G*S, D]，K/V 保持 N_kv 头随 batched matmul 复用。
-    # 数值上与展开完全等价，峰值内存由 scores 决定而非物化后的 K/V。
-    G = N_q // N_kv
-    q = q.reshape(B, S, N_kv, G, D_qk).permute(0, 2, 3, 1, 4).reshape(B, N_kv, G * S, D_qk)
-    k = k.permute(0, 2, 1, 3)  # [B, N_kv, S_kv, D_qk]
-    v = v.permute(0, 2, 1, 3)  # [B, N_kv, S_kv, d_nope]
-
-    # 缩放点积注意力: scores [B, N_kv, G*S, S_kv]，还原 G/S 两维以便掩码与 softmax
-    scores = torch.matmul(q, k.transpose(-2, -1)) * scaleValue
-    scores = scores.reshape(B, N_kv, G, S, S_kv)
-    if is_causal:
-        i = torch.arange(S, device=scores.device).unsqueeze(-1)
-        j = torch.arange(S_kv, device=scores.device).unsqueeze(0)
-        causal_mask = j > (i + (S_kv - S))  # 右下角对齐：上三角置 -inf；[S, S_kv] 广播到各 group
-        scores = scores.masked_fill(causal_mask, float('-inf'))
-    # F217: 全 mask 行 (整行 = -inf) 在 softmax 时得 0/0 = NaN，对齐
-    # sparse_flash_attention 加显式保护 → 全 mask 行权重置 0。
-    scores_max = scores.max(dim=-1, keepdim=True).values
-    all_masked = torch.isinf(scores_max) & (scores_max < 0)
-    attn_weights = torch.nn.functional.softmax(scores, dim=-1)
-    attn_weights = torch.where(all_masked, torch.zeros_like(attn_weights), attn_weights)
-    attn_weights = attn_weights.reshape(B, N_kv, G * S, S_kv)
-    out = torch.matmul(attn_weights, v)  # [B, N_kv, G*S, d_nope]
-
-    # 还原为 BSND: [B, S, N_q, d_nope]（N_q 头序 = n_kv * G + g，与展开路径一致）
-    out = out.reshape(B, N_kv, G, S, d_nope).permute(0, 3, 1, 2, 4).reshape(B, S, N_q, d_nope)
-
-    # 按输入 layout 输出
+        qn, qr, kn, kr, vv = [x.permute(0, 2, 1, 3) for x in (qn, qr, kn, kr, vv)]
+    B, S, Nq, Dv = qn.shape
+    Sk, Nkv = kn.shape[1:3]
+    if numKVHeads != Nkv or Nq % Nkv:
+        raise ValueError("numKVHeads must match KV shape and divide query heads")
+    if is_causal and S > Sk:
+        raise ValueError("right-bottom causal attention requires S <= S_kv")
+    G = Nq // Nkv
+    Dqk = Dv + qr.shape[-1]
+    scale = Dqk**-0.5 if scaleValue <= 0 else scaleValue
+    q = torch.cat((qn, qr), -1)
+    k = torch.cat((kn, kr), -1)
+    out = torch.empty((B, S, Nq, Dv), dtype=compute_dtype, device=q.device)
+    # A tile stores at most 4M logits, independent of B, Nq and query length.
+    row_tile = max(1, min(G * S, 4194304 // Sk))
+    keys = torch.arange(Sk, device=q.device)
+    for b in range(B):
+        for h in range(Nkv):
+            rows = q[b, :, h * G : (h + 1) * G].transpose(0, 1).reshape(G * S, Dqk)
+            key = k[b, :, h]
+            value = vv[b, :, h]
+            dest = torch.empty((G * S, Dv), dtype=compute_dtype, device=q.device)
+            for start in range(0, G * S, row_tile):
+                end = min(G * S, start + row_tile)
+                scores = torch.matmul(rows[start:end], key.transpose(-2, -1)) * scale
+                if is_causal:
+                    query_rows = torch.arange(start, end, device=q.device) % S
+                    scores = scores.masked_fill(
+                        keys[None] > query_rows[:, None] + Sk - S, -torch.inf
+                    )
+                probs = torch.nn.functional.softmax(scores, dim=-1)
+                dest[start:end] = torch.matmul(probs, value)
+            out[b, :, h * G : (h + 1) * G] = dest.reshape(G, S, Dv).transpose(0, 1)
     if inputLayout == "BNSD":
         out = out.permute(0, 2, 1, 3)
+    return out.to(output_dtype).contiguous()
 
+
+# Native reference only: round stage outputs to the input dtype, as in the
+# published Torch reference. The public Golden above remains FP32/FP64.
+_NATIVE_SCORE_ELEMENTS = 4 * 1024**2
+
+
+def _native_attention(q, k, v, scale, is_causal):
+    """BSND grouped attention; full KV softmax, bounded query-row workspace."""
+    batch, query_length, query_heads, width = q.shape
+    key_length, kv_heads = k.shape[1:3]
+    if query_heads % kv_heads:
+        raise ValueError("query heads must be divisible by KV heads")
+    if is_causal and query_length > key_length:
+        raise ValueError("right-bottom causal attention requires S <= S_kv")
+    group = query_heads // kv_heads
+    value_width = v.shape[-1]
+    out = torch.empty(
+        (batch, query_length, query_heads, value_width), dtype=q.dtype, device=q.device
+    )
+    row_tile = max(1, min(group * query_length, _NATIVE_SCORE_ELEMENTS // key_length))
+    keys = torch.arange(key_length, device=q.device)
+    for b in range(batch):
+        for h in range(kv_heads):
+            rows = (
+                q[b, :, h * group : (h + 1) * group].transpose(0, 1).reshape(-1, width)
+            )
+            destination = torch.empty(
+                (group * query_length, value_width), dtype=q.dtype, device=q.device
+            )
+            for start in range(0, group * query_length, row_tile):
+                end = min(group * query_length, start + row_tile)
+                # Each operation stores an input-dtype result; do not replace
+                # this path with the promoted public Golden.
+                scores = torch.matmul(rows[start:end], k[b, :, h].transpose(0, 1))
+                scores = scores * scale
+                if is_causal:
+                    query_rows = (
+                        torch.arange(start, end, device=q.device) % query_length
+                    )
+                    scores = scores.masked_fill(
+                        keys[None] > query_rows[:, None] + key_length - query_length,
+                        -torch.inf,
+                    )
+                probabilities = torch.nn.functional.softmax(scores, dim=-1)
+                destination[start:end] = torch.matmul(probabilities, v[b, :, h])
+            out[b, :, h * group : (h + 1) * group] = destination.reshape(
+                group, query_length, value_width
+            ).transpose(0, 1)
     return out
+
+
+def mla_bench(
+    q_nope: torch.Tensor,
+    q_rope: torch.Tensor,
+    k_nope: torch.Tensor,
+    k_rope: torch.Tensor,
+    v: torch.Tensor,
+    numKVHeads: int = 1,
+    scaleValue: float = -1.0,
+    inputLayout: str = "BSND",
+    is_causal: bool = False,
+) -> torch.Tensor:
+    """Independent native-stage reference; preserves the shared-latent inputs."""
+    if inputLayout not in ("BSND", "BNSD"):
+        raise ValueError("inputLayout must be BSND or BNSD")
+    tensors = (q_nope, q_rope, k_nope, k_rope, v)
+    if inputLayout == "BNSD":
+        tensors = tuple(t.permute(0, 2, 1, 3) for t in tensors)
+    qn, qr, kn, kr, value = tensors
+    if numKVHeads != kn.shape[2]:
+        raise ValueError("numKVHeads must match KV shape")
+    q, k = torch.cat((qn, qr), -1), torch.cat((kn, kr), -1)
+    scale = q.shape[-1] ** -0.5 if scaleValue <= 0 else scaleValue
+    out = _native_attention(q, k, value, scale, is_causal)
+    if inputLayout == "BNSD":
+        out = out.permute(0, 2, 1, 3)
+    return out.contiguous()

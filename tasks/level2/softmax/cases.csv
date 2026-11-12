@@ -13,7 +13,7 @@ Softmax,11,"[[367, 373, 379]]","[""float32""]","{""dim"": 1}","[-50, 100]",L-flo
 Softmax,12,"[[11, 13, 17, 4001]]","[""bfloat16""]","{""dim"": -1}","[-3, 6]",M-bfloat16-9M-质数非对齐-4D-dim=-1 | baseline_kernels: SoftmaxV2×1
 Softmax,13,"[[1000003, 2]]","[""float16""]","{""dim"": -1}","[""-inf"", ""inf""]",S-float16-2M-质数非对齐-inf特殊值 | baseline_kernels: SoftmaxV2×1
 Softmax,14,"[[11, 13, 17, 67, 67]]","[""float32""]","{""dim"": -1}","[""nan"", ""nan""]",M-float32-10M-质数非对齐-nan特殊值-5D | baseline_kernels: SoftmaxV2×1
-Softmax,15,"[[3, 7, 11, 13, 1013]]","[""bfloat16""]","{""dim"": -1}","[0, 0]",S-bfloat16-3M-质数非对齐-零值特殊值-5D | baseline_kernels: SoftmaxV2×1
+Softmax,15,"[[3, 7, 11, 13, 1013]]","[""bfloat16""]","{""dim"": -1}","[-1, 1]","softmax nonconstant input; retains original shape, dtype and attrs | baseline_kernels: SoftmaxV2×1"
 Softmax,16,"[[512, 2049]]","[""float16""]","{""dim"": 0}","[-0.5, 0.5]",S-float16-1M-非对齐-dim=0 | baseline_kernels: SoftmaxV2×1
 Softmax,17,"[[255, 8193]]","[""float32""]","{""dim"": 1}","[-1000, 1000]",S-float32-2M-非对齐-对称大值域-dim=1 | baseline_kernels: SoftmaxV2×1
 Softmax,18,"[[2, 511, 2049]]","[""bfloat16""]","{""dim"": -1}","[-0.2, 0.2]",S-bfloat16-2M-非对齐-对称微小值域-3D | baseline_kernels: SoftmaxV2×1

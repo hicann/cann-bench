@@ -10,265 +10,199 @@
 
 # 输入顺序: hidden [T,H], weight [V,H], labels [T] (int32)
 # value_range 按输入独立指定: labels 取 [0, V-1] 保证索引合法; weight 取 [-0.02, 0.02] 模拟 LM-head 初始化尺度
-# 大词表 (V≈13万~15万) 时 T 取 1024~4096, 控制单 case 中间 logits 内存在数 GB 以内
+# 公开集覆盖轻量、中等、较大及边界场景；大词表与 token 规模按执行预算组合。
 cases:
 - operator: LinearCrossEntropy
   case_id: 1
   input_shape:
-  - [1024, 4096]
-  - [128256, 4096]
-  - [1024]
+    [[32, 1024], [8192, 1024], [32]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 128255]
-  note: "bfloat16-LLaMA3-8B-T1024-mean"
+    [[-1, 1], [-0.02, 0.02], [0, 8191]]
+  note: "bfloat16 / int32; shapes=[[32,1024],[8192,1024],[32]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 2
   input_shape:
-  - [2048, 4096]
-  - [128256, 4096]
-  - [2048]
+    [[128, 1024], [8192, 1024], [128]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 128255]
-  note: "bfloat16-LLaMA3-8B-T2048-mean"
+    [[-1, 1], [-0.02, 0.02], [0, 8191]]
+  note: "bfloat16 / int32; shapes=[[128,1024],[8192,1024],[128]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 3
   input_shape:
-  - [4096, 4096]
-  - [128256, 4096]
-  - [4096]
+    [[1024, 1024], [8192, 1024], [1024]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 128255]
-  note: "bfloat16-LLaMA3-8B-T4096-mean-large-T"
+    [[-1, 1], [-0.02, 0.02], [0, 8191]]
+  note: "bfloat16 / int32; shapes=[[1024,1024],[8192,1024],[1024]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 4
   input_shape:
-  - [2048, 4096]
-  - [128256, 4096]
-  - [2048]
+    [[64, 256], [4096, 256], [64]]
   dtype: [float16, float16, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 128255]
-  note: "float16-LLaMA3-8B-T2048-sum"
+    [[-1, 1], [-0.02, 0.02], [0, 4095]]
+  note: "float16 / int32; shapes=[[64,256],[4096,256],[64]]; reduction=sum"
 - operator: LinearCrossEntropy
   case_id: 5
   input_shape:
-  - [1024, 3584]
-  - [152064, 3584]
-  - [1024]
+    [[64, 256], [4096, 256], [64]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 152063]
-  note: "bfloat16-Qwen2-7B-T1024-mean"
+    [[-1, 1], [-0.02, 0.02], [0, 4095]]
+  note: "bfloat16 / int32; shapes=[[64,256],[4096,256],[64]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 6
   input_shape:
-  - [2048, 3584]
-  - [152064, 3584]
-  - [2048]
+    [[256, 1024], [32000, 1024], [256]]
   dtype: [float16, float16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 152063]
-  note: "float16-Qwen2-7B-T2048-mean"
+    [[-1, 1], [-0.02, 0.02], [0, 31999]]
+  note: "float16 / int32; shapes=[[256,1024],[32000,1024],[256]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 7
   input_shape:
-  - [1024, 8192]
-  - [152064, 8192]
-  - [1024]
+    [[128, 1024], [128256, 1024], [128]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 152063]
-  note: "bfloat16-Qwen2-72B-T1024-mean"
+    [[-1, 1], [-0.02, 0.02], [0, 128255]]
+  note: "bfloat16 / int32; shapes=[[128,1024],[128256,1024],[128]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 8
   input_shape:
-  - [2048, 8192]
-  - [152064, 8192]
-  - [2048]
+    [[256, 1024], [128256, 1024], [256]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 152063]
-  note: "bfloat16-Qwen2-72B-T2048-sum"
+    [[-1, 1], [-0.02, 0.02], [0, 128255]]
+  note: "bfloat16 / int32; shapes=[[256,1024],[128256,1024],[256]]; reduction=sum"
 - operator: LinearCrossEntropy
   case_id: 9
   input_shape:
-  - [1024, 7168]
-  - [129280, 7168]
-  - [1024]
+    [[128, 1024], [129280, 1024], [128]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 129279]
-  note: "bfloat16-DeepSeekV3-T1024-mean"
+  note: "bfloat16 / int32; shapes=[[128,1024],[129280,1024],[128]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 10
   input_shape:
-  - [2048, 7168]
-  - [129280, 7168]
-  - [2048]
+    [[256, 1024], [129280, 1024], [256]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 129279]
-  note: "bfloat16-DeepSeekV3-T2048-mean"
+  note: "bfloat16 / int32; shapes=[[256,1024],[129280,1024],[256]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 11
   input_shape:
-  - [1024, 7168]
-  - [129280, 7168]
-  - [1024]
+    [[256, 1024], [32000, 1024], [256]]
   dtype: [float32, float32, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 129279]
-  note: "float32-DeepSeekV3-T1024-mean-fp32-baseline"
+    [[-1, 1], [-0.02, 0.02], [0, 31999]]
+  note: "float32 / int32; shapes=[[256,1024],[32000,1024],[256]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 12
   input_shape:
-  - [8192, 4096]
-  - [32000, 4096]
-  - [8192]
+    [[256, 4096], [32000, 4096], [256]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 31999]
-  note: "bfloat16-LLaMA2-7B-T8192-mean-long-T"
+  note: "bfloat16 / int32; shapes=[[256,4096],[32000,4096],[256]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 13
   input_shape:
-  - [4096, 4096]
-  - [32000, 4096]
-  - [4096]
+    [[512, 4096], [32000, 4096], [512]]
   dtype: [float32, float32, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 31999]
-  note: "float32-LLaMA2-7B-T4096-sum-fp32-baseline"
+  note: "float32 / int32; shapes=[[512,4096],[32000,4096],[512]]; reduction=sum"
 - operator: LinearCrossEntropy
   case_id: 14
   input_shape:
-  - [1024, 3584]
-  - [152064, 3584]
-  - [1024]
+    [[129, 1024], [8192, 1024], [129]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: 0}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 1]
-  note: "bfloat16-Qwen2-7B-T1024-mean-ignore-index-half"
+  note: "bfloat16 / int32; shapes=[[129,1024],[8192,1024],[129]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 15
   input_shape:
-  - [2048, 7168]
-  - [129280, 7168]
-  - [2048]
+    [[512, 1792], [129280, 1792], [512]]
   dtype: [float16, float16, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 129279]
-  note: "float16-DeepSeekV3-T2048-sum"
+  note: "float16 / int32; shapes=[[512,1792],[129280,1792],[512]]; reduction=sum"
 - operator: LinearCrossEntropy
   case_id: 16
   input_shape:
-  - [4096, 8192]
-  - [152064, 8192]
-  - [4096]
+    [[512, 1024], [152064, 1024], [512]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
   - [-1, 1]
   - [-0.02, 0.02]
   - [0, 152063]
-  note: "bfloat16-Qwen2-72B-T4096-mean-extreme-T"
+  note: "bfloat16 / int32; shapes=[[512,1024],[152064,1024],[512]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 17
   input_shape:
-  - [1024, 4096]
-  - [128256, 4096]
-  - [1024]
+    [[128, 512], [8192, 512], [128]]
   dtype: [float32, float32, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 128255]
-  note: "float32-LLaMA3-8B-T1024-mean-fp32-baseline"
+    [[-1, 1], [-0.02, 0.02], [0, 8191]]
+  note: "float32 / int32; shapes=[[128,512],[8192,512],[128]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 18
   input_shape:
-  - [1024, 4096]
-  - [32000, 4096]
-  - [1024]
+    [[64, 512], [4096, 512], [64]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: mean, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 31999]
-  note: "bfloat16-LLaMA2-7B-T1024-mean-small-T"
+    [[-1, 1], [-0.02, 0.02], [0, 4095]]
+  note: "bfloat16 / int32; shapes=[[64,512],[4096,512],[64]]; reduction=mean"
 - operator: LinearCrossEntropy
   case_id: 19
   input_shape:
-  - [8192, 4096]
-  - [32000, 4096]
-  - [8192]
+    [[129, 1023], [8193, 1023], [129]]
   dtype: [float16, float16, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 31999]
-  note: "float16-LLaMA2-7B-T8192-sum-long-T"
+    [[-1, 1], [-0.02, 0.02], [0, 8192]]
+  note: "float16 / int32; shapes=[[129,1023],[8193,1023],[129]]; reduction=sum"
 - operator: LinearCrossEntropy
   case_id: 20
   input_shape:
-  - [4096, 7168]
-  - [129280, 7168]
-  - [4096]
+    [[384, 2048], [128256, 2048], [384]]
   dtype: [bfloat16, bfloat16, int32]
   attrs: {reduction: sum, ignore_index: -100}
   value_range:
-  - [-1, 1]
-  - [-0.02, 0.02]
-  - [0, 129279]
-  note: "bfloat16-DeepSeekV3-T4096-sum-extreme-T"
+    [[-1, 1], [-0.02, 0.02], [0, 128255]]
+  note: "bfloat16 / int32; shapes=[[384,2048],[128256,2048],[384]]; reduction=sum"

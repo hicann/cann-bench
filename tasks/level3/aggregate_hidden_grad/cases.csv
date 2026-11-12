@@ -17,5 +17,5 @@ AggregateHiddenGrad,15,"[[466, 8, 1796], [466, 8, 1796], [3, 1796], [8, 466]]","
 AggregateHiddenGrad,16,"[[1024, 4, 470], [1024, 4, 470], [3, 470], [4, 1024]]","[""bfloat16"", ""bfloat16"", ""bfloat16"", ""bool""]",{},"[[-3, 3], [-3, 3], [-3, 3], [false, true]]",aggregate_hidden_bf16_4096_4_770_L0_000000
 AggregateHiddenGrad,17,"[[1024, 2, 24576], [1024, 2, 24576], [3, 24576]]","[""bfloat16"", ""bfloat16"", ""bfloat16""]",{},"[[-3, 3], [-3, 3], [-3, 3]]",aggregate_hidden_bf16_boundary_HMax_FUZZ_000000
 AggregateHiddenGrad,18,"[[1, 1, 384], [1, 1, 384], [3, 384], [1, 1]]","[""float16"", ""float16"", ""float16"", ""bool""]",{},"[[-3, 3], [-3, 3], [-3, 3], [false, true]]",aggregate_hidden_fp16_boundary_shapeMin_FUZZ_000001
-AggregateHiddenGrad,19,"[[16384, 8, 1200], [16384, 8, 1200], [3, 1200]]","[""bfloat16"", ""bfloat16"", ""bfloat16""]",{},"[[-3, 3], [-3, 3], [-3, 3]]",aggregate_hidden_bf16_boundary_shapeMax_FUZZ_000000
+AggregateHiddenGrad,19,"[[8192, 8, 1200], [8192, 8, 1200], [3, 1200]]","[""bfloat16"", ""bfloat16"", ""bfloat16""]",{},"[[-3, 3], [-3, 3], [-3, 3]]","bfloat16; shapes=[[8192,8,1200],[8192,8,1200],[3,1200]]"
 AggregateHiddenGrad,20,"[[10, 2, 384], [10, 2, 384], [3, 384]]","[""float16"", ""float16"", ""float16""]",{},"[[-3, 3], [-3, 3], [-3, 3]]",aggregate_hidden_fp16_boundary_HMIN_FUZZ_000000

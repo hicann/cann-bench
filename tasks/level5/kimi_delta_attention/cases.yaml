@@ -835,8 +835,20 @@ cases:
   attrs:
     use_qk_l2norm: false
     scaleValue: -1.0
-  value_range: [[-0.05, 0.05], [-0.05, 0.05], [-0.2, 0.2], [0, 0], [0.05, 0.95], [-0.3, 0.3]]
-  note: "core-attr-S-0.009MiB read-only-initial-state [B:beta re-ranged 0->(0.05,0.95), rank-1 update active]"
+  value_range:
+  - - -0.0498046875
+    - 0.0498046875
+  - - -0.0498046875
+    - 0.0498046875
+  - - -0.2
+    - 0.2
+  - - 0
+    - 0
+  - - 0.05
+    - 0.95
+  - - -0.3
+    - 0.3
+  note: "bfloat16 / float32; shapes=[[1,8,2,16],[1,8,2,16],[1,8,2,24],[1,8,2,16],[1,8,2],[1,2,16,24]]"
 - operator: KimiDeltaAttention
   case_id: 18
   input_shape:
@@ -874,10 +886,10 @@ cases:
     use_qk_l2norm: true
     scaleValue: -1.0
   value_range:
-  - &id018
+  - &id017
     - 0
     - 0
-  - *id018
+  - *id017
   - - -0.2
     - 0.2
   - - 0
@@ -923,8 +935,20 @@ cases:
   attrs:
     use_qk_l2norm: true
     scaleValue: -1.0
-  value_range: [[-0.2, 0.2], [-0.2, 0.2], [-0.2, 0.2], [-0.8, -0.2], [0.05, 0.95], [-0.3, 0.3]]
-  note: "core-boundary-S-0.057MiB channel-decay-no-write [B:beta re-ranged 0->(0.05,0.95), rank-1 update active]"
+  value_range:
+  - - -0.2
+    - 0.2
+  - - -0.2
+    - 0.2
+  - - -0.2
+    - 0.2
+  - - -0.8
+    - -0.2
+  - - 0
+    - 0
+  - - -0.3
+    - 0.3
+  note: "float16 / float32; shapes=[[1,17,3,32],[1,17,3,32],[1,17,3,48],[1,17,3,32],[1,17,3],[1,3,32,48]]"
 - operator: KimiDeltaAttention
   case_id: 20
   input_shape:
@@ -962,10 +986,10 @@ cases:
     use_qk_l2norm: true
     scaleValue: -1.0
   value_range:
-  - &id020
+  - &id018
     - -0.2
     - 0.2
-  - *id020
+  - *id018
   - - -0.2
     - 0.2
   - - -0.02

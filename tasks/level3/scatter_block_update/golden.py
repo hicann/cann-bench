@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python# -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------
 # Copyright (c) 2025 Huawei Technologies Co., Ltd.
@@ -52,14 +51,40 @@ def get_input(input, indices, update, **kwargs):
     return (input, indices, update)
 
 
-def scatter_block_update(input: torch.Tensor, indices: torch.Tensor, update: torch.Tensor):
+def scatter_block_update(
+    input: torch.Tensor, indices: torch.Tensor, update: torch.Tensor
+):
     """
-ScatterBlockUpdate算子Torch Golden参考实现
+    ScatterBlockUpdate算子Torch Golden参考实现
 
-公式: scatter_block_update(...)
-"""
+    公式: scatter_block_update(...)
+    """
     # Make a copy of input to avoid modifying it
     output = input.clone()
+    if indices.shape[0] == 0:
+        return output
+
+    # The task requires distinct destination blocks. Assign those blocks in one
+    # operation instead of dispatching a Python slice assignment for every row.
+    # Keep the row-wise behavior for malformed update shapes: missing rows
+    # raise, extra rows are ignored, and a flat update is not broadcast.
+    if (
+        indices.dtype in (torch.int32, torch.int64)
+        and update.ndim == 2
+        and update.shape[0] == indices.shape[0]
+    ):
+        rows, cols = indices.to(torch.int64).unbind(dim=1)
+        # Normalize negative indices for duplicate detection only. Use the
+        # original indices for assignment so out-of-bounds indices still fail.
+        canonical_rows = torch.where(rows < 0, rows + input.shape[0], rows)
+        canonical_cols = torch.where(cols < 0, cols + input.shape[1], cols)
+        destinations = canonical_rows * input.shape[1] + canonical_cols
+        if torch.unique(destinations).numel() == indices.shape[0]:
+            output[rows, cols, :] = update.to(dtype=output.dtype)
+            return output
+
+    # Preserve the historical last-write-wins behavior for duplicate indices,
+    # even though such inputs are outside the task's distinct-index contract.
     for k in range(indices.shape[0]):
         idx0 = indices[k, 0].item()
         idx1 = indices[k, 1].item()

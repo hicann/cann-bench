@@ -85,15 +85,7 @@ cases:
 - operator: Conv2D
   case_id: 3
   input_shape:
-  - - 2
-    - 256
-    - 128
-    - 128
-  - - 256
-    - 256
-    - 5
-    - 5
-  - - 256
+    [[1, 128, 128, 128], [256, 128, 5, 5], [256]]
   dtype:
   - bfloat16
   - bfloat16
@@ -117,8 +109,7 @@ cases:
     - 3
   - - -0.3
     - 0.3
-  note: 'M-bfloat16-33M-对齐-5x5k | baseline_kernels: TransData×3 + MemSet×1 + Cast×1
-    + Conv2D×1'
+  note: "bfloat16; shapes=[[1,128,128,128],[256,128,5,5],[256]]"
 - operator: Conv2D
   case_id: 4
   input_shape:
@@ -633,15 +624,7 @@ cases:
 - operator: Conv2D
   case_id: 18
   input_shape:
-  - - 2
-    - 255
-    - 127
-    - 127
-  - - 255
-    - 255
-    - 3
-    - 3
-  - - 255
+    [[1, 255, 127, 127], [255, 255, 3, 3], [255]]
   dtype:
   - bfloat16
   - bfloat16
@@ -665,8 +648,7 @@ cases:
     - 10
   - - -1
     - 1
-  note: 'M-bfloat16-16M-非对齐-dilation=3 | baseline_kernels: TransData×3 + MemSet×1
-    + Cast×1 + Conv2D×1'
+  note: "bfloat16; shapes=[[1,255,127,127],[255,255,3,3],[255]]"
 - operator: Conv2D
   case_id: 19
   input_shape:

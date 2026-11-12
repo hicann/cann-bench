@@ -47,7 +47,7 @@ def conv_2d(
     """
 
     # pads 格式: [pad_top, pad_bottom, pad_left, pad_right]
-    # PyTorch conv2d只接受(pad_h, pad_w)，非对称填充需先使用pad。
+    # PyTorch conv2d padding 格式: (left, right, top, bottom) 或 (pad_h, pad_w) 对称模式
     # 检查是否对称填充
     if pads[0] == pads[1] and pads[2] == pads[3]:
         # 对称模式: (pad_height, pad_width)

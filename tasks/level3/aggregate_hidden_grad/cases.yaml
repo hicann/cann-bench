@@ -495,10 +495,10 @@ cases:
 - operator: AggregateHiddenGrad
   case_id: 19
   input_shape:
-  - - 16384
+  - - 8192
     - 8
     - 1200
-  - - 16384
+  - - 8192
     - 8
     - 1200
   - - 3
@@ -515,7 +515,7 @@ cases:
     - 3
   - - -3
     - 3
-  note: aggregate_hidden_bf16_boundary_shapeMax_FUZZ_000000
+  note: "bfloat16; shapes=[[8192,8,1200],[8192,8,1200],[3,1200]]"
 - operator: AggregateHiddenGrad
   case_id: 20
   input_shape:

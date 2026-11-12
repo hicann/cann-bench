@@ -14,14 +14,14 @@ operator:
   difficulty: L4
   formula: |
     K_sel, V_sel = gather(K, V, sparseIndices)  # 按 KV 头组稀疏索引提取
-    K_sel, V_sel = repeat(K_sel, V_sel, G)      # GQA 扩展到 N1 个 query 头
+    # GQA: 连续 G=N1/N2 个 query 头共享一个 KV 头和对应索引；无需物化 KV 复制
     y = softmax(Q @ K_sel^T * scaleValue) @ V_sel
   description: 稀疏注意力算子，支持 GQA（N1 != N2）、不同 head dim（Dk != Dv）和 BSND/BNSD 布局
-  shape_support: "BSND: query [B,S1,N1,Dk], key [B,S2,N2,Dk], value [B,S2,N2,Dv], sparseIndices [B,S1,N2,topK]; BNSD: 对应 permute"
+  shape_support: "BSND: query [B,S1,N1,Dk], key [B,S2,N2,Dk], value [B,S2,N2,Dv], sparseIndices [B,S1,N2,topK]; BNSD: 对应 permute; N1%N2=0, Dk/Dv 为64倍数, Dv<=Dk, 1<=topK<=min(2048,S2); 每行索引无重复且在[0,S2)内"
   attrs:
   - name: scaleValue
     type: float
-    description: 缩放因子，通常为 1/sqrt(Dk)
+    description: 有限正缩放因子，通常为 1/sqrt(Dk)
     required: true
   - name: inputLayout
     type: str
@@ -31,7 +31,7 @@ operator:
   - name: is_causal
     type: bool
     default: false
-    description: 是否启用因果掩码（右下角对齐），True 时在稀疏 gather 之上额外屏蔽 sparseIndices[..., s1, i] > s1 + (S2 - S1) 的位置
+    description: 是否启用因果掩码（右下角对齐），True 时要求S1<=S2并在稀疏gather之上屏蔽 sparseIndices[..., s1, i] > s1 + (S2 - S1) 的位置；全屏蔽行输出零
     required: false
   inputs:
   - name: query
@@ -53,13 +53,13 @@ operator:
     - bfloat16
     shape: "BSND: [B, S2, N2, Dv]; BNSD: [B, N2, S2, Dv]"
   - name: sparseIndices
-    description: 按 KV 头分组的稀疏索引，同组内 N1/N2 个 query 头共享，前三维布局与 inputLayout 一致
+    description: 按KV头分组的稀疏索引；每个(b,n2,s1)行内必须无重复且在[0,S2)内，同组内N1/N2个query头共享，前三维布局与inputLayout一致
     dtype:
     - int32
     shape: "BSND: [B, S1, N2, topK]; BNSD: [B, N2, S1, topK]"
   outputs:
   - name: y
-    description: 稀疏注意力计算输出张量，布局与输入一致
+    description: 稀疏注意力输出，布局与输入一致且连续；Golden对float16/bfloat16输入用float32累积并转换回输入dtype，FP64 oracle保持float64；独立bench模拟输入精度的阶段舍入，仅作为同精度比较参考
     dtype:
     - float16
     - bfloat16

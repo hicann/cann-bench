@@ -16,7 +16,6 @@ from typing import Optional, Sequence
 import torch
 
 
-
 def _ceil(value):
     ivalue = int(value)
     return ivalue if float(value) == float(ivalue) else ivalue + 1
@@ -44,7 +43,10 @@ class _NumpyAlias:
 
 np = _NumpyAlias()
 
-def _default_lengths(total: Optional[int], batch: Optional[int], default_mode: Optional[str]):
+
+def _default_lengths(
+    total: Optional[int], batch: Optional[int], default_mode: Optional[str]
+):
     if total is None:
         return []
     batch = max(int(batch or 1), 1)
@@ -71,14 +73,18 @@ def as_int_list(
     empty_uses_default: bool = True,
 ):
     if value is None:
-        return _default_lengths(total, batch, default_mode) if empty_uses_default else []
+        return (
+            _default_lengths(total, batch, default_mode) if empty_uses_default else []
+        )
     if isinstance(value, torch.Tensor):
         value = value.detach().cpu().reshape(-1).tolist()
     elif allow_scalar and isinstance(value, (int, float)):
         value = [value]
     out = [int(x) for x in value]
     if not out:
-        return _default_lengths(total, batch, default_mode) if empty_uses_default else []
+        return (
+            _default_lengths(total, batch, default_mode) if empty_uses_default else []
+        )
     if not is_tnd or total is None:
         return out
     if all(a <= b for a, b in zip(out, out[1:])) and out[-1] == int(total):
@@ -95,7 +101,9 @@ def as_int_list(
         positive = [1] * len(out)
     raw = [int(total) * x / sum(positive) for x in positive]
     lengths = [int(x) for x in raw]
-    for idx in sorted(range(len(raw)), key=lambda i: raw[i] - lengths[i], reverse=True)[: int(total) - sum(lengths)]:
+    for idx in sorted(range(len(raw)), key=lambda i: raw[i] - lengths[i], reverse=True)[
+        : int(total) - sum(lengths)
+    ]:
         lengths[idx] += 1
     return lengths
 
@@ -118,7 +126,9 @@ def starts_from_lengths(lengths: Sequence[int]):
     return starts
 
 
-def page_to_bsnd(x: torch.Tensor, block_table: Optional[torch.Tensor], lengths: Sequence[int]):
+def page_to_bsnd(
+    x: torch.Tensor, block_table: Optional[torch.Tensor], lengths: Sequence[int]
+):
     x = x.detach().cpu()
     if block_table is None:
         return x
@@ -138,7 +148,9 @@ def page_to_bsnd(x: torch.Tensor, block_table: Optional[torch.Tensor], lengths: 
     return out
 
 
-def page_to_bsnd_device(x: torch.Tensor, block_table: Optional[torch.Tensor], lengths: Sequence[int]):
+def page_to_bsnd_device(
+    x: torch.Tensor, block_table: Optional[torch.Tensor], lengths: Sequence[int]
+):
     if block_table is None:
         return x
     block_num, block_size, n, d = x.shape
@@ -157,7 +169,9 @@ def page_to_bsnd_device(x: torch.Tensor, block_table: Optional[torch.Tensor], le
     return out
 
 
-def _to_bsnd_core(x: torch.Tensor, layout: str, lengths: Sequence[int], preserve_grad: bool):
+def _to_bsnd_core(
+    x: torch.Tensor, layout: str, lengths: Sequence[int], preserve_grad: bool
+):
     x = x.cpu() if preserve_grad and x.requires_grad else x.detach().cpu()
     if layout == "TND":
         max_len = max(lengths, default=0)
@@ -171,8 +185,14 @@ def _to_bsnd_core(x: torch.Tensor, layout: str, lengths: Sequence[int], preserve
                     pad_shape = (max_len - int(seq_len), *part.shape[1:])
                     part = torch.cat([part, part.new_zeros(pad_shape)], dim=0)
                 parts.append(part)
-            return torch.stack(parts, dim=0) if parts else x.new_empty((0, max_len, x.shape[-2], x.shape[-1]))
-        out = torch.zeros((len(lengths), max_len, x.shape[-2], x.shape[-1]), dtype=x.dtype)
+            return (
+                torch.stack(parts, dim=0)
+                if parts
+                else x.new_empty((0, max_len, x.shape[-2], x.shape[-1]))
+            )
+        out = torch.zeros(
+            (len(lengths), max_len, x.shape[-2], x.shape[-1]), dtype=x.dtype
+        )
         start = 0
         for b, seq_len in enumerate(lengths):
             out[b, :seq_len] = x[start : start + seq_len]
@@ -184,7 +204,11 @@ def _to_bsnd_core(x: torch.Tensor, layout: str, lengths: Sequence[int], preserve
 def to_bsnd_device(x: torch.Tensor, layout: str, lengths: Sequence[int]):
     if layout == "TND":
         max_len = max(lengths, default=0)
-        out = torch.zeros((len(lengths), max_len, x.shape[-2], x.shape[-1]), dtype=x.dtype, device=x.device)
+        out = torch.zeros(
+            (len(lengths), max_len, x.shape[-2], x.shape[-1]),
+            dtype=x.dtype,
+            device=x.device,
+        )
         start = 0
         for b, seq_len in enumerate(lengths):
             out[b, :seq_len] = x[start : start + seq_len]
@@ -208,7 +232,11 @@ def to_bsnd(x: torch.Tensor, layout: str, lengths: Sequence[int]):
 def from_bsnd(x: torch.Tensor, layout: str, lengths: Sequence[int]):
     if layout == "TND":
         parts = [x[b, : int(seq_len)] for b, seq_len in enumerate(lengths)]
-        return torch.cat(parts, dim=0) if parts else x.new_empty((0, x.shape[-2], x.shape[-1]))
+        return (
+            torch.cat(parts, dim=0)
+            if parts
+            else x.new_empty((0, x.shape[-2], x.shape[-1]))
+        )
     return x
 
 
@@ -241,12 +269,24 @@ def slice_optional_device(x: Optional[torch.Tensor], b: int, q_len: int, kv_len:
         return x[b_idx : b_idx + 1, :, -q_len:, -kv_len:]
     return x
 
+
 _slice_optional = slice_optional
 _slice_optional_device = slice_optional_device
 
-def sparse_lightning_kl_grad(query, key, query_index, key_index, weights, topk_index,
-                             scale_value=1.0, layout="TND", actual_seq_lengths_query=None,
-                             actual_seq_lengths_key=None, sparse_mode=3):
+
+def sparse_lightning_kl_grad(
+    query,
+    key,
+    query_index,
+    key_index,
+    weights,
+    topk_index,
+    scale_value=1.0,
+    layout="TND",
+    actual_seq_lengths_query=None,
+    actual_seq_lengths_key=None,
+    sparse_mode=3,
+):
     with torch.enable_grad():
         return _sparse_lightning_kl_grad_impl(
             query,
@@ -260,83 +300,183 @@ def sparse_lightning_kl_grad(query, key, query_index, key_index, weights, topk_i
             actual_seq_lengths_query=actual_seq_lengths_query,
             actual_seq_lengths_key=actual_seq_lengths_key,
             sparse_mode=sparse_mode,
+            _calc_dtype=torch.float64
+            if query.dtype == torch.float64
+            else torch.float32,
         )
 
 
-def _sparse_lightning_kl_grad_impl(query, key, query_index, key_index, weights, topk_index,
-                                   scale_value=1.0, layout="TND", actual_seq_lengths_query=None,
-                                   actual_seq_lengths_key=None, sparse_mode=3):
-    batch = len(actual_seq_lengths_query) if actual_seq_lengths_query is not None else (query.shape[0] if layout == "BSND" else 1)
-    q_lens = as_int_list(
+def _checked_segment_lengths(value, total, batch=None, layout="TND"):
+    """Read supported prefix/length forms; never silently rescale bad cases."""
+    if value is None:
+        return [int(total)] * int(batch or 1)
+    values = (
+        value.detach().cpu().reshape(-1).tolist()
+        if isinstance(value, torch.Tensor)
+        else list(value)
+    )
+    values = [int(v) for v in values]
+    if not values or any(v < 0 for v in values):
+        raise ValueError("actual sequence lengths must be nonnegative and nonempty")
+    if layout == "TND":
+        if values[-1] == int(total) and all(a <= b for a, b in zip(values, values[1:])):
+            values = [values[0]] + [b - a for a, b in zip(values, values[1:])]
+        if sum(values) != int(total):
+            raise ValueError("actual sequence lengths must sum to the TND token count")
+    elif batch is not None and (
+        len(values) != int(batch) or any(v > int(total) for v in values)
+    ):
+        raise ValueError("BSND lengths must contain one in-bounds length per batch")
+    return values
+
+
+def _sparse_lightning_kl_grad_impl(
+    query,
+    key,
+    query_index,
+    key_index,
+    weights,
+    topk_index,
+    scale_value=1.0,
+    layout="TND",
+    actual_seq_lengths_query=None,
+    actual_seq_lengths_key=None,
+    sparse_mode=3,
+    _calc_dtype=torch.float32,
+):
+    """Bounded CPU reference; analytic derivative of the explicitly clamped KL.
+
+    Work on unpadded segments and bounded query chunks. In particular, a ragged
+    64-sequence TND input must not allocate B * max_q or B * max_k buffers.
+    Half inputs retain their quantization and are promoted before arithmetic.
+    The private dtype parameter exists for the independent fp64 audit only.
+    """
+    if layout not in ("TND", "BSND") or int(sparse_mode) not in (0, 3):
+        raise ValueError("supported layouts are TND/BSND and sparse modes are 0/3")
+    q_lens = _checked_segment_lengths(
         actual_seq_lengths_query,
         query.shape[0] if layout == "TND" else query.shape[1],
-        batch,
-        layout == "TND",
-        default_mode="split_total" if layout == "TND" else "per_batch_full",
+        query.shape[0] if layout == "BSND" else None,
+        layout,
     )
-    k_lens = as_int_list(
+    k_lens = _checked_segment_lengths(
         actual_seq_lengths_key,
         key.shape[0] if layout == "TND" else key.shape[1],
-        len(q_lens),
-        layout == "TND",
-        default_mode="split_total" if layout == "TND" else "per_batch_full",
+        key.shape[0] if layout == "BSND" else None,
+        layout,
     )
-    native = query.device.type == "npu" and query.dtype in (torch.float16, torch.bfloat16)
-    calc_device = query.device if native else torch.device("cpu")
-    calc_dtype = query.dtype if native else torch.float32
-    layout_fn = to_bsnd_device if native else to_bsnd_grad
-    q_b = layout_fn(query, layout, q_lens).detach().to(calc_device).to(calc_dtype)
-    k_b = layout_fn(key, layout, k_lens).detach().to(calc_device).to(calc_dtype)
-    qi_b = layout_fn(query_index, layout, q_lens).detach().to(calc_device).to(calc_dtype)
-    ki_b = layout_fn(key_index, layout, k_lens).detach().to(calc_device).to(calc_dtype)
-    w_b = layout_fn(weights.unsqueeze(-1), layout, q_lens).squeeze(-1).detach().to(calc_device).to(calc_dtype) if layout == "TND" else weights.detach().to(calc_device).to(calc_dtype)
-    idx_b = topk_index.detach().to(calc_device)
-    if layout == "TND":
-        idx_b = layout_fn(idx_b, layout, q_lens)
-    dqi = torch.zeros_like(qi_b)
-    dki = torch.zeros_like(ki_b)
-    dw = torch.zeros_like(w_b)
-    loss = torch.zeros(1, dtype=torch.float32, device=calc_device)
-    n2 = k_b.shape[-2]
-    n1 = q_b.shape[-2]
-    group = max(n1 // n2, 1)
-    for b, q_len in enumerate(q_lens):
-        kv_len = k_lens[min(b, len(k_lens) - 1)] if k_lens else 0
-        for s in range(q_len):
-            for kv_head in range(n2):
-                raw_positions = idx_b[b, s, kv_head].to(torch.int64).reshape(-1).tolist()
-                positions = []
-                for raw in raw_positions:
-                    raw = int(raw)
-                    if raw < 0:
-                        continue
-                    if kv_len <= 0:
-                        continue
-                    positions.append(raw % kv_len)
-                if not positions:
+    if len(q_lens) != len(k_lens):
+        raise ValueError("query/key must describe the same number of sequences")
+    nq, nk, ni = query.shape[-2], key.shape[-2], query_index.shape[-2]
+    if nq % nk or ni % nk or weights.shape[-1] != ni:
+        raise ValueError("query and indexer heads must be divisible by KV heads")
+    q_group, i_group = nq // nk, ni // nk
+    dqi = torch.zeros(query_index.shape, dtype=_calc_dtype)
+    dki = torch.zeros(key_index.shape, dtype=_calc_dtype)
+    dw = torch.zeros(weights.shape, dtype=_calc_dtype)
+    loss = torch.zeros(1, dtype=_calc_dtype)
+    q_start = k_start = 0
+    # This bound includes target/indexer score and gathered key intermediates.
+    max_work_elements = 4 * 1024 * 1024
+    with torch.no_grad():
+        for b, (q_len, k_len) in enumerate(zip(q_lens, k_lens)):
+            if layout == "TND":
+                qs, ks = (
+                    slice(q_start, q_start + q_len),
+                    slice(k_start, k_start + k_len),
+                )
+                q, k = query[qs], key[ks]
+                qi, ki, w, idx = (
+                    query_index[qs],
+                    key_index[ks],
+                    weights[qs],
+                    topk_index[qs],
+                )
+                oq, ok, ow = dqi[qs], dki[ks], dw[qs]
+            else:
+                q, k = query[b, :q_len], key[b, :k_len]
+                qi, ki, w, idx = (
+                    query_index[b, :q_len],
+                    key_index[b, :k_len],
+                    weights[b, :q_len],
+                    topk_index[b, :q_len],
+                )
+                oq, ok, ow = dqi[b, :q_len], dki[b, :k_len], dw[b, :q_len]
+            q_start += q_len
+            k_start += k_len
+            if not q_len or not k_len or not idx.shape[-1]:
+                continue
+            k = k.detach().cpu().to(_calc_dtype)
+            ki = ki.detach().cpu().to(_calc_dtype)
+            for h in range(nk):
+                head_indices = idx[:, h].detach().cpu().long()
+                # Storage K can exceed every sequence length (e.g. K2048 for
+                # 512-token packed segments). Entirely invalid columns have no
+                # arithmetic or gradients; do not multiply their padding keys.
+                used_columns = ((head_indices >= 0) & (head_indices < k_len)).any(dim=0)
+                head_indices = head_indices[:, used_columns]
+                slots = int(head_indices.shape[-1])
+                if not slots:
                     continue
-                heads = slice(kv_head * group, (kv_head + 1) * group)
-                q_prob = q_b[b, s, heads]
-                k_prob = k_b[b, positions, kv_head]
-                p_scores = torch.matmul(q_prob, k_prob.transpose(-1, -2)) * float(scale_value)
-                if sparse_mode == 3:
-                    threshold = kv_len - q_len + s + 1
-                    p_scores = p_scores.masked_fill(torch.tensor(positions, device=calc_device).view(1, -1) >= threshold, -40000.0)
-                p = torch.softmax(p_scores, dim=-1).reshape(n2, group, len(positions)).mean(dim=1)[kv_head]
-                q_idx = qi_b[b, s, heads].clone().requires_grad_(True)
-                k_idx = ki_b[b, positions, kv_head].clone().requires_grad_(True)
-                w = w_b[b, s, heads].clone().requires_grad_(True)
-                s_scores = torch.relu(torch.matmul(q_idx, k_idx.transpose(-1, -2))) * w.unsqueeze(-1)
-                s_reduced = s_scores.sum(dim=0)
-                pred = torch.softmax(s_reduced, dim=-1)
-                cur_loss = torch.sum(p.clamp_min(1e-8) * (p.clamp_min(1e-8).log() - pred.clamp_min(1e-8).log()))
-                cur_loss.backward()
-                loss += cur_loss.detach()
-                dqi[b, s, heads] += q_idx.grad
-                dki[b, positions, kv_head] += k_idx.grad
-                dw[b, s, heads] += w.grad
-    return from_bsnd(dqi, layout, q_lens), from_bsnd(dki, layout, k_lens), from_bsnd(dw, layout, q_lens), loss
-
+                per_row = slots * (
+                    k.shape[-1] + ki.shape[-1] + 3 * q_group + 5 * i_group + 8
+                )
+                chunk = max(1, min(64, max_work_elements // max(per_row, 1)))
+                qh = slice(h * q_group, (h + 1) * q_group)
+                ih = slice(h * i_group, (h + 1) * i_group)
+                for start in range(0, q_len, chunk):
+                    end = min(start + chunk, q_len)
+                    raw_idx = head_indices[start:end]
+                    valid = (raw_idx >= 0) & (raw_idx < k_len)
+                    nonempty = valid.any(dim=-1, keepdim=True)
+                    safe_idx = raw_idx.clamp(0, k_len - 1)
+                    selected_k = k[:, h][safe_idx]
+                    q_part = q[start:end, qh].detach().cpu().to(_calc_dtype)
+                    score = torch.bmm(q_part, selected_k.transpose(1, 2)) * float(
+                        scale_value
+                    )
+                    if int(sparse_mode) == 3:
+                        threshold = (
+                            k_len - q_len + torch.arange(start, end).view(-1, 1) + 1
+                        )
+                        score.masked_fill_(
+                            (safe_idx >= threshold).unsqueeze(1), -40000.0
+                        )
+                    score.masked_fill_(~valid.unsqueeze(1), -float("inf"))
+                    # Empty sparse rows contribute exactly zero, without NaN intermediates.
+                    score = torch.where(
+                        nonempty.unsqueeze(1), score, torch.zeros_like(score)
+                    )
+                    p = torch.softmax(score, dim=-1).mean(dim=1) * valid
+                    qi_part = qi[start:end, ih].detach().cpu().to(_calc_dtype)
+                    ki_part = ki[:, h][safe_idx]
+                    w_part = w[start:end, ih].detach().cpu().to(_calc_dtype)
+                    dots = torch.bmm(qi_part, ki_part.transpose(1, 2))
+                    positive = dots.clamp_min(0)
+                    importance = (positive * w_part.unsqueeze(-1)).sum(dim=1)
+                    importance.masked_fill_(~valid, -float("inf"))
+                    importance = torch.where(
+                        nonempty, importance, torch.zeros_like(importance)
+                    )
+                    pred = torch.softmax(importance, dim=-1) * valid
+                    p_safe, pred_safe = p.clamp_min(1e-8), pred.clamp_min(1e-8)
+                    loss += (
+                        (p_safe * (p_safe.log() - pred_safe.log()) * valid)
+                        .sum()
+                        .reshape(1)
+                    )
+                    # clamp_min has zero derivative below eps. pred-p is not the
+                    # derivative when a probability has been clamped.
+                    active_target = p_safe * (pred >= 1e-8) * valid
+                    ds = pred * active_target.sum(dim=-1, keepdim=True) - active_target
+                    ow[start:end, ih] += (positive * ds.unsqueeze(1)).sum(dim=-1)
+                    ddot = ds.unsqueeze(1) * w_part.unsqueeze(-1) * (dots > 0)
+                    oq[start:end, ih] += torch.bmm(ddot, ki_part)
+                    key_contrib = torch.bmm(ddot.transpose(1, 2), qi_part)
+                    # index_add_ is required: advanced-index += loses repeated-key
+                    # contributions both within one row and across query rows.
+                    ok[:, h].index_add_(0, safe_idx[valid], key_contrib[valid])
+    return dqi, dki, dw, loss
 
 
 def sparse_lightning_indexer_grad_kl_loss_enhance(
@@ -384,7 +524,11 @@ def _prefix_or_lengths(value, total):
     out = [int(v) for v in value]
     if not out:
         return [int(total)]
-    if len(out) > 1 and all(a <= b for a, b in zip(out, out[1:])) and out[-1] == int(total):
+    if (
+        len(out) > 1
+        and all(a <= b for a, b in zip(out, out[1:]))
+        and out[-1] == int(total)
+    ):
         prev = 0
         lens = []
         for item in out:
@@ -394,31 +538,43 @@ def _prefix_or_lengths(value, total):
     return out
 
 
-def _build_st_sparse_indices(topk_index, q_lens, k_lens, sparse_mode, sparse_block_size):
+def _build_st_sparse_indices(
+    topk_index, q_lens, k_lens, sparse_mode, sparse_block_size
+):
+    """Deterministic, noncontiguous token coverage, including causal future keys.
+
+    K is a storage bound, not permission to prune the causal mask from the test.
+    Valid key indices remain unique within each row. Negative sentinels and
+    padding exercise invalid-index handling. The pattern is public and
+    identical across devices.
+    """
     if topk_index is None:
         return None
+    if int(sparse_block_size) != 1:
+        raise ValueError(
+            "the current task supports token indices (sparse_block_size=1)"
+        )
     out = torch.full_like(topk_index, -1)
-    topk = int(topk_index.shape[-1])
-    n2 = int(topk_index.shape[-2])
-    t = 0
-    for b, q_len in enumerate(q_lens):
-        kv_len = k_lens[min(b, len(k_lens) - 1)] if k_lens else 0
-        for s in range(int(q_len)):
-            if sparse_mode == 3:
-                valid = int(kv_len) - int(q_len) + s + 1
-                if valid <= 0:
-                    valid = int(kv_len)
-            else:
-                valid = int(kv_len)
-            valid_blocks = max((valid + int(sparse_block_size) - 1) // int(sparse_block_size), 0)
-            count = min(topk, valid_blocks)
-            if count > 0:
-                row = torch.arange(count, dtype=out.dtype, device=out.device)
+    topk, n2 = int(out.shape[-1]), int(out.shape[-2])
+    token = 0
+    for b, (q_len, k_len) in enumerate(zip(q_lens, k_lens)):
+        count = min(topk, int(k_len))
+        if count:
+            base = torch.arange(count, device=out.device, dtype=torch.int64)
+            if count > 1:
+                base = base * (int(k_len) - 1) // (count - 1)
+            for s in range(int(q_len)):
+                row = (base + s) % int(k_len)
+                # Preserve unique valid keys; occasionally insert a negative sentinel.
+                if count >= 4 and (s + b) % 11 == 7:
+                    row[-1] = -1
                 if out.dim() == 3:
-                    out[t, :n2, :count] = row.view(1, count).expand(n2, count)
+                    out[token, :, :count] = row.to(out.dtype).view(1, -1).expand(n2, -1)
                 else:
-                    out[b, s, :n2, :count] = row.view(1, count).expand(n2, count)
-            t += 1
+                    out[b, s, :, :count] = row.to(out.dtype).view(1, -1).expand(n2, -1)
+                token += 1
+        else:
+            token += int(q_len)
     return out
 
 
@@ -444,9 +600,18 @@ def _cat_rope_for_stats(x, rope):
     return torch.cat((x, rope.to(device=x.device, dtype=x.dtype)), dim=-1)
 
 
-def _build_st_softmax_stats(query, key, topk_index, layout, actual_seq_lengths_query,
-                            actual_seq_lengths_key, scale_value, sparse_block_size,
-                            query_rope=None, key_rope=None):
+def _build_st_softmax_stats(
+    query,
+    key,
+    topk_index,
+    layout,
+    actual_seq_lengths_query,
+    actual_seq_lengths_key,
+    scale_value,
+    sparse_block_size,
+    query_rope=None,
+    key_rope=None,
+):
     if query is None or key is None or topk_index is None:
         return None, None
     query = _cat_rope_for_stats(query, query_rope)
@@ -462,8 +627,12 @@ def _build_st_softmax_stats(query, key, topk_index, layout, actual_seq_lengths_q
         idx = to_bsnd_grad(idx, layout, q_lens)
     if int(sparse_block_size) != 1:
         start = idx * int(sparse_block_size)
-        offset = torch.arange(int(sparse_block_size), dtype=idx.dtype).view(1, 1, 1, 1, -1)
-        idx = (start.unsqueeze(-1) + offset).reshape(*idx.shape[:-1], idx.shape[-1] * int(sparse_block_size))
+        offset = torch.arange(int(sparse_block_size), dtype=idx.dtype).view(
+            1, 1, 1, 1, -1
+        )
+        idx = (start.unsqueeze(-1) + offset).reshape(
+            *idx.shape[:-1], idx.shape[-1] * int(sparse_block_size)
+        )
 
     bsz, max_q, n1, dim = q_b.shape
     n2 = k_b.shape[2]
@@ -487,7 +656,10 @@ def _build_st_softmax_stats(query, key, topk_index, layout, actual_seq_lengths_q
                 raw = idx_cur[s, kv_head].reshape(-1)
                 safe = raw.clamp(min=0, max=max(kv_len - 1, 0))
                 key_topk = k_cur[safe, kv_head]
-                scores = torch.matmul(q_cur[s, kv_head * group:(kv_head + 1) * group], key_topk.transpose(-1, -2))
+                scores = torch.matmul(
+                    q_cur[s, kv_head * group : (kv_head + 1) * group],
+                    key_topk.transpose(-1, -2),
+                )
                 scores = scores * float(scale_value)
                 invalid = (raw < 0) | (raw >= kv_len)
                 if invalid.any():
@@ -504,8 +676,12 @@ def _build_st_softmax_stats(query, key, topk_index, layout, actual_seq_lengths_q
         empty = torch.empty((1, 0, n1), dtype=torch.float32)
         return empty, empty
     if layout == "TND":
-        return torch.cat(max_values, dim=0).unsqueeze(0), torch.cat(sum_values, dim=0).unsqueeze(0)
-    return torch.stack(max_values, dim=0).unsqueeze(0).unsqueeze(0), torch.stack(sum_values, dim=0).unsqueeze(0).unsqueeze(0)
+        return torch.cat(max_values, dim=0).unsqueeze(0), torch.cat(
+            sum_values, dim=0
+        ).unsqueeze(0)
+    return torch.stack(max_values, dim=0).unsqueeze(0).unsqueeze(0), torch.stack(
+        sum_values, dim=0
+    ).unsqueeze(0).unsqueeze(0)
 
 
 def get_input(
@@ -522,33 +698,41 @@ def get_input(
     **kwargs,
 ):
     layout = kwargs.get("layout", "TND")
-    sparse_mode = int(kwargs.get("sparse_mode", 3))
-    sparse_block_size = int(kwargs.get("sparse_block_size", 1))
-    if query_rope is None and query is not None and query.shape[-1] == 512:
-        query_rope = _zero_rope_like(query, kwargs.get("rope_head_dim", 64))
-    if key_rope is None and key is not None and key.shape[-1] == 512:
-        key_rope = _zero_rope_like(key, kwargs.get("rope_head_dim", 64))
     if query is not None and key is not None and topk_index is not None:
         q_total = query.shape[0] if layout == "TND" else query.shape[1]
         k_total = key.shape[0] if layout == "TND" else key.shape[1]
-        q_lens = _prefix_or_lengths(kwargs.get("actual_seq_lengths_query"), q_total)
-        k_lens = _prefix_or_lengths(kwargs.get("actual_seq_lengths_key"), k_total)
-        topk_index = _build_st_sparse_indices(topk_index, q_lens, k_lens, sparse_mode, sparse_block_size)
-    if softmax_max is None or softmax_sum is None:
-        st_max, st_sum = _build_st_softmax_stats(
-            query,
-            key,
-            topk_index,
-            layout,
+        q_lens = _checked_segment_lengths(
             kwargs.get("actual_seq_lengths_query"),
-            kwargs.get("actual_seq_lengths_key"),
-            kwargs.get("scale_value", 1.0),
-            sparse_block_size,
-            query_rope=query_rope,
-            key_rope=key_rope,
+            q_total,
+            query.shape[0] if layout == "BSND" else None,
+            layout,
         )
-        if softmax_max is None:
-            softmax_max = st_max
-        if softmax_sum is None:
-            softmax_sum = st_sum
-    return [query, key, query_index, key_index, weights, topk_index, softmax_max, softmax_sum, query_rope, key_rope]
+        k_lens = _checked_segment_lengths(
+            kwargs.get("actual_seq_lengths_key"),
+            k_total,
+            key.shape[0] if layout == "BSND" else None,
+            layout,
+        )
+        if len(q_lens) != len(k_lens):
+            raise ValueError("query/key must describe the same number of sequences")
+        topk_index = _build_st_sparse_indices(
+            topk_index,
+            q_lens,
+            k_lens,
+            int(kwargs.get("sparse_mode", 3)),
+            int(kwargs.get("sparse_block_size", 1)),
+        )
+    # These optional fields are reserved and unused by the task. Preserve None;
+    # do not synthesize large rope/statistics buffers or pad ragged TND inputs.
+    return [
+        query,
+        key,
+        query_index,
+        key_index,
+        weights,
+        topk_index,
+        softmax_max,
+        softmax_sum,
+        query_rope,
+        key_rope,
+    ]

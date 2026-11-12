@@ -25,17 +25,36 @@ linear_cross_entropy_oracle 跟随输入精度（golden_precision=fp64_cpu 下�
 """
 
 
-def _linear_cross_entropy_core(hidden, weight, labels, reduction, ignore_index, compute_dtype):
-    """核心计算：以 compute_dtype 精度执行 matmul + 交叉熵。"""
-    logits = torch.matmul(hidden.to(compute_dtype), weight.to(compute_dtype).t())   # [T, V]
-    # 交叉熵（内部 log_softmax 数值稳定），labels 转 long
-    loss = F.cross_entropy(
-        logits,
-        labels.long(),
-        reduction=reduction,
-        ignore_index=ignore_index,
-    )
-    return loss.reshape(1)
+def _linear_cross_entropy_core(
+    hidden, weight, labels, reduction, ignore_index, compute_dtype
+):
+    """Token-chunked reference: retain full vocabulary and global valid-token reduction."""
+    if hidden.shape[0] == 0 or reduction not in ("mean", "sum"):
+        # Retain legacy edge behavior without extending the declared task domain.
+        logits = torch.matmul(hidden.to(compute_dtype), weight.to(compute_dtype).t())
+        return F.cross_entropy(
+            logits, labels.long(), reduction=reduction, ignore_index=ignore_index
+        ).reshape(1)
+    weight_c = weight.to(compute_dtype)
+    labels_c = labels.long()
+    losses = []
+    # This controls logits materialization only, not the already-promoted weight.
+    for start in range(0, hidden.shape[0], 128):
+        logits = torch.matmul(
+            hidden[start : start + 128].to(compute_dtype), weight_c.t()
+        )
+        losses.append(
+            F.cross_entropy(
+                logits,
+                labels_c[start : start + 128],
+                reduction="none",
+                ignore_index=ignore_index,
+            )
+        )
+    total = torch.cat(losses).sum()
+    if reduction == "mean":
+        total = total / (labels_c != ignore_index).sum()
+    return total.reshape(1)
 
 
 def linear_cross_entropy(
@@ -58,7 +77,9 @@ def linear_cross_entropy(
     Returns:
         loss: [1] 聚合后的交叉熵损失, float32
     """
-    return _linear_cross_entropy_core(hidden, weight, labels, reduction, ignore_index, torch.float32)
+    return _linear_cross_entropy_core(
+        hidden, weight, labels, reduction, ignore_index, torch.float32
+    )
 
 
 def linear_cross_entropy_oracle(
@@ -69,4 +90,6 @@ def linear_cross_entropy_oracle(
     ignore_index: int = -100,
 ) -> torch.Tensor:
     """Oracle (g)：dtype-agnostic，计算精度跟随输入（fp64_cpu 下为 fp64 真值），不硬编码 .float()。"""
-    return _linear_cross_entropy_core(hidden, weight, labels, reduction, ignore_index, hidden.dtype)
+    return _linear_cross_entropy_core(
+        hidden, weight, labels, reduction, ignore_index, hidden.dtype
+    )

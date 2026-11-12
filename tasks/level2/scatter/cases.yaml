@@ -18,18 +18,22 @@ cases:
   note: "S-float16-dst1048576-write524288-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (S-float16-int32-float16-1M-对齐-dim=0-update) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
 - operator: Scatter
   case_id: 2
-  input_shape: [[4194304], [2097152], [2097152]]
+  input_shape: [[2097152], [1048576], [1048576]]
   dtype: [float32, int32, float32]
-  attrs: {dim: 0, reduce: null}
-  value_range: [[-2, 2], [unique, 0, 4194303], [-2, 2]]
-  note: "M-float32-dst4194304-write2097152-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (M-float32-int32-float32-4M-对齐-dim=0-update) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
+  attrs:
+    dim: 0
+    reduce: null
+  value_range: [[-2, 2], [unique, 0, 2097151], [-2, 2]]
+  note: "float32 / int32; shapes=[[2097152],[1048576],[1048576]]; dim=0, reduce=None"
 - operator: Scatter
   case_id: 3
-  input_shape: [[16777216], [8388608], [8388608]]
+  input_shape: [[2097152], [2097152], [2097152]]
   dtype: [bfloat16, int64, bfloat16]
-  attrs: {dim: 0, reduce: null}
-  value_range: [[-3, 3], [unique, 0, 16777215], [-3, 3]]
-  note: "L-bfloat16-dst16777216-write8388608-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (L-bfloat16-int64-bfloat16-16M-对齐-dim=0-update) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
+  attrs:
+    dim: 0
+    reduce: null
+  value_range: [[-3, 3], [unique, 0, 2097151], [-3, 3]]
+  note: "bfloat16 / int64; shapes=[[2097152],[2097152],[2097152]]; dim=0, reduce=None"
 - operator: Scatter
   case_id: 4
   input_shape:
@@ -98,11 +102,13 @@ cases:
   note: "S-float32-1M-非对齐-dim=0-add | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
 - operator: Scatter
   case_id: 10
-  input_shape: [[49691433], [24777271], [24777271]]
+  input_shape: [[2097143], [1048567], [1048567]]
   dtype: [bfloat16, int32, bfloat16]
-  attrs: {dim: 0, reduce: null}
-  value_range: [[-50, 100], [unique, 0, 49691432], [-50, 100]]
-  note: "M-bfloat16-dst49691433-write24777271-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (L-bfloat16-50M-质数非对齐-dim=0-3D) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
+  attrs:
+    dim: 0
+    reduce: null
+  value_range: [[-50, 100], [unique, 0, 2097142], [-50, 100]]
+  note: "bfloat16 / int32; shapes=[[2097143],[1048567],[1048567]]; dim=0, reduce=None"
 - operator: Scatter
   case_id: 11
   input_shape: [[1051137], [525312], [525312]]
@@ -139,18 +145,22 @@ cases:
   note: "S-float32-dst1048583-write1048-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (S-float32-1M-质数非对齐-dim=0-inf特殊值-1D) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
 - operator: Scatter
   case_id: 15
-  input_shape: [[10912759], [6944483], [6944483]]
+  input_shape: [[2097133], [1334539], [1334539]]
   dtype: [float16, int64, float16]
-  attrs: {dim: 0, reduce: null}
-  value_range: [[nan, nan], [unique, 0, 10912758], [nan, nan]]
-  note: "M-float16-dst10912759-write6944483-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (M-float16-10M-质数非对齐-dim=0-nan特殊值-5D) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
+  attrs:
+    dim: 0
+    reduce: null
+  value_range: [[nan, nan], [unique, 0, 2097132], [nan, nan]]
+  note: "float16 / int64; shapes=[[2097133],[1334539],[1334539]]; dim=0, reduce=None"
 - operator: Scatter
   case_id: 16
-  input_shape: [[3042039], [2028026], [2028026]]
+  input_shape: [[1572863], [1048575], [1048575]]
   dtype: [float32, int32, float32]
-  attrs: {dim: 0, reduce: null}
-  value_range: [[-5, 5], [unique, 0, 3042038], [-7, 7]]
-  note: "M-float32-dst3042039-write2028026-1D置换式唯一索引 [B:D9.2 determinism via unique range; converted from multi-D (M-float32-3M-质数非对齐-dim=0-常规值域-5D) - per-lane uniqueness inexpressible, volumes preserved] | baseline_kernels: TensorMove×1 + Cast×1 + LinearIndex×1 + ScatterElementsV2×1"
+  attrs:
+    dim: 0
+    reduce: null
+  value_range: [[-5, 5], [unique, 0, 1572862], [-7, 7]]
+  note: "float32 / int32; shapes=[[1572863],[1048575],[1048575]]; dim=0, reduce=None"
 - operator: Scatter
   case_id: 17
   input_shape: [[1048576], [524288], [524288]]

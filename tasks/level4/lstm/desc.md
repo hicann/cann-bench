@@ -13,7 +13,7 @@ Long Short-Term Memory 循环神经网络算子，通过输入门、遗忘门、
 **算子特征**：
 - 难度等级：L4（FusedComposite）
 - 多输入（x, weight_ih, weight_hh, 可选 bias_ih, bias_hh, h0, c0）三输出（y, hn, cn）
-- 支持多层堆叠、双向处理、batch_first 格式、层间 Dropout、投影降维
+- 支持多层堆叠、双向处理、batch_first 格式和投影降维；本基准为推理模式，不执行层间 Dropout
 
 ## 2. 算子定义
 
@@ -68,24 +68,27 @@ cann_bench.lstm(Tensor x, TensorList weight_ih, TensorList weight_hh, int inputS
 
 ### 输入参数说明
 
+下文记 `num_directions = 2 if bidirectional else 1`，
+`H_out = projSize if projSize > 0 else hiddenSize`。隐藏状态使用 `H_out`，细胞状态始终使用 `hiddenSize`。
+
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | x | Tensor | 必选 | 输入序列张量，shape 为 (S, B, input_size) 或 (B, S, input_size) |
 | weight_ih | TensorList | 必选 | 输入到隐藏层权重列表，每层/每个方向独立 tensor。详见权重列表格式 |
-| weight_hh | TensorList | 必选 | 隐藏层到隐藏层权重列表，每个 tensor shape 为 (4*hiddenSize, hiddenSize) |
+| weight_hh | TensorList | 必选 | 隐藏层到隐藏层权重列表，每个 tensor shape 为 (4*hiddenSize, H_out) |
 | inputSize | int | 必选 | 输入特征维度 |
-| hiddenSize | int | 必选 | 隐藏状态特征维度 |
+| hiddenSize | int | 必选 | 细胞状态及投影前隐藏状态的特征维度 |
 | numLayers | int | 1 | 循环层数 |
 | bias | bool | true | 是否使用偏置 |
 | batchFirst | bool | false | 输入是否为 (B, S, input_size) 格式 |
-| dropout | float | 0.0 | Dropout 概率（层间） |
+| dropout | float | 0.0 | 保留层间 Dropout 概率参数；推理模式下不生效 |
 | bidirectional | bool | false | 是否双向 LSTM |
 | projSize | int | 0 | 投影维度（>0 时启用 LSTM with Projection） |
 | bias_ih | TensorList | None | 输入到隐藏层偏置列表（可选），每个 tensor shape 为 (4*hiddenSize) |
 | bias_hh | TensorList | None | 隐藏层到隐藏层偏置列表（可选），每个 tensor shape 为 (4*hiddenSize) |
 | weight_hr | TensorList | None | 投影矩阵列表（可选，仅 projSize>0 / LSTMP 需要），每层/每个方向一个 tensor，shape 为 (projSize, hiddenSize) |
-| h0 | Tensor | None | 初始隐藏状态（可选，默认全 0），shape 为 (num_layers * num_directions, B, hiddenSize) |
-| c0 | Tensor | None | 初始细胞状态（可选，默认全 0），shape 为 (num_layers * num_directions, B, hiddenSize) |
+| h0 | Tensor | None | 初始隐藏状态（可选，默认全 0），shape 为 (numLayers * num_directions, B, H_out) |
+| c0 | Tensor | None | 初始细胞状态（可选，默认全 0），shape 为 (numLayers * num_directions, B, hiddenSize) |
 
 ### 权重列表格式
 
@@ -95,6 +98,7 @@ LSTM 有 4 个门（i, f, g, o），每个门都需要独立的权重矩阵。�
 
 - `len(weight_ih) = numLayers * num_directions`
 - `len(weight_hh) = numLayers * num_directions`
+- `len(weight_hr) = numLayers * num_directions`（`projSize > 0` 时）
 - `len(bias_ih) = numLayers * num_directions`（如有偏置）
 - `len(bias_hh) = numLayers * num_directions`（如有偏置）
 
@@ -109,18 +113,19 @@ LSTM 有 4 个门（i, f, g, o），每个门都需要独立的权重矩阵。�
 
 | 参数 | Layer 0 | Layer k (k>0) |
 |------|---------|---------------|
-| weight_ih (单向) | (4*hiddenSize, inputSize) | (4*hiddenSize, hiddenSize) |
-| weight_ih (双向) | (4*hiddenSize, inputSize) | (4*hiddenSize, 2*hiddenSize) |
-| weight_hh | (4*hiddenSize, hiddenSize) | (4*hiddenSize, hiddenSize 或 projSize) |
+| weight_ih (单向) | (4*hiddenSize, inputSize) | (4*hiddenSize, H_out) |
+| weight_ih (双向) | (4*hiddenSize, inputSize) | (4*hiddenSize, 2*H_out) |
+| weight_hh | (4*hiddenSize, H_out) | (4*hiddenSize, H_out) |
+| weight_hr（仅 projSize>0） | (projSize, hiddenSize) | (projSize, hiddenSize) |
 | bias_ih/bias_hh | (4*hiddenSize) | (4*hiddenSize) |
 
 ### 输出
 
 | 参数 | Shape | dtype | 描述 |
 |------|-------|-------|------|
-| y | (S, B, num_directions * hiddenSize) 或 (B, S, num_directions * hiddenSize) | 与输入 x 相同 | 输出序列 |
-| hn | (num_layers * num_directions, B, hiddenSize 或 projSize) | 与输入 x 相同 | 最终隐藏状态 |
-| cn | (num_layers * num_directions, B, hiddenSize) | 与输入 x 相同 | 最终细胞状态 |
+| y | (S, B, num_directions * H_out) 或 (B, S, num_directions * H_out) | 与输入 x 相同 | 输出序列 |
+| hn | (numLayers * num_directions, B, H_out) | 与输入 x 相同 | 最终隐藏状态 |
+| cn | (numLayers * num_directions, B, hiddenSize) | 与输入 x 相同 | 最终细胞状态 |
 
 ### 数据类型
 
@@ -137,10 +142,9 @@ LSTM 有 4 个门（i, f, g, o），每个门都需要独立的权重矩阵。�
 - 多层 LSTM 时，Layer k 的输入来自前一层的输出，因此 weight_ih 的列维度需要调整
 - 当 `bias=true` 时，`bias_ih` 和 `bias_hh` 必须提供
 - 当 `bidirectional=true` 时，num_directions=2，否则为 1
-- `dropout` 仅在 `numLayers > 1` 时生效，作用于层间（非最后一层）
-- `projSize > 0` 时启用投影降维，隐藏状态的有效维度变为 projSize，weight_hh 列维度变为 projSize
-- `batchFirst=true` 时，输入 x 的 shape 为 (B, S, input_size)，输出 y 的 shape 为 (B, S, num_directions * hiddenSize)
-- PyTorch LSTM 内部使用 float32 计算，float16/bfloat16 输入会转换为 float32 后计算，结果再转回原 dtype
+- 本算子执行推理前向，所有层均禁用 Dropout。即使 `numLayers > 1` 且 `dropout > 0`，也不生成或应用随机掩码。
+- `projSize > 0` 时须满足 `projSize < hiddenSize`，并提供 `weight_hr`；隐藏状态有效维度为 `H_out=projSize`，细胞状态维度仍为 `hiddenSize`。
+- `batchFirst=true` 时，输入 x 的 shape 为 (B, S, input_size)，输出 y 的 shape 为 (B, S, num_directions * H_out)
 
 ### 支持范围
 
@@ -155,12 +159,12 @@ LSTM 有 4 个门（i, f, g, o），每个门都需要独立的权重矩阵。�
 | `numLayers` | 1 ~ 8 | cases.csv 实测 1 ~ 3 |
 | `bias` | {true, false} | cases.csv 覆盖两种；为 true 时 bias_ih/bias_hh 必填 |
 | `batchFirst` | {true, false} | cases.csv 覆盖两种；true 时 x 为 (B, S, inputSize) |
-| `dropout` | 0.0 ~ 1.0 | cases.csv 实测 0.0 ~ 0.1；仅 numLayers>1 时生效 |
+| `dropout` | 0.0 ~ 1.0 | cases.csv 实测 0.0 ~ 0.1；参数保留，但推理模式下不生效 |
 | `bidirectional` | {true, false} | cases.csv 覆盖两种；true 时 num_directions=2 |
-| `projSize` | 0 ~ hiddenSize | cases.csv 实测 0 / 16；>0 时启用投影降维 |
+| `projSize` | 0，或 0 < projSize < hiddenSize | cases.csv 实测 0 / 16；>0 时启用投影降维 |
 | `h0`, `c0` 维度 0 | = numLayers * num_directions | 可选；缺省全 0 |
 
-约束：`weight_ih[k]` shape 为 (4*hiddenSize, inputSize)（第 0 层）或 (4*hiddenSize, num_directions*hiddenSize)（其它层）；`weight_hh[k]` shape 为 (4*hiddenSize, hiddenSize 或 projSize)；`bias_ih[k]`、`bias_hh[k]` shape 为 (4*hiddenSize)；TensorList 长度 = numLayers * num_directions。
+约束：`weight_ih[k]` shape 为 (4*hiddenSize, inputSize)（第 0 层）或 (4*hiddenSize, num_directions*H_out)（其它层）；`weight_hh[k]` shape 为 (4*hiddenSize, H_out)；`bias_ih[k]`、`bias_hh[k]` shape 为 (4*hiddenSize)；TensorList 长度 = numLayers * num_directions。
 
 ## 4. 精度要求
 
@@ -225,7 +229,7 @@ def lstm(
         numLayers: 层数
         bias: 是否使用偏置
         batchFirst: 输入格式是否为 (batch, seq, feature)
-        dropout: 层间 dropout
+        dropout: 保留层间 dropout 参数；推理模式下不生效
         bidirectional: 是否双向
         projSize: 投影维度 (>0 时启用 LSTM with Projection / LSTMP)
         bias_ih: TensorList?, 每层每方向一个 [4*hiddenSize] tensor

@@ -19,9 +19,9 @@ Gcd算子Torch Golden参考实现
 计算两个整数的最大公约数
 公式: y = gcd(x1, x2)
 """
-def gcd(
-    x1: torch.Tensor, x2: torch.Tensor
-) -> torch.Tensor:
+
+
+def gcd(x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
     """
     计算两个整数的最大公约数
 
@@ -44,5 +44,9 @@ def gcd(
 
     # NPU broadcast GCD 存在 bug，先显式广播再计算
     x1_bc, x2_bc = torch.broadcast_tensors(x1, x2)
+    # CPU torch.gcd overflows on int32 min (-2**31); compute in int64
+    # and cast back so results match the mathematically correct value.
+    if x1_bc.dtype == torch.int32:
+        return torch.gcd(x1_bc.long(), x2_bc.long()).to(torch.int32)
     y = torch.gcd(x1_bc, x2_bc)
     return y

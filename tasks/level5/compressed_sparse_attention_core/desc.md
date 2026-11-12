@@ -1,6 +1,6 @@
 # CompressedSparseAttentionCore 算子 API 描述
 
-版本：2026-10-05 v0.3。已纳入下一版新增题目预告（Issue #177）。正式定级 level5（赛季二 D10 裁定，定级权属平台团队）；按 level5 计分，四平台 t_hw 元数据已生成。NPU 真机验证另行完成。
+版本：2026-10-30 质量修订。level5 任务定义保持不变；本修订检查 CPU 参考、合法输入域和测试证据，不声明新的 NPU 精度、时延或硬件下界测量。
 
 ## 1. 算子简介
 
@@ -65,7 +65,8 @@ query/KV有限且在[-8,8]；sink为FP32且在[-20,20]；scaleValue有限，正�
 
 ## 4. 精度要求
 
-Golden/bench采用FP32核心计算，y转回输入dtype。oracle由评测器提供FP64输入，输出保持FP64，不允许假FP64回落。
+Golden/bench 对 FP16/BF16/FP32 输入采用 FP32 核心计算；开发者 FP64 输入全程采用 FP64，y转回输入dtype。oracle由评测器提供FP64输入，输出保持FP64，不允许假FP64回落。
+FP32 输入的 QK 点积使用分块显式 FP32 乘法与归约，限制 BLAS 累加顺序对大 logits 和输出相消的影响；FP16/BF16 路径仍采用 FP32 核心计算，FP64 oracle 保持真实 FP64。测试值域与精度阈值不变。
 独立CPU自测使用：FP32 `rtol=1e-4, atol=1e-5`；FP16 `rtol=3e-3, atol=3e-4`；BF16 `rtol=2e-2, atol=2e-3`。
 这些是本包验证门限，不覆盖仓库正式精度检查器。正式上线仍需用仓库checker和同精度参考验证NPU候选，不写入未经真机校准的算子级阈值。
 本实现不承诺与公开低精度kernel逐位相同，也不能用该串行/分块PyTorch Golden的速度作为有竞争力的性能baseline。
@@ -75,18 +76,6 @@ Golden/bench采用FP32核心计算，y转回输入dtype。oracle由评测器提�
 下方内容与同目录golden.py逐字一致，入口、oracle及bench签名保持一致。
 
 ```python
-#!/usr/bin/python3
-# coding=utf-8
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# Licensed under the CANN Open Software License Agreement Version 2.0.
-# See the repository LICENSE for the full text.
-
-"""DeepSeek-V4 CSA core benchmark, not a complete model attention layer.
-
-Original reference implementation of the mathematical contract in desc.md.
-Compressed entries and raw-window entries share K=V, but are distinct entries
-in ONE sink-augmented softmax. Compression, index search and RoPE are upstream.
-"""
 
 import math
 
@@ -97,7 +86,15 @@ COMPRESSION_RATIO = 4
 WINDOW_SIZE = 128
 
 
-def _validate(query, compressed_kv, window_kv, compressed_indices, attn_sink, query_start, scaleValue):
+def _validate(
+    query,
+    compressed_kv,
+    window_kv,
+    compressed_indices,
+    attn_sink,
+    query_start,
+    scaleValue,
+):
     if query.ndim != 4 or compressed_kv.ndim != 3 or window_kv.ndim != 3:
         raise ValueError("Expected query[B,S,H,D] and two KV tensors[B,N,D]")
     b, s, h, d = query.shape
@@ -123,17 +120,53 @@ def _validate(query, compressed_kv, window_kv, compressed_indices, attn_sink, qu
         raise TypeError("attn_sink must be FP32, or FP64 for the oracle")
     if isinstance(query_start, bool) or not isinstance(query_start, int):
         raise TypeError("query_start must be an integer")
-    if isinstance(scaleValue, bool) or not isinstance(scaleValue, (float, int)) or not math.isfinite(scaleValue):
+    if (
+        isinstance(scaleValue, bool)
+        or not isinstance(scaleValue, (float, int))
+        or not math.isfinite(scaleValue)
+    ):
         raise ValueError("scaleValue must be finite")
-    if any(x.device != query.device for x in (compressed_kv, window_kv, compressed_indices, attn_sink)):
+    if any(
+        x.device != query.device
+        for x in (compressed_kv, window_kv, compressed_indices, attn_sink)
+    ):
         raise ValueError("All inputs must be on the same device")
 
 
-def _compute(query, compressed_kv, window_kv, compressed_indices, attn_sink, query_start, scaleValue):
+def _fp32_query_key(query, entries):
+    """Explicit FP32 products and reductions; bound the temporary by two tiles.
+
+    FP32 public outputs face the strictest checker. Large finite logits make
+    BLAS-dependent dot accumulation visible after softmax and cancellation.
+    The reduction stays FP32 and does not change any input values or threshold.
+    """
+    b, s, h, _ = query.shape
+    count = entries.shape[2]
+    scores = query.new_empty((b, s, h, count))
+    for head in range(0, h, 8):
+        for entry in range(0, count, 64):
+            products = (
+                query[:, :, head : head + 8, None, :]
+                * entries[:, :, None, entry : entry + 64, :]
+            )
+            scores[:, :, head : head + 8, entry : entry + 64] = products.sum(dim=-1)
+    return scores
+
+
+def _compute(
+    query,
+    compressed_kv,
+    window_kv,
+    compressed_indices,
+    attn_sink,
+    query_start,
+    scaleValue,
+    explicit_fp32_dot=False,
+):
     """Bound temporary memory by query tiling; arithmetic follows query dtype."""
     b, s, h, d = query.shape
     c = compressed_kv.shape[1]
-    scale = d ** -0.5 if scaleValue <= 0 else scaleValue
+    scale = d**-0.5 if scaleValue <= 0 else scaleValue
     start = max(0, query_start - WINDOW_SIZE + 1)
     batch = torch.arange(b, device=query.device)[:, None, None]
     offsets = torch.arange(WINDOW_SIZE, device=query.device)
@@ -155,14 +188,18 @@ def _compute(query, compressed_kv, window_kv, compressed_indices, attn_sink, que
             comp = torch.zeros((*ids.shape, d), dtype=query.dtype, device=query.device)
         entries = torch.cat((raw, comp), dim=2)
         mask = torch.cat((raw_valid[None, :, :].expand(b, -1, -1), valid), dim=2)
-        scores = torch.einsum("bshd,bsed->bshe", query[:, lo:hi], entries) * scale
+        scores = (
+            _fp32_query_key(query[:, lo:hi], entries)
+            if explicit_fp32_dot
+            else torch.einsum("bshd,bsed->bshe", query[:, lo:hi], entries)
+        ) * scale
         scores = scores.masked_fill(~mask[:, :, None, :], -torch.inf)
         sink = attn_sink.to(query.dtype)[None, None, :, None]
         maximum = torch.maximum(scores.amax(dim=-1, keepdim=True), sink)
         weights = torch.exp(scores - maximum)
         denominator = weights.sum(dim=-1, keepdim=True) + torch.exp(sink - maximum)
         outputs.append(torch.einsum("bshe,bsed->bshd", weights / denominator, entries))
-    return torch.cat(outputs, dim=1)
+    return torch.cat(outputs, dim=1).contiguous()
 
 
 def compressed_sparse_attention_core(
@@ -174,15 +211,34 @@ def compressed_sparse_attention_core(
     query_start: int = 0,
     scaleValue: float = -1.0,
 ) -> torch.Tensor:
-    """Return [B,S,H,D] in query dtype, with FP32 dot/exp/sum accumulation.
+    """Return [B,S,H,D] in query dtype; use FP32, or genuine FP64, arithmetic.
 
-window_kv has absolute origin max(0,query_start-127); compressed block j has
-completion position 4*j+3. Valid indices are unique per row; -1 is padding.
-Inputs have already received any model projection/normalization/RoPE.
-"""
-    _validate(query, compressed_kv, window_kv, compressed_indices, attn_sink, query_start, scaleValue)
-    return _compute(query.float(), compressed_kv, window_kv, compressed_indices, attn_sink,
-                    query_start, scaleValue).to(query.dtype)
+    window_kv has absolute origin max(0,query_start-127); compressed block j has
+    completion position 4*j+3. Valid indices are unique per row; -1 is padding.
+    Inputs have already received any model projection/normalization/RoPE.
+    """
+    _validate(
+        query,
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+    )
+    accumulation_dtype = (
+        torch.float64 if query.dtype == torch.float64 else torch.float32
+    )
+    return _compute(
+        query.to(accumulation_dtype),
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+        explicit_fp32_dot=query.dtype == torch.float32,
+    ).to(query.dtype)
 
 
 def compressed_sparse_attention_core_oracle(
@@ -195,9 +251,24 @@ def compressed_sparse_attention_core_oracle(
     scaleValue: float = -1.0,
 ) -> torch.Tensor:
     """Dtype-preserving hook: evaluator FP64 inputs yield a genuine FP64 result."""
-    _validate(query, compressed_kv, window_kv, compressed_indices, attn_sink, query_start, scaleValue)
-    return _compute(query, compressed_kv, window_kv, compressed_indices, attn_sink,
-                    query_start, scaleValue)
+    _validate(
+        query,
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+    )
+    return _compute(
+        query,
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+    )
 
 
 def compressed_sparse_attention_core_bench(
@@ -210,8 +281,15 @@ def compressed_sparse_attention_core_bench(
     scaleValue: float = -1.0,
 ) -> torch.Tensor:
     """Same-precision correctness reference; NOT a measured performance baseline."""
-    return compressed_sparse_attention_core(query, compressed_kv, window_kv, compressed_indices, attn_sink,
-                        query_start, scaleValue)
+    return compressed_sparse_attention_core(
+        query,
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+    )
 
 
 def get_input(
@@ -226,13 +304,21 @@ def get_input(
 ):
     """Make causal, unique index rows from seeded generator inputs, for ALL paths.
 
-An all--1 source row stays all padding. Other rows include the latest completed
-block and block zero when space permits, followed by input-dependent remote
-blocks. Short prefixes pad with -1. No randomness is introduced here and the
-seeded source indices affect selection. This is untimed structural input setup,
-not index search inside the operator. No external files or hidden case IDs.
-"""
-    _validate(query, compressed_kv, window_kv, compressed_indices, attn_sink, query_start, scaleValue)
+    An all--1 source row stays all padding. Other rows include the latest completed
+    block and block zero when space permits, followed by input-dependent remote
+    blocks. Short prefixes pad with -1. No randomness is introduced here and the
+    seeded source indices affect selection. This is untimed structural input setup,
+    not index search inside the operator. No external files are consulted.
+    """
+    _validate(
+        query,
+        compressed_kv,
+        window_kv,
+        compressed_indices,
+        attn_sink,
+        query_start,
+        scaleValue,
+    )
     b, s, k = compressed_indices.shape
     c = compressed_kv.shape[1]
     source = compressed_indices.detach().cpu().tolist()
@@ -254,12 +340,18 @@ not index search inside the operator. No external files or hidden case IDs.
                 if len(selected) == count:
                     break
             result[bi, si, :count] = torch.tensor(selected, dtype=result.dtype)
-    return [query, compressed_kv, window_kv, result.to(compressed_indices.device), attn_sink]
+    return [
+        query,
+        compressed_kv,
+        window_kv,
+        result.to(compressed_indices.device),
+        attn_sink,
+    ]
 ```
 
 ## 6. 测试用例与验收
 
-恰好20个公开Core候选用例；Smoke为ID 1、9、15、18的子集，不能重复进入计分分母。未创建、也未宣称这些是Hidden用例。
+恰好20个公开Core候选用例；Smoke为ID 1、9、15、18的子集，不能重复进入计分分母。另有80个内部用例（ID 21–100），公开与内部输入域均在本次修订中检查；边界用例单独归类，不作为代表性工作量的证据。
 用途配额为4热点/4形态/3尾块/3精度/3属性/2边界/1性能。热点是模型核心维度或缩小的代表性情景，并非平台实测热点排名。
 
 | ID | 主要目的 | 输入尺寸摘要 | dtype | 设计要点 |

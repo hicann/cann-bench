@@ -13,11 +13,11 @@ cases:
   case_id: 1
   input_shape:
   - - 2
-    - 128
+    - 64
     - 128
     - 512
   - - 2
-    - 128
+    - 64
     - 128
     - 64
   - - 2
@@ -44,18 +44,26 @@ cases:
     inputLayout: BSND
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'M-float16-BSND-B2S128Nq128Nkv1-dnope512drope64-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,64,128,512],[2,64,128,64],[2,128,1,512],[2,128,1,64],[2,128,1,512]]"
 - operator: MLA
   case_id: 2
   input_shape:
   - - 4
-    - 256
+    - 32
     - 128
     - 512
   - - 4
-    - 256
+    - 32
     - 128
     - 64
   - - 4
@@ -82,9 +90,17 @@ cases:
     inputLayout: BSND
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-bfloat16-BSND-B4S256Nq128Nkv1-dnope512drope64-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[4,32,128,512],[4,32,128,64],[4,256,1,512],[4,256,1,64],[4,256,1,512]]"
 - operator: MLA
   case_id: 3
   input_shape:
@@ -120,29 +136,37 @@ cases:
     inputLayout: BSND
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: M-bfloat16-BSND-B2S128Nq64Nkv1-dnope448drope64-causal
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,128,64,448],[2,128,64,64],[2,128,1,448],[2,128,1,64],[2,128,1,448]]"
 - operator: MLA
   case_id: 4
   input_shape:
-  - - 2
+  - - 1
     - 256
-    - 128
+    - 32
     - 512
-  - - 2
+  - - 1
     - 256
-    - 128
+    - 32
     - 64
-  - - 2
+  - - 1
     - 128
     - 1
     - 512
-  - - 2
+  - - 1
     - 128
     - 1
     - 64
-  - - 2
+  - - 1
     - 128
     - 1
     - 512
@@ -158,18 +182,26 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'M-float16-BSND-B2Sq256Skv128Nq128-dnope512-cross | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[1,256,32,512],[1,256,32,64],[1,128,1,512],[1,128,1,64],[1,128,1,512]]"
 - operator: MLA
   case_id: 5
   input_shape:
   - - 2
-    - 256
+    - 64
     - 128
     - 512
   - - 2
-    - 256
+    - 64
     - 128
     - 64
   - - 2
@@ -196,30 +228,38 @@ cases:
     inputLayout: BSND
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BSND-B2S256Nq128-dnope512-long-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,64,128,512],[2,64,128,64],[2,256,1,512],[2,256,1,64],[2,256,1,512]]"
 - operator: MLA
   case_id: 6
   input_shape:
-  - - 2
-    - 256
+  - - 1
+    - 128
     - 128
     - 448
-  - - 2
-    - 256
+  - - 1
+    - 128
     - 128
     - 64
-  - - 2
-    - 256
+  - - 1
+    - 128
     - 1
     - 448
-  - - 2
-    - 256
+  - - 1
+    - 128
     - 1
     - 64
-  - - 2
-    - 256
+  - - 1
+    - 128
     - 1
     - 448
   dtype:
@@ -234,9 +274,17 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: L-float16-BSND-B2S256Nq128-dnope448-long-prefill
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[1,128,128,448],[1,128,128,64],[1,128,1,448],[1,128,1,64],[1,128,1,448]]"
 - operator: MLA
   case_id: 7
   input_shape:
@@ -272,29 +320,37 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-BSND-B1S1Skv2048Nq128-decode-single-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[1,1,128,512],[1,1,128,64],[1,2048,1,512],[1,2048,1,64],[1,2048,1,512]]"
 - operator: MLA
   case_id: 8
   input_shape:
-  - - 16
+  - - 8
     - 1
     - 128
     - 512
-  - - 16
+  - - 8
     - 1
     - 128
     - 64
-  - - 16
+  - - 8
     - 2048
     - 1
     - 512
-  - - 16
+  - - 8
     - 2048
     - 1
     - 64
-  - - 16
+  - - 8
     - 2048
     - 1
     - 512
@@ -310,30 +366,38 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'M-float16-BSND-B16S1Skv2048Nq128-decode | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[8,1,128,512],[8,1,128,64],[8,2048,1,512],[8,2048,1,64],[8,2048,1,512]]"
 - operator: MLA
   case_id: 9
   input_shape:
-  - - 32
+  - - 16
     - 1
     - 128
     - 512
-  - - 32
+  - - 16
     - 1
     - 128
     - 64
-  - - 32
-    - 2048
+  - - 16
+    - 1024
     - 1
     - 512
-  - - 32
-    - 2048
+  - - 16
+    - 1024
     - 1
     - 64
-  - - 32
-    - 2048
+  - - 16
+    - 1024
     - 1
     - 512
   dtype:
@@ -348,9 +412,17 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-bfloat16-BSND-B32S1Skv2048Nq128-decode | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[16,1,128,512],[16,1,128,64],[16,1024,1,512],[16,1024,1,64],[16,1024,1,512]]"
 - operator: MLA
   case_id: 10
   input_shape:
@@ -363,15 +435,15 @@ cases:
     - 128
     - 64
   - - 60
-    - 2048
+    - 256
     - 1
     - 512
   - - 60
-    - 2048
+    - 256
     - 1
     - 64
   - - 60
-    - 2048
+    - 256
     - 1
     - 512
   dtype:
@@ -386,9 +458,17 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BSND-B60S1Skv2048Nq128-dnope512-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,1,128,512],[60,1,128,64],[60,256,1,512],[60,256,1,64],[60,256,1,512]]"
 - operator: MLA
   case_id: 11
   input_shape:
@@ -401,15 +481,15 @@ cases:
     - 128
     - 64
   - - 128
-    - 1024
+    - 128
     - 1
     - 512
   - - 128
-    - 1024
+    - 128
     - 1
     - 64
   - - 128
-    - 1024
+    - 128
     - 1
     - 512
   dtype:
@@ -424,9 +504,17 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BSND-B128S1Skv4096Nq128-dnope512-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[128,1,128,512],[128,1,128,64],[128,128,1,512],[128,128,1,64],[128,128,1,512]]"
 - operator: MLA
   case_id: 12
   input_shape:
@@ -439,15 +527,15 @@ cases:
     - 64
     - 64
   - - 60
-    - 2048
+    - 256
     - 1
     - 512
   - - 60
-    - 2048
+    - 256
     - 1
     - 64
   - - 60
-    - 2048
+    - 256
     - 1
     - 512
   dtype:
@@ -462,19 +550,27 @@ cases:
     inputLayout: BSND
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BSND-B60S1Skv2048Nq64-dnope512-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,1,64,512],[60,1,64,64],[60,256,1,512],[60,256,1,64],[60,256,1,512]]"
 - operator: MLA
   case_id: 13
   input_shape:
   - - 2
     - 128
-    - 128
+    - 64
     - 512
   - - 2
     - 128
-    - 128
+    - 64
     - 64
   - - 2
     - 1
@@ -500,19 +596,27 @@ cases:
     inputLayout: BNSD
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'M-float16-BNSD-B2Nq128S128-dnope512drope64-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,64,512],[2,128,64,64],[2,1,128,512],[2,1,128,64],[2,1,128,512]]"
 - operator: MLA
   case_id: 14
   input_shape:
   - - 2
     - 128
-    - 128
+    - 64
     - 448
   - - 2
     - 128
-    - 128
+    - 64
     - 64
   - - 2
     - 1
@@ -538,21 +642,63 @@ cases:
     inputLayout: BNSD
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: M-float16-BNSD-B2Nq128S128-dnope448drope64-prefill-causal
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,64,448],[2,128,64,64],[2,1,128,448],[2,1,128,64],[2,1,128,448]]"
 - operator: MLA
   case_id: 15
   input_shape:
-  - [2, 32, 64, 512]
-  - [2, 32, 64, 64]
-  - [2, 1, 512, 512]
-  - [2, 1, 512, 64]
-  - [2, 1, 512, 512]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, bfloat16]
-  attrs: {numKVHeads: 1, scaleValue: -1.0, inputLayout: BNSD, is_causal: true}
-  value_range: [-1, 1]
-  note: "[R:bounded-resource] dtype=bfloat16/bfloat16/bfloat16/bfloat16/bfloat16; shapes=2x32x64x512/2x32x64x64/2x1x512x512/2x1x512x64/2x1x512x512; inputLayout=BNSD,is_causal=True"
+  - - 2
+    - 32
+    - 64
+    - 512
+  - - 2
+    - 32
+    - 64
+    - 64
+  - - 2
+    - 1
+    - 512
+    - 512
+  - - 2
+    - 1
+    - 512
+    - 64
+  - - 2
+    - 1
+    - 512
+    - 512
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    numKVHeads: 1
+    scaleValue: -1.0
+    inputLayout: BNSD
+    is_causal: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,32,64,512],[2,32,64,64],[2,1,512,512],[2,1,512,64],[2,1,512,512]]"
 - operator: MLA
   case_id: 16
   input_shape:
@@ -566,15 +712,15 @@ cases:
     - 64
   - - 60
     - 1
-    - 2048
+    - 256
     - 512
   - - 60
     - 1
-    - 2048
+    - 256
     - 64
   - - 60
     - 1
-    - 2048
+    - 256
     - 512
   dtype:
   - float16
@@ -588,29 +734,37 @@ cases:
     inputLayout: BNSD
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BNSD-B60Nq128S1Skv2048-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,128,1,512],[60,128,1,64],[60,1,256,512],[60,1,256,64],[60,1,256,512]]"
 - operator: MLA
   case_id: 17
   input_shape:
-  - - 16
+  - - 8
     - 2
     - 128
     - 512
-  - - 16
+  - - 8
     - 2
     - 128
     - 64
-  - - 16
+  - - 8
     - 2048
     - 1
     - 512
-  - - 16
+  - - 8
     - 2048
     - 1
     - 64
-  - - 16
+  - - 8
     - 2048
     - 1
     - 512
@@ -626,41 +780,83 @@ cases:
     inputLayout: BSND
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BSND-B16Sq2Skv2048Nq128-dnope512-MTP-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[8,2,128,512],[8,2,128,64],[8,2048,1,512],[8,2048,1,64],[8,2048,1,512]]"
 - operator: MLA
   case_id: 18
   input_shape:
-  - [4, 2, 32, 512]
-  - [4, 2, 32, 64]
-  - [4, 512, 1, 512]
-  - [4, 512, 1, 64]
-  - [4, 512, 1, 512]
-  dtype: [bfloat16, bfloat16, bfloat16, bfloat16, bfloat16]
-  attrs: {numKVHeads: 1, scaleValue: -1.0, inputLayout: BSND, is_causal: true}
-  value_range: [-1, 1]
-  note: "[R:bounded-resource] dtype=bfloat16/bfloat16/bfloat16/bfloat16/bfloat16; shapes=4x2x32x512/4x2x32x64/4x512x1x512/4x512x1x64/4x512x1x512; inputLayout=BSND,is_causal=True"
+  - - 4
+    - 2
+    - 32
+    - 512
+  - - 4
+    - 2
+    - 32
+    - 64
+  - - 4
+    - 512
+    - 1
+    - 512
+  - - 4
+    - 512
+    - 1
+    - 64
+  - - 4
+    - 512
+    - 1
+    - 512
+  dtype:
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  - bfloat16
+  attrs:
+    numKVHeads: 1
+    scaleValue: -1.0
+    inputLayout: BSND
+    is_causal: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[4,2,32,512],[4,2,32,64],[4,512,1,512],[4,512,1,64],[4,512,1,512]]"
 - operator: MLA
   case_id: 19
   input_shape:
-  - - 16
+  - - 8
     - 128
     - 2
     - 512
-  - - 16
+  - - 8
     - 128
     - 2
     - 64
-  - - 16
+  - - 8
     - 1
     - 2048
     - 512
-  - - 16
+  - - 8
     - 1
     - 2048
     - 64
-  - - 16
+  - - 8
     - 1
     - 2048
     - 512
@@ -676,13 +872,60 @@ cases:
     inputLayout: BNSD
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-BNSD-B16Nq128Sq2Skv2048-dnope512-MTP | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[8,128,2,512],[8,128,2,64],[8,1,2048,512],[8,1,2048,64],[8,1,2048,512]]"
 - operator: MLA
   case_id: 20
-  input_shape: [[1, 256, 128, 512], [1, 256, 128, 64], [1, 256, 1, 512], [1, 256, 1, 64], [1, 256, 1, 512]]
-  dtype: [float16, float16, float16, float16, float16]
-  attrs: {numKVHeads: 1, scaleValue: -1.0, inputLayout: BSND, is_causal: true}
-  value_range: [-1, 1]
-  note: "M-float16-B1-S256-去重替换 [R:replaced vr-only dup of c1]"
+  input_shape:
+  - - 1
+    - 128
+    - 128
+    - 512
+  - - 1
+    - 128
+    - 128
+    - 64
+  - - 1
+    - 256
+    - 1
+    - 512
+  - - 1
+    - 256
+    - 1
+    - 64
+  - - 1
+    - 256
+    - 1
+    - 512
+  dtype:
+  - float16
+  - float16
+  - float16
+  - float16
+  - float16
+  attrs:
+    numKVHeads: 1
+    scaleValue: -1.0
+    inputLayout: BSND
+    is_causal: true
+  value_range:
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[1,128,128,512],[1,128,128,64],[1,256,1,512],[1,256,1,64],[1,256,1,512]]"

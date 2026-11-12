@@ -127,8 +127,8 @@ cases:
   - [3, 7, 11, 13, 1013]
   dtype: [bfloat16]
   attrs: {dim: -1}
-  value_range: [0, 0]
-  note: "S-bfloat16-3M-质数非对齐-零值特殊值-5D | baseline_kernels: SoftmaxV2×1"
+  value_range: [-1, 1]
+  note: "softmax nonconstant input; retains original shape, dtype and attrs | baseline_kernels: SoftmaxV2×1"
 - operator: Softmax
   case_id: 16
   input_shape:

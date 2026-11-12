@@ -11,6 +11,40 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
+# Portions of _bilinear_interpolate and _roi_align_fallback were adapted
+# from torchvision and are licensed under BSD-3-Clause.
+# Reference: https://github.com/pytorch/vision/blob/v0.28.0/torchvision/ops/roi_align.py
+#
+# BSD 3-Clause License
+#
+# Copyright (c) Soumith Chintala 2016,
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import torch
 
 """
@@ -29,13 +63,19 @@ to a pure-Python implementation mirroring the torchvision reference.
 
 try:
     from torchvision.ops import roi_align as _tv_roi_align
+
     HAS_TORCHVISION = True
 except Exception:
     HAS_TORCHVISION = False
 
 
 def _bilinear_interpolate(
-    input, roi_batch_ind, y, x, ymask, xmask,
+    input,
+    roi_batch_ind,
+    y,
+    x,
+    ymask,
+    xmask,
 ):
     """Bilinear interpolation, mirroring torchvision's _bilinear_interpolate."""
     _, channels, height, width = input.size()
@@ -61,7 +101,9 @@ def _bilinear_interpolate(
             x_idx = torch.where(xmask[:, None, :], x_idx, 0)
         return input[
             roi_batch_ind[:, None, None, None, None, None],
-            torch.arange(channels, device=input.device)[None, :, None, None, None, None],
+            torch.arange(channels, device=input.device)[
+                None, :, None, None, None, None
+            ],
             y_idx[:, None, :, None, :, None],
             x_idx[:, None, None, :, None, :],
         ]
@@ -82,20 +124,27 @@ def _bilinear_interpolate(
 
 
 def _roi_align_fallback(
-    x, boxes, outputHeight, outputWidth,
-    spatial_scale, sampling_ratio, aligned,
+    x,
+    boxes,
+    outputHeight,
+    outputWidth,
+    spatial_scale,
+    sampling_ratio,
+    aligned,
 ):
     """Pure-Python fallback mirroring torchvision.ops.roi_align's reference path."""
     orig_dtype = x.dtype
-    x_fp32 = x.float()
-    boxes_fp32 = boxes.float()
-    _, channels, height, width = x_fp32.size()
-    roi_batch_ind = boxes_fp32[:, 0].long()
+    # Preserve the evaluator FP64 oracle; low-precision inputs still accumulate in FP32.
+    calc_dtype = torch.float64 if x.dtype == torch.float64 else torch.float32
+    x_calc = x.to(calc_dtype)
+    boxes_calc = boxes.to(calc_dtype)
+    _, channels, height, width = x_calc.size()
+    roi_batch_ind = boxes_calc[:, 0].long()
     offset = 0.5 if aligned else 0.0
-    roi_start_w = boxes_fp32[:, 1] * spatial_scale - offset
-    roi_start_h = boxes_fp32[:, 2] * spatial_scale - offset
-    roi_end_w = boxes_fp32[:, 3] * spatial_scale - offset
-    roi_end_h = boxes_fp32[:, 4] * spatial_scale - offset
+    roi_start_w = boxes_calc[:, 1] * spatial_scale - offset
+    roi_start_h = boxes_calc[:, 2] * spatial_scale - offset
+    roi_end_w = boxes_calc[:, 3] * spatial_scale - offset
+    roi_end_h = boxes_calc[:, 4] * spatial_scale - offset
     roi_width = roi_end_w - roi_start_w
     roi_height = roi_end_h - roi_start_h
     if not aligned:
@@ -104,8 +153,12 @@ def _roi_align_fallback(
     bin_size_h = roi_height / outputHeight
     bin_size_w = roi_width / outputWidth
     exact_sampling = sampling_ratio > 0
-    roi_bin_grid_h = sampling_ratio if exact_sampling else torch.ceil(roi_height / outputHeight)
-    roi_bin_grid_w = sampling_ratio if exact_sampling else torch.ceil(roi_width / outputWidth)
+    roi_bin_grid_h = (
+        sampling_ratio if exact_sampling else torch.ceil(roi_height / outputHeight)
+    )
+    roi_bin_grid_w = (
+        sampling_ratio if exact_sampling else torch.ceil(roi_width / outputWidth)
+    )
     if exact_sampling:
         count = max(roi_bin_grid_h * roi_bin_grid_w, 1)
         iy = torch.arange(roi_bin_grid_h, device=x.device)
@@ -114,8 +167,11 @@ def _roi_align_fallback(
         xmask = None
     else:
         count = torch.clamp(roi_bin_grid_h * roi_bin_grid_w, min=1)
-        iy = torch.arange(height, device=x.device)
-        ix = torch.arange(width, device=x.device)
+        # Crop only masked-out sampling slots; preserve the old H/W limit.
+        gh = min(height, max(0, int(roi_bin_grid_h.max().item())))
+        gw = min(width, max(0, int(roi_bin_grid_w.max().item())))
+        iy = torch.arange(gh, device=x.device)
+        ix = torch.arange(gw, device=x.device)
         ymask = iy[None, :] < roi_bin_grid_h[:, None]
         xmask = ix[None, :] < roi_bin_grid_w[:, None]
 
@@ -124,29 +180,35 @@ def _roi_align_fallback(
 
     y = (
         from_K(roi_start_h)
-        + torch.arange(outputHeight, device=x.device)[None, :, None] * from_K(bin_size_h)
-        + (iy[None, None, :] + 0.5).to(x_fp32.dtype) * from_K(bin_size_h / roi_bin_grid_h)
+        + torch.arange(outputHeight, device=x.device)[None, :, None]
+        * from_K(bin_size_h)
+        + (iy[None, None, :] + 0.5).to(x_calc.dtype)
+        * from_K(bin_size_h / roi_bin_grid_h)
     )
     x_pos = (
         from_K(roi_start_w)
         + torch.arange(outputWidth, device=x.device)[None, :, None] * from_K(bin_size_w)
-        + (ix[None, None, :] + 0.5).to(x_fp32.dtype) * from_K(bin_size_w / roi_bin_grid_w)
+        + (ix[None, None, :] + 0.5).to(x_calc.dtype)
+        * from_K(bin_size_w / roi_bin_grid_w)
     )
 
-    # _bilinear_interpolate materializes [n, C, oh, gh, ow, gw]; for auto-sampling
-    # (gh,gw span the full feature map) this reaches ~18 GiB on case 16 and OOMs the
-    # NPU. Per-ROI reductions are independent, so chunking the ROI axis is bit-exact
-    # and caps the peak val tensor to ~1 GiB (fp32).
+    # Interpolation materializes [K,C,PH,PW,IY,IX]. Crop masked sampling
+    # slots and chunk ROIs; reduction order may differ within tolerance.
+    # Other live tensors contribute to total memory beyond the val budget.
     n_rois = y.shape[0]
     elems_per_roi = max(
-        1, x_fp32.shape[1] * y.shape[1] * y.shape[2] * x_pos.shape[1] * x_pos.shape[2]
+        1, x_calc.shape[1] * y.shape[1] * y.shape[2] * x_pos.shape[1] * x_pos.shape[2]
     )
-    chunk = max(1, (256 * 1024 * 1024) // elems_per_roi)
+    # Budget a single val tensor at 32 MiB; this is not a total RSS guarantee.
+    chunk = max(1, (32 * 1024 * 1024) // (x_calc.element_size() * elems_per_roi))
     parts = []
     for st in range(0, n_rois, chunk):
         en = st + chunk
         val = _bilinear_interpolate(
-            x_fp32, roi_batch_ind[st:en], y[st:en], x_pos[st:en],
+            x_calc,
+            roi_batch_ind[st:en],
+            y[st:en],
+            x_pos[st:en],
             None if ymask is None else ymask[st:en],
             None if xmask is None else xmask[st:en],
         )
@@ -165,8 +227,13 @@ def _roi_align_fallback(
 
 
 def roi_align(
-    x: torch.Tensor, boxes: torch.Tensor, outputHeight: int, outputWidth: int,
-    spatial_scale: float, sampling_ratio: int = -1, aligned: bool = False,
+    x: torch.Tensor,
+    boxes: torch.Tensor,
+    outputHeight: int,
+    outputWidth: int,
+    spatial_scale: float,
+    sampling_ratio: int = -1,
+    aligned: bool = False,
 ) -> torch.Tensor:
     """Region-of-interest pooling for feature maps of non-uniform input size.
 
@@ -187,14 +254,21 @@ def roi_align(
     """
     if HAS_TORCHVISION:
         return _tv_roi_align(
-            x, boxes, (outputHeight, outputWidth),
+            x,
+            boxes,
+            (outputHeight, outputWidth),
             spatial_scale=spatial_scale,
             sampling_ratio=sampling_ratio,
             aligned=aligned,
         )
     return _roi_align_fallback(
-        x, boxes, outputHeight, outputWidth,
-        spatial_scale, sampling_ratio, aligned,
+        x,
+        boxes,
+        outputHeight,
+        outputWidth,
+        spatial_scale,
+        sampling_ratio,
+        aligned,
     )
 
 
@@ -241,8 +315,12 @@ def get_input(
     max_y = (H - 1) / spatial_scale
     x0 = torch.rand(N, generator=g) * 0.5 * max_x
     y0 = torch.rand(N, generator=g) * 0.5 * max_y
-    x1 = x0 + (0.1 + 0.4 * torch.rand(N, generator=g)) * max_x  # width in (0.1,0.5)*max -> x1>x0, x1<=max
+    x1 = (
+        x0 + (0.1 + 0.4 * torch.rand(N, generator=g)) * max_x
+    )  # width in (0.1,0.5)*max -> x1>x0, x1<=max
     y1 = y0 + (0.1 + 0.4 * torch.rand(N, generator=g)) * max_y
 
-    new_boxes = torch.stack([batch_idx, x0, y0, x1, y1], dim=1).to(boxes.device, boxes.dtype)
+    new_boxes = torch.stack([batch_idx, x0, y0, x1, y1], dim=1).to(
+        boxes.device, boxes.dtype
+    )
     return [x, new_boxes]

@@ -11,14 +11,14 @@
 
 **算子特征**：
 - 难度等级：L3（SortSelect）
-- 单输入双输出（唯一值张量和可选的逆索引），支持 ND 格式输入
+- 单输入，返回唯一值张量；启用 `return_inverse` 时另返回逆索引，支持 ND 格式输入
 
 ## 2. 算子定义
 
 ### 数学公式
 
 $$
-y, inverse = \text{unique}(x, \text{return\_inverse})
+y = \text{unique}(x, \text{False}), \qquad (y, inverse) = \text{unique}(x, \text{True})
 $$
 
 对输入张量 x 进行去重操作，返回唯一值张量 y。当 return_inverse=True 时，同时返回逆索引 inverse，满足 $x = y[inverse]$。
@@ -28,7 +28,10 @@ $$
 ### 算子原型
 
 ```python
-cann_bench.unique(Tensor x, bool return_inverse) -> (Tensor y, Tensor inverse)
+# return_inverse=False（默认）：返回单个 Tensor
+cann_bench.unique(x, return_inverse=False) -> y
+# return_inverse=True：返回两个 Tensor 组成的元组
+cann_bench.unique(x, return_inverse=True) -> (y, inverse)
 ```
 
 ### 输入参数说明
@@ -45,7 +48,7 @@ cann_bench.unique(Tensor x, bool return_inverse) -> (Tensor y, Tensor inverse)
 | y | 由唯一值数量决定 | 与输入 x 相同 | 输出张量，唯一值 |
 | inverse | 与输入 x 相同 | int64 | 逆索引，满足 x = y[inverse]（仅当 return_inverse=True 时返回） |
 
-**返回行为**（对标 PyTorch `torch.unique`）：
+**返回行为**：
 - `return_inverse=True`：返回 `(y, inverse)` 元组
 - `return_inverse=False`：仅返回 `y`（单个 Tensor）
 
@@ -64,10 +67,10 @@ cann_bench.unique(Tensor x, bool return_inverse) -> (Tensor y, Tensor inverse)
 ### 规则与约束
 
 - 输入支持 ND 格式张量，去重前会将输入展平为一维
-- 输出唯一值张量 `y` 的元素按数值升序排列（与 `torch.unique(..., sorted=True)` 默认行为一致），其长度取决于输入中不重复元素的数量
-- 当 `return_inverse=false` 时，`inverse` 输出为 None
+- 输出唯一值张量 `y` 的元素按数值升序排列，其长度等于输入中不重复元素的数量
+- 当 `return_inverse=False` 时，仅返回单个 Tensor `y`，不返回 `(y, None)`，也没有第二个输出槽位。
 - 输出 `y` 的 dtype 与输入 `x` 相同；`inverse` 的 dtype 固定为 int64
-- 浮点去重语义**要求 NPU 实现遵循 `torch.unique`**：按 IEEE 754 数值相等去重（`+0.0` 与 `-0.0` 必须合并为同一唯一值，PyTorch CPU 实现保留首次出现者，通常落到 `+0.0` 这一 sign）；`+inf` 与 `-inf` 视为不同唯一值（bit pattern 与 IEEE 值都不同）；本基准的输入生成器不引入 NaN，无需考虑 NaN 去重语义。若 NPU 将 `±0.0` 视为不同唯一值，`y` 长度会与 Golden 不匹配，bit-exact 检查直接因 shape mismatch 失败
+- 浮点元素按数值相等关系去重：`+0.0` 与 `-0.0` 合并为一个唯一值，`+inf` 与 `-inf` 是两个不同的唯一值。浮点输出的位级要求见第 4 节。本任务输入不含 NaN。
 
 ### 支持范围
 
@@ -130,14 +133,20 @@ bit-exact 判定通过 `src/kernel_eval/utils/precision.py` 中浮点 `threshold
 import torch
 from typing import Tuple, Union
 
+"""
+Unique 算子 Torch Golden 参考实现
+
+去除张量中的重复元素
+公式（return_inverse=True）：y, inverse = unique(x, True)
+"""
 def unique(
     x: torch.Tensor,
     return_inverse: bool = False
-) -> Union[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
     """
     去除张量中的重复元素
 
-    公式：y, inverse = unique(x, return_inverse)
+    公式（return_inverse=True）：y, inverse = unique(x, True)
 
     Args:
         x: 输入张量
@@ -148,10 +157,7 @@ def unique(
         return_inverse=False: y             仅唯一值
     """
 
-    y, inverse = torch.unique(x, return_inverse=True)
-    if return_inverse:
-        return y, inverse
-    return y
+    return torch.unique(x, return_inverse=return_inverse)
 ```
 
 ## 6. 额外信息

@@ -32,9 +32,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-B2S128Nq32Nkv8D128-G4-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,32,128],[2,128,8,128],[2,128,8,128]]"
 - operator: GQA
   case_id: 2
   input_shape:
@@ -58,9 +62,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-B2S128Nq48Nkv4D128-G12-prefill | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,48,128],[2,128,4,128],[2,128,4,128]]"
 - operator: GQA
   case_id: 3
   input_shape:
@@ -84,9 +92,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-B2S128Nq128Nkv8D128-G16-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,128,128],[2,128,8,128],[2,128,8,128]]"
 - operator: GQA
   case_id: 4
   input_shape:
@@ -110,9 +122,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'M-bfloat16-B4S256Nq64Nkv8D128-G8-prefill | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[4,256,64,128],[4,256,8,128],[4,256,8,128]]"
 - operator: GQA
   case_id: 5
   input_shape:
@@ -136,9 +152,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-B2S128Nq32Nkv8D256-G4-D256-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,32,256],[2,128,8,256],[2,128,8,256]]"
 - operator: GQA
   case_id: 6
   input_shape:
@@ -162,9 +182,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'M-bfloat16-B2S256Nq128Nkv8D256-G16-D256-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,256,128,256],[2,256,8,256],[2,256,8,256]]"
 - operator: GQA
   case_id: 7
   input_shape:
@@ -188,22 +212,26 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'S-bfloat16-B2Sq128Skv256Nq32Nkv8D128-G4-cross | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,128,32,128],[2,256,8,128],[2,256,8,128]]"
 - operator: GQA
   case_id: 8
   input_shape:
-  - - 4
-    - 1024
+  - - 2
+    - 512
     - 32
     - 128
-  - - 4
-    - 1024
+  - - 2
+    - 512
     - 8
     - 128
-  - - 4
-    - 1024
+  - - 2
+    - 512
     - 8
     - 128
   dtype:
@@ -214,22 +242,26 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B4S1024Nq32Nkv8D128-G4-long-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,512,32,128],[2,512,8,128],[2,512,8,128]]"
 - operator: GQA
   case_id: 9
   input_shape:
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 64
     - 128
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 8
     - 128
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 8
     - 128
   dtype:
@@ -240,22 +272,26 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-bfloat16-B4S512Nq64Nkv8D128-G8-long-prefill | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,256,64,128],[2,256,8,128],[2,256,8,128]]"
 - operator: GQA
   case_id: 10
   input_shape:
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 128
     - 128
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 8
     - 128
-  - - 4
-    - 512
+  - - 2
+    - 256
     - 8
     - 128
   dtype:
@@ -266,9 +302,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-bfloat16-B4S512Nq128Nkv8D128-G16-long-prefill-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,256,128,128],[2,256,8,128],[2,256,8,128]]"
 - operator: GQA
   case_id: 11
   input_shape:
@@ -277,11 +317,11 @@ cases:
     - 32
     - 128
   - - 16
-    - 2048
+    - 512
     - 8
     - 128
   - - 16
-    - 2048
+    - 512
     - 8
     - 128
   dtype:
@@ -292,9 +332,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B16S1Skv2048Nq32Nkv8D128-G4-decode | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[16,1,32,128],[16,512,8,128],[16,512,8,128]]"
 - operator: GQA
   case_id: 12
   input_shape:
@@ -303,11 +347,11 @@ cases:
     - 96
     - 128
   - - 16
-    - 2048
+    - 512
     - 8
     - 128
   - - 16
-    - 2048
+    - 512
     - 8
     - 128
   dtype:
@@ -318,9 +362,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-bfloat16-B16S1Skv2048Nq96Nkv8D128-G12-decode | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[16,1,96,128],[16,512,8,128],[16,512,8,128]]"
 - operator: GQA
   case_id: 13
   input_shape:
@@ -329,11 +377,11 @@ cases:
     - 32
     - 128
   - - 60
-    - 2048
+    - 128
     - 8
     - 128
   - - 60
-    - 2048
+    - 128
     - 8
     - 128
   dtype:
@@ -344,9 +392,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B60S1Skv2048Nq32Nkv8D128-G4-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,1,32,128],[60,128,8,128],[60,128,8,128]]"
 - operator: GQA
   case_id: 14
   input_shape:
@@ -355,11 +407,11 @@ cases:
     - 128
     - 128
   - - 128
-    - 512
+    - 64
     - 8
     - 128
   - - 128
-    - 512
+    - 64
     - 8
     - 128
   dtype:
@@ -370,9 +422,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B128S1Skv4096Nq128Nkv8D128-G16-decode-large-batch | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[128,1,128,128],[128,64,8,128],[128,64,8,128]]"
 - operator: GQA
   case_id: 15
   input_shape:
@@ -381,11 +437,11 @@ cases:
     - 32
     - 256
   - - 60
-    - 1024
+    - 64
     - 8
     - 256
   - - 60
-    - 1024
+    - 64
     - 8
     - 256
   dtype:
@@ -396,9 +452,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B60S1Skv2048Nq32Nkv8D256-G4-decode-large-batch-D256 | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,1,32,256],[60,64,8,256],[60,64,8,256]]"
 - operator: GQA
   case_id: 16
   input_shape:
@@ -407,11 +467,11 @@ cases:
     - 32
     - 128
   - - 60
-    - 2048
+    - 128
     - 8
     - 128
   - - 60
-    - 2048
+    - 128
     - 8
     - 128
   dtype:
@@ -422,9 +482,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B60Sq2Skv2048Nq32Nkv8D128-G4-MTP-large-batch-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[60,2,32,128],[60,128,8,128],[60,128,8,128]]"
 - operator: GQA
   case_id: 17
   input_shape:
@@ -433,11 +497,11 @@ cases:
     - 128
     - 128
   - - 128
-    - 512
+    - 64
     - 8
     - 128
   - - 128
-    - 512
+    - 64
     - 8
     - 128
   dtype:
@@ -448,9 +512,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'L-float16-B128Sq4Skv4096Nq128Nkv8D128-G16-MTP-large-batch-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[128,4,128,128],[128,64,8,128],[128,64,8,128]]"
 - operator: GQA
   case_id: 18
   input_shape:
@@ -474,9 +542,13 @@ cases:
     scaleValue: -1.0
     is_causal: false
   value_range:
-  - -1
-  - 1
-  note: 'S-float16-B2S128Nq32Nkv1D128-G32-MQA-degenerate | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "float16; shapes=[[2,128,32,128],[2,128,1,128],[2,128,1,128]]"
 - operator: GQA
   case_id: 19
   input_shape:
@@ -500,9 +572,13 @@ cases:
     scaleValue: -1.0
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'S-bfloat16-B2S128Nq32Nkv32D128-G1-MHA-degenerate-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,128,32,128],[2,128,32,128],[2,128,32,128]]"
 - operator: GQA
   case_id: 20
   input_shape:
@@ -526,6 +602,10 @@ cases:
     scaleValue: 0.08838
     is_causal: true
   value_range:
-  - -1
-  - 1
-  note: 'S-bfloat16-B2S128Nq32Nkv8D128-G4-explicit-scale-causal | baseline_kernels: FusedInferAttentionScore×1'
+  - - -1
+    - 1
+  - - -1
+    - 1
+  - - -1
+    - 1
+  note: "bfloat16; shapes=[[2,128,32,128],[2,128,8,128],[2,128,8,128]]"

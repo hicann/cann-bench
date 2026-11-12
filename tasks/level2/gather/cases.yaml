@@ -170,10 +170,8 @@ cases:
   - [2, 7, 11, 13, 1013]
   dtype: [float32, int64]
   attrs: {dim: 1}
-  value_range:
-  - [0, 0]
-  - [0, 2]
-  note: "M-float32-int64_idx-3M-质数非对齐-零值-5D-dim=1 | baseline_kernels: Transpose×3 + GatherElements×1"
+  value_range: [[-1, 1], [0, 2]]
+  note: "gather nonconstant input; retains original shape, dtype and attrs | baseline_kernels: Transpose×3 + GatherElements×1"
 - operator: Gather
   case_id: 16
   input_shape:

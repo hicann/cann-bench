@@ -1,6 +1,6 @@
 # KimiDeltaAttention 算子 API 描述
 
-版本：2026-10-05 v0.3。已纳入下一版新增题目预告（Issue #177）。正式定级 level5（赛季二 D10 裁定，定级权属平台团队）；按 level5 计分，四平台 t_hw 元数据已生成。NPU 真机验证另行完成。
+版本：2026-10-30 质量修订。level5 任务定义保持不变；本修订检查 CPU 参考、合法输入域和测试证据，不声明新的 NPU 精度、时延或硬件下界测量。
 
 ## 1. 算子简介
 
@@ -63,7 +63,7 @@ scaleValue为有限数，正值≤1；非正值均表示自动缩放。initial_s
 
 ## 4. 精度要求
 
-Golden/bench采用FP32核心计算，y转回输入dtype；末态保持FP32。oracle由评测器提供FP64输入，输出保持FP64，不允许假FP64回落。
+Golden/bench 对 FP16/BF16/FP32 输入采用 FP32 核心计算；开发者 FP64 输入全程采用 FP64，y转回输入dtype；末态保持FP32。oracle由评测器提供FP64输入，输出保持FP64，不允许假FP64回落。
 独立CPU自测使用：FP32 `rtol=1e-4, atol=1e-5`；FP16 `rtol=3e-3, atol=3e-4`；BF16 `rtol=2e-2, atol=2e-3`；末态 `rtol=2e-4, atol=2e-5`。
 这些是本包验证门限，不覆盖仓库正式精度检查器。正式上线仍需用仓库checker和同精度参考验证NPU候选，不写入未经真机校准的算子级阈值。
 本实现不承诺与公开低精度kernel逐位相同，也不能用该串行/分块PyTorch Golden的速度作为有竞争力的性能baseline。
@@ -73,19 +73,6 @@ Golden/bench采用FP32核心计算，y转回输入dtype；末态保持FP32。ora
 下方内容与同目录golden.py逐字一致，入口、oracle及bench签名保持一致。
 
 ```python
-#!/usr/bin/python3
-# coding=utf-8
-# Copyright (c) 2026 Huawei Technologies Co., Ltd.
-# Licensed under the CANN Open Software License Agreement Version 2.0.
-# See the repository LICENSE for the full text.
-
-"""KDA forward core: normalized queries/keys and fine-grained delta recurrence.
-
-The equations follow Kimi Linear, arXiv:2510.26692v1, Eq. (1).
-The benchmark contract deliberately fixes equal query/key/value head counts,
-key-first states, preactivated log decay/beta, and always returns the final state.
-This is an independently written reference, not a model layer or FLA wrapper.
-"""
 
 import math
 from typing import Tuple
@@ -110,8 +97,12 @@ def _check_inputs(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue):
     allowed_dtypes = (torch.float16, torch.bfloat16, torch.float32, torch.float64)
     if q.dtype not in allowed_dtypes or k.dtype != q.dtype or v.dtype != q.dtype:
         raise TypeError("q, k and v must share a supported floating-point dtype")
-    if any(t.dtype not in (torch.float32, torch.float64) for t in (g, beta, initial_state)):
-        raise TypeError("g, beta and initial_state must be FP32 (or FP64 for oracle checks)")
+    if any(
+        t.dtype not in (torch.float32, torch.float64) for t in (g, beta, initial_state)
+    ):
+        raise TypeError(
+            "g, beta and initial_state must be FP32 (or FP64 for oracle checks)"
+        )
     if any(t.device != q.device for t in (k, v, g, beta, initial_state)):
         raise ValueError("all tensor inputs must be on the same device")
     if not isinstance(use_qk_l2norm, bool):
@@ -120,7 +111,7 @@ def _check_inputs(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue):
         raise TypeError("scaleValue must be a finite number")
     if not math.isfinite(scaleValue):
         raise ValueError("scaleValue must be finite")
-    return key_dim ** -0.5 if scaleValue <= 0 else float(scaleValue)
+    return key_dim**-0.5 if scaleValue <= 0 else float(scaleValue)
 
 
 def kimi_delta_attention(
@@ -160,12 +151,14 @@ def kimi_delta_attention(
         faded_memory = memory * decay[:, token].unsqueeze(-1)
         token_key = key[:, token]
         predicted_value = torch.sum(faded_memory * token_key.unsqueeze(-1), dim=-2)
-        correction = (value[:, token] - predicted_value) * update_strength[:, token].unsqueeze(-1)
+        correction = (value[:, token] - predicted_value) * update_strength[
+            :, token
+        ].unsqueeze(-1)
         memory = faded_memory + token_key.unsqueeze(-1) * correction.unsqueeze(-2)
         output[:, token] = torch.sum(memory * query[:, token].unsqueeze(-1), dim=-2)
 
     state_dtype = torch.float64 if q.dtype == torch.float64 else torch.float32
-    return output.to(q.dtype), memory.to(state_dtype)
+    return output.to(q.dtype).contiguous(), memory.to(state_dtype).contiguous()
 
 
 def kimi_delta_attention_oracle(
@@ -204,11 +197,14 @@ def kimi_delta_attention_oracle(
         projected = np.squeeze(memory_vk @ kt[..., None], axis=-1)
         residual = (vt - projected) * strength[:, token, :, None]
         memory_vk = memory_vk + residual[..., :, None] @ kt[..., None, :]
-        output[:, token] = np.squeeze(memory_vk @ (query[:, token] * scale)[..., None], axis=-1)
+        output[:, token] = np.squeeze(
+            memory_vk @ (query[:, token] * scale)[..., None], axis=-1
+        )
 
     y = torch.from_numpy(output.copy()).to(device=q.device, dtype=q.dtype)
+    state_dtype = torch.float64 if q.dtype == torch.float64 else torch.float32
     final_state = torch.from_numpy(np.swapaxes(memory_vk, -1, -2).copy()).to(
-        device=q.device, dtype=q.dtype
+        device=q.device, dtype=state_dtype
     )
     return y, final_state
 
@@ -224,12 +220,14 @@ def kimi_delta_attention_bench(
     scaleValue: float = -1.0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Functional placeholder only; not an optimized or NPU-validated baseline."""
-    return kimi_delta_attention(q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue)
+    return kimi_delta_attention(
+        q, k, v, g, beta, initial_state, use_qk_l2norm, scaleValue
+    )
 ```
 
 ## 6. 测试用例与验收
 
-恰好20个公开Core候选用例；Smoke为ID 1、9、15、18的子集，不能重复进入计分分母。未创建、也未宣称这些是Hidden用例。
+恰好20个公开Core候选用例；Smoke为ID 1、9、15、18的子集，不能重复进入计分分母。另有80个内部用例（ID 21–100），公开与内部输入域均在本次修订中检查；边界用例单独归类，不作为代表性工作量的证据。
 用途配额为4热点/4形态/3尾块/3精度/3属性/2边界/1性能。热点是模型核心维度或缩小的代表性情景，并非平台实测热点排名。
 
 | ID | 主要目的 | 输入尺寸摘要 | dtype | 设计要点 |

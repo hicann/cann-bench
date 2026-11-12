@@ -85,6 +85,7 @@ cann_bench.scatter(Tensor data, int dim, Tensor indices, Tensor updates, str? re
   - `reduce=None`（覆盖模式）：写入顺序与具体实现相关，PyTorch/NPU 均不保证确定性，最终留下来的值可能是任一个对应的 `updates` 元素
   - `reduce='add'/'multiply'/'amax'/'amin'`：聚合结果与顺序无关，且语义等价于 `scatter_reduce_(include_self=True)`
 - **计分 case 约定**：`reduce=None` 的计分 case 保证 `indices` 在目标位置上互不重复（覆盖歧义行为不进入计分）；重复索引仅与各 reduce 聚合模式搭配出现
+- update 用例按 case seed 生成合法的唯一索引；已满足约束的索引经预处理后保持不变。多维输入要求每个目标切片内索引互异，索引值必须位于目标维合法范围内。
 - 特殊值行为：reduce=None 时数据仅被写入、不做算术，NaN/±Inf 按位原样保留；reduce 聚合模式下按 IEEE 规则参与运算；比对按 NaN==NaN、Inf 同号匹配。
 
 ### 支持范围
@@ -131,6 +132,7 @@ cann_bench.scatter(Tensor data, int dim, Tensor indices, Tensor updates, str? re
 ## 5. 标准 Golden 代码
 
 ```python
+
 import torch
 
 """
@@ -139,8 +141,14 @@ Scatter算子Torch Golden参考实现
 将updates按索引indices更新到data中
 公式: y[index[i][j][k]] = src[i][j][k] (if dim == 0)
 """
+
+
 def scatter(
-    data: torch.Tensor, dim: int, indices: torch.Tensor, updates: torch.Tensor, reduce: str = None
+    data: torch.Tensor,
+    dim: int,
+    indices: torch.Tensor,
+    updates: torch.Tensor,
+    reduce: str = None,
 ) -> torch.Tensor:
     """
     将updates按索引indices更新到data中
@@ -160,17 +168,71 @@ def scatter(
 
     y = data.clone()
     idx = indices.long()
-    if reduce is None or reduce == 'update':
+    if reduce is None or reduce == "update":
         y.scatter_(dim, idx, updates)
-    elif reduce == 'add':
+    elif reduce == "add":
         y.scatter_add_(dim, idx, updates)
-    elif reduce == 'multiply':
+    elif reduce == "multiply":
         y.scatter_reduce_(dim, idx, updates, reduce="prod", include_self=True)
-    elif reduce == 'amin':
+    elif reduce == "amin":
         y.scatter_reduce_(dim, idx, updates, reduce="amin", include_self=True)
-    elif reduce == 'amax':
+    elif reduce == "amax":
         y.scatter_reduce_(dim, idx, updates, reduce="amax", include_self=True)
     return y
+
+
+def get_input(
+    data: torch.Tensor,
+    indices: torch.Tensor,
+    updates: torch.Tensor,
+    dim: int = 0,
+    reduce: str = None,
+    **kwargs,
+):
+    """Preserve valid update indices; normalize ambiguous duplicate-index inputs.
+
+    Official update cases generate unique indices using their case seed. Inputs
+    that already meet the update contract retain their original tensor object.
+    Reduction cases retain their original indices, including repeated entries.
+    """
+    # 可交换归约：重复索引良定义，保持原始分布
+    if reduce not in (None, "update"):
+        return [data, indices, updates]
+
+    ndim = indices.dim()
+    dim_n = dim if dim >= 0 else ndim + dim
+    D = int(data.shape[dim_n])
+    n = int(indices.shape[dim_n])
+    if D == 1 and n >= 1:
+        return [data, torch.zeros_like(indices), updates]
+    if n <= 1:
+        return [data, indices, updates]
+    if n > D:
+        # 抽屉原理：互异索引不存在，保持原样（当前用例集不会走到这里）
+        return [data, indices, updates]
+
+    ordered = indices.movedim(dim_n, -1).sort(dim=-1).values
+    in_bounds = bool(((indices >= 0) & (indices < D)).all())
+    if in_bounds and not bool((ordered[..., 1:] == ordered[..., :-1]).any()):
+        return [data, indices, updates]
+
+    # 把 dim 换到最后一维并展平前导维 -> (slices, n)，逐切片独立抽样
+    moved = indices.movedim(dim_n, -1)
+    moved_shape = moved.shape
+    slices = moved.numel() // n
+
+    g = torch.Generator().manual_seed(0)  # 固定种子：跨 eval 运行必须可复现
+    out = torch.empty(slices, n, dtype=torch.int64)
+    # 分块限制峰值内存：置换临时量为 chunk*D，最大用例 slices*D 达 49.7M
+    chunk = max(1, min(slices, (1 << 22) // D or 1))
+    for start in range(0, slices, chunk):
+        stop = min(start + chunk, slices)
+        # argsort(rand) 即随机置换；取前 n 项得到 [0, D) 内 n 个互异索引
+        out[start:stop] = torch.rand(stop - start, D, generator=g).argsort(dim=1)[:, :n]
+
+    new_indices = out.reshape(moved_shape).movedim(-1, dim_n).contiguous()
+    new_indices = new_indices.to(dtype=indices.dtype, device=indices.device)
+    return [data, new_indices, updates]
 ```
 
 ## 6. 额外信息

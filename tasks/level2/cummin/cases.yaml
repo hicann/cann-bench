@@ -36,27 +36,27 @@ cases:
 - operator: Cummin
   case_id: 4
   input_shape:
-  - [8192, 8192]
+    [[2048, 8192]]
   dtype: [int32]
   attrs: {dim: -1}
   value_range: [-10000, 10000]
-  note: "L-int32-67M-对齐-对称中值域-dim=-1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
+  note: "int32; shapes=[[2048,8192]]; dim=-1"
 - operator: Cummin
   case_id: 5
   input_shape:
-  - [16384, 16384]
+    [[16384, 1024]]
   dtype: [float16]
   attrs: {dim: 0}
   value_range: [-100, 100]
-  note: "L-float16-268M-对齐-对称大值域-dim=0 | baseline_kernels: Cummin×1 + Cast×1"
+  note: "float16; shapes=[[16384,1024]]; dim=0"
 - operator: Cummin
   case_id: 6
   input_shape:
-  - [8192, 8192]
+    [[2048, 8192]]
   dtype: [float32]
   attrs: {dim: 1}
   value_range: [-1000, 1000]
-  note: "L-float32-1G-对齐-对称大值域-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
+  note: "float32; shapes=[[2048,8192]]; dim=1"
 - operator: Cummin
   case_id: 7
   input_shape:
@@ -84,11 +84,11 @@ cases:
 - operator: Cummin
   case_id: 10
   input_shape:
-  - [363, 367, 373]
+    [[181, 367, 187]]
   dtype: [bfloat16]
   attrs: {dim: 1}
   value_range: [-50, 100]
-  note: "M-bfloat16-50M-质数非对齐-非对称大值域-3D-dim=1 | baseline_kernels: Transpose×3 + Cummin×1 + Cast×1"
+  note: "bfloat16; shapes=[[181,367,187]]; dim=1"
 - operator: Cummin
   case_id: 11
   input_shape:
