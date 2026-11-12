@@ -19,6 +19,23 @@ torch.library.define("cann_bench_utils::cann_bench_cache_clean", "(Tensor x) -> 
 # The dispatcher op mutates ``dst`` and deliberately has no return value.  The
 # Python wrapper below returns ``dst`` for callers that need the copied tensor.
 torch.library.define("cann_bench_utils::cann_bench_copy", "(Tensor src, Tensor(a!) dst) -> ()")
+torch.library.define("cann_bench_utils::cann_bench_zero", "(Tensor(a!) dst) -> ()")
+
+
+@torch.library.impl("cann_bench_utils::cann_bench_zero", "PrivateUse1")
+def _zero_npu(dst: torch.Tensor) -> None:
+    _C.device_zero_npu(dst)
+
+
+@torch.library.impl("cann_bench_utils::cann_bench_zero", "Meta")
+def _zero_meta(dst: torch.Tensor) -> None:
+    if not dst.is_contiguous():
+        raise ValueError("cann_bench_zero requires a contiguous tensor")
+
+
+def cann_bench_zero(dst: torch.Tensor) -> None:
+    """Zero tensor bytes on the current stream; caller synchronizes before release."""
+    torch.ops.cann_bench_utils.cann_bench_zero(dst)
 
 
 @torch.library.impl("cann_bench_utils::cann_bench_warmup", "PrivateUse1")
@@ -91,4 +108,5 @@ __all__ = [
     'cann_bench_cache_clean',
     'cann_bench_copy',
     'cann_bench_clone',
+    'cann_bench_zero',
 ]

@@ -195,6 +195,7 @@ def _make_config(
     cfg.warmup = args.warmup
     cfg.repeat = args.repeat
     cfg.enable_profiler = enable_profiler
+    cfg.perf_restore_inputs = bool(getattr(args, "perf_restore_inputs", True))
     cfg.perf_batch_cases = bool(getattr(args, "perf_batch_cases", cfg.perf_batch_cases))
     cfg.perf_batch_case_memory_limit_mb = float(
         getattr(
@@ -755,7 +756,8 @@ def _run_with_score_profile(args, bench_root, filter_prefix):
     memory_limit_mb = float(getattr(args, "perf_batch_case_memory_limit_mb", 32 * 1024))
     batch_allowlist, individual_allowlist = _partition_performance_case_keys(
         correctness_ops,
-        batch_enabled=bool(getattr(args, "perf_batch_cases", True)),
+        batch_enabled=(bool(getattr(args, "perf_batch_cases", True))
+                       and not bool(getattr(args, "perf_restore_inputs", True))),
         memory_limit_mb=memory_limit_mb,
     )
     print(
@@ -892,6 +894,10 @@ def create_parser() -> argparse.ArgumentParser:
         help="关闭批量 case 性能采集，恢复逐 case profiler",
     )
     parser.set_defaults(perf_batch_cases=True)
+    parser.add_argument(
+        "--perf-restore-inputs", action=argparse.BooleanOptionalAction, default=True,
+        help="Restore inputs and clean invocation I/O for every performance call (default: enabled)",
+    )
     parser.add_argument(
         "--perf-batch-case-memory-limit-mb",
         type=float,

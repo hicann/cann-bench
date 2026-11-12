@@ -638,13 +638,18 @@ class ProcessPoolCoordinator:
         if source_dir:
             cmd += ["--source-dir", child_path(source_dir)]
 
+        if getattr(self.base_config, "perf_restore_inputs", True):
+            cmd.append("--perf-restore-inputs")
+        else:
+            cmd.append("--no-perf-restore-inputs")
+
         # profiler 配置
         if not self.process_config.enable_profiler:
             cmd.append("--no-perf")
         batch_cases = task.perf_batch_cases
         if batch_cases is None:
             batch_cases = getattr(self.base_config, "perf_batch_cases", True)
-        if outer_isolation:
+        if outer_isolation or getattr(self.base_config, "perf_restore_inputs", True):
             batch_cases = False
         if batch_cases:
             cmd.append("--perf-batch-cases")
@@ -716,6 +721,7 @@ class ProcessPoolCoordinator:
             batch_cases
             and self.process_config.enable_profiler
             and len(task.cases) > 1
+            and not getattr(self.base_config, "perf_restore_inputs", True)
             and not getattr(self.base_config, "pypto_pro_outer_case_isolation", False)
         )
 

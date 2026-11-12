@@ -32,6 +32,7 @@ import torch
 from ..utils.device_manager import DeviceManager
 from .perf_eval import PerfEvaluator, PerfResult
 from .input_pool import CallInputPool
+from .restored_inputs import migrate_call_inputs
 
 
 @contextmanager
@@ -128,6 +129,9 @@ class OpRunner:
         return self._perf_batch_active
 
     def begin_perf_batch(self) -> None:
+        if self.perf_evaluator is not None and getattr(
+                self.perf_evaluator.config, "perf_restore_inputs", True):
+            raise RuntimeError("restored-input profiling requires explicit per-case inputs, not deferred batch")
         if self._perf_batch_active:
             raise RuntimeError("performance batch is already active")
         self._perf_batch_active = True
@@ -250,7 +254,8 @@ class OpRunner:
                 fn.release()
 
     def run(self, func: Callable, params: Dict, case_id: str, input_tensors: List,
-            to_device: bool = True, enable_profiler: bool = False) -> OpRunResult:
+            to_device: bool = True, enable_profiler: bool = False,
+            *, input_factory=None, validator=None) -> OpRunResult:
         """执行函数
 
         Args:
@@ -263,8 +268,18 @@ class OpRunner:
         """
         captured_output = ""
         try:
+            is_npu = self.device_manager.is_npu_mode()
             # 迁移输入到设备
-            if to_device:
+            # Restoration constrains NPU performance calls. CPU execution is
+            # accuracy-only even when the profiler flag keeps its default True.
+            strict_inputs = bool(enable_profiler and is_npu and self.perf_evaluator is not None
+                                 and getattr(self.perf_evaluator.config, "perf_restore_inputs", True))
+            if to_device and strict_inputs:
+                # Params are already bound by Evaluator; migrate the full graph
+                # once so repeated tensors and nested aliases survive H2D.
+                _, updated_params, _ = migrate_call_inputs(
+                    (), params, self.device_manager.to_device)
+            elif to_device:
                 device_tensors = self.device_manager.to_device_batch(input_tensors)
                 updated_params = self._update_params(params, device_tensors)
             else:
@@ -274,12 +289,15 @@ class OpRunner:
             use_profiler = (enable_profiler
                          and self.perf_evaluator is not None
                          and self.perf_evaluator.config.enable_profiler
-                         and self.device_manager.is_npu_mode())
+                         and is_npu)
+            if strict_inputs and not use_profiler:
+                raise RuntimeError("perf_restore_inputs requires NPU profiler performance evaluation")
             if use_profiler:
                 # 仅性能阶段启用输入地址轮换（防 data_ptr 缓存作弊）；精度阶段走下方非 profiler 分支，不启用。
                 rotate_inputs = getattr(self.perf_evaluator.config, 'perf_rotate_inputs', True)
                 outputs, perf_result = self.perf_evaluator.run_profiled(
-                    case_id, func, use_input_pool=rotate_inputs, **updated_params)
+                    case_id, func, use_input_pool=rotate_inputs,
+                    input_factory=input_factory, validator=validator, **updated_params)
                 self.perf_evaluator.wait_all()
                 elapsed_us = perf_result.elapsed_us
                 # profiler 路径：异常被 run_profiled 捕获存在 error_msg 中，outputs 为 None
@@ -348,7 +366,7 @@ class OpRunner:
         return error
 
     def run_ai_op(self, ai_op_func: Callable, params: Dict, case_id: str, input_tensors: List,
-                  enable_perf: bool = True) -> OpRunResult:
+                  enable_perf: bool = True, *, input_factory=None, validator=None) -> OpRunResult:
         """执行AI算子（受 TorchOpGuard 监视，检测对禁用 builtin 数学 API 的调用）"""
         # 防作弊监听：detect AI op calling torch.matmul / conv / softmax 等
         guard_mode = "block"
@@ -377,7 +395,8 @@ class OpRunner:
             # 如果需要性能采集且evaluator可用，临时启用
             if enable_perf and self.perf_evaluator:
                 return self.run(ai_op_func, params, case_id, input_tensors,
-                                enable_profiler=enable_perf)
+                                enable_profiler=enable_perf,
+                                input_factory=input_factory, validator=validator)
             else:
                 # 不采集性能，简单执行
                 return self._run_simple(ai_op_func, params, input_tensors)

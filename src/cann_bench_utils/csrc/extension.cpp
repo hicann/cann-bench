@@ -15,6 +15,7 @@
 #include <torch/all.h>
 
 namespace cann_bench_utils {
+void device_zero_npu(const torch::Tensor &dst);
 void device_memcpy_npu(const torch::Tensor &src, const torch::Tensor &dst);
 void device_memcpy_meta(const torch::Tensor &src, const torch::Tensor &dst);
 torch::Tensor warmup_npu(const torch::Tensor &x, const torch::Tensor &y, const torch::Tensor &z);
@@ -24,6 +25,7 @@ torch::Tensor cache_clean_meta(const torch::Tensor &x);
 }
 
 PYBIND11_MODULE(_C, m) {
+    m.def("device_zero_npu", &cann_bench_utils::device_zero_npu, "Zero NPU tensor bytes asynchronously");
     m.def("warmup_npu", &cann_bench_utils::warmup_npu, "CannBenchWarmup NPU impl");
     m.def("cache_clean_npu", &cann_bench_utils::cache_clean_npu, "CannBenchCacheClean NPU impl");
     m.def("warmup_meta", &cann_bench_utils::warmup_meta, "CannBenchWarmup Meta impl");

@@ -233,6 +233,10 @@ def create_parser() -> argparse.ArgumentParser:
     )
     eval_parser.set_defaults(perf_batch_cases=True)
     eval_parser.add_argument(
+        "--perf-restore-inputs", action=argparse.BooleanOptionalAction, default=True,
+        help="Restore inputs and clean invocation I/O for every performance call (default: enabled)",
+    )
+    eval_parser.add_argument(
         "--perf-batch-case-memory-limit-mb",
         type=float,
         default=32 * 1024,
@@ -400,6 +404,10 @@ def create_parser() -> argparse.ArgumentParser:
     )
     child_parser.set_defaults(perf_batch_cases=True)
     child_parser.add_argument(
+        "--perf-restore-inputs", action=argparse.BooleanOptionalAction, default=True,
+        help="Restore inputs and clean invocation I/O for every performance call (default: enabled)",
+    )
+    child_parser.add_argument(
         "--monitor-case-memory", action="store_true", help=argparse.SUPPRESS
     )
     child_parser.add_argument(
@@ -523,6 +531,7 @@ def _create_config_from_args(args, bench_root: str) -> Config:
         config.max_cases_per_task_unit = args.max_cases_per_task_unit
     if getattr(args, "no_perf", False):
         config.enable_profiler = False
+    config.perf_restore_inputs = bool(getattr(args, "perf_restore_inputs", True))
     config.perf_batch_cases = bool(
         getattr(args, "perf_batch_cases", config.perf_batch_cases)
     )
@@ -962,6 +971,7 @@ def _create_config_from_args_for_child(args, bench_root: str) -> Config:
     config.warmup = args.warmup
     config.repeat = args.repeat
     config.enable_profiler = not args.no_perf
+    config.perf_restore_inputs = bool(getattr(args, "perf_restore_inputs", True))
     config.perf_batch_cases = bool(
         getattr(args, "perf_batch_cases", config.perf_batch_cases)
     )

@@ -16,13 +16,13 @@
 
 职责：
 1. 预分配一组clone输入，轮换使用
-2. 防止按data_ptr缓存输出的攻击
+2. 在有限池内轮换地址（不保证阻止结果缓存）
 3. 限制内存占用，避免OOM
 
 原理：
 - 攻击者可能缓存output按data_ptr缓存结果
-- 预分配pool轮换使用，每次调用data_ptr不同
-- pool填充时间窗口后，每次都是cache miss
+- 预分配 pool 轮换使用；池大小为 1 或绕回后地址会重复
+- 本池不恢复被修改的输入；严格恢复模式见 restored_inputs.py
 
 参考evaluation/evaluate.py中的clone pool机制
 """
@@ -54,7 +54,7 @@ class InputPool:
     """
     输入池管理器
 
-    用于性能测量时防止data_ptr缓存攻击
+    用于性能测量时有限轮换输入地址
 
     使用方法：
         pool = InputPool(inputs, pool_size=warmup+repeat)
@@ -155,7 +155,7 @@ class CallInputPool:
 
     - 只 clone 张量（含嵌套于 list / tuple 中的张量）；非张量值（如 attr）按引用共享。
     - 每次 get_next 返回 (args, kwargs)，池大小 >= 2 时相邻两次的张量地址不同，
-      使按 data_ptr() 命中的缓存在 repeat 各步 cache miss。
+      但池绕回后仍可能命中缓存，且不恢复已修改的值。
     - clone 值与原输入逐位相等，故性能阶段的精度复检不受影响。
     - 池大小按 InputPoolConfig 的内存 / 数量上限裁剪，避免大张量 OOM。
 

@@ -98,10 +98,14 @@ class Config:
     enable_accuracy_retry: bool = False
 
     # 防作弊：仅在**性能测量阶段**轮换输入地址（对实际调用的 args/kwargs 张量做 clone 池），
-    # 使按 data_ptr() 命中的缓存 / 预设结果在 repeat 各步 cache miss 而失效。
+    # 有限池会绕回，不保证每步地址唯一或阻止所有结果缓存。
     # 只作用于 profiler 采集路径（性能阶段）；精度阶段（golden / AI 一次执行）不启用。
     # 为 True 时 op_runner 以 use_input_pool=True 调 run_profiled。内存占用按 InputPool 上限裁剪。
     perf_rotate_inputs: bool = True
+
+    # Restore inputs and retire invocation I/O by default. Each measured call
+    # has its own profiler session; explicit opt-out retains the legacy protocol.
+    perf_restore_inputs: bool = True
 
     # 同一 TaskUnit 内多个 case 共用 profiler 会话。正确性阶段会记录每个
     # case 的 host RSS 峰值；超过阈值的 case 在性能阶段自动改走逐 case profiler。

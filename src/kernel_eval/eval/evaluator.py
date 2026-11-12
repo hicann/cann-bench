@@ -73,6 +73,7 @@ from ..base.result import (
 )
 from .op_runner import OpRunner, OpRunResult
 from .accuracy_eval import AccuracyEvaluator
+from .restored_inputs import clone_reference_inputs
 from .perf_eval import PerfEvaluator
 from .results import EvalCaseResult, EvalOperatorResult, EvalSessionResult
 from .failure_synthesizer import FailureSynthesizer
@@ -389,6 +390,19 @@ class Evaluator:
         """
         case_id_str = case.get_case_id_str()
 
+        if (getattr(self.config, "perf_restore_inputs", True)
+                and self.config.enable_profiler) and (
+            (case.attrs or {}).get("mc2_distributed", False)
+            or self._pypto_pro_jit_isolation
+            or getattr(self.config, "pypto_pro_outer_case_isolation", False)
+        ):
+            return EvalCaseResult(
+                case_id=case_id_str, rel_path=case.rel_path, operator=case.operator,
+                case_num=case.case_num, success=False,
+                error_msg="perf_restore_inputs does not yet support MC2/PyPTO isolated backends",
+                failure_type=FAILURE_TYPE_COMPILE_RUNTIME_ERROR,
+            )
+
         # MC2 多卡通信类算子（如 MatmulReduceScatter / AllGatherMatmul 等）需要
         # 多 rank HCCL 进程组，无法走单进程 golden 路径，转交专用分布式 runner。
         if (case.attrs or {}).get("mc2_distributed", False):
@@ -549,9 +563,18 @@ class Evaluator:
                 )
             else:
                 oracle_func = self._oracle_reference_func(case.rel_path, golden_func)
-                golden_inputs = self._apply_golden_precision(input_tensors)
+                if (getattr(self.config, "perf_restore_inputs", True)
+                        and self.config.enable_profiler):
+                    # Clone before golden can mutate integers/native CPU tensors.
+                    # Convert unique tensors once so reference aliases survive.
+                    golden_inputs, reference_params = clone_reference_inputs(
+                        input_tensors, params,
+                        lambda tensor: self._apply_golden_precision([tensor])[0])
+                else:
+                    golden_inputs = self._apply_golden_precision(input_tensors)
+                    reference_params = params
                 if get_input_func is not None:
-                    golden_params = params
+                    golden_params = reference_params
                 else:
                     golden_params = self.param_builder.build_call_params(
                         oracle_func, case, golden_inputs
@@ -652,9 +675,15 @@ class Evaluator:
             else:
                 # 同精度参考 (b)：优先 <op>_bench（硬件忠实），否则回退 golden（现状行为）。
                 bench_func = self._bench_reference_func(case.rel_path, golden_func)
-                native_inputs = tensors_to_cpu(input_tensors)
+                if (getattr(self.config, "perf_restore_inputs", True)
+                        and self.config.enable_profiler):
+                    native_inputs, reference_params = clone_reference_inputs(
+                        input_tensors, params, lambda tensor: tensor.cpu())
+                else:
+                    native_inputs = tensors_to_cpu(input_tensors)
+                    reference_params = params
                 if get_input_func is not None:
-                    native_params = params
+                    native_params = reference_params
                 else:
                     native_params = self.param_builder.build_call_params(
                         bench_func, case, native_inputs
@@ -853,6 +882,7 @@ class Evaluator:
             cached = None
             input_tensors = params = None
             golden_inputs = golden_params = golden_result = golden_outs = None
+            reference_params = None
             native_inputs = native_params = native_result = native_out = None
             ai_result = ai_outs = None
             # 紧随的 gc.collect() 让上面的释放立即生效
@@ -885,6 +915,8 @@ class Evaluator:
         return self.run_cases(cases, operator, rel_path)
 
     def _should_batch_perf(self, cases: list) -> bool:
+        if getattr(self.config, "perf_restore_inputs", True):
+            return False
         if not getattr(self.config, "perf_batch_cases", False):
             return False
         # Pro worker reuse is experimental process/JIT reuse only. The shared

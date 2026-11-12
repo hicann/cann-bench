@@ -450,6 +450,20 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             if var in os.environ:
                 self.assertIn(var, env)
 
+    def test_build_child_cmd_propagates_restoration_without_batch_downgrade(self):
+        self.base_config.device_type = "cpu"
+        self.assertTrue(self.base_config.perf_restore_inputs)
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=ProcessConfig(enable_profiler=True),
+        )
+        task = TaskUnit(operator="Exp", rel_path="level1/test",
+                        cases=[make_case("Exp", 1), make_case("Exp", 2)], device_id=0)
+        cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
+        self.assertIn("--perf-restore-inputs", cmd)
+        self.assertIn("--no-perf-batch-cases", cmd)
+        self.assertFalse(coordinator._task_uses_perf_batch(task))
+
     def test_build_child_cmd_propagates_reports_dir(self):
         """eval-child 子进程继承父进程 reports_dir"""
         self.base_config.device_type = "cpu"
@@ -470,7 +484,8 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         self.assertEqual(cmd[idx + 1], "/tmp/cann-bench-reports")
 
     def test_build_child_cmd_propagates_perf_batch_flag(self):
-        """默认开启时父进程显式向 eval-child 传递批量模式。"""
+        """显式使用旧协议时，父进程传递批量模式。"""
+        self.base_config.perf_restore_inputs = False
         self.base_config.device_type = "cpu"
         self.base_config.perf_batch_cases = True
         coordinator = ProcessPoolCoordinator(
@@ -491,6 +506,7 @@ class TestProcessPoolCoordinator(unittest.TestCase):
         )
 
         self.assertIn("--perf-batch-cases", cmd)
+        self.assertIn("--no-perf-restore-inputs", cmd)
 
     def test_build_child_cmd_propagates_disabled_perf_batch_flag(self):
         """父进程显式关闭时，eval-child 不得回落到默认开启。"""
@@ -1523,6 +1539,7 @@ class TestDynamicDispatch(unittest.TestCase):
         self, mock_detect
     ):
         mock_detect.return_value = 2
+        self.base_config.perf_restore_inputs = False
         self.base_config.perf_batch_cases = True
         coordinator = ProcessPoolCoordinator(
             base_config=self.base_config,

@@ -37,7 +37,7 @@ class TestProfileOperatorTempDirCleanup:
     def test_temp_dir_cleaned_on_profiler_exception(self):
         """profiler 抛异常后 finally 块仍执行清理，异常信息保留在 metadata"""
         # PerfEvaluator 从 Config.perf_metric_strategy_override 获取策略
-        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
+        config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
 
         def dummy_func():
@@ -56,7 +56,7 @@ class TestProfileOperatorTempDirCleanup:
 
     def test_temp_dir_cleaned_even_when_csv_walk_throws(self):
         """CSV 遍历抛异常后 finally 块仍执行清理"""
-        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
+        config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
 
         def dummy_func():
@@ -74,7 +74,7 @@ class TestProfileOperatorTempDirCleanup:
 
     def test_archive_mode_does_not_cleanup(self):
         """archive_prof=True 时 finally 块不应清理目录"""
-        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
+        config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, archive_prof=True, freq_boost=False)
 
         def dummy_func():
@@ -94,7 +94,7 @@ class TestMeasureSimple:
 
     def test_measure_simple_basic(self):
         """enable_profiler=False 时走简单计时路径"""
-        config = Config(enable_profiler=False)
+        config = Config(perf_restore_inputs=False, enable_profiler=False)
         evaluator = PerfEvaluator(config)
 
         def add(a, b):
@@ -112,7 +112,7 @@ class TestMeasureSimple:
 def test_run_profiled_uses_trace_view_strategy():
     """Config.perf_metric_strategy_override="trace_view" 时使用 trace_view 口径"""
     # PerfEvaluator 从 Config.perf_metric_strategy_override 自取策略
-    config = Config(enable_profiler=True, perf_metric_strategy_override="trace_view")
+    config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="trace_view")
     evaluator = PerfEvaluator(config, archive_prof=False, freq_boost=False)
     trace_strategy = evaluator.perf_metric_strategy  # 从 registry 取到的 TraceViewStrategy 实例
 
@@ -172,7 +172,7 @@ class TestProfilerStepSynchronization:
             def step(self):
                 calls.append("step")
 
-        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
+        config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, device_manager=FakeDeviceManager(), archive_prof=False, freq_boost=False)
 
         def fn():
@@ -196,7 +196,7 @@ class TestProfilerStepSynchronization:
             def step(self):
                 calls.append("step")
 
-        config = Config(enable_profiler=True, perf_metric_strategy_override="kernel_details")
+        config = Config(perf_restore_inputs=False, enable_profiler=True, perf_metric_strategy_override="kernel_details")
         evaluator = PerfEvaluator(config, device_manager=FakeDeviceManager(), archive_prof=False, freq_boost=False)
 
         def fn():
@@ -262,7 +262,7 @@ class TestProfiledBatch:
     def test_batch_returns_per_case_medians(self, tmp_path):
         csv_path = tmp_path / "kernel_details.csv"
         self._write_csv(csv_path)
-        config = Config(
+        config = Config(perf_restore_inputs=False,
             enable_profiler=True,
             perf_metric_strategy_override="kernel_details",
         )
@@ -287,7 +287,7 @@ class TestProfiledBatch:
         assert results["level1/exp_1"].metadata["perf_batch_used"] is True
 
     def test_batch_prepares_deferred_calls_before_profiler(self):
-        config = Config(
+        config = Config(perf_restore_inputs=False,
             enable_profiler=True,
             perf_metric_strategy_override="kernel_details",
         )
@@ -349,7 +349,7 @@ class TestProfiledBatch:
                 "Avg(us)": "1",
                 "Time(us)": "6",
             })
-        config = Config(
+        config = Config(perf_restore_inputs=False,
             enable_profiler=True,
             perf_metric_strategy_override="kernel_details",
         )
@@ -583,7 +583,7 @@ class TestProfiledBatch:
             for timestamp in (1, 2, 3, 4, 5, 6, 41)
         )
         trace_path.write_text(json.dumps(trace), encoding="utf-8")
-        config = Config(
+        config = Config(perf_restore_inputs=False,
             enable_profiler=True,
             perf_metric_strategy_override="kernel_details",
         )
@@ -626,7 +626,7 @@ class TestProfilerRetry:
     """
 
     def _make_evaluator(self, max_retries=2, retry_delay=0.0):
-        config = Config(
+        config = Config(perf_restore_inputs=False,
             enable_profiler=True,
             perf_metric_strategy_override="kernel_details",
             profiler_max_retries=max_retries,

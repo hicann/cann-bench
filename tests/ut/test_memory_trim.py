@@ -34,6 +34,7 @@ import torch
 
 import kernel_eval.eval.evaluator as evaluator_mod
 from kernel_eval.base.result import FAILURE_TYPE_COMPILE_RUNTIME_ERROR
+from kernel_eval.config import Config
 from kernel_eval.eval.accuracy_eval import AccuracyEvaluator
 from kernel_eval.eval.evaluator import (
     Evaluator,
@@ -324,10 +325,12 @@ def _build_stub_evaluator(op_runner):
     """绕过重量级 __init__，仅装配 evaluate_case 实际使用的协作者"""
     _ensure_correctness_checker()
     evaluator = Evaluator.__new__(Evaluator)
-    evaluator.config = SimpleNamespace(
+    # CPU-only lifetime checks use real config defaults without NPU profiling.
+    evaluator.config = Config(
         eval_seed=0,
         precision_thresholds={},
         enable_accuracy_retry=False,
+        enable_profiler=False,
     )
     evaluator.bench_config = SimpleNamespace(
         golden_precision="fp64_cpu",

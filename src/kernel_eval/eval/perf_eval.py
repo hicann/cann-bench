@@ -30,6 +30,7 @@ import logging
 import os
 import re
 import shutil
+import statistics
 import subprocess
 import tempfile
 import time
@@ -43,6 +44,7 @@ _logger = logging.getLogger(__name__)
 from ..utils.device_manager import DeviceManager
 from ..config import Config, get_config
 from .input_pool import InputPool, CallInputPool
+from .restored_inputs import RestoredCall, PerfIntegrityError
 from ..base.result import PerfResult, compute_speedup
 from ..base.perf_strategy import (
     PerfMetricStrategy,
@@ -289,7 +291,8 @@ class PerfEvaluator:
         return None
 
     def _profile(self, fn: Callable, prof_dir: str, warmup: int, repeat: int,
-                 include_host: bool = False):
+                 include_host: bool = False, *, run_preflight: bool = True,
+                 condition_steps: bool = True):
         """Execute warmup + repeat calls with NPU profiler.
 
         使用 config.profiler_level（Level1 或 Level2）采集性能数据。
@@ -352,12 +355,13 @@ class PerfEvaluator:
         # TODO: 后续优化提升性能 — 重构 evaluator 流程为先跑精度（不带 profiler），
         # 精度通过的 case 才继续跑性能验证（带 profiler），避免重复执行 fn()。
         # 精度验证自然成为 profiler 的门卫，无需额外 pre-flight。
-        try:
-            fn()
-            self._synchronize_profile_step()
-        except BaseException:
-            _logger.info("perf_eval: fn() pre-flight failed — skipping profiler session")
-            raise
+        if run_preflight:
+            try:
+                fn()
+                self._synchronize_profile_step()
+            except BaseException:
+                _logger.info("perf_eval: fn() pre-flight failed — skipping profiler session")
+                raise
 
         # 诊断日志：记录 profiler session 开始前的 PROF_* 目录状态
         pre_prof_dirs = [e for e in os.listdir(prof_dir)
@@ -409,7 +413,7 @@ class PerfEvaluator:
                 # the caller surfaces the failure normally.
                 fn_exc: Optional[BaseException] = None
                 for i in range(warmup + repeat):
-                    if self.freq_boost and i >= warmup:
+                    if condition_steps and self.freq_boost and i >= warmup:
                         self._clear_cache()
                     fn_exc = self._run_profile_step(fn, prof)
                     if fn_exc is not None:
@@ -763,6 +767,8 @@ class PerfEvaluator:
         an empty case slice produce error results. The OpRunner caller then
         invokes the unchanged per-case profiler path for those cases.
         """
+        if getattr(self.config, "perf_restore_inputs", True):
+            raise PerfIntegrityError("restored-input profiling cannot use opaque batch callables")
         warmup = self.warmup if warmup is None else warmup
         repeat = self.repeat if repeat is None else repeat
         batch_id = f"{os.getpid()}-{time.time_ns()}"
@@ -890,6 +896,7 @@ class PerfEvaluator:
     def run_profiled(self, case_id: str, func: Callable, *args,
                      warmup: int = None, repeat: int = None,
                      inputs: List = None, use_input_pool: bool = False,
+                     input_factory=None, validator=None,
                      **kwargs) -> Tuple[Any, PerfResult]:
         """Profile func with warmup + repeat steps, return (outputs, result).
 
@@ -914,10 +921,212 @@ class PerfEvaluator:
         # F748: 移除设备锁（DeviceLock）
         # 原因：threading.Lock 只在进程内有效，多卡并行是多进程架构。
         # 设备隔离（ASCEND_RT_VISIBLE_DEVICES）已经从根本上解决了资源竞争。
+        if getattr(self.config, "perf_restore_inputs", True):
+            return self._run_restored_profiled(
+                case_id, func, tuple(inputs) if inputs is not None else args, kwargs,
+                warmup=warmup, repeat=repeat,
+                input_factory=input_factory, validator=validator,
+            )
+        if input_factory is not None or validator is not None:
+            raise PerfIntegrityError("performance hooks require perf_restore_inputs")
         return self._run_profiled_impl(case_id, func, *args,
                                        warmup=warmup, repeat=repeat,
                                        inputs=inputs, use_input_pool=use_input_pool,
                                        **kwargs)
+
+    @staticmethod
+    def _parse_restored_step(prof_files):
+        """Sum every kernel in a capture containing exactly one candidate call.
+
+        No name-based exclusions: preparation and cache conditioning happened
+        before capture, so even a candidate named CannBenchCopy must be counted.
+        Task ID is a launch ID, not an invocation ID; grouping by it would lose
+        work when a candidate launches a kernel multiple times.
+        """
+        import math
+
+        if not prof_files.csv_path or not os.path.isfile(prof_files.csv_path):
+            raise PerfIntegrityError("restored-input capture has no kernel_details.csv")
+        kernels = {}
+        with open(prof_files.csv_path, encoding="utf-8") as stream:
+            for row in csv.DictReader(stream):
+                name = str(row.get("Name") or row.get("Type") or "").strip()
+                duration = float(row.get("Duration(us)") or 0)
+                if not name or not math.isfinite(duration) or duration < 0:
+                    raise PerfIntegrityError("invalid kernel row in restored-input capture")
+                kernels[name] = kernels.get(name, 0.0) + duration
+        if not kernels or sum(kernels.values()) <= 0:
+            raise PerfIntegrityError("restored-input capture contains no positive candidate kernel time")
+        memcpy_counts = {}
+        if not prof_files.api_statistic_path or not os.path.isfile(prof_files.api_statistic_path):
+            raise PerfIntegrityError("restored-input capture lacks api_statistic.csv for memcpy validation")
+        with open(prof_files.api_statistic_path, encoding="utf-8") as stream:
+            reader = csv.DictReader(stream)
+            if not {'API Name', 'Count'}.issubset(reader.fieldnames or []):
+                raise PerfIntegrityError("invalid api_statistic.csv schema in restored-input capture")
+            for row in reader:
+                api_name = str(row.get("API Name") or "")
+                if api_name.startswith("aclrtMemcpy"):
+                    count = int(row.get("Count") or 0)
+                    if count < 0:
+                        raise PerfIntegrityError("invalid memcpy count in restored-input capture")
+                    memcpy_counts[api_name] = memcpy_counts.get(api_name, 0) + count
+        return kernels, memcpy_counts
+
+    def _run_restored_profiled(self, case_id, func, args, kwargs, *,
+                               warmup=None, repeat=None, input_factory=None,
+                               validator=None):
+        """One capture per invocation, with trusted preparation and I/O retirement."""
+        from ..security.torch_op_guard import TorchOpGuard
+
+        warmup = self.warmup if warmup is None else warmup
+        repeat = self.repeat if repeat is None else repeat
+        result = PerfResult(metadata={
+            'case_id': case_id, '_repeat': repeat, 'perf_restore_inputs': True,
+            'perf_protocol': 'restored_io_v2', 'perf_batch_used': False,
+            'warmup_used': self.freq_boost, 'freq_boost': self.freq_boost,
+            'prepared_calls': 0, 'measured_calls': 0,
+            'prepare_wall_us': 0.0, 'validation_wall_us': 0.0,
+            'io_cleanup_wall_us': 0.0, 'io_scrubbed_bytes': 0, 'io_retired_calls': 0,
+            'io_address_policy': 'previous_generation_quarantine',
+            'perf_restore_invocations': [],
+            'candidate_memcpy_count': 0, 'candidate_memcpy_counts': {},
+        })
+        started = time.perf_counter()
+        call = None
+        last_outputs = None
+        prof_dir = None
+        try:
+            if not self.config.enable_profiler or warmup < 0 or repeat < 1:
+                raise PerfIntegrityError("restored inputs require profiler, warmup >= 0 and repeat >= 1")
+            if self.perf_metric_strategy.get_strategy_name() != 'kernel_details':
+                raise PerfIntegrityError("restored inputs currently require kernel_details strategy")
+            if self.device_manager is not None and not self.device_manager.is_npu_mode():
+                raise PerfIntegrityError("restored inputs require NPU profiling")
+            rel_path, case_num = self._parse_case_id(case_id)
+            if self.archive_prof:
+                prof_dir = os.path.join(self.prof_data_dir, rel_path, case_num,
+                                        f'restored-{os.getpid()}-{time.time_ns()}')
+                os.makedirs(prof_dir, exist_ok=False)
+            else:
+                prof_dir = tempfile.mkdtemp(prefix='cann_prof_restored_')
+            before = time.perf_counter()
+            with TorchOpGuard.pause():
+                call = RestoredCall(func, args, kwargs,
+                                    input_factory=input_factory, validator=validator,
+                                    synchronize=self._synchronize_profile_step)
+                self._synchronize_profile_step()
+                if self.freq_boost:
+                    self._prepare_warmup_tensors()
+            result.metadata['snapshot_wall_us'] = (time.perf_counter() - before) * 1e6
+            kernel_steps = []
+            memcpy_counts = {}
+            phases = ['preflight'] + ['warmup'] * warmup + ['measured'] * repeat
+            for index, phase in enumerate(phases):
+                invocation = {'index': index, 'phase': phase, 'candidate_elapsed_us': None,
+                              'candidate_memcpy_counts': None}
+                result.metadata['perf_restore_invocations'].append(invocation)
+                before = time.perf_counter()
+                with TorchOpGuard.pause():
+                    call.prepare(index, phase)
+                    self._synchronize_profile_step()
+                    if self.freq_boost and phase == 'measured':
+                        self._clear_cache()
+                result.metadata['prepare_wall_us'] += (time.perf_counter() - before) * 1e6
+                result.metadata['prepared_calls'] += 1
+                result.metadata['input_bytes'] = call.input_bytes
+
+                def invoke():
+                    call()
+
+                if phase == 'measured':
+                    step_dir = os.path.join(prof_dir, f'measured-{len(kernel_steps)}')
+                    os.makedirs(step_dir)
+                    self._profile(invoke, step_dir, warmup=0, repeat=1,
+                                  run_preflight=False, condition_steps=False)
+                    result.metadata['measured_calls'] += 1
+                else:
+                    invoke()
+                    self._synchronize_profile_step()
+                before = time.perf_counter()
+                with TorchOpGuard.pause():
+                    call.complete(call.io.output, index, phase)
+                result.metadata['validation_wall_us'] += (time.perf_counter() - before) * 1e6
+                if phase == 'measured':
+                    self.wait_all()
+                    kernels, counts = self._parse_restored_step(self._locate_prof_files(step_dir))
+                    invocation['candidate_memcpy_counts'] = counts
+                    # Match KernelDetailsStrategy and batch attribution: each API
+                    # has its own case-wide budget over all measured repeats.
+                    for api_name, count in counts.items():
+                        memcpy_counts[api_name] = memcpy_counts.get(api_name, 0) + count
+                    result.metadata['candidate_memcpy_counts'] = dict(memcpy_counts)
+                    result.metadata['candidate_memcpy_count'] = sum(memcpy_counts.values())
+                    for api_name, count in memcpy_counts.items():
+                        if count > 5:
+                            raise PerfIntegrityError(
+                                f"excessive aclrtMemcpy ({api_name}={count} >5 across measured candidate windows)"
+                            )
+                    kernel_steps.append(kernels)
+                    invocation['candidate_elapsed_us'] = sum(kernels.values())
+                before = time.perf_counter()
+                with TorchOpGuard.pause():
+                    last_outputs, cleared = call.retire(preserve_output=index == len(phases) - 1)
+                cleanup_us = (time.perf_counter() - before) * 1e6
+                invocation['io_cleanup_wall_us'] = cleanup_us
+                invocation['io_scrubbed_bytes'] = cleared
+                result.metadata['io_cleanup_wall_us'] += cleanup_us
+                result.metadata['io_scrubbed_bytes'] += cleared
+                result.metadata['io_retired_calls'] += 1
+                # Visible current/previous storage only; excludes pristine caller
+                # inputs, final snapshot, allocator reserves and private workspaces.
+                result.metadata['io_peak_tracked_bytes'] = call.io.peak_tracked_bytes
+            # Aggregate complete calls, preserving correlations between kernels.
+            # Summing per-kernel medians can combine mutually exclusive paths or
+            # undercount calls even when every invocation has the same kernel set.
+            step_totals = [sum(step.values()) for step in kernel_steps]
+            names = set().union(*(step.keys() for step in kernel_steps))
+            # Conditional per-kernel medians remain diagnostic only: absent
+            # kernels have no sample, and these values must not be added for scoring.
+            medians = {name: statistics.median(step[name] for step in kernel_steps if name in step)
+                       for name in sorted(names)}
+            result.elapsed_us = round(statistics.median(step_totals), 2)
+            result.op_times = {'device_kernels': {name: round(value, 2) for name, value in medians.items()}}
+            result.metadata.update({
+                'elapsed_us_source': 'kernel_details.restored_per_invocation',
+                'data_source': 'kernel_details_csv',
+                'step_kernel_us': step_totals,
+                'elapsed_us_aggregation': 'median_of_invocation_totals',
+                'device_kernels_aggregation': 'median_when_present_diagnostic_only',
+                'profiler_sessions': repeat,
+                'validated_calls': repeat if validator is not None else 0,
+            })
+        except Exception as exc:
+            # No retry or batch fallback: integrity failures are sticky. A caller
+            # can rerun an infrastructure failure with the same strict protocol.
+            last_outputs = None
+            result.elapsed_us = 0.0
+            result.error_msg = f'{type(exc).__name__}: {exc}'
+            result.metadata.update({
+                'perf_integrity_failed': True, 'perf_collection_failed': False,
+                'profile_exception_type': type(exc).__name__,
+                'profile_exception_traceback': traceback.format_exc(),
+            })
+        finally:
+            if call is not None:
+                try:
+                    with TorchOpGuard.pause():
+                        call.release()
+                except Exception as exc:  # noqa: BLE001 - cleanup failure invalidates the case
+                    last_outputs = None
+                    result.elapsed_us = 0.0
+                    result.error_msg = (result.error_msg or '') + f'; I/O cleanup failed: {type(exc).__name__}: {exc}'
+                    result.metadata.update(perf_integrity_failed=True, perf_collection_failed=False,
+                                           io_cleanup_failed=True)
+            result.metadata['protocol_wall_us'] = (time.perf_counter() - started) * 1e6
+            if prof_dir is not None and not self.archive_prof:
+                shutil.rmtree(prof_dir, ignore_errors=True)
+        return last_outputs, result
 
     def _run_profiled_impl(self, case_id: str, func: Callable, *args,
                           warmup: int = None, repeat: int = None,
@@ -1014,7 +1223,7 @@ class PerfEvaluator:
                         last_outputs = func(*pool.get_next())
                 elif use_input_pool and (args or kwargs):
                     # 防作弊（仅性能阶段）：对实际调用的 args/kwargs 张量做 clone 轮换，
-                    # 每步输入地址不同，使按 data_ptr() 命中的缓存/预设结果在 repeat 各步失效。
+                    # 有限地址池会绕回；严格恢复输入由 restored-input 路径处理。
                     pool = CallInputPool(args, kwargs, warmup + repeat)
                     def _fn():
                         nonlocal last_outputs

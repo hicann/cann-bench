@@ -6,6 +6,9 @@ from kernel_eval.eval.op_runner import OpRunner
 
 
 class FakeDeviceManager:
+    def to_device(self, tensor):
+        return tensor
+
     def to_device_batch(self, tensors):
         return tensors
 
