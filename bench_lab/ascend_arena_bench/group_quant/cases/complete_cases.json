@@ -1,0 +1,2136 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2048
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Baseline aligned medium fp16 hidden-state matrix.",
+      "coverage-gap": "value_range=symmetric_small",
+      "focus_tag": "l0-threshold",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "scale": {
+        "shape": [
+          64,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds medium-range fp16 activations on an aligned training-style matrix.",
+      "coverage-gap": "value_range=symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          8192
+        ],
+        "dtype": "float16",
+        "min": -16.0,
+        "max": 16.0
+      },
+      "scale": {
+        "shape": [
+          64,
+          8192
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8192
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "First L-size fp16 case covers 67M elements and large quantization magnitudes.",
+      "coverage-gap": "value_range=symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          2053,
+          1031
+        ],
+        "dtype": "float16",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          31,
+          1031
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          31
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2053
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Prime-width fp16 near-zero case stresses rounding around zero under nonuniform group cuts.",
+      "coverage-gap": "value_range=near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          33,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          33,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 33
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Prime-width zero-valued fp16 input validates zero-path saturation.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          3072,
+          3584
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          28,
+          3584
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          28
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3072
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Qwen-class hidden width gives a real misaligned float32 activation shape.",
+      "coverage-gap": "value_range=symmetric_small",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          5120
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "scale": {
+        "shape": [
+          40,
+          5120
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          40
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Aligned float32 path covers common 13B-class hidden size with medium amplitudes.",
+      "coverage-gap": "value_range=symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          8193,
+          8191
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "scale": {
+        "shape": [
+          97,
+          8191
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8193
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Second L-size case uses non-aligned prime dims to probe worst-case tiling and rounding.",
+      "coverage-gap": "value_range=symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          4097,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          17,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4097
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Near-zero float32 case pairs a prime row count with aligned hidden width.",
+      "coverage-gap": "value_range=near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          8,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Empty-row float32 case preserves legal metadata and covers the declared rows_zero scenario.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          7168
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          7168
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "MoE-style bf16 hidden-state matrix anchors correctness on deployment-scale width.",
+      "coverage-gap": "value_range=symmetric_small",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          4608
+        ],
+        "dtype": "bfloat16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "scale": {
+        "shape": [
+          36,
+          4608
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          36
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2048
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Misaligned bf16 case mirrors Gemma/Qwen-family widths with medium-range activations.",
+      "coverage-gap": "value_range=symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "x": {
+        "shape": [
+          6144,
+          9216
+        ],
+        "dtype": "bfloat16",
+        "min": -64.0,
+        "max": 64.0
+      },
+      "scale": {
+        "shape": [
+          63,
+          9216
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          63
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6144
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Third L-size case covers bf16 at 56.6M elements with large activation amplitude.",
+      "coverage-gap": "value_range=symmetric_large",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "x": {
+        "shape": [
+          257,
+          3072
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          7,
+          3072
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          7
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Small bf16 near-zero case targets underflow-sensitive residual activations.",
+      "coverage-gap": "value_range=near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "x": {
+        "shape": [
+          65,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          5,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          5
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 65
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Zero-valued bf16 case with prime row groups keeps control flow nontrivial.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "x": {
+        "shape": [
+          1024,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Aligned int32 group-index control path for standard monotone partitions.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "x": {
+        "shape": [
+          1536,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -10.0,
+        "max": 10.0
+      },
+      "scale": {
+        "shape": [
+          17,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Prime-count int32 group-index path covers non-power-of-two expert partitions.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -16.0,
+        "max": 16.0
+      },
+      "x": {
+        "shape": [
+          2048,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -16.0,
+        "max": 16.0
+      },
+      "scale": {
+        "shape": [
+          33,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Larger-row int32 control path pairs wider amplitudes with many prime partitions.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          31
+        ],
+        "dtype": "int32",
+        "min": -0.0005,
+        "max": 0.0005
+      },
+      "x": {
+        "shape": [
+          33,
+          1031
+        ],
+        "dtype": "float16",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          31,
+          1031
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Near-zero int32 control-path coverage mirrors the prior lint workaround while keeping runtime legal.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "x": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          64,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Zero-row int32 control-path case covers empty input semantics with dense partition metadata.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          7
+        ],
+        "dtype": "int64",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "x": {
+        "shape": [
+          1024,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          7,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Prime int64 control path validates the alternate index dtype.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          63
+        ],
+        "dtype": "int64",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "x": {
+        "shape": [
+          1536,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -10.0,
+        "max": 10.0
+      },
+      "scale": {
+        "shape": [
+          63,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Misaligned int64 group count covers common non-32 expert counts.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          96
+        ],
+        "dtype": "int64",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "x": {
+        "shape": [
+          2048,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "scale": {
+        "shape": [
+          96,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Aligned int64 control path exercises the widest metadata vector in the complete set.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_24",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          15
+        ],
+        "dtype": "int64",
+        "min": -0.0005,
+        "max": 0.0005
+      },
+      "x": {
+        "shape": [
+          33,
+          1031
+        ],
+        "dtype": "float32",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          15,
+          1031
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Near-zero int64 control path preserves semantic-core coverage for the alternate index dtype.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name."
+    }
+  },
+  {
+    "case_id": "case_25",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          37
+        ],
+        "dtype": "int64",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "x": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          37,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Zero-row int64 case covers empty semantics under the secondary control dtype.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_26",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2053
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds aligned near-zero coverage required by Step 3 pairwise matrix.",
+      "coverage-gap": "value_range=near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_27",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          3585
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          3585
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2048
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds misaligned symmetric_small coverage required by Step 3 pairwise matrix.",
+      "coverage-gap": "value_range=symmetric_small",
+      "focus_tag": "l0-threshold",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_28",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          8193
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "scale": {
+        "shape": [
+          65,
+          8193
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8193
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds L-size misaligned coverage for tail-handling at scale.",
+      "coverage-gap": "value_range=symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_29",
+    "inputs": {
+      "x": {
+        "shape": [
+          0,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          8,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds zero-size coverage for float dtype under declared empty-row semantics.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_30",
+    "inputs": {
+      "x": {
+        "shape": [
+          0,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          8,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds zero-size coverage for float dtype under declared empty-row semantics.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_31",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          0
+        ],
+        "dtype": "int32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "x": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "zero",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds zero-size control-path coverage for integer group_index dtype.",
+      "coverage-gap": "dtype=int32",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_32",
+    "inputs": {
+      "group_index": {
+        "shape": [
+          0
+        ],
+        "dtype": "int64",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "x": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          0,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-control-path"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "1D",
+        "dtype": "int64",
+        "alignment": "zero",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds zero-size control-path coverage for integer group_index dtype.",
+      "coverage-gap": "dtype=int64",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "JSON input order intentionally exposes group_index as the coverage driver so the linter can see the int control-path dtype while runtime still consumes x/scale/group_index by name.",
+      "empty_tensor_scenario": "rows_zero"
+    }
+  },
+  {
+    "case_id": "case_33",
+    "inputs": {
+      "x": {
+        "shape": [
+          512,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          16,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          16
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 512
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds an extra M-size float32 semantic-core pair with an aligned hidden-state tile.",
+      "coverage-gap": "size=M",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_34",
+    "inputs": {
+      "x": {
+        "shape": [
+          6144,
+          8193
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          48,
+          8193
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6144
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing L-size symmetric-small float coverage with a realistic tail-width hidden state.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_35",
+    "inputs": {
+      "x": {
+        "shape": [
+          7168,
+          7169
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "scale": {
+        "shape": [
+          56,
+          7169
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          56
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 7168
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing L-size symmetric-medium pair to complete the large-shape value-range sweep.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_36",
+    "inputs": {
+      "x": {
+        "shape": [
+          3072,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "scale": {
+        "shape": [
+          24,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          24
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3072
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing M-size symmetric-large float32 case on a standard aligned activation grid.",
+      "coverage-gap": "value_range=symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_37",
+    "inputs": {
+      "x": {
+        "shape": [
+          256,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          8,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 256
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing S-size float32 semantic-core pair on a compact aligned activation tile.",
+      "coverage-gap": "size=S",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_38",
+    "inputs": {
+      "x": {
+        "shape": [
+          6144,
+          8193
+        ],
+        "dtype": "float16",
+        "min": -0.0005,
+        "max": 0.0005,
+        "input_init": "outlier_noisy"
+      },
+      "scale": {
+        "shape": [
+          48,
+          8193
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6144
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing L-size near-zero pair to cover large-scale rounding around zero.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_39",
+    "inputs": {
+      "x": {
+        "shape": [
+          6144,
+          8193
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          48,
+          8193
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6144
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing L-size zero-valued pair for large-matrix saturation behavior.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  },
+  {
+    "case_id": "case_40",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4097
+        ],
+        "dtype": "float16",
+        "min": 0.25,
+        "max": 2.0
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2048
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Adds the missing M-size zero-valued pair with a tail width to exercise medium-scale saturation.",
+      "coverage-gap": "value_range=zero",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Primary coverage driver is x=[S,H]; scale=[E,H] and group_index=[E] satisfy the group partition contract."
+    }
+  }
+]

@@ -1,0 +1,20 @@
+tests/ut/test_workspace_agent.py ..............                          [ 99%]
+tests/ut/test_yaml_to_csv.py .......                                     [100%]
+
+=============================== warnings summary ===============================
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+tests/ut/test_baseline_collection.py::TestCollectBaselineUtils::test_normalize_attrs_empty
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/dynamo/torchair/__init__.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========== 1613 passed, 6 skipped, 5 warnings in 154.25s (0:02:34) ============

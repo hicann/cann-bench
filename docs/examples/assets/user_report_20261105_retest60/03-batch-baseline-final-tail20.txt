@@ -1,0 +1,20 @@
+      "workspace": "benchmark_runs/user-report-20261105-sg4nCj/batch/group_norm_silu_quant/work",
+      "device_id": 5
+    },
+    "gather_elements_v2": {
+      "status": "prepared",
+      "workspace": "benchmark_runs/user-report-20261105-sg4nCj/batch/gather_elements_v2/work",
+      "device_id": 6
+    },
+    "chamfer_distance_grad": {
+      "status": "prepared",
+      "workspace": "benchmark_runs/user-report-20261105-sg4nCj/batch/chamfer_distance_grad/work",
+      "device_id": 7
+    },
+    "apply_rotary_pos_emb": {
+      "status": "prepared",
+      "workspace": "benchmark_runs/user-report-20261105-sg4nCj/batch/apply_rotary_pos_emb/work",
+      "device_id": 5
+    }
+  }
+}

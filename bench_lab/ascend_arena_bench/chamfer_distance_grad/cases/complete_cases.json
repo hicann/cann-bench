@@ -1,0 +1,2364 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "idx2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "grad_dist1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l0-threshold/float16/misaligned/symmetric_small case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l0-threshold/float16/misaligned/symmetric_small",
+      "focus_tag": "l0-threshold",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          64,
+          16,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          64,
+          16,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx1": {
+        "shape": [
+          64,
+          16
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 15
+      },
+      "idx2": {
+        "shape": [
+          64,
+          16
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 15
+      },
+      "grad_dist1": {
+        "shape": [
+          64,
+          16
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          64,
+          16
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-precision/float16/misaligned/near_zero case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-precision/float16/misaligned/near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          16,
+          17,
+          2
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "xyz2": {
+        "shape": [
+          16,
+          17,
+          2
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "idx1": {
+        "shape": [
+          16,
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 16
+      },
+      "idx2": {
+        "shape": [
+          16,
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 16
+      },
+      "grad_dist1": {
+        "shape": [
+          16,
+          17
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "grad_dist2": {
+        "shape": [
+          16,
+          17
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l2-exception/float16/prime/zero case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l2-exception/float16/prime/zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          64,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          64,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          64,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "idx2": {
+        "shape": [
+          64,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "grad_dist1": {
+        "shape": [
+          64,
+          32
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          64,
+          32
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-functional/float16/misaligned/symmetric_medium case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-functional/float16/misaligned/symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          8,
+          67,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          8,
+          67,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          8,
+          67
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 66
+      },
+      "idx2": {
+        "shape": [
+          8,
+          67
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 66
+      },
+      "grad_dist1": {
+        "shape": [
+          8,
+          67
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          8,
+          67
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Executable prime fp16 coverage using stable symmetric_medium range; prior symmetric_large fp16 generated NaNs under NPU comparison on some seeds.",
+      "coverage-gap": "S/3D/float16/prime/symmetric_medium",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          96,
+          64,
+          2
+        ],
+        "dtype": "float16",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "xyz2": {
+        "shape": [
+          96,
+          64,
+          2
+        ],
+        "dtype": "float16",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "idx1": {
+        "shape": [
+          96,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "idx2": {
+        "shape": [
+          96,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "grad_dist1": {
+        "shape": [
+          96,
+          64
+        ],
+        "dtype": "float16",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "grad_dist2": {
+        "shape": [
+          96,
+          64
+        ],
+        "dtype": "float16",
+        "min": -3.0,
+        "max": 7.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-functional/float16/misaligned/asymmetric case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "S/l1-functional/float16/misaligned/asymmetric",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "idx2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "grad_dist1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l0-threshold/float32/misaligned/symmetric_small case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l0-threshold/float32/misaligned/symmetric_small",
+      "focus_tag": "l0-threshold",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          8,
+          65,
+          2
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          8,
+          65,
+          2
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx1": {
+        "shape": [
+          8,
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 64
+      },
+      "idx2": {
+        "shape": [
+          8,
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 64
+      },
+      "grad_dist1": {
+        "shape": [
+          8,
+          65
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          8,
+          65
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-precision/float32/prime/near_zero case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-precision/float32/prime/near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          7,
+          97,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "xyz2": {
+        "shape": [
+          7,
+          97,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "idx1": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "idx2": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "grad_dist1": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "grad_dist2": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l2-exception/float32/prime/zero case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l2-exception/float32/prime/zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          64,
+          64,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          64,
+          64,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "idx2": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "grad_dist1": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-functional/float32/misaligned/symmetric_medium case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-functional/float32/misaligned/symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          16,
+          129,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "xyz2": {
+        "shape": [
+          16,
+          129,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "idx1": {
+        "shape": [
+          16,
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "idx2": {
+        "shape": [
+          16,
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "grad_dist1": {
+        "shape": [
+          16,
+          129
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "grad_dist2": {
+        "shape": [
+          16,
+          129
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-precision/float32/prime/symmetric_large case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-precision/float32/prime/symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          96,
+          48,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "xyz2": {
+        "shape": [
+          96,
+          48,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "idx1": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 47
+      },
+      "idx2": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 47
+      },
+      "grad_dist1": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "grad_dist2": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven S/l1-functional/float32/misaligned/asymmetric case for Chamfer gradient real inputs.",
+      "coverage-gap": "S/l1-functional/float32/misaligned/asymmetric",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          512,
+          2048,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          512,
+          2048,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          512,
+          2048
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2047
+      },
+      "idx2": {
+        "shape": [
+          512,
+          2048
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2047
+      },
+      "grad_dist1": {
+        "shape": [
+          512,
+          2048
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          512,
+          2048
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l1-performance/float16/misaligned/symmetric_small case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l1-performance/float16/misaligned/symmetric_small",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          512,
+          2053,
+          2
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          512,
+          2053,
+          2
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx1": {
+        "shape": [
+          512,
+          2053
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2052
+      },
+      "idx2": {
+        "shape": [
+          512,
+          2053
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2052
+      },
+      "grad_dist1": {
+        "shape": [
+          512,
+          2053
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          512,
+          2053
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l1-precision/float32/prime/near_zero case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l1-precision/float32/prime/near_zero",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          17,
+          65537,
+          2
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "xyz2": {
+        "shape": [
+          17,
+          65537,
+          2
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "idx1": {
+        "shape": [
+          17,
+          65537
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 65536
+      },
+      "idx2": {
+        "shape": [
+          17,
+          65537
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 65536
+      },
+      "grad_dist1": {
+        "shape": [
+          17,
+          65537
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "grad_dist2": {
+        "shape": [
+          17,
+          65537
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l2-exception/float16/prime/zero case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l2-exception/float16/prime/zero",
+      "focus_tag": "l2-exception",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1024,
+          2048,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          1024,
+          2048,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2047
+      },
+      "idx2": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2047
+      },
+      "grad_dist1": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l1-performance/float32/misaligned/symmetric_medium case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l1-performance/float32/misaligned/symmetric_medium",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          768,
+          4099,
+          2
+        ],
+        "dtype": "float16",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "xyz2": {
+        "shape": [
+          768,
+          4099,
+          2
+        ],
+        "dtype": "float16",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "idx1": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4098
+      },
+      "idx2": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4098
+      },
+      "grad_dist1": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "float16",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "grad_dist2": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "float16",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l1-performance/float16/prime/symmetric_large case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l1-performance/float16/prime/symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          768,
+          4099,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "xyz2": {
+        "shape": [
+          768,
+          4099,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "idx1": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4098
+      },
+      "idx2": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4098
+      },
+      "grad_dist1": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "grad_dist2": {
+        "shape": [
+          768,
+          4099
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "Coverage-driven M/l1-performance/float32/prime/asymmetric case for Chamfer gradient real inputs. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "M/l1-performance/float32/prime/asymmetric",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "idx1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1
+      },
+      "xyz1": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          32,
+          32,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 31
+      },
+      "grad_dist1": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "2D index-input coverage using real idx1 tensor while exercising full Chamfer gradient inputs; covers aligned/symmetric_small.",
+      "coverage-gap": "2D/int32/aligned/symmetric_small",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "idx1": {
+        "shape": [
+          8,
+          64
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz1": {
+        "shape": [
+          8,
+          64,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          8,
+          64,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx2": {
+        "shape": [
+          8,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "grad_dist1": {
+        "shape": [
+          8,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          8,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "2D index-input coverage using real idx1 tensor while exercising full Chamfer gradient inputs; covers misaligned/near_zero.",
+      "coverage-gap": "2D/int32/misaligned/near_zero",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "idx1": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "int32",
+        "min": -2,
+        "max": 2
+      },
+      "xyz1": {
+        "shape": [
+          64,
+          64,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          64,
+          64,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx2": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 63
+      },
+      "grad_dist1": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "2D index-input coverage using real idx1 tensor while exercising full Chamfer gradient inputs; covers aligned/symmetric_medium.",
+      "coverage-gap": "2D/int32/aligned/symmetric_medium",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "idx1": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "int32",
+        "min": -100,
+        "max": 100
+      },
+      "xyz1": {
+        "shape": [
+          7,
+          97,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "xyz2": {
+        "shape": [
+          7,
+          97,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "idx2": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "grad_dist1": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "grad_dist2": {
+        "shape": [
+          7,
+          97
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "2D index-input coverage using real idx1 tensor while exercising full Chamfer gradient inputs; covers prime/symmetric_large.",
+      "coverage-gap": "2D/int32/prime/symmetric_large",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "idx1": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "int32",
+        "min": -3,
+        "max": 7
+      },
+      "xyz1": {
+        "shape": [
+          96,
+          48,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "xyz2": {
+        "shape": [
+          96,
+          48,
+          2
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "idx2": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 47
+      },
+      "grad_dist1": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "grad_dist2": {
+        "shape": [
+          96,
+          48
+        ],
+        "dtype": "float32",
+        "min": -3.0,
+        "max": 7.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "2D index-input coverage using real idx1 tensor while exercising full Chamfer gradient inputs; covers misaligned/asymmetric.",
+      "coverage-gap": "2D/int32/misaligned/asymmetric",
+      "focus_tag": "l1-functional",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_24",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          8192,
+          3072,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          8192,
+          3072,
+          2
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          8192,
+          3072
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3071
+      },
+      "idx2": {
+        "shape": [
+          8192,
+          3072
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3071
+      },
+      "grad_dist1": {
+        "shape": [
+          8192,
+          3072
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          8192,
+          3072
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "L-size coverage gap: real Chamfer gradient tensors at >=50M elements stress tiling/memory scale; kept lint-only because CPU reference loops over B*N. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_25",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          8192,
+          3073,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "xyz2": {
+        "shape": [
+          8192,
+          3073,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "idx1": {
+        "shape": [
+          8192,
+          3073
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3072
+      },
+      "idx2": {
+        "shape": [
+          8192,
+          3073
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3072
+      },
+      "grad_dist1": {
+        "shape": [
+          8192,
+          3073
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "grad_dist2": {
+        "shape": [
+          8192,
+          3073
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "L-size coverage gap: real Chamfer gradient tensors at >=50M elements stress tiling/memory scale; kept lint-only because CPU reference loops over B*N. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-precision",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_26",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          4096,
+          6143,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          4096,
+          6143,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx1": {
+        "shape": [
+          4096,
+          6143
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6142
+      },
+      "idx2": {
+        "shape": [
+          4096,
+          6143
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 6142
+      },
+      "grad_dist1": {
+        "shape": [
+          4096,
+          6143
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          4096,
+          6143
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "coverage-expanded",
+      "lint-only-coverage"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "expansion-reason": "L-size coverage gap: real Chamfer gradient tensors at >=50M elements stress tiling/memory scale; kept lint-only because CPU reference loops over B*N. Marked coverage-only because executable correctness with Python-loop CPU reference exceeds benchmark timeout at this B*N scale.",
+      "coverage-gap": "size=L",
+      "focus_tag": "l1-performance",
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_27",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          40,
+          8127,
+          2
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "xyz2": {
+        "shape": [
+          40,
+          8127,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      },
+      "idx1": {
+        "shape": [
+          40,
+          8127
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "idx2": {
+        "shape": [
+          40,
+          8127
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "grad_dist1": {
+        "shape": [
+          40,
+          8127
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "grad_dist2": {
+        "shape": [
+          40,
+          8127
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      }
+    },
+    "roles": ["complete-test"]
+  },
+  {
+    "case_id": "case_28",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          40,
+          8128,
+          2
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "xyz2": {
+        "shape": [
+          40,
+          8128,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      },
+      "idx1": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "idx2": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "grad_dist1": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "grad_dist2": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "roles": ["complete-test"]
+  },
+  {
+    "case_id": "case_29",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          40,
+          8128,
+          2
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "xyz2": {
+        "shape": [
+          40,
+          8128,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      },
+      "idx1": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "idx2": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "grad_dist1": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      },
+      "grad_dist2": {
+        "shape": [
+          40,
+          8128
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      }
+    },
+    "roles": ["complete-test"]
+  },
+  {
+    "case_id": "case_30",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          40,
+          8129,
+          2
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "xyz2": {
+        "shape": [
+          40,
+          8129,
+          2
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      },
+      "idx1": {
+        "shape": [
+          40,
+          8129
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "idx2": {
+        "shape": [
+          40,
+          8129
+        ],
+        "dtype": "int32",
+        "input_init": "identity"
+      },
+      "grad_dist1": {
+        "shape": [
+          40,
+          8129
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      },
+      "grad_dist2": {
+        "shape": [
+          40,
+          8129
+        ],
+        "dtype": "float32",
+        "min": 1,
+        "max": 1
+      }
+    },
+    "roles": ["complete-test"]
+  }
+]

@@ -1,0 +1,3453 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "permute": {
+        "shape": [
+          0
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      },
+      "output_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 0
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "zero",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=0",
+        "coverage-note": "zero-1D-int32-zero-symmetric_small-output_size=0"
+      },
+      "coverage-note": "zero-1D-int32-zero-symmetric_small-output_size=0",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l2-exception",
+      "empty_tensor_scenario": "empty_permute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "permute": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          9
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "output_offsets": {
+        "shape": [
+          9
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 96
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=96",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=96"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=96",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 128
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=128",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=128"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=128",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "permute": {
+        "shape": [
+          31
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      },
+      "output_offsets": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 129
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=129",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=129"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=129",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 160
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=160",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=160"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=160",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 177
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=177",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=177"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=177",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 193
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=193",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=193"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=193",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "permute": {
+        "shape": [
+          47
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      },
+      "output_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 211
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=211",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=211"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=211",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "permute": {
+        "shape": [
+          96
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      },
+      "output_offsets": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 223
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=223",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=223"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=223",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "permute": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          66
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      },
+      "output_offsets": {
+        "shape": [
+          66
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 257
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=257",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=257"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=257",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "permute": {
+        "shape": [
+          80
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      },
+      "output_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 289
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=289",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=289"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=289",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "permute": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      },
+      "output_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 301
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=301",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=301"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=301",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "permute": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=4001",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=4001"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=4001",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "permute": {
+        "shape": [
+          128
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=4096",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=4096"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=4096",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "permute": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4101
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=4101",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=4101"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=4101",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "permute": {
+        "shape": [
+          16
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "output_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 96
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=96",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=96"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=96",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 128
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=128",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=128"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=128",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "permute": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          18
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      },
+      "output_offsets": {
+        "shape": [
+          18
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 129
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=129",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=129"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=129",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "permute": {
+        "shape": [
+          80
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      },
+      "output_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 160
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=160",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=160"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=160",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 177
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=177",
+        "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=177"
+      },
+      "coverage-note": "S-1D-int32-misaligned-symmetric_small-output_size=177",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 193
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=193",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=193"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=193",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "permute": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      },
+      "output_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 211
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=211",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=211"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=211",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "permute": {
+        "shape": [
+          128
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      },
+      "output_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 223
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=223",
+        "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=223"
+      },
+      "coverage-note": "S-1D-int32-aligned-symmetric_small-output_size=223",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_24",
+    "inputs": {
+      "permute": {
+        "shape": [
+          47
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      },
+      "output_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 257
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=257",
+        "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=257"
+      },
+      "coverage-note": "S-1D-int32-prime-symmetric_small-output_size=257",
+      "expansion-reason": "Step 3 jagged sparse-feature coverage using legal table-count and output_size combinations from current proto; value tensors are permutation/offset indices.",
+      "coverage-gap": "step3-regenerated-common-jagged-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_25",
+    "inputs": {
+      "permute": {
+        "shape": [
+          0
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      },
+      "output_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 0
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "zero",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=0"
+      },
+      "coverage-note": "S-1D-int32-zero-near_zero-output_size=0",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision",
+      "empty_tensor_scenario": "empty_permute"
+    }
+  },
+  {
+    "case_id": "case_26",
+    "inputs": {
+      "permute": {
+        "shape": [
+          0
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      },
+      "output_offsets": {
+        "shape": [
+          1
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 0
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "zero",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "zero",
+        "value_range": "zero",
+        "attrs_signature": "output_size=0"
+      },
+      "coverage-note": "S-1D-int32-zero-zero-output_size=0",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception",
+      "empty_tensor_scenario": "empty_permute"
+    }
+  },
+  {
+    "case_id": "case_27",
+    "inputs": {
+      "permute": {
+        "shape": [
+          16
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "output_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 96
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=96"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=96",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_28",
+    "inputs": {
+      "permute": {
+        "shape": [
+          16
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      },
+      "output_offsets": {
+        "shape": [
+          17
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 96
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 96
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=96"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=96",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_29",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 128
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=128"
+      },
+      "coverage-note": "S-1D-int32-aligned-near_zero-output_size=128",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_30",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 128
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 128
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=128"
+      },
+      "coverage-note": "S-1D-int32-aligned-zero-output_size=128",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_31",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 129
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=129"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=129",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_32",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 129
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 129
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=129"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=129",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_33",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 160
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=160"
+      },
+      "coverage-note": "S-1D-int32-aligned-near_zero-output_size=160",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_34",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 160
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 160
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=160"
+      },
+      "coverage-note": "S-1D-int32-aligned-zero-output_size=160",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_35",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 177
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=177"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=177",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_36",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 177
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 177
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=177"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=177",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_37",
+    "inputs": {
+      "permute": {
+        "shape": [
+          193
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          194
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      },
+      "output_offsets": {
+        "shape": [
+          194
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 193
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=193"
+      },
+      "coverage-note": "S-1D-int32-prime-near_zero-output_size=193",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_38",
+    "inputs": {
+      "permute": {
+        "shape": [
+          193
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          194
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      },
+      "output_offsets": {
+        "shape": [
+          194
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 193
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 193
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=193"
+      },
+      "coverage-note": "S-1D-int32-prime-zero-output_size=193",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_39",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 211
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=211"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=211",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_40",
+    "inputs": {
+      "permute": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      },
+      "output_offsets": {
+        "shape": [
+          34
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 211
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 211
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=211"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=211",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_41",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 223
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=223"
+      },
+      "coverage-note": "S-1D-int32-aligned-near_zero-output_size=223",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_42",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 223
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 223
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=223"
+      },
+      "coverage-note": "S-1D-int32-aligned-zero-output_size=223",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_43",
+    "inputs": {
+      "permute": {
+        "shape": [
+          257
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      },
+      "output_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 257
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=257"
+      },
+      "coverage-note": "S-1D-int32-prime-near_zero-output_size=257",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_44",
+    "inputs": {
+      "permute": {
+        "shape": [
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      },
+      "output_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 257
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 257
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=257"
+      },
+      "coverage-note": "S-1D-int32-prime-zero-output_size=257",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_45",
+    "inputs": {
+      "permute": {
+        "shape": [
+          80
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      },
+      "output_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 289
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=289"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=289",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_46",
+    "inputs": {
+      "permute": {
+        "shape": [
+          80
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      },
+      "output_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 289
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 289
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=289"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=289",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_47",
+    "inputs": {
+      "permute": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      },
+      "output_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 301
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=301"
+      },
+      "coverage-note": "S-1D-int32-prime-near_zero-output_size=301",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_48",
+    "inputs": {
+      "permute": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      },
+      "output_offsets": {
+        "shape": [
+          98
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 301
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 301
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=301"
+      },
+      "coverage-note": "S-1D-int32-prime-zero-output_size=301",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_49",
+    "inputs": {
+      "permute": {
+        "shape": [
+          4001
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          4002
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          4002
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=4001"
+      },
+      "coverage-note": "S-1D-int32-prime-near_zero-output_size=4001",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_50",
+    "inputs": {
+      "permute": {
+        "shape": [
+          4001
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          4002
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          4002
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=4001"
+      },
+      "coverage-note": "S-1D-int32-prime-zero-output_size=4001",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_51",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=4096"
+      },
+      "coverage-note": "S-1D-int32-aligned-near_zero-output_size=4096",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_52",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=4096"
+      },
+      "coverage-note": "S-1D-int32-aligned-zero-output_size=4096",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_53",
+    "inputs": {
+      "permute": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": -0.001,
+        "max": 0.001,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4101
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=4101"
+      },
+      "coverage-note": "S-1D-int32-misaligned-near_zero-output_size=4101",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_54",
+    "inputs": {
+      "permute": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 0,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          130
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4101
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "1D",
+        "dtype": "int32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=4101"
+      },
+      "coverage-note": "S-1D-int32-misaligned-zero-output_size=4101",
+      "expansion-reason": "Step 3 coverage metadata case for jagged sparse index operator; prepare_inputs still constructs legal permutation and monotone offsets.",
+      "coverage-gap": "value-range-coverage-repair",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_55",
+    "inputs": {
+      "permute": {
+        "shape": [
+          26
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          27
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          27
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "TorchRec/DLRM-style sparse features often use about two dozen feature tables.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "TorchRec DLRM sparse features",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://github.com/pytorch/torchrec",
+      "shape-mapping-note": "permute length P=26 models sparse feature/table count; offsets length P+1; output_size=4001."
+    }
+  },
+  {
+    "case_id": "case_56",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "FBGEMM sparse ops document jagged permutation over table-level sparse features.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "FBGEMM sparse_ops expand_into_jagged_permute",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/cpp-api/sparse_ops.html",
+      "shape-mapping-note": "permute length P=32 models sparse feature/table count; offsets length P+1; output_size=4096."
+    }
+  },
+  {
+    "case_id": "case_57",
+    "inputs": {
+      "permute": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "KeyedJaggedTensor-style sparse feature groups commonly carry many feature tables.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "TorchRec KeyedJaggedTensor",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "permute length P=64 models sparse feature/table count; offsets length P+1; output_size=4096."
+    }
+  },
+  {
+    "case_id": "case_58",
+    "inputs": {
+      "permute": {
+        "shape": [
+          80
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          81
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4101
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Online recommendation inference can combine many sparse features with bounded per-request expansion.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "TorchRec sparse recommendation inference",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "permute length P=80 models sparse feature/table count; offsets length P+1; output_size=4101."
+    }
+  },
+  {
+    "case_id": "case_59",
+    "inputs": {
+      "permute": {
+        "shape": [
+          96
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "JaggedTensorOps describe offset-based sparse tensor processing; 96 partitions stresses table count.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "FBGEMM JaggedTensorOps",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/overview/jagged-tensor-ops/JaggedTensorOps.html",
+      "shape-mapping-note": "permute length P=96 models sparse feature/table count; offsets length P+1; output_size=4096."
+    }
+  },
+  {
+    "case_id": "case_60",
+    "inputs": {
+      "permute": {
+        "shape": [
+          65
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          66
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          66
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Misaligned table counts catch offset/permutation boundary cases common in customized feature sets.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "TorchRec sparse custom feature groups",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://github.com/pytorch/torchrec",
+      "shape-mapping-note": "permute length P=65 models sparse feature/table count; offsets length P+1; output_size=4001."
+    }
+  },
+  {
+    "case_id": "case_61",
+    "inputs": {
+      "permute": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          33
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4001
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Moderate table count with near-maximum legal output_size stresses expanded output length.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "FBGEMM sparse_ops expand_into_jagged_permute",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/cpp-api/sparse_ops.html",
+      "shape-mapping-note": "permute length P=32 models sparse feature/table count; offsets length P+1; output_size=4001."
+    }
+  },
+  {
+    "case_id": "case_62",
+    "inputs": {
+      "permute": {
+        "shape": [
+          47
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4096
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Prime feature group count represents customized sparse feature sets.",
+      "expansion-reason": "Common sparse/jagged recommendation profile shape mapped to the current legal output_size range.",
+      "model-reference": "TorchRec jagged sparse feature path",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "permute length P=47 models sparse feature/table count; offsets length P+1; output_size=4096."
+    }
+  }
+]

@@ -33,6 +33,10 @@ TASKS_ROOT="${PROJECT_ROOT}/tasks"
 SOURCE_DIR=""
 TASK_DIR=""
 BENCH_NAME="cann"  # 评测集名称：cann 或 stanford
+RUN_OPTIMIZE=false  # Ascend Arena baseline/candidate comparison
+INIT_ONLY=false  # Ascend Arena original implementation initialization
+BASELINE_DIR=""  # Reusable Ascend Arena baseline results
+NO_CLEAN_SANDBOX=false  # 保留 Ascend Arena 临时 sandbox 以便调试
 OPERATOR=""
 CASE_ID=""
 DEVICE_ID=""  # 空表示多卡模式，指定值表示单卡模式
@@ -45,8 +49,9 @@ PROCESSES_PER_CARD=2
 TIMEOUT_PER_PROCESS=300
 
 # 性能配置
-WARMUP=3
-REPEAT=5
+WARMUP=""
+REPEAT=""
+ARENA_DEVICE_CHECK="warn"
 NO_PERF=false
 PROFILER_LEVEL="Level1"
 EVAL_SEED=""  # 评测种子（默认: 0 = 确定性，-1 = 纯随机）
@@ -75,6 +80,11 @@ print_help() {
     echo "  -a, --action <action>     操作类型: eval(评测), list(列表), info(详情), config(配置)"
     echo "                            默认: eval"
     echo "  --source-dir <dir>        AI生成的算子源码目录（显式指定，与位置参数等效）"
+    echo "  --run_optimize             使用 Ascend Arena 优化评测流程（可用 --run-optimize）"
+    echo "  --init-only               仅评测 Ascend Arena 原始实现（正确性与性能）"
+    echo "  --baseline-dir <path>     复用 Ascend Arena 已采集基线（默认自动评测原始与优化实现）"
+    echo "  --no-clean-sandbox         保留 Ascend Arena 评测 sandbox（仅 --run_optimize）"
+    echo "  --profile-artifacts <all|compact> 成功评测后保留全部或仅汇总数据（默认 all）"
     echo ""
     echo "评测集配置:"
     echo "  --bench-name <name>       评测集名称: cann, stanford（默认: cann）"
@@ -102,6 +112,7 @@ print_help() {
     echo "性能配置:"
     echo "  --warmup <n>              预热次数（默认: 3）"
     echo "  --repeat <n>              采集次数（默认: 5）"
+    echo "  --device-check <mode>     Ascend Arena 占用检查：warn（默认）或 require-idle"
     echo "  --no-perf                 关闭性能采集，仅做精度验证"
     echo "  --profiler-level <level>  Profiler 级别: Level1, Level2（默认: Level1）"
     echo "  --eval-seed <n>           输入生成确定性种子（默认: 0 = 自动确定性）。"
@@ -185,6 +196,27 @@ while [[ $# -gt 0 ]]; do
             SOURCE_DIR="$2"
             shift 2
             ;;
+        --run_optimize|--run-optimize)
+            RUN_OPTIMIZE=true
+            shift
+            ;;
+        --init-only)
+            INIT_ONLY=true
+            shift
+            ;;
+        --baseline-dir)
+            BASELINE_DIR="$2"
+            shift 2
+            ;;
+        --no-clean-sandbox)
+            NO_CLEAN_SANDBOX=true
+            shift
+            ;;
+        --profile-artifacts)
+            case "$2" in all|compact) export ASCEND_ARENA_PROFILE_ARTIFACTS="$2" ;;
+                *) echo "--profile-artifacts requires all or compact" >&2; exit 2 ;; esac
+            shift 2
+            ;;
         --task-dir)
             TASK_DIR="$2"
             shift 2
@@ -227,6 +259,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --repeat)
             REPEAT="$2"
+            shift 2
+            ;;
+        --device-check)
+            ARENA_DEVICE_CHECK="$2"
             shift 2
             ;;
         --no-perf)
@@ -290,7 +326,9 @@ check_python() {
 
 # V3 Anti-Cheat: 检测并安装 cann_bench_utils（强制依赖）
 # 实现抽到 scripts/ensure_cann_bench_utils.sh，与 run_auto_pipeline.sh 共享。
-source "${PROJECT_ROOT}/scripts/ensure_cann_bench_utils.sh"
+if [[ "${RUN_OPTIMIZE}" != true ]]; then
+    source "${PROJECT_ROOT}/scripts/ensure_cann_bench_utils.sh"
+fi
 
 # 卸载已安装的cann_bench包（避免算子重复注册冲突）
 # V3 Anti-Cheat: 排除 cann_bench_utils（强制依赖，不能卸载）
@@ -436,6 +474,45 @@ build_cmd_args() {
     echo "${CMD_ARGS}"
 }
 
+build_optimize_cmd() {
+    OPTIMIZE_CMD=(
+        python -m kernel_eval.optimize
+        --source-dir "${SOURCE_DIR}"
+        --task-dir "${TASK_DIR}"
+        --operator "${OPERATOR}"
+        --reports-dir "${REPORTS_DIR}"
+        --device-id "${DEVICE_ID}"
+        --warmup "${WARMUP}"
+        --repeat "${REPEAT}"
+        --device-check "${ARENA_DEVICE_CHECK}"
+    )
+    if [[ "${NO_CLEAN_SANDBOX}" == true ]]; then
+        OPTIMIZE_CMD+=(--no-clean-sandbox)
+    fi
+    if [[ "${INIT_ONLY}" == true ]]; then
+        OPTIMIZE_CMD+=(--init-only)
+    fi
+    if [[ -n "${BASELINE_DIR}" ]]; then
+        OPTIMIZE_CMD+=(--baseline-dir "${BASELINE_DIR}")
+    fi
+    if [[ "${NO_PERF}" == true ]]; then
+        OPTIMIZE_CMD+=(--no-perf)
+    fi
+    if [[ -n "${ARENA_DEPENDENCY_ROOT:-}" ]]; then
+        OPTIMIZE_CMD+=(--dependency-root "${ARENA_DEPENDENCY_ROOT}")
+    fi
+    if [[ -n "${ARENA_OPS_JSON:-}" ]]; then
+        OPTIMIZE_CMD+=(--ops-json "${ARENA_OPS_JSON}")
+    fi
+    if [[ -n "${ARENA_ENV_SCRIPT:-}" ]]; then
+        OPTIMIZE_CMD+=(--env-script "${ARENA_ENV_SCRIPT}")
+    fi
+}
+
+run_optimize_cmd() {
+    PYTHONPATH="${SRC_DIR}${PYTHONPATH:+:${PYTHONPATH}}" "${OPTIMIZE_CMD[@]}"
+}
+
 # 执行命令
 run_cmd() {
     CMD_ARGS="$1"
@@ -448,9 +525,28 @@ run_cmd() {
 
 # 主函数
 main() {
+    if [[ "${RUN_OPTIMIZE}" == true ]]; then
+        WARMUP="${WARMUP:-10}"
+        REPEAT="${REPEAT:-30}"
+    else
+        WARMUP="${WARMUP:-3}"
+        REPEAT="${REPEAT:-5}"
+    fi
     log_info "Kernel Bench 评测脚本"
     log_info "项目根目录: ${PROJECT_ROOT}"
     log_info "操作: ${ACTION}"
+
+    if [[ "${RUN_OPTIMIZE}" == true ]]; then
+        BENCH_NAME="ascend_arena"
+        ACTION="eval"
+        if [[ -z "${SOURCE_DIR}" || -z "${TASK_DIR}" || -z "${OPERATOR}" ]]; then
+            log_error "--run_optimize requires --source-dir, --task-dir and --operator"
+            exit 1
+        fi
+        if [[ -z "${DEVICE_ID}" ]]; then
+            DEVICE_ID=0
+        fi
+    fi
 
     # 推断 bench_name 和 task_dir（支持双向推断）
     # 反向推断：task_dir → bench_name
@@ -480,18 +576,25 @@ main() {
 
     check_python
 
-    # V3 Anti-Cheat: 确保 cann_bench_utils 已安装（强制依赖）
-    ensure_cann_bench_utils || exit 1
+    # V3 Anti-Cheat dependency is only relevant to the legacy CANN flow.
+    if [[ "${RUN_OPTIMIZE}" != true ]]; then
+        ensure_cann_bench_utils || exit 1
+    fi
 
     # 仅在有 source-dir 时卸载 cann_bench（避免与即将编译安装的包冲突）
     # 无 source-dir 时保留已安装的包（golden whl 或 submission whl）
     # 注意: cann_bench_utils 永远不会被卸载（V3 Anti-Cheat 强制依赖）
-    if [[ -n "${SOURCE_DIR}" ]]; then
+    if [[ -n "${SOURCE_DIR}" && "${RUN_OPTIMIZE}" != true ]]; then
         uninstall_packages
     fi
 
     # 检查数据目录
-    if [[ "${BENCH_NAME}" == "stanford" ]]; then
+    if [[ "${RUN_OPTIMIZE}" == true ]]; then
+        if [[ ! -d "${TASK_DIR}" ]]; then
+            log_error "Arena benchmark directory does not exist: ${TASK_DIR}"
+            exit 1
+        fi
+    elif [[ "${BENCH_NAME}" == "stanford" ]]; then
         check_stanford_data
     else
         check_tasks
@@ -536,19 +639,26 @@ main() {
     fi
 
     log_info "开始执行..."
-    CMD_ARGS=$(build_cmd_args)
-    if [[ "${CMD_ARGS}" == staged-eval* ]]; then
-        log_info "命令: python -m kernel_eval.staged_eval ${CMD_ARGS#staged-eval}"
+    if [[ "${RUN_OPTIMIZE}" == true ]]; then
+        build_optimize_cmd
+        printf -v OPTIMIZE_DISPLAY '%q ' "${OPTIMIZE_CMD[@]}"
+        log_info "命令: ${OPTIMIZE_DISPLAY% }"
     else
+        CMD_ARGS=$(build_cmd_args)
+    fi
+    if [[ "${RUN_OPTIMIZE}" != true && "${CMD_ARGS}" == staged-eval* ]]; then
+        log_info "命令: python -m kernel_eval.staged_eval ${CMD_ARGS#staged-eval}"
+    elif [[ "${RUN_OPTIMIZE}" != true ]]; then
         log_info "命令: python -m kernel_eval.cli ${CMD_ARGS}"
     fi
 
-    if run_cmd "${CMD_ARGS}"; then
+    if { [[ "${RUN_OPTIMIZE}" == true ]] && run_optimize_cmd; } || \
+       { [[ "${RUN_OPTIMIZE}" != true ]] && run_cmd "${CMD_ARGS}"; }; then
         log_success "执行完成"
 
         if [[ "${ACTION}" == "eval" ]]; then
             # 显示最新报告
-            latest_report=$(ls -t "${REPORTS_DIR}"/*.md 2>/dev/null | head -1)
+            latest_report=$(find "${REPORTS_DIR}" -type f -name '*.md' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
             if [[ -n "${latest_report}" ]]; then
                 log_success "报告已生成: ${latest_report}"
                 echo ""

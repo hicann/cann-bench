@@ -1,0 +1,61 @@
+operator:
+  name: "adaptive_avg_pool3d"
+  category: "FusedComposite"
+  difficulty: "L1"
+  formula: "y = AdaptiveAvgPool3d(x, output_size)"
+  description: "Apply adaptive average pooling over the trailing D/H/W axes of a 4D or 5D tensor."
+  shape_support: "x: 4D or 5D tensor; output keeps non-spatial axes and replaces the last three axes with output_size."
+  attrs:
+    - name: output_size
+      type: str
+      default: "2x2x2"
+      enum:
+        - "2x2x2"
+      description: target pooled depth/height/width
+  inputs:
+    - name: x
+      description: input tensor
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+  outputs:
+    - name: y
+      description: pooled output tensor
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+  schema: "adaptive_avg_pool3d(Tensor x, int[3] output_size) -> Tensor y"
+
+constraints:
+  min_rank: 4
+  max_rank: 5
+
+coverage_skip:
+  triples:
+    - [bfloat16, symmetric_small, "output_size=2x2x2"]
+    - [float16, boundary, "output_size=2x2x2"]
+    - [bfloat16, boundary, "output_size=2x2x2"]
+  pairs:
+    - [misaligned, boundary]
+    - [prime, boundary]
+
+empty_tensor_scenarios: []
+
+dtype_value_ranges:
+  float16:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.001, 0.001]
+    boundary: [60000.0, 65504.0]
+  bfloat16:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.001, 0.001]
+    boundary: [1.0e30, 3.4e38]
+  float32:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.001, 0.001]
+    boundary: [1.0e30, 3.4e38]
+
+coverage_axes:
+  size: [S, M, L]
+  rank: [4D, 5D]
+  alignment: [aligned, misaligned, prime]
+  value_range: [symmetric_small, symmetric_medium, symmetric_large, asymmetric, near_zero, zero]
+  attrs_signature: ["output_size=2x2x2"]

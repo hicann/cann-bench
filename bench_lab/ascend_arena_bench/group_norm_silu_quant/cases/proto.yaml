@@ -1,0 +1,75 @@
+operator:
+  name: group_norm_silu_quant
+  category: normalization
+  difficulty: medium
+  formula: group norm + SiLU + quantize
+  inputs:
+    - name: self
+      dtype: [float16, bfloat16]
+      shape: "[N, C, ...]"
+    - name: gamma
+      dtype: [float16, bfloat16]
+      shape: "[C]"
+    - name: beta
+      dtype: [float16, bfloat16]
+      shape: "[C]"
+    - name: quant_scale
+      dtype: [float32]
+      shape: "[1]"
+  outputs:
+    - name: out
+      dtype: [int8]
+      shape: "[N, C, ...]"
+      precision_standard: quantized_integer_ae1
+    - name: mean_out
+      dtype: [float16, bfloat16]
+      shape: "[N, group]"
+    - name: rstd_out
+      dtype: [float16, bfloat16]
+      shape: "[N, group]"
+  attrs:
+    - name: group
+      type: int64
+      default: 1
+      enum: [1, 2]
+    - name: eps
+      type: double
+      default: 1.0e-05
+      enum: [1.0e-05]
+    - name: activate_silu
+      type: bool
+      default: true
+      enum: [true]
+
+constraints:
+  dtype_equal:
+    - [self, gamma]
+    - [self, beta]
+  match:
+    - source: gamma.shape
+      source_index: 0
+      target: self.shape
+      target_index: 1
+    - source: beta.shape
+      source_index: 0
+      target: self.shape
+      target_index: 1
+
+coverage_axes:
+  size: [S, M, L]
+  rank: [3D, 4D]
+  alignment: [aligned, misaligned, prime]
+  value_range: [symmetric_small, symmetric_medium, symmetric_large, asymmetric, near_zero, zero]
+  attrs_signature:
+    - "activate_silu=True,eps=1e-05,group=1"
+    - "activate_silu=True,eps=1e-05,group=2"
+
+dtype_value_ranges:
+  float16:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.0001, 0.0001]
+    boundary: [60000.0, 65504.0]
+  bfloat16:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.0001, 0.0001]
+    boundary: [1.0e30, 3.4e38]

@@ -1,0 +1,499 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          4096,
+          4096
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          1,
+          4096,
+          128
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 4095
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Meta-Llama-3-8B config exposes hidden_size=4096 and num_attention_heads=32; mapped to a 3D hidden-state gather on the last axis.",
+      "expansion-reason": "Single-batch long-context inference anchor for a mainstream dense LLM.",
+      "model-reference": "Meta-Llama-3-8B",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/meta-llama/Meta-Llama-3-8B/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          2048,
+          8192
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          1,
+          2048,
+          128
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Meta-Llama-3-70B config exposes hidden_size=8192 and num_attention_heads=64; mapped to a long-sequence inference hidden-state gather.",
+      "expansion-reason": "High-end dense LLM anchor with a wider hidden dimension than 8B-class models.",
+      "model-reference": "Meta-Llama-3-70B",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/meta-llama/Meta-Llama-3-70B/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          40,
+          4096,
+          128
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          1,
+          40,
+          4096,
+          32
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 127
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Qwen2.5-32B-Instruct config exposes hidden_size=5120 and num_attention_heads=40; mapped as [batch, heads, seq, head_dim] = [1,40,4096,128].",
+      "expansion-reason": "Real non-aligned head-count case from a Chinese-focused production LLM family.",
+      "model-reference": "Qwen2.5-32B-Instruct",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/Qwen/Qwen2.5-32B-Instruct/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          4096,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          2,
+          4096,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Mixtral-8x7B-v0.1 config exposes hidden_size=4096 and intermediate_size=14336; mapped to a small-batch MoE hidden-state gather workload.",
+      "expansion-reason": "MoE-family anchor to diversify deployment patterns beyond dense decoders.",
+      "model-reference": "Mixtral-8x7B-v0.1",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/mistralai/Mixtral-8x7B-v0.1/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          2048,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          4,
+          2048,
+          64
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 4095
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Mistral-7B-v0.1 config exposes hidden_size=4096 and num_attention_heads=32; mapped to a higher-batch training-style gather on hidden states.",
+      "expansion-reason": "Adds a training-leaning dense workload from a widely deployed open-weight model family.",
+      "model-reference": "Mistral-7B-v0.1",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/mistralai/Mistral-7B-v0.1/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          2048,
+          3072
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          4,
+          2048,
+          96
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 3071
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Phi-3.5-mini-instruct config exposes hidden_size=3072; mapped to a medium float32 hidden-state gather that stresses bandwidth without extreme memory footprint.",
+      "expansion-reason": "Keeps float32 represented in profile with a mainstream compact model configuration.",
+      "model-reference": "Phi-3.5-mini-instruct",
+      "research-source": "Phase 1 web research: Hugging Face config.json",
+      "provenance-url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          2048,
+          256
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 4095
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "Local op_stats entry for aten::gather links this workload family to MiniMax-M2.5 / MiMo-V2-Flash / DeepSeek-R1 deployments; scaled to a realistic hidden-state lookup matrix.",
+      "expansion-reason": "Preserves a workload anchor derived from observed production traces rather than synthetic construction.",
+      "model-reference": "MiniMax-M2.5 family from op_stats.json",
+      "research-source": "Phase 1 local reference plus web operator research",
+      "provenance-url": ".agents/skills/expand-test-cases/references/op_stats.json"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          1024
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          8192,
+          128
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "PyTorch torch.gather documentation defines the same-rank, output-equals-index contract used here; mapped to a small correctness-and-profiling anchor.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "PyTorch torch.gather API contract",
+      "research-source": "Phase 1 web research: PyTorch documentation",
+      "provenance-url": "https://pytorch.org/docs/stable/generated/torch.gather.html",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              512,
+              1024
+            ],
+            "dtype": "float32",
+            "min": -1.0,
+            "max": 1.0
+          },
+          "index": {
+            "shape": [
+              512,
+              128
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 1023
+          }
+        },
+        "original_attrs": {
+          "dim": {
+            "shape": [],
+            "dtype": "int64",
+            "value": -1
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          64,
+          32,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          64,
+          32,
+          128
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 4095
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "PyTorch scatter/gather test coverage uses the same last-axis legality rules; mapped to a batched 3D hidden-state gather representative of framework regression coverage.",
+      "expansion-reason": "Anchors the profile set in upstream framework validation, not just model configs.",
+      "model-reference": "PyTorch test_scatter_gather_ops",
+      "research-source": "Phase 1 web research: PyTorch GitHub tests",
+      "provenance-url": "https://github.com/pytorch/pytorch/blob/main/test/test_scatter_gather_ops.py"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          12289
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          4096,
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 12288
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "The Spatter benchmark family emphasizes irregular gather/scatter memory access; mapped to a large misaligned 2D worst-case width for bandwidth sensitivity.",
+      "expansion-reason": "Deliberate worst-case profile anchor: large, non-power-of-two width with sparse gathers from each row.",
+      "model-reference": "Spatter irregular gather benchmark family",
+      "research-source": "Phase 1 web research: benchmark reference",
+      "provenance-url": "https://github.com/hpcgarage/spatter"
+    }
+  }
+]

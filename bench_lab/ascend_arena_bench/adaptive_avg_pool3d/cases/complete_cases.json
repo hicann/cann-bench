@@ -1,0 +1,2207 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          32,
+          8,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-float16-misaligned-symmetric_small",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          31,
+          7,
+          30,
+          34
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-float32-prime-symmetric_medium",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          17,
+          5,
+          29,
+          31
+        ],
+        "dtype": "bfloat16",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-bfloat16-prime-symmetric_large",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          8,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 10.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float16-misaligned-asymmetric",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          31,
+          7,
+          30,
+          34
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float32-prime-near_zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          17,
+          5,
+          29,
+          31
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-bfloat16-prime-zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          3,
+          65,
+          7,
+          63,
+          65
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-float32-prime-symmetric_small",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          67,
+          7,
+          71,
+          73
+        ],
+        "dtype": "bfloat16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-bfloat16-prime-symmetric_medium",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          128,
+          16,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float16-misaligned-symmetric_large",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          96,
+          15,
+          65,
+          63
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 10.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float32-misaligned-asymmetric",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "x": {
+        "shape": [
+          97,
+          11,
+          67,
+          71
+        ],
+        "dtype": "bfloat16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-bfloat16-prime-near_zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "x": {
+        "shape": [
+          8,
+          256,
+          8,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-float16-misaligned-zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "x": {
+        "shape": [
+          5,
+          257,
+          7,
+          67,
+          83
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-bfloat16-prime-symmetric_small",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          32,
+          8,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-float16-misaligned-symmetric_medium",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          31,
+          7,
+          30,
+          34
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-float32-prime-symmetric_large",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          17,
+          5,
+          29,
+          31
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 10.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-bfloat16-prime-asymmetric",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          8,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float16-misaligned-near_zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "x": {
+        "shape": [
+          31,
+          7,
+          30,
+          34
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float32-prime-zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          64,
+          8,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-float16-misaligned-symmetric_small",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "x": {
+        "shape": [
+          3,
+          65,
+          7,
+          63,
+          65
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-float32-prime-symmetric_medium",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          67,
+          7,
+          71,
+          73
+        ],
+        "dtype": "bfloat16",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-bfloat16-prime-symmetric_large",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "x": {
+        "shape": [
+          128,
+          16,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 10.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float16-misaligned-asymmetric",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "x": {
+        "shape": [
+          96,
+          15,
+          65,
+          63
+        ],
+        "dtype": "float32",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float32-misaligned-near_zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_24",
+    "inputs": {
+      "x": {
+        "shape": [
+          97,
+          11,
+          67,
+          71
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-bfloat16-prime-zero",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_25",
+    "inputs": {
+      "x": {
+        "shape": [
+          7,
+          257,
+          8,
+          64,
+          65
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-float32-prime-symmetric_small",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_26",
+    "inputs": {
+      "x": {
+        "shape": [
+          5,
+          257,
+          7,
+          67,
+          83
+        ],
+        "dtype": "bfloat16",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-bfloat16-prime-symmetric_medium",
+      "expansion-reason": "Step 3 coverage case using common 3D video/volume-style tensor layouts while exercising dtype, rank, alignment, value range, and L-size paths.",
+      "coverage-gap": "step3-regenerated-common-shapes",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_27",
+    "inputs": {
+      "x": {
+        "shape": [
+          128,
+          8,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": -1,
+        "max": 1
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float16-misaligned-symmetric_small",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_28",
+    "inputs": {
+      "x": {
+        "shape": [
+          128,
+          16,
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float32-misaligned-symmetric_medium",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_29",
+    "inputs": {
+      "x": {
+        "shape": [
+          64,
+          32,
+          128,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -100,
+        "max": 100
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-bfloat16-aligned-symmetric_large",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_30",
+    "inputs": {
+      "x": {
+        "shape": [
+          64,
+          16,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-4D-float16-misaligned-near_zero",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_31",
+    "inputs": {
+      "x": {
+        "shape": [
+          64,
+          32,
+          128,
+          128
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 10
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-4D-float32-aligned-asymmetric",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_32",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          64,
+          8,
+          64,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-bfloat16-misaligned-symmetric_small",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_33",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          256,
+          8,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "min": -100,
+        "max": 100
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "M-5D-float16-misaligned-symmetric_large",
+      "expansion-reason": "Repair Step 3 pairwise coverage with common aligned/large 3D pooling shapes.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_34",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1,
+        "max": 1
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float16-aligned-symmetric_small",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_35",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float32-aligned-symmetric_medium",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_36",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float16-aligned-near_zero",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-precision"
+    }
+  },
+  {
+    "case_id": "case_37",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-4D-float32-aligned-zero",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_38",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-float16-aligned-near_zero",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_39",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32,
+          64
+        ],
+        "dtype": "float32",
+        "min": 0,
+        "max": 10
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-float32-aligned-asymmetric",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_40",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          32,
+          32,
+          32,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -100,
+        "max": 100
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "5D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "L-5D-bfloat16-aligned-symmetric_large",
+      "expansion-reason": "Repair Step 3 aligned pairwise coverage using all-32-divisible common 3D pooling tensors.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-performance"
+    }
+  },
+  {
+    "case_id": "case_41",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          17,
+          5,
+          29,
+          31
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "5D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "output_size=2x2x2"
+      },
+      "coverage-note": "S-5D-float16-prime-symmetric_small",
+      "expansion-reason": "Repair final dtype/alignment pairwise coverage with a small prime-dimension 3D pooling tensor.",
+      "coverage-gap": "lint-pairwise-repair",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_42",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          64,
+          8,
+          14,
+          14
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PyTorch AdaptiveAvgPool3d documented 5D N,C,D,H,W feature tensor.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "PyTorch AdaptiveAvgPool3d",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [1, 64, 8, 14, 14]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_43",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          64,
+          8,
+          28,
+          28
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Common 3D CNN mid-stage feature map with temporal and spatial axes.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "Video 3D CNN mid feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [4, 64, 8, 28, 28]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_44",
+    "inputs": {
+      "x": {
+        "shape": [
+          8,
+          512,
+          4,
+          7,
+          7
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Late video backbone features before classification pooling.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "Video ResNet late feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [8, 512, 4, 7, 7]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_45",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          256,
+          16,
+          14,
+          14
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Temporal pathway style feature tensor preserving sequence depth.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "Video temporal feature pooling",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [2, 256, 16, 14, 14]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_46",
+    "inputs": {
+      "x": {
+        "shape": [
+          16,
+          128,
+          8,
+          14,
+          14
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Batched 3D feature map representative of throughput profiling.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "Batched video feature pooling",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [16, 128, 8, 14, 14]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_47",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          1024,
+          2,
+          7,
+          7
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "High-channel late-stage feature before global-style adaptive pooling.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "3D classification late feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [4, 1024, 2, 7, 7]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_48",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          64,
+          16,
+          28,
+          28
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PyTorch AdaptiveAvgPool3d documented 5D N,C,D,H,W feature tensor.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "PyTorch AdaptiveAvgPool3d",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              1,
+              64,
+              8,
+              14,
+              14
+            ],
+            "dtype": "float32",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_49",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          64,
+          8,
+          56,
+          56
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Common 3D CNN mid-stage feature map with temporal and spatial axes.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "Video 3D CNN mid feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              4,
+              64,
+              8,
+              28,
+              28
+            ],
+            "dtype": "bfloat16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  }
+]

@@ -1,0 +1,1076 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          512,
+          512
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          512,
+          128
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 511
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Orthogonal baseline for small aligned fp16 coverage.",
+      "coverage-gap": "baseline small aligned fp16",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          61,
+          127,
+          67
+        ],
+        "dtype": "float32",
+        "min": -0.5,
+        "max": 1.5
+      },
+      "index": {
+        "shape": [
+          61,
+          127,
+          17
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 66
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Prime-shaped asymmetric float32 case for irregular 3D addressing.",
+      "coverage-gap": "prime asymmetric coverage",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          768,
+          1000
+        ],
+        "dtype": "bfloat16",
+        "min": -1e-30,
+        "max": 1e-30
+      },
+      "index": {
+        "shape": [
+          768,
+          96
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 999
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Underflow-sensitive bf16 case with a non-aligned last dimension.",
+      "coverage-gap": "near_zero bf16",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          128,
+          256
+        ],
+        "dtype": "float16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "index": {
+        "shape": [
+          32,
+          128,
+          32
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 255
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Zero-valued 3D aligned path for exact copy semantics.",
+      "coverage-gap": "zero edge case",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          257,
+          1031
+        ],
+        "dtype": "float32",
+        "min": 1e+30,
+        "max": 3.4e+38,
+        "input_init": "precision_edge"
+      },
+      "index": {
+        "shape": [
+          257,
+          65
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1030
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "boundary",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Precision-edge float32 case on prime extents.",
+      "coverage-gap": "boundary prime coverage",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          96,
+          256,
+          100
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          96,
+          256,
+          20
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 99
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Medium-sized misaligned float32 baseline.",
+      "coverage-gap": "medium misaligned float32",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "bfloat16",
+        "min": -2.0,
+        "max": 5.0
+      },
+      "index": {
+        "shape": [
+          1024,
+          256
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2047
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Aligned bf16 matrix with a skewed range representative of activations after fusion.",
+      "coverage-gap": "medium aligned bf16",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          127,
+          257,
+          67
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001
+      },
+      "index": {
+        "shape": [
+          127,
+          257,
+          17
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 66
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Prime-shaped fp16 near-zero medium tensor for underflow-sensitive copies.",
+      "coverage-gap": "medium prime near_zero",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          1000
+        ],
+        "dtype": "float32",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "index": {
+        "shape": [
+          2048,
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 999
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Medium zero-valued float32 case with a non-multiple-of-32 width.",
+      "coverage-gap": "medium zero float32",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          32,
+          512,
+          512
+        ],
+        "dtype": "bfloat16",
+        "min": -3.0,
+        "max": 7.0
+      },
+      "index": {
+        "shape": [
+          32,
+          512,
+          64
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 511
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Replaced bf16 precision-edge values with a stable normal-range asymmetric tensor after benchmark-side NaN precision failures.",
+      "coverage-gap": "medium aligned bf16 stability",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "x": {
+        "shape": [
+          769,
+          65537
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          769,
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 65536
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Required L-size prime case for bf16 with a large last-axis gather domain.",
+      "coverage-gap": "L-size bf16 prime",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "x": {
+        "shape": [
+          160,
+          320,
+          1001
+        ],
+        "dtype": "float16",
+        "min": -8.0,
+        "max": 12.0
+      },
+      "index": {
+        "shape": [
+          160,
+          320,
+          63
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 1000
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Required L-size misaligned case that keeps the last axis non-prime and non-aligned.",
+      "coverage-gap": "L-size misaligned fp16",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          8192
+        ],
+        "dtype": "float32",
+        "min": -1e-06,
+        "max": 1e-06
+      },
+      "index": {
+        "shape": [
+          8192,
+          256
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Required L-size aligned matrix to stress bandwidth with tiny magnitudes.",
+      "coverage-gap": "L-size aligned fp32",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "x": {
+        "shape": [
+          257,
+          257,
+          769
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "index": {
+        "shape": [
+          257,
+          257,
+          97
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 768
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Required L-size prime zero-valued case for exact edge semantics.",
+      "coverage-gap": "L-size prime zero",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          12345
+        ],
+        "dtype": "float16",
+        "min": 60000.0,
+        "max": 65504.0,
+        "input_init": "precision_edge"
+      },
+      "index": {
+        "shape": [
+          4096,
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 12344
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "boundary",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Required L-size boundary-value case with a clearly non-aligned logical width.",
+      "coverage-gap": "L-size boundary fp16",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "x": {
+        "shape": [
+          1536,
+          2048
+        ],
+        "dtype": "float16",
+        "min": -2.0,
+        "max": 5.0
+      },
+      "index": {
+        "shape": [
+          1536,
+          192
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 2047
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Additional medium aligned fp16 case to raise complete-case density without changing observed coverage levels.",
+      "coverage-gap": "count floor support",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "x": {
+        "shape": [
+          96,
+          256,
+          100
+        ],
+        "dtype": "float32",
+        "min": 1e+30,
+        "max": 3.4e+38,
+        "input_init": "precision_edge"
+      },
+      "index": {
+        "shape": [
+          96,
+          256,
+          24
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 99
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "boundary",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Adds another medium float32 path with the same observed level set for benchmark robustness.",
+      "coverage-gap": "count floor support",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "x": {
+        "shape": [
+          1021,
+          509
+        ],
+        "dtype": "bfloat16",
+        "min": 0.0,
+        "max": 0.0
+      },
+      "index": {
+        "shape": [
+          1021,
+          63
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 508
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Small bf16 prime zero case to strengthen exact-copy coverage at low size.",
+      "coverage-gap": "count floor support",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "x": {
+        "shape": [
+          64,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          64,
+          256,
+          48
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 255
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Extra aligned fp16 medium tensor to meet the lint count floor with a common hidden-state shape.",
+      "coverage-gap": "count floor support",
+      "focus_tag": "l0-threshold"
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "x": {
+        "shape": [
+          509,
+          1031
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          509,
+          97
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1030
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "2D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Extra prime float32 baseline for the minimum complete-case count requirement.",
+      "coverage-gap": "count floor support",
+      "focus_tag": "l1-functional"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "x": {
+        "shape": [
+          1024,
+          2048
+        ],
+        "dtype": "bfloat16",
+        "min": 1e+30,
+        "max": 1e+30
+      },
+      "index": {
+        "shape": [
+          1024,
+          128
+        ],
+        "dtype": "int64",
+        "min": 0,
+        "max": 2047
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "2D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "boundary",
+        "attrs_signature": "dim=-1"
+      },
+      "expansion-reason": "Restores the aligned bf16 boundary triple with a deterministic finite boundary value after device-side NaN precision failures from randomized precision_edge generation.",
+      "coverage-gap": "bf16 aligned boundary",
+      "focus_tag": "l2-exception"
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "x": {
+        "shape": [
+          512,
+          1024
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "index": {
+        "shape": [
+          512,
+          128
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      }
+    },
+    "attrs": {
+      "dim": {
+        "shape": [],
+        "dtype": "int64",
+        "value": -1
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_bitwise"
+    },
+    "meta": {
+      "provenance": "PyTorch torch.gather documentation defines the same-rank, output-equals-index contract used here; mapped to a small correctness-and-profiling anchor.",
+      "expansion-reason": "Provides an intentionally small source-backed case so profile spans S, M, and L bands.",
+      "model-reference": "PyTorch torch.gather API contract",
+      "research-source": "Phase 1 web research: PyTorch documentation",
+      "provenance-url": "https://pytorch.org/docs/stable/generated/torch.gather.html"
+    }
+  }
+]

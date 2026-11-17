@@ -1,0 +1,19 @@
+[adaptive_avg_pool3d] 任务开始 2026-11-05T11:52:11.747083+08:00
+{
+  "status": "prepared",
+  "benchmark": "ascend_arena",
+  "operator": "adaptive_avg_pool3d",
+  "workspace": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work",
+  "source_dir": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/adaptive_avg_pool3d",
+  "artifact_dir": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/artifact",
+  "task_dir": "bench_lab/ascend_arena_bench/adaptive_avg_pool3d",
+  "workspace_task_dir": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work",
+  "validate_script": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/validate.sh",
+  "reports_dir": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval",
+  "compile_repo": "ops-skeleton",
+  "compile_family": "nn",
+  "device_id": 4,
+  "baseline_present": false,
+  "task_root": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d"
+}
+[adaptive_avg_pool3d] 任务结束 2026-11-05T11:52:11.796822+08:00 耗时=0.050s 退出码=0

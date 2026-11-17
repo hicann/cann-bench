@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ascend Arena performance comparison report",
+  "type": "object",
+  "required": ["schema_version", "operator", "device", "summary", "cases", "source_diff", "baseline_status", "candidate_status"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "operator": {"type": "string"},
+    "device": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["total_cases", "passed_cases", "failed_cases", "compared_cases", "average_speedup"],
+      "properties": {
+        "total_cases": {"type": "integer", "minimum": 0},
+        "passed_cases": {"type": "integer", "minimum": 0},
+        "failed_cases": {"type": "integer", "minimum": 0},
+        "compared_cases": {"type": ["integer", "null"]},
+        "average_speedup": {"type": ["number", "null"]}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_id", "baseline_us", "candidate_us", "speedup", "candidate_passed", "noise_band", "significant"],
+        "properties": {
+          "case_id": {"type": "string"},
+          "baseline_us": {"type": ["number", "null"]},
+          "candidate_us": {"type": ["number", "null"]},
+          "speedup": {"type": ["number", "null"]},
+          "timing_scope": {"enum": ["kernel", "operator_call", "kernel_total", "mixed"]},
+          "measurement_protocol": {"type": ["object", "null"]},
+          "baseline_call_us": {"type": ["number", "null"]},
+          "candidate_call_us": {"type": ["number", "null"]},
+          "call_speedup": {"type": ["number", "null"]},
+          "candidate_passed": {"type": "boolean"},
+          "noise_band": {"type": ["number", "null"]},
+          "significant": {"type": ["boolean", "null"]}
+        }
+      }
+    },
+    "source_diff": {"type": "object"},
+    "baseline_status": {"type": "object"},
+    "candidate_status": {"type": "object"}
+  }
+}

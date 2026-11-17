@@ -1,0 +1,87 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "permute": {"shape": [3], "dtype": "int32", "min": 0, "max": 2, "input_init": "default"},
+      "input_offsets": {"shape": [4], "dtype": "int32", "min": 0, "max": 6},
+      "output_offsets": {"shape": [4], "dtype": "int32", "min": 0, "max": 6}
+    },
+    "attrs": {
+      "output_size": {"shape": [], "dtype": "int64", "value": 6}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_expand_into_jagged_permute.cpp",
+      "precision-level-l0": true,
+      "op-compute-type": "integer_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "permute": {"shape": [4], "dtype": "int32", "min": 0, "max": 3, "input_init": "precision_edge"},
+      "input_offsets": {"shape": [5], "dtype": "int32", "min": 0, "max": 13},
+      "output_offsets": {"shape": [5], "dtype": "int32", "min": 0, "max": 13}
+    },
+    "attrs": {
+      "output_size": {"shape": [], "dtype": "int64", "value": 13}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_kernel/test_expand_into_jagged_permute.cpp",
+      "precision-level-l0": true,
+      "op-compute-type": "integer_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "permute": {"shape": [5], "dtype": "int32", "min": 0, "max": 4, "input_init": "outlier_noisy"},
+      "input_offsets": {"shape": [6], "dtype": "int32", "min": 0, "max": 17},
+      "output_offsets": {"shape": [6], "dtype": "int32", "min": 0, "max": 17}
+    },
+    "attrs": {
+      "output_size": {"shape": [], "dtype": "int64", "value": 17}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "README.md::usage-example-derived",
+      "precision-level-l0": true,
+      "op-compute-type": "integer_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "permute": {"shape": [0], "dtype": "int32", "min": 0, "max": 0, "input_init": "default"},
+      "input_offsets": {"shape": [1], "dtype": "int32", "min": 0, "max": 0},
+      "output_offsets": {"shape": [1], "dtype": "int32", "min": 0, "max": 0}
+    },
+    "attrs": {
+      "output_size": {"shape": [], "dtype": "int64", "value": 0}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "api_desc.md::supports-empty-derived",
+      "precision-level-l0": true,
+      "op-compute-type": "integer_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "permute": {"shape": [6], "dtype": "int32", "min": 0, "max": 5, "input_init": "nan_inf_mix"},
+      "input_offsets": {"shape": [7], "dtype": "int32", "min": 0, "max": 22},
+      "output_offsets": {"shape": [7], "dtype": "int32", "min": 0, "max": 22}
+    },
+    "attrs": {
+      "output_size": {"shape": [], "dtype": "int64", "value": 22}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-sol-execbench": "SOL-ExecBench ragged-offset proxy smoke seed",
+      "precision-level-l0": true,
+      "op-compute-type": "integer_compute"
+    }
+  }
+]

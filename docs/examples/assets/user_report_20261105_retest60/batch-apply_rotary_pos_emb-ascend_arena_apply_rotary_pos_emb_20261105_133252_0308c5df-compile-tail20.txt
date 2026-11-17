@@ -1,0 +1,20 @@
+[ERROR] TBE(4084304,python3):2026-11-05-13:33:22.759.225 [opc.py:688][main] Opc tool compile failed.
+[INFO] RUNTIME(4084304,python3):2026-11-05-13:33:22.816.492 [xpu_task_fail_callback_data_manager.cc:64] 4084304 ~XpuTaskFailCallBackManager: XpuTaskFailCallBackManager Destructor.
+[INFO] RUNTIME(4084304,python3):2026-11-05-13:33:22.816.516 [task_fail_callback_data_manager.cc:98] 4084304 ~TaskFailCallBackManager: Destructor.
+[INFO] ATRACE(4084304,python3):2026-11-05-13:33:22.824.326 [stacktrace_signal.c:199](tid:4084304) unregister all signal handlers, can not capture signal.
+<sandbox>/cannbench_arena_apply_rotary_pos_emb_f067chyd/runs/candidate/apply_rotary_pos_emb/src/build/ops_skeleton_kernels/binary/ascend910b/apply_rotary_pos_emb/ApplyRotaryPosEmb_4f3846c6d3b2eda9b44a8049109e9fa5.json not generated!
+make[4]: *** [<sandbox>/cannbench_arena_apply_rotary_pos_emb_f067chyd/runs/candidate/apply_rotary_pos_emb/src/build/ApplyRotaryPosEmb_ascend910b/apply_rotary_pos_emb.make:5: apply_rotary_pos_emb1] Error 1
+Traceback (most recent call last):
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 277, in <module>
+    kernel_builder.ascendc_build()
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 214, in ascendc_build
+    raise RuntimeError('Kernel Compilation Error: OpType {} Kernel File {}!'.format(
+RuntimeError: Kernel Compilation Error: OpType ApplyRotaryPosEmb Kernel File <sandbox>/cannbench_arena_apply_rotary_pos_emb_f067chyd/runs/candidate/apply_rotary_pos_emb/src/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb.cpp!
+gmake[3]: *** [CMakeFiles/ApplyRotaryPosEmb_ascend910b.dir/build.make:70: CMakeFiles/ApplyRotaryPosEmb_ascend910b] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:422: CMakeFiles/ApplyRotaryPosEmb_ascend910b.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:565: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:384: binary] Error 2
+
+
+## validation_build
+validation_skipped

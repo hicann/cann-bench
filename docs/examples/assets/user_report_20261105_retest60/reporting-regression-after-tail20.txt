@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.20, pytest-9.0.3, pluggy-1.6.0
+rootdir: .
+configfile: pyproject.toml
+plugins: anyio-4.13.0, platformdirs-4.12.4
+collected 18 items
+
+tests/ut/test_optimization_trajectory.py ............                    [ 66%]
+tests/ut/test_batch_report.py ......                                     [100%]
+
+============================== 18 passed in 0.22s ==============================

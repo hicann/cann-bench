@@ -1,0 +1,616 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          8,
+          64,
+          16,
+          28,
+          28
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PyTorch AdaptiveAvgPool3d documented 5D N,C,D,H,W feature tensor.",
+      "expansion-reason": "Larger batch increases input and pooled-output work while preserving channel/spatial dimensions, dtype, value range and output_size.",
+      "model-reference": "PyTorch AdaptiveAvgPool3d",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              1,
+              64,
+              8,
+              14,
+              14
+            ],
+            "dtype": "float32",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage.",
+        "previous_inputs": {
+          "x": {
+            "shape": [
+              1,
+              64,
+              16,
+              28,
+              28
+            ],
+            "dtype": "float32",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "previous_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        }
+      },
+      "scaling-chain": "[1, 64, 8, 14, 14] -> [1, 64, 16, 28, 28] -> [8, 64, 16, 28, 28]; batch scaling with output_size=2x2x2."
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          3,
+          16,
+          112,
+          112
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Torchvision video classification models use clip-like 5D video tensors.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "Torchvision Video ResNet/R3D",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [1, 3, 16, 112, 112]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          8,
+          64,
+          8,
+          56,
+          56
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Common 3D CNN mid-stage feature map with temporal and spatial axes.",
+      "expansion-reason": "Larger batch increases input and pooled-output work while preserving channel/spatial dimensions, dtype, value range and output_size.",
+      "model-reference": "Video 3D CNN mid feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              4,
+              64,
+              8,
+              28,
+              28
+            ],
+            "dtype": "bfloat16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage.",
+        "previous_inputs": {
+          "x": {
+            "shape": [
+              4,
+              64,
+              8,
+              56,
+              56
+            ],
+            "dtype": "bfloat16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "previous_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        }
+      },
+      "scaling-chain": "[4, 64, 8, 28, 28] -> [4, 64, 8, 56, 56] -> [8, 64, 8, 56, 56]; batch scaling with output_size=2x2x2."
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          8,
+          512,
+          8,
+          14,
+          14
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Late video backbone features before classification pooling.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "Video ResNet late feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              8,
+              512,
+              4,
+              7,
+              7
+            ],
+            "dtype": "float16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          16,
+          96,
+          96,
+          96
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Volumetric medical imaging models commonly use 3D patches/features.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "MONAI 3D network patch",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.monai.io/en/stable/networks.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [1, 16, 96, 96, 96]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          32,
+          64,
+          64,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Volumetric feature-map pooling workload with cubic D/H/W.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "MONAI 3D feature map",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.monai.io/en/stable/networks.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [2, 32, 64, 64, 64]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          2,
+          256,
+          32,
+          28,
+          28
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Temporal pathway style feature tensor preserving sequence depth.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "Video temporal feature pooling",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              2,
+              256,
+              16,
+              14,
+              14
+            ],
+            "dtype": "float16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          1,
+          48,
+          24,
+          40,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Anisotropic D/H/W volume covering non-cubic 3D pooling.",
+      "expansion-reason": "Common production-style 3D pooling input shape mapped to the standardized output_size=2x2x2 contract.",
+      "model-reference": "PyTorch AdaptiveAvgPool3d anisotropic input",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
+      "shape-mapping-note": "Input follows N,C,D,H,W = [1, 48, 24, 40, 64]; output_size remains 2x2x2 per current binding contract.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          16,
+          128,
+          8,
+          28,
+          28
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Batched 3D feature map representative of throughput profiling.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "Batched video feature pooling",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              16,
+              128,
+              8,
+              14,
+              14
+            ],
+            "dtype": "bfloat16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          4,
+          1024,
+          4,
+          14,
+          14
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [
+          3
+        ],
+        "dtype": "int64",
+        "value": "2x2x2"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "High-channel late-stage feature before global-style adaptive pooling.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "3D classification late feature",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/vision/stable/models/video_resnet.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "measurement-scale": {
+        "original_inputs": {
+          "x": {
+            "shape": [
+              4,
+              1024,
+              2,
+              7,
+              7
+            ],
+            "dtype": "float16",
+            "min": -1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [
+              3
+            ],
+            "dtype": "int64",
+            "value": "2x2x2"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  }
+]

@@ -48,6 +48,8 @@
 
 面向使用者，提供操作指南。
 
+算子优化的环境安装、评测与 Agent 使用步骤统一见[项目 README](../README.md)。
+
 | 文档 | 说明 |
 |------|------|
 | [contributing.md](guide/contributing.md) | 算子贡献指南：如何提交新算子评测任务（含 proto.yaml schema） |
@@ -58,6 +60,13 @@
 | [custom_benchmark_integration.md](guide/custom_benchmark_integration.md) | 自定义评测集接入指南 |
 | [auto_pipeline_usage.md](guide/auto_pipeline_usage.md) | auto_pipeline 使用指南：CLI、配置、环境变量、输出目录 |
 | [auto_pipeline_agent_integration.md](guide/auto_pipeline_agent_integration.md) | auto_pipeline 新 agent 接入指南：通用 code agent + skills 与 LangGraph workflow 两类路径 |
+
+### 验收报告
+
+| 文档 | 说明 |
+|------|------|
+| [Ascend Arena 优化任务测试模板](templates/ascend_arena_user_evaluation_report.md) | 记录单算子或批量优化的正确性、性能与证据，附完整验收清单 |
+| [Claude Code + deepseek-flash 验收示例](examples/ascend_arena_user_evaluation_report.md) | 独立环境中的实测结果、耗时和证据摘录 |
 
 ### 版本记录
 

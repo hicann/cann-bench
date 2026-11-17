@@ -1,0 +1,1951 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "query": {
+        "shape": [
+          32,
+          32,
+          32,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          32,
+          32,
+          16,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          32,
+          32,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          32,
+          32,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-float16-aligned-near_zero-layout=1,rotary_mode=half",
+      "rationale": "Near-zero BSND path checks small-value stability.",
+      "expansion-reason": "Near-zero BSND path checks small-value stability.",
+      "coverage-gap": "value_range=near_zero"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "query": {
+        "shape": [
+          509,
+          15,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          509,
+          5,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          509,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          509,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "S-3D-float16-prime-near_zero-layout=4,rotary_mode=half",
+      "rationale": "Prime misalignment with tiny values covers sparse decode tails.",
+      "expansion-reason": "Prime misalignment with tiny values covers sparse decode tails.",
+      "coverage-gap": "alignment=prime"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "query": {
+        "shape": [
+          16,
+          1024,
+          32,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          16,
+          1024,
+          8,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          16,
+          1024,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          16,
+          1024,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l0-threshold",
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "L-4D-bfloat16-misaligned-symmetric_small-layout=1,rotary_mode=half",
+      "rationale": "Aligned BSND bf16 path mirrors high-throughput prefill.",
+      "expansion-reason": "Aligned BSND bf16 path mirrors high-throughput prefill.",
+      "coverage-gap": "dtype=bf16"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "query": {
+        "shape": [
+          8,
+          2048,
+          32,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          8,
+          2048,
+          8,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          8,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          8,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "L-4D-bfloat16-misaligned-symmetric_medium-layout=1,rotary_mode=half",
+      "rationale": "L-size bf16 BSND path covers mainstream training amplitude.",
+      "expansion-reason": "L-size bf16 BSND path covers mainstream training amplitude.",
+      "coverage-gap": "size=L"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "query": {
+        "shape": [
+          3,
+          1536,
+          13,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          3,
+          1536,
+          5,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          3,
+          1536,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          3,
+          1536,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-bfloat16-prime-asymmetric-layout=1,rotary_mode=half",
+      "rationale": "Misaligned bf16 BSND path reflects odd head packing.",
+      "expansion-reason": "Misaligned bf16 BSND path reflects odd head packing.",
+      "coverage-gap": "alignment=misaligned"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "query": {
+        "shape": [
+          7,
+          257,
+          11,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          7,
+          257,
+          3,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          7,
+          257,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          7,
+          257,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "S-4D-bfloat16-prime-near_zero-layout=1,rotary_mode=half",
+      "rationale": "Prime-factor bf16 BSND near-zero path catches cancellation sensitivity.",
+      "expansion-reason": "Prime-factor bf16 BSND near-zero path catches cancellation sensitivity.",
+      "coverage-gap": "near_zero"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "query": {
+        "shape": [
+          4096,
+          16,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          4096,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          4096,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          4096,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-bfloat16-misaligned-symmetric_small-layout=4,rotary_mode=half",
+      "rationale": "Aligned bf16 TND path matches MLA-style prefill.",
+      "expansion-reason": "Aligned bf16 TND path matches MLA-style prefill.",
+      "coverage-gap": "attrs=layout4"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "query": {
+        "shape": [
+          8192,
+          16,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          8192,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          8192,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          8192,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-bfloat16-misaligned-symmetric_medium-layout=4,rotary_mode=half",
+      "rationale": "L-size bf16 TND path covers long-context inference.",
+      "expansion-reason": "L-size bf16 TND path covers long-context inference.",
+      "coverage-gap": "size=L"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "query": {
+        "shape": [
+          2049,
+          28,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          2049,
+          4,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          2049,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          2049,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-bfloat16-misaligned-asymmetric-layout=4,rotary_mode=half",
+      "rationale": "Misaligned bf16 TND path maps to grouped-query decode with odd token counts.",
+      "expansion-reason": "Misaligned bf16 TND path maps to grouped-query decode with odd token counts.",
+      "coverage-gap": "alignment=misaligned"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "query": {
+        "shape": [
+          1543,
+          17,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1543,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1543,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1543,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "S-3D-bfloat16-prime-near_zero-layout=4,rotary_mode=half",
+      "rationale": "Prime bf16 TND near-zero path covers compact MQA decode.",
+      "expansion-reason": "Prime bf16 TND near-zero path covers compact MQA decode.",
+      "coverage-gap": "alignment=prime"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "query": {
+        "shape": [
+          2,
+          2048,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          2,
+          2048,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          2,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          2,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l0-threshold",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-float32-misaligned-symmetric_small-layout=1,rotary_mode=half",
+      "rationale": "Float32 BSND baseline preserves high-precision long-sequence behavior.",
+      "expansion-reason": "Float32 BSND baseline preserves high-precision long-sequence behavior.",
+      "coverage-gap": "dtype=float32"
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "query": {
+        "shape": [
+          4,
+          2048,
+          24,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          4,
+          2048,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          4,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          4,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-float32-misaligned-symmetric_medium-layout=1,rotary_mode=half",
+      "rationale": "Float32 BSND medium-amplitude path covers optimizer-side checks.",
+      "expansion-reason": "Float32 BSND medium-amplitude path covers optimizer-side checks.",
+      "coverage-gap": "symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "query": {
+        "shape": [
+          5,
+          1024,
+          11,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          5,
+          1024,
+          3,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          5,
+          1024,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          5,
+          1024,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-float32-prime-asymmetric-layout=1,rotary_mode=half",
+      "rationale": "Misaligned float32 BSND path covers non-power-of-two serving batches.",
+      "expansion-reason": "Misaligned float32 BSND path covers non-power-of-two serving batches.",
+      "coverage-gap": "alignment=misaligned"
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "query": {
+        "shape": [
+          31,
+          127,
+          13,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          31,
+          127,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          31,
+          127,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          31,
+          127,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "M-4D-float32-prime-near_zero-layout=1,rotary_mode=half",
+      "rationale": "Prime float32 BSND near-zero path stresses cancellation in residual branches.",
+      "expansion-reason": "Prime float32 BSND near-zero path stresses cancellation in residual branches.",
+      "coverage-gap": "near_zero"
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "query": {
+        "shape": [
+          4096,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          4096,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          4096,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          4096,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-float32-aligned-symmetric_small-layout=4,rotary_mode=half",
+      "rationale": "Aligned float32 TND prefill path for reference-grade coverage.",
+      "expansion-reason": "Aligned float32 TND prefill path for reference-grade coverage.",
+      "coverage-gap": "attrs=layout4"
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "query": {
+        "shape": [
+          2048,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          2048,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-float32-aligned-symmetric_medium-layout=4,rotary_mode=half",
+      "rationale": "Float32 TND medium-amplitude path represents reference debug workloads.",
+      "expansion-reason": "Float32 TND medium-amplitude path represents reference debug workloads.",
+      "coverage-gap": "symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "query": {
+        "shape": [
+          3073,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          3073,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          3073,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          3073,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-float32-misaligned-asymmetric-layout=4,rotary_mode=half",
+      "rationale": "Prime-length float32 TND path covers odd-token decode.",
+      "expansion-reason": "Prime-length float32 TND path covers odd-token decode.",
+      "coverage-gap": "alignment=prime"
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "query": {
+        "shape": [
+          1025,
+          15,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1025,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1025,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1025,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "S-3D-float32-misaligned-near_zero-layout=4,rotary_mode=half",
+      "rationale": "Misaligned float32 TND near-zero path probes tiny rotary factors.",
+      "expansion-reason": "Misaligned float32 TND near-zero path probes tiny rotary factors.",
+      "coverage-gap": "near_zero"
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "query": {
+        "shape": [
+          12289,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          12289,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          12289,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          12289,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "L-3D-float32-prime-symmetric_medium-layout=4,rotary_mode=half",
+      "rationale": "Prime-token L-size TND float32 anchor closes L/3D/layout4/float32 and prime symmetric_medium coverage.",
+      "expansion-reason": "Prime-token L-size TND float32 anchor closes L/3D/layout4/float32 and prime symmetric_medium coverage.",
+      "coverage-gap": "size=L"
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "query": {
+        "shape": [
+          24577,
+          32,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          24577,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          24577,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          24577,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "L-3D-bfloat16-misaligned-near_zero-layout=4,rotary_mode=half",
+      "rationale": "L-size TND bf16 near-zero anchor closes the missing L/near_zero bucket.",
+      "expansion-reason": "L-size TND bf16 near-zero anchor closes the missing L/near_zero bucket.",
+      "coverage-gap": "size=L"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "query": {
+        "shape": [
+          32,
+          32,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          32,
+          32,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          32,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          32,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l0-threshold",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "S-3D-bfloat16-aligned-symmetric_small-layout=4,rotary_mode=half",
+      "rationale": "Small fully aligned bf16 TND case closes the missing (bfloat16, aligned) and (S, aligned) buckets while keeping every coverage-driver dimension divisible by 32.",
+      "expansion-reason": "Small fully aligned bf16 TND case closes the missing (bfloat16, aligned) and (S, aligned) buckets while keeping every coverage-driver dimension divisible by 32.",
+      "coverage-gap": "dtype=bf16"
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "query": {
+        "shape": [
+          7,
+          31,
+          17,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          7,
+          31,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          7,
+          31,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          7,
+          31,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l0-threshold",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "S-4D-float32-prime-symmetric_small-layout=1,rotary_mode=half",
+      "rationale": "Small prime-factor float32 BSND case closes the prime/symmetric_small bucket.",
+      "expansion-reason": "Small prime-factor float32 BSND case closes the prime/symmetric_small bucket.",
+      "coverage-gap": "size=S"
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "query": {
+        "shape": [
+          1536,
+          17,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1536,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1536,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1536,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "S-3D-float32-prime-asymmetric-layout=4,rotary_mode=half",
+      "rationale": "Small TND asymmetric float32 case closes the S/asymmetric bucket.",
+      "expansion-reason": "Small TND asymmetric float32 case closes the S/asymmetric bucket.",
+      "coverage-gap": "size=S"
+    }
+  }
+]

@@ -38,3 +38,18 @@ def _save_restore_global_config():
         # 直接恢复模块级变量，避免 set_config 的副作用
         import kernel_eval.config as _mod
         _mod._global_config = saved
+
+
+@pytest.fixture
+def arena_workspace_source(tmp_path, monkeypatch):
+    """Exercise workspace copying without downloading the official source repositories."""
+    from auto_pipeline.generator.ascend_arena import workspace
+
+    def source(e2e_root, entry, task_dir):
+        directory = tmp_path / "baseline_fixture" / entry["compile-op-name"]
+        for name in ("op_host", "op_kernel"):
+            (directory / name).mkdir(parents=True, exist_ok=True)
+        (directory / "op_kernel/kernel.cpp").write_text("// workspace fixture\n")
+        return directory
+
+    monkeypatch.setattr(workspace, "_operator_source_dir", source)

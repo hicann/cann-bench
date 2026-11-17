@@ -1,0 +1,20 @@
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/share/cmake/Torch/TorchConfig.cmake:125 (append_torchlib_if_found)
+  CMakeLists.txt:17 (find_package)
+
+
+-- Found Torch: $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/lib/libtorch.so  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: <sandbox>/cannbench_arena_adaptive_avg_pool3d_t0ja83rg/runs/candidate/adaptive_avg_pool3d/build
+[ 50%] Building CXX object CMakeFiles/kernel_gen_ops.dir/pybind.cpp.o
+[100%] Linking CXX shared library kernel_gen_ops.cpython-310-aarch64-linux-gnu.so
+[100%] Built target kernel_gen_ops
+
+
+## symbol_check
+aclnn_symbol=aclnnAdaptiveAvgPool3d
+wanted=aclnnAdaptiveAvgPool3d,aclnnAdaptiveAvgPool3dGetWorkspaceSize
+checked:
+  <sandbox>/cannbench_arena_adaptive_avg_pool3d_t0ja83rg/runs/candidate/adaptive_avg_pool3d/custom_opp/benchmark_nn/op_api/lib/libcust_opapi.so: FOUND=aclnnAdaptiveAvgPool3d,aclnnAdaptiveAvgPool3dGetWorkspaceSize
+  /usr/local/Ascend/cann-9.1.0/lib64/libopapi.so: FOUND=aclnnAdaptiveAvgPool3d,aclnnAdaptiveAvgPool3dGetWorkspaceSize
+status=ok

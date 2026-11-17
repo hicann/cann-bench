@@ -1,0 +1,1049 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "query": {
+        "shape": [
+          16384,
+          16,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          16384,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          16384,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          16384,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "SOL-ExecBench entry 019_mla_paged_prefill_causal_h16_ckv512_kpe64_ps1 mapped q_pe head_dim_kpe=64 into TND rope tensors.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "SOL-ExecBench MLA paged prefill entry 019",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "local:.agents/skills/expand-test-cases/references/SOL-ExecBench.json",
+      "measurement-scale": {
+        "original_inputs": {
+          "query": {
+            "shape": [
+              4096,
+              16,
+              64
+            ],
+            "dtype": "bfloat16",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "key": {
+            "shape": [
+              4096,
+              8,
+              64
+            ],
+            "dtype": "bfloat16",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "cos": {
+            "shape": [
+              4096,
+              1,
+              64
+            ],
+            "dtype": "bfloat16",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "sin": {
+            "shape": [
+              4096,
+              1,
+              64
+            ],
+            "dtype": "bfloat16",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          }
+        },
+        "original_attrs": {
+          "layout": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4
+          },
+          "rotary_mode": {
+            "shape": [],
+            "dtype": "string",
+            "value": "half"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "query": {
+        "shape": [
+          4,
+          2048,
+          32,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          4,
+          2048,
+          4,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          4,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          4,
+          2048,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "SOL-ExecBench entry 016_gqa_ragged_prefill_causal_h32_kv4_d128 expanded total_q into BxS=4x2048 while preserving d=128.",
+      "expansion-reason": "GQA prefill anchor stresses a high-head BSND layout with kv-head compression.",
+      "model-reference": "SOL-ExecBench GQA ragged prefill entry 016",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "local:.agents/skills/expand-test-cases/references/SOL-ExecBench.json"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "query": {
+        "shape": [
+          1,
+          4096,
+          28,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1,
+          4096,
+          4,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1,
+          4096,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1,
+          4096,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Qwen2.5-7B-Instruct config uses hidden_size=3584, num_attention_heads=28, num_key_value_heads=4, max_position_embeddings=32768; head_dim=128.",
+      "expansion-reason": "Chinese-focused GQA model with non-power-of-two head count; good real-world non-32-head anchor.",
+      "model-reference": "Qwen2.5-7B-Instruct (Qwen, 2024)",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "query": {
+        "shape": [
+          2048,
+          32,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          2048,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          2048,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Mistral-7B-v0.3 config uses hidden_size=4096, num_attention_heads=32, num_key_value_heads=8, max_position_embeddings=32768; head_dim=128.",
+      "expansion-reason": "Reference-grade TND prefill anchor from a widely deployed dense decoder model.",
+      "model-reference": "Mistral-7B-v0.3 (Mistral AI, 2024)",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "https://huggingface.co/mistralai/Mistral-7B-v0.3/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "query": {
+        "shape": [
+          2,
+          4096,
+          32,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          2,
+          4096,
+          8,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          2,
+          4096,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          2,
+          4096,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Mixtral-8x7B-Instruct-v0.1 config uses hidden_size=4096, num_attention_heads=32, num_key_value_heads=8, max_position_embeddings=32768; head_dim=128.",
+      "expansion-reason": "MoE family anchor with GQA-style key heads and long prefill sequence.",
+      "model-reference": "Mixtral-8x7B-Instruct-v0.1 (Mistral AI, 2024)",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "query": {
+        "shape": [
+          1,
+          8192,
+          16,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1,
+          8192,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1,
+          8192,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Gemma-2-9b config uses hidden_size=3584 or family variants with 16 attention heads and rotary head_dim=256 in the Gemma line; mapped as BSND long-context prefill. Legalized from head_dim=256 to head_dim=128 to satisfy proto max_last_dim=128 while retaining batch/seq/head structure.",
+      "expansion-reason": "Multimodal-adjacent family with wider rotary head width stresses non-128 last-dim behavior.",
+      "model-reference": "Gemma-2 family wide-head rope pattern (Google, 2024)",
+      "research-source": "Phase 1 web research and local operator fixture audit",
+      "provenance-url": "https://huggingface.co/google/gemma-2-9b-it/blob/main/config.json",
+      "scaling-chain": "raw anchor [1,8192,16,256] -> legalized [1,8192,16,128] because ascend910b proto caps last_dim at 128 -> no further scaling"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "query": {
+        "shape": [
+          32,
+          256,
+          32,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          32,
+          256,
+          16,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          32,
+          256,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          32,
+          256,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=1,rotary_mode=half"
+      },
+      "coverage-note": "L-4D-float16-aligned-near_zero-layout=1,rotary_mode=half",
+      "rationale": "Scaled profiling workload preserves the original rank, dtype, alignment and value range.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "coverage-gap": "value_range=near_zero",
+      "provenance": "Derived from the complete suite; identical input shapes, dtypes and attributes.",
+      "measurement-scale": {
+        "original_inputs": {
+          "query": {
+            "shape": [
+              32,
+              32,
+              32,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "key": {
+            "shape": [
+              32,
+              32,
+              16,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "cos": {
+            "shape": [
+              32,
+              32,
+              1,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "sin": {
+            "shape": [
+              32,
+              32,
+              1,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          }
+        },
+        "original_attrs": {
+          "layout": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 1
+          },
+          "rotary_mode": {
+            "shape": [],
+            "dtype": "string",
+            "value": "half"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "query": {
+        "shape": [
+          8191,
+          15,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          8191,
+          5,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          8191,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          8191,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l2-exception",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-float16-prime-near_zero-layout=4,rotary_mode=half",
+      "rationale": "Scaled profiling workload preserves the original rank, dtype, alignment and value range.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "coverage-gap": "alignment=prime",
+      "provenance": "Derived from the complete suite; identical input shapes, dtypes and attributes.",
+      "measurement-scale": {
+        "original_inputs": {
+          "query": {
+            "shape": [
+              509,
+              15,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "key": {
+            "shape": [
+              509,
+              5,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "cos": {
+            "shape": [
+              509,
+              1,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          },
+          "sin": {
+            "shape": [
+              509,
+              1,
+              64
+            ],
+            "dtype": "float16",
+            "min": -0.0001,
+            "max": 0.0001,
+            "input_init": "default"
+          }
+        },
+        "original_attrs": {
+          "layout": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4
+          },
+          "rotary_mode": {
+            "shape": [],
+            "dtype": "string",
+            "value": "half"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "query": {
+        "shape": [
+          8192,
+          16,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          8192,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          8192,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          8192,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-precision",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-bfloat16-misaligned-symmetric_medium-layout=4,rotary_mode=half",
+      "rationale": "L-size bf16 TND path covers long-context inference.",
+      "expansion-reason": "L-size bf16 TND path covers long-context inference.",
+      "coverage-gap": "size=L",
+      "provenance": "Derived from the complete suite; identical input shapes, dtypes and attributes."
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "query": {
+        "shape": [
+          6144,
+          17,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          6144,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          6144,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          6144,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute",
+      "focus_tag": "l1-functional",
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "layout=4,rotary_mode=half"
+      },
+      "coverage-note": "M-3D-float32-prime-asymmetric-layout=4,rotary_mode=half",
+      "rationale": "Scaled profiling workload preserves the original rank, dtype, alignment and value range.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "coverage-gap": "size=S",
+      "provenance": "Derived from the complete suite; identical input shapes, dtypes and attributes.",
+      "measurement-scale": {
+        "original_inputs": {
+          "query": {
+            "shape": [
+              1536,
+              17,
+              64
+            ],
+            "dtype": "float32",
+            "min": -0.25,
+            "max": 0.75,
+            "input_init": "default"
+          },
+          "key": {
+            "shape": [
+              1536,
+              5,
+              64
+            ],
+            "dtype": "float32",
+            "min": -0.25,
+            "max": 0.75,
+            "input_init": "default"
+          },
+          "cos": {
+            "shape": [
+              1536,
+              1,
+              64
+            ],
+            "dtype": "float32",
+            "min": -0.25,
+            "max": 0.75,
+            "input_init": "default"
+          },
+          "sin": {
+            "shape": [
+              1536,
+              1,
+              64
+            ],
+            "dtype": "float32",
+            "min": -0.25,
+            "max": 0.75,
+            "input_init": "default"
+          }
+        },
+        "original_attrs": {
+          "layout": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4
+          },
+          "rotary_mode": {
+            "shape": [],
+            "dtype": "string",
+            "value": "half"
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  }
+]

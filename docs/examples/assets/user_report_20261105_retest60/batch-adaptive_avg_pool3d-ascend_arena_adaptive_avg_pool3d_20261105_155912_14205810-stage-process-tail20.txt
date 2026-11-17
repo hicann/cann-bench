@@ -1,0 +1,16 @@
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[progress] {"label": "build_start", "op_name": "adaptive_avg_pool3d"}
+[progress] {"label": "build_finished", "op_name": "adaptive_avg_pool3d", "success": true, "log_path": "benchmark_runs/user-report-20261105-retest60/batch/adaptive_avg_pool3d/work/kernel_eval/ascend_arena_adaptive_avg_pool3d_20261105_155912_14205810/results/compile.log"}
+[progress] {"label": "smoke_correctness_start", "op_name": "adaptive_avg_pool3d"}
+[progress] {"label": "smoke_correctness_finished", "op_name": "adaptive_avg_pool3d", "success": true, "case_count": 6, "passed_count": 6, "log_path": "benchmark_runs/user-report-20261105-retest60/batch/adaptive_avg_pool3d/work/kernel_eval/ascend_arena_adaptive_avg_pool3d_20261105_155912_14205810/results/smoke-correctness.log"}
+[progress] {"label": "complete_correctness_start", "op_name": "adaptive_avg_pool3d"}
+[progress] {"label": "complete_correctness_finished", "op_name": "adaptive_avg_pool3d", "success": false, "case_count": 0, "passed_count": 0, "log_path": "benchmark_runs/user-report-20261105-retest60/batch/adaptive_avg_pool3d/work/kernel_eval/ascend_arena_adaptive_avg_pool3d_20261105_155912_14205810/results/complete-correctness.log"}
+[progress] {"label": "benchmark_finished", "op_name": "adaptive_avg_pool3d", "success": false, "build_success": true, "smoke_success": true, "complete_success": false, "correctness_success": false, "profile_success": false}
+__CANN_BENCH_STAGE_RESULT__{"success": false, "build_success": true, "profile_success": false, "compile_log": "benchmark_runs/user-report-20261105-retest60/batch/adaptive_avg_pool3d/work/kernel_eval/ascend_arena_adaptive_avg_pool3d_20261105_155912_14205810/results/compile.log", "profile_log": "benchmark_runs/user-report-20261105-retest60/batch/adaptive_avg_pool3d/work/kernel_eval/ascend_arena_adaptive_avg_pool3d_20261105_155912_14205810/results/profile.log", "profile_message": "skipped_after_complete_failed", "profile_cases": 0}

@@ -1,0 +1,521 @@
+operator:
+  name: expand_into_jagged_permute
+  category: FusedComposite
+  difficulty: L1
+  formula: output_permute[output_offsets[i]:output_offsets[i+1]] = arange(input_offsets[permute[i]],
+    input_offsets[permute[i]] + output_offsets[i+1] - output_offsets[i])
+  description: Expand a table-level permutation into flattened jagged indices using
+    paired monotone offset arrays.
+  shape_support: 'permute: [P]; input_offsets: [P_PLUS_1]; output_offsets: [P_PLUS_1];
+    output: [OUT]'
+  attrs:
+  - name: output_size
+    type: int
+    default: 0
+    enum:
+    - 0
+    - 96
+    - 128
+    - 129
+    - 160
+    - 177
+    - 193
+    - 211
+    - 223
+    - 257
+    - 289
+    - 301
+    - 4001
+    - 4096
+    - 4101
+    - 524193
+    - 524288
+    - 524293
+    description: Flattened output length
+  inputs:
+  - name: permute
+    description: Permutation indices over jagged rows
+    shape: '[P]'
+    dtype:
+    - int32
+  - name: input_offsets
+    description: Source jagged row offsets
+    shape: '[P_PLUS_1]'
+    dtype:
+    - int32
+  - name: output_offsets
+    description: Destination jagged row offsets
+    shape: '[P_PLUS_1]'
+    dtype:
+    - int32
+  outputs:
+  - name: output_permute
+    description: Expanded flattened indices
+    shape: '[OUT]'
+    dtype:
+    - int32
+  schema: expand_into_jagged_permute(Tensor permute, Tensor input_offsets, Tensor
+    output_offsets, int output_size) -> Tensor
+constraints: {}
+coverage_skip:
+  triples: []
+  pairs:
+  - - size
+    - attrs
+    - L
+    - output_size=0
+  - - size
+    - attrs
+    - L
+    - output_size=128
+  - - size
+    - attrs
+    - L
+    - output_size=129
+  - - size
+    - attrs
+    - L
+    - output_size=160
+  - - size
+    - attrs
+    - L
+    - output_size=177
+  - - size
+    - attrs
+    - L
+    - output_size=193
+  - - size
+    - attrs
+    - L
+    - output_size=211
+  - - size
+    - attrs
+    - L
+    - output_size=223
+  - - size
+    - attrs
+    - L
+    - output_size=257
+  - - size
+    - attrs
+    - L
+    - output_size=289
+  - - size
+    - attrs
+    - L
+    - output_size=301
+  - - size
+    - attrs
+    - L
+    - output_size=96
+  - - size
+    - attrs
+    - M
+    - output_size=0
+  - - size
+    - attrs
+    - M
+    - output_size=128
+  - - size
+    - attrs
+    - M
+    - output_size=129
+  - - size
+    - attrs
+    - M
+    - output_size=160
+  - - size
+    - attrs
+    - M
+    - output_size=177
+  - - size
+    - attrs
+    - M
+    - output_size=193
+  - - size
+    - attrs
+    - M
+    - output_size=211
+  - - size
+    - attrs
+    - M
+    - output_size=223
+  - - size
+    - attrs
+    - M
+    - output_size=289
+  - - size
+    - attrs
+    - M
+    - output_size=301
+  - - size
+    - attrs
+    - M
+    - output_size=96
+  - - size
+    - attrs
+    - S
+    - output_size=4001
+  - - size
+    - attrs
+    - S
+    - output_size=4096
+  - - size
+    - attrs
+    - S
+    - output_size=4101
+  - - rank
+    - attrs
+    - 1D
+    - output_size=0
+  - - rank
+    - attrs
+    - 1D
+    - output_size=211
+  - - rank
+    - attrs
+    - 1D
+    - output_size=223
+  - - rank
+    - attrs
+    - 1D
+    - output_size=289
+  - - rank
+    - attrs
+    - 1D
+    - output_size=301
+  - - rank
+    - attrs
+    - 2D
+    - output_size=128
+  - - rank
+    - attrs
+    - 2D
+    - output_size=129
+  - - rank
+    - attrs
+    - 2D
+    - output_size=177
+  - - rank
+    - attrs
+    - 2D
+    - output_size=193
+  - - rank
+    - attrs
+    - 2D
+    - output_size=96
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=129
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=177
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=193
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=211
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=257
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=289
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=301
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=4001
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=4101
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=96
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=0
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=128
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=160
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=193
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=223
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=257
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=301
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=4001
+  - - alignment
+    - attrs
+    - misaligned
+    - output_size=4096
+  - - alignment
+    - attrs
+    - prime
+    - output_size=0
+  - - alignment
+    - attrs
+    - prime
+    - output_size=128
+  - - alignment
+    - attrs
+    - prime
+    - output_size=129
+  - - alignment
+    - attrs
+    - prime
+    - output_size=160
+  - - alignment
+    - attrs
+    - prime
+    - output_size=177
+  - - alignment
+    - attrs
+    - prime
+    - output_size=211
+  - - alignment
+    - attrs
+    - prime
+    - output_size=223
+  - - alignment
+    - attrs
+    - prime
+    - output_size=289
+  - - alignment
+    - attrs
+    - prime
+    - output_size=4096
+  - - alignment
+    - attrs
+    - prime
+    - output_size=4101
+  - - alignment
+    - attrs
+    - prime
+    - output_size=96
+  - - size
+    - alignment
+    - S
+    - zero
+  - - size
+    - alignment
+    - zero
+    - aligned
+  - - size
+    - alignment
+    - zero
+    - misaligned
+  - - size
+    - alignment
+    - zero
+    - prime
+  - - size
+    - attrs
+    - S
+    - output_size=0
+  - - size
+    - attrs
+    - zero
+    - output_size=128
+  - - size
+    - attrs
+    - zero
+    - output_size=129
+  - - size
+    - attrs
+    - zero
+    - output_size=160
+  - - size
+    - attrs
+    - zero
+    - output_size=177
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=0
+  - - alignment
+    - attrs
+    - aligned
+    - output_size=223
+  - - alignment
+    - attrs
+    - zero
+    - output_size=128
+  - - alignment
+    - attrs
+    - zero
+    - output_size=129
+  - - alignment
+    - attrs
+    - zero
+    - output_size=160
+  - - alignment
+    - attrs
+    - zero
+    - output_size=177
+  - - alignment
+    - attrs
+    - zero
+    - output_size=193
+  - - alignment
+    - attrs
+    - zero
+    - output_size=211
+  - - alignment
+    - attrs
+    - zero
+    - output_size=223
+  - - alignment
+    - attrs
+    - zero
+    - output_size=257
+  - - alignment
+    - attrs
+    - zero
+    - output_size=289
+  - - alignment
+    - attrs
+    - zero
+    - output_size=301
+  - - alignment
+    - attrs
+    - zero
+    - output_size=4001
+  - - alignment
+    - attrs
+    - zero
+    - output_size=4096
+  - - alignment
+    - attrs
+    - zero
+    - output_size=4101
+  - - size
+    - attrs
+    - zero
+    - output_size=193
+  - - size
+    - attrs
+    - zero
+    - output_size=211
+  - - size
+    - attrs
+    - zero
+    - output_size=223
+  - - size
+    - attrs
+    - zero
+    - output_size=257
+  - - size
+    - attrs
+    - zero
+    - output_size=289
+  - - size
+    - attrs
+    - zero
+    - output_size=301
+  - - size
+    - attrs
+    - zero
+    - output_size=4001
+  - - size
+    - attrs
+    - zero
+    - output_size=4096
+  - - size
+    - attrs
+    - zero
+    - output_size=4101
+  - - size
+    - attrs
+    - zero
+    - output_size=96
+  - - alignment
+    - attrs
+    - zero
+    - output_size=96
+empty_tensor_scenarios:
+- name: empty_permute
+  description: No jagged rows, output_size = 0.
+  dims_zero:
+    permute:
+    - 0
+    input_offsets:
+    - 0
+    output_offsets:
+    - 0
+dtype_value_ranges:
+  int32:
+    normal:
+    - -1000
+    - 1000
+    near_zero:
+    - -0.001
+    - 0.001
+    boundary:
+    - -2147483648
+    - 2147483647
+coverage_axes:
+  size:
+  - S
+  - zero
+  rank:
+  - 1D
+  alignment:
+  - aligned
+  - misaligned
+  - prime
+  - zero
+  value_range:
+  - symmetric_small
+  - near_zero
+  - zero
+  attrs_signature:
+  - output_size=0
+  - output_size=96
+  - output_size=128
+  - output_size=129
+  - output_size=160
+  - output_size=177
+  - output_size=193
+  - output_size=211
+  - output_size=223
+  - output_size=257
+  - output_size=289
+  - output_size=301
+  - output_size=4001
+  - output_size=4096
+  - output_size=4101
+  - output_size=524193
+  - output_size=524288
+  - output_size=524293

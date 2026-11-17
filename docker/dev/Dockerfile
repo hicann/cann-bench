@@ -29,11 +29,17 @@ ARG DEVICE=910b
 ARG VARIANT=devel
 ARG TRITON_ASCEND_VERSION=
 ARG TRITON_ASCEND_INDEX_URL=https://triton-ascend.osinfra.cn/pypi/simple
+ARG NODE_MAJOR=22
+ARG CODEX_VERSION=0.150.1
+ARG CLAUDE_CODE_VERSION=2.1.220
 
 FROM swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:${CANN_VERSION}-${DEVICE}-ubuntu22.04-py3.12-${VARIANT}
 
 ARG TRITON_ASCEND_VERSION
 ARG TRITON_ASCEND_INDEX_URL
+ARG NODE_MAJOR
+ARG CODEX_VERSION
+ARG CLAUDE_CODE_VERSION
 
 # 防作弊：永久删除 CANN 内置 kernel 树，阻断 aclnn 内置算子的 NPU 内核访问。
 # kernel/ascend* 删预编译的 .o + config/ascend* 删 JSON 配置；
@@ -50,6 +56,18 @@ RUN apt-get update && \
     clang lld ninja-build \
     tmux clangd gh rsync && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Non-interactive optimization agents used by scripts/batch_optimize.py.
+# Credentials and API endpoints remain runtime environment variables.
+RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" -o /tmp/nodesource.sh \
+    && bash /tmp/nodesource.sh \
+    && rm -f /tmp/nodesource.sh \
+    && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g \
+       "@openai/codex@${CODEX_VERSION}" \
+       "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+    && npm cache clean --force \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -LSf https://astral.sh/uv/install.sh | sh && \
     install -m 0755 /root/.local/bin/uv  /usr/local/bin/uv && \
@@ -73,7 +91,7 @@ RUN uv pip install --system --index-url ${PYPI_INDEX_URL:-https://mirrors.huawei
     filelock typing-extensions sympy networkx jinja2 fsspec mpmath markupsafe \
     numpy pyyaml decorator scipy attrs cloudpickle \
     ml-dtypes psutil tornado pandas expecttest protobuf \
-    pytest pytest-timeout 'ruamel.yaml>=0.18' build setuptools wheel
+    pytest pytest-timeout 'ruamel.yaml>=0.18' build setuptools wheel pybind11
 RUN uv pip install --system --no-deps --index-url https://download.pytorch.org/whl/cpu torch==${TORCH_VERSION}
 RUN uv pip install --system --no-deps --index-url ${PYPI_INDEX_URL:-https://mirrors.huaweicloud.com/repository/pypi/simple/} torch_npu==${TORCH_NPU_VERSION}
 

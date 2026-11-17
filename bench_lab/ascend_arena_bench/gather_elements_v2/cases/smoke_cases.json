@@ -1,0 +1,86 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {"shape": [4, 32], "dtype": "float32", "min": -1.0, "max": 1.0},
+      "index": {"shape": [4, 32], "dtype": "int32", "min": 0, "max": 31}
+    },
+    "attrs": {
+      "dim": {"shape": [], "dtype": "int64", "value": -1}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_gather_elements_v2.cpp:main",
+      "precision-level-l2": true,
+      "op-compute-type": "non_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {"shape": [8, 65], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "index": {"shape": [8, 33], "dtype": "int64", "min": 0, "max": 64}
+    },
+    "attrs": {
+      "dim": {"shape": [], "dtype": "int64", "value": -1}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-op-stats": "op_stats.json::aten::gather#2 models=[Mistral-Small-4-119B-2603]",
+      "shape-mapping-note": "Expanded the second dimension from 128/4 to 65/33 to exercise a small misaligned path while preserving gather-last-dim semantics.",
+      "precision-level-l2": true,
+      "op-compute-type": "non_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {"shape": [8, 17], "dtype": "bfloat16", "min": -1.0, "max": 1.0},
+      "index": {"shape": [8, 1], "dtype": "int64", "min": 0, "max": 16}
+    },
+    "attrs": {
+      "dim": {"shape": [], "dtype": "int64", "value": -1}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-op-stats": "op_stats.json::aten::gather#3 models=[Phi-3.5-MoE-instruct]",
+      "shape-mapping-note": "Directly preserves the negative-axis bf16 gather pattern with a prime gather extent.",
+      "precision-level-l2": true,
+      "op-compute-type": "non_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {"shape": [1, 4, 9], "dtype": "float32", "min": -1.0, "max": 1.0},
+      "index": {"shape": [1, 4, 5], "dtype": "int32", "min": 0, "max": 8}
+    },
+    "attrs": {
+      "dim": {"shape": [], "dtype": "int64", "value": -1}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_host/test_aclnn_gather.cpp:case_norm_float32_aicpu",
+      "shape-mapping-note": "Reduced the vendor 7D aicpu case to a small 3D form that retains the last-dimension gather semantics and prime axis extent.",
+      "precision-level-l2": true,
+      "op-compute-type": "non_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {"shape": [2, 4, 32], "dtype": "float16", "min": -0.5, "max": 0.5},
+      "index": {"shape": [2, 4, 16], "dtype": "int32", "min": 0, "max": 31}
+    },
+    "attrs": {
+      "dim": {"shape": [], "dtype": "int64", "value": -1}
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-family-template": "misc/elementwise_unary_fallback_small",
+      "shape-mapping-note": "Uses a tiny aligned 3D shape for smoke coverage; template used only for small debug geometry, not for profile provenance.",
+      "precision-level-l2": true,
+      "op-compute-type": "non_compute"
+    }
+  }
+]

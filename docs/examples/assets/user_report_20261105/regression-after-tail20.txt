@@ -1,0 +1,20 @@
+
+tests/ut/test_arena_pipeline_integrity.py ................               [ 18%]
+tests/ut/test_arena_kernel_totals.py ...............                     [ 35%]
+tests/ut/test_arena_case_catalog.py .................                    [ 55%]
+tests/ut/test_ascend_arena_auto_pipeline.py ............................ [ 87%]
+...........                                                              [100%]
+
+=============================== warnings summary ===============================
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 87 passed, 4 warnings in 26.10s ========================

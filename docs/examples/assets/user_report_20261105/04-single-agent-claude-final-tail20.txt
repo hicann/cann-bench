@@ -1,0 +1,20 @@
+  "task_root": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d",
+  "agent_run": {
+    "agent": "claude",
+    "harness": "claude-code",
+    "workspace": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work",
+    "returncode": 124,
+    "ok": false,
+    "log_file": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/artifact/claude.log",
+    "timed_out": true,
+    "evaluation": {
+      "success": false,
+      "run_name": "ascend_arena_adaptive_avg_pool3d_20261105_121214_091f9c3d",
+      "source_changed": true,
+      "source_matches": false,
+      "reason": "final_source_unvalidated"
+    },
+    "error_kind": ""
+  }
+}
+[adaptive_avg_pool3d] 任务结束 2026-11-05T12:25:00.468556+08:00 耗时=1800.850s 退出码=1

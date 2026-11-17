@@ -1,0 +1,79 @@
+operator:
+  name: "apply_rotary_pos_emb"
+  category: "Attention"
+  difficulty: "L1"
+  formula: "q_out = q * cos + rotate(q) * sin; k_out = k * cos + rotate(k) * sin"
+  description: "Apply rotary position embedding to query and key tensors."
+  shape_support: "layout=1: query[B,S,Nq,D], key[B,S,Nk,D], cos/sin[B,S,1,D]; layout=4: query[T,Nq,D], key[T,Nk,D], cos/sin[T,1,D]"
+  attrs:
+    - name: layout
+      type: int
+      default: 1
+      enum: [1, 4]
+      description: "ascend910b benchmark only uses BSND(1) and TND(4)"
+    - name: rotary_mode
+      type: str
+      default: "half"
+      enum: ["half"]
+      description: "ascend910b benchmark freezes rotary_mode to half"
+  inputs:
+    - name: query
+      description: "query tensor"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+    - name: key
+      description: "key tensor"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+    - name: cos
+      description: "cos tensor"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+    - name: sin
+      description: "sin tensor"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+  outputs:
+    - name: query_out
+      description: "rotary query output"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+    - name: key_out
+      description: "rotary key output"
+      shape: "[*]"
+      dtype: [float16, bfloat16, float32]
+  schema: "apply_rotary_pos_emb(Tensor query, Tensor key, Tensor cos, Tensor sin, int layout=1, str rotary_mode='half') -> (Tensor, Tensor)"
+constraints:
+  max_last_dim: 128
+  min_rank: 3
+  max_rank: 4
+  last_dim_even: true
+  dtype_equal:
+    - [query, key, cos, sin]
+coverage_skip:
+  triples:
+    - ["bfloat16", "boundary", "layout=1,rotary_mode=half"]
+    - ["bfloat16", "boundary", "layout=4,rotary_mode=half"]
+  pairs:
+    - [rank, attrs, 3D, "layout=1,rotary_mode=half"]
+    - [rank, attrs, 4D, "layout=4,rotary_mode=half"]
+empty_tensor_scenarios: []
+dtype_value_ranges:
+  float16:
+    normal: [-1.0, 1.0]
+    near_zero: [-6.1e-5, 6.1e-5]
+    boundary: [60000.0, 65504.0]
+  bfloat16:
+    normal: [-1.0, 1.0]
+    near_zero: [-1.2e-38, 1.2e-38]
+    boundary: [1.0e30, 3.4e38]
+  float32:
+    normal: [-1.0, 1.0]
+    near_zero: [-1.2e-38, 1.2e-38]
+    boundary: [1.0e30, 3.4e38]
+coverage_axes:
+  size: [S, M, L]
+  rank: [3D, 4D]
+  alignment: [aligned, misaligned, prime]
+  value_range: [symmetric_small, symmetric_medium, asymmetric, near_zero, boundary]
+  attrs_signature: ["layout=1,rotary_mode=half", "layout=4,rotary_mode=half"]

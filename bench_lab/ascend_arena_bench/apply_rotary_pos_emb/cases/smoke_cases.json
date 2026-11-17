@@ -1,0 +1,440 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "query": {
+        "shape": [
+          1,
+          8,
+          4,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1,
+          8,
+          2,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1,
+          8,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1,
+          8,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-bsnd-01",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "query": {
+        "shape": [
+          1,
+          7,
+          5,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1,
+          7,
+          3,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1,
+          7,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 0.75,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1,
+          7,
+          1,
+          64
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 0.75,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-bsnd-02",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "query": {
+        "shape": [
+          32,
+          8,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          32,
+          4,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          32,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          32,
+          1,
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-tnd-03",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "query": {
+        "shape": [
+          33,
+          12,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          33,
+          6,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          33,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          33,
+          1,
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-tnd-04",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "query": {
+        "shape": [
+          1,
+          4,
+          4,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          1,
+          4,
+          2,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          1,
+          4,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          1,
+          4,
+          1,
+          128
+        ],
+        "dtype": "float32",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-bsnd-05",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "query": {
+        "shape": [
+          8,
+          8,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "key": {
+        "shape": [
+          8,
+          4,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "cos": {
+        "shape": [
+          8,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      },
+      "sin": {
+        "shape": [
+          8,
+          1,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.25,
+        "max": 0.25,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "layout": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 4
+      },
+      "rotary_mode": {
+        "shape": [],
+        "dtype": "string",
+        "value": "half"
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-family-template": "attention/smoke-tnd-06",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  }
+]

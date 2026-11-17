@@ -1,0 +1,20 @@
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/share/cmake/Torch/TorchConfig.cmake:125 (append_torchlib_if_found)
+  CMakeLists.txt:17 (find_package)
+
+
+-- Found Torch: $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/lib/libtorch.so  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: <sandbox>/cannbench_arena_group_quant_0lrqtkcs/runs/candidate/group_quant/build
+[ 50%] Building CXX object CMakeFiles/kernel_gen_ops.dir/pybind.cpp.o
+[100%] Linking CXX shared library kernel_gen_ops.cpython-310-aarch64-linux-gnu.so
+[100%] Built target kernel_gen_ops
+
+
+## symbol_check
+aclnn_symbol=aclnnGroupQuant
+wanted=aclnnGroupQuant,aclnnGroupQuantGetWorkspaceSize
+checked:
+  <sandbox>/cannbench_arena_group_quant_0lrqtkcs/runs/candidate/group_quant/custom_opp/benchmark_nn/op_api/lib/libcust_opapi.so: FOUND=aclnnGroupQuant,aclnnGroupQuantGetWorkspaceSize
+  /usr/local/Ascend/cann-9.1.0/lib64/libopapi.so: FOUND=aclnnGroupQuant,aclnnGroupQuantGetWorkspaceSize
+status=ok

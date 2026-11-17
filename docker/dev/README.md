@@ -15,6 +15,9 @@ CANN-BENCH 参考执行镜像。torch 2.10.0 + torch\_npu 2.10.0.post4 + 相关�
 | `VARIANT` | `devel` | AscendHub tag 的末段；`devel` 才带编译工具链，评测要编提交 |
 | `TORCH_VERSION` | `2.10.0` | 与 `CANN_VERSION` 配套,见下 |
 | `TORCH_NPU_VERSION` | `2.10.0.post4` | 同上 |
+| `NODE_MAJOR` | `22` | Codex 与 Claude Code 使用的 Node.js 主版本 |
+| `CODEX_VERSION` | `0.150.1` | 镜像内 Codex CLI 版本 |
+| `CLAUDE_CODE_VERSION` | `2.1.220` | 镜像内 Claude Code 版本 |
 
 torch 栈**不**取基础镜像自带的串号,由 Dockerfile 显式安装并钉死。改 `CANN_VERSION` 时这两个
 要一起按[官方配套表](https://gitcode.com/Ascend/pytorch/blob/master/COMPATIBILITY.md)改
@@ -92,6 +95,14 @@ IMAGE=cann-bench:cann9.1.0-950-triton3.2.1 bash run.sh smoke
 ```
 
 期望 `ALL CHECKS PASSED`。
+
+镜像同时包含 `codex` 与 `claude`，供仓库根目录的 `scripts/batch_optimize.py --docker`
+按算子启动临时容器。凭据、API 地址和模型通过运行时环境变量传入：
+
+```bash
+docker run --rm cann-bench:cann9.1.0-910b-latest codex --version
+docker run --rm cann-bench:cann9.1.0-910b-latest claude --version
+```
 
 ## 3. 启动临时容器
 

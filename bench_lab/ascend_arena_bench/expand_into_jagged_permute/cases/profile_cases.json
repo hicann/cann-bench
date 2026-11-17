@@ -1,0 +1,872 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "permute": {
+        "shape": [
+          104
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          105
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          105
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524193
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "TorchRec/DLRM-style sparse features often use about two dozen feature tables.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "TorchRec DLRM sparse features",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://github.com/pytorch/torchrec",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              26
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              27
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          },
+          "output_offsets": {
+            "shape": [
+              27
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4001
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "permute": {
+        "shape": [
+          128
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524288
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "FBGEMM sparse ops document jagged permutation over table-level sparse features.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "FBGEMM sparse_ops expand_into_jagged_permute",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/cpp-api/sparse_ops.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              32
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              33
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          },
+          "output_offsets": {
+            "shape": [
+              33
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4096
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "permute": {
+        "shape": [
+          256
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          257
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524288
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "KeyedJaggedTensor-style sparse feature groups commonly carry many feature tables.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "TorchRec KeyedJaggedTensor",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              64
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              65
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          },
+          "output_offsets": {
+            "shape": [
+              65
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4096
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "permute": {
+        "shape": [
+          320
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          321
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          321
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524293
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Online recommendation inference can combine many sparse features with bounded per-request expansion.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "TorchRec sparse recommendation inference",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              80
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              81
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4101
+          },
+          "output_offsets": {
+            "shape": [
+              81
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4101
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4101
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "permute": {
+        "shape": [
+          384
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          385
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          385
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524288
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "JaggedTensorOps describe offset-based sparse tensor processing; 96 partitions stresses table count.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "FBGEMM JaggedTensorOps",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/overview/jagged-tensor-ops/JaggedTensorOps.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              96
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              97
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          },
+          "output_offsets": {
+            "shape": [
+              97
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4096
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "permute": {
+        "shape": [
+          512
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          513
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          513
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524288
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Large table-count sparse feature setups stress long permute and offset vectors.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "FBGEMM sparse feature pipeline",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/cpp-api/sparse_ops.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              128
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              129
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          },
+          "output_offsets": {
+            "shape": [
+              129
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4096
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "permute": {
+        "shape": [
+          257
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          258
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524193
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Misaligned table counts catch offset/permutation boundary cases common in customized feature sets.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "TorchRec sparse custom feature groups",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://github.com/pytorch/torchrec",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              65
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              66
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          },
+          "output_offsets": {
+            "shape": [
+              66
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4001
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "permute": {
+        "shape": [
+          385
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          386
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      },
+      "output_offsets": {
+        "shape": [
+          386
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4101
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524293
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Prime table counts stress non-vector-aligned sparse feature permutations.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "FBGEMM jagged permutation stress",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/overview/jagged-tensor-ops/JaggedTensorOps.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              97
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              98
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4101
+          },
+          "output_offsets": {
+            "shape": [
+              98
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4101
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4101
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "permute": {
+        "shape": [
+          128
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      },
+      "output_offsets": {
+        "shape": [
+          129
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4001
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524193
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Moderate table count with near-maximum legal output_size stresses expanded output length.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "FBGEMM sparse_ops expand_into_jagged_permute",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://docs.pytorch.org/FBGEMM/fbgemm_gpu/cpp-api/sparse_ops.html",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              32
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              33
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          },
+          "output_offsets": {
+            "shape": [
+              33
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4001
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4001
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "permute": {
+        "shape": [
+          185
+        ],
+        "dtype": "int32",
+        "min": -1,
+        "max": 1,
+        "input_init": "default"
+      },
+      "input_offsets": {
+        "shape": [
+          186
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      },
+      "output_offsets": {
+        "shape": [
+          186
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 524288
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Prime feature group count represents customized sparse feature sets.",
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "model-reference": "TorchRec jagged sparse feature path",
+      "research-source": "Step 3 web research",
+      "provenance-url": "https://pytorch.org/torchrec/",
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale.",
+      "measurement-scale": {
+        "original_inputs": {
+          "permute": {
+            "shape": [
+              47
+            ],
+            "dtype": "int32",
+            "min": -1,
+            "max": 1,
+            "input_init": "default"
+          },
+          "input_offsets": {
+            "shape": [
+              48
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          },
+          "output_offsets": {
+            "shape": [
+              48
+            ],
+            "dtype": "int32",
+            "min": 0,
+            "max": 4096
+          }
+        },
+        "original_attrs": {
+          "output_size": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 4096
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      }
+    }
+  }
+]

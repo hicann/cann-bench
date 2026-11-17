@@ -1,0 +1,20 @@
+[ERROR] TBE(3714306,python3):2026-11-05-13:12:47.112.820 [opc.py:688][main] Opc tool compile failed.
+[INFO] RUNTIME(3714306,python3):2026-11-05-13:12:47.180.225 [xpu_task_fail_callback_data_manager.cc:64] 3714306 ~XpuTaskFailCallBackManager: XpuTaskFailCallBackManager Destructor.
+[INFO] RUNTIME(3714306,python3):2026-11-05-13:12:47.180.256 [task_fail_callback_data_manager.cc:98] 3714306 ~TaskFailCallBackManager: Destructor.
+[INFO] ATRACE(3714306,python3):2026-11-05-13:12:47.193.763 [stacktrace_signal.c:199](tid:3714306) unregister all signal handlers, can not capture signal.
+<sandbox>/cannbench_arena_group_norm_silu_quant_602eu4cc/runs/candidate/group_norm_silu_quant/src/build/ops_skeleton_kernels/binary/ascend910b/group_norm_silu_quant/GroupNormSiluQuant_035ecc3242f32d6a5928bfba55376e73.json not generated!
+make[4]: *** [<sandbox>/cannbench_arena_group_norm_silu_quant_602eu4cc/runs/candidate/group_norm_silu_quant/src/build/GroupNormSiluQuant_ascend910b/group_norm_silu_quant.make:5: group_norm_silu_quant1] Error 1
+Traceback (most recent call last):
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 277, in <module>
+    kernel_builder.ascendc_build()
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 214, in ascendc_build
+    raise RuntimeError('Kernel Compilation Error: OpType {} Kernel File {}!'.format(
+RuntimeError: Kernel Compilation Error: OpType GroupNormSiluQuant Kernel File <sandbox>/cannbench_arena_group_norm_silu_quant_602eu4cc/runs/candidate/group_norm_silu_quant/src/group_norm_silu_quant/op_kernel/group_norm_silu_quant.cpp!
+gmake[3]: *** [CMakeFiles/GroupNormSiluQuant_ascend910b.dir/build.make:70: CMakeFiles/GroupNormSiluQuant_ascend910b] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:390: CMakeFiles/GroupNormSiluQuant_ascend910b.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:532: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:371: binary] Error 2
+
+
+## validation_build
+validation_skipped

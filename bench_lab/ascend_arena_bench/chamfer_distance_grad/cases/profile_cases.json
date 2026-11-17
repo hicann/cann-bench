@@ -1,0 +1,842 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          4,
+          1024,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          4,
+          1024,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          4,
+          1024
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      },
+      "idx2": {
+        "shape": [
+          4,
+          1024
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      },
+      "grad_dist1": {
+        "shape": [
+          4,
+          1024
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          4,
+          1024
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PointNet++ ModelNet40 training/evaluation commonly uses 1024-point clouds; batch 24 is a representative training mini-batch.",
+      "expansion-reason": "PointNet++ ModelNet40 training/evaluation commonly uses 1024-point clouds; batch 24 is a representative training mini-batch. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "PointNet++ / ModelNet40 1024-point classification",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://www.cs.toronto.edu/~bonner/courses/2022s/csc2547/papers/point_nets/pointnet%2B%2B%2C_qi%2C_nips2017.pdf",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          2,
+          1024,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          2,
+          1024,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          2,
+          1024
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      },
+      "idx2": {
+        "shape": [
+          2,
+          1024
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 1023
+      },
+      "grad_dist1": {
+        "shape": [
+          2,
+          1024
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          2,
+          1024
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PointNeXt/ModelNet40 reports 1024 sampled points from 2048-point objects; batch 16 maps to an inference/training anchor.",
+      "expansion-reason": "PointNeXt/ModelNet40 reports 1024 sampled points from 2048-point objects; batch 16 maps to an inference/training anchor. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "PointNeXt / ModelNet40 1024 sampled points",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://papers.nips.cc/paper_files/paper/2022/file/9318763d049edf9a1f2779b2a59911d3-Paper-Conference.pdf",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "idx2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "PCN/ShapeNet completion uses dense complete clouds with 16,384 points; batch 8 stresses completion training Chamfer loss.",
+      "expansion-reason": "PCN/ShapeNet completion uses dense complete clouds with 16,384 points; batch 8 stresses completion training Chamfer loss. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "PCN / ShapeNet 16,384-point completion",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://patents.justia.com/patent/20230019972",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "idx2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "SpareNet processed ShapeNet completion data uses 16,384 points; fp32 checks higher precision completion loss gradients.",
+      "expansion-reason": "SpareNet processed ShapeNet completion data uses 16,384 points; fp32 checks higher precision completion loss gradients. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "SpareNet / ShapeNet completion",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://github.com/microsoft/SpareNet",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          4096,
+          2
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "idx2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4095
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -100.0,
+        "max": 100.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "ProxyFormer reports ShapeNet-55/34 completion with Chamfer metrics; small batch with large value range is a precision stress anchor.",
+      "expansion-reason": "ProxyFormer reports ShapeNet-55/34 completion with Chamfer metrics; small batch with large value range is a precision stress anchor. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "ProxyFormer / ShapeNet-55 completion",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://openaccess.thecvf.com/content/CVPR2023/papers/Li_ProxyFormer_Proxy_Alignment_Assisted_Point_Cloud_Completion_With_Missing_Part_CVPR_2023_paper.pdf",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          4,
+          2500,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          4,
+          2500,
+          2
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          4,
+          2500
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2499
+      },
+      "idx2": {
+        "shape": [
+          4,
+          2500
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2499
+      },
+      "grad_dist1": {
+        "shape": [
+          4,
+          2500
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          4,
+          2500
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "AtlasNet evaluates surface generation with Chamfer distance over 2,500 points, mapped to the fixed 2-coordinate kernel contract.",
+      "expansion-reason": "AtlasNet evaluates surface generation with Chamfer distance over 2,500 points, mapped to the fixed 2-coordinate kernel contract. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "AtlasNet 2,500-point Chamfer evaluation",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://graphics.stanford.edu/courses/cs348a-20-winter/Papers/atlasnet_1802.05384.pdf",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          4608,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          4608,
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "idx1": {
+        "shape": [
+          1,
+          4608
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4607
+      },
+      "idx2": {
+        "shape": [
+          1,
+          4608
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4607
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          4608
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          4608
+        ],
+        "dtype": "float16",
+        "min": -0.001,
+        "max": 0.001
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "SO-Net comparison reports 4,608-point input variant; near-zero gradients exercise small-value accumulation.",
+      "expansion-reason": "SO-Net comparison reports 4,608-point input variant; near-zero gradients exercise small-value accumulation. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "SO-Net 4,608-point point-cloud comparison",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://diglib.eg.org/bitstream/handle/10.1111/cgf13792/v38i5pp099-108.pdf",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          8192,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          8192,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      },
+      "idx2": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Point Cloud Utils exposes Chamfer over arbitrary point clouds; 65,536-point single-cloud metric anchors large local evaluation.",
+      "expansion-reason": "Point Cloud Utils exposes Chamfer over arbitrary point clouds; 65,536-point single-cloud metric anchors large local evaluation. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "Point Cloud Utils Chamfer metric",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://fwilliams.info/point-cloud-utils/sections/shape_metrics/",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          8192,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          8192,
+          2
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      },
+      "idx2": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8191
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          8192
+        ],
+        "dtype": "float32",
+        "min": -2.0,
+        "max": 2.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Dense photogrammetry point clouds commonly reach 50k+ points; batch 16 creates an M-size production stress case.",
+      "expansion-reason": "Dense photogrammetry point clouds commonly reach 50k+ points; batch 16 creates an M-size production stress case. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "Dense photogrammetry point-cloud Chamfer workload",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://www.reddit.com/r/computervision/comments/t4y64d",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float32",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "xyz1": {
+        "shape": [
+          1,
+          8191,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "xyz2": {
+        "shape": [
+          1,
+          8191,
+          2
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "idx1": {
+        "shape": [
+          1,
+          8191
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8190
+      },
+      "idx2": {
+        "shape": [
+          1,
+          8191
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8190
+      },
+      "grad_dist1": {
+        "shape": [
+          1,
+          8191
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "grad_dist2": {
+        "shape": [
+          1,
+          8191
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance": "Non-power-of-two dense point cloud sample count stresses boundary tiling with a prime point dimension.",
+      "expansion-reason": "Non-power-of-two dense point cloud sample count stresses boundary tiling with a prime point dimension. Benchmark execution uses a micro-batch/provenance-scaled point count to keep CPU-reference profile correctness within the service timeout.",
+      "model-reference": "Dense point-cloud prime-count stress scenario",
+      "research-source": "Phase 1 web research: point-cloud Chamfer/model workload; mapped from [B,N,3] to kernel-supported [B,N,2] by preserving batch and point count.",
+      "provenance-url": "https://www.reddit.com/r/photogrammetry/comments/u5wm63",
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "<none>"
+      },
+      "op-compute-type": "float_compute",
+      "precision-level-l1": true
+    }
+  }
+]

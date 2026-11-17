@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, Mapping
 
 from auto_pipeline.generator.base import Runner
 from auto_pipeline.generator.akg import AkgAgent
+from auto_pipeline.generator.ascend_arena import AscendArenaAgent
 from auto_pipeline.generator.opencode import OpenCodeAgent
 from auto_pipeline.generator.pypto import PyptoOrchestratorAgent
 from auto_pipeline.generator.pypto_pro import PyptoProOrchestratorAgent
@@ -170,7 +171,21 @@ def _create_akg(cfg: Mapping[str, Any]) -> AkgAgent:
     )
 
 
+def _create_ascend_arena(cfg: Mapping[str, Any]) -> AscendArenaAgent:
+    repo_root = cfg.get("repo_root")
+    if not repo_root:
+        raise ValueError("ascend-arena generator requires repo_root")
+    runner_name = str(cfg.get("runner") or "opencode")
+    return AscendArenaAgent(
+        cann_bench_root=repo_root,
+        runner=create_runner(runner_name, cfg),
+        device_id=_optional_int(cfg.get("device_id")),
+        goal=str(cfg.get("goal") or ""),
+    )
+
+
 register_runner("opencode", _create_opencode)
 register_generator("akg-agent", _create_akg)
 register_generator("pypto", _create_pypto)
 register_generator("pypto-pro", _create_pypto_pro)
+register_generator("ascend-arena", _create_ascend_arena)

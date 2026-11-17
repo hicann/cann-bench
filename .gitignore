@@ -45,6 +45,7 @@ fusion_result.json
 
 # Project specific
 benchmark_runs/
+.ascend_arena_env
 .auto_pipeline/
 skill/
 case_generate/
@@ -73,7 +74,11 @@ inner/baseline_perf_prof/results/msprof_level*/
 # 本地保留,只是 untrack —— xc/dev squash merge 时 master diff 不含此目录.
 torch_ops_extension/
 # 本地辅助文件（个人 working notes / skill / profiling output）
+# Keep the original root-level ignore while allowing vendored sources to use
+# a directory named output/ (for example nlohmann/json headers).
 output/
+!src/ascend_arena_e2e/dependency/**/output/
+!src/ascend_arena_e2e/dependency/**/output/**
 SKILL_*.md
 skill_*.md
 待解决问题.md
@@ -99,3 +104,7 @@ inner/tests/baseline/results/*.json
 /tests/st/_artifacts.*/
 # baseline 采集产出（collect_baseline.py 输出，不入主仓）
 scripts/baseline/output/
+.env
+
+# Native helper build metadata
+src/cann_bench_utils/cann_bench_utils/_build_info.json

@@ -1,0 +1,2903 @@
+--- a/adaptive_avg_pool3d/_deps/common/inc/op_host/static_register_symbol.h
++++ b/adaptive_avg_pool3d/_deps/common/inc/op_host/static_register_symbol.h
+@@ -16,4 +16,3 @@
+-#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)                  \
+-    [[maybe_unused]] std::string                                                                   \
+-        op_impl_register_template_##op_type##_##class_name##priority##counter##line = std::string( \
+-            "op_impl_register_template_" #op_type)
++#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##op_type##_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" #op_type) \
+@@ -21,2 +19,0 @@
+-#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -24,3 +21,2 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)                           \
+-    [[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line = std::string( \
+-        "op_impl_register_template_" op_type)
++#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -28,2 +24,9 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
++#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" op_type)  \
++
++
++#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
+--- a/adaptive_avg_pool3d/_deps/common/inc/op_host/tiling_base.h
++++ b/adaptive_avg_pool3d/_deps/common/inc/op_host/tiling_base.h
+@@ -124,4 +124 @@
+-    virtual void DumpTilingInfo() { OP_LOGD(context_, "%ld", DefaultTilingInfoDump()); }
+-
+-    int64_t DefaultTilingInfoDump()
+-    {
++    virtual void DumpTilingInfo() {
+@@ -141 +137,0 @@
+-        return 0;
+--- a/adaptive_avg_pool3d/_deps/common/inc/op_host/tiling_templates_registry.h
++++ b/adaptive_avg_pool3d/_deps/common/inc/op_host/tiling_templates_registry.h
+@@ -497,5 +497,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                       \
+-    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;            \
+-    static Ops::NN::Optiling::RegisterArch                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterArch(#op_type) \
+-                                                                 .tiling<class_name>(priority, archs)
++#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                \
++    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;     \
++    static Ops::NN::Optiling::RegisterArch VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterArch(#op_type).tiling<class_name>(priority, archs)
++
+@@ -505,5 +505,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)         \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_versions)
++#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)  \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_versions)
++
+@@ -513,5 +513,5 @@
+-#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                                                        \
+-    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                                  \
+-    static Ops::NN::Optiling::Register                                                                                 \
+-        VAR_UNUSED##op_type_##class_name##priority_register = Ops::NN::Optiling::Register(op_type).tiling<class_name>( \
+-            priority)
++#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                              \
++    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);        \
++    static Ops::NN::Optiling::Register VAR_UNUSED##op_type_##class_name##priority_register = \
++        Ops::NN::Optiling::Register(op_type).tiling<class_name>(priority)
++
+@@ -522,5 +522,5 @@
+-#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)                      \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_version)
++#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)               \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_version)
++
+@@ -531,5 +531,6 @@
+-#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                                 \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                   \
+-    static Ops::NN::Optiling::Register __attribute__((unused))                                      \
+-    tiling_##op_type##_##class_name##_##priority##_register = Ops::NN::Optiling::Register(#op_type) \
+-                                                                  .tiling<class_name>(priority)
++#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                       \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);         \
++    static Ops::NN::Optiling::Register                                                    \
++        __attribute__((unused)) tiling_##op_type##_##class_name##_##priority##_register = \
++            Ops::NN::Optiling::Register(#op_type).tiling<class_name>(priority)
++
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_avg_pool3d_big_kernel.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_avg_pool3d_big_kernel.h
+@@ -19 +19 @@
+-#include "pool_utils/arch35/compute/adaptive_avg_pool_big_kernel_compute.h"
++
+@@ -25 +25,67 @@
+-template <typename T>
++ template <typename T, typename U>
++__aicore__ inline void StoreOneValue(const __local_mem__ void* dstAddr, MicroAPI::RegTensor<U>& srcReg,
++                                       MicroAPI::MaskReg& maskReg, uint32_t offset)
++{
++    auto addr = (__local_mem__ T*)dstAddr + offset;
++    if constexpr (IsSameType<T, half>::value) {
++        MicroAPI::RegTensor<half> regfp16;
++        MicroAPI::Cast<half, float, CASTB4TOB2>(regfp16, srcReg, maskReg);
++        MicroAPI::DataCopy<half, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, regfp16, maskReg);
++    } else if constexpr (IsSameType<T, bfloat16_t>::value) {
++        MicroAPI::RegTensor<bfloat16_t> regBf16;
++        MicroAPI::Cast<bfloat16_t, float, CASTB4TOB2>(regBf16, srcReg, maskReg);
++        MicroAPI::DataCopy<bfloat16_t, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, regBf16, maskReg);
++    } else if constexpr (sizeof(T) == DIGHT4) {
++        MicroAPI::DataCopy<T, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B32>(addr, (MicroAPI::RegTensor<T>&)srcReg, maskReg);
++    } else {
++        MicroAPI::UnalignReg uReg;
++        MicroAPI::DataCopyUnAlign(addr, srcReg, uReg, 1);
++        MicroAPI::DataCopyUnAlignPost(addr, uReg, 0);
++    }
++}
++
++template <typename U>
++__aicore__ inline void LoadOneValue(const __local_mem__ void* srcAddr, MicroAPI::RegTensor<U>& dstReg,
++                                      MicroAPI::MaskReg& preg, uint32_t offset)
++{
++    auto addr = (__local_mem__ U*)srcAddr + offset;
++    if constexpr (sizeof(U) == DIGHT4) {
++        MicroAPI::DataCopy<U, MicroAPI::LoadDist::DIST_BRC_B32>(dstReg, addr);
++    } else {
++        MicroAPI::UnalignReg ureg;
++        MicroAPI::DataCopyUnAlignPre(ureg, addr);
++        MicroAPI::DataCopyUnAlign(dstReg, ureg, addr, 1);
++    }
++}
++
++template <typename T, typename U>
++__aicore__ inline void LoadXLocalToReg(const __local_mem__ void* srcAddr, MicroAPI::RegTensor<U>& dstReg,
++                                     MicroAPI::MaskReg& preg, MicroAPI::AddrReg& offset)
++{
++    if constexpr (IsSameType<T, half>::value) {
++        MicroAPI::RegTensor<half> regfp16;
++        MicroAPI::DataCopy<half, MicroAPI::LoadDist::DIST_UNPACK_B16>(regfp16, (__local_mem__ half*)srcAddr, offset);
++        MicroAPI::Cast<float, half, CASTB2TOB4>(dstReg, regfp16, preg);
++    } else if constexpr (IsSameType<T, bfloat16_t>::value) {
++        MicroAPI::RegTensor<bfloat16_t> regBf16;
++        MicroAPI::DataCopy<bfloat16_t, MicroAPI::LoadDist::DIST_UNPACK_B16>(regBf16, (__local_mem__ bfloat16_t*)srcAddr, offset);
++        MicroAPI::Cast<float, bfloat16_t, CASTB2TOB4>(dstReg, regBf16, preg);
++    } else {
++        MicroAPI::DataCopy(dstReg, (__local_mem__ float*)srcAddr, offset);
++    }
++}
++
++template <typename U>
++__aicore__ inline void UpdateSum(MicroAPI::RegTensor<U>& res, const __local_mem__ U* storeLocalAddr, int32_t offset)
++{
++    // get data from local mem
++    MicroAPI::MaskReg pregOne = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::VL1>();
++    MicroAPI::RegTensor<U> lastRes;
++
++    // get last res from local mem
++    LoadOneValue<U>(storeLocalAddr, lastRes, pregOne, offset);
++
++    //calc sum
++    MicroAPI::Add(res, res, lastRes, pregOne);
++    MicroAPI::LocalMemBar<MicroAPI::MemType::VEC_LOAD, MicroAPI::MemType::VEC_STORE>();
++} template <typename T>
+@@ -44 +110,3 @@
+-    template <typename U>
++    template < int32_t SPLIT_MODE, typename U>
++    __aicore__ inline void ComputeSum(LocalTensor<T> xLocal, int64_t localCurIdx, int64_t dataCount);
++    template < typename U>
+@@ -56 +124 @@
+-    __ubuf__ U* avgStoreOutAddr = (__ubuf__ U*)avgStoreOutLocal.GetPhyAddr();
++    __local_mem__ U* avgStoreOutAddr = (__local_mem__ U*)avgStoreOutLocal.GetPhyAddr();
+@@ -64,2 +132,2 @@
+-        Reg::RegTensor<U> avgStoreOutReg;
+-        Reg::Duplicate(avgStoreOutReg, static_cast<U>(0));
++        MicroAPI::RegTensor<U> avgStoreOutReg;
++        MicroAPI::Duplicate(avgStoreOutReg, static_cast<U>(0));
+@@ -67,3 +135,3 @@
+-            Reg::MaskReg avgStoreOutMask = Reg::UpdateMask<U>(maxOutCount);
+-            Reg::AddrReg offsetStoreReg = Reg::CreateAddrReg<U>(i, maxVfCount);
+-            Reg::StoreAlign(avgStoreOutAddr, avgStoreOutReg, offsetStoreReg, avgStoreOutMask);
++            MicroAPI::MaskReg avgStoreOutMask = MicroAPI::UpdateMask<U>(maxOutCount);
++            MicroAPI::AddrReg offsetStoreReg = MicroAPI::CreateAddrReg<U>(i, maxVfCount);
++            MicroAPI::DataCopy(avgStoreOutAddr, avgStoreOutReg, offsetStoreReg, avgStoreOutMask);
+@@ -81 +149 @@
+-    __ubuf__ T* avgOutAddr = (__ubuf__ T*)avgOutLocal.GetPhyAddr();
++    __local_mem__ T* avgOutAddr = (__local_mem__ T*)avgOutLocal.GetPhyAddr();
+@@ -89,2 +157,2 @@
+-        Reg::RegTensor<T> avgOutReg;
+-        Reg::Duplicate(avgOutReg, static_cast<T>(0));
++        MicroAPI::RegTensor<T> avgOutReg;
++        MicroAPI::Duplicate(avgOutReg, static_cast<T>(0));
+@@ -92,3 +160,3 @@
+-            Reg::MaskReg avgOutMask = Reg::UpdateMask<T>(maxOutCount);
+-            Reg::AddrReg offsetReg = Reg::CreateAddrReg<T>(i, maxVfCount);
+-            Reg::StoreAlign(avgOutAddr, avgOutReg, offsetReg, avgOutMask);
++            MicroAPI::MaskReg avgOutMask = MicroAPI::UpdateMask<T>(maxOutCount);
++            MicroAPI::AddrReg offsetReg = MicroAPI::CreateAddrReg<T>(i, maxVfCount);
++            MicroAPI::DataCopy(avgOutAddr, avgOutReg, offsetReg, avgOutMask);
+@@ -104,2 +172,2 @@
+-    __ubuf__ U* storeLocalAddr = (__ubuf__ U*)storeAddLocal.GetPhyAddr();
+-    __ubuf__ T* dstLocalAddr = (__ubuf__ T*)outputLocal.GetPhyAddr();
++    __local_mem__ U* storeLocalAddr = (__local_mem__ U*)storeAddLocal.GetPhyAddr();
++    __local_mem__ T* dstLocalAddr = (__local_mem__ T*)outputLocal.GetPhyAddr();
+@@ -110,9 +178,43 @@
+-        Reg::MaskReg pregOne = Reg::CreateMask<U, Reg::MaskPattern::VL1>();
+-        Reg::RegTensor<U> disiv;
+-        Reg::RegTensor<U> lastRes;
+-
+-        Reg::Duplicate(disiv, divNum);
+-        PoolUtils::Compute::LoadOneValue<U>(storeLocalAddr, lastRes, pregOne, 0);
+-        Reg::Div(lastRes, lastRes, disiv, pregOne);
+-
+-        PoolUtils::Compute::StoreOneValue<T, U>(dstLocalAddr, lastRes, pregOne, curIdx);
++        MicroAPI::MaskReg pregOne = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::VL1>();
++        MicroAPI::RegTensor<U> disiv;
++        MicroAPI::RegTensor<U> lastRes;
++
++        MicroAPI::Duplicate(disiv, divNum);
++        LoadOneValue<U>(storeLocalAddr, lastRes, pregOne, 0);
++        MicroAPI::Div(lastRes, lastRes, disiv, pregOne);
++
++        StoreOneValue<T, U>(dstLocalAddr, lastRes, pregOne, curIdx );
++    }
++}
++
++template <typename T>
++template <int32_t SPLIT_MODE, typename U>
++__aicore__ inline void AdaptiveAvgPool3dBigKernel<T>::ComputeSum(
++    LocalTensor<T> xLocal, int64_t localCurIdx, int64_t dataCount)
++{
++    LocalTensor<U> storeAddLocal = this->storeAddUB_.template Get<U>();
++    __local_mem__ T* xLocalAddr = (__local_mem__ T*)xLocal.GetPhyAddr();
++    __local_mem__ U* storeLocalAddr = (__local_mem__ U*)storeAddLocal.GetPhyAddr();
++
++    uint32_t repeatCount = platform::GetVRegSize() / sizeof(U); //一个vf需要的次数
++    uint16_t repeatTimes = ops::CeilDiv(static_cast<uint32_t>(dataCount), repeatCount); //上取整，获取repeatCount的整数倍
++    uint32_t dataCount_ = dataCount;
++
++    __VEC_SCOPE__
++    {
++        MicroAPI::RegTensor<U> vd0;
++        MicroAPI::RegTensor<U> vd1;
++        MicroAPI::RegTensor<U> res;
++        MicroAPI::MaskReg sumMask = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::VL1>();
++        MicroAPI::Duplicate(res, static_cast<U>(0));
++        for (uint16_t i = 0; i < repeatTimes; i++) {
++            MicroAPI::MaskReg p0 = MicroAPI::UpdateMask<U>(dataCount_); //一次处理数量
++            MicroAPI::AddrReg offset = MicroAPI::CreateAddrReg<T>(i, repeatCount); //搬运偏移
++            LoadXLocalToReg<T, U>(xLocalAddr, vd0, p0, offset);
++            MicroAPI::ReduceSum(vd1, vd0, p0);
++            MicroAPI::Add(res, res, vd1, sumMask);
++        }
++        if constexpr (SPLIT_MODE != NO_SPLIT) {
++            UpdateSum<U>(res, storeLocalAddr, 0);
++        }
++        StoreOneValue<U, U>(storeLocalAddr, res, sumMask, 0 );
+@@ -133 +235 @@
+-        PoolUtils::Compute::ComputeSum<T, float, SPLIT_D != NO_SPLIT>(xLocal, this->storeAddUB_.template Get<float>(),
++        ComputeSum<SPLIT_D, float>(xLocal, curIdx,
+@@ -152,2 +254,2 @@
+-            PoolUtils::Compute::ComputeSum<T, float, SPLIT_H != NO_SPLIT>(
+-                xLocal, this->storeAddUB_.template Get<float>(), this->AlignW * curHFactor);
++            ComputeSum<SPLIT_H, float>(
++                xLocal, curIdx, this->AlignW * curHFactor);
+@@ -174,2 +276,2 @@
+-                PoolUtils::Compute::ComputeSum<T, float, SPLIT_W != NO_SPLIT>(
+-                    xLocal, this->storeAddUB_.template Get<float>(), curWFactor);
++                ComputeSum<SPLIT_W, float>(
++                    xLocal, curIdx, curWFactor);
+@@ -188 +290 @@
+-    PoolUtils::Compute::ComputeSum<T, float, NO_SPLIT != NO_SPLIT>(xLocal, this->storeAddUB_.template Get<float>(),
++    ComputeSum<NO_SPLIT, float>(xLocal, curIdx,
+@@ -224 +326,3 @@
+-}
++ if constexpr (IsSameType<T, half>::value) {
++        SetCtrlSpr<HALF_OVERFLOW_MODE_CTRL, HALF_OVERFLOW_MODE_CTRL>(1);
++    } }
+@@ -248 +352 @@
+-            PoolUtils::DataMove::CopyOut<T>(this->outputUB_, this->yGm_, curLocalIdx, outputOffset);
++            AdaptivePool3dBigKernel<T>::CopyOut( curLocalIdx, outputOffset);
+@@ -255 +359 @@
+-        PoolUtils::DataMove::CopyOut<T>(this->outputUB_, this->yGm_, curLocalIdx, outputOffset);
++        AdaptivePool3dBigKernel<T>::CopyOut( curLocalIdx, outputOffset);
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_avg_pool3d_parall_pool.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_avg_pool3d_parall_pool.h
+@@ -25,3 +25 @@
+-#include "pool_utils/arch35/compute/adaptive_pool3d_parall_pool_compute.h"
+-#include "pool_utils/arch35/data_move/adaptive_pool3d_parall_pool_data_move.h"
+-#include "pool_utils/arch35/data_move/adaptive_pool_transpose_data_move.h"
++
+@@ -55,4 +53,4 @@
+-constexpr AscendC::Reg::CastTrait castTraitI32Fp32 = {
+-    AscendC::Reg::RegLayout::UNKNOWN,
+-    AscendC::Reg::SatMode::UNKNOWN,
+-    AscendC::Reg::MaskMergeMode::ZEROING,
++constexpr AscendC::MicroAPI::CastTrait castTraitI32Fp32 = {
++    AscendC::MicroAPI::RegLayout::UNKNOWN,
++    AscendC::MicroAPI::SatMode::UNKNOWN,
++    AscendC::MicroAPI::MaskMergeMode::ZEROING,
+@@ -68,0 +67,8 @@
++    __aicore__ inline void  CalInputBlockPara(int64_t curBlockIdx, BlockSplitParam& blockPara);
++    __aicore__ inline void CopyInput(
++        uint32_t ncNum, uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen, int64_t xOffset);
++    __aicore__ inline void TransposeB16(
++        LocalTensor<T> xLocalTrans, LocalTensor<T> xLocal, uint32_t rowNum, uint32_t colNum);
++    template <typename U>
++    __aicore__ inline void TransposeB32(
++        LocalTensor<U> xLocalTrans, LocalTensor<U> xLocal, uint32_t rowNum, uint32_t colNum);
+@@ -110,2 +116,2 @@
+-        IsSameType<ID_T, int64_t>::value, typename AscendC::Reg::RegTensor<int64_t, AscendC::Reg::RegTraitNumTwo>,
+-        typename AscendC::Reg::RegTensor<int32_t>>::type;
++        IsSameType<ID_T, int64_t>::value, typename AscendC::MicroAPI::RegTensor<int64_t, AscendC::MicroAPI::RegTraitNumTwo>,
++        typename AscendC::MicroAPI::RegTensor<int32_t>>::type;
+@@ -155,2 +161,165 @@
+-__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::TransInput(uint32_t diDataLen, uint32_t hiDataLen,
+-                                                                      uint32_t wiDataLen)
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::CalInputBlockPara(
++    int64_t curBlockIdx, BlockSplitParam& blockPara)
++{
++    int64_t dhwOuter = tilingData_.doOuter * tilingData_.hoOuter * tilingData_.woOuter;
++    int64_t hwOuter = tilingData_.hoOuter * tilingData_.woOuter;
++
++    blockPara.ncIdx = curBlockIdx / dhwOuter;
++    blockPara.ncNum = (blockPara.ncIdx == (tilingData_.ncOuter - 1)) ? tilingData_.ncTail : tilingData_.ncFactor;
++    /* ncdhw */
++    int64_t blockIdxOnNc = curBlockIdx % dhwOuter;
++    blockPara.doIdx = blockIdxOnNc / hwOuter;
++    blockPara.doNum = (blockPara.doIdx == (tilingData_.doOuter - 1)) ? tilingData_.doTail : tilingData_.doFactor;
++
++    int64_t blockIdxOnD = blockIdxOnNc % hwOuter;
++    blockPara.hoIdx = blockIdxOnD / tilingData_.woOuter;
++    blockPara.hoNum = (blockPara.hoIdx == (tilingData_.hoOuter - 1)) ? tilingData_.hoTail : tilingData_.hoFactor;
++
++    int64_t blockIdxOnDH = blockIdxOnD % tilingData_.woOuter;
++    blockPara.woIdx = blockIdxOnDH % tilingData_.woOuter;
++    blockPara.woNum = (blockPara.woIdx == (tilingData_.woOuter - 1)) ? tilingData_.woTail : tilingData_.woFactor;
++
++    blockPara.kerDStartIdx = ((blockPara.doIdx * tilingData_.doFactor) * tilingData_.dIn) / tilingData_.dOut;
++    blockPara.kerHStartIdx = ((blockPara.hoIdx * tilingData_.hoFactor) * tilingData_.hIn) / tilingData_.hOut;
++    blockPara.kerWStartIdx = ((blockPara.woIdx * tilingData_.woFactor) * tilingData_.wIn) / tilingData_.wOut;
++    int32_t kerDEndIdx =
++        Ceil((blockPara.doIdx * tilingData_.doFactor + blockPara.doNum) * tilingData_.dIn, tilingData_.dOut);
++    int32_t kerHEndIdx =
++        Ceil((blockPara.hoIdx * tilingData_.hoFactor + blockPara.hoNum) * tilingData_.hIn, tilingData_.hOut);
++    int32_t kerWEndIdx =
++        Ceil((blockPara.woIdx * tilingData_.woFactor + blockPara.woNum) * tilingData_.wIn, tilingData_.wOut);
++
++    blockPara. diDataLen= kerDEndIdx - blockPara.kerDStartIdx;
++    blockPara. hiDataLen= kerHEndIdx - blockPara.kerHStartIdx;
++    blockPara. wiDataLen= kerWEndIdx - blockPara.kerWStartIdx;
++    blockPara.xOffset = blockPara.ncIdx * tilingData_.ncFactor * inDHW_ + blockPara.kerDStartIdx * inHW_ +
++                        blockPara.kerHStartIdx * tilingData_.wIn + blockPara.kerWStartIdx;
++}
++
++template <typename T, typename ID_T>
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>:: CopyInput(
++    uint32_t ncNum, uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen, int64_t xOffset)
++{
++    LocalTensor<T> xLocal = inputQue.AllocTensor<T>();
++
++    uint32_t wiDataAlign = ops::CeilAlign(wiDataLen, ubAlignNum_);
++    DataCopyExtParams paramsIn = {
++        static_cast<uint16_t>(hiDataLen), static_cast<uint32_t>(wiDataLen * sizeof(T)),
++        static_cast<uint32_t>((tilingData_.wIn - wiDataLen) * sizeof(T)), static_cast<uint32_t>(0),
++        static_cast<uint32_t>(0)};
++    DataCopyPadExtParams<T> padParams = {false, 0, 0, 0};
++
++    LoopModeParams loopModeParams;
++    loopModeParams.loop1Size = diDataLen;
++    loopModeParams.loop2Size = ncNum;
++    loopModeParams.loop1SrcStride = inHW_ * sizeof(T);
++    loopModeParams.loop2SrcStride = inDHW_ * sizeof(T);
++    loopModeParams.loop1DstStride = hiDataLen * wiDataAlign * sizeof(T);
++    loopModeParams.loop2DstStride = diDataLen * hiDataLen * wiDataAlign * sizeof(T);
++
++    SetLoopModePara(loopModeParams, DataCopyMVType::OUT_TO_UB);
++    DataCopyPad(xLocal, xGm[xOffset], paramsIn, padParams);
++    ResetLoopModePara(DataCopyMVType::OUT_TO_UB);
++    inputQue.EnQue(xLocal);
++}
++
++template <typename T, typename ID_T>
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::TransposeB16(
++    LocalTensor<T> xLocalTrans, LocalTensor<T> xLocal, uint32_t rowNum, uint32_t colNum)
++{
++    uint64_t dstList[TRANS_ADDR_LEN];
++    uint64_t srcList[TRANS_ADDR_LEN];
++
++    TransDataTo5HDParams transDataParams;
++    transDataParams.dstHighHalf = false;
++    transDataParams.srcHighHalf = false;
++
++    uint64_t transPoseAlign = ubAlignNum_;
++    if (colNum == transPoseAlign) {
++        /* repeat在行方向，一次处理16*8个b32或者16*16个B16 */
++        transDataParams.repeatTimes = rowNum / TRANS_ADDR_LEN;
++        /* dstSride16*sizeof(T), srcSride16dataBlock */
++        transDataParams.dstRepStride = TRANS_ADDR_LEN * sizeof(T) / ubBlockSize_;
++        transDataParams.srcRepStride = TRANS_ADDR_LEN;
++        for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++            srcList[i] = static_cast<uint64_t>(xLocal[i * transPoseAlign].GetPhyAddr());
++            dstList[i] = static_cast<uint64_t>(xLocalTrans[i * rowNum].GetPhyAddr());
++        }
++        if (transDataParams.repeatTimes == 1) {
++            transDataParams.srcRepStride = 0;
++            transDataParams.dstRepStride = 0;
++        }
++        TransDataTo5HD<T>(dstList, srcList, transDataParams);
++    } else {
++        /* repeatTimes不会为1 */
++        transDataParams.repeatTimes = colNum / transPoseAlign;
++        transDataParams.dstRepStride = rowNum;
++        transDataParams.srcRepStride = 1;
++        /* repeat在列方向,一次处理16*8个b32或者16*16个B16， 行方向一次处理16行 */
++        for (int32_t rowLoopIdx = 0; rowLoopIdx < rowNum / TRANS_ADDR_LEN; rowLoopIdx++) {
++            for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++                srcList[i] =
++                    static_cast<uint64_t>(xLocal[rowLoopIdx * TRANS_ADDR_LEN * colNum + i * colNum].GetPhyAddr());
++                dstList[i] = static_cast<uint64_t>(xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum].GetPhyAddr());
++            }
++            TransDataTo5HD<T>(dstList, srcList, transDataParams);
++        }
++    }
++}
++
++template <typename T, typename ID_T>
++template <typename U>
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::TransposeB32(
++    LocalTensor<U> xLocalTrans, LocalTensor<U> xLocal, uint32_t rowNum, uint32_t colNum)
++{
++    uint64_t dstList[TRANS_ADDR_LEN];
++    uint64_t srcList[TRANS_ADDR_LEN];
++
++    TransDataTo5HDParams transDataParams;
++    transDataParams.dstHighHalf = false;
++    transDataParams.srcHighHalf = false;
++    uint64_t transPoseAlign = ubBlockSize_ / sizeof(U);
++    if (colNum == transPoseAlign) {
++        /* repeat在行方向，一次处理16*8个b32或者16*16个B16 */
++        transDataParams.repeatTimes = rowNum / TRANS_ADDR_LEN;
++        /* dstSride大小为16*sizeof(T), srcSride大小为16个dataBlock */
++        transDataParams.dstRepStride = TRANS_ADDR_LEN * sizeof(int32_t) / ubBlockSize_;
++        transDataParams.srcRepStride = TRANS_ADDR_LEN;
++
++        for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++            srcList[i] = static_cast<uint64_t>(xLocal[i * transPoseAlign].GetPhyAddr());
++        }
++        for (int32_t i = 0; i < TRANS_LEN_B32; i++) {
++            dstList[i * 2] = static_cast<uint64_t>(xLocalTrans[i * rowNum].GetPhyAddr());
++            dstList[i * 2 + 1] = static_cast<uint64_t>(xLocalTrans[i * rowNum + transPoseAlign].GetPhyAddr());
++        }
++        if (transDataParams.repeatTimes == 1) {
++            transDataParams.srcRepStride = 0;
++            transDataParams.dstRepStride = 0;
++        }
++        TransDataTo5HD<U>(dstList, srcList, transDataParams);
++    } else {
++        /* repeatTimes不会为1 */
++        transDataParams.repeatTimes = colNum / transPoseAlign;
++        transDataParams.dstRepStride = rowNum;
++        transDataParams.srcRepStride = 1;
++        /* repeat在列方向, 一次处理16*8个b32或者16*16个B16, 行方向一次处理16行 */
++        for (int32_t rowLoopIdx = 0; rowLoopIdx < rowNum / TRANS_ADDR_LEN; rowLoopIdx++) {
++            for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++                srcList[i] =
++                    static_cast<uint64_t>(xLocal[rowLoopIdx * TRANS_ADDR_LEN * colNum + i * colNum].GetPhyAddr());
++            }
++            for (int32_t i = 0; i < TRANS_LEN_B32; i++) {
++                dstList[i * 2] =
++                    static_cast<uint64_t>(xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum].GetPhyAddr());
++                dstList[i * 2 + 1] = static_cast<uint64_t>(
++                    xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum + transPoseAlign].GetPhyAddr());
++            }
++            TransDataTo5HD<U>(dstList, srcList, transDataParams);
++        }
++    }
++}
++
++template <typename T, typename ID_T>
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::TransInput(
++    uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen)
+@@ -162,2 +331 @@
+-        PoolUtils::DataMove::TransposeB32<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign,
+-                                             ubBlockSize_);
++        TransposeB32<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign);
+@@ -165,2 +333 @@
+-        PoolUtils::DataMove::TransposeB16<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign,
+-                                             ubBlockSize_);
++        TransposeB16(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign);
+@@ -173 +340 @@
+-__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>::CalKernelSize(int64_t kernelIdx, int32_t kernelNum,
++__aicore__ inline void AdaptiveAvgPool3dParaPool<T, ID_T>:: CalKernelSize(int64_t kernelIdx, int32_t kernelNum,
+@@ -191,3 +358,3 @@
+-        Reg::RegTensor<int32_t> startDstReg;
+-        Reg::RegTensor<int32_t> kSizeDstReg;
+-        Reg::MaskReg calMask;
++        MicroAPI::RegTensor<int32_t> startDstReg;
++        MicroAPI::RegTensor<int32_t> kSizeDstReg;
++        MicroAPI::MaskReg calMask;
+@@ -196,2 +363,2 @@
+-        Reg::Duplicate(dupReg, static_cast<ID_T>(dimOut));
+-        Reg::Duplicate(gblStIdxReg, globalStartIdx);
++        MicroAPI::Duplicate(dupReg, static_cast<ID_T>(dimOut));
++        MicroAPI::Duplicate(gblStIdxReg, globalStartIdx);
+@@ -200 +367 @@
+-                calMask = Reg::UpdateMask<ID_T, Reg::RegTraitNumTwo>(dataLen);
++                calMask = MicroAPI::UpdateMask<ID_T, MicroAPI::RegTraitNumTwo>(dataLen);
+@@ -202 +369 @@
+-                calMask = Reg::UpdateMask<ID_T>(dataLen);
++                calMask = MicroAPI::UpdateMask<ID_T>(dataLen);
+@@ -205,10 +372,10 @@
+-            Reg::Arange(startIdxReg, startIdx);
+-            Reg::Adds(endIdxReg, startIdxReg, static_cast<ID_T>(1), calMask);
+-            Reg::Muls(startIdxReg, startIdxReg, static_cast<ID_T>(dimIn), calMask);
+-            Reg::Muls(endIdxReg, endIdxReg, static_cast<ID_T>(dimIn), calMask);
+-            Reg::Adds(endIdxReg, endIdxReg, static_cast<ID_T>(dimOut - 1), calMask);
+-
+-            Reg::Div(startIdxReg, startIdxReg, dupReg, calMask);
+-            Reg::Div(endIdxReg, endIdxReg, dupReg, calMask);
+-            Reg::Sub(kerSizeReg, endIdxReg, startIdxReg, calMask);
+-            Reg::Sub(startIdxReg, startIdxReg, gblStIdxReg, calMask);
++            MicroAPI::Arange(startIdxReg, startIdx);
++            MicroAPI::Adds(endIdxReg, startIdxReg, static_cast<ID_T>(1), calMask);
++            MicroAPI::Muls(startIdxReg, startIdxReg, static_cast<ID_T>(dimIn), calMask);
++            MicroAPI::Muls(endIdxReg, endIdxReg, static_cast<ID_T>(dimIn), calMask);
++            MicroAPI::Adds(endIdxReg, endIdxReg, static_cast<ID_T>(dimOut - 1), calMask);
++
++            MicroAPI::Div(startIdxReg, startIdxReg, dupReg, calMask);
++            MicroAPI::Div(endIdxReg, endIdxReg, dupReg, calMask);
++            MicroAPI::Sub(kerSizeReg, endIdxReg, startIdxReg, calMask);
++            MicroAPI::Sub(startIdxReg, startIdxReg, gblStIdxReg, calMask);
+@@ -217,4 +384,4 @@
+-                startDstReg = (AscendC::Reg::RegTensor<int32_t>&)startIdxReg.reg[0];
+-                kSizeDstReg = (AscendC::Reg::RegTensor<int32_t>&)kerSizeReg.reg[0];
+-                Reg::StoreAlign(startIdxAddr + i * vfLen, startDstReg, calMask);
+-                Reg::StoreAlign(kernelSizeAddr + i * vfLen, kSizeDstReg, calMask);
++                startDstReg = (AscendC::MicroAPI::RegTensor<int32_t>&)startIdxReg.reg[0];
++                kSizeDstReg = (AscendC::MicroAPI::RegTensor<int32_t>&)kerSizeReg.reg[0];
++                MicroAPI::DataCopy(startIdxAddr + i * vfLen, startDstReg, calMask);
++                MicroAPI::DataCopy(kernelSizeAddr + i * vfLen, kSizeDstReg, calMask);
+@@ -222,2 +389,2 @@
+-                Reg::StoreAlign(startIdxAddr + i * vfLen, startIdxReg, calMask);
+-                Reg::StoreAlign(kernelSizeAddr + i * vfLen, kerSizeReg, calMask);
++                MicroAPI::DataCopy(startIdxAddr + i * vfLen, startIdxReg, calMask);
++                MicroAPI::DataCopy(kernelSizeAddr + i * vfLen, kerSizeReg, calMask);
+@@ -243,4 +410,4 @@
+-        Reg::RegTensor<float> inputReg;
+-        Reg::RegTensor<float> sumReg;
+-
+-        Reg::MaskReg calMask = Reg::CreateMask<int32_t>();
++        MicroAPI::RegTensor<float> inputReg;
++        MicroAPI::RegTensor<float> sumReg;
++
++        MicroAPI::MaskReg calMask = MicroAPI::CreateMask<int32_t>();
+@@ -256,3 +423,3 @@
+-                Reg::Add(sumReg, inputReg, sumReg, calMask);
+-            }
+-            Reg::StoreAlign(dstOfset, sumReg, calMask);
++                MicroAPI::Add(sumReg, inputReg, sumReg, calMask);
++            }
++            MicroAPI::DataCopy(dstOfset, sumReg, calMask);
+@@ -264 +431 @@
+-                    Reg::Add(sumReg, inputReg, sumReg, calMask);
++                    MicroAPI::Add(sumReg, inputReg, sumReg, calMask);
+@@ -266 +433 @@
+-                Reg::StoreAlign(dstOfset + vfLenFp32, sumReg, calMask);
++                MicroAPI::DataCopy(dstOfset + vfLenFp32, sumReg, calMask);
+@@ -371,5 +538,5 @@
+-        Reg::RegTensor<float> sumReg;
+-        Reg::RegTensor<float> avgReg;
+-        Reg::RegTensor<float> cntReg;
+-        Reg::RegTensor<int32_t> cntRegInt;
+-        Reg::MaskReg calMask = Reg::CreateMask<int32_t>();
++        MicroAPI::RegTensor<float> sumReg;
++        MicroAPI::RegTensor<float> avgReg;
++        MicroAPI::RegTensor<float> cntReg;
++        MicroAPI::RegTensor<int32_t> cntRegInt;
++        MicroAPI::MaskReg calMask = MicroAPI::CreateMask<int32_t>();
+@@ -387,5 +554,5 @@
+-                    Reg::Duplicate(cntRegInt, kerSize);
+-                    Reg::Cast<float, int32_t, castTraitI32Fp32>(cntReg, cntRegInt, calMask);
+-                    Reg::LoadAlign(sumReg, srcOfset);
+-                    Reg::Div(avgReg, sumReg, cntReg, calMask);
+-                    Reg::StoreAlign(srcOfset, avgReg, calMask);
++                    MicroAPI::Duplicate(cntRegInt, kerSize);
++                    MicroAPI::Cast<float, int32_t, castTraitI32Fp32>(cntReg, cntRegInt, calMask);
++                    MicroAPI::DataCopy(sumReg, srcOfset);
++                    MicroAPI::Div(avgReg, sumReg, cntReg, calMask);
++                    MicroAPI::DataCopy(srcOfset, avgReg, calMask);
+@@ -394,3 +561,3 @@
+-                        Reg::LoadAlign(sumReg, srcOfset);
+-                        Reg::Div(avgReg, sumReg, cntReg, calMask);
+-                        Reg::StoreAlign(srcOfset, avgReg, calMask);
++                        MicroAPI::DataCopy(sumReg, srcOfset);
++                        MicroAPI::Div(avgReg, sumReg, cntReg, calMask);
++                        MicroAPI::DataCopy(srcOfset, avgReg, calMask);
+@@ -416 +583 @@
+-    PoolUtils::DataMove::TransposeB32<float>(avgOutLocal, dTransLocal, rowNumAlign, vlNum_, ubBlockSize_);
++    TransposeB32<float>(avgOutLocal, dTransLocal, rowNumAlign, vlNum_);
+@@ -472,4 +639,2 @@
+-    PoolUtils::Compute::CalInputBlockPara(startBlockIdx_, blockPara_, tilingData_, inDHW_, inHW_);
+-    PoolUtils::DataMove::CopyInput<T>(inputQue, xGm, blockPara_.ncNum, blockPara_.diDataLen, blockPara_.hiDataLen,
+-                                      blockPara_.wiDataLen, blockPara_.xOffset, ubAlignNum_, tilingData_.wIn, inHW_,
+-                                      inDHW_);
++    CalInputBlockPara(startBlockIdx_, blockPara_);CopyInput( blockPara_.ncNum, blockPara_.diDataLen, blockPara_.hiDataLen,
++                                      blockPara_.wiDataLen, blockPara_.xOffset);
+@@ -497,4 +662,2 @@
+-        PoolUtils::Compute::CalInputBlockPara(curIdx + 1, blockPara_, tilingData_, inDHW_, inHW_);
+-        PoolUtils::DataMove::CopyInput<T>(inputQue, xGm, blockPara_.ncNum, blockPara_.diDataLen, blockPara_.hiDataLen,
+-                                          blockPara_.wiDataLen, blockPara_.xOffset, ubAlignNum_, tilingData_.wIn, inHW_,
+-                                          inDHW_);
++        CalInputBlockPara(curIdx + 1, blockPara_);CopyInput( blockPara_.ncNum, blockPara_.diDataLen, blockPara_.hiDataLen,
++                                          blockPara_.wiDataLen, blockPara_.xOffset);
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_big_kernel.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_big_kernel.h
+@@ -24,2 +24,2 @@
+-__aicore__ inline void StoreOneValue(const __local_mem__ void* dstAddr, Reg::RegTensor<U>& srcReg,
+-                                     Reg::MaskReg& maskReg, uint32_t offset)
++__aicore__ inline void StoreOneValue(const __local_mem__ void* dstAddr, MicroAPI::RegTensor<U>& srcReg,
++                                     MicroAPI::MaskReg& maskReg, uint32_t offset)
+@@ -29 +29 @@
+-        Reg::DataCopy<half, Reg::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, srcReg, maskReg);
++        MicroAPI::DataCopy<half, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, srcReg, maskReg);
+@@ -31,3 +31,3 @@
+-        Reg::RegTensor<bfloat16_t> regBf16;
+-        Reg::Cast<bfloat16_t, float, CASTB4TOB2>(regBf16, srcReg, maskReg);
+-        Reg::DataCopy<bfloat16_t, Reg::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, regBf16, maskReg);
++        MicroAPI::RegTensor<bfloat16_t> regBf16;
++        MicroAPI::Cast<bfloat16_t, float, CASTB4TOB2>(regBf16, srcReg, maskReg);
++        MicroAPI::DataCopy<bfloat16_t, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B16>(addr, regBf16, maskReg);
+@@ -35,5 +35,5 @@
+-        Reg::DataCopy<T, Reg::StoreDist::DIST_FIRST_ELEMENT_B32>(addr, (Reg::RegTensor<T>&)srcReg, maskReg);
+-    } else {
+-        Reg::UnalignRegForStore uReg;
+-        Reg::DataCopyUnAlign(addr, srcReg, uReg, 1);
+-        Reg::DataCopyUnAlignPost(addr, uReg, 0);
++        MicroAPI::DataCopy<T, MicroAPI::StoreDist::DIST_FIRST_ELEMENT_B32>(addr, (MicroAPI::RegTensor<T>&)srcReg, maskReg);
++    } else {
++        MicroAPI::UnalignReg uReg;
++        MicroAPI::DataCopyUnAlign(addr, srcReg, uReg, 1);
++        MicroAPI::DataCopyUnAlignPost(addr, uReg, 0);
+@@ -44 +44 @@
+-__aicore__ inline void LoadOneValue(const __local_mem__ void* srcAddr, Reg::RegTensor<U>& dstReg, Reg::MaskReg& preg,
++__aicore__ inline void LoadOneValue(const __local_mem__ void* srcAddr, MicroAPI::RegTensor<U>& dstReg, MicroAPI::MaskReg& preg,
+@@ -49,3 +49,3 @@
+-        Reg::RegTensor<bfloat16_t> regBf16;
+-        Reg::DataCopy<bfloat16_t, Reg::LoadDist::DIST_BRC_B16>(regBf16, addr);
+-        Reg::Cast<float, bfloat16_t, CASTB2TOB4>(dstReg, regBf16, preg);
++        MicroAPI::RegTensor<bfloat16_t> regBf16;
++        MicroAPI::DataCopy<bfloat16_t, MicroAPI::LoadDist::DIST_BRC_B16>(regBf16, addr);
++        MicroAPI::Cast<float, bfloat16_t, CASTB2TOB4>(dstReg, regBf16, preg);
+@@ -53 +53 @@
+-        Reg::DataCopy<half, Reg::LoadDist::DIST_BRC_B16>(dstReg, addr);
++        MicroAPI::DataCopy<half, MicroAPI::LoadDist::DIST_BRC_B16>(dstReg, addr);
+@@ -55,5 +55,5 @@
+-        Reg::DataCopy<T, Reg::LoadDist::DIST_BRC_B32>(dstReg, addr);
+-    } else {
+-        Reg::UnalignRegForLoad ureg;
+-        Reg::DataCopyUnAlignPre(ureg, addr);
+-        Reg::DataCopyUnAlign(dstReg, ureg, addr, 1);
++        MicroAPI::DataCopy<T, MicroAPI::LoadDist::DIST_BRC_B32>(dstReg, addr);
++    } else {
++        MicroAPI::UnalignReg ureg;
++        MicroAPI::DataCopyUnAlignPre(ureg, addr);
++        MicroAPI::DataCopyUnAlign(dstReg, ureg, addr, 1);
+@@ -64,2 +64,2 @@
+-__aicore__ inline void LoadXLocalToReg(const __local_mem__ void* srcAddr, Reg::RegTensor<U>& dstReg, Reg::MaskReg& preg,
+-                                       Reg::AddrReg& offset)
++__aicore__ inline void LoadXLocalToReg(const __local_mem__ void* srcAddr, MicroAPI::RegTensor<U>& dstReg, MicroAPI::MaskReg& preg,
++                                       MicroAPI::AddrReg& offset)
+@@ -68 +68 @@
+-        Reg::DataCopy(dstReg, (__local_mem__ half*)srcAddr, offset);
++        MicroAPI::DataCopy(dstReg, (__local_mem__ half*)srcAddr, offset);
+@@ -70,5 +70,5 @@
+-        Reg::RegTensor<bfloat16_t> regBf16;
+-        Reg::DataCopy<bfloat16_t, Reg::LoadDist::DIST_UNPACK_B16>(regBf16, (__local_mem__ bfloat16_t*)srcAddr, offset);
+-        Reg::Cast<float, bfloat16_t, CASTB2TOB4>(dstReg, regBf16, preg);
+-    } else {
+-        Reg::DataCopy(dstReg, (__local_mem__ float*)srcAddr, offset);
++        MicroAPI::RegTensor<bfloat16_t> regBf16;
++        MicroAPI::DataCopy<bfloat16_t, MicroAPI::LoadDist::DIST_UNPACK_B16>(regBf16, (__local_mem__ bfloat16_t*)srcAddr, offset);
++        MicroAPI::Cast<float, bfloat16_t, CASTB2TOB4>(dstReg, regBf16, preg);
++    } else {
++        MicroAPI::DataCopy(dstReg, (__local_mem__ float*)srcAddr, offset);
+@@ -81,3 +81,3 @@
+-    Reg::RegTensor<T> vReg;
+-    Reg::UnalignRegForStore uReg;
+-    Reg::Duplicate(vReg, padValue);
++    MicroAPI::RegTensor<T> vReg;
++    MicroAPI::UnalignReg uReg;
++    MicroAPI::Duplicate(vReg, padValue);
+@@ -85,3 +85,3 @@
+-    Reg::DataCopyUnAlign(addr, vReg, uReg, padNum);
+-    Reg::DataCopyUnAlignPost(addr, uReg, 0);
+-    Reg::LocalMemBar<Reg::MemType::VEC_STORE, Reg::MemType::VEC_LOAD>();
++    MicroAPI::DataCopyUnAlign(addr, vReg, uReg, padNum);
++    MicroAPI::DataCopyUnAlignPost(addr, uReg, 0);
++    MicroAPI::LocalMemBar<MicroAPI::MemType::VEC_STORE, MicroAPI::MemType::VEC_LOAD>();
+@@ -91,2 +91,2 @@
+-__aicore__ inline void CalcMaxAndIndex(Reg::RegTensor<U>& dstMax, Reg::RegTensor<UINDEX>& dstIndex,
+-                                       Reg::RegTensor<U>& srcMax, Reg::RegTensor<UINDEX>& srcIndex,
++__aicore__ inline void CalcMaxAndIndex(MicroAPI::RegTensor<U>& dstMax, MicroAPI::RegTensor<UINDEX>& dstIndex,
++                                       MicroAPI::RegTensor<U>& srcMax, MicroAPI::RegTensor<UINDEX>& srcIndex,
+@@ -96,6 +96,6 @@
+-    Reg::MaskReg maskAll = Reg::CreateMask<U, Reg::MaskPattern::ALL>();
+-    Reg::MaskReg maskRegNotNan;
+-    Reg::MaskReg maskRegNan;
+-    Reg::RegTensor<U> vRegMaxNotNan;
+-    Reg::RegTensor<U> vRegMaxNotNanAll;
+-    Reg::RegTensor<UINDEX> uIndexReg;
++    MicroAPI::MaskReg maskAll = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::ALL>();
++    MicroAPI::MaskReg maskRegNotNan;
++    MicroAPI::MaskReg maskRegNan;
++    MicroAPI::RegTensor<U> vRegMaxNotNan;
++    MicroAPI::RegTensor<U> vRegMaxNotNanAll;
++    MicroAPI::RegTensor<UINDEX> uIndexReg;
+@@ -103,4 +103,4 @@
+-    Reg::Duplicate(uIndexReg, idxDefaultValue);
+-    Reg::Compare<U, CMPMODE::NE>(maskRegNan, srcMax, srcMax, maskAll); // nan mask
+-    Reg::Select(uIndexReg, srcIndex, uIndexReg, maskRegNan);
+-    Reg::ReduceMax(uIndexReg, uIndexReg, maskAll);
++    MicroAPI::Duplicate(uIndexReg, idxDefaultValue);
++    MicroAPI::Compare<U, CMPMODE::NE>(maskRegNan, srcMax, srcMax, maskAll); // nan mask
++    MicroAPI::Select(uIndexReg, srcIndex, uIndexReg, maskRegNan);
++    MicroAPI::ReduceMax(uIndexReg, uIndexReg, maskAll);
+@@ -109,5 +109,5 @@
+-    Reg::Compare<U, CMPMODE::EQ>(maskRegNotNan, srcMax, srcMax, maskAll);
+-    Reg::ReduceMax(vRegMaxNotNan, srcMax, maskRegNotNan);
+-    Reg::Duplicate(vRegMaxNotNanAll, vRegMaxNotNan, maskAll);
+-    Reg::Compare<U, CMPMODE::EQ>(maskRegNotNan, srcMax, vRegMaxNotNanAll, maskAll);
+-    Reg::ReduceMin(dstIndex, srcIndex, maskRegNotNan);
++    MicroAPI::Compare<U, CMPMODE::EQ>(maskRegNotNan, srcMax, srcMax, maskAll);
++    MicroAPI::ReduceMax(vRegMaxNotNan, srcMax, maskRegNotNan);
++    MicroAPI::Duplicate(vRegMaxNotNanAll, vRegMaxNotNan, maskAll);
++    MicroAPI::Compare<U, CMPMODE::EQ>(maskRegNotNan, srcMax, vRegMaxNotNanAll, maskAll);
++    MicroAPI::ReduceMin(dstIndex, srcIndex, maskRegNotNan);
+@@ -116,3 +116,3 @@
+-    Reg::CompareScalar<UINDEX, CMPMODE::NE>(maskRegNan, uIndexReg, idxDefaultValue, maskAll);
+-    Reg::Select(dstIndex, uIndexReg, dstIndex, maskRegNan);
+-    Reg::ReduceMax(dstMax, srcMax, maskAll);
++    MicroAPI::CompareScalar<UINDEX, CMPMODE::NE>(maskRegNan, uIndexReg, idxDefaultValue, maskAll);
++    MicroAPI::Select(dstIndex, uIndexReg, dstIndex, maskRegNan);
++    MicroAPI::ReduceMax(dstMax, srcMax, maskAll);
+@@ -121,3 +121,3 @@
+-    Reg::CompareScalar<UINDEX, CMPMODE::EQ>(maskRegNotNan, dstIndex, idxDefaultValue, maskAll);
+-    Reg::Duplicate(uIndexReg, static_cast<UINDEX>(0));
+-    Reg::Select(dstIndex, uIndexReg, dstIndex, maskRegNotNan);
++    MicroAPI::CompareScalar<UINDEX, CMPMODE::EQ>(maskRegNotNan, dstIndex, idxDefaultValue, maskAll);
++    MicroAPI::Duplicate(uIndexReg, static_cast<UINDEX>(0));
++    MicroAPI::Select(dstIndex, uIndexReg, dstIndex, maskRegNotNan);
+@@ -127,9 +127,9 @@
+-__aicore__ inline void CalcDivAndMod(Reg::RegTensor<TINDEX>& totalReg, Reg::RegTensor<TINDEX>& divisorReg,
+-                                     Reg::RegTensor<TINDEX>& divReg, Reg::RegTensor<TINDEX>& modReg)
+-{
+-    Reg::MaskReg maskOne = Reg::CreateMask<TINDEX, Reg::MaskPattern::VL1>();
+-    Reg::RegTensor<TINDEX> tmpReg;
+-
+-    Reg::Div(divReg, totalReg, divisorReg, maskOne);
+-    Reg::Mul(tmpReg, divReg, divisorReg, maskOne);
+-    Reg::Sub(modReg, totalReg, tmpReg, maskOne);
++__aicore__ inline void CalcDivAndMod(MicroAPI::RegTensor<TINDEX>& totalReg, MicroAPI::RegTensor<TINDEX>& divisorReg,
++                                     MicroAPI::RegTensor<TINDEX>& divReg, MicroAPI::RegTensor<TINDEX>& modReg)
++{
++    MicroAPI::MaskReg maskOne = MicroAPI::CreateMask<TINDEX, MicroAPI::MaskPattern::VL1>();
++    MicroAPI::RegTensor<TINDEX> tmpReg;
++
++    MicroAPI::Div(divReg, totalReg, divisorReg, maskOne);
++    MicroAPI::Mul(tmpReg, divReg, divisorReg, maskOne);
++    MicroAPI::Sub(modReg, totalReg, tmpReg, maskOne);
+@@ -139 +139 @@
+-__aicore__ inline void CalcRealIndex(Reg::RegTensor<TINDEX>& resIndex, Reg::RegTensor<UINDEX>& index, TINDEX wInDim,
++__aicore__ inline void CalcRealIndex(MicroAPI::RegTensor<TINDEX>& resIndex, MicroAPI::RegTensor<UINDEX>& index, TINDEX wInDim,
+@@ -142,2 +142,2 @@
+-    Reg::MaskReg maskOne = Reg::CreateMask<UINDEX, Reg::MaskPattern::VL1>();
+-    Reg::RegTensor<int32_t> regTmp;
++    MicroAPI::MaskReg maskOne = MicroAPI::CreateMask<UINDEX, MicroAPI::MaskPattern::VL1>();
++    MicroAPI::RegTensor<int32_t> regTmp;
+@@ -147,3 +147,3 @@
+-        Reg::Cast<int32_t, int16_t, CASTB2TOB4>(regTmp, index, maskOne);
+-    } else {
+-        Reg::Move(regTmp, index, maskOne);
++        MicroAPI::Cast<int32_t, int16_t, CASTB2TOB4>(regTmp, index, maskOne);
++    } else {
++        MicroAPI::Move(regTmp, index, maskOne);
+@@ -154,3 +154,3 @@
+-        Reg::Cast<int64_t, int32_t, CASTB4TOB8>(resIndex, regTmp, maskOne);
+-    } else {
+-        Reg::Move(resIndex, regTmp, maskOne);
++        MicroAPI::Cast<int64_t, int32_t, CASTB4TOB8>(resIndex, regTmp, maskOne);
++    } else {
++        MicroAPI::Move(resIndex, regTmp, maskOne);
+@@ -160 +160 @@
+-        Reg::Adds(resIndex, resIndex, curOffset, maskOne);
++        MicroAPI::Adds(resIndex, resIndex, curOffset, maskOne);
+@@ -162,5 +162,5 @@
+-        Reg::RegTensor<TINDEX> regOffset;
+-        Reg::RegTensor<TINDEX> regCurkW;
+-        Reg::RegTensor<TINDEX> regHOffset;
+-        Reg::Duplicate(regOffset, curOffset, maskOne);
+-        Reg::Duplicate(regCurkW, curkW, maskOne);
++        MicroAPI::RegTensor<TINDEX> regOffset;
++        MicroAPI::RegTensor<TINDEX> regCurkW;
++        MicroAPI::RegTensor<TINDEX> regHOffset;
++        MicroAPI::Duplicate(regOffset, curOffset, maskOne);
++        MicroAPI::Duplicate(regCurkW, curkW, maskOne);
+@@ -168,12 +168,12 @@
+-        Reg::Muls(regHOffset, regHOffset, wInDim, maskOne);
+-        Reg::Add(resIndex, resIndex, regHOffset, maskOne);
+-        Reg::Add(resIndex, resIndex, regOffset, maskOne);
+-    } else {
+-        Reg::RegTensor<TINDEX> regOffset;
+-        Reg::RegTensor<TINDEX> regCurkW;
+-        Reg::RegTensor<TINDEX> regCurkHW;
+-        Reg::RegTensor<TINDEX> regDOffset;
+-        Reg::RegTensor<TINDEX> regHOffset;
+-        Reg::Duplicate(regOffset, curOffset, maskOne);
+-        Reg::Duplicate(regCurkHW, curkHW, maskOne);
+-        Reg::Duplicate(regCurkW, curkW, maskOne);
++        MicroAPI::Muls(regHOffset, regHOffset, wInDim, maskOne);
++        MicroAPI::Add(resIndex, resIndex, regHOffset, maskOne);
++        MicroAPI::Add(resIndex, resIndex, regOffset, maskOne);
++    } else {
++        MicroAPI::RegTensor<TINDEX> regOffset;
++        MicroAPI::RegTensor<TINDEX> regCurkW;
++        MicroAPI::RegTensor<TINDEX> regCurkHW;
++        MicroAPI::RegTensor<TINDEX> regDOffset;
++        MicroAPI::RegTensor<TINDEX> regHOffset;
++        MicroAPI::Duplicate(regOffset, curOffset, maskOne);
++        MicroAPI::Duplicate(regCurkHW, curkHW, maskOne);
++        MicroAPI::Duplicate(regCurkW, curkW, maskOne);
+@@ -182,5 +182,5 @@
+-        Reg::Muls(regDOffset, regDOffset, inHW, maskOne);
+-        Reg::Muls(regHOffset, regHOffset, wInDim, maskOne);
+-        Reg::Add(resIndex, resIndex, regDOffset, maskOne);
+-        Reg::Add(resIndex, resIndex, regHOffset, maskOne);
+-        Reg::Add(resIndex, resIndex, regOffset, maskOne);
++        MicroAPI::Muls(regDOffset, regDOffset, inHW, maskOne);
++        MicroAPI::Muls(regHOffset, regHOffset, wInDim, maskOne);
++        MicroAPI::Add(resIndex, resIndex, regDOffset, maskOne);
++        MicroAPI::Add(resIndex, resIndex, regHOffset, maskOne);
++        MicroAPI::Add(resIndex, resIndex, regOffset, maskOne);
+@@ -191 +191 @@
+-__aicore__ inline void UpdateMaxAndIndex(Reg::RegTensor<T2>& res, Reg::RegTensor<TINDEX>& realResIndex,
++__aicore__ inline void UpdateMaxAndIndex(MicroAPI::RegTensor<T2>& res, MicroAPI::RegTensor<TINDEX>& realResIndex,
+@@ -196,7 +196,7 @@
+-    Reg::MaskReg maskAll = Reg::CreateMask<T2, Reg::MaskPattern::ALL>();
+-    Reg::MaskReg notNanMaskReg;
+-    Reg::MaskReg nanMaskReg;
+-    Reg::MaskReg pregOne = Reg::CreateMask<T2, Reg::MaskPattern::VL1>();
+-    Reg::MaskReg maskOne = Reg::CreateMask<TINDEX, Reg::MaskPattern::VL1>();
+-    Reg::RegTensor<T2> lastRes;
+-    Reg::RegTensor<TINDEX> lastResIndex;
++    MicroAPI::MaskReg maskAll = MicroAPI::CreateMask<T2, MicroAPI::MaskPattern::ALL>();
++    MicroAPI::MaskReg notNanMaskReg;
++    MicroAPI::MaskReg nanMaskReg;
++    MicroAPI::MaskReg pregOne = MicroAPI::CreateMask<T2, MicroAPI::MaskPattern::VL1>();
++    MicroAPI::MaskReg maskOne = MicroAPI::CreateMask<TINDEX, MicroAPI::MaskPattern::VL1>();
++    MicroAPI::RegTensor<T2> lastRes;
++    MicroAPI::RegTensor<TINDEX> lastResIndex;
+@@ -209,4 +209,4 @@
+-    Reg::Compare<T2, CMPMODE::NE>(nanMaskReg, res, res, maskAll);
+-    Reg::Compare<T2, CMPMODE::GT>(notNanMaskReg, res, lastRes, maskAll);
+-    Reg::MaskXor(notNanMaskReg, notNanMaskReg, nanMaskReg, maskAll);
+-    Reg::Select(res, res, lastRes, notNanMaskReg);
++    MicroAPI::Compare<T2, CMPMODE::NE>(nanMaskReg, res, res, maskAll);
++    MicroAPI::Compare<T2, CMPMODE::GT>(notNanMaskReg, res, lastRes, maskAll);
++    MicroAPI::MaskXor(notNanMaskReg, notNanMaskReg, nanMaskReg, maskAll);
++    MicroAPI::Select(res, res, lastRes, notNanMaskReg);
+@@ -215,4 +215,4 @@
+-    Reg::CompareScalar<TINDEX, CMPMODE::EQ>(nanMaskReg, lastResIndex, isPadValue, maskAll);
+-    Reg::Select(lastResIndex, realResIndex, lastResIndex, nanMaskReg);
+-    Reg::Select(realResIndex, realResIndex, lastResIndex, notNanMaskReg);
+-    Reg::LocalMemBar<Reg::MemType::VEC_LOAD, Reg::MemType::VEC_STORE>();
++    MicroAPI::CompareScalar<TINDEX, CMPMODE::EQ>(nanMaskReg, lastResIndex, isPadValue, maskAll);
++    MicroAPI::Select(lastResIndex, realResIndex, lastResIndex, nanMaskReg);
++    MicroAPI::Select(realResIndex, realResIndex, lastResIndex, notNanMaskReg);
++    MicroAPI::LocalMemBar<MicroAPI::MemType::VEC_LOAD, MicroAPI::MemType::VEC_STORE>();
+@@ -246 +246 @@
+-    int64_t oriOverflowMode_ = 0; // 存储原始SPR配置
++     // 存储原始SPR配置
+@@ -271,2 +271,2 @@
+-        Reg::RegTensor<T> maxReg;
+-        Reg::Duplicate(maxReg, maxDefaultValue);
++        MicroAPI::RegTensor<T> maxReg;
++        MicroAPI::Duplicate(maxReg, maxDefaultValue);
+@@ -274,6 +274,6 @@
+-            Reg::MaskReg maxMask = Reg::UpdateMask<T>(maxOutCount);
+-            Reg::AddrReg offsetReg = Reg::CreateAddrReg<T>(i, maxVfCount);
+-            Reg::DataCopy(maxOutAddr, maxReg, offsetReg, maxMask);
+-        }
+-        Reg::RegTensor<TINDEX> idxReg;
+-        Reg::Duplicate(idxReg, idxDefaultValue);
++            MicroAPI::MaskReg maxMask = MicroAPI::UpdateMask<T>(maxOutCount);
++            MicroAPI::AddrReg offsetReg = MicroAPI::CreateAddrReg<T>(i, maxVfCount);
++            MicroAPI::DataCopy(maxOutAddr, maxReg, offsetReg, maxMask);
++        }
++        MicroAPI::RegTensor<TINDEX> idxReg;
++        MicroAPI::Duplicate(idxReg, idxDefaultValue);
+@@ -281,3 +281,3 @@
+-            Reg::MaskReg idxMask = Reg::UpdateMask<TINDEX>(idxOutCount);
+-            Reg::AddrReg offsetReg = Reg::CreateAddrReg<TINDEX>(i, idxVfCount);
+-            Reg::DataCopy(idxOutAddr, idxReg, offsetReg, idxMask);
++            MicroAPI::MaskReg idxMask = MicroAPI::UpdateMask<TINDEX>(idxOutCount);
++            MicroAPI::AddrReg offsetReg = MicroAPI::CreateAddrReg<TINDEX>(i, idxVfCount);
++            MicroAPI::DataCopy(idxOutAddr, idxReg, offsetReg, idxMask);
+@@ -330,14 +330,14 @@
+-        Reg::RegTensor<U> vd0;
+-        Reg::RegTensor<U> res;
+-        Reg::RegTensor<UINDEX> resIndex;
+-        Reg::RegTensor<UINDEX> dstIndex;
+-        Reg::RegTensor<TINDEX> realResIndex;
+-        Reg::MaskReg cmpMaskNanReg;
+-        Reg::MaskReg cmpMaskReg;
+-        Reg::MaskReg maskRegAll = Reg::CreateMask<U, Reg::MaskPattern::ALL>();
+-        Reg::MaskReg maskRegMax = Reg::CreateMask<U, Reg::MaskPattern::VL1>();
+-        Reg::MaskReg maskRegIdx = Reg::CreateMask<UINDEX, Reg::MaskPattern::VL1>();
+-
+-        Reg::Duplicate(resIndex, idxDefaultValue);
+-        Reg::Duplicate(res, uMinValue);
+-        Reg::Arange(dstIndex, 0);
++        MicroAPI::RegTensor<U> vd0;
++        MicroAPI::RegTensor<U> res;
++        MicroAPI::RegTensor<UINDEX> resIndex;
++        MicroAPI::RegTensor<UINDEX> dstIndex;
++        MicroAPI::RegTensor<TINDEX> realResIndex;
++        MicroAPI::MaskReg cmpMaskNanReg;
++        MicroAPI::MaskReg cmpMaskReg;
++        MicroAPI::MaskReg maskRegAll = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::ALL>();
++        MicroAPI::MaskReg maskRegMax = MicroAPI::CreateMask<U, MicroAPI::MaskPattern::VL1>();
++        MicroAPI::MaskReg maskRegIdx = MicroAPI::CreateMask<UINDEX, MicroAPI::MaskPattern::VL1>();
++
++        MicroAPI::Duplicate(resIndex, idxDefaultValue);
++        MicroAPI::Duplicate(res, uMinValue);
++        MicroAPI::Arange(dstIndex, 0);
+@@ -346,2 +346,2 @@
+-            Reg::MaskReg p0 = Reg::UpdateMask<U>(totalNum);
+-            Reg::AddrReg offset = Reg::CreateAddrReg<T>(i, repeatCount);
++            MicroAPI::MaskReg p0 = MicroAPI::UpdateMask<U>(totalNum);
++            MicroAPI::AddrReg offset = MicroAPI::CreateAddrReg<T>(i, repeatCount);
+@@ -349,6 +349,6 @@
+-            Reg::Compare<U, CMPMODE::NE>(cmpMaskNanReg, vd0, vd0, maskRegAll);
+-            Reg::Compare<U, CMPMODE::GT>(cmpMaskReg, vd0, res, maskRegAll);
+-            Reg::MaskXor(cmpMaskReg, cmpMaskReg, cmpMaskNanReg, maskRegAll);
+-            Reg::Select(res, vd0, res, cmpMaskReg);
+-            Reg::Select(resIndex, dstIndex, resIndex, cmpMaskReg);
+-            Reg::Adds(dstIndex, dstIndex, repeatCount, maskRegAll);
++            MicroAPI::Compare<U, CMPMODE::NE>(cmpMaskNanReg, vd0, vd0, maskRegAll);
++            MicroAPI::Compare<U, CMPMODE::GT>(cmpMaskReg, vd0, res, maskRegAll);
++            MicroAPI::MaskXor(cmpMaskReg, cmpMaskReg, cmpMaskNanReg, maskRegAll);
++            MicroAPI::Select(res, vd0, res, cmpMaskReg);
++            MicroAPI::Select(resIndex, dstIndex, resIndex, cmpMaskReg);
++            MicroAPI::Adds(dstIndex, dstIndex, repeatCount, maskRegAll);
+@@ -488 +488 @@
+-        oriOverflowMode_ = GetCtrlSpr<HALF_OVERFLOW_MODE_CTRL, HALF_OVERFLOW_MODE_CTRL>();
++
+@@ -514 +514 @@
+-            PoolUtils::DataMove::CopyOut<T>(this->outputUB_, this->yGm_, curLocalIdx, outputOffset);
++            AdaptivePool3dBigKernel<T>::CopyOut( curLocalIdx, outputOffset);
+@@ -522 +522 @@
+-        PoolUtils::DataMove::CopyOut<T>(this->outputUB_, this->yGm_, curLocalIdx, outputOffset);
++        AdaptivePool3dBigKernel<T>::CopyOut( curLocalIdx, outputOffset);
+@@ -524,3 +523,0 @@
+-    }
+-    if constexpr (IsSameType<T, half>::value) {
+-        SetCtrlSpr<HALF_OVERFLOW_MODE_CTRL, HALF_OVERFLOW_MODE_CTRL>(oriOverflowMode_);
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_parall_pool.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_parall_pool.h
+@@ -24,3 +24 @@
+-#include "pool_utils/arch35/compute/adaptive_pool3d_parall_pool_compute.h"
+-#include "pool_utils/arch35/data_move/adaptive_pool3d_parall_pool_data_move.h"
+-#include "pool_utils/arch35/data_move/adaptive_pool_transpose_data_move.h"
++
+@@ -61,0 +60,8 @@
++    __aicore__ inline void  CalInputBlockPara(int64_t curBlockIdx, BlockSplitParam& blockPara);
++    __aicore__ inline void CopyInput(
++        uint32_t ncNum, uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen, int64_t xOffset);
++    __aicore__ inline void TransposeB16(
++        LocalTensor<T> xLocalTrans, LocalTensor<T> xLocal, uint32_t rowNum, uint32_t colNum);
++    template <typename I>
++    __aicore__ inline void TransposeB32(
++        LocalTensor<I> xLocalTrans, LocalTensor<I> xLocal, uint32_t rowNum, uint32_t colNum);
+@@ -138,2 +144,166 @@
+-__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::TransInput(uint32_t ncNum, uint32_t diDataLen,
+-                                                                   uint32_t hiDataLen, uint32_t wiDataLen)
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::CalInputBlockPara(
++    int64_t curBlockIdx, BlockSplitParam& blockPara)
++{
++    int64_t dhwOuter = tilingData_.doOuter * tilingData_.hoOuter * tilingData_.woOuter;
++    int64_t hwOuter = tilingData_.hoOuter * tilingData_.woOuter;
++
++    blockPara.ncIdx = curBlockIdx / dhwOuter;
++    blockPara. ncNum= (blockPara.ncIdx == (tilingData_.ncOuter - 1)) ? tilingData_.ncTail : tilingData_.ncFactor;
++    /* ncdhw */
++    int64_t blockIdxOnNc = curBlockIdx % dhwOuter;
++    blockPara.doIdx = blockIdxOnNc / hwOuter;
++    blockPara.doNum = (blockPara.doIdx == (tilingData_.doOuter - 1)) ? tilingData_.doTail : tilingData_.doFactor;
++
++    int64_t blockIdxOnD = blockIdxOnNc % hwOuter;
++    blockPara.hoIdx = blockIdxOnD / tilingData_.woOuter;
++    blockPara.hoNum = (blockPara.hoIdx == (tilingData_.hoOuter - 1)) ? tilingData_.hoTail : tilingData_.hoFactor;
++
++    int64_t blockIdxOnDH = blockIdxOnD % tilingData_.woOuter;
++    blockPara.woIdx = blockIdxOnDH % tilingData_.woOuter;
++    blockPara.woNum = (blockPara.woIdx == (tilingData_.woOuter - 1)) ? tilingData_.woTail : tilingData_.woFactor;
++
++    blockPara.kerDStartIdx = ((blockPara.doIdx * tilingData_.doFactor) * tilingData_.dIn) / tilingData_.dOut;
++    blockPara.kerHStartIdx = ((blockPara.hoIdx * tilingData_.hoFactor) * tilingData_.hIn) / tilingData_.hOut;
++    blockPara.kerWStartIdx = ((blockPara.woIdx * tilingData_.woFactor) * tilingData_.wIn) / tilingData_.wOut;
++    int32_t kerDEndIdx =
++        Ceil((blockPara.doIdx * tilingData_.doFactor + blockPara.doNum) * tilingData_.dIn, tilingData_.dOut);
++    int32_t kerHEndIdx =
++        Ceil((blockPara.hoIdx * tilingData_.hoFactor + blockPara.hoNum) * tilingData_.hIn, tilingData_.hOut);
++    int32_t kerWEndIdx =
++        Ceil((blockPara.woIdx * tilingData_.woFactor + blockPara.woNum) * tilingData_.wIn, tilingData_.wOut);
++
++    blockPara. diDataLen= kerDEndIdx - blockPara.kerDStartIdx;
++    blockPara. hiDataLen= kerHEndIdx - blockPara.kerHStartIdx;
++    blockPara. wiDataLen= kerWEndIdx - blockPara.kerWStartIdx;
++    blockPara.xOffset = blockPara.ncIdx * tilingData_.ncFactor * inDHW_ + blockPara.kerDStartIdx * inHW_ +
++                        blockPara.kerHStartIdx * tilingData_.wIn + blockPara.kerWStartIdx;
++}
++
++template <typename T, typename U>
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::CopyInput(
++    uint32_t ncNum, uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen, int64_t xOffset)
++{
++    LocalTensor<T> xLocal = inputQue.AllocTensor<T>();
++
++    uint32_t wiDataAlign = ops::CeilAlign(wiDataLen, ubAlignNum_);
++    DataCopyExtParams paramsIn = {
++        static_cast<
++    uint16_t >(hiDataLen), static_cast<uint32_t>(wiDataLen * sizeof(T)),
++        static_cast<uint32_t>((tilingData_.wIn - wiDataLen) * sizeof(T)), static_cast<uint32_t>( 0),
++        static_cast<uint32_t>(0)};
++    DataCopyPadExtParams<T> padParams = {false, 0, 0, 0};
++
++    LoopModeParams loopModeParams;
++    loopModeParams.loop1Size = diDataLen;
++    loopModeParams.loop2Size = ncNum;
++    loopModeParams.loop1SrcStride = inHW_ * sizeof(T);
++    loopModeParams.loop2SrcStride = inDHW_ * sizeof(T);
++    loopModeParams.loop1DstStride = hiDataLen * wiDataAlign * sizeof(T);
++    loopModeParams.loop2DstStride = diDataLen * hiDataLen * wiDataAlign * sizeof(T);
++
++    SetLoopModePara(loopModeParams, DataCopyMVType::OUT_TO_UB);
++    DataCopyPad(xLocal, xGm[xOffset], paramsIn, padParams);
++    ResetLoopModePara(DataCopyMVType::OUT_TO_UB);
++    inputQue.EnQue(xLocal);
++}
++
++template <typename T, typename U>
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>:: TransposeB16(
++    LocalTensor<T> xLocalTrans, LocalTensor<T> xLocal, uint32_t rowNum, uint32_t colNum)
++{
++    uint64_t dstList[TRANS_ADDR_LEN];
++    uint64_t srcList[TRANS_ADDR_LEN];
++
++    TransDataTo5HDParams transDataParams;
++    transDataParams.dstHighHalf = false;
++    transDataParams.srcHighHalf = false;
++
++    uint64_t transPoseAlign = ubAlignNum_;
++    if (colNum == transPoseAlign) {
++        /* repeat在行方向，一次处理16*8个b32或者16*16个B16 */
++        transDataParams.repeatTimes = rowNum / TRANS_ADDR_LEN;
++        /* dstSride16*sizeof(T), srcSride16dataBlock */
++        transDataParams.dstRepStride = TRANS_ADDR_LEN * sizeof(T) / ubBlockSize_;
++        transDataParams.srcRepStride = TRANS_ADDR_LEN;
++        for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++            srcList[i] = static_cast<uint64_t>(xLocal[i * transPoseAlign].GetPhyAddr());
++            dstList[i] = static_cast<uint64_t>(xLocalTrans[i * rowNum].GetPhyAddr());
++        }
++        if (transDataParams.repeatTimes == 1) {
++            transDataParams.srcRepStride = 0;
++            transDataParams.dstRepStride = 0;
++        }
++        TransDataTo5HD<T>(dstList, srcList, transDataParams);
++    } else {
++        /* repeatTimes不会为1 */
++        transDataParams.repeatTimes = colNum / transPoseAlign;
++        transDataParams.dstRepStride = rowNum;
++        transDataParams.srcRepStride = 1;
++        /* repeat在列方向,一次处理16*8个b32或者16*16个B16， 行方向一次处理16行 */
++        for (int32_t rowLoopIdx = 0; rowLoopIdx < rowNum / TRANS_ADDR_LEN; rowLoopIdx++) {
++            for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++                srcList[i] =
++                    static_cast<uint64_t>(xLocal[rowLoopIdx * TRANS_ADDR_LEN * colNum + i * colNum].GetPhyAddr());
++                dstList[i] = static_cast<uint64_t>(xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum].GetPhyAddr());
++            }
++            TransDataTo5HD<T>(dstList, srcList, transDataParams);
++        }
++    }
++}
++
++template <typename T, typename U>
++template <typename I>
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::TransposeB32(
++    LocalTensor<I> xLocalTrans, LocalTensor<I> xLocal, uint32_t rowNum, uint32_t colNum)
++{
++    uint64_t dstList[TRANS_ADDR_LEN];
++    uint64_t srcList[TRANS_ADDR_LEN];
++
++    TransDataTo5HDParams transDataParams;
++    transDataParams.dstHighHalf = false;
++    transDataParams.srcHighHalf = false;
++    uint64_t transPoseAlign = ubBlockSize_ / sizeof(I);
++    if (colNum == transPoseAlign) {
++        /* repeat在行方向，一次处理16*8个b32或者16*16个B16 */
++        transDataParams.repeatTimes = rowNum / TRANS_ADDR_LEN;
++        /* dstSride大小为16*sizeof(T), srcSride大小为16个dataBlock */
++        transDataParams.dstRepStride = TRANS_ADDR_LEN * sizeof(int32_t) / ubBlockSize_;
++        transDataParams.srcRepStride = TRANS_ADDR_LEN;
++
++        for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++            srcList[i] = static_cast<uint64_t>(xLocal[i * transPoseAlign].GetPhyAddr());
++        }
++        for (int32_t i = 0; i < TRANS_LEN_B32; i++) {
++            dstList[i * 2] = static_cast<uint64_t>(xLocalTrans[i * rowNum].GetPhyAddr());
++            dstList[i * 2 + 1] = static_cast<uint64_t>(xLocalTrans[i * rowNum + transPoseAlign].GetPhyAddr());
++        }
++        if (transDataParams.repeatTimes == 1) {
++            transDataParams.srcRepStride = 0;
++            transDataParams.dstRepStride = 0;
++        }
++        TransDataTo5HD<I>(dstList, srcList, transDataParams);
++    } else {
++        /* repeatTimes不会为1 */
++        transDataParams.repeatTimes = colNum / transPoseAlign;
++        transDataParams.dstRepStride = rowNum;
++        transDataParams.srcRepStride = 1;
++        /* repeat在列方向, 一次处理16*8个b32或者16*16个B16, 行方向一次处理16行 */
++        for (int32_t rowLoopIdx = 0; rowLoopIdx < rowNum / TRANS_ADDR_LEN; rowLoopIdx++) {
++            for (int32_t i = 0; i < TRANS_ADDR_LEN; i++) {
++                srcList[i] =
++                    static_cast<uint64_t>(xLocal[rowLoopIdx * TRANS_ADDR_LEN * colNum + i * colNum].GetPhyAddr());
++            }
++            for (int32_t i = 0; i < TRANS_LEN_B32; i++) {
++                dstList[i * 2] =
++                    static_cast<uint64_t>(xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum].GetPhyAddr());
++                dstList[i * 2 + 1] = static_cast<uint64_t>(
++                    xLocalTrans[rowLoopIdx * TRANS_ADDR_LEN + i * rowNum + transPoseAlign].GetPhyAddr());
++            }
++            TransDataTo5HD<I>(dstList, srcList, transDataParams);
++        }
++    }
++}
++
++template <typename T, typename U>
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::TransInput(
++    uint32_t ncNum, uint32_t diDataLen, uint32_t hiDataLen, uint32_t wiDataLen)
+@@ -145,2 +315 @@
+-        PoolUtils::DataMove::TransposeB32<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign,
+-                                             ubBlockSize_);
++        TransposeB32<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign);
+@@ -148,2 +317 @@
+-        PoolUtils::DataMove::TransposeB16<T>(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign,
+-                                             ubBlockSize_);
++        TransposeB16(xLocalTransVL, xLocal, vlNum_, diDataLen * hiDataLen * wiDataAlign);
+@@ -171,11 +339,11 @@
+-        Reg::RegTensor<T> inputReg;
+-        Reg::RegTensor<T> maxReg;
+-        Reg::RegTensor<int32_t> inputIndexReg;
+-        Reg::RegTensor<int32_t> maxIndexReg;
+-        Reg::RegTensor<int32_t> maxIndexReg1;
+-
+-        Reg::MaskReg fullMask = Reg::CreateMask<T>();
+-        Reg::MaskReg indexMask = Reg::CreateMask<T>();
+-        Reg::MaskReg cmpMask = Reg::CreateMask<T>();
+-        Reg::MaskReg cmpMaskNan = Reg::CreateMask<T>();
+-        Reg::MaskReg cmpIndexMask = Reg::CreateMask<int32_t>();
++        MicroAPI::RegTensor<T> inputReg;
++        MicroAPI::RegTensor<T> maxReg;
++        MicroAPI::RegTensor<int32_t> inputIndexReg;
++        MicroAPI::RegTensor<int32_t> maxIndexReg;
++        MicroAPI::RegTensor<int32_t> maxIndexReg1;
++
++        MicroAPI::MaskReg fullMask = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg indexMask = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg cmpMask = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg cmpMaskNan = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg cmpIndexMask = MicroAPI::CreateMask<int32_t>();
+@@ -191,2 +359,2 @@
+-            Reg::DataCopy(maxReg, srcOfset);
+-            Reg::DataCopy(maxIndexReg, srcIdxOfset);
++            MicroAPI::DataCopy(maxReg, srcOfset);
++            MicroAPI::DataCopy(maxIndexReg, srcIdxOfset);
+@@ -194 +362 @@
+-                Reg::DataCopy(maxIndexReg1, srcIdxOfset + vfLenInt);
++                MicroAPI::DataCopy(maxIndexReg1, srcIdxOfset + vfLenInt);
+@@ -197,7 +365,7 @@
+-                Reg::DataCopy(inputReg, srcOfset + k * vfLen);
+-                Reg::Compare<T, CMPMODE::GT>(cmpMask, inputReg, maxReg, fullMask);
+-                Reg::Compare<T, CMPMODE::NE>(cmpMaskNan, inputReg, inputReg, fullMask);
+-                Reg::Or(cmpMask, cmpMask, cmpMaskNan, fullMask);
+-                AscendC::Reg::Select(maxReg, inputReg, maxReg, cmpMask);
+-
+-                Reg::DataCopy(inputIndexReg, srcIdxOfset + k * vfLen);
++                MicroAPI::DataCopy(inputReg, srcOfset + k * vfLen);
++                MicroAPI::Compare<T, CMPMODE::GT>(cmpMask, inputReg, maxReg, fullMask);
++                MicroAPI::Compare<T, CMPMODE::NE>(cmpMaskNan, inputReg, inputReg, fullMask);
++                MicroAPI::Or(cmpMask, cmpMask, cmpMaskNan, fullMask);
++                AscendC::MicroAPI::Select(maxReg, inputReg, maxReg, cmpMask);
++
++                MicroAPI::DataCopy(inputIndexReg, srcIdxOfset + k * vfLen);
+@@ -205 +373 @@
+-                    AscendC::Reg::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpMask);
++                    AscendC::MicroAPI::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpMask);
+@@ -207,6 +375,6 @@
+-                    AscendC::Reg::UnPack<AscendC::Reg::HighLowPart::LOWEST>(cmpIndexMask, cmpMask);
+-                    AscendC::Reg::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpIndexMask);
+-
+-                    Reg::DataCopy(inputIndexReg, srcIdxOfset + k * vfLen + vfLenInt);
+-                    AscendC::Reg::UnPack<AscendC::Reg::HighLowPart::HIGHEST>(cmpIndexMask, cmpMask);
+-                    AscendC::Reg::Select(maxIndexReg1, inputIndexReg, maxIndexReg1, cmpIndexMask);
++                    AscendC::MicroAPI::UnPack<AscendC::MicroAPI::HighLowPart::LOWEST>(cmpIndexMask, cmpMask);
++                    AscendC::MicroAPI::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpIndexMask);
++
++                    MicroAPI::DataCopy(inputIndexReg, srcIdxOfset + k * vfLen + vfLenInt);
++                    AscendC::MicroAPI::UnPack<AscendC::MicroAPI::HighLowPart::HIGHEST>(cmpIndexMask, cmpMask);
++                    AscendC::MicroAPI::Select(maxIndexReg1, inputIndexReg, maxIndexReg1, cmpIndexMask);
+@@ -216,2 +384,2 @@
+-            Reg::DataCopy(dstOfset, maxReg, fullMask);
+-            Reg::DataCopy(dstIdxOfset, maxIndexReg, indexMask);
++            MicroAPI::DataCopy(dstOfset, maxReg, fullMask);
++            MicroAPI::DataCopy(dstIdxOfset, maxIndexReg, indexMask);
+@@ -219 +387 @@
+-                Reg::DataCopy(dstIdxOfset + vfLenInt, maxIndexReg1, indexMask);
++                MicroAPI::DataCopy(dstIdxOfset + vfLenInt, maxIndexReg1, indexMask);
+@@ -226 +394 @@
+-__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>::CustomSelectOnW(
++__aicore__ inline void AdaptiveMaxPool3dParaPool<T, U>:: CustomSelectOnW(
+@@ -240,11 +408,11 @@
+-        Reg::RegTensor<T> inputReg;
+-        Reg::RegTensor<int32_t> inputIndexReg;
+-        Reg::RegTensor<T> maxReg;
+-        Reg::RegTensor<int32_t> maxIndexReg;
+-        Reg::RegTensor<int32_t> maxIndexReg1;
+-
+-        Reg::MaskReg fullMask = Reg::CreateMask<T>();
+-        Reg::MaskReg cmpMask = Reg::CreateMask<T>();
+-        Reg::MaskReg cmpMaskNan = Reg::CreateMask<T>();
+-        Reg::MaskReg indexMask = Reg::CreateMask<int32_t>();
+-        Reg::MaskReg cmpIndexMask = Reg::CreateMask<int32_t>();
++        MicroAPI::RegTensor<T> inputReg;
++        MicroAPI::RegTensor<int32_t> inputIndexReg;
++        MicroAPI::RegTensor<T> maxReg;
++        MicroAPI::RegTensor<int32_t> maxIndexReg;
++        MicroAPI::RegTensor<int32_t> maxIndexReg1;
++
++        MicroAPI::MaskReg fullMask = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg cmpMask = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg cmpMaskNan = MicroAPI::CreateMask<T>();
++        MicroAPI::MaskReg indexMask = MicroAPI::CreateMask<int32_t>();
++        MicroAPI::MaskReg cmpIndexMask = MicroAPI::CreateMask<int32_t>();
+@@ -264,3 +432,3 @@
+-                Reg::DataCopy(maxReg, srcOfset);
+-                Reg::Duplicate(inputIndexReg, assistIdx);
+-                Reg::Duplicate(maxIndexReg, assistIdx);
++                MicroAPI::DataCopy(maxReg, srcOfset);
++                MicroAPI::Duplicate(inputIndexReg, assistIdx);
++                MicroAPI::Duplicate(maxIndexReg, assistIdx);
+@@ -268 +436 @@
+-                    Reg::Duplicate(maxIndexReg1, assistIdx);
++                    MicroAPI::Duplicate(maxIndexReg1, assistIdx);
+@@ -271,7 +439,7 @@
+-                    Reg::DataCopy(inputReg, srcOfset + k * vfLen);
+-                    Reg::Compare<T, CMPMODE::GT>(cmpMask, inputReg, maxReg, fullMask);
+-                    Reg::Compare<T, CMPMODE::NE>(cmpMaskNan, inputReg, inputReg, fullMask);
+-                    Reg::Or(cmpMask, cmpMask, cmpMaskNan, fullMask);
+-                    AscendC::Reg::Select(maxReg, inputReg, maxReg, cmpMask);
+-
+-                    Reg::Adds(inputIndexReg, inputIndexReg, static_cast<int32_t>(1), indexMask);
++                    MicroAPI::DataCopy(inputReg, srcOfset + k * vfLen);
++                    MicroAPI::Compare<T, CMPMODE::GT>(cmpMask, inputReg, maxReg, fullMask);
++                    MicroAPI::Compare<T, CMPMODE::NE>(cmpMaskNan, inputReg, inputReg, fullMask);
++                    MicroAPI::Or(cmpMask, cmpMask, cmpMaskNan, fullMask);
++                    AscendC::MicroAPI::Select(maxReg, inputReg, maxReg, cmpMask);
++
++                    MicroAPI::Adds(inputIndexReg, inputIndexReg, static_cast<int32_t>(1), indexMask);
+@@ -279 +447 @@
+-                        AscendC::Reg::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpMask);
++                        AscendC::MicroAPI::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpMask);
+@@ -281,5 +449,5 @@
+-                        AscendC::Reg::UnPack<AscendC::Reg::HighLowPart::LOWEST>(cmpIndexMask, cmpMask);
+-                        AscendC::Reg::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpIndexMask);
+-
+-                        AscendC::Reg::UnPack<AscendC::Reg::HighLowPart::HIGHEST>(cmpIndexMask, cmpMask);
+-                        AscendC::Reg::Select(maxIndexReg1, inputIndexReg, maxIndexReg1, cmpIndexMask);
++                        AscendC::MicroAPI::UnPack<AscendC::MicroAPI::HighLowPart::LOWEST>(cmpIndexMask, cmpMask);
++                        AscendC::MicroAPI::Select(maxIndexReg, inputIndexReg, maxIndexReg, cmpIndexMask);
++
++                        AscendC::MicroAPI::UnPack<AscendC::MicroAPI::HighLowPart::HIGHEST>(cmpIndexMask, cmpMask);
++                        AscendC::MicroAPI::Select(maxIndexReg1, inputIndexReg, maxIndexReg1, cmpIndexMask);
+@@ -288,2 +456,2 @@
+-                Reg::DataCopy(dstIdxOfset, maxIndexReg, indexMask);
+-                Reg::DataCopy(dstOfset, maxReg, fullMask);
++                MicroAPI::DataCopy(dstIdxOfset, maxIndexReg, indexMask);
++                MicroAPI::DataCopy(dstOfset, maxReg, fullMask);
+@@ -291 +459 @@
+-                    Reg::DataCopy(dstIdxOfset + vfLenInt, maxIndexReg1, indexMask);
++                    MicroAPI::DataCopy(dstIdxOfset + vfLenInt, maxIndexReg1, indexMask);
+@@ -403 +571 @@
+-        PoolUtils::DataMove::TransposeB32<T>(maxOutLocal, dTransLocal, rowNumAlign, vlNum_, ubBlockSize_);
++        TransposeB32<T>(maxOutLocal, dTransLocal, rowNumAlign, vlNum_);
+@@ -405,3 +573,2 @@
+-        PoolUtils::DataMove::TransposeB16<T>(maxOutLocal, dTransLocal, rowNumAlign, vlNum_, ubBlockSize_);
+-    }
+-    PoolUtils::DataMove::TransposeB32<int32_t>(maxIndexOutLocal, maxIndexInLocal, rowNumAlign, vlNum_, ubBlockSize_);
++        TransposeB16(maxOutLocal, dTransLocal, rowNumAlign, vlNum_);
++    }TransposeB32<int32_t>(maxIndexOutLocal, maxIndexInLocal, rowNumAlign, vlNum_);
+@@ -482 +649 @@
+-            PoolUtils::Compute::CalInputBlockPara(curIdx, blockPara_, tilingData_, inDHW_, inHW_);
++            CalInputBlockPara(curIdx, blockPara_);
+@@ -503,2 +670 @@
+-            PoolUtils::DataMove::CopyInput<T>(inputQue, xGm, ncNum, diDataLen, hiDataLen, wiDataLen, xOffset,
+-                                              ubAlignNum_, tilingData_.wIn, inHW_, inDHW_);
++            CopyInput( ncNum, diDataLen, hiDataLen, wiDataLen, xOffset);
+@@ -509,4 +675,2 @@
+-            PoolUtils::Compute::CalInputBlockPara(curIdx + 1, blockPara_, tilingData_, inDHW_, inHW_);
+-            PoolUtils::DataMove::CopyInput<T>(inputQue, xGm, blockPara_.ncNum, blockPara_.diDataLen,
+-                                              blockPara_.hiDataLen, blockPara_.wiDataLen, blockPara_.xOffset,
+-                                              ubAlignNum_, tilingData_.wIn, inHW_, inDHW_);
++            CalInputBlockPara(curIdx + 1, blockPara_);CopyInput( blockPara_.ncNum, blockPara_.diDataLen,
++                                              blockPara_.hiDataLen, blockPara_.wiDataLen, blockPara_.xOffset);
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_simt.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_max_pool3d_simt.h
+@@ -33 +33 @@
+-constexpr uint32_t THREAD_BOUND = 2048;
++constexpr uint32_t THREAD_DIM = 1024;
+@@ -133 +133 @@
+-__simt_vf__ __aicore__ LAUNCH_BOUND(THREAD_BOUND) inline void AdaptiveMaxPool3DNcdhwUb(
++__simt_vf__ __aicore__ LAUNCH_BOUND(THREAD_DIM) inline void AdaptiveMaxPool3DNcdhwUb(
+@@ -152 +152 @@
+-__simt_vf__ __aicore__ LAUNCH_BOUND(THREAD_BOUND) inline void AdaptiveMaxPool3DNcdhwFunc(
++__simt_vf__ __aicore__ LAUNCH_BOUND(THREAD_DIM) inline void AdaptiveMaxPool3DNcdhwFunc(
+@@ -186 +186 @@
+-            dim3(tilingData_->threadNum), static_cast<FORMAT_T>(totalSize), inputData, ncSize,
++            dim3(THREAD_DIM), static_cast<FORMAT_T>(totalSize), inputData, ncSize,
+@@ -204 +204 @@
+-            dim3(tilingData_->threadNum), static_cast<FORMAT_T>(totalSize), inputData, ncSize,
++            dim3(THREAD_DIM), static_cast<FORMAT_T>(totalSize), inputData, ncSize,
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_pool3d_big_kernel.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_pool3d_big_kernel.h
+@@ -24 +24 @@
+-#include "pool_utils/arch35/data_move/adaptive_pool_big_kernel_data_move.h"
++
+@@ -50 +50 @@
+-constexpr Reg::CastTrait CASTB4TOB2 = {Reg::RegLayout::ZERO, Reg::SatMode::NO_SAT, Reg::MaskMergeMode::ZEROING,
++constexpr MicroAPI::CastTrait CASTB4TOB2 = {MicroAPI::RegLayout::ZERO, MicroAPI::SatMode::NO_SAT, MicroAPI::MaskMergeMode::ZEROING,
+@@ -52 +52 @@
+-constexpr Reg::CastTrait CASTB2TOB4 = {Reg::RegLayout::ZERO, Reg::SatMode::UNKNOWN, Reg::MaskMergeMode::ZEROING,
++constexpr MicroAPI::CastTrait CASTB2TOB4 = {MicroAPI::RegLayout::ZERO, MicroAPI::SatMode::UNKNOWN, MicroAPI::MaskMergeMode::ZEROING,
+@@ -54 +54 @@
+-constexpr Reg::CastTrait CASTB4TOB8 = {Reg::RegLayout::ZERO, Reg::SatMode::UNKNOWN, Reg::MaskMergeMode::ZEROING,
++constexpr MicroAPI::CastTrait CASTB4TOB8 = {MicroAPI::RegLayout::ZERO, MicroAPI::SatMode::UNKNOWN, MicroAPI::MaskMergeMode::ZEROING,
+@@ -66,0 +67 @@
++    __aicore__ inline void  CopyOut(int64_t copyCount, int64_t offset);
+@@ -157 +158,17 @@
+-__aicore__ inline void AdaptivePool3dBigKernel<T>::Init(GM_ADDR x, GM_ADDR y)
++__aicore__ inline void AdaptivePool3dBigKernel<T>::CopyOut(int64_t copyCount, int64_t offset)
++{
++    event_t eventIdVtoMTE3 = static_cast<event_t>(GetTPipePtr()->FetchEventID(HardEvent::V_MTE3));
++    SetFlag<HardEvent::V_MTE3>(eventIdVtoMTE3);
++    WaitFlag<HardEvent::V_MTE3>(eventIdVtoMTE3);
++    LocalTensor<T> outputLocal = outputUB_.Get<T>();
++    DataCopyExtParams extParams;
++    extParams.blockCount = DIGHT1;
++    extParams.blockLen = copyCount * sizeof(T);
++    extParams.srcStride = 0;
++    extParams.dstStride = 0;
++    DataCopyPad(
++    yGm_[offset], outputLocal, extParams);
++}
++
++template <typename T>
++__aicore__ inline void AdaptivePool3dBigKernel<T>:: Init(GM_ADDR x, GM_ADDR y)
+@@ -173 +190 @@
+-__aicore__ inline void AdaptivePool3dBigKernel<T>::CalcWindowSize(int64_t curOutIdx)
++__aicore__ inline void AdaptivePool3dBigKernel<T>:: CalcWindowSize(int64_t curOutIdx)
+--- a/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_pool3d_tiling_struct.h
++++ b/adaptive_avg_pool3d/adaptive_pool3d_common/arch35/adaptive_pool3d_tiling_struct.h
+@@ -29,2 +29 @@
+-#define TPL_MULTI_MODE_1 1
+-#define TPL_DATA_FORMAT_MODE_0 0
++#define  TPL_DATA_FORMAT_MODE_0 0
+@@ -36 +35 @@
+-                      ASCENDC_TPL_UINT_DECL(MULTI_MODE, 1, ASCENDC_TPL_UI_LIST, TPL_MULTI_MODE_0, TPL_MULTI_MODE_1),
++                      ASCENDC_TPL_UINT_DECL(MULTI_MODE, 1, ASCENDC_TPL_UI_LIST, TPL_MULTI_MODE_0),
+@@ -56,6 +54,0 @@
+-                         ASCENDC_TPL_UINT_SEL(DYTPE_MODE, ASCENDC_TPL_UI_LIST, TPL_DTYPE_0),
+-                         ASCENDC_TPL_UINT_SEL(MULTI_MODE, ASCENDC_TPL_UI_LIST, TPL_MULTI_MODE_1),
+-                         ASCENDC_TPL_UINT_SEL(FORMAT_MODE, ASCENDC_TPL_UI_LIST, TPL_DATA_FORMAT_MODE_0),
+-                         ASCENDC_TPL_TILING_STRUCT_SEL(AdaptivePool3DTiling::AdaptivePool3dGatherTransTilingData)),
+-    ASCENDC_TPL_ARGS_SEL(ASCENDC_TPL_KERNEL_TYPE_SEL(ASCENDC_TPL_AIV_ONLY),
+-                         ASCENDC_TPL_UINT_SEL(TEMPLATE_MODE, ASCENDC_TPL_UI_LIST, TPL_MODE_0),
+@@ -77 +70 @@
+-    int64_t threadNum = 0;
++
+@@ -121,21 +114 @@
+-class AdaptivePool3dGatherTransTilingData {
+-public:
+-    int64_t dIn = 1;
+-    int64_t hIn = 1;
+-    int64_t wIn = 1;
+-    int64_t dOut = 1;
+-    int64_t hOut = 1;
+-    int64_t wOut = 1;
+-    int64_t useCoreNum = 1;
+-    int64_t blockFactor = 1;
+-    int64_t blockTail = 1;
+-    int64_t ncFactor = 1;
+-    int64_t ncOuter = 1;
+-    int64_t ncTail = 1;
+-    int64_t ncBatch = 1;
+-    int64_t doFactor = 1;
+-    int64_t doOuter = 1;
+-    int64_t doTail = 1;
+-    int64_t maxDInBlock = 1;
+-    int64_t maxDoBlock = 1;
+-};
++
+--- a/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.cpp
++++ b/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.cpp
+@@ -73 +73 @@
+-            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "self'dims is invalid, self No.[%lu] dim is not bigger than [%d].", i, 0);
++            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "self'dims is invalid, self No.[%lu] dim is not bigger than [%d].", i + 1 , 0);
+@@ -81 +81 @@
+-            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "Out dims No.[%lu] must match self dims.", i);
++            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "Out dims No.[%lu] must match self dims.", i + 1 );
+@@ -87 +87 @@
+-            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "Out dims is invalid, out No.[%lu] dim is not bigger than [%d].", i, 0);
++            OP_LOGE(ACLNN_ERR_PARAM_INVALID, "Out dims is invalid, out No.[%lu] dim is not bigger than [%d].", i + 1 , 0);
+--- a/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_infershape.cpp
++++ b/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_infershape.cpp
+@@ -58,2 +58,2 @@
+-                OP_LOGE_FOR_INVALID_SHAPEDIM_WITH_REASON("AdaptiveAvgPool3d", "X",
+-                                                         std::to_string(input_dim_num).c_str(), "must be 4 or 5"),
++                OP_LOGE(context, "The dims of x must be 4 or 5, but got %zu.", input_dim_num),
++                return
+@@ -63 +63,2 @@
+-        OP_LOGE_FOR_INVALID_LISTSIZE("AdaptiveAvgPool3d", "output_size", std::to_string(output_size_len).c_str(), "3"),
++        OP_LOGE(context, "The size of output_size not equal 3."),
++        return
+--- a/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp
++++ b/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp
+@@ -270 +270 @@
+-    OP_CHECK_IF(xShape.GetDimNum() != X_DIMS, OP_LOGE(nodeName, "Check x shape failed, the dims of x not equal to 5."),
++    OP_CHECK_IF(xShape.GetDimNum() != X_DIMS, OP_LOGE(nodeName, "Check x shape failed, the dims of x not equal 5."),
+@@ -284 +284 @@
+-                OP_LOGE(nodeName, "Check output_size failed, the size of output_size not equal to 3."),
++                OP_LOGE(nodeName, "Check output_size failed, the size of output_size not equal 3."),
+--- a/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_apt.cpp
++++ b/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_apt.cpp
+@@ -21 +21 @@
+-#include "../adaptive_pool3d_common/arch35/adaptive_avg_pool3d_gather_trans.h"
++
+@@ -54,6 +54 @@
+-    } else if constexpr (TEMPLATE_MODE == TPL_MODE_0 && MULTI_MODE == TPL_MULTI_MODE_1 && DYTPE_MODE == TPL_DTYPE_0) {
+-        GET_TILING_DATA_WITH_STRUCT(AdaptivePool3DTiling::AdaptivePool3dGatherTransTilingData, tilingData, tiling);
+-        AdaptivePool3d::AdaptiveAvgPool3dGatherTrans<DTYPE_X> op(tilingData, pipeBase);
+-        op.Init(x, y);
+-        op.Process();
+-    } else if constexpr (TEMPLATE_MODE == TPL_MODE_1 && DYTPE_MODE == TPL_DTYPE_0 && MULTI_MODE == TPL_MULTI_MODE_0) {
++    } else if constexpr (TEMPLATE_MODE == TPL_MODE_1 && DYTPE_MODE == TPL_DTYPE_0&& MULTI_MODE == TPL_MULTI_MODE_0) {
+--- a/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.cpp
++++ b/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.cpp
+@@ -84,2 +84 @@
+-                OP_LOGE(nodeName, "[ExpandIntoJaggedPermuteTilingData] outputoffsetShape and inputoffsetShape should "
+-                                  "be one more than permuteShape."),
++                OP_LOGE(nodeName, "[ExpandIntoJaggedPermuteTilingData] outputoffsetShape and inputoffsetShape should be one more than permuteShape."),
+--- a/group_quant/_deps/common/inc/op_host/static_register_symbol.h
++++ b/group_quant/_deps/common/inc/op_host/static_register_symbol.h
+@@ -16,4 +16,3 @@
+-#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)                  \
+-    [[maybe_unused]] std::string                                                                   \
+-        op_impl_register_template_##op_type##_##class_name##priority##counter##line = std::string( \
+-            "op_impl_register_template_" #op_type)
++#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##op_type##_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" #op_type) \
+@@ -21,2 +19,0 @@
+-#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -24,3 +21,2 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)                           \
+-    [[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line = std::string( \
+-        "op_impl_register_template_" op_type)
++#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -28,2 +24,9 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
++#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" op_type)  \
++
++
++#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
+--- a/group_quant/_deps/common/inc/op_host/tiling_base.h
++++ b/group_quant/_deps/common/inc/op_host/tiling_base.h
+@@ -124,4 +124 @@
+-    virtual void DumpTilingInfo() { OP_LOGD(context_, "%ld", DefaultTilingInfoDump()); }
+-
+-    int64_t DefaultTilingInfoDump()
+-    {
++    virtual void DumpTilingInfo() {
+@@ -141 +137,0 @@
+-        return 0;
+--- a/group_quant/_deps/common/inc/op_host/tiling_templates_registry.h
++++ b/group_quant/_deps/common/inc/op_host/tiling_templates_registry.h
+@@ -497,5 +497,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                       \
+-    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;            \
+-    static Ops::NN::Optiling::RegisterArch                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterArch(#op_type) \
+-                                                                 .tiling<class_name>(priority, archs)
++#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                \
++    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;     \
++    static Ops::NN::Optiling::RegisterArch VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterArch(#op_type).tiling<class_name>(priority, archs)
++
+@@ -505,5 +505,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)         \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_versions)
++#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)  \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_versions)
++
+@@ -513,5 +513,5 @@
+-#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                                                        \
+-    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                                  \
+-    static Ops::NN::Optiling::Register                                                                                 \
+-        VAR_UNUSED##op_type_##class_name##priority_register = Ops::NN::Optiling::Register(op_type).tiling<class_name>( \
+-            priority)
++#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                              \
++    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);        \
++    static Ops::NN::Optiling::Register VAR_UNUSED##op_type_##class_name##priority_register = \
++        Ops::NN::Optiling::Register(op_type).tiling<class_name>(priority)
++
+@@ -522,5 +522,5 @@
+-#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)                      \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_version)
++#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)               \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_version)
++
+@@ -531,5 +531,6 @@
+-#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                                 \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                   \
+-    static Ops::NN::Optiling::Register __attribute__((unused))                                      \
+-    tiling_##op_type##_##class_name##_##priority##_register = Ops::NN::Optiling::Register(#op_type) \
+-                                                                  .tiling<class_name>(priority)
++#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                       \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);         \
++    static Ops::NN::Optiling::Register                                                    \
++        __attribute__((unused)) tiling_##op_type##_##class_name##_##priority##_register = \
++            Ops::NN::Optiling::Register(#op_type).tiling<class_name>(priority)
++
+--- a/group_norm_silu_quant/_deps/common/inc/op_host/static_register_symbol.h
++++ b/group_norm_silu_quant/_deps/common/inc/op_host/static_register_symbol.h
+@@ -16,4 +16,3 @@
+-#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)                  \
+-    [[maybe_unused]] std::string                                                                   \
+-        op_impl_register_template_##op_type##_##class_name##priority##counter##line = std::string( \
+-            "op_impl_register_template_" #op_type)
++#define GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##op_type##_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" #op_type) \
+@@ -21,2 +19,0 @@
+-#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -24,3 +21,2 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)                           \
+-    [[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line = std::string( \
+-        "op_impl_register_template_" op_type)
++#define GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_SYMBOL_REAL(op_type, class_name, priority, counter, line)
+@@ -28,2 +24,9 @@
+-#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line) \
+-    GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
++#define GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)   \
++[[maybe_unused]] std::string op_impl_register_template_##class_name##priority##counter##line =  \
++    std::string("op_impl_register_template_" op_type)  \
++
++
++#define GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, counter, line)   \
++GLOBAL_REGISTER_STR_SYMBOL_REAL(op_type, class_name, priority, counter, line)
++
+--- a/group_norm_silu_quant/_deps/common/inc/op_host/tiling_base.h
++++ b/group_norm_silu_quant/_deps/common/inc/op_host/tiling_base.h
+@@ -124,4 +124 @@
+-    virtual void DumpTilingInfo() { OP_LOGD(context_, "%ld", DefaultTilingInfoDump()); }
+-
+-    int64_t DefaultTilingInfoDump()
+-    {
++    virtual void DumpTilingInfo() {
+@@ -141 +137,0 @@
+-        return 0;
+--- a/group_norm_silu_quant/_deps/common/inc/op_host/tiling_templates_registry.h
++++ b/group_norm_silu_quant/_deps/common/inc/op_host/tiling_templates_registry.h
+@@ -497,5 +497,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                       \
+-    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;            \
+-    static Ops::NN::Optiling::RegisterArch                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterArch(#op_type) \
+-                                                                 .tiling<class_name>(priority, archs)
++#define REGISTER_TILING_TEMPLATE_WITH_ARCH(op_type, class_name, archs, priority)                \
++    [[maybe_unused]] uint32_t op_impl_register_template_##op_type##_##class_name##priority;     \
++    static Ops::NN::Optiling::RegisterArch VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterArch(#op_type).tiling<class_name>(priority, archs)
++
+@@ -505,5 +505,5 @@
+-#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)         \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_versions)
++#define REGISTER_TILING_TEMPLATE_WITH_SOCVERSION(op_type, class_name, soc_versions, priority)  \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_versions)
++
+@@ -513,5 +513,5 @@
+-#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                                                        \
+-    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                                  \
+-    static Ops::NN::Optiling::Register                                                                                 \
+-        VAR_UNUSED##op_type_##class_name##priority_register = Ops::NN::Optiling::Register(op_type).tiling<class_name>( \
+-            priority)
++#define REGISTER_TILING_TEMPLATE(op_type, class_name, priority)                              \
++    GLOBAL_REGISTER_STR_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);        \
++    static Ops::NN::Optiling::Register VAR_UNUSED##op_type_##class_name##priority_register = \
++        Ops::NN::Optiling::Register(op_type).tiling<class_name>(priority)
++
+@@ -522,5 +522,5 @@
+-#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)                      \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                     \
+-    static Ops::NN::Optiling::RegisterNew                                                             \
+-        VAR_UNUSED##op_type##class_name##priority_register = Ops::NN::Optiling::RegisterNew(#op_type) \
+-                                                                 .tiling<class_name>(priority, soc_version)
++#define REGISTER_TILING_TEMPLATE_NEW(op_type, class_name, soc_version, priority)               \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);              \
++    static Ops::NN::Optiling::RegisterNew VAR_UNUSED##op_type##class_name##priority_register = \
++        Ops::NN::Optiling::RegisterNew(#op_type).tiling<class_name>(priority, soc_version)
++
+@@ -531,5 +531,6 @@
+-#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                                 \
+-    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);                   \
+-    static Ops::NN::Optiling::Register __attribute__((unused))                                      \
+-    tiling_##op_type##_##class_name##_##priority##_register = Ops::NN::Optiling::Register(#op_type) \
+-                                                                  .tiling<class_name>(priority)
++#define REGISTER_OPS_TILING_TEMPLATE(op_type, class_name, priority)                       \
++    GLOBAL_REGISTER_SYMBOL(op_type, class_name, priority, __COUNTER__, __LINE__);         \
++    static Ops::NN::Optiling::Register                                                    \
++        __attribute__((unused)) tiling_##op_type##_##class_name##_##priority##_register = \
++            Ops::NN::Optiling::Register(#op_type).tiling<class_name>(priority)
++
+--- a/group_norm_silu_quant/_deps/common/stub/op_api/level0/zero_op.h
++++ b/group_norm_silu_quant/_deps/common/stub/op_api/level0/zero_op.h
+@@ -17 +17 @@
+-__attribute__((weak)) const aclTensor* InplaceZerosLike(const aclTensor* self, aclOpExecutor* executor);
++
+--- a/group_norm_silu_quant/op_api/aclnn_group_norm_silu_quant.cpp
++++ b/group_norm_silu_quant/op_api/aclnn_group_norm_silu_quant.cpp
+@@ -18 +18 @@
+-#include "op_api/op_api_def_nn.h"
++#include "op_api/op_api_def.h"
+--- a/group_norm_silu_quant/op_host/group_norm_silu_quant_def.cpp
++++ b/group_norm_silu_quant/op_host/group_norm_silu_quant_def.cpp
+@@ -65,6 +65 @@
+-        OpAICoreConfig config_regbase;
+-        config_regbase.DynamicCompileStaticFlag(true)
+-            .DynamicRankSupportFlag(true)
+-            .DynamicShapeSupportFlag(true)
+-            .ExtendCfgInfo("opFile.value", "group_norm_silu_quant");
+-        this->AICore().AddConfig("ascend950", config_regbase);
++
+--- a/gather_elements_v2/_deps/nn/index/gather_v2/op_api/gather_v2.cpp
++++ b/gather_elements_v2/_deps/nn/index/gather_v2/op_api/gather_v2.cpp
+@@ -11 +11 @@
+-#include "op_api/gather_v2.h"
++#include "gather_v2.h"
+--- a/gather_elements_v2/op_api/aclnn_gather.cpp
++++ b/gather_elements_v2/op_api/aclnn_gather.cpp
+@@ -17 +17 @@
+-#include "index/common/op_api/gather_elements.h"
++#include "level0/gather_elements.h"
+@@ -19 +19 @@
+-#include "op_api/gather_v2.h"
++#include "index/gather_v2/op_api/gather_v2.h"
+--- a/chamfer_distance_grad/op_host/chamfer_distance_grad_def.cpp
++++ b/chamfer_distance_grad/op_host/chamfer_distance_grad_def.cpp
+@@ -69 +69 @@
+-        this->AICore().AddConfig("ascend950", aicore_config);
++
+--- a/chamfer_distance_grad/op_host/chamfer_distance_grad_infershape.cpp
++++ b/chamfer_distance_grad/op_host/chamfer_distance_grad_infershape.cpp
+@@ -16,2 +16 @@
+-#include <cstdint>
+-#include "exe_graph/runtime/infer_shape_context.h"
++
+@@ -20,4 +18,0 @@
+-#include "util/shape_util.h"
+-
+-using namespace ge;
+-
+@@ -35,10 +30,4 @@
+-constexpr int64_t XYZ_RANK = 3;
+-constexpr int64_t POINTWISE_RANK = 2;
+-constexpr int64_t BATCH_AXIS = 0;
+-constexpr int64_t POINT_AXIS = 1;
+-constexpr int64_t COORD_AXIS = 2;
+-constexpr int64_t COORD_DIM = 2;
+-
+-inline bool IsDimCompatible(const int64_t lhs, const int64_t rhs)
+-{
+-    return lhs < 0 || rhs < 0 || lhs == rhs;
++constexpr int64_t ZERO_AXIS = 0;
++constexpr int64_t ONE_AXIS = 1;
++constexpr int64_t TWO_AXIS = 2;
++constexpr int64_t LAST_DIM = 2;
+@@ -47,6 +36,3 @@
+-inline bool IsPointwiseShapeCompatible(const gert::Shape& xyzShape, const gert::Shape& pointwiseShape)
+-{
+-    return IsDimCompatible(xyzShape.GetDim(BATCH_AXIS), pointwiseShape.GetDim(BATCH_AXIS)) &&
+-           IsDimCompatible(xyzShape.GetDim(POINT_AXIS), pointwiseShape.GetDim(POINT_AXIS));
+-}
+-} // namespace
++using namespace ge;
++
++ // namespace
+@@ -58,3 +43,0 @@
+-    if (context == nullptr) {
+-        return ge::GRAPH_FAILED;
+-    }
+@@ -62 +44,0 @@
+-    OP_LOGD(context->GetNodeName(), "InferDataType4ChamferDistanceGrad start.");
+@@ -64,2 +46,3 @@
+-    context->SetOutputDataType(INDEX_GRAD_XYZ1, context->GetInputDataType(INDEX_XYZ1));
+-    context->SetOutputDataType(INDEX_GRAD_XYZ2, context->GetInputDataType(INDEX_XYZ2));
++    OP_LOGD(context, "InferDataType4ChamferDistanceGrad start");
++    auto input_xyz1_dtype = context->GetInputDataType(INDEX_XYZ1);
++    auto input_xyz2_dtype = context->GetInputDataType(INDEX_XYZ2);
+@@ -67 +50,4 @@
+-    OP_LOGD(context->GetNodeName(), "InferDataType4ChamferDistanceGrad end.");
++    context->SetOutputDataType(INDEX_GRAD_XYZ1, input_xyz1_dtype);
++    context->SetOutputDataType(INDEX_GRAD_XYZ2, input_xyz2_dtype);
++
++    OP_LOGD(context, "InferDataType4ChamferDistanceGrad end");
+@@ -73,3 +58,0 @@
+-    if (context == nullptr) {
+-        return ge::GRAPH_FAILED;
+-    }
+@@ -77 +59,0 @@
+-    OP_LOGD(context->GetNodeName(), "Runtime2.0 ChamferDistanceGrad InferShape start.");
+@@ -79,6 +61,4 @@
+-    const gert::Shape* xyz1Shape = context->GetInputShape(INDEX_XYZ1);
+-    const gert::Shape* xyz2Shape = context->GetInputShape(INDEX_XYZ2);
+-    const gert::Shape* idx1Shape = context->GetInputShape(INDEX_IDX1);
+-    const gert::Shape* idx2Shape = context->GetInputShape(INDEX_IDX2);
+-    const gert::Shape* gradDist1Shape = context->GetInputShape(INDEX_GRAD_DIST1);
+-    const gert::Shape* gradDist2Shape = context->GetInputShape(INDEX_GRAD_DIST2);
++    const gert::Shape* grad_dist1_shape = context->GetInputShape(INDEX_GRAD_DIST1);
++    const gert::Shape* grad_dist2_shape = context->GetInputShape(INDEX_GRAD_DIST2);
++    OP_CHECK_NULL_WITH_CONTEXT(context, grad_dist1_shape);
++    OP_CHECK_NULL_WITH_CONTEXT(context, grad_dist2_shape); gert::Shape* grad_xyz1_shape = context->GetOutputShape(INDEX_GRAD_XYZ1); gert::Shape* grad_xyz2_shape = context->GetOutputShape(INDEX_GRAD_XYZ2);
+@@ -86,6 +66,2 @@
+-    OP_CHECK_NULL_WITH_CONTEXT(context, xyz1Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, xyz2Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, idx1Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, idx2Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, gradDist1Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, gradDist2Shape);
++    OP_CHECK_NULL_WITH_CONTEXT(context, grad_xyz1_shape);
++    OP_CHECK_NULL_WITH_CONTEXT(context, grad_xyz2_shape);
+@@ -93,126 +69,7 @@
+-    gert::Shape* gradXyz1Shape = context->GetOutputShape(INDEX_GRAD_XYZ1);
+-    gert::Shape* gradXyz2Shape = context->GetOutputShape(INDEX_GRAD_XYZ2);
+-
+-    OP_CHECK_NULL_WITH_CONTEXT(context, gradXyz1Shape);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, gradXyz2Shape);
+-
+-    /*
+-     * A2/A3 supported shape:
+-     *
+-     *   xyz1:       [B, N, 2]
+-     *   xyz2:       [B, N, 2]
+-     *   idx1:       [B, N]
+-     *   idx2:       [B, N]
+-     *   grad_dist1: [B, N]
+-     *   grad_dist2: [B, N]
+-     *
+-     * Output:
+-     *
+-     *   grad_xyz1:  [B, N, 2]
+-     *   grad_xyz2:  [B, N, 2]
+-     */
+-
+-    if (Ops::Base::IsUnknownRank(*xyz1Shape) || Ops::Base::IsUnknownRank(*xyz2Shape) ||
+-        Ops::Base::IsUnknownRank(*idx1Shape) || Ops::Base::IsUnknownRank(*idx2Shape) ||
+-        Ops::Base::IsUnknownRank(*gradDist1Shape) || Ops::Base::IsUnknownRank(*gradDist2Shape)) {
+-        Ops::Base::SetUnknownRank(*gradXyz1Shape);
+-        Ops::Base::SetUnknownRank(*gradXyz2Shape);
+-
+-        OP_LOGD(context->GetNodeName(), "ChamferDistanceGrad InferShape handles unknown rank.");
+-        return ge::GRAPH_SUCCESS;
+-    }
+-
+-    const int64_t xyz1Rank = static_cast<int64_t>(xyz1Shape->GetDimNum());
+-    const int64_t xyz2Rank = static_cast<int64_t>(xyz2Shape->GetDimNum());
+-    const int64_t idx1Rank = static_cast<int64_t>(idx1Shape->GetDimNum());
+-    const int64_t idx2Rank = static_cast<int64_t>(idx2Shape->GetDimNum());
+-    const int64_t gradDist1Rank = static_cast<int64_t>(gradDist1Shape->GetDimNum());
+-    const int64_t gradDist2Rank = static_cast<int64_t>(gradDist2Shape->GetDimNum());
+-
+-    if (xyz1Rank != XYZ_RANK || xyz2Rank != XYZ_RANK) {
+-        OP_LOGE(context->GetNodeName(),
+-                "xyz1 and xyz2 must be rank-3 tensors, but got rank %ld and %ld.",
+-                xyz1Rank, xyz2Rank);
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (idx1Rank != POINTWISE_RANK || idx2Rank != POINTWISE_RANK ||
+-        gradDist1Rank != POINTWISE_RANK || gradDist2Rank != POINTWISE_RANK) {
+-        OP_LOGE(context->GetNodeName(),
+-                "idx1, idx2, grad_dist1 and grad_dist2 must all be rank-2 tensors.");
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    /*
+-     * The coordinate dimension is fixed to 2.
+-     *
+-     * An unknown coordinate dimension is accepted during dynamic
+-     * compilation, but a known value other than 2 is rejected.
+-     */
+-    if (!IsDimCompatible(xyz1Shape->GetDim(COORD_AXIS), COORD_DIM) ||
+-        !IsDimCompatible(xyz2Shape->GetDim(COORD_AXIS), COORD_DIM)) {
+-        OP_LOGE(context->GetNodeName(),
+-                "The last dimensions of xyz1 and xyz2 must both be 2, but got %ld and %ld.",
+-                xyz1Shape->GetDim(COORD_AXIS), xyz2Shape->GetDim(COORD_AXIS));
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    /*
+-     * A2/A3 Tiling only has one batch_size and one num, so xyz1 and
+-     * xyz2 must have the same batch dimension and point dimension.
+-     */
+-    if (!IsDimCompatible(xyz1Shape->GetDim(BATCH_AXIS), xyz2Shape->GetDim(BATCH_AXIS))) {
+-        OP_LOGE(context->GetNodeName(),
+-                "xyz1 and xyz2 must have the same batch dimension, but got %ld and %ld.",
+-                xyz1Shape->GetDim(BATCH_AXIS), xyz2Shape->GetDim(BATCH_AXIS));
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (!IsDimCompatible(xyz1Shape->GetDim(POINT_AXIS), xyz2Shape->GetDim(POINT_AXIS))) {
+-        OP_LOGE(context->GetNodeName(),
+-                "xyz1 and xyz2 must have the same point dimension, but got %ld and %ld.",
+-                xyz1Shape->GetDim(POINT_AXIS), xyz2Shape->GetDim(POINT_AXIS));
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (!IsPointwiseShapeCompatible(*xyz1Shape, *idx1Shape)) {
+-        OP_LOGE(context->GetNodeName(),
+-                "idx1 shape must match the first two dimensions of xyz1.");
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (!IsPointwiseShapeCompatible(*xyz2Shape, *idx2Shape)) {
+-        OP_LOGE(context->GetNodeName(),
+-                "idx2 shape must match the first two dimensions of xyz2.");
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (!IsPointwiseShapeCompatible(*xyz1Shape, *gradDist1Shape)) {
+-        OP_LOGE(context->GetNodeName(),
+-                "grad_dist1 shape must match the first two dimensions of xyz1.");
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    if (!IsPointwiseShapeCompatible(*xyz2Shape, *gradDist2Shape)) {
+-        OP_LOGE(context->GetNodeName(),
+-                "grad_dist2 shape must match the first two dimensions of xyz2.");
+-        return ge::GRAPH_FAILED;
+-    }
+-
+-    /*
+-     * Preserve every known dynamic dimension from xyz1 and xyz2.
+-     *
+-     * For example:
+-     *
+-     *   xyz1 = [4, -1, 2] -> grad_xyz1 = [4, -1, 2]
+-     *
+-     * instead of changing the result to [-1, -1, -1].
+-     */
+-    *gradXyz1Shape = *xyz1Shape;
+-    *gradXyz2Shape = *xyz2Shape;
+-
+-    OP_LOGD(context->GetNodeName(),
+-            "Runtime2.0 ChamferDistanceGrad InferShape success. "
+-            "grad_xyz1 shape is %s, grad_xyz2 shape is %s.",
+-            Ops::Base::ToString(*gradXyz1Shape).c_str(),
+-            Ops::Base::ToString(*gradXyz2Shape).c_str());
++    // Input_shape->Output_shape : (B, N) -> (B, N, 2)
++    grad_xyz1_shape->AppendDim(grad_dist1_shape->GetDim(ZERO_AXIS));
++    grad_xyz1_shape->AppendDim(grad_dist1_shape->GetDim(ONE_AXIS));
++    grad_xyz1_shape->AppendDim(LAST_DIM);
++    grad_xyz2_shape->AppendDim(grad_dist2_shape->GetDim(ZERO_AXIS));
++    grad_xyz2_shape->AppendDim(grad_dist2_shape->GetDim(ONE_AXIS));
++    grad_xyz2_shape->AppendDim(LAST_DIM);
+--- a/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.cpp
++++ b/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.cpp
+@@ -23 +23 @@
+-#include "op_host/tiling_util.h"
++
+@@ -48,2 +48,2 @@
+-    uint64_t batch_size = 1;
+-    uint64_t num = 100;
++    uint32_t batch_size = 1;
++    uint32_t num = 100;
+@@ -51,3 +51,3 @@
+-    uint64_t task_per_core = 1;
+-    uint64_t core_used = 1;
+-    uint64_t task_tail_core = 1;
++    uint32_t task_per_core = 1;
++    uint32_t core_used = 1;
++    uint32_t task_tail_core = 1;
+@@ -76 +76 @@
+-    OP_CHECK_NULL_WITH_CONTEXT(TilingContext, compileInfo);
++
+@@ -79,2 +79,2 @@
+-    uint64_t core_num = static_cast<uint64_t>(compileInfo->totalCoreNum);
+-    OP_LOGD(TilingContext, "core_num is %lu.", core_num);
++    uint32_t core_num = compileInfo->totalCoreNum;
++    OP_LOGD(TilingContext, "core_num is %u.", core_num);
+@@ -116,2 +116,2 @@
+-    OP_LOGD(TilingContext, "batch_size:       %lu.", batch_size);
+-    OP_LOGD(TilingContext, "num:  %lu.", num);
++    OP_LOGD(TilingContext, "batch_size:       %d.", batch_size);
++    OP_LOGD(TilingContext, "num:  %d.", num);
+@@ -119,3 +119,3 @@
+-    OP_LOGD(TilingContext, "task_per_core:      %lu.", task_per_core);
+-    OP_LOGD(TilingContext, "core_used:     %lu.", core_used);
+-    OP_LOGD(TilingContext, "task_tail_core:     %lu.", task_tail_core);
++    OP_LOGD(TilingContext, "task_per_core:      %d.", task_per_core);
++    OP_LOGD(TilingContext, "core_used:     %d.", core_used);
++    OP_LOGD(TilingContext, "task_tail_core:     %d.", task_tail_core);
+@@ -124 +124 @@
+-ge::graphStatus DoChamferDistanceGradTiling950(gert::TilingContext* context);
++
+@@ -128 +128 @@
+-    if (!Ops::NN::OpTiling::IsRegbaseSocVersion(context)) {
++
+@@ -132,2 +131,0 @@
+-    }
+-    return DoChamferDistanceGradTiling950(context);
+--- a/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.h
++++ b/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.h
+@@ -25,2 +25,2 @@
+-TILING_DATA_FIELD_DEF(uint64_t, batch_size);     // 0
+-TILING_DATA_FIELD_DEF(uint64_t, num);            // 1
++TILING_DATA_FIELD_DEF(uint32_t, batch_size);     // 0
++TILING_DATA_FIELD_DEF(uint32_t, num);            // 1
+@@ -28,3 +28,3 @@
+-TILING_DATA_FIELD_DEF(uint64_t, task_per_core);  // 3
+-TILING_DATA_FIELD_DEF(uint64_t, core_used);      // 4
+-TILING_DATA_FIELD_DEF(uint64_t, task_tail_core); // 5
++TILING_DATA_FIELD_DEF(uint32_t, task_per_core);  // 3
++TILING_DATA_FIELD_DEF(uint32_t, core_used);      // 4
++TILING_DATA_FIELD_DEF(uint32_t, task_tail_core); // 5
+--- a/chamfer_distance_grad/op_kernel/chamfer_distance_grad.cpp
++++ b/chamfer_distance_grad/op_kernel/chamfer_distance_grad.cpp
+@@ -15,3 +15 @@
+-#if defined(__CCE_AICORE__) && __CCE_AICORE__ == 310
+-#include "arch35/chamfer_distance_grad_simt.h"
+-#else
++
+@@ -19 +16,0 @@
+-#endif
+@@ -21,13 +17,0 @@
+-#if defined(__CCE_AICORE__) && __CCE_AICORE__ == 310
+-template <uint32_t schMode>
+-__global__ __aicore__ void chamfer_distance_grad(GM_ADDR xyz1, GM_ADDR xyz2, GM_ADDR idx1, GM_ADDR idx2,
+-                                                 GM_ADDR grad_dist1, GM_ADDR grad_dist2, GM_ADDR grad_xyz1,
+-                                                 GM_ADDR grad_xyz2, GM_ADDR workspace, GM_ADDR tiling)
+-{
+-    REGISTER_TILING_DEFAULT(ChamferDistanceGradTilingData);
+-    GET_TILING_DATA_WITH_STRUCT(ChamferDistanceGradTilingData, tilingData, tiling);
+-
+-    NsChamferDistanceGrad::Process<DTYPE_XYZ1>(xyz1, xyz2, idx1, idx2, grad_dist1, grad_dist2, grad_xyz1, grad_xyz2,
+-                                               workspace, &tilingData, AscendC::GetBlockIdx());
+-}
+-#else
+@@ -49 +33 @@
+-#endif
++
+--- a/chamfer_distance_grad/op_kernel/chamfer_distance_grad.h
++++ b/chamfer_distance_grad/op_kernel/chamfer_distance_grad.h
+@@ -22,21 +22 @@
+-#ifdef __CCE_KT_TEST__
+-#ifndef CHAMFER_DISTANCE_GRAD_TILING_DATA_H_
+-struct ChamferDistanceGradTilingData {
+-    uint64_t batch_size = 0;
+-    uint64_t num = 0;
+-    uint64_t ub_size = 0;
+-    uint64_t task_per_core = 0;
+-    uint64_t core_used = 0;
+-    uint64_t task_tail_core = 0;
+-};
+-#endif
+-
+-#undef GET_TILING_DATA
+-#define GET_TILING_DATA(tilingData, tilingPointer)                                                         \
+-    ChamferDistanceGradTilingData tilingData;                                                              \
+-    do {                                                                                                   \
+-        const ChamferDistanceGradTilingData* ptr = reinterpret_cast<const ChamferDistanceGradTilingData*>( \
+-            tilingPointer);                                                                                \
+-        tilingData = *ptr;                                                                                 \
+-    } while (0)
+-#endif
++
+@@ -53 +33 @@
+-    uint64_t num;
++    uint32_t num;
+@@ -56,3 +36,3 @@
+-    uint64_t cur_core_task_num;
+-    uint64_t xyz_ele_num;
+-    uint64_t half_xyz_ele_num;
++    uint32_t cur_core_task_num;
++    uint32_t xyz_ele_num;
++    uint32_t half_xyz_ele_num;
+@@ -60,2 +40,2 @@
+-    uint64_t per_ub_size;
+-    uint64_t start_task_id;
++    uint32_t per_ub_size;
++    uint32_t start_task_id;
+@@ -66 +46 @@
+-                                          const ChamferDistanceGradTilingData* tiling_data)
++                                           ChamferDistanceGradTilingData* tiling_data)
+@@ -72 +52 @@
+-        uint64_t batch_size = tiling_data->batch_size;
++        auto batch_size = tiling_data->batch_size;
+@@ -100 +80 @@
+-        uint64_t per_ub_size = tiling_data->ub_size / ub_num / sizeof(float) / block_bytes * block_bytes;
++        uint32_t per_ub_size = tiling_data->ub_size / ub_num / sizeof(float) / block_bytes * block_bytes;
+@@ -138 +118 @@
+-        uint64_t task_idx, T db, float neg, T fill_value, const LocalTensor<T>& xyz_local,
++        int32_t task_idx, T db, float neg, T fill_value, const LocalTensor<T>& xyz_local,
+@@ -140,2 +120,2 @@
+-        const LocalTensor<T>& xy_zero_block_local, const LocalTensor<T>& block_local, uint64_t cur_task_idx,
+-        uint64_t cur_task_batch, uint64_t cur_task_num)
++        const LocalTensor<T>& xy_zero_block_local, const LocalTensor<T>& block_local, int32_t cur_task_idx,
++        int32_t cur_task_batch, int32_t cur_task_num)
+@@ -144,3 +124,3 @@
+-        if (this->cur_core_task_num > this->per_ub_size) {
+-            uint64_t loop = this->cur_core_task_num / this->per_ub_size;
+-            for (uint64_t loop_ind = 0; loop_ind < loop; loop_ind++) {
++        if (this->cur_core_task_num >= this->per_ub_size) {
++            int32_t loop = this->cur_core_task_num / this->per_ub_size;
++            for (uint32_t loop_ind = 0; loop_ind < loop; loop_ind++) {
+@@ -162,2 +142,2 @@
+-            uint64_t numD2 = this->cur_core_task_num % this->per_ub_size;
+-            uint64_t loop_num = this->cur_core_task_num / this->per_ub_size;
++            int32_t num = this->cur_core_task_num % this->per_ub_size;
++            int32_t loop_num = this->cur_core_task_num / this->per_ub_size;
+@@ -168 +148 @@
+-                             xy_zero_block_local, block_local, cur_task_num, numD2, cur_task_idx);
++                             xy_zero_block_local, block_local, cur_task_num, num, cur_task_idx);
+@@ -172,4 +152,4 @@
+-            auto end = ceil(numD2 * doub, this->t_per_block);
+-            PipeSync<AscendC::HardEvent::S_V>();
+-            if (end > numD2 * doub) {
+-                for (auto ind = numD2 * doub; ind < end; ind++) {
++            auto end = ceil(num * doub, this->t_per_block);
++            PipeSync<AscendC::HardEvent::S_V>();
++            if (end > num * doub) {
++                for (auto ind = num * doub; ind < end; ind++) {
+@@ -182 +162 @@
+-                        {1, static_cast<uint32_t>(numD2 * doub * sizeof(T)), 0, 0, 0});
++                        {1, static_cast<uint32_t>(num * doub * sizeof(T)), 0, 0, 0});
+@@ -188 +168 @@
+-    __aicore__ inline void main_cal_func_d2(uint64_t cur_task_batch, T db, float neg, const LocalTensor<T>& xyz_local,
++    __aicore__ inline void main_cal_func_d2(int32_t cur_task_batch, T db, float neg, const LocalTensor<T>& xyz_local,
+@@ -191,2 +171 @@
+-                                            const LocalTensor<T>& block_local, uint64_t cur_task_num, uint64_t num,
+-                                            uint64_t cur_task_idx)
++                                            const LocalTensor<T>& block_local, int32_t cur_task_num, int32_t num, int32_t cur_task_idx)
+@@ -209,3 +188,3 @@
+-        for (uint64_t ind = 0; ind < num; ind++) {
+-            uint64_t cur_batch = (cur_task_idx + ind) / this->num;
+-            int32_t cur_ind = id_local.GetValue(ind);
++        for (int32_t ind = 0; ind < num; ind++) {
++            auto cur_batch = (cur_task_idx + ind) / this->num;
++            auto cur_ind = id_local.GetValue(ind);
+@@ -251 +230 @@
+-    __aicore__ inline void compute_mode_zero(uint64_t task_idx)
++    __aicore__ inline void compute_mode_zero(int32_t task_idx)
+@@ -267,6 +246,6 @@
+-        uint64_t cur_task_idx = 0;
+-        uint64_t cur_task_batch = 0;
+-        uint64_t cur_task_num = 0;
+-        if (this->cur_core_task_num > this->per_ub_size) {
+-            uint64_t loop = this->cur_core_task_num / this->per_ub_size;
+-            for (uint64_t loop_ind = 0; loop_ind < loop; loop_ind++) {
++        int32_t cur_task_idx = 0;
++        int32_t cur_task_batch = 0;
++        int32_t cur_task_num = 0;
++        if (this->cur_core_task_num >= this->per_ub_size) {
++            auto loop = this->cur_core_task_num / this->per_ub_size;
++            for (uint32_t loop_ind = 0; loop_ind < loop; loop_ind++) {
+@@ -289,2 +268,2 @@
+-            uint64_t num = this->cur_core_task_num % this->per_ub_size;
+-            uint64_t loop_num = this->cur_core_task_num / this->per_ub_size;
++            auto num = this->cur_core_task_num % this->per_ub_size;
++            auto loop_num = this->cur_core_task_num / this->per_ub_size;
+@@ -326 +305 @@
+-    __aicore__ inline void main_cal_func_d1(uint64_t cur_task_batch, T db, float neg, const LocalTensor<T>& xyz_local,
++    __aicore__ inline void main_cal_func_d1(int32_t cur_task_batch, T db, float neg, const LocalTensor<T>& xyz_local,
+@@ -329,4 +308,3 @@
+-                                            const LocalTensor<T>& block_local, uint64_t cur_task_num, uint64_t num,
+-                                            uint64_t cur_task_idx)
+-    {
+-        uint32_t doubD1 = 2;
++                                            const LocalTensor<T>& block_local, int32_t cur_task_num, int32_t num, int32_t cur_task_idx)
++    {
++        uint32_t doub = 2;
+@@ -335,2 +313,2 @@
+-        DataCopyPad(xyz_local, xyz1_gm[cur_task_batch * this->num * doubD1 + cur_task_num * doubD1],
+-                    {1, static_cast<uint32_t>(num * doubD1 * sizeof(T)), 0, 0, 0}, {false, 0, 0, 0});
++        DataCopyPad(xyz_local, xyz1_gm[cur_task_batch * this->num * doub + cur_task_num * doub],
++                    {1, static_cast<uint32_t>(num * doub * sizeof(T)), 0, 0, 0}, {false, 0, 0, 0});
+@@ -347,2 +325,2 @@
+-        for (uint64_t ind = 0; ind < num; ind++) {
+-            uint64_t cur_batch = (cur_task_idx + ind) / this->num;
++        for (int32_t ind = 0; ind < num; ind++) {
++            int32_t cur_batch = (cur_task_idx + ind) / this->num;
+@@ -352,2 +330,2 @@
+-            DataCopyPad(block_local, xyz2_gm[cur_batch * this->num * doubD1 + cur_ind * doubD1],
+-                        {1, static_cast<uint32_t>(doubD1 * sizeof(T)), 0, 0, 0}, {false, 0, 0, 0});
++            DataCopyPad(block_local, xyz2_gm[cur_batch * this->num * doub + cur_ind * doub],
++                        {1, static_cast<uint32_t>(doub * sizeof(T)), 0, 0, 0}, {false, 0, 0, 0});
+@@ -357,2 +335,2 @@
+-            float x1 = (float)xyz_local.GetValue(doubD1 * ind);
+-            float y1 = (float)xyz_local.GetValue(doubD1 * ind + 1);
++            float x1 = (float)xyz_local.GetValue(doub * ind);
++            float y1 = (float)xyz_local.GetValue(doub * ind + 1);
+@@ -364,2 +342,2 @@
+-                d_local.SetValue(doubD1 * ind, d1);
+-                d_local.SetValue(doubD1 * ind + 1, d2);
++                d_local.SetValue(doub * ind, d1);
++                d_local.SetValue(doub * ind + 1, d2);
+@@ -367,2 +345,2 @@
+-                d_local.SetValue(doubD1 * ind, (half)d1);
+-                d_local.SetValue(doubD1 * ind + 1, (half)d2);
++                d_local.SetValue(doub * ind, (half)d1);
++                d_local.SetValue(doub * ind + 1, (half)d2);
+@@ -371,2 +349,2 @@
+-            float neg_dd1 = neg * d1;
+-            float neg_dd2 = neg * d2;
++            float neg_d1 = neg * d1;
++            float neg_d2 = neg * d2;
+@@ -375,2 +353,2 @@
+-                xy_zero_block_local.SetValue(0, neg_dd1);
+-                xy_zero_block_local.SetValue(1, neg_dd2);
++                xy_zero_block_local.SetValue(0, neg_d1);
++                xy_zero_block_local.SetValue(1, neg_d2);
+@@ -378,2 +356,2 @@
+-                xy_zero_block_local.SetValue(0, (half)neg_dd1);
+-                xy_zero_block_local.SetValue(1, (half)neg_dd2);
++                xy_zero_block_local.SetValue(0, (half)neg_d1);
++                xy_zero_block_local.SetValue(1, (half)neg_d2);
+@@ -383,2 +361,2 @@
+-            DataCopyPad(grad_xyz2_gm[cur_batch * this->num * doubD1 + cur_ind * doubD1], xy_zero_block_local,
+-                        {1, static_cast<uint32_t>(doubD1 * sizeof(T)), 0, 0, 0});
++            DataCopyPad(grad_xyz2_gm[cur_batch * this->num * doub + cur_ind * doub], xy_zero_block_local,
++                        {1, static_cast<uint32_t>(doub * sizeof(T)), 0, 0, 0});
+@@ -430 +408 @@
+-    __aicore__ inline void main_fuc_of_mode_zero(uint64_t task_idx)
++    __aicore__ inline void main_fuc_of_mode_zero(int32_t task_idx)
+--- a/apply_rotary_pos_emb/_deps/common/include/tiling_base/tiling_base.h
++++ b/apply_rotary_pos_emb/_deps/common/include/tiling_base/tiling_base.h
+@@ -159,5 +159 @@
+-        OP_LOGD(context_, "%ld", DefaultTilingInfoDump());
+-    }
+-
+-    int64_t DefaultTilingInfoDump()
+-    {
++
+@@ -177 +172,0 @@
+-        return 0;
+--- a/apply_rotary_pos_emb/_deps/common/include/tiling_base/tiling_templates_registry.h
++++ b/apply_rotary_pos_emb/_deps/common/include/tiling_base/tiling_templates_registry.h
+@@ -22 +22 @@
+-#include "op_host/tiling_base.h"
++#include "tiling_base/tiling_base.h"
+--- a/apply_rotary_pos_emb/_deps/common/src/tiling_base/tiling_util.cpp
++++ b/apply_rotary_pos_emb/_deps/common/src/tiling_base/tiling_util.cpp
+@@ -16 +16 @@
+-#include "op_host/tiling_util.h"
++#include "tiling_base/tiling_util.h"
+--- a/apply_rotary_pos_emb/op_api/aclnn_apply_rotary_pos_emb.cpp
++++ b/apply_rotary_pos_emb/op_api/aclnn_apply_rotary_pos_emb.cpp
+@@ -12 +12 @@
+-#include "aclnnInner_apply_rotary_pos_emb.h"
++
+@@ -18 +18,5 @@
+-aclnnStatus aclnnApplyRotaryPosEmbGetWorkspaceSize(
++ extern aclnnStatus aclnnInnerApplyRotaryPosEmbGetWorkspaceSize(
++    aclTensor* queryRef, aclTensor* keyRef, const aclTensor* cos, const aclTensor* sin, int64_t layout,
++    char* rotaryModeOptional, uint64_t* workspaceSize, aclOpExecutor** executor);
++extern aclnnStatus aclnnInnerApplyRotaryPosEmb(
++    void* workspace, uint64_t workspaceSize, aclOpExecutor* executor, aclrtStream stream); aclnnStatus aclnnApplyRotaryPosEmbGetWorkspaceSize(
+--- a/apply_rotary_pos_emb/op_api/aclnn_apply_rotary_pos_emb_v2.cpp
++++ b/apply_rotary_pos_emb/op_api/aclnn_apply_rotary_pos_emb_v2.cpp
+@@ -12 +12 @@
+-#include "aclnnInner_apply_rotary_pos_emb.h"
++
+@@ -18 +18,6 @@
+-aclnnStatus aclnnApplyRotaryPosEmbV2GetWorkspaceSize(aclTensor* queryRef, aclTensor* keyRef, const aclTensor* cos,
++ extern aclnnStatus aclnnInnerApplyRotaryPosEmbGetWorkspaceSize(aclTensor* queryRef, aclTensor* keyRef,
++                                                               const aclTensor* cos, const aclTensor* sin,
++                                                               int64_t layout, char* rotaryMode,
++                                                               uint64_t* workspaceSize, aclOpExecutor** executor);
++extern aclnnStatus aclnnInnerApplyRotaryPosEmb(void* workspace, uint64_t workspaceSize, aclOpExecutor* executor,
++                                               aclrtStream stream); aclnnStatus aclnnApplyRotaryPosEmbV2GetWorkspaceSize(aclTensor* queryRef, aclTensor* keyRef, const aclTensor* cos,
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_def.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_def.cpp
+@@ -70,2 +70 @@
+-        this->AICore().AddConfig("mc62", regbaseCfg);
+-        OpAICoreConfig aicore_config;
++         OpAICoreConfig aicore_config;
+@@ -107,2 +106 @@
+-        aicore_config.ExtendCfgInfo("opFile.value", "apply_rotary_pos_emb");
+-        this->AICore().AddConfig("ascend310p", aicore_config);
++        aicore_config.ExtendCfgInfo("opFile.value", "apply_rotary_pos_emb"); this->AICore().AddConfig("ascend310p", aicore_config);
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.cpp
+@@ -19,2 +19,2 @@
+-#include "op_host/tiling_base.h"
+-#include "op_host/tiling_templates_registry.h"
++#include "tiling_base/tiling_base.h"
++#include "tiling_base/tiling_templates_registry.h"
+@@ -40,2 +39,0 @@
+-static const std::vector<std::string> inputNames = {"query", "key", "cos", "sin"};
+-
+@@ -56 +54 @@
+-using namespace Ops::Base;
++
+@@ -144,5 +142,2 @@
+-    if (params.qDims != DIM_4 && params.qDims != DIM_3) {
+-        std::string dimStr = std::to_string(params.qDims) + "D";
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context->GetNodeName(), "query", dimStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (params.qDims != DIM_4 && params.qDims != DIM_3, OP_LOGE(context->GetNodeName(), "q shape dims is not 3 or 4"),
++        return ge::GRAPH_FAILED);
+@@ -158,6 +153,2 @@
+-    if (kDims != params.qDims) {
+-        std::string dimMsg = std::to_string(kDims) + " and " + std::to_string(params.qDims);
+-        OP_LOGE_FOR_INVALID_SHAPEDIMS_WITH_REASON(context->GetNodeName(), "key and query", dimMsg.c_str(),
+-                                                  "The shape dims of input key and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (kDims != params.qDims, OP_LOGE(context->GetNodeName(), "k shape dims is not same as q dims"),
++        return ge::GRAPH_FAILED);
+@@ -172,6 +163,2 @@
+-    if (cosDims != params.qDims) {
+-        std::string dimMsg = std::to_string(cosDims) + " and " + std::to_string(params.qDims);
+-        OP_LOGE_FOR_INVALID_SHAPEDIMS_WITH_REASON(context->GetNodeName(), "cos and query", dimMsg.c_str(),
+-                                                  "The shape dims of input cos and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (cosDims != params.qDims, OP_LOGE(context->GetNodeName(), "cos shape dims is not same as q dims"),
++        return ge::GRAPH_FAILED);
+@@ -186,20 +173,7 @@
+-    if (sinDims != DIM_4 && sinDims != DIM_3) {
+-        std::string dimStr = std::to_string(sinDims) + "D";
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context->GetNodeName(), "sin", dimStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (cosShape != sinShape) {
+-        std::string shapeMsg = ToString(cosShape) + " and " + ToString(sinShape);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context->GetNodeName(), "cos and sin", shapeMsg.c_str(),
+-                                               "The shapes of input cos and input sin should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (qShape.GetShapeSize() == 0 || kShape.GetShapeSize() == 0 || cosShape.GetShapeSize() == 0 ||
+-        sinShape.GetShapeSize() == 0) {
+-        std::string shapeSizeMsg =
+-            std::to_string(qShape.GetShapeSize()) + ", " + std::to_string(kShape.GetShapeSize()) + ", " +
+-            std::to_string(cosShape.GetShapeSize()) + " and " + std::to_string(sinShape.GetShapeSize());
+-        OP_LOGE_FOR_INVALID_SHAPESIZES_WITH_REASON(context->GetNodeName(), "query, key, cos and sin",
+-                                                   shapeSizeMsg.c_str(), "All inputs must be non-empty tensors");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF( (sinDims != DIM_4 && sinDims != DIM_3) || (cosShape != sinShape) ,
++                OP_LOGE(context->GetNodeName(), "cos and sin shape not equal or rank not 3 or 4"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (qShape.GetShapeSize() == 0 || kShape.GetShapeSize() == 0 || cosShape.GetShapeSize() == 0 ||
++        sinShape.GetShapeSize() == 0,
++                OP_LOGE(context->GetNodeName(), "input can not be empty."),
++        return ge::GRAPH_FAILED);
+@@ -218,76 +192,25 @@
+-    if (layout != ApplyRotaryPosEmbLayout::BSND && layout != ApplyRotaryPosEmbLayout::TND) {
+-        std::string layoutStr = std::to_string(static_cast<int64_t>(layout));
+-        OP_LOGE_FOR_INVALID_VALUE(context->GetNodeName(), "layout", layoutStr.c_str(), "1 or 4");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (layout == ApplyRotaryPosEmbLayout::BSND && params.qDims != DIM_4) {
+-        std::string dimStr = std::to_string(params.qDims) + "D";
+-        OP_LOGE_FOR_INVALID_SHAPEDIM_WITH_REASON(
+-            context->GetNodeName(), "query", dimStr.c_str(),
+-            "The shape dims of input query must be 4 when the attr layout is 1 (BSND)");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (layout == ApplyRotaryPosEmbLayout::TND && params.qDims != DIM_3) {
+-        std::string dimStr = std::to_string(params.qDims) + "D";
+-        OP_LOGE_FOR_INVALID_SHAPEDIM_WITH_REASON(
+-            context->GetNodeName(), "query", dimStr.c_str(),
+-            "The shape dims of input query must be 3 when the attr layout is 4 (TND)");
+-        return ge::GRAPH_FAILED;
+-    }
+-    auto q = context->GetInputTensor(INPUT0);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, q);
+-    gert::Shape qShape = q->GetStorageShape();
+-
+-    auto k = context->GetInputTensor(INPUT1);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, k);
+-    gert::Shape kShape = k->GetStorageShape();
+-
+-    auto cos = context->GetInputTensor(INPUT2);
+-    OP_CHECK_NULL_WITH_CONTEXT(context, cos);
+-    gert::Shape cosShape = cos->GetStorageShape();
+-
+-    if ((params.kDim0 != params.qDim0) || (params.cosDim0 != params.kDim0)) {
+-        std::string shapeMsg = ToString(qShape) + ", " + ToString(kShape) + " and " + ToString(cosShape);
+-        std::string reasonMsg =
+-            "The batches of input query, key and cos should be equal, "
+-            "where batch is 1 when the attr layout is 4 (TND), otherwise is the 0th dim of its shape";
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context->GetNodeName(), "query, key and cos", shapeMsg.c_str(),
+-                                               reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
+-    if ((params.kDim1 != params.qDim1) || (params.cosDim1 != params.kDim1)) {
+-        std::string shapeMsg = ToString(qShape) + ", " + ToString(kShape) + " and " + ToString(cosShape);
+-        std::string reasonMsg =
+-            "The 1st dims of input query, key and cos should be equal when the attr layout is 1 (BSND), "
+-            "and the 0th dims of input query, key and cos should be equal when the attr layout is 4 (TND)";
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context->GetNodeName(), "query, key and cos", shapeMsg.c_str(),
+-                                               reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (params.cosDim3 != LASTDIM_64 && params.cosDim3 != LASTDIM_128) {
+-        std::string shapeStr = ToString(cosShape);
+-        OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context->GetNodeName(), "cos", shapeStr.c_str(),
+-                                              "The last dim of input cos should be 64 or 128");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (params.qDim3 < params.cosDim3) {
+-        std::string shapeMsg = ToString(qShape) + " and " + ToString(cosShape);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(
+-            context->GetNodeName(), "query and cos", shapeMsg.c_str(),
+-            "The last dim of input query should be greater than or equal to the last dim of input cos");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (params.qDim3 != LASTDIM_128 && params.qDim3 != LASTDIM_64) {
+-        std::string shapeStr = ToString(qShape);
+-        OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context->GetNodeName(), "query", shapeStr.c_str(),
+-                                              "The last dim of input query should be 64 or 128");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (params.coscNum != 1) {
+-        std::string reasonMsg = "The N axis of input cos should be 1, "
+-                                "where N refers to the 2nd dim when the attr layout is 1 (BSND), "
+-                                "or the 1st dim when the attr layout is 4 (TND)";
+-        std::string shapeStr = ToString(cosShape);
+-        OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context->GetNodeName(), "cos", shapeStr.c_str(), reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (layout != ApplyRotaryPosEmbLayout::BSND && layout != ApplyRotaryPosEmbLayout::TND, OP_LOGE(context->GetNodeName(), "layout is not 1 or 4"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (layout == ApplyRotaryPosEmbLayout::BSND && params.qDims != DIM_4, OP_LOGE(
++            context->GetNodeName(), "layout is BSND, but shape dims is not 4"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (layout == ApplyRotaryPosEmbLayout::TND && params.qDims != DIM_3, OP_LOGE(
++            context->GetNodeName(), "layout is TND, but shape dim is not 3"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF ((params.kDim0 != params.qDim0) || (params.cosDim0 != params.kDim0),
++                OP_LOGE(context->GetNodeName(), "all input dim0 must equal"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF ((params.kDim1 != params.qDim1) || (params.cosDim1 != params.kDim1),
++                OP_LOGE(context->GetNodeName(), "all input dim1 must equal"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (params.cosDim3 != LASTDIM_64 && params.cosDim3 != LASTDIM_128) ,
++                OP_LOGE(context->GetNodeName(), "The head_dim for cos/sin must be 64 or 128"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (params.qDim3 < params.cosDim3,
++                OP_LOGE(
++            context->GetNodeName(), "The head_dim of Q must >= the head_dim of cos/sin"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (params.qDim3 != LASTDIM_128 && params.qDim3 != LASTDIM_64, OP_LOGE(context->GetNodeName(), "last dim is not 128 or 64"),
++        return ge::GRAPH_FAILED);
++    OP_CHECK_IF (params.coscNum != 1, OP_LOGE(context->GetNodeName(), "cos dim2 is not one"),
++        return ge::GRAPH_FAILED);
+@@ -297,5 +220,2 @@
+-    if (qDtype != ge::DT_BF16 && qDtype != ge::DT_FLOAT && qDtype != ge::DT_FLOAT16) {
+-        std::string dtypeStr = ToString(qDtype);
+-        OP_LOGE_FOR_INVALID_DTYPE(context->GetNodeName(), "query", dtypeStr.c_str(), "BF16, FLOAT or FLOAT16");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (qDtype != ge::DT_BF16 && qDtype != ge::DT_FLOAT && qDtype != ge::DT_FLOAT16, OP_LOGE(context->GetNodeName(), "input 0 dtype not right"),
++        return ge::GRAPH_FAILED);
+@@ -307,8 +227,2 @@
+-        if (inputDtype != qDtype) {
+-            std::string paramMsg = inputNames[i] + " and query";
+-            std::string dtypeMsg = ToString(inputDtype) + " and " + ToString(qDtype);
+-            std::string reasonMsg = "The dtypes of input " + inputNames[i] + " and input query should be the same";
+-            OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context->GetNodeName(), paramMsg.c_str(), dtypeMsg.c_str(),
+-                                                   reasonMsg.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
++        OP_CHECK_IF (inputDtype != qDtype, OP_LOGE(context->GetNodeName(), "input[%d] dtype not right",i),
++            return ge::GRAPH_FAILED);
+@@ -329 +243 @@
+-                OP_LOGE(context->GetNodeName(), "oneLoop is too large or less than 0"), return ge::GRAPH_FAILED);
++                OP_LOGE(context->GetNodeName(), "oneLoop is too large or small than 0"), return ge::GRAPH_FAILED);
+@@ -344 +258 @@
+-    OP_LOGD(context->GetNodeName(), "times is %ld, remainingMte %ld", times, shengMte);
++    OP_LOGD(context->GetNodeName(), "times is %ld, shengMte %ld", times, shengMte);
+@@ -408,10 +322,2 @@
+-    if (params.qkcNum > UINT8_MAX) {
+-        gert::Shape qShape = context->GetInputTensor(INPUT0)->GetStorageShape();
+-        gert::Shape kShape = context->GetInputTensor(INPUT1)->GetStorageShape();
+-        std::string shapeMsg = ToString(qShape) + " and " + ToString(kShape);
+-        std::string reasonMsg = "The sum of the N axis of input query and the N axis of input key must not exceed " +
+-                                std::to_string(UINT8_MAX) + ", where N is the second-to-last dimension";
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context->GetNodeName(), "query and key", shapeMsg.c_str(),
+-                                               reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (params.qkcNum > UINT8_MAX, OP_LOGE(context->GetNodeName(), "qkcNum exceeds the maximum range of uint8_t"),
++        return ge::GRAPH_FAILED);
+@@ -463,2 +369 @@
+-            "blockLenQ is %ld, srcStrideK is %ld, blockLenq2q1 is %ld,  mask is %ld, tilingKey is %ld, qDim3 is %ld, "
+-            "kDim3 is %ld, blockMoveQ is %ld",
++            "blockLenQ is %ld, srcStrideK is %ld, blockLenq2q1 is %ld,  mask is %ld, tilingKey is %ld, qDim3 is %ld, kDim3 is %ld, blockMoveQ is %ld",
+@@ -571 +476 @@
+-        OP_CHECK_IF(params.totalCoreNum <= 0, OP_LOGE(context_->GetNodeName(), "PrepareTiling failed to get core num."),
++        OP_CHECK_IF(params.totalCoreNum <= 0, OP_LOGE(context_->GetNodeName(), "PrepareTiling fail to get core num."),
+@@ -574 +479 @@
+-        OP_CHECK_IF(params.totalUbSize <= 0, OP_LOGE(context_->GetNodeName(), "PrepareTiling failed to get ub size."),
++        OP_CHECK_IF(params.totalUbSize <= 0, OP_LOGE(context_->GetNodeName(), "PrepareTiling fail to get ub size."),
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.h
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.h
+@@ -20,3 +20,3 @@
+-#include "op_host/tiling_templates_registry.h"
+-#include "op_host/tiling_base.h"
+-#include "op_host/tiling_util.h"
++#include "tiling_base/tiling_templates_registry.h"
++#include "tiling_base/tiling_base.h"
++#include "tiling_base/tiling_util.h"
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_ab_arch35.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_ab_arch35.cpp
+@@ -63,7 +63,2 @@
+-    if (dSplitCoef_ == 0) {
+-        OP_LOGE(context_->GetNodeName(), "dSplitCoef_ can't be 0.");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (typeSize == 0) {
+-        OP_LOGE_FOR_INVALID_DTYPE_WITH_REASON(context_->GetNodeName(), "query",
+-            Ops::Base::ToString(dtype_).c_str(), "The dtype size of input query cannot be 0");
++    if (dSplitCoef_ == 0 || typeSize == 0 ) {
++        OP_LOGE(context_->GetNodeName(), "dSplitCoef_ can't be 0 or typeSize can't be 0.");
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_aba_and_ba_arch35.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_aba_and_ba_arch35.cpp
+@@ -16 +16 @@
+-#include "op_host/tiling_templates_registry.h"
++#include "tiling_base/tiling_templates_registry.h"
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_bab_arch35.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_bab_arch35.cpp
+@@ -98 +98 @@
+-        OP_LOGE(context_->GetNodeName(), "split coreNum [%ld] larger than coreNum [%ld]", blockNumB_ * blockNumS_,
++        OP_LOGE(context_->GetNodeName(), "split coreNum [%ld] large than coreNum[%ld]", blockNumB_ * blockNumS_,
+--- a/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_base_arch35.cpp
++++ b/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_base_arch35.cpp
+@@ -15 +15 @@
+-#include <algorithm>
++
+@@ -42 +42 @@
+-using namespace Ops::Base;
++
+@@ -114 +114 @@
+-    static const std::vector<std::string> inputNames = {"query", "key", "cos", "sin"};
++
+@@ -116,8 +116,3 @@
+-        if (shape.GetDim(i) <= 0) {
+-            std::string reasonMsg = "The shape of input " + inputNames[idx] +
+-                " can not be an invalid tensor with a negative dimension";
+-            std::string shapeStr = ToString(shape);
+-            OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context_->GetNodeName(), inputNames[idx].c_str(),
+-                shapeStr.c_str(), reasonMsg.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
++        OP_CHECK_IF (shape.GetDim(i) <= 0,
++            OP_LOGE(context_, "input %ld has non positive shape, dim %lu actual %ld .",idx, i,shape.GetDim(i)),
++            return ge::GRAPH_FAILED);
+@@ -137 +132 @@
+-    OP_CHECK_IF(qRes != ge::GRAPH_SUCCESS, OP_LOGE(context_, "query and key have non positive shape."),
++    OP_CHECK_IF(qRes != ge::GRAPH_SUCCESS, OP_LOGE(context_, "query and key has non positive shape."),
+@@ -152,8 +147,2 @@
+-    if (d > D_LIMIT) {
+-        std::string reason = "The D axis of input query can not be greater than " + std::to_string(D_LIMIT) +
+-            ", where D axis refers to the last dim";
+-        std::string qShapeStr = ToString(qShape_);
+-        OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context_->GetNodeName(), "query",
+-            qShapeStr.c_str(), reason.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (d > D_LIMIT, OP_LOGE(context_, "D must be small than %ld, actual %ld.",D_LIMIT, d),
++                return ge::GRAPH_FAILED);
+@@ -161,8 +150,3 @@
+-        if (d % HALF_INTERLEAVE_MODE_COEF != 0) {
+-            std::string reason = "The D axis of input query should be divisible by " + std::to_string(HALF_INTERLEAVE_MODE_COEF) +
+-                " when the attr rotary_mode is half and interleave, where D axis refers to the last dim";
+-            std::string qShapeStr = ToString(qShape_);
+-            OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context_->GetNodeName(), "query",
+-                qShapeStr.c_str(), reason.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
++        OP_CHECK_IF (d % HALF_INTERLEAVE_MODE_COEF != 0,
++                    OP_LOGE(context_, "D must be multiples of 2 in half and interleave mode, actual %ld.", d),
++                    return ge::GRAPH_FAILED);
+@@ -170,8 +154,3 @@
+-        if (d % QUARTER_MODE_COEF != 0) {
+-            std::string reason = "The D axis of input query should be divisible by " + std::to_string(QUARTER_MODE_COEF) +
+-                " when the attr rotary_mode is quarter, where D axis refers to the last dim";
+-            std::string qShapeStr = ToString(qShape_);
+-            OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context_->GetNodeName(), "query",
+-                qShapeStr.c_str(), reason.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
++        OP_CHECK_IF (d % QUARTER_MODE_COEF != 0,
++                    OP_LOGE(context_, "D must be multiples of 4 in quarter mode, actual %ld.", d),
++                    return ge::GRAPH_FAILED);
+@@ -184,6 +163 @@
+-    static const std::map<ApplyRotaryPosEmbLayout, std::string> layoutMap = {
+-        {ApplyRotaryPosEmbLayout::BSND, "BSND"},
+-        {ApplyRotaryPosEmbLayout::SBND, "SBND"},
+-        {ApplyRotaryPosEmbLayout::BNSD, "BNSD"},
+-        {ApplyRotaryPosEmbLayout::TND, "TND"}
+-    };
++
+@@ -206,42 +180,17 @@
+-    if (cosShape_ != sinShape_) {
+-        std::string shapeMsg = ToString(cosShape_) + " and " + ToString(sinShape_);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "cos and sin",
+-            shapeMsg.c_str(), "The shapes of input cos and input sin should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (qShape_ != qOutShape_) {
+-        std::string shapeMsg = ToString(qShape_) + " and " + ToString(qOutShape_);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "query(input) and query(output)",
+-            shapeMsg.c_str(), "The shapes of input query and output query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (kShape_ != kOutShape_) {
+-        std::string shapeMsg = ToString(kShape_) + " and " + ToString(kOutShape_);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "key(input) and key(output)",
+-            shapeMsg.c_str(), "The shapes of input key and output key should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (cosShape_.GetDim(nIdx) != 1) {
+-        std::string reasonMsg = "The N axis of input cos should be 1, "
+-            "where N refers to the " + std::to_string(nIdx) + "th dim when the attr layout is " + layoutMap.at(layout_);
+-        std::string cosShapeStr = ToString(cosShape_);
+-        OP_LOGE_FOR_INVALID_SHAPE_WITH_REASON(context_->GetNodeName(), "cos",
+-            cosShapeStr.c_str(), reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (!(cosShape_.GetDim(sIdx) == qShape_.GetDim(sIdx) && kShape_.GetDim(sIdx) == qShape_.GetDim(sIdx))) {
+-        std::string shapeMsg = ToString(cosShape_) + ", " + ToString(kShape_) + " and " + ToString(qShape_);
+-        std::string reason = "The S axes of input query, cos and key should be the same, "
+-            "where S refers to the " + std::to_string(sIdx) + "th dim when the attr layout is " + layoutMap.at(layout_);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "cos, key and query",
+-            shapeMsg.c_str(), reason.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (!(cosShape_.GetDim(dIdx) <= qShape_.GetDim(dIdx) && kShape_.GetDim(dIdx) <= qShape_.GetDim(dIdx))) {
+-        std::string shapeMsg = ToString(cosShape_) + ", " + ToString(kShape_) + " and " + ToString(qShape_);
+-        std::string reasonMsg = "The D axes of input cos and key can not be greater than the D axis of input query, "
+-            "where D refers to the " + std::to_string(dIdx) + "th dim when the attr layout is " + layoutMap.at(layout_);
+-        OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(),
+-            "cos, key and query", shapeMsg.c_str(), reasonMsg.c_str());
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (cosShape_ != sinShape_, OP_LOGE(context_, "shape of cos and sin should be same."),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(qShape_ != qOutShape_, OP_LOGE(context_, "shape of query in and out should be same."),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(kShape_ != kOutShape_, OP_LOGE(context_, "shape of key in and out should be same."),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(cosShape_.GetDim(nIdx) != 1,
++                OP_LOGE(context_, "N of cos, sin should be 1, actual %ld.",cosShape_.GetDim(nIdx) ),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF (!(cosShape_.GetDim(sIdx) == qShape_.GetDim(sIdx) && kShape_.GetDim(sIdx) == qShape_.GetDim(sIdx)),
++                OP_LOGE(context_, "S of query, key, cos, sin should be same, actual %ld %ld %ld %ld.",
++                        qShape_.GetDim(sIdx), kShape_.GetDim(sIdx),cosShape_.GetDim(sIdx) , cosShape_.GetDim(sIdx)),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF (!(cosShape_.GetDim(dIdx) <= qShape_.GetDim(dIdx) && kShape_.GetDim(dIdx) <= qShape_.GetDim(dIdx)),
++                OP_LOGE(context_, "D of query, key should be bigger than cos, sin , actual %ld %ld %ld %ld.",
++                        qShape_.GetDim(dIdx), kShape_.GetDim(dIdx),cosShape_.GetDim(dIdx), cosShape_.GetDim(dIdx)),
++                return ge::GRAPH_FAILED);
+@@ -249,16 +198,8 @@
+-        if (kShape_.GetDim(bIdx) != qShape_.GetDim(bIdx)) {
+-            std::string shapeMsg = ToString(kShape_) + " and " + ToString(qShape_);
+-            std::string reasonMsg = "The B axes of input query and key should be the same, "
+-                "where B refers to the " + std::to_string(bIdx) + "th dim when the attr layout is " + layoutMap.at(layout_);
+-            OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "key and query",
+-                shapeMsg.c_str(), reasonMsg.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
+-        if (cosShape_.GetDim(bIdx) != qShape_.GetDim(bIdx) && cosShape_.GetDim(bIdx) != 1) {
+-            std::string shapeMsg = ToString(cosShape_) + " and " + ToString(qShape_);
+-            std::string reasonMsg = "The B axis of input cos should be 1 or equal to the B axis of input query, "
+-                "where B refers to the " + std::to_string(bIdx) + "th dim when the attr layout is " + layoutMap.at(layout_);
+-            OP_LOGE_FOR_INVALID_SHAPES_WITH_REASON(context_->GetNodeName(), "cos and query",
+-                shapeMsg.c_str(), reasonMsg.c_str());
+-            return ge::GRAPH_FAILED;
+-        }
++        OP_CHECK_IF(kShape_.GetDim(bIdx) != qShape_.GetDim(bIdx),
++            OP_LOGE(context_,"B of query, key should be same, actual %ld %ld.",
++                qShape_.GetDim(bIdx),kShape_.GetDim(bIdx) ),
++            return ge::GRAPH_FAILED);
++        OP_CHECK_IF(!(cosShape_.GetDim(bIdx)== qShape_.GetDim(bIdx) || cosShape_.GetDim(bIdx) == 1),
++            OP_LOGE(context_, "B of cos, sin should be able to broadcast to query, key, actual %ld %ld %ld %ld.",
++                cosShape_.GetDim(bIdx), sinShape_.GetDim(bIdx), qShape_.GetDim(bIdx),kShape_.GetDim(bIdx) ),
++                    return ge::GRAPH_FAILED);
+@@ -273,36 +214,18 @@
+-    if (qShape_.GetDimNum() != DIM_NUM && qShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(qShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "query",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (kShape_.GetDimNum() != DIM_NUM && kShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(kShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "key",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (cosShape_.GetDimNum() != DIM_NUM && cosShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(cosShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "cos",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (sinShape_.GetDimNum() != DIM_NUM && sinShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(sinShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "sin",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (qOutShape_.GetDimNum() != DIM_NUM && qOutShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(qOutShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "query(output)",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (kOutShape_.GetDimNum() != DIM_NUM && kOutShape_.GetDimNum() != DIM_NUM_TND) {
+-        std::string dimNumStr = std::to_string(kOutShape_.GetDimNum());
+-        OP_LOGE_FOR_INVALID_SHAPEDIM(context_->GetNodeName(), "key(output)",
+-            dimNumStr.c_str(), "3D or 4D");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF( (qShape_.GetDimNum() != DIM_NUM && qShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of query expect 4 or 3, actual %zu.",qShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (kShape_.GetDimNum() != DIM_NUM && kShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of key expect 4 or 3, actual %zu.",kShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (cosShape_.GetDimNum() != DIM_NUM && cosShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of cos expect 4 or 3, actual %zu.",cosShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (sinShape_.GetDimNum() != DIM_NUM && sinShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of sin expect 4 or 3, actual %zu.",sinShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (qOutShape_.GetDimNum() != DIM_NUM && qOutShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of query out expect 4 or 3, actual %zu.",qOutShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF( (kOutShape_.GetDimNum() != DIM_NUM && kOutShape_.GetDimNum() != DIM_NUM_TND) ,
++                OP_LOGE(context_, "dim of key out expect 4 or 3, actual %zu.",kOutShape_.GetDimNum()),
++                return ge::GRAPH_FAILED);
+@@ -317,2 +240,2 @@
+-        OP_LOGE_FOR_INVALID_VALUE(context_->GetNodeName(), "rotary_mode",
+-            rotaryModeStr_.c_str(), "half, interleave or quarter"),
++        OP_LOGE(context_, "rotary mode only support half, interleave, quarter, actual %s.",
++            rotaryModeStr_.c_str()),
+@@ -320,36 +243,18 @@
+-    if (std::find(SUPPORT_DTYPE.begin(), SUPPORT_DTYPE.end(), qDataType_) == SUPPORT_DTYPE.end()) {
+-        std::string dtypeStr = ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPE(context_->GetNodeName(), "query",
+-            dtypeStr.c_str(), "FLOAT, BF16 or FLOAT16");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (kDataType_ != qDataType_) {
+-        std::string dtypesStr = ToString(kDataType_) + " and " + ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context_->GetNodeName(), "key and query",
+-            dtypesStr.c_str(), "The dtypes of input key and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (cosDataType_ != qDataType_) {
+-        std::string dtypesStr = ToString(cosDataType_) + " and " + ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context_->GetNodeName(), "cos and query",
+-            dtypesStr.c_str(), "The dtypes of input cos and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (sinDataType_ != qDataType_) {
+-        std::string dtypesStr = ToString(sinDataType_) + " and " + ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context_->GetNodeName(), "sin and query",
+-            dtypesStr.c_str(), "The dtypes of input sin and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (qOutDataType_ != qDataType_) {
+-        std::string dtypesStr = ToString(qOutDataType_) + " and " + ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context_->GetNodeName(), "query(output) and query(input)",
+-            dtypesStr.c_str(), "The dtypes of output query and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
+-    if (kOutDataType_ != qDataType_) {
+-        std::string dtypesStr = ToString(kOutDataType_) + " and " + ToString(qDataType_);
+-        OP_LOGE_FOR_INVALID_DTYPES_WITH_REASON(context_->GetNodeName(), "key(output) and query(input)",
+-            dtypesStr.c_str(), "The dtypes of output key and input query should be the same");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF (std::find(SUPPORT_DTYPE.begin(), SUPPORT_DTYPE.end(), qDataType_) == SUPPORT_DTYPE.end(),
++                OP_LOGE(context_->GetNodeName(), "Only support F32, BF16, F16 datetype, actual %d.",qDataType_),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF (kDataType_ != qDataType_,
++                OP_LOGE(context_, "the input k's datatype expect %d, actual %d.", qDataType_,kDataType_) ,
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(cosDataType_ !=qDataType_,
++                OP_LOGE(context_, "the input cos's datatype expect %d, actual %d.", qDataType_,cosDataType_  ),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(sinDataType_ != qDataType_,
++                OP_LOGE(context_, "the input sin's datatype expect %d, actual %d.",qDataType_,sinDataType_  ),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(qOutDataType_ != qDataType_,
++                OP_LOGE(context_, "the output q's datatype expect %d, actual %d.",qDataType_,qOutDataType_  ),
++                return ge::GRAPH_FAILED);
++    OP_CHECK_IF(kOutDataType_ != qDataType_,
++                OP_LOGE(context_, "the output k's datatype expect %d, actual %d.",qDataType_,kOutDataType_ ),
++                return ge::GRAPH_FAILED);
+@@ -433,7 +338,4 @@
+-    if (static_cast<int64_t>(layoutValue) < static_cast<int64_t>(ApplyRotaryPosEmbLayout::BSND) ||
+-        static_cast<int64_t>(layoutValue) > static_cast<int64_t>(ApplyRotaryPosEmbLayout::TND)) {
+-        std::string layoutValStr = std::to_string(static_cast<int64_t>(layoutValue));
+-        OP_LOGE_FOR_INVALID_VALUE(context_->GetNodeName(), "layout",
+-            layoutValStr.c_str(), "1, 2, 3 or 4");
+-        return ge::GRAPH_FAILED;
+-    }
++    OP_CHECK_IF( (static_cast<int64_t>(layoutValue) < static_cast<int64_t>(ApplyRotaryPosEmbLayout::BSND) ||
++        static_cast<int64_t>(layoutValue) > static_cast<int64_t>(ApplyRotaryPosEmbLayout::TND)) ,
++                OP_LOGE(context_, "layout should in [1, 4], actual %ld.",static_cast<int64_t>(layoutValue)),
++                return ge::GRAPH_FAILED);
+--- a/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_aba_and_ba.h
++++ b/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_aba_and_ba.h
+@@ -376,2 +376,2 @@
+-        BatchHalfAlignVF<T, IsBBoardcast>((__ubuf__ T *)inUb.GetPhyAddr(), (__ubuf__ T *)cos.GetPhyAddr(),
+-                                          (__ubuf__ T *)sin.GetPhyAddr(), (__ubuf__ T *)outUb.GetPhyAddr(), sLength,
++        BatchHalfAlignVF<T, IsBBoardcast>((__local_mem__ T *)inUb.GetPhyAddr(), (__local_mem__ T *)cos.GetPhyAddr(),
++                                          (__local_mem__ T *)sin.GetPhyAddr(), (__local_mem__ T *)outUb.GetPhyAddr(), sLength,
+@@ -380,2 +380,2 @@
+-        BatchInterleaveModeVF<T, IsBBoardcast>((__ubuf__ T *)inUb.GetPhyAddr(), (__ubuf__ T *)cos.GetPhyAddr(),
+-                                               (__ubuf__ T *)sin.GetPhyAddr(), (__ubuf__ T *)outUb.GetPhyAddr(),
++        BatchInterleaveModeVF<T, IsBBoardcast>((__local_mem__ T *)inUb.GetPhyAddr(), (__local_mem__ T *)cos.GetPhyAddr(),
++                                               (__local_mem__ T *)sin.GetPhyAddr(), (__local_mem__ T *)outUb.GetPhyAddr(),
+@@ -385,2 +385,2 @@
+-        BatchQuarterAlignVF<T, IsBBoardcast>((__ubuf__ T *)inUb.GetPhyAddr(), (__ubuf__ T *)cos.GetPhyAddr(),
+-                                             (__ubuf__ T *)sin.GetPhyAddr(), (__ubuf__ T *)outUb.GetPhyAddr(), sLength,
++        BatchQuarterAlignVF<T, IsBBoardcast>((__local_mem__ T *)inUb.GetPhyAddr(), (__local_mem__ T *)cos.GetPhyAddr(),
++                                             (__local_mem__ T *)sin.GetPhyAddr(), (__local_mem__ T *)outUb.GetPhyAddr(), sLength,
+--- a/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_common.h
++++ b/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_common.h
+@@ -67,4 +67,4 @@
+-    __ubuf__ T *sinUb = (__ubuf__ T *)sinTensor.GetPhyAddr();
+-    __ubuf__ T *cosUb = (__ubuf__ T *)cosTensor.GetPhyAddr();
+-    __ubuf__ T *inUb = (__ubuf__ T *)inTensor.GetPhyAddr();
+-    __ubuf__ T *outUb = (__ubuf__ T *)outTensor.GetPhyAddr();
++    __local_mem__ T *sinUb = (__local_mem__ T *)sinTensor.GetPhyAddr();
++    __local_mem__ T *cosUb = (__local_mem__ T *)cosTensor.GetPhyAddr();
++    __local_mem__ T *inUb = (__local_mem__ T *)inTensor.GetPhyAddr();
++    __local_mem__ T *outUb = (__local_mem__ T *)outTensor.GetPhyAddr();
+@@ -74,4 +74,4 @@
+-    __ubuf__ T *currInUb;
+-    __ubuf__ T *currOutUb;
+-    __ubuf__ T *currSinUb;
+-    __ubuf__ T *currCosUb;
++    __local_mem__ T *currInUb;
++    __local_mem__ T *currOutUb;
++    __local_mem__ T *currSinUb;
++    __local_mem__ T *currCosUb;
+@@ -134,4 +134,4 @@
+-    __ubuf__ T *sinUb = (__ubuf__ T *)sinTensor.GetPhyAddr();
+-    __ubuf__ T *cosUb = (__ubuf__ T *)cosTensor.GetPhyAddr();
+-    __ubuf__ T *inUb = (__ubuf__ T *)inTensor.GetPhyAddr();
+-    __ubuf__ T *outUb = (__ubuf__ T *)outTensor.GetPhyAddr();
++    __local_mem__ T *sinUb = (__local_mem__ T *)sinTensor.GetPhyAddr();
++    __local_mem__ T *cosUb = (__local_mem__ T *)cosTensor.GetPhyAddr();
++    __local_mem__ T *inUb = (__local_mem__ T *)inTensor.GetPhyAddr();
++    __local_mem__ T *outUb = (__local_mem__ T *)outTensor.GetPhyAddr();
+@@ -141,4 +141,4 @@
+-    __ubuf__ T *currInUb;
+-    __ubuf__ T *currOutUb;
+-    __ubuf__ T *currSinUb;
+-    __ubuf__ T *currCosUb;
++    __local_mem__ T *currInUb;
++    __local_mem__ T *currOutUb;
++    __local_mem__ T *currSinUb;
++    __local_mem__ T *currCosUb;
+@@ -218,4 +218,4 @@
+-    __ubuf__ T *sinUb = (__ubuf__ T *)sinTensor.GetPhyAddr();
+-    __ubuf__ T *cosUb = (__ubuf__ T *)cosTensor.GetPhyAddr();
+-    __ubuf__ T *inUb = (__ubuf__ T *)inTensor.GetPhyAddr();
+-    __ubuf__ T *outUb = (__ubuf__ T *)outTensor.GetPhyAddr();
++    __local_mem__ T *sinUb = (__local_mem__ T *)sinTensor.GetPhyAddr();
++    __local_mem__ T *cosUb = (__local_mem__ T *)cosTensor.GetPhyAddr();
++    __local_mem__ T *inUb = (__local_mem__ T *)inTensor.GetPhyAddr();
++    __local_mem__ T *outUb = (__local_mem__ T *)outTensor.GetPhyAddr();
+@@ -229,6 +229,6 @@
+-    __ubuf__ T *currInUb;
+-    __ubuf__ T *currOutUb;
+-    __ubuf__ T *currSinUb;
+-    __ubuf__ T *currCosUb;
+-    __ubuf__ T *tailSinUb;
+-    __ubuf__ T *tailCosUb;
++    __local_mem__ T *currInUb;
++    __local_mem__ T *currOutUb;
++    __local_mem__ T *currSinUb;
++    __local_mem__ T *currCosUb;
++    __local_mem__ T *tailSinUb;
++    __local_mem__ T *tailCosUb;
+@@ -332,4 +332,4 @@
+-    __ubuf__ T *sinUb = (__ubuf__ T *)sinTensor.GetPhyAddr();
+-    __ubuf__ T *cosUb = (__ubuf__ T *)cosTensor.GetPhyAddr();
+-    __ubuf__ T *inUb = (__ubuf__ T *)inTensor.GetPhyAddr();
+-    __ubuf__ T *outUb = (__ubuf__ T *)outTensor.GetPhyAddr();
++    __local_mem__ T *sinUb = (__local_mem__ T *)sinTensor.GetPhyAddr();
++    __local_mem__ T *cosUb = (__local_mem__ T *)cosTensor.GetPhyAddr();
++    __local_mem__ T *inUb = (__local_mem__ T *)inTensor.GetPhyAddr();
++    __local_mem__ T *outUb = (__local_mem__ T *)outTensor.GetPhyAddr();
+@@ -345,4 +345,4 @@
+-    __ubuf__ T *currInUb;
+-    __ubuf__ T *currOutUb;
+-    __ubuf__ T *currSinUb;
+-    __ubuf__ T *currCosUb;
++    __local_mem__ T *currInUb;
++    __local_mem__ T *currOutUb;
++    __local_mem__ T *currSinUb;
++    __local_mem__ T *currCosUb;
+@@ -450 +450 @@
+-__aicore__ inline void BatchHalfAlignVF(__ubuf__ T *in, __ubuf__ T *cos, __ubuf__ T *sin, __ubuf__ T *out,
++__aicore__ inline void BatchHalfAlignVF(__local_mem__ T *in, __local_mem__ T *cos, __local_mem__ T *sin, __local_mem__ T *out,
+@@ -472 +472 @@
+-        __ubuf__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
++        __local_mem__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
+@@ -517 +517 @@
+-__aicore__ inline void BatchQuarterAlignVF(__ubuf__ T *in, __ubuf__ T *cos, __ubuf__ T *sin, __ubuf__ T *out,
++__aicore__ inline void BatchQuarterAlignVF(__local_mem__ T *in, __local_mem__ T *cos, __local_mem__ T *sin, __local_mem__ T *out,
+@@ -547 +547 @@
+-        __ubuf__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
++        __local_mem__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
+@@ -610 +610 @@
+-__aicore__ inline void BatchInterleaveModeVF(__ubuf__ T *in, __ubuf__ T *cos, __ubuf__ T *sin, __ubuf__ T *out,
++__aicore__ inline void BatchInterleaveModeVF(__local_mem__ T *in, __local_mem__ T *cos, __local_mem__ T *sin, __local_mem__ T *out,
+@@ -645 +645 @@
+-        __ubuf__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
++        __local_mem__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
+@@ -693 +693 @@
+-__aicore__ inline void BatchDeepSeekInterleaveModeVF(__ubuf__ T *in, __ubuf__ T *cos, __ubuf__ T *sin, __ubuf__ T *out,
++__aicore__ inline void BatchDeepSeekInterleaveModeVF(__local_mem__ T *in, __local_mem__ T *cos, __local_mem__ T *sin, __local_mem__ T *out,
+@@ -729 +729 @@
+-        __ubuf__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;
++        __local_mem__ T *currInUb, *currOutUb, *currSinUb, *currCosUb;

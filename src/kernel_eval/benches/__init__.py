@@ -33,6 +33,7 @@
 # 导入所有评测集模块，触发注册
 from . import cann
 from . import stanford
+from . import ascend_arena
 
 # 重新导出 CANN 组件（便于直接从 benches 导入）
 from .cann import (
@@ -73,6 +74,7 @@ from .stanford import (
     # Scoring
     StanfordScoringScheme,
 )
+from .ascend_arena import AscendArenaTaskLoader, AscendArenaCaseLoader, AscendArenaCaseSpec, AscendArenaGoldenLoader, AscendArenaMatcher
 
 __all__ = [
     'cann',
@@ -110,4 +112,9 @@ __all__ = [
     "StanfordMatcher",
     # Stanford Scoring
     "StanfordScoringScheme",
+    "AscendArenaTaskLoader",
+    "AscendArenaCaseLoader",
+    "AscendArenaCaseSpec",
+    "AscendArenaGoldenLoader",
+    "AscendArenaMatcher",
 ]

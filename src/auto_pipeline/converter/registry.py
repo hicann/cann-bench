@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, Mapping
 
 from auto_pipeline.generator.akg.converter.to_cann import AkgToCannConverter
 from auto_pipeline.generator.akg.converter.to_stanford import AkgToStanfordConverter
+from auto_pipeline.generator.ascend_arena.converter import AscendArenaConverter
 from auto_pipeline.generator.pypto.converter.to_cann import PyptoToCannConverter
 from auto_pipeline.generator.pypto.converter.to_stanford import PyptoToStanfordConverter
 from auto_pipeline.generator.pypto_pro.converter.to_cann import PyptoProToCannConverter
@@ -90,9 +91,14 @@ def _create_akg_to_stanford(cfg: Mapping[str, Any]) -> AkgToStanfordConverter:
     return AkgToStanfordConverter(timeout_sec=_timeout(cfg), env=_env_mapping(cfg.get("env")))
 
 
+def _create_ascend_arena(cfg: Mapping[str, Any]) -> AscendArenaConverter:
+    return AscendArenaConverter(timeout_sec=_timeout(cfg), env=_env_mapping(cfg.get("env")))
+
+
 register_converter("pypto", "cann", _create_pypto_to_cann)
 register_converter("pypto", "stanford", _create_pypto_to_stanford)
 register_converter("pypto-pro", "cann", _create_pypto_pro_to_cann)
 register_converter("pypto-pro", "stanford", _create_pypto_pro_to_stanford)
 register_converter("akg-agent", "cann", _create_akg_to_cann)
 register_converter("akg-agent", "stanford", _create_akg_to_stanford)
+register_converter("ascend-arena", "ascend-arena", _create_ascend_arena)

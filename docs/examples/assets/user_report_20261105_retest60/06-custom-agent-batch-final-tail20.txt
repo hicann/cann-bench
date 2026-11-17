@@ -1,0 +1,20 @@
+      "started_at": "2026-11-05T18:09:17+08:00",
+      "finished_at": "2026-11-05T19:09:17+08:00",
+      "agent_run": {
+        "agent": "cannbot",
+        "harness": "cannbot",
+        "workspace": "benchmark_runs/user-report-20261105-retest60/custom/apply_rotary_pos_emb/work",
+        "returncode": 124,
+        "ok": false,
+        "log_file": "benchmark_runs/user-report-20261105-retest60/custom/apply_rotary_pos_emb/work/artifact/cannbot.log",
+        "timed_out": true,
+        "evaluation": {
+          "success": false,
+          "reason": "incomplete_evaluation",
+          "run_name": "ascend_arena_apply_rotary_pos_emb_20261105_190746_5bbf3489"
+        },
+        "error_kind": ""
+      }
+    }
+  }
+}

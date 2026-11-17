@@ -1,0 +1,10 @@
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[progress] {"label": "build_start", "op_name": "chamfer_distance_grad"}
+[progress] {"label": "build_finished", "op_name": "chamfer_distance_grad", "success": true, "log_path": "benchmark_runs/user-report-20261105-sg4nCj/batch/chamfer_distance_grad/work/kernel_eval/ascend_arena_chamfer_distance_grad_20261105_133005_47b1693b/results/compile.log"}

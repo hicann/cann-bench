@@ -1,0 +1,1945 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          1024
+        ],
+        "dtype": "bfloat16",
+        "min": -3,
+        "max": 7
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=3D, alignment=aligned, value_range=asymmetric.",
+      "coverage-gap": "M/3D/aligned/asymmetric"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          1024
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=3D, alignment=aligned, value_range=symmetric_medium.",
+      "coverage-gap": "M/3D/aligned/symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "self": {
+        "shape": [
+          33,
+          1025,
+          65
+        ],
+        "dtype": "float16",
+        "min": -100,
+        "max": 100
+      },
+      "gamma": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=3D, alignment=misaligned, value_range=symmetric_large.",
+      "coverage-gap": "M/3D/misaligned/symmetric_large"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "self": {
+        "shape": [
+          33,
+          1025,
+          65
+        ],
+        "dtype": "float16",
+        "min": -2,
+        "max": 2
+      },
+      "gamma": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=3D, alignment=misaligned, value_range=symmetric_medium.",
+      "coverage-gap": "M/3D/misaligned/symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "self": {
+        "shape": [
+          17,
+          257,
+          512
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "near_zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=3D, alignment=prime, value_range=near_zero.",
+      "coverage-gap": "M/3D/prime/near_zero"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -3,
+        "max": 7
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=4D, alignment=aligned, value_range=asymmetric.",
+      "coverage-gap": "M/4D/aligned/asymmetric"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "self": {
+        "shape": [
+          2,
+          65,
+          128,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -100,
+        "max": 100
+      },
+      "gamma": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=4D, alignment=misaligned, value_range=symmetric_large.",
+      "coverage-gap": "M/4D/misaligned/symmetric_large"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "self": {
+        "shape": [
+          2,
+          65,
+          128,
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -1,
+        "max": 1
+      },
+      "gamma": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=4D, alignment=misaligned, value_range=symmetric_small.",
+      "coverage-gap": "M/4D/misaligned/symmetric_small"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "self": {
+        "shape": [
+          17,
+          257,
+          32,
+          16
+        ],
+        "dtype": "float16",
+        "min": 0,
+        "max": 0
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l2-exception"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l2-exception",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=M, rank=4D, alignment=prime, value_range=zero.",
+      "coverage-gap": "M/4D/prime/zero"
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          32
+        ],
+        "dtype": "float16",
+        "min": -2,
+        "max": 2
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=aligned, value_range=symmetric_medium.",
+      "coverage-gap": "S/3D/aligned/symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_11",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1,
+        "max": 1
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l0-threshold"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l0-threshold",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=aligned, value_range=symmetric_small.",
+      "coverage-gap": "S/3D/aligned/symmetric_small"
+    }
+  },
+  {
+    "case_id": "case_12",
+    "inputs": {
+      "self": {
+        "shape": [
+          32,
+          64,
+          32
+        ],
+        "dtype": "float16",
+        "min": 0,
+        "max": 0
+      },
+      "gamma": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          64
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=aligned, value_range=zero.",
+      "coverage-gap": "S/3D/aligned/zero"
+    }
+  },
+  {
+    "case_id": "case_13",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          33,
+          65
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001
+      },
+      "gamma": {
+        "shape": [
+          33
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          33
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=misaligned, value_range=near_zero.",
+      "coverage-gap": "S/3D/misaligned/near_zero"
+    }
+  },
+  {
+    "case_id": "case_14",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          257,
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": -100,
+        "max": 100
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_large",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=prime, value_range=symmetric_large.",
+      "coverage-gap": "S/3D/prime/symmetric_large"
+    }
+  },
+  {
+    "case_id": "case_15",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          257,
+          257
+        ],
+        "dtype": "float16",
+        "min": -1,
+        "max": 1
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l0-threshold"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l0-threshold",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=3D, alignment=prime, value_range=symmetric_small.",
+      "coverage-gap": "S/3D/prime/symmetric_small"
+    }
+  },
+  {
+    "case_id": "case_16",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          33,
+          65,
+          2
+        ],
+        "dtype": "float16",
+        "min": -3,
+        "max": 7
+      },
+      "gamma": {
+        "shape": [
+          33
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          33
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "asymmetric",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=4D, alignment=misaligned, value_range=asymmetric.",
+      "coverage-gap": "S/4D/misaligned/asymmetric"
+    }
+  },
+  {
+    "case_id": "case_17",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          33,
+          65,
+          2
+        ],
+        "dtype": "bfloat16",
+        "min": -0.0001,
+        "max": 0.0001
+      },
+      "gamma": {
+        "shape": [
+          33
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          33
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "near_zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=4D, alignment=misaligned, value_range=near_zero.",
+      "coverage-gap": "S/4D/misaligned/near_zero"
+    }
+  },
+  {
+    "case_id": "case_18",
+    "inputs": {
+      "self": {
+        "shape": [
+          17,
+          257,
+          17,
+          17
+        ],
+        "dtype": "bfloat16",
+        "min": 0,
+        "max": 0
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l2-exception"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l2-exception",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=S, rank=4D, alignment=prime, value_range=zero.",
+      "coverage-gap": "S/4D/prime/zero"
+    }
+  },
+  {
+    "case_id": "case_19",
+    "inputs": {
+      "self": {
+        "shape": [
+          64,
+          1024,
+          1024
+        ],
+        "dtype": "float16",
+        "min": -0.0001,
+        "max": 0.0001
+      },
+      "gamma": {
+        "shape": [
+          1024
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          1024
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l2-exception"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "near_zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l2-exception",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=3D, alignment=aligned, value_range=near_zero.",
+      "coverage-gap": "L/3D/aligned/near_zero"
+    }
+  },
+  {
+    "case_id": "case_20",
+    "inputs": {
+      "self": {
+        "shape": [
+          257,
+          257,
+          1024
+        ],
+        "dtype": "float16",
+        "min": -3,
+        "max": 7
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "asymmetric",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=3D, alignment=prime, value_range=asymmetric.",
+      "coverage-gap": "L/3D/prime/asymmetric"
+    }
+  },
+  {
+    "case_id": "case_21",
+    "inputs": {
+      "self": {
+        "shape": [
+          257,
+          257,
+          1024
+        ],
+        "dtype": "float16",
+        "min": -1,
+        "max": 1
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "prime",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=3D, alignment=prime, value_range=symmetric_small.",
+      "coverage-gap": "L/3D/prime/symmetric_small"
+    }
+  },
+  {
+    "case_id": "case_22",
+    "inputs": {
+      "self": {
+        "shape": [
+          128,
+          512,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -100,
+        "max": 100
+      },
+      "gamma": {
+        "shape": [
+          512
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          512
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l2-exception"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "aligned",
+        "value_range": "symmetric_large",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l2-exception",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=4D, alignment=aligned, value_range=symmetric_large.",
+      "coverage-gap": "L/4D/aligned/symmetric_large"
+    }
+  },
+  {
+    "case_id": "case_23",
+    "inputs": {
+      "self": {
+        "shape": [
+          33,
+          65,
+          128,
+          192
+        ],
+        "dtype": "bfloat16",
+        "min": 0,
+        "max": 0
+      },
+      "gamma": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          65
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default",
+      "l2-exception"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "zero",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l2-exception",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=4D, alignment=misaligned, value_range=zero.",
+      "coverage-gap": "L/4D/misaligned/zero"
+    }
+  },
+  {
+    "case_id": "case_24",
+    "inputs": {
+      "self": {
+        "shape": [
+          17,
+          257,
+          32,
+          384
+        ],
+        "dtype": "bfloat16",
+        "min": -2,
+        "max": 2
+      },
+      "gamma": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          257
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "prime",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Regenerated after benchmark round 2: boundary ranges are unstable for this fused quant op; this case covers size=L, rank=4D, alignment=prime, value_range=symmetric_medium.",
+      "coverage-gap": "L/4D/prime/symmetric_medium"
+    }
+  },
+  {
+    "case_id": "case_25",
+    "inputs": {
+      "self": {
+        "shape": [
+          33,
+          1025,
+          65
+        ],
+        "dtype": "float16",
+        "min": -2,
+        "max": 2
+      },
+      "gamma": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          1025
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_medium",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "focus_tag": "l1-functional",
+      "expansion-reason": "Additional runtime-safe M-size case to keep complete case count in the 25-60 target.",
+      "coverage-gap": "case-count"
+    }
+  },
+  {
+    "case_id": "case_26",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          8,
+          18432
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          8
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          8
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "complete-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from DeepSeek-R1 / DeepSeek-V3.2 SiLU activation; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "Local op_stats.json::aclnnSilu: DeepSeek-R1/DeepSeek-V3.2 shape [1,8,18432]",
+      "model-reference": "DeepSeek-R1 / DeepSeek-V3.2 SiLU activation",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "local references/op_stats.json#aclnnSilu"
+    }
+  }
+]

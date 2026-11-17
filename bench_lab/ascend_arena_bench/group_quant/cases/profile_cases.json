@@ -1,0 +1,512 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Meta-Llama-3-8B: hidden_size=4096, intermediate_size=14336, num_attention_heads=32, max_position_embeddings=8192",
+      "expansion-reason": "Dense LLM prefill matrix using one full hidden-state tile per token row.",
+      "model-reference": "Meta-Llama-3-8B",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/NousResearch/Meta-Llama-3-8B/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [
+          2048,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          64,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 2048
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Llama-2-70B family: hidden_size=8192, intermediate_size=28672, num_attention_heads=64",
+      "expansion-reason": "70B-class dense hidden width represents a high-end aligned activation matrix.",
+      "model-reference": "Llama-2-70B family",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/nvidia/OpenMath-Llama-2-70b-hf/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          4096
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          8,
+          4096
+        ],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          8
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Mixtral-8x7B: hidden_size=4096, intermediate_size=14336, num_local_experts=8",
+      "expansion-reason": "MoE model source mapped to one group per local expert for realistic expert-partitioned quantization.",
+      "model-reference": "Mixtral-8x7B",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/mistralai/Mixtral-8x7B-v0.1/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          64,
+          8192
+        ],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          64
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Qwen2.5-72B-Instruct: hidden_size=8192, intermediate_size=29568, num_attention_heads=64, sliding_window=131072",
+      "expansion-reason": "Chinese-focused long-context model contributes a large aligned hidden-state matrix.",
+      "model-reference": "Qwen2.5-72B-Instruct",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/Qwen/Qwen2.5-72B-Instruct/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          3072
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          3072
+        ],
+        "dtype": "float32",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Phi-3-mini-4k-instruct: hidden_size=3072, intermediate_size=8192, num_attention_heads=32",
+      "expansion-reason": "Compact dense model adds a smaller hidden width with float32 coverage.",
+      "model-reference": "Phi-3-mini-4k-instruct",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          4096
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "GLM-4-9B-Chat: hidden_size=4096, ffn_hidden_size=13696, num_attention_heads=32, seq_length=131072",
+      "expansion-reason": "Chinese bilingual deployment source with 128K context config.",
+      "model-reference": "GLM-4-9B-Chat",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/zai-org/glm-4-9b-chat/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          5120
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          160,
+          5120
+        ],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          160
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8192
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "DeepSeek-V2: hidden_size=5120, intermediate_size=12288, num_attention_heads=128, n_routed_experts=160",
+      "expansion-reason": "MoE production source maps routed experts to group count for a long-context bf16 profile.",
+      "model-reference": "DeepSeek-V2",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/deepseek-ai/DeepSeek-V2/blob/main/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          4096
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8192
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "Mistral-7B-v0.1: hidden_size=4096, intermediate_size=14336, num_attention_heads=32, sliding_window=4096",
+      "expansion-reason": "Long-sequence inference anchor with many token rows and standard 4K hidden width.",
+      "model-reference": "Mistral-7B-v0.1",
+      "research-source": "Phase 1 research",
+      "provenance-url": "https://huggingface.co/mistralai/Mistral-7B-v0.1/blob/29b3489dc8f0210f34d2a4bda08ccc072cd20d09/config.json",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "x": {
+        "shape": [
+          4096,
+          7168
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          7168
+        ],
+        "dtype": "float16",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 4096
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "SOL-ExecBench MoE entry: e32, h7168, i2048 from 020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048",
+      "expansion-reason": "Direct benchmark-source profile anchor for expert-routed hidden-state quantization.",
+      "model-reference": "SOL-ExecBench MoE entry",
+      "research-source": "Phase 1 research",
+      "provenance-url": "local://SOL-ExecBench.json#020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "x": {
+        "shape": [
+          8192,
+          4096
+        ],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "scale": {
+        "shape": [
+          32,
+          4096
+        ],
+        "dtype": "float32",
+        "min": 0.5,
+        "max": 1.5
+      },
+      "group_index": {
+        "shape": [
+          32
+        ],
+        "dtype": "int32",
+        "min": 0,
+        "max": 8192
+      }
+    },
+    "attrs": {},
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "tolerance": {
+      "standard": "huawei_quant_int_out",
+      "AE_max": 1
+    },
+    "meta": {
+      "provenance": "SOL-ExecBench GQA entry: h32, d128 -> hidden_size=4096 from 012_gqa_paged_decode_h32_kv4_d128_ps1",
+      "expansion-reason": "Direct benchmark-source profile anchor derived from flattened attention query activations.",
+      "model-reference": "SOL-ExecBench GQA entry",
+      "research-source": "Phase 1 research",
+      "provenance-url": "local://SOL-ExecBench.json#012_gqa_paged_decode_h32_kv4_d128_ps1",
+      "op-compute-type": "quant_compute",
+      "precision-level-l0": true,
+      "shape-mapping-note": "Mapped model hidden-state matrix [tokens, hidden_size] to x=[S,H], with scale=[E,H] and group_index=[E] chosen from expert count or a standard row partition count."
+    }
+  }
+]

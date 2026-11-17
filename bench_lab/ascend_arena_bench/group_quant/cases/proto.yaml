@@ -1,0 +1,218 @@
+operator:
+  name: group_quant
+  category: misc
+  difficulty: medium
+  formula: y = round(x * scale[group] + offset)
+  inputs:
+  - name: x
+    shape: '[S, H]'
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: scale
+    shape: '[E, H]'
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: group_index
+    shape: '[E]'
+    dtype:
+    - int32
+    - int64
+  - name: offset
+    shape: '[1]'
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    optional: true
+  outputs:
+  - name: y
+    shape: '[S, H]'
+    dtype:
+    - int8
+    precision_standard: quantized_integer_ae1
+  attrs: []
+  schema: group_quant(Tensor x, Tensor scale, Tensor group_index, Tensor? offset=None, int dst_type=2) -> Tensor y
+constraints:
+  dtype_equal:
+  - - x
+    - scale
+  match:
+  - source: scale.shape
+    source_index: 0
+    target: group_index.shape
+    target_index: 0
+  - source: scale.shape
+    source_index: 1
+    target: x.shape
+    target_index: 1
+  min_rank: 1
+  max_rank: 2
+coverage_axes:
+  size:
+  - S
+  - M
+  - L
+  - zero
+  rank:
+  - 1D
+  - 2D
+  alignment:
+  - aligned
+  - misaligned
+  - prime
+  - zero
+  value_range:
+  - symmetric_small
+  - symmetric_medium
+  - symmetric_large
+  - near_zero
+  - zero
+  attrs_signature:
+  - <none>
+coverage_skip:
+  pairs:
+  - - size
+    - dtype
+    - L
+    - int32
+  - - size
+    - dtype
+    - L
+    - int64
+  - - size
+    - dtype
+    - M
+    - int32
+  - - size
+    - dtype
+    - M
+    - int64
+  - - alignment
+    - dtype
+    - aligned
+    - int64
+  - - alignment
+    - dtype
+    - prime
+    - int32
+  - - rank
+    - dtype
+    - 1D
+    - float16
+  - - rank
+    - dtype
+    - 1D
+    - float32
+  - - rank
+    - dtype
+    - 1D
+    - bfloat16
+  - - rank
+    - dtype
+    - 2D
+    - int32
+  - - rank
+    - dtype
+    - 2D
+    - int64
+  - - size
+    - rank
+    - L
+    - 1D
+  - - size
+    - rank
+    - M
+    - 1D
+  - - size
+    - alignment
+    - L
+    - zero
+  - - size
+    - alignment
+    - M
+    - zero
+  - - size
+    - alignment
+    - S
+    - zero
+  - - size
+    - alignment
+    - zero
+    - prime
+  - - rank
+    - alignment
+    - 2D
+    - zero
+  - - dtype
+    - alignment
+    - float16
+    - zero
+  - - dtype
+    - alignment
+    - float32
+    - zero
+  - - dtype
+    - alignment
+    - bfloat16
+    - zero
+  - - alignment
+    - value_range
+    - zero
+    - symmetric_small
+  - - alignment
+    - value_range
+    - zero
+    - symmetric_medium
+  - - alignment
+    - value_range
+    - zero
+    - symmetric_large
+  - - alignment
+    - value_range
+    - zero
+    - near_zero
+  - - size
+    - value_range
+    - zero
+    - symmetric_small
+  - - size
+    - value_range
+    - zero
+    - symmetric_medium
+  - - size
+    - value_range
+    - zero
+    - symmetric_large
+  - - size
+    - value_range
+    - zero
+    - near_zero
+empty_tensor_scenarios:
+- name: rows_zero
+  description: x has zero rows while scale/group metadata remain non-empty and legal.
+dtype_value_ranges:
+  float16:
+    normal:
+    - -2.0
+    - 2.0
+    boundary:
+    - 8.0
+    - 16.0
+  float32:
+    normal:
+    - -2.0
+    - 2.0
+    boundary:
+    - 16.0
+    - 128.0
+  bfloat16:
+    normal:
+    - -2.0
+    - 2.0
+    boundary:
+    - 16.0
+    - 64.0

@@ -9,6 +9,10 @@ import shutil
 import subprocess
 import sys
 import logging
+import json
+import hashlib
+import runpy
+from pathlib import Path
 from setuptools import setup, find_packages, Distribution, Command
 from wheel.bdist_wheel import bdist_wheel
 
@@ -96,6 +100,12 @@ class CMakeBuildCommand(Command):
             'cmake', '--build', build_dir,
             '--config', 'Release', '--parallel', str(cpu_count)
         ])
+        build_info = runpy.run_path(f"{PACKAGE_NAME}/build_info.py")
+        info = build_info["current_environment"]()
+        info["source_sha256"] = build_info["source_fingerprint"](Path.cwd())
+        info["npu_arch"] = NPU_ARCH
+        info["binary_sha256"] = hashlib.sha256(Path(build_dir, "_C.so").read_bytes()).hexdigest()
+        Path(PACKAGE_NAME, "_build_info.json").write_text(json.dumps(info) + "\n")
         logging.info("CMake build complete.")
 
 
@@ -110,7 +120,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     packages=find_packages(),
-    package_data={PACKAGE_NAME: ['*.so']},
+    package_data={PACKAGE_NAME: ['*.so', '_build_info.json']},
     distclass=BinaryDistribution,
     cmdclass=cmdclass,
     zip_safe=False,

@@ -1,0 +1,14 @@
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[progress] {"label": "build_start", "op_name": "chamfer_distance_grad"}
+[progress] {"label": "build_finished", "op_name": "chamfer_distance_grad", "success": true, "log_path": "benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/ascend_arena_chamfer_distance_grad_20261105_173222_d6dbd7d4/results/compile.log"}
+[progress] {"label": "smoke_correctness_start", "op_name": "chamfer_distance_grad"}
+[progress] {"label": "smoke_correctness_finished", "op_name": "chamfer_distance_grad", "success": false, "case_count": 5, "passed_count": 1, "log_path": "benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/ascend_arena_chamfer_distance_grad_20261105_173222_d6dbd7d4/results/smoke-correctness.log"}
+[progress] {"label": "benchmark_finished", "op_name": "chamfer_distance_grad", "success": false, "build_success": true, "smoke_success": false, "complete_success": false, "correctness_success": false, "profile_success": false}
+__CANN_BENCH_STAGE_RESULT__{"success": false, "build_success": true, "profile_success": false, "compile_log": "benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/ascend_arena_chamfer_distance_grad_20261105_173222_d6dbd7d4/results/compile.log", "profile_log": "benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/ascend_arena_chamfer_distance_grad_20261105_173222_d6dbd7d4/results/profile.log", "profile_message": "skipped_after_smoke_failed", "profile_cases": 0}

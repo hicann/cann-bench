@@ -1,0 +1,12 @@
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[progress] {"label": "build_start", "op_name": "group_norm_silu_quant"}
+[progress] {"label": "build_finished", "op_name": "group_norm_silu_quant", "success": false, "log_path": "benchmark_runs/user-report-20261105-sg4nCj/batch/group_norm_silu_quant/work/kernel_eval/ascend_arena_group_norm_silu_quant_20261105_131148_596297c3/results/compile.log"}
+[progress] {"label": "benchmark_finished", "op_name": "group_norm_silu_quant", "success": false, "build_success": false, "smoke_success": false, "complete_success": false, "correctness_success": false, "profile_success": false}
+__CANN_BENCH_STAGE_RESULT__{"success": false, "build_success": false, "profile_success": false, "compile_log": "benchmark_runs/user-report-20261105-sg4nCj/batch/group_norm_silu_quant/work/kernel_eval/ascend_arena_group_norm_silu_quant_20261105_131148_596297c3/results/compile.log", "profile_log": "benchmark_runs/user-report-20261105-sg4nCj/batch/group_norm_silu_quant/work/kernel_eval/ascend_arena_group_norm_silu_quant_20261105_131148_596297c3/results/profile.log", "profile_message": "skipped_after_build_failed", "profile_cases": 0}

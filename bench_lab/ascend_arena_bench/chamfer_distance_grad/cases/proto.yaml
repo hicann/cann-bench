@@ -1,0 +1,108 @@
+operator:
+  name: chamfer_distance_grad
+  category: misc
+  difficulty: medium
+  formula: |
+    grad_xyz1[b,n] += 2 * grad_dist1[b,n] * (xyz1[b,n] - xyz2[b,idx1[b,n]])
+    grad_xyz2[b,idx1[b,n]] -= 2 * grad_dist1[b,n] * (xyz1[b,n] - xyz2[b,idx1[b,n]])
+    grad_xyz2[b,n] += 2 * grad_dist2[b,n] * (xyz2[b,n] - xyz1[b,idx2[b,n]])
+    grad_xyz1[b,idx2[b,n]] -= 2 * grad_dist2[b,n] * (xyz2[b,n] - xyz1[b,idx2[b,n]])
+  inputs:
+    - name: xyz1
+      shape: "[B, N, 2]"
+      dtype: ["float16", "float32"]
+    - name: xyz2
+      shape: "[B, N, 2]"
+      dtype: ["float16", "float32"]
+    - name: idx1
+      shape: "[B, N]"
+      dtype: ["int32"]
+    - name: idx2
+      shape: "[B, N]"
+      dtype: ["int32"]
+    - name: grad_dist1
+      shape: "[B, N]"
+      dtype: ["float16", "float32"]
+    - name: grad_dist2
+      shape: "[B, N]"
+      dtype: ["float16", "float32"]
+  outputs:
+    - name: grad_xyz1
+      shape: "[B, N, 2]"
+      dtype: ["float16", "float32"]
+    - name: grad_xyz2
+      shape: "[B, N, 2]"
+      dtype: ["float16", "float32"]
+  attrs: []
+
+constraints:
+  min_rank: 2
+  max_rank: 3
+  dtype_equal:
+    - [xyz1, xyz2, grad_dist1, grad_dist2]
+
+coverage_axes:
+  size:
+    - S
+    - M
+    - L
+  rank:
+    - 2D
+    - 3D
+  alignment:
+    - aligned
+    - misaligned
+    - prime
+  value_range:
+    - symmetric_small
+    - near_zero
+    - zero
+    - symmetric_medium
+    - symmetric_large
+    - asymmetric
+  attrs_signature:
+    - "<none>"
+
+
+coverage_skip:
+  pairs:
+    - [rank, dtype, 2D, float16]
+    - [rank, dtype, 2D, float32]
+    - [rank, dtype, 3D, int32]
+    - [rank, alignment, 3D, aligned]
+    - [dtype, alignment, float16, aligned]
+    - [dtype, alignment, float32, aligned]
+    - [alignment, value_range, aligned, asymmetric]
+    - [alignment, value_range, aligned, near_zero]
+    - [alignment, value_range, aligned, symmetric_large]
+    - [alignment, value_range, misaligned, zero]
+    - [alignment, value_range, prime, asymmetric]
+    - [alignment, value_range, prime, symmetric_medium]
+    - [alignment, value_range, prime, symmetric_small]
+    - [size, rank, L, 2D]
+    - [size, rank, M, 2D]
+    - [size, dtype, L, int32]
+    - [size, dtype, M, int32]
+    - [size, alignment, L, aligned]
+    - [size, alignment, M, aligned]
+    - [size, value_range, L, asymmetric]
+    - [size, value_range, L, symmetric_small]
+    - [size, value_range, L, zero]
+    - [alignment, value_range, aligned, zero]
+    - [rank, value_range, 2D, zero]
+    - [dtype, value_range, int32, zero]
+  pair_reasons:
+    - "Coverage axes are extracted from a single primary input. The real 2D input is idx1/int32, while float tensors are structurally 3D [B,N,2]; these rank/dtype pairs are unreachable without synthetic tensors."
+    - "For real xyz tensors with fixed trailing dim=2, lint classifies 3D shapes as misaligned or prime, never aligned, because dimension 2 is not divisible by 32."
+    - "Aligned float16/float32 is structurally unreachable for 3D xyz primary tensors due to the fixed trailing dim=2; aligned cases are possible only for 2D int32 index primary inputs."
+    - "Skipped alignment/value_range pairs are redundant under the structural primary-input split and covered semantically through dtype×value_range plus size×value_range cases."
+
+dtype_value_ranges:
+  float16:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.001, 0.001]
+    boundary: [-65504.0, 65504.0]
+  float32:
+    normal: [-1.0, 1.0]
+    near_zero: [-0.001, 0.001]
+    boundary: [-3.4e38, 3.4e38]

@@ -1,0 +1,20 @@
+[ERROR] TBE(2975444,python3):2026-11-05-16:22:23.997.283 [opc.py:688][main] Opc tool compile failed.
+[INFO] RUNTIME(2975444,python3):2026-11-05-16:22:24.044.439 [xpu_task_fail_callback_data_manager.cc:64] 2975444 ~XpuTaskFailCallBackManager: XpuTaskFailCallBackManager Destructor.
+[INFO] RUNTIME(2975444,python3):2026-11-05-16:22:24.044.467 [task_fail_callback_data_manager.cc:98] 2975444 ~TaskFailCallBackManager: Destructor.
+[INFO] ATRACE(2975444,python3):2026-11-05-16:22:24.052.660 [stacktrace_signal.c:199](tid:2975444) unregister all signal handlers, can not capture signal.
+<sandbox>/cannbench_arena_adaptive_avg_pool3d_v5e8r6iz/runs/candidate/adaptive_avg_pool3d/src/build/ops_skeleton_kernels/binary/ascend910b/adaptive_avg_pool3d/AdaptiveAvgPool3d_14a332837954e9bd05f09b6dc7946aac.json not generated!
+make[4]: *** [<sandbox>/cannbench_arena_adaptive_avg_pool3d_v5e8r6iz/runs/candidate/adaptive_avg_pool3d/src/build/AdaptiveAvgPool3d_ascend910b/adaptive_avg_pool3d.make:7: adaptive_avg_pool3d2] Error 1
+Traceback (most recent call last):
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 277, in <module>
+    kernel_builder.ascendc_build()
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 214, in ascendc_build
+    raise RuntimeError('Kernel Compilation Error: OpType {} Kernel File {}!'.format(
+RuntimeError: Kernel Compilation Error: OpType AdaptiveAvgPool3d Kernel File <sandbox>/cannbench_arena_adaptive_avg_pool3d_v5e8r6iz/runs/candidate/adaptive_avg_pool3d/src/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d.cpp!
+gmake[3]: *** [CMakeFiles/AdaptiveAvgPool3d_ascend910b.dir/build.make:70: CMakeFiles/AdaptiveAvgPool3d_ascend910b] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:392: CMakeFiles/AdaptiveAvgPool3d_ascend910b.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:534: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:371: binary] Error 2
+
+
+## validation_build
+validation_skipped

@@ -1,0 +1,20 @@
+
+Compile op info cfg successfully.
+[ 85%] Built target ops_skeleton_kernels_ops_info_gen_ascend910b
+[ 85%] Built target opbase_util_objs
+[ 85%] Built target opbase_tiling_objs
+[ 92%] Building CXX object gather_elements_v2/CMakeFiles/ophost_math_tiling_obj.dir/op_host/gather_elements_v2_tiling.cpp.o
+In file included from <sandbox>/cannbench_arena_gather_elements_v2_ja7ep2dt/runs/candidate/gather_elements_v2/src/gather_elements_v2/op_host/gather_elements_v2_tiling.cpp:16:
+<sandbox>/cannbench_arena_gather_elements_v2_ja7ep2dt/runs/candidate/gather_elements_v2/src/gather_elements_v2/op_host/gather_elements_v2_last_dim_tiling.h: In member function ‘void optiling::GatherElementsV2LastDimTiling::DoUBSlice()’:
+<sandbox>/cannbench_arena_gather_elements_v2_ja7ep2dt/runs/candidate/gather_elements_v2/src/gather_elements_v2/op_host/gather_elements_v2_last_dim_tiling.h:229:90: error: ‘NUM_TWO’ was not declared in this scope; did you mean ‘NUM_TEN’?
+  229 |         int64_t perGroupSize = xAxisSize_ * xDSize_ + indexPhysDSize_ * indexAxisSize_ * NUM_TWO;
+      |                                                                                          ^~~~~~~
+      |                                                                                          NUM_TEN
+gmake[3]: *** [gather_elements_v2/CMakeFiles/ophost_math_tiling_obj.dir/build.make:76: gather_elements_v2/CMakeFiles/ophost_math_tiling_obj.dir/op_host/gather_elements_v2_tiling.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:708: gather_elements_v2/CMakeFiles/ophost_math_tiling_obj.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:532: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:371: binary] Error 2
+
+
+## validation_build
+validation_skipped

@@ -1,0 +1,20 @@
+[ERROR] TBE(1424327,python3):2026-11-05-14:57:07.364.354 [opc.py:688][main] Opc tool compile failed.
+[INFO] RUNTIME(1424327,python3):2026-11-05-14:57:07.418.980 [xpu_task_fail_callback_data_manager.cc:64] 1424327 ~XpuTaskFailCallBackManager: XpuTaskFailCallBackManager Destructor.
+[INFO] RUNTIME(1424327,python3):2026-11-05-14:57:07.419.006 [task_fail_callback_data_manager.cc:98] 1424327 ~TaskFailCallBackManager: Destructor.
+[INFO] ATRACE(1424327,python3):2026-11-05-14:57:07.427.595 [stacktrace_signal.c:199](tid:1424327) unregister all signal handlers, can not capture signal.
+benchmark_runs/user-report-20261105-sg4nCj/custom/gather_elements_v2/work/kernel_eval/.sandboxes/ascend_arena_gather_elements_v2_20261105_145636_4e5e48ea_1793861797366909041/runs/candidate/gather_elements_v2/src/build/ops_skeleton_kernels/binary/ascend910b/gather_elements_v2/GatherElementsV2_ed5edee2d1170eea99a66275d139e5cf.json not generated!
+make[4]: *** [benchmark_runs/user-report-20261105-sg4nCj/custom/gather_elements_v2/work/kernel_eval/.sandboxes/ascend_arena_gather_elements_v2_20261105_145636_4e5e48ea_1793861797366909041/runs/candidate/gather_elements_v2/src/build/GatherElementsV2_ascend910b/gather_elements_v2.make:3: gather_elements_v20] Error 1
+Traceback (most recent call last):
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 277, in <module>
+    kernel_builder.ascendc_build()
+  File "/usr/local/Ascend/cann-9.1.0/compiler/tikcpp/ascendc_kernel_cmake/fwk_modules/util/ascendc_compile_kernel.py", line 214, in ascendc_build
+    raise RuntimeError('Kernel Compilation Error: OpType {} Kernel File {}!'.format(
+RuntimeError: Kernel Compilation Error: OpType GatherElementsV2 Kernel File benchmark_runs/user-report-20261105-sg4nCj/custom/gather_elements_v2/work/kernel_eval/.sandboxes/ascend_arena_gather_elements_v2_20261105_145636_4e5e48ea_1793861797366909041/runs/candidate/gather_elements_v2/src/gather_elements_v2/op_kernel/gather_elements_v2.cpp!
+gmake[3]: *** [CMakeFiles/GatherElementsV2_ascend910b.dir/build.make:70: CMakeFiles/GatherElementsV2_ascend910b] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:390: CMakeFiles/GatherElementsV2_ascend910b.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:532: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:371: binary] Error 2
+
+
+## validation_build
+validation_skipped

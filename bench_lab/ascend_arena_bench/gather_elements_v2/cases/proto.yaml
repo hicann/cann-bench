@@ -1,0 +1,106 @@
+operator:
+  name: gather_elements_v2
+  category: FusedComposite
+  difficulty: L1
+  formula: y[i0,...,in-1] = x[i0,...,i(d-1), index[i0,...,in-1], i(d+1),...,in-1]
+  description: Gather values from x along dim using index; output shape matches index.
+  shape_support: 'x: [*]; index: [*]; x and index share rank; y shape equals index'
+  attrs:
+  - name: dim
+    type: int
+    default: -1
+    enum:
+    - -1
+    description: Gather dimension, fixed to negative-last-axis path for Step 2 semantic
+      core.
+  inputs:
+  - name: x
+    description: Source tensor
+    shape: '[*]'
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+  - name: index
+    description: Indices along dim; shape also defines the output shape
+    shape: '[*]'
+    dtype:
+    - int32
+    - int64
+  outputs:
+  - name: y
+    description: Gather result
+    shape: '[*]'
+    dtype:
+    - float16
+    - float32
+    - bfloat16
+    precision_standard: exact
+  schema: gather_elements_v2(Tensor x, Tensor index, int dim=-1) -> Tensor y
+constraints:
+  max_rank: 8
+coverage_skip:
+  triples: []
+  pairs: []
+dtype_value_ranges:
+  float16:
+    normal:
+    - -1.0
+    - 1.0
+    near_zero:
+    - -0.0001
+    - 0.0001
+    boundary:
+    - 60000.0
+    - 65504.0
+  bfloat16:
+    normal:
+    - -1.0
+    - 1.0
+    near_zero:
+    - -1.0e-30
+    - 1.0e-30
+    boundary:
+    - 1.0e30
+    - 3.4e38
+  float32:
+    normal:
+    - -1.0
+    - 1.0
+    near_zero:
+    - -1.0e-06
+    - 1.0e-06
+    boundary:
+    - 1.0e30
+    - 3.4e38
+  int32:
+    normal:
+    - -1000
+    - 1000
+    boundary:
+    - -2147483648
+    - 2147483647
+  int64:
+    normal:
+    - -1000000
+    - 1000000
+coverage_axes:
+  size:
+  - S
+  - M
+  - L
+  rank:
+  - 2D
+  - 3D
+  alignment:
+  - aligned
+  - misaligned
+  - prime
+  value_range:
+  - symmetric_small
+  - asymmetric
+  - near_zero
+  - zero
+  - boundary
+  attrs_signature:
+  - dim=-1

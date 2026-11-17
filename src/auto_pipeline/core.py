@@ -127,6 +127,14 @@ def read_case_preview(path: Path, *, limit: int = 3) -> List[Dict[str, Any]]:
         with path.open("r", encoding="utf-8", newline="") as handle:
             return [dict(row) for _, row in zip(range(limit), csv.DictReader(handle))]
 
+    if path.suffix.lower() == ".json":
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            data = data.get("cases", data.get("test_cases", []))
+        if not isinstance(data, list):
+            return []
+        return [case for case in data[:limit] if isinstance(case, dict)]
+
     return []
 
 class ParentProcessSignal(SystemExit):
@@ -584,8 +592,11 @@ class CannBenchClient:
     def load_case(self, bench_name: str, task_selector: str) -> CannBenchCase:
         """Load one cann-bench operator case into the benchmark pipeline."""
 
-        if bench_name.lower() == "stanford":
+        bench_key = bench_name.strip().lower().replace("-", "_")
+        if bench_key == "stanford":
             return self._load_stanford_case(bench_name, task_selector)
+        if bench_key == "ascend_arena":
+            return self._load_ascend_arena_case(bench_name, task_selector)
 
         task_dir = self._resolve_task_dir(task_selector)
         self._validate_task_dir(task_dir)
@@ -630,7 +641,13 @@ class CannBenchClient:
         """Load an evaluation target, accepting one operator or a directory."""
 
         task_dir = self._resolve_task_dir(task_selector)
-        if self._is_single_task_dir(task_dir):
+        bench_key = bench_name.strip().lower().replace("-", "_")
+        single_task = (
+            self._is_ascend_arena_task_dir(task_dir)
+            if bench_key == "ascend_arena"
+            else self._is_single_task_dir(task_dir)
+        )
+        if single_task:
             case = self.load_case(bench_name, task_selector)
             return EvalTarget(
                 bench_name=case.bench_name,
@@ -642,6 +659,11 @@ class CannBenchClient:
                 metadata={**case.metadata, "multi_operator": False},
             )
 
+        task_dirs = (
+            self._discover_ascend_arena_task_dirs(task_dir)
+            if bench_key == "ascend_arena"
+            else self._discover_task_dirs(task_dir)
+        )
         return EvalTarget(
             bench_name=bench_name,
             task_dir=task_dir,
@@ -650,7 +672,7 @@ class CannBenchClient:
             metadata={
                 "task_selector": task_selector,
                 "multi_operator": True,
-                "task_count": len(self._discover_task_dirs(task_dir)),
+                "task_count": len(task_dirs),
             },
         )
 
@@ -667,6 +689,27 @@ class CannBenchClient:
         """Build the cann-bench kernel_eval command without executing it."""
 
         extra_args_list = list(extra_args or [])
+        bench_key = bench_name.strip().lower().replace("-", "_")
+        if bench_key == "ascend_arena":
+            case = self._load_ascend_arena_case(bench_name, task_selector)
+            command = [
+                self.python_executable,
+                "-m",
+                "kernel_eval.optimize",
+                "--source-dir",
+                str(Path(source_dir)),
+                "--task-dir",
+                str(case.task_dir),
+                "--operator",
+                case.operator,
+                "--reports-dir",
+                str(Path(reports_dir)),
+            ]
+            if device_id is not None:
+                command.extend(["--device-id", str(device_id)])
+            command.extend(extra_args_list)
+            return command
+
         eval_task_selector = task_selector
         auto_operator = None
         if bench_name.lower() == "stanford":
@@ -720,7 +763,11 @@ class CannBenchClient:
             device_id=device_id,
             extra_args=extra_args,
         )
-        eval_env = self._build_eval_env(source_dir=source_dir, reports_dir=reports_dir)
+        eval_env = self._build_eval_env(
+            source_dir=source_dir,
+            reports_dir=reports_dir,
+            isolate_python=bench_name.strip().lower().replace("-", "_") != "ascend_arena",
+        )
         try:
             completed = _run_captured_process(
                 command,
@@ -746,8 +793,16 @@ class CannBenchClient:
             report_files=self._collect_report_files(reports_dir),
         )
 
-    def _build_eval_env(self, *, source_dir: Path, reports_dir: Path) -> Dict[str, str]:
+    def _build_eval_env(
+        self,
+        *,
+        source_dir: Path,
+        reports_dir: Path,
+        isolate_python: bool = True,
+    ) -> Dict[str, str]:
         env = self._build_env()
+        if not isolate_python:
+            return env
         isolation_dir = reports_dir / f"_eval_isolation_{uuid.uuid4().hex}"
         pip_target = isolation_dir / "pip_target"
         pip_shim_dir = isolation_dir / "pip_shim"
@@ -790,6 +845,50 @@ class CannBenchClient:
                 return resolved
         display = ", ".join(str(path) for path in candidates)
         raise FileNotFoundError(f"cann-bench task not found: {task_selector}; tried: {display}")
+
+    def _load_ascend_arena_case(self, bench_name: str, task_selector: str) -> CannBenchCase:
+        task_dir = self._resolve_task_dir(task_selector)
+        if not self._is_ascend_arena_task_dir(task_dir):
+            raise FileNotFoundError(
+                f"invalid Ascend Arena task dir: {task_dir}; "
+                "required: api_desc.md, reference.py, cases/proto.yaml"
+            )
+        proto_path = task_dir / "cases" / "proto.yaml"
+        proto = read_yaml_mapping(proto_path)
+        operator_meta = proto.get("operator") if isinstance(proto, dict) else {}
+        if not isinstance(operator_meta, dict):
+            operator_meta = {}
+        operator = str(operator_meta.get("name") or task_dir.name)
+        paths = {
+            "api_desc": task_dir / "api_desc.md",
+            "reference": task_dir / "reference.py",
+            "proto": proto_path,
+            "smoke_cases": task_dir / "cases" / "smoke_cases.json",
+            "complete_cases": task_dir / "cases" / "complete_cases.json",
+            "profile_cases": task_dir / "cases" / "profile_cases.json",
+            "prepare_inputs": task_dir / "cases" / "prepare_inputs.py",
+            "binding_module": task_dir / "binding" / "module.py",
+            "binding_cpp": task_dir / "binding" / "pybind.cpp",
+        }
+        files = {key: path for key, path in paths.items() if path.is_file()}
+        profile_cases = files.get("profile_cases")
+        return CannBenchCase(
+            bench_name=bench_name,
+            task_dir=task_dir,
+            operator=operator,
+            rel_path=self._task_rel_path(task_dir),
+            files=files,
+            metadata={
+                "proto": proto,
+                "operator": operator_meta,
+                "schema": operator_meta.get("schema"),
+                "category": operator_meta.get("category"),
+                "difficulty": operator_meta.get("difficulty"),
+                "case_format": "json",
+                "case_preview": read_case_preview(profile_cases) if profile_cases else [],
+                "task_selector": task_selector,
+            },
+        )
 
     def _load_stanford_case(self, bench_name: str, task_selector: str) -> CannBenchCase:
         py_path = self._resolve_stanford_task_file(task_selector)
@@ -869,8 +968,30 @@ class CannBenchClient:
             (task_dir / name).is_file() for name in _CASE_FILENAMES
         )
 
+    @staticmethod
+    def _is_ascend_arena_task_dir(task_dir: Path) -> bool:
+        return all(
+            path.is_file()
+            for path in (
+                task_dir / "api_desc.md",
+                task_dir / "reference.py",
+                task_dir / "cases" / "proto.yaml",
+                task_dir / "cases" / "profile_cases.json",
+            )
+        )
+
     def _discover_task_dirs(self, root: Path) -> List[Path]:
         return sorted(path for path in root.rglob("*") if path.is_dir() and self._is_single_task_dir(path))
+
+    def _discover_ascend_arena_task_dirs(self, root: Path) -> List[Path]:
+        registry_path = self.cann_bench_root / "src" / "ascend_arena_e2e" / "ops.json"
+        registered = set(json.loads(registry_path.read_text(encoding="utf-8"))) if registry_path.is_file() else None
+        return sorted(
+            path for path in root.rglob("*")
+            if path.is_dir()
+            and self._is_ascend_arena_task_dir(path)
+            and (registered is None or path.name in registered)
+        )
 
     def _find_cases_file(self, task_dir: Path) -> Path:
         for name in _CASE_FILENAMES:
@@ -908,7 +1029,7 @@ class CannBenchClient:
         return sorted(
             path
             for path in reports_dir.rglob("*")
-            if path.is_file() and path.suffix.lower() in {".json", ".md", ".csv"}
+            if path.is_file() and path.suffix.lower() in {".json", ".md", ".csv", ".html"}
             and not any(part.startswith("_eval_isolation_") for part in path.parts)
         )
 
@@ -1194,13 +1315,18 @@ class BenchmarkPipeline:
 
         if status_callback is not None:
             status_callback(stage="eval", status="running", operator=case.operator)
+        eval_args = list(extra_eval_args or [])
+        baseline_dir = generated_artifact.metadata.get("baseline_dir")
+        if (self.bench_name.strip().lower().replace("-", "_") == "ascend_arena" and baseline_dir
+                and not any(arg == "--baseline-dir" or arg.startswith("--baseline-dir=") for arg in eval_args)):
+            eval_args.extend(["--baseline-dir", str(baseline_dir)])
         eval_result = self.client.eval_submission(
             bench_name=self.bench_name,
             source_dir=conversion.submission.source_dir,
             task_selector=str(case.metadata.get("task_selector") or case.rel_path),
             reports_dir=reports_dir,
             device_id=device_id,
-            extra_args=extra_eval_args,
+            extra_args=eval_args,
         )
         return PipelineRunResult(
             case=case,
@@ -1290,7 +1416,8 @@ def _snapshot_pypto_custom_artifact(
     task_root: Path,
     strict: bool,
 ) -> Artifact:
-    if "pypto_status" not in artifact.metadata and "pypto_pro_status" not in artifact.metadata:
+    snapshot_markers = {"pypto_status", "pypto_pro_status", "ascend_arena_status"}
+    if snapshot_markers.isdisjoint(artifact.metadata):
         return artifact
     source_dir = artifact.files.get("source_dir")
     if source_dir is None:
@@ -1729,6 +1856,9 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
     def status_update(**payload: Any) -> None:
         _write_task_state(spec, task, payload=payload, device_id=device_id)
 
+    eval_args = []
+    if _normalize_name(spec.bench_name) != "ascend-arena":
+        eval_args = build_eval_args(_default_eval_config(perf_metric_strategy=perf_strategy))
     result = pipeline.run_case(
         selector=task.selector,
         generator=generator,
@@ -1741,8 +1871,7 @@ def _run_task(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Optional[i
         timeout_sec=spec.gen_timeout,
         env=_task_env(spec, task),
         device_id=device_id,
-        extra_eval_args=build_eval_args(
-            _default_eval_config(perf_metric_strategy=perf_strategy)),
+        extra_eval_args=eval_args,
         status_callback=status_update,
         reuse_generated=spec.reuse_generated,
         opencode_json_path=spec.opencode_json_path,
@@ -1785,9 +1914,10 @@ def _generator_config(spec: SimpleConfig, task: ConfiguredTask, *, device_id: Op
         cfg["env"] = env
     if device_id is not None:
         cfg["device_id"] = device_id
-    if _normalize_name(spec.agent_type) in ("pypto", "pypto-pro"):
+    if _normalize_name(spec.agent_type) in ("pypto", "pypto-pro", "ascend-arena"):
         if spec.model:
             cfg["model"] = spec.model
+    if _normalize_name(spec.agent_type) in ("pypto", "pypto-pro"):
         if device_id is not None:
             cfg["device_mode"] = "pool"
     return cfg
@@ -2177,6 +2307,8 @@ def _allowed_agent_keys() -> set[str]:
         "workflow",
         "verify_timeout",
         "config_path",
+        "runner",
+        "goal",
     }
 
 

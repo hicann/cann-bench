@@ -1,0 +1,58 @@
+{
+  "adaptive_avg_pool3d": {
+    "op": "adaptive_avg_pool3d",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "adaptive_avg_pool3d",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": false
+  },
+  "expand_into_jagged_permute": {
+    "op": "expand_into_jagged_permute",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "expand_into_jagged_permute",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": false
+  },
+  "group_quant": {
+    "op": "group_quant",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "group_quant",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": true
+  },
+  "group_norm_silu_quant": {
+    "op": "group_norm_silu_quant",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "group_norm_silu_quant",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": false
+  },
+  "gather_elements_v2": {
+    "op": "gather_elements_v2",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "gather_elements_v2",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": true
+  },
+  "chamfer_distance_grad": {
+    "op": "chamfer_distance_grad",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "nn",
+    "compile-op-name": "chamfer_distance_grad",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": false
+  },
+  "apply_rotary_pos_emb": {
+    "op": "apply_rotary_pos_emb",
+    "compile-repo": "ops-skeleton",
+    "compile-family": "transformer",
+    "compile-op-name": "apply_rotary_pos_emb",
+    "support-devices": ["ascend910b", "ascend910_93"],
+    "is_fewshot": false
+  }
+}

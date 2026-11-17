@@ -1,0 +1,7 @@
+{
+  "repository": "https://gitcode.com/cann/multimodal-benchmark",
+  "commit": "d01990e1a3f1aab95b1a9ab2ab8c1f55d244d1bc",
+  "distribution": "submodule",
+  "sha256": "9a8577027021b4ddbe2fb5ec77d2c10fcc5500d45903d637d9b02d473d4bf67c",
+  "subdirectory": "ops_optimization_skeleton"
+}

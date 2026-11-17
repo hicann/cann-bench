@@ -1,0 +1,20 @@
+case_id=case_40 seed=0 passed=False max_abs_diff=4325374.671875 max_rel_diff=3914684.219406 MARE=3914684.219406 MERE=608209.987086 RMSE=507194.527838 small_value_errors=38/45
+case_id=case_40 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_41 seed=0 passed=False max_abs_diff=61.740936 max_rel_diff=2136.392880 MARE=2136.392880 MERE=523.822576 RMSE=12.153308 small_value_errors=1/1
+case_id=case_41 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_42 seed=0 passed=False max_abs_diff=30.162389 max_rel_diff=352.352492 MARE=352.352492 MERE=31.738032 RMSE=3.464900 small_value_errors=1/1
+case_id=case_42 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_43 seed=0 passed=False max_abs_diff=87.551758 max_rel_diff=2313.681016 MARE=2313.681016 MERE=607.634525 RMSE=12.918420 small_value_errors=237/331
+case_id=case_43 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_44 seed=0 passed=False max_abs_diff=16.321045 max_rel_diff=63.797773 MARE=63.797773 MERE=3.333889 RMSE=0.941900 small_value_errors=14/110
+case_id=case_44 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_45 seed=0 passed=False max_abs_diff=44.387207 max_rel_diff=758.438841 MARE=758.438841 MERE=141.330321 RMSE=4.640304 small_value_errors=12/71
+case_id=case_45 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_46 seed=0 passed=False max_abs_diff=47.585938 max_rel_diff=384.007142 MARE=384.007142 MERE=135.147474 RMSE=3.353265 small_value_errors=316/1274
+case_id=case_46 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_47 seed=0 passed=False max_abs_diff=11.157227 max_rel_diff=32.263705 MARE=32.263705 MERE=1.551928 RMSE=0.652073 small_value_errors=8/86
+case_id=case_47 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_48 seed=0 passed=False max_abs_diff=102.946845 max_rel_diff=5237.208574 MARE=5237.208574 MERE=904.986767 RMSE=20.140065 small_value_errors=1/2
+case_id=case_48 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_49 seed=0 passed=False max_abs_diff=181.025391 max_rel_diff=13144.982636 MARE=13144.982636 MERE=567.860659 RMSE=14.858292 small_value_errors=602/602
+case_id=case_49 passed_runs=0 total_runs=1 pass_rate=0.000000

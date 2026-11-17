@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software; you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 """CLI for cann-bench benchmark pipeline."""
 
 from __future__ import annotations
@@ -17,10 +27,9 @@ from pathlib import Path
 from typing import List, Mapping, Optional
 
 from auto_pipeline import state as pipeline_state
-from auto_pipeline.core import ParentProcessSignal
-from auto_pipeline.core import read_yaml_mapping, run_cases_from_mapping, run_from_config
+from auto_pipeline.core import CannBenchClient, DEFAULT_CANN_BENCH_ROOT, ParentProcessSignal
+from auto_pipeline.core import build_case_material, read_yaml_mapping, run_cases_from_mapping, run_from_config
 
-_COMMANDS = {"run", "list", "monitor", "kill", "retry"}
 _TERMINAL_RUN_STATUSES = {"success", "failed", "error", "killed"}
 _CLEAR_SCREEN = "\033[2J\033[H"
 
@@ -31,6 +40,7 @@ def create_parser() -> argparse.ArgumentParser:
         description="Run and monitor the cann-bench benchmark generation pipeline.",
     )
     subparsers = parser.add_subparsers(dest="command")
+    _add_prepare_args(subparsers.add_parser("prepare", help="prepare an editable operator workspace"))
     _add_run_args(subparsers.add_parser("run", help="run a pipeline"))
     _add_list_args(subparsers.add_parser("list", help="list registered pipeline runs"))
     _add_monitor_args(subparsers.add_parser("monitor", help="show a monitor table for one run"))
@@ -72,6 +82,24 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--no-monitor", action="store_true", help="do not open monitor after background start")
     parser.add_argument("--monitor-interval", type=float, default=2.0, help="auto-monitor refresh interval seconds")
     parser.add_argument("--run-id", help=argparse.SUPPRESS)
+
+
+def _add_prepare_args(parser: argparse.ArgumentParser) -> None:
+    from ascend_arena_e2e.agent_base import add_agent_arguments
+
+    parser.add_argument("--bench-name", default="ascend_arena", choices=("ascend_arena",))
+    parser.add_argument("--operator", required=True, help="operator to prepare")
+    parser.add_argument(
+        "--task-dir",
+        help="benchmark operator directory; defaults to bench_lab/ascend_arena_bench/<operator>",
+    )
+    parser.add_argument("--output", help="workspace run root; defaults to benchmark_runs/workspace_<operator>_*")
+    parser.add_argument("--device-id", type=int, default=0, help="device used by the generated validate.sh")
+    parser.add_argument("--goal", default="", help="optional optimization goal used by the selected agent")
+    parser.add_argument("--force", action="store_true", help="replace an existing workspace for this operator")
+    parser.add_argument("--workspace-only", action="store_true", help="create files without evaluation or agent execution")
+    parser.add_argument("--resume", action="store_true", help="reuse existing source and successful baseline")
+    add_agent_arguments(parser)
 
 
 def _add_list_args(parser: argparse.ArgumentParser) -> None:
@@ -119,7 +147,7 @@ def _add_run_selector_args(parser: argparse.ArgumentParser) -> None:
 def main(argv: Optional[List[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     try:
-        if argv and (argv[0] in _COMMANDS or argv[0] in {"-h", "--help"}):
+        if argv and (not argv[0].startswith("-") or argv[0] in {"-h", "--help"}):
             parser = create_parser()
             args = parser.parse_args(argv)
         else:
@@ -127,6 +155,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             args = parser.parse_args(argv)
             args.command = "run"
 
+        if args.command == "prepare":
+            return _main_prepare(args)
         if args.command == "run":
             return _main_run(args, argv)
         if args.command == "list":
@@ -145,6 +175,104 @@ def main(argv: Optional[List[str]] = None) -> int:
     except KeyboardInterrupt:
         print("interrupted; child processes terminated", file=sys.stderr)
         return 130
+
+
+def _main_prepare(args: argparse.Namespace) -> int:
+    from ascend_arena_e2e.timing import timed_run
+
+    if not args.output:
+        args.output = str(DEFAULT_CANN_BENCH_ROOT / "benchmark_runs" /
+                          f"workspace_{args.operator}_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}")
+    with timed_run(Path(args.output).expanduser().resolve() / "timing.jsonl", "task", args.operator) as timing:
+        timing["returncode"] = _prepare_workspace_and_agent(args)
+        return timing["returncode"]
+
+
+def _prepare_workspace_and_agent(args: argparse.Namespace) -> int:
+    from auto_pipeline.generator.ascend_arena.workspace import prepare_ascend_arena_workspace
+    from ascend_arena_e2e.agent_base import agent_from_args
+
+    root = DEFAULT_CANN_BENCH_ROOT.resolve()
+    try:
+        agent = agent_from_args(args)
+        if args.workspace_only and agent is not None:
+            raise ValueError("--workspace-only cannot be combined with --agent")
+        if args.resume and args.force:
+            raise ValueError("--resume and --force are mutually exclusive")
+        if agent is not None:
+            agent.preflight(docker=bool(args.docker))
+        if args.docker and agent is None:
+            raise ValueError("--docker requires --agent")
+        if args.task_dir:
+            selector = args.task_dir
+        else:
+            task_path = Path("bench_lab/ascend_arena_bench")
+            selector = str(task_path / args.operator)
+        case = CannBenchClient(root).load_case(args.bench_name, selector)
+        if case.operator.lower() != str(args.operator).lower():
+            raise ValueError(
+                f"operator mismatch: requested {args.operator}, task contains {case.operator}"
+            )
+        material = build_case_material(case)
+        output = (
+            Path(args.output).expanduser().resolve()
+            if args.output
+            else root
+            / "benchmark_runs"
+            / f"workspace_{case.operator}_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        )
+        task_root = output / case.operator
+        if task_root.exists() and any(task_root.iterdir()):
+            if not args.force and not args.resume:
+                raise FileExistsError(
+                    f"workspace already exists: {task_root}; pass --resume to continue or --force to replace it"
+                )
+            if args.force:
+                shutil.rmtree(task_root)
+        initial_command = (
+            agent.build_docker_command(
+                task_root / "work",
+                ["./validate.sh", "init"],
+                image=args.docker_image,
+                device_id=args.device_id,
+                environment={},
+            )
+            if args.docker
+            else None
+        )
+        workspace = prepare_ascend_arena_workspace(
+            cann_bench_root=root,
+            case=case,
+            material=material,
+            workdir=task_root / "work",
+            reports_dir=task_root / "work" / "kernel_eval",
+            device_id=args.device_id,
+            goal=args.goal,
+            initial_evaluation_command=initial_command,
+            reuse_existing=args.resume,
+            skip_initial_evaluation=args.workspace_only,
+        )
+        agent_result = (
+            agent.run(
+                workspace.workdir,
+                prompt=args.agent_prompt,
+                device_id=args.device_id,
+                docker_image=args.docker_image if args.docker else "",
+            )
+            if agent is not None
+            else None
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"prepare failed: {exc}", file=sys.stderr)
+        return 1
+
+    payload = {**workspace.to_dict(case=case), "task_root": str(task_root)}
+    if agent_result is not None:
+        payload["agent_run"] = agent_result.to_dict()
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    if agent_result is not None and getattr(agent_result, "timed_out", False):
+        return 124
+    return 0 if agent_result is None or agent_result.ok else 1
 
 
 def _main_run(args: argparse.Namespace, argv: list[str]) -> int:

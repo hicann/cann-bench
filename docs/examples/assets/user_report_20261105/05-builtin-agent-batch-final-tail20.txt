@@ -1,0 +1,20 @@
+      "agent_run": {
+        "agent": "claude",
+        "harness": "claude-code",
+        "workspace": "benchmark_runs/user-report-20261105-sg4nCj/batch/apply_rotary_pos_emb/work",
+        "returncode": 124,
+        "ok": false,
+        "log_file": "benchmark_runs/user-report-20261105-sg4nCj/batch/apply_rotary_pos_emb/work/artifact/claude.log",
+        "timed_out": true,
+        "evaluation": {
+          "success": true,
+          "run_name": "ascend_arena_apply_rotary_pos_emb_20261105_133730_735cc040",
+          "source_changed": true,
+          "source_matches": true,
+          "reason": "validated"
+        },
+        "error_kind": ""
+      }
+    }
+  }
+}

@@ -6,8 +6,13 @@
 
 ```
 scripts/
+├── setup_ascend_arena_env.sh    # 用户级 Conda 环境一键安装与 NPU 检查
+├── activate_ascend_arena_env.sh # 加载 Conda、CANN 与项目环境
 ├── run_evaluation.sh        # AI算子源码评测（完整流程：编译→安装→评测）
 ├── run_auto_pipeline.sh     # auto_pipeline 的 python -m 包装入口
+├── batch_optimize.py          # 可续传的多卡批量优化
+├── generate_batch_report.py   # 汇总手动/agent 优化结果为单文件 HTML
+├── generate_acceptance_report.py # 生成可归档的验收报告与证据包
 ├── run_ut.sh                # 单元测试运行
 ├── utils/
 │   ├── build_golden_wheel.sh # Golden whl 打包（Shell 入口）
@@ -16,6 +21,122 @@ scripts/
 │   └── yaml_block_to_flow.py  # YAML block → flow 格式转换
 └── README.md
 ```
+
+---
+
+## batch_optimize.py
+
+按 NPU 卡数并发优化当前注册的 7 个 Ascend Arena 算子。每张卡固定一个 worker，同一卡上的算子串行执行：
+
+```bash
+cp -n src/ascend_arena_e2e/agents/.env.example src/ascend_arena_e2e/agents/.env
+# 编辑 .env 中的 codex profile
+python scripts/batch_optimize.py \
+  --agent codex \
+  --devices 0,1,2,3
+```
+
+`.env` 使用 YAML 格式，包含 harness、API key、API 地址、模型和推理强度。Claude Code
+只需使用对应的 profile：
+
+```bash
+python scripts/batch_optimize.py --agent claude-code --devices 0,1,2,3
+```
+
+默认输出为 `benchmark_runs/<agent>-<model>/`；`--output` 可覆盖。目录中的 `config.json`
+记录复现参数，`progress.json` 原子记录每个算子的状态，`report.html` 内嵌整批及逐算子详情。
+Agent 输出会实时显示在终端，并同步刷新到各 workspace 的 `artifact/<agent>.log`。
+workspace 包含源码、binding、reference 和 smoke cases；complete/profile cases 由评测入口从仓库任务目录读取。`AGENTS.md` 由所选 Agent 类生成。
+再次执行会跳过已完成算子；`--restart` 会重新运行全部所选算子，`--force` 还会重建 workspace。
+增加 `--docker` 后，每个算子在独立临时容器中运行，`--docker-image` 可指定镜像。
+
+省略 `--agent` 时，创建全部 7 个算子的 workspace 并完成原始基线的五阶段评测：
+
+```bash
+python scripts/batch_optimize.py --devices 0,1 --output benchmark_runs/manual
+```
+
+## generate_batch_report.py
+
+手动优化并执行各 workspace 的 `validate.sh` 后，重新生成唯一的批次报告：
+
+```bash
+python scripts/generate_batch_report.py benchmark_runs/manual
+```
+
+报告数据直接嵌入 `report.html`，不依赖任何算子子目录中的 HTML 文件。自定义 agent 接口见
+[根目录 README](../README.md#external-agent)。
+
+## generate_acceptance_report.py
+
+将路径中的占位内容替换为实际目录或运行 ID，再执行示例。
+
+批量功能测试完成后，使用下面的命令生成仓库级功能完整性报告。报告不逐个展开算子；
+算子结果只汇总为样本数量、编译/正确性/性能通过数和平均加速比，详细文件仍归档到 `evidence/`：
+
+```bash
+python scripts/generate_acceptance_report.py \
+  "benchmark_runs/ascend-arena-e2e-<时间>" \
+  --command "python tests/run_ascend_arena_batch_e2e.py --output benchmark_runs/ascend-arena-e2e-<时间>"
+```
+
+`run_root` 可以是批量目录（含 `e2e_summary.json`）、单算子 workspace（含
+`kernel_eval/`），也可以直接是一次 candidate 评测目录（含 `results/status.json`）。
+脚本按 README 功能生成验收矩阵；默认从 `<run_root>/feature_results.json` 读取人工执行的
+功能命令和截图，也可以显式指定：
+
+```bash
+python scripts/generate_acceptance_report.py "<run-root>" \
+  --feature-results /path/to/feature_results.json \
+  --screenshots-dir /path/to/screenshots \
+  --command "<实际执行命令>"
+```
+
+`feature_results.json` 按功能 ID 填写，示例如下。将执行结果和证据路径替换为本次实际值：
+
+```json
+{
+  "features": {
+    "workspace_only": {
+      "status": "PASS",
+      "actual": "工作区创建成功",
+      "evidence": ["workspace-proof.txt"]
+    }
+  }
+}
+```
+`PASS` 必须同时填写 `actual` 并提供可读的 `evidence` 文件；否则脚本会降为
+`INCOMPLETE`。一次只跑批量算子评测属于 `runtime-only` 证据范围；没有执行的功能标记 `N/A`，
+功能完整性结论保持 `INCOMPLETE`，不会把一次算子评测冒充为全仓库验收。
+例如：
+
+```bash
+python scripts/generate_acceptance_report.py benchmark_runs/evaluate/adaptive_avg_pool3d
+python scripts/generate_acceptance_report.py "benchmark_runs/evaluate/adaptive_avg_pool3d/kernel_eval/ascend_arena_adaptive_avg_pool3d_<run>"
+```
+
+默认生成目录为 `<run_root>/acceptance_report/`，包括：
+
+- `acceptance_report.md`：环境、第三方骨架版本、README 功能验收矩阵、算子总体摘要和审核清单；
+- `report_data.json`：机器可解析的同一份数据；
+- `evidence/`：汇总、功能结果、固定版本骨架清单、状态、逐 case 对比、HTML/轨迹和日志等小型证据，不复制 Profiler 原始目录；
+- `screenshots/`：截图目录（默认为空）。
+
+把任意机器上截取的图片放入目录后重新生成，脚本会复制并在报告中使用相对链接：
+
+```bash
+python scripts/generate_acceptance_report.py \
+  "benchmark_runs/ascend-arena-e2e-<时间>" \
+  --screenshots-dir /path/to/screenshots \
+  --command "<实际执行命令>"
+```
+
+归档前请检查执行命令、截图和日志中不含 API Key、Token 或密码。
+
+建议截图命名为 `01_environment.png`、`02_command.png`、`03_batch_summary.png` 和
+`04_report.png`。`report_data.json` 中的证据链接均为相对路径，可和
+`acceptance_report/` 一起复制到其他机器；环境中的 CANN 路径在 JSON 中只保留文件名，
+并标记为测试主机路径。逐算子 `comparison.json` 只在需要复核具体性能时打开。
 
 ---
 
@@ -40,6 +161,22 @@ export PTO_TILE_LIB_CODE_PATH=/path/to/pto-isa
 当前 `auto_pipeline` 的使用说明见
 [`docs/guide/auto_pipeline_usage.md`](../docs/guide/auto_pipeline_usage.md)，实现设计见
 [`docs/design/benchmark_orchestrator_architecture.md`](../docs/design/benchmark_orchestrator_architecture.md)。
+
+准备一个可手动编辑的 Ascend Arena workspace：
+
+```bash
+./scripts/run_auto_pipeline.sh prepare \
+  --operator adaptive_avg_pool3d \
+  --output benchmark_runs/adaptive_avg_pool3d_workspace \
+  --device-id 0
+```
+
+可编辑源码位于 `benchmark_runs/adaptive_avg_pool3d_workspace/adaptive_avg_pool3d/work/adaptive_avg_pool3d/`，修改完成后
+在 `work/` 下运行 `./validate.sh`。
+
+workspace 已复制 benchmark 用例和 binding，`validate.sh` 使用这份副本，因此整个
+workspace 可以移动到其它目录。请先激活安装了 CANN、torch_npu 和 pybind11 的 Python
+环境（例如 `conda activate cannbench`），再执行验证脚本。
 
 ---
 
@@ -106,6 +243,17 @@ AI 生成算子源码评测脚本，支持完整流程（扫描→编译→安�
 | `-h, --help` | 显示帮助信息 |
 
 > shell 只透传最常用参数子集。若需要 `--no-subprocess-isolation` / `--op-timeout-sec` / `--no-iterative-compile` / `--reports-dir` / `--eval-code` 等，请直调 cli（`python -m kernel_eval.cli eval ...`），完整参数表见 [docs/design/evaluator_design.md §3.3](../docs/design/evaluator_design.md#33-命令行参数)。
+
+Ascend Arena 直接评测使用独立流程：
+
+```bash
+./scripts/run_evaluation.sh --run_optimize \
+  --source-dir /path/to/adaptive_avg_pool3d \
+  --task-dir bench_lab/ascend_arena_bench \
+  --operator adaptive_avg_pool3d --device-id 0
+```
+
+结果默认写入 `reports/ascend_arena/<run>/`，可用 `--reports-dir` 指定目录。
 
 ### 使用示例
 

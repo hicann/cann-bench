@@ -1,0 +1,12 @@
+[submodule "src/ascend_arena_e2e/dependency/ops-skeleton"]
+	path = src/ascend_arena_e2e/dependency/ops-skeleton
+	url = https://gitcode.com/cann/multimodal-benchmark.git
+[submodule "src/ascend_arena_e2e/dependency/ops-base"]
+	path = src/ascend_arena_e2e/dependency/ops-base
+	url = https://gitcode.com/cann/opbase.git
+[submodule "src/ascend_arena_e2e/dependency/ops-nn"]
+	path = src/ascend_arena_e2e/dependency/ops-nn
+	url = https://gitcode.com/cann/ops-nn.git
+[submodule "src/ascend_arena_e2e/dependency/ops-transformer"]
+	path = src/ascend_arena_e2e/dependency/ops-transformer
+	url = https://gitcode.com/cann/ops-transformer.git

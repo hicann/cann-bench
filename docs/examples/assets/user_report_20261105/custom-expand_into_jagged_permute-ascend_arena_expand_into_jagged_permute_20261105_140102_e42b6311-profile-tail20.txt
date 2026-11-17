@@ -1,0 +1,20 @@
+
+Traceback (most recent call last):
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 162, in run
+    self._execute_torch_profiler_cases(
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 636, in _execute_torch_profiler_cases
+    self._verify_profile_output(state["directory"], state["case"], fresh, actual, runtime["policy"])
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 658, in _verify_profile_output
+    raise RuntimeError(f"{PROFILE_PRECISION_FAILURE_MARKER}{compare.message}")
+RuntimeError: profile_precision_failed:output[0]:integer_mismatch
+
+case_id=case_10 success=False exit_code=1 nonzero_exit_with_metrics=True precision_failed=True precision_verified=False metrics_complete=True output_dir=<sandbox>/cannbench_arena_expand_into_jagged_permute_155hwesb/runs/candidate/expand_into_jagged_permute/profile/case_10
+
+Traceback (most recent call last):
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 162, in run
+    self._execute_torch_profiler_cases(
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 636, in _execute_torch_profiler_cases
+    self._verify_profile_output(state["directory"], state["case"], fresh, actual, runtime["policy"])
+  File "src/ascend_arena_e2e/ascend_arena/runners/profile.py", line 658, in _verify_profile_output
+    raise RuntimeError(f"{PROFILE_PRECISION_FAILURE_MARKER}{compare.message}")
+RuntimeError: profile_precision_failed:output[0]:integer_mismatch

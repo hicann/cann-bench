@@ -29,6 +29,7 @@ __global__ __aicore__ void CannBenchDeviceMemcpy(GM_ADDR src, GM_ADDR dst,
                                                   int64_t blockBytes,
                                                   uint32_t tileSize)
 {
+    KERNEL_TASK_TYPE_DEFAULT(KERNEL_TYPE_AIV_ONLY);
     AscendC::TPipe pipe;
     AscendC::GlobalTensor<byte_t> srcGm, dstGm;
     AscendC::TQue<AscendC::QuePosition::VECIN, PIPELINE_DEPTH> inQ;

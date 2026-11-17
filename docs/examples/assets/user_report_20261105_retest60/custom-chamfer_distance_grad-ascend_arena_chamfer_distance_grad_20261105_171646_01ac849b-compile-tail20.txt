@@ -1,0 +1,20 @@
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/share/cmake/Torch/TorchConfig.cmake:125 (append_torchlib_if_found)
+  CMakeLists.txt:17 (find_package)
+
+
+-- Found Torch: $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch/lib/libtorch.so  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/.sandboxes/ascend_arena_chamfer_distance_grad_20261105_171646_01ac849b_1793870207390823805/runs/candidate/chamfer_distance_grad/build
+[ 50%] Building CXX object CMakeFiles/kernel_gen_ops.dir/pybind.cpp.o
+[100%] Linking CXX shared library kernel_gen_ops.cpython-310-aarch64-linux-gnu.so
+[100%] Built target kernel_gen_ops
+
+
+## symbol_check
+aclnn_symbol=aclnnChamferDistanceBackward
+wanted=aclnnChamferDistanceBackward,aclnnChamferDistanceBackwardGetWorkspaceSize
+checked:
+  benchmark_runs/user-report-20261105-retest60/custom/chamfer_distance_grad/work/kernel_eval/.sandboxes/ascend_arena_chamfer_distance_grad_20261105_171646_01ac849b_1793870207390823805/runs/candidate/chamfer_distance_grad/custom_opp/benchmark_nn/op_api/lib/libcust_opapi.so: FOUND=aclnnChamferDistanceBackward,aclnnChamferDistanceBackwardGetWorkspaceSize
+  /usr/local/Ascend/cann-9.1.0/lib64/libopapi.so: FOUND=aclnnChamferDistanceBackward,aclnnChamferDistanceBackwardGetWorkspaceSize
+status=ok

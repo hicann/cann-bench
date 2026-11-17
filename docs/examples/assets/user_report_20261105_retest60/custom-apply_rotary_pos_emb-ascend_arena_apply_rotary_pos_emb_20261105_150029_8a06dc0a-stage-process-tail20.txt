@@ -1,0 +1,15 @@
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+[progress] {"label": "build_start", "op_name": "apply_rotary_pos_emb"}
+[progress] {"label": "build_finished", "op_name": "apply_rotary_pos_emb", "success": true, "log_path": "benchmark_runs/user-report-20261105-sg4nCj/custom/apply_rotary_pos_emb/work/kernel_eval/ascend_arena_apply_rotary_pos_emb_20261105_150029_8a06dc0a/results/compile.log"}
+[progress] {"label": "smoke_correctness_start", "op_name": "apply_rotary_pos_emb"}
+[progress] {"label": "smoke_correctness_finished", "op_name": "apply_rotary_pos_emb", "success": true, "case_count": 6, "passed_count": 6, "log_path": "benchmark_runs/user-report-20261105-sg4nCj/custom/apply_rotary_pos_emb/work/kernel_eval/ascend_arena_apply_rotary_pos_emb_20261105_150029_8a06dc0a/results/smoke-correctness.log"}
+[progress] {"label": "complete_correctness_start", "op_name": "apply_rotary_pos_emb"}
+[progress] {"label": "complete_correctness_finished", "op_name": "apply_rotary_pos_emb", "success": true, "case_count": 23, "passed_count": 23, "log_path": "benchmark_runs/user-report-20261105-sg4nCj/custom/apply_rotary_pos_emb/work/kernel_eval/ascend_arena_apply_rotary_pos_emb_20261105_150029_8a06dc0a/results/complete-correctness.log"}
+[progress] {"label": "correctness_start", "op_name": "apply_rotary_pos_emb"}

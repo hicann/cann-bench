@@ -1,0 +1,20 @@
+case_id=case_14 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/4535424
+case_id=case_14 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_15 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000015 MARE=0.000015 MERE=0.000000 RMSE=0.000000 small_value_errors=1460/2587
+case_id=case_15 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_16 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000047 MARE=0.000047 MERE=0.000000 RMSE=0.000000 small_value_errors=255/310
+case_id=case_16 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_17 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000007 MARE=0.000007 MERE=0.000000 RMSE=0.000000 small_value_errors=1620/6303
+case_id=case_17 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_18 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/1312000
+case_id=case_18 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_19 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000058 MARE=0.000058 MERE=0.000000 RMSE=0.000000 small_value_errors=1493/1905
+case_id=case_19 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_20 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.001013 MARE=0.001013 MERE=0.000000 RMSE=0.000000 small_value_errors=0/62917120
+case_id=case_20 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_21 seed=0 passed=True max_abs_diff=0.007812 max_rel_diff=0.007812 MARE=0.007812 MERE=0.000028 RMSE=0.000105 small_value_errors=0/1125
+case_id=case_21 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_22 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.001175 MARE=0.001175 MERE=0.000000 RMSE=0.000000 small_value_errors=19/36
+case_id=case_22 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_23 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000007 MARE=0.000007 MERE=0.000000 RMSE=0.000000 small_value_errors=228/829
+case_id=case_23 passed_runs=1 total_runs=1 pass_rate=1.000000

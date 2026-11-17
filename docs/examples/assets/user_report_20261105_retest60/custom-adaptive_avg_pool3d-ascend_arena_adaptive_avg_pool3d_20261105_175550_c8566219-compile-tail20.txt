@@ -1,0 +1,20 @@
+<sandbox>/cannbench_arena_adaptive_avg_pool3d_cyv5bqw5/runs/candidate/adaptive_avg_pool3d/src/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp:280:9: error: ‘chunkRows’ was not declared in this scope
+  280 |         chunkRows = availBytes / perRowBytes;
+      |         ^~~~~~~~~
+<sandbox>/cannbench_arena_adaptive_avg_pool3d_cyv5bqw5/runs/candidate/adaptive_avg_pool3d/src/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp:287:13: error: ‘chunkRows’ was not declared in this scope
+  287 |         if (chunkRows == 0UL) {
+      |             ^~~~~~~~~
+<sandbox>/cannbench_arena_adaptive_avg_pool3d_cyv5bqw5/runs/candidate/adaptive_avg_pool3d/src/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp:290:13: error: ‘chunkRows’ was not declared in this scope
+  290 |         if (chunkRows > static_cast<uint64_t>(NCDHW_MAX_CHUNK_ROWS)) {
+      |             ^~~~~~~~~
+<sandbox>/cannbench_arena_adaptive_avg_pool3d_cyv5bqw5/runs/candidate/adaptive_avg_pool3d/src/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp:293:28: error: ‘chunkRows’ was not declared in this scope
+  293 |         params.chunkRows = chunkRows;
+      |                            ^~~~~~~~~
+gmake[3]: *** [adaptive_avg_pool3d/CMakeFiles/ophost_math_tiling_obj.dir/build.make:76: adaptive_avg_pool3d/CMakeFiles/ophost_math_tiling_obj.dir/op_host/adaptive_avg_pool3d_tiling.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:737: adaptive_avg_pool3d/CMakeFiles/ophost_math_tiling_obj.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:534: CMakeFiles/binary.dir/rule] Error 2
+gmake: *** [Makefile:371: binary] Error 2
+
+
+## validation_build
+validation_skipped

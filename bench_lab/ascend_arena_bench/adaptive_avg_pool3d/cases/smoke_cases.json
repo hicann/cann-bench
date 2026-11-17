@@ -1,0 +1,152 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "x": {
+        "shape": [1, 2, 4, 5, 6],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [2, 3, 4]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "README.md:usage-example adapted to 5D benchmark path",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "x": {
+        "shape": [2, 1, 2, 2, 4],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [2, 2, 2]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_adaptive_avg_pool3d.cpp:inputShape/outSize",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "x": {
+        "shape": [1, 2, 2, 4, 4],
+        "dtype": "bfloat16",
+        "min": 0.5,
+        "max": 1.5,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [1, 1, 1]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_api/test_aclnn_adaptive_avg_pool3d.cpp:ascend910B2_adaptive_avg_pool3d_cdhw_common_bf16 lifted_to_5d",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "x": {
+        "shape": [2, 4, 3, 3],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [2, 2, 2]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_api/test_aclnn_adaptive_avg_pool3d.cpp:adaptive_avg_pool3d_cdhw_common",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "x": {
+        "shape": [2, 2, 4, 3],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [2, 3, 2]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_api/test_aclnn_adaptive_avg_pool3d.cpp:adaptive_avg_pool3d_cdhw_common_fp16",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "x": {
+        "shape": [2, 2, 4, 3, 1],
+        "dtype": "float32",
+        "min": -1.0,
+        "max": 1.0,
+        "input_init": "default"
+      }
+    },
+    "attrs": {
+      "output_size": {
+        "shape": [3],
+        "dtype": "int64",
+        "value": [3, 2, 1]
+      }
+    },
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_api/test_aclnn_adaptive_avg_pool3d.cpp:adaptive_avg_pool3d_outputsize_common_DHW_not_same",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  }
+]

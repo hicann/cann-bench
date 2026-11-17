@@ -1,0 +1,334 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          2,
+          4,
+          4
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          2
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          2
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 2
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_group_norm_silu_quant.cpp:1",
+      "precision-level-l1": true,
+      "op-compute-type": "quant_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "self": {
+        "shape": [
+          2,
+          3,
+          16
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          3
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          3
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_host/test_aclnn_group_norm_silu_quant.cpp:ascend910B2_case_bfloat16_perchannel",
+      "precision-level-l1": true,
+      "op-compute-type": "quant_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          4,
+          16
+        ],
+        "dtype": "float16",
+        "min": -0.5,
+        "max": 0.5
+      },
+      "gamma": {
+        "shape": [
+          4
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          4
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_group_norm_silu_quant.cpp:149",
+      "precision-level-l1": true,
+      "op-compute-type": "quant_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "self": {
+        "shape": [
+          2,
+          2,
+          4,
+          4
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          2
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          2
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_host/test_aclnn_group_norm_silu_quant.cpp:ascend910B2_case_float16_perchannel",
+      "precision-level-l1": true,
+      "op-compute-type": "quant_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          8,
+          16
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          8
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          8
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 2
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "smoke-test",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "provenance-vendor-fixture": "README.md:usage-example",
+      "precision-level-l1": true,
+      "op-compute-type": "quant_compute"
+    }
+  }
+]

@@ -1,0 +1,20 @@
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_04
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_05
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_06
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_07
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_08
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_09
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 开始 case_10
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_01 174.8930 μs 262.5700 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_02 1708.9140 μs 1798.8800 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_03 350.6970 μs 438.9200 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_04 99.1320 μs 188.3900 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_05 3106.4120 μs 3201.9900 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_06 1494.2000 μs 1582.5200 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_07 239.1750 μs 325.4600 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_08 311.2660 μs 402.3700 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_09 225.9545 μs 314.3100 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能用例 通过 case_10 65.2710 μs 177.5000 μs
+[adaptive_avg_pool3d/init/NPU:4] 性能采集 通过  用例数=10
+[adaptive_avg_pool3d] 评测结束 2026-11-05T11:54:58.180326+08:00 耗时=158.900s 退出码=0
+[0;32m[SUCCESS][0m 执行完成

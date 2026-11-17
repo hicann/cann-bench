@@ -36,10 +36,15 @@ import torch
 # aclnnInplaceCopy which may be unavailable due to anti-cheat
 # TBE kernel tree deletion.
 try:
-    from cann_bench_utils import cann_bench_clone as _safe_tensor_clone
+    from cann_bench_utils import cann_bench_clone as _cann_bench_clone
 except ImportError:
     def _safe_tensor_clone(x):
         return x.clone()
+else:
+    def _safe_tensor_clone(x):
+        if x.device.type == "cpu":
+            return x.clone()
+        return _cann_bench_clone(x)
 
 
 

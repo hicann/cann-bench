@@ -27,6 +27,7 @@ Generators：
 
 - `akg-agent`
 - `pypto`
+- `ascend-arena`
 
 Converters：
 
@@ -168,6 +169,66 @@ benchmark:
   --parallel 2
 ```
 
+## Ascend Arena workspace 准备
+
+创建 workspace 不要求配置或运行任何 agent。指定算子后，先执行：
+
+```bash
+./scripts/run_auto_pipeline.sh prepare \
+  --operator angle_v2 \
+  --output benchmark_runs/angle_v2_workspace \
+  --device-id 0
+```
+
+命令会输出 workspace、可编辑源码和验证脚本的绝对路径。用户或任意 agent 都可以进入：
+
+```bash
+cd benchmark_runs/angle_v2_workspace/angle_v2/work
+```
+
+只修改 `angle_v2/` 中的算子实现。完成后运行：
+
+```bash
+./validate.sh
+```
+
+评测结果保存到 `benchmark_runs/angle_v2_workspace/angle_v2/work/kernel_eval/`。重复使用同一个
+`--output` 时默认拒绝覆盖已有修改；只有显式传入 `--force` 才会重新创建 workspace。
+
+workspace 已复制 benchmark 用例和 binding，`validate.sh` 使用 workspace 内的副本，
+所以可以移动整个 workspace。执行前请激活包含 CANN、torch_npu 和 pybind11 的 Python
+环境，例如 `conda activate cannbench`。
+
+## Ascend Arena agent 自动优化
+
+Ascend Arena 使用 CannBench 原生 task workspace。`--workspace` 指向包含
+`src/ascend_arena_e2e` 的 CannBench checkout；OpenCode 在每个 task 的 `work/` 中运行，
+不会修改该 checkout 中的 dependency。
+
+```bash
+./scripts/run_auto_pipeline.sh run --foreground \
+  --config src/auto_pipeline/config/ascend_arena_adaptive_avg_pool3d.yaml \
+  --workspace . \
+  --model gpt-5.4 \
+  --output benchmark_runs/ascend_arena_adaptive_avg_pool3d \
+  --devices 0 \
+  --parallel 1
+```
+
+单个 task 的 Arena 产物为：
+
+```text
+<output>/adaptive_avg_pool3d/work/adaptive_avg_pool3d/       # agent 编辑区
+<output>/adaptive_avg_pool3d/work/artifact/       # prompt 和 OpenCode 日志
+<output>/adaptive_avg_pool3d/custom/adaptive_avg_pool3d/     # 生成结果快照
+<output>/adaptive_avg_pool3d/submission/adaptive_avg_pool3d/ # 评测提交
+<output>/adaptive_avg_pool3d/work/kernel_eval/     # 基线、候选和对比报告
+```
+
+工作区初始化时，原始实现执行编译、smoke、complete、profile correctness 和性能采集，
+结果保存在 `work/kernel_eval/init_results/`。最终评测复用该基线，再执行候选实现的五阶段评测。
+阶段结果和逐 case 性能的查看方式见[根目录 README](../../README.md#results)。
+
 ## 输出目录
 
 `--output` 可选；不配置时自动生成：
@@ -176,7 +237,7 @@ benchmark:
 benchmark_runs/run_<timestamp>_<random>/
 ```
 
-每个 task 的目录固定为：
+每个传统 task 的目录固定为：
 
 ```text
 <output>/<task_name>/work

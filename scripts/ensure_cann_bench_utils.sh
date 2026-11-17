@@ -7,26 +7,41 @@
 # 共享：确保 cann_bench_utils 已编译安装（V3 Anti-Cheat 强制依赖）
 #
 # 由 scripts/run_evaluation.sh 与 scripts/run_auto_pipeline.sh 共同 source。
-# 幂等：已安装时仅做一次 import 检查即返回，未安装则自动编译 + 安装 + 验证。
+# 幂等：已安装时检查导入及构建环境兼容性，未安装则自动编译 + 安装 + 验证。
 # ----------------------------------------------------------------------------------------------------------
 
 # 自带最小日志函数（加 _cbu_ 前缀，避免与调用方的 log_info/log_error 命名冲突）
 _cbu_log_info()  { echo -e "\033[0;34m[INFO]\033[0m $1"; }
 _cbu_log_error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
 
+_cbu_check_build() {
+    "$1" - "$2" <<'PY_CHECK'
+import sys
+from pathlib import Path
+try:
+    from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean
+    from cann_bench_utils.build_info import check_build_compatibility
+    source_root = Path(sys.argv[1])
+    check_build_compatibility(source_root=source_root if (source_root / "CMakeLists.txt").is_file() else None)
+except Exception as error:
+    print(str(error), file=sys.stderr)
+    sys.exit(1)
+PY_CHECK
+}
+
 ensure_cann_bench_utils() {
     local py="${PYTHON:-python}"
-    if "$py" -c "from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean" 2>/dev/null; then
-        _cbu_log_info "cann_bench_utils 已安装"
+    # PROJECT_ROOT 由调用方（run_evaluation.sh / run_auto_pipeline.sh）预先设置；
+    # 若未设置则按本文件位置回退推导。
+    local project_root="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+    local utils_dir="${project_root}/src/cann_bench_utils"
+    if _cbu_check_build "$py" "$utils_dir" 2>/dev/null; then
+        _cbu_log_info "cann_bench_utils 已安装且构建环境匹配"
         return 0
     fi
 
-    _cbu_log_info "cann_bench_utils 未安装，开始自动编译安装..."
+    _cbu_log_info "cann_bench_utils 缺失或构建环境不匹配，开始重新编译安装..."
 
-    # PROJECT_ROOT 由调用方（run_evaluation.sh / run_auto_pipeline.sh）预先设置；
-    # 若未设置则按本文件位置回退推导（scripts/lib/ -> 上两级）。
-    local project_root="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-    local utils_dir="${project_root}/src/cann_bench_utils"
     if [[ ! -d "${utils_dir}" ]]; then
         _cbu_log_error "cann_bench_utils 源码目录不存在: ${utils_dir}"
         _cbu_log_error "V3 Anti-Cheat 需要 cann_bench_utils，请检查代码库完整性"
@@ -53,7 +68,7 @@ ensure_cann_bench_utils() {
         return 1
     }
 
-    if "$py" -c "from cann_bench_utils import cann_bench_warmup, cann_bench_cache_clean" 2>/dev/null; then
+    if _cbu_check_build "$py" "$utils_dir" 2>/dev/null; then
         _cbu_log_info "cann_bench_utils 安装成功"
     else
         _cbu_log_error "cann_bench_utils 安装验证失败"

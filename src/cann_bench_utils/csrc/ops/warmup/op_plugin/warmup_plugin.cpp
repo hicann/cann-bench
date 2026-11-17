@@ -42,6 +42,8 @@ torch::Tensor warmup_npu(const torch::Tensor &x, const torch::Tensor &y, const t
     int64_t totalLength = x.numel();
     int64_t numBlocks, blockLength, tileSize;
     std::tie(numBlocks, blockLength, tileSize) = calc_warmup_tiling_params();
+    // Align down before TPipe rounds each buffer up.
+    tileSize = tileSize / 32 * 32;
 
     auto x_ptr = (GM_ADDR)x.data_ptr();
     auto y_ptr = (GM_ADDR)y.data_ptr();

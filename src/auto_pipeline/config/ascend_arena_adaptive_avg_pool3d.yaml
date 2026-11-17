@@ -1,0 +1,9 @@
+agent:
+  type: ascend-arena
+  runner: opencode
+  goal: Optimize the existing Ascend C implementation while preserving correctness for every benchmark case.
+
+benchmark:
+  name: ascend_arena
+  tasks:
+    - bench_lab/ascend_arena_bench/adaptive_avg_pool3d

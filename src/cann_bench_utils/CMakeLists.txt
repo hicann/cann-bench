@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 3.16)
 set(PKG_NAME cann_bench_utils)
 project(${PKG_NAME} VERSION 1.0.0)
 
+# Bisheng/cce-ld does not support the GNU --dependency-file linker option.
+# CMake 3.27+ can enable it after detecting the host linker.
+set(CMAKE_LINK_DEPENDS_USE_LINKER FALSE)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

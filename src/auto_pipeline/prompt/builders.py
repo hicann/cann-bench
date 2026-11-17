@@ -99,6 +99,95 @@ class CannPromptBuilder:
         )
 
 
+class AscendArenaPromptBuilder:
+    name = "ascend_arena"
+
+    _TARGETS = {
+        "api_desc": "api_desc.md",
+        "reference": "reference.py",
+        "proto": "cases/proto.yaml",
+        "smoke_cases": "cases/smoke_cases.json",
+        "complete_cases": "cases/complete_cases.json",
+        "profile_cases": "cases/profile_cases.json",
+        "prepare_inputs": "cases/prepare_inputs.py",
+        "binding_module": "binding/module.py",
+        "binding_cpp": "binding/pybind.cpp",
+    }
+
+    def case_op_name(self, case: CannBenchCase) -> str:
+        return _sanitize_op_name(str(case.operator or case.task_dir.name))
+
+    def build_case_material(self, case: CannBenchCase) -> CaseMaterial:
+        required = ("api_desc", "reference", "proto", "profile_cases")
+        for key in required:
+            path = case.files.get(key)
+            if path is None or not Path(path).is_file():
+                raise FileNotFoundError(f"Ascend Arena task missing required file: {key}")
+
+        task_files = []
+        for key, target_name in self._TARGETS.items():
+            raw_path = case.files.get(key)
+            if raw_path is None:
+                continue
+            path = Path(raw_path).expanduser().resolve()
+            if path.is_file():
+                task_files.append(CaseFile(key, path, target_name))
+
+        op_name = self.case_op_name(case)
+        api_desc = _read_text_for_prompt(Path(case.files["api_desc"]).resolve())
+        proto = _read_text_for_prompt(Path(case.files["proto"]).resolve())
+        reference = _read_text_for_prompt(Path(case.files["reference"]).resolve())
+        case_preview = json.dumps(case.metadata.get("case_preview") or [], ensure_ascii=False, indent=2)
+        require_text = f"""# {op_name} Ascend C Optimization Task
+
+Optimize the existing dependency implementation while preserving the benchmark API and numerical behavior.
+
+## API description
+
+```markdown
+{api_desc}
+```
+
+## Operator protocol
+
+```yaml
+{proto}
+```
+
+## Reference implementation
+
+```python
+{reference}
+```
+
+## Profile case preview
+
+```json
+{case_preview}
+```
+"""
+        return CaseMaterial(
+            bench_name=case.bench_name,
+            op_name=op_name,
+            task_files=tuple(task_files),
+            require_path=None,
+            require_text=require_text,
+            prompt_context={
+                "case_task_files_text": "\n".join(
+                    f"- Ascend Arena {task_file.key}: `{{op_dir_rel}}/{task_file.target_name}`"
+                    for task_file in task_files
+                ),
+                "case_detail_sections": "\n\n".join(
+                    [
+                        f"API description:\n{api_desc}",
+                        f"Operator protocol:\n{proto}",
+                        f"Profile case preview:\n{case_preview}",
+                    ]
+                ),
+            },
+        )
+
+
 class StanfordPromptBuilder:
     name = "stanford"
 

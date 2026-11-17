@@ -17,10 +17,16 @@ export PROJECT_ROOT="${PROJECT_DIR}"
 
 export PYTHONPATH="${PROJECT_DIR}/src${PYTHONPATH:+:${PYTHONPATH}}"
 
-# V3 Anti-Cheat: 确保 cann_bench_utils 已编译安装（强制依赖）
-# 与 scripts/run_evaluation.sh 共享同一份 ensure_cann_bench_utils 实现。
-source "${SCRIPT_DIR}/ensure_cann_bench_utils.sh"
-ensure_cann_bench_utils || exit 1
+case "${1:-}" in
+    ""|-*|prepare|run|list|monitor|kill|retry) ;;
+    *) echo "未知子命令: $1；可用命令: prepare, run, list, monitor, kill, retry" >&2; exit 2 ;;
+esac
+
+# prepare 使用独立的 Ascend Arena 评测入口。
+if [[ "${1:-}" != "prepare" ]]; then
+    source "${SCRIPT_DIR}/ensure_cann_bench_utils.sh"
+    ensure_cann_bench_utils || exit 1
+fi
 
 if [[ $# -eq 0 ]]; then
     set -- --help

@@ -1,0 +1,33 @@
+/logs/
+/artifacts/
+/__pycache__/
+*.pyc
+*.pyo
+*.so
+*.egg-info/
+/.pytest_cache/
+/dist/
+/build/
+/build_out/
+*.log
+.mypy_cache/
+/config.yaml
+/kernel_meta/
+# Only ignore generated directories at the E2E project root.  These names also
+# occur in vendored dependency repositories and must remain available there.
+/tests/
+/extra-info/
+/assets/
+/docs/
+/test/
+/extra-log/
+/paper/
+/output/
+/auto-research-skills/
+/.agents/
+/.claude/
+/.codex/
+/.tmp/
+/test*.sh
+/test_*.py
+/agents/.env

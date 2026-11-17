@@ -1,0 +1,827 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "self": {
+        "shape": [
+          2,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          320
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          320
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from Stable Diffusion v1.5 UNet; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "Stable Diffusion v1.5 UNet config: block_out_channels[0]=320, sample_size=64, norm_num_groups=32, act_fn=silu",
+      "model-reference": "Stable Diffusion v1.5 UNet",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/rupeshs/LCM-runwayml-stable-diffusion-v1-5/blob/main/unet/config.json"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          384,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          384
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          384
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from Stable Diffusion XL refiner UNet; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SDXL refiner UNet config: block_out_channels[0]=384, sample_size=128, norm_num_groups=32, act_fn=silu",
+      "model-reference": "Stable Diffusion XL refiner UNet",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/blob/main/unet/config.json"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "self": {
+        "shape": [
+          8,
+          1280,
+          16,
+          16
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          1280
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          1280
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from SD ControlNet Canny; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SD ControlNet Canny config: deep latent stage C=1280 with GroupNorm/SiLU blocks",
+      "model-reference": "SD ControlNet Canny",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/lllyasviel/sd-controlnet-canny/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "self": {
+        "shape": [
+          4,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          640
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          640
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from SD ControlNet Depth; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SD ControlNet Depth config: mid latent stage C=640 with GroupNorm/SiLU blocks",
+      "model-reference": "SD ControlNet Depth",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/lllyasviel/sd-controlnet-depth/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "self": {
+        "shape": [
+          4,
+          384,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          384
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          384
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from Kandinsky 2.2 Decoder UNet; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "Kandinsky 2.2 decoder UNet config: block_out_channels[0]=384, sample_size=64, norm_num_groups=32, act_fn=silu",
+      "model-reference": "Kandinsky 2.2 Decoder UNet",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder/blame/824f8d584960715056dc509c119d6a33cde34889/unet/config.json"
+    }
+  },
+  {
+    "case_id": "case_06",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          128,
+          256,
+          256
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from Stable Diffusion VAE ft-MSE; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SD VAE ft-MSE config: block_out_channels[0]=128, sample_size=256, norm_num_groups=32, act_fn=silu",
+      "model-reference": "Stable Diffusion VAE ft-MSE",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/stabilityai/sd-vae-ft-mse/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_07",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          128,
+          512,
+          512
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          128
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          128
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "4D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from SDXL VAE FP16 fix; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SDXL VAE FP16 fix config: block_out_channels[0]=128, high-resolution VAE feature map",
+      "model-reference": "SDXL VAE FP16 fix",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_08",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          128,
+          1024,
+          512
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          128
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "L",
+        "rank": "4D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from SDXL VAE; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "SDXL VAE config: sample_size=1024, C=128 high-resolution VAE feature map; one spatial axis reduced for bounded profiling",
+      "model-reference": "SDXL VAE",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "https://huggingface.co/stabilityai/sdxl-vae/blob/main/config.json"
+    }
+  },
+  {
+    "case_id": "case_09",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          32,
+          18432
+        ],
+        "dtype": "bfloat16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          32
+        ],
+        "dtype": "bfloat16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          32
+        ],
+        "dtype": "bfloat16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "M",
+        "rank": "3D",
+        "dtype": "bfloat16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Larger profiling workload reduces the relative effect of microsecond-scale variation while preserving dtype, layout and value range.",
+      "provenance": "Local op_stats.json::aclnnSilu: DeepSeek-R1/DeepSeek-V3.2 shape [1,8,18432]",
+      "model-reference": "DeepSeek-R1 / DeepSeek-V3.2 SiLU activation",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "local references/op_stats.json#aclnnSilu",
+      "measurement-scale": {
+        "original_inputs": {
+          "self": {
+            "shape": [
+              1,
+              8,
+              18432
+            ],
+            "dtype": "bfloat16",
+            "min": -1.0,
+            "max": 1.0
+          },
+          "gamma": {
+            "shape": [
+              8
+            ],
+            "dtype": "bfloat16",
+            "min": 0.9,
+            "max": 1.1
+          },
+          "beta": {
+            "shape": [
+              8
+            ],
+            "dtype": "bfloat16",
+            "min": -0.1,
+            "max": 0.1
+          },
+          "quant_scale": {
+            "shape": [
+              1
+            ],
+            "dtype": "float32",
+            "min": 1.0,
+            "max": 1.0
+          }
+        },
+        "original_attrs": {
+          "group": {
+            "shape": [],
+            "dtype": "int64",
+            "value": 1
+          },
+          "eps": {
+            "shape": [],
+            "dtype": "float64",
+            "value": 1e-05
+          },
+          "activate_silu": {
+            "shape": [],
+            "dtype": "bool",
+            "value": true
+          }
+        },
+        "reason": "Larger representative workload for short-latency profiling; retain original geometry in correctness coverage."
+      },
+      "shape-mapping-note": "The cited source describes the original workload. Profiling dimensions are scaled for measurement; original inputs and attributes are recorded in measurement-scale."
+    }
+  },
+  {
+    "case_id": "case_10",
+    "inputs": {
+      "self": {
+        "shape": [
+          1,
+          8,
+          28672
+        ],
+        "dtype": "float16",
+        "min": -1.0,
+        "max": 1.0
+      },
+      "gamma": {
+        "shape": [
+          8
+        ],
+        "dtype": "float16",
+        "min": 0.9,
+        "max": 1.1
+      },
+      "beta": {
+        "shape": [
+          8
+        ],
+        "dtype": "float16",
+        "min": -0.1,
+        "max": 0.1
+      },
+      "quant_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float32",
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "attrs": {
+      "group": {
+        "shape": [],
+        "dtype": "int64",
+        "value": 1
+      },
+      "eps": {
+        "shape": [],
+        "dtype": "float64",
+        "value": 1e-05
+      },
+      "activate_silu": {
+        "shape": [],
+        "dtype": "bool",
+        "value": true
+      }
+    },
+    "roles": [
+      "perf-anchored",
+      "correctness-must-pass",
+      "corr-default"
+    ],
+    "meta": {
+      "coverage-axes": {
+        "size": "S",
+        "rank": "3D",
+        "dtype": "float16",
+        "alignment": "misaligned",
+        "value_range": "symmetric_small",
+        "attrs_signature": "activate_silu=True,eps=1e-05,group=1"
+      },
+      "expansion-reason": "Real-world profile anchor from Llama-3.3-70B-Instruct SiLU activation; maps NCHW/activation dimensions onto group_norm_silu_quant self/gamma/beta contract.",
+      "provenance": "Local op_stats.json::aclnnSilu: Llama-3.3-70B-Instruct shape [1,8,28672], adapted as N,C,L",
+      "model-reference": "Llama-3.3-70B-Instruct SiLU activation",
+      "research-source": "Phase 1 research: model config or local op statistics",
+      "provenance-url": "local references/op_stats.json#aclnnSilu"
+    }
+  }
+]

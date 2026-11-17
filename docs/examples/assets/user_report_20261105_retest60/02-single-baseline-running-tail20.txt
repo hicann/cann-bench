@@ -1,0 +1,19 @@
+[0;34m[INFO][0m Kernel Bench 评测脚本
+[0;34m[INFO][0m 项目根目录: .
+[0;34m[INFO][0m 操作: eval
+[0;34m[INFO][0m 评测集: ascend_arena
+[0;34m[INFO][0m Python版本: Python 3.10.20
+[0;34m[INFO][0m 创建报告目录: benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval
+[0;34m[INFO][0m 源码目录: benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/adaptive_avg_pool3d
+[0;34m[INFO][0m 评测目录: bench_lab/ascend_arena_bench/adaptive_avg_pool3d
+[0;34m[INFO][0m 算子: adaptive_avg_pool3d
+[0;34m[INFO][0m 设备模式: 单卡 (NPU:4)
+[0;34m[INFO][0m 预热次数: 10
+[0;34m[INFO][0m 采集次数: 30
+[0;34m[INFO][0m Profiler: Level1
+[0;34m[INFO][0m 评测模式: 单次 eval
+[0;34m[INFO][0m 开始执行...
+[0;34m[INFO][0m 命令: python -m kernel_eval.optimize --source-dir benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/adaptive_avg_pool3d --task-dir bench_lab/ascend_arena_bench/adaptive_avg_pool3d --operator adaptive_avg_pool3d --reports-dir benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval --device-id 4 --warmup 10 --repeat 30 --device-check require-idle --init-only --baseline-dir benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval/init_results
+[adaptive_avg_pool3d] 评测开始 2026-11-05T11:52:19.280808+08:00
+[device] NPU 4: idle; snapshot: benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval/init_results/device_preflight.json
+{"run_dir": "benchmark_runs/user-report-20261105-sg4nCj/single/adaptive_avg_pool3d/work/kernel_eval/init_results", "sandbox": "<sandbox>/cannbench_arena_adaptive_avg_pool3d_0rano6bl", "sandbox_retained": false, "compile_repo": "ops-skeleton", "compile_family": "nn"}

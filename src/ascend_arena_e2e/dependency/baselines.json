@@ -1,0 +1,1572 @@
+{
+  "repositories": {
+    "ops-nn": {
+      "revision": "8e051c393f3a7bbcb67ac40e1c42bb0c55abe1ef",
+      "paths": [
+        "LICENSE",
+        "common/inc/op_api/aclnn_util.h",
+        "common/inc/op_host/static_register_symbol.h",
+        "common/inc/op_host/tiling_base.h",
+        "common/inc/op_host/tiling_templates_registry.h",
+        "common/inc/op_host/tiling_util.h",
+        "common/stub/op_api/level0/fill.h",
+        "common/stub/op_api/level0/ones_like.h",
+        "common/stub/op_api/level0/reduce_mean.h",
+        "common/stub/op_api/level0/squeeze.h",
+        "common/stub/op_api/level0/unsqueeze.h",
+        "common/stub/op_api/level0/zero_op.h",
+        "index/expand_into_jagged_permute/op_host/config/ascend910b/expand_into_jagged_permute_binary.json",
+        "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_def.cpp",
+        "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.cpp",
+        "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.h",
+        "index/expand_into_jagged_permute/op_kernel/expand_into_jagged_permute.cpp",
+        "index/expand_into_jagged_permute/op_kernel/expand_into_jagged_permute.h",
+        "index/gather_elements_v2/op_host/config/ascend910b/gather_elements_v2_binary.json",
+        "index/gather_elements_v2/op_host/config/kirinx90/gather_elements_v2_binary.json",
+        "index/gather_elements_v2/op_host/gather_elements_v2_def.cpp",
+        "index/gather_elements_v2/op_host/gather_elements_v2_last_dim_tiling.h",
+        "index/gather_elements_v2/op_host/gather_elements_v2_tiling.cpp",
+        "index/gather_elements_v2/op_host/gather_elements_v2_tiling.h",
+        "index/gather_elements_v2/op_host/op_api/aclnn_gather.cpp",
+        "index/gather_elements_v2/op_host/op_api/aclnn_gather.h",
+        "index/gather_elements_v2/op_host/op_api/gather_elements_v2.cpp",
+        "index/gather_elements_v2/op_host/op_api/gather_elements_v2.h",
+        "index/gather_elements_v2/op_kernel/gather_elements_v2.cpp",
+        "index/gather_elements_v2/op_kernel/gather_elements_v2_common.h",
+        "index/gather_elements_v2/op_kernel/gather_elements_v2_last_dim.h",
+        "index/gather_elements_v2/op_kernel/gather_elements_v2_scalar.h",
+        "index/gather_elements_v2/op_kernel/gather_elements_v2_transpose.h",
+        "index/gather_v2/op_api/gather_v2.cpp",
+        "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_def.cpp",
+        "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_infershape.cpp",
+        "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.cpp",
+        "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.h",
+        "loss/chamfer_distance_grad/op_host/config/ascend950/chamfer_distance_grad_binary.json",
+        "loss/chamfer_distance_grad/op_host/op_api/aclnn_chamfer_distance_backward.cpp",
+        "loss/chamfer_distance_grad/op_host/op_api/aclnn_chamfer_distance_backward.h",
+        "loss/chamfer_distance_grad/op_host/op_api/chamfer_distance_backward.cpp",
+        "loss/chamfer_distance_grad/op_host/op_api/chamfer_distance_backward.h",
+        "loss/chamfer_distance_grad/op_kernel/chamfer_distance_grad.cpp",
+        "loss/chamfer_distance_grad/op_kernel/chamfer_distance_grad.h",
+        "norm/group_norm_silu_quant/op_host/arch22/group_norm_silu_quant_tiling.cpp",
+        "norm/group_norm_silu_quant/op_host/arch22/group_norm_silu_quant_tiling.h",
+        "norm/group_norm_silu_quant/op_host/config/ascend910_93/group_norm_silu_quant_binary.json",
+        "norm/group_norm_silu_quant/op_host/config/ascend910b/group_norm_silu_quant_binary.json",
+        "norm/group_norm_silu_quant/op_host/group_norm_silu_quant_def.cpp",
+        "norm/group_norm_silu_quant/op_host/op_api/aclnn_group_norm_silu_quant.cpp",
+        "norm/group_norm_silu_quant/op_host/op_api/aclnn_group_norm_silu_quant.h",
+        "norm/group_norm_silu_quant/op_host/op_api/group_norm_silu_quant.cpp",
+        "norm/group_norm_silu_quant/op_host/op_api/group_norm_silu_quant.h",
+        "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant.cpp",
+        "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant_b16.h",
+        "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant_base.h",
+        "pooling/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.cpp",
+        "pooling/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.h",
+        "pooling/adaptive_avg_pool3d/op_api/adaptive_avg_pool3d.cpp",
+        "pooling/adaptive_avg_pool3d/op_api/adaptive_avg_pool3d.h",
+        "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_def.cpp",
+        "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_infershape.cpp",
+        "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp",
+        "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.h",
+        "pooling/adaptive_avg_pool3d/op_host/config/ascend910b/adaptive_avg_pool3d_binary.json",
+        "pooling/adaptive_avg_pool3d/op_host/config/ascend950/adaptive_avg_pool3d_binary.json",
+        "pooling/adaptive_avg_pool3d/op_host/config/kirinx90/adaptive_avg_pool3d_binary.json",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d.cpp",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_apt.cpp",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_common.h",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_multi_w.h",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_split_c.h",
+        "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_split_w.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_big_kernel.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_parall_pool.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_simt.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_big_kernel.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_parall_pool.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_simt.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_pool3d_big_kernel.h",
+        "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_pool3d_tiling_struct.h",
+        "quant/group_quant/op_host/config/ascend950/group_quant_binary.json",
+        "quant/group_quant/op_host/config/kirinx90/group_quant_binary.json",
+        "quant/group_quant/op_host/group_quant_def.cpp",
+        "quant/group_quant/op_host/group_quant_infershape.cpp",
+        "quant/group_quant/op_host/group_quant_tiling.cpp",
+        "quant/group_quant/op_host/group_quant_tiling.h",
+        "quant/group_quant/op_host/op_api/aclnn_group_quant.cpp",
+        "quant/group_quant/op_host/op_api/aclnn_group_quant.h",
+        "quant/group_quant/op_host/op_api/group_quant.cpp",
+        "quant/group_quant/op_host/op_api/group_quant.h",
+        "quant/group_quant/op_kernel/group_quant.cpp",
+        "quant/group_quant/op_kernel/group_quant_base.h"
+      ]
+    },
+    "ops-transformer": {
+      "revision": "0d380e3bb0959d306a3c33d8090adfc32f5279c2",
+      "paths": [
+        "LICENSE",
+        "common/include/op_host/tiling_base.h",
+        "common/include/op_host/tiling_templates_registry.h",
+        "common/include/op_host/tiling_util.h",
+        "common/src/op_host/tiling_util.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_def.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_infershape.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.h",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_ab_arch35.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_aba_and_ba_arch35.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_bab_arch35.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_base_arch35.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/config/ascend910b/apply_rotary_pos_emb_binary.json",
+        "posembedding/apply_rotary_pos_emb/op_host/config/ascend950/apply_rotary_pos_emb_binary.json",
+        "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_binary.json",
+        "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb.h",
+        "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb_v2.cpp",
+        "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb_v2.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb.cpp",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_apt.cpp",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_base.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_compute_ab.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_compute_ab_cast.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_small.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_ab.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_aba_and_ba.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_bab.h",
+        "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_common.h"
+      ]
+    }
+  },
+  "operators": {
+    "adaptive_avg_pool3d": {
+      "CMakeLists.txt": {
+        "sha256": "d200ac272f9341e7021c2e366a9a2e670301e6f6ae0da32392a417b229cbf886",
+        "override": "adaptive_avg_pool3d/CMakeLists.txt",
+        "baseline_sha256": "d200ac272f9341e7021c2e366a9a2e670301e6f6ae0da32392a417b229cbf886",
+        "baseline_directives_sha256": "7cb79c6705331e3a4827fef232280e704f153d426869e73b591d30a677ce61e0"
+      },
+      "_deps/common/inc/op_api/aclnn_util.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_api/aclnn_util.h",
+        "source_sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "baseline_tokens_sha256": "b682b89d3ab593d1018c903a2fc8db271bcd0c002af9874fbd4e53dfc687b6ae",
+        "baseline_sha256": "4109a4c5196ce92795f58d2f9d14bcfd26540132259d2f24028bd57cc41793ae",
+        "baseline_directives_sha256": "a70dad78128f0430ddb7545ab007d4d82d1341cd22003fbf4825da82cd1d9b61"
+      },
+      "_deps/common/inc/op_host/static_register_symbol.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/static_register_symbol.h",
+        "source_sha256": "1cbb8db24c2944ad12be18e4a995d7dd05922317f8961e073248dc4c2dda6f33",
+        "sha256": "e3ee1bf94555fd0f3a47b3417dd38463ba0482f7641a21282ce8d5e68633825a",
+        "baseline_tokens_sha256": "f7dc75863a55b62f88ef8623a2d4008b84f9f01541f07cd851dc3794cd236f7c",
+        "baseline_sha256": "7f41885a3ceb55ca19ca07b965cc73294e071222d7e26840c8e5005d8285d4a2",
+        "baseline_directives_sha256": "fb8c16eb9db96cf08bdab5c07ed7f6efc92f69f5b637e149fe6e0a90493bbe55"
+      },
+      "_deps/common/inc/op_host/tiling_base.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_base.h",
+        "source_sha256": "61b279a4cf97e594c5ce7acfa149f9fb08aace1ab669e29b1b0484ecb61c2d17",
+        "sha256": "e6f47cab333f18b5e4bae8770dd857eb7463ef60148e57d7db253f7d95aebde1",
+        "baseline_tokens_sha256": "f32a2ce04828d864ec4ea60335228d43c4f51884ee23c02f311f36abeff9814e",
+        "baseline_sha256": "c0a0ed4438e9309d0fcf150be7948a2b34cb9ef9c2fd0f13945cc04b82b95c9a",
+        "baseline_directives_sha256": "8ffd1ce5413a3f7a78d1adb7640b19d67a3e1755d30b65fb707ef60d36cbf098"
+      },
+      "_deps/common/inc/op_host/tiling_templates_registry.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_templates_registry.h",
+        "source_sha256": "55914293627689e4846033d5c84bb286eadaf453bb8cd0a39c52fecb0389795a",
+        "sha256": "1589eee427e269ec9e647673901c27bb9d5802c51c1b2b5d270b482123f6cc78",
+        "baseline_tokens_sha256": "61604603ae178876ffc2f77116b5a7295184d85cecda54f97e28db69b7b32abb",
+        "baseline_sha256": "ddbd4dfe36fab8b05ea2a47c39ca2cb28cb762c29e25acd2095b4afc60d7f5aa",
+        "baseline_directives_sha256": "84f5f950510d5c5911755a3c0ea704c879f181c3df57afdd8c9f382a8f6fefc6"
+      },
+      "_deps/common/inc/op_host/tiling_util.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_util.h",
+        "source_sha256": "5bed817d07982c0e1451ee1ee88b51c7b008e835531e9e88b89cd7f0579f7cb3",
+        "sha256": "5bed817d07982c0e1451ee1ee88b51c7b008e835531e9e88b89cd7f0579f7cb3",
+        "baseline_tokens_sha256": "3197a588459e484000c4c6bcf36b9c08891fa642a8e93179db45fc8bfec13e38",
+        "baseline_sha256": "28ae8041ed979715a2305f9da29172110410597ab6ba2c23a2dbaad5243c4afe",
+        "baseline_directives_sha256": "3a182fab61271f98a2256f83bd6df06fed453e6f491bddd1bc03575021b57f84"
+      },
+      "_deps/common/stub/op_api/level0/reduce_mean.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/reduce_mean.h",
+        "source_sha256": "d4efc8d3b4d229c0ee973884370aa241351a426d18a690340be45837d0d0fc1f",
+        "sha256": "d4efc8d3b4d229c0ee973884370aa241351a426d18a690340be45837d0d0fc1f",
+        "baseline_tokens_sha256": "af48a390572de26a6b398a91b73c2c9b66b2dcf8b2708414056ad66580a38773",
+        "baseline_sha256": "7778ad2ba7aa5736b43ae5c1c57e67e6e408d7abd4ee7c4554a40d8ab9f8c1e0",
+        "baseline_directives_sha256": "6151b777e2bc9e9cf225ab4c152ed13bae984d7582b772205d6ebc20fd75a0dd"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_avg_pool3d_big_kernel.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_big_kernel.h",
+        "source_sha256": "d1e19df3fe7ecdd1aec575bf40d55c5f25fa5a6a04b56ebf59f0e04d14bb20b9",
+        "sha256": "30ff05685254ab1875d6604022664f4e53438d75dff7e1ae62cde979ae526d58",
+        "baseline_tokens_sha256": "295cd323e48abc4411b0c300378f615f46d3440fe8e0e4550f0295e7851ebf62",
+        "baseline_sha256": "d69fcb848d6df3b590a4b063b6dfd54877711b820f323512ab8f27b35362f13b",
+        "baseline_directives_sha256": "cf7e7c15292d533635aee6dd43c518b3493b3c0d6b090627f261a27b903474ea"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_avg_pool3d_parall_pool.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_parall_pool.h",
+        "source_sha256": "1e7d97e453b0af54c1a7801633c2fddc37e9d754ce618bd26bc3856dcc3ba1c7",
+        "sha256": "77cad767c09dc36d50951ec14549bd08513fbe02b7901e7a1f0b1eee1d8a9df0",
+        "baseline_tokens_sha256": "1ee0fb5d9c3c95fc75b0e3ad4b0b9d2a4888ce272a9572060df7f0fe8ace819e",
+        "baseline_sha256": "24adca36b170f45c301d2aaeaef6fbb693c40e3154c143dfb0b847898f044224",
+        "baseline_directives_sha256": "8fe72516c008cf447c23f5ff618d8fac79833e9ab4db8ea6f08cbb3c73370b83"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_avg_pool3d_simt.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_avg_pool3d_simt.h",
+        "source_sha256": "d9e9f31fbe22f7e1def68a24c4d030055b8826a13a230e8f8818ac039ec7ac49",
+        "sha256": "d9e9f31fbe22f7e1def68a24c4d030055b8826a13a230e8f8818ac039ec7ac49",
+        "baseline_tokens_sha256": "fd895351a21f43d3d994172f56dca47dc1381d1daee590de534d1d76201ea7f0",
+        "baseline_sha256": "b4ec3a4f7eba2da658b7c0668062507a8f0164bf6a3d6ccab0fa2f78975216d8",
+        "baseline_directives_sha256": "de6f9405b4e50175843fec82c0333e6546bcce0a5e77f14141838c4f23e53615"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_max_pool3d_big_kernel.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_big_kernel.h",
+        "source_sha256": "75336adf38997d5f1d2da664873317cd81791ba7b3d4ce34ad6dd54ba57764ef",
+        "sha256": "baaa3cf5da71c78f9399fbd69cf9690067354b6e00a741aedb9112f348a390dd",
+        "baseline_tokens_sha256": "7c0bcdea95b04c45e6214a4df4780587b22ca0590a1cf8a14bf87e6a15648c9f",
+        "baseline_sha256": "c8841a96724c84d479b0255a08f473227953381d193dc1d1d371a52e438edfc3",
+        "baseline_directives_sha256": "20bfba9a0a2a6df4fa8089434d293544a23d634707f1246ccf2e92aad5d8f87a"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_max_pool3d_parall_pool.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_parall_pool.h",
+        "source_sha256": "132788a564828fcdb5fb0224ce43fe9326f20d88d920a4be3046e717cafd552c",
+        "sha256": "a99252e9734897fd984123bc42f33d17d50dd026e452a25c59a75040c24cebe2",
+        "baseline_tokens_sha256": "c988b2dba6eb24e9ec4062b94b55e18722afae9b643a1160afc7c02d0ac2a06c",
+        "baseline_sha256": "1ca754e40581e43f1b39a1d282010decfe5982ede018013257b57c88f234aa76",
+        "baseline_directives_sha256": "0c66851c221634ad3183271250f3d1d40d1968c4f9b6f3e855f318f806aeb814"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_max_pool3d_simt.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_max_pool3d_simt.h",
+        "source_sha256": "f208a667b988c7c716bfac8153f15b4e36707e53b4dd90904f1aa356cc1304c7",
+        "sha256": "af323f4dac348c3b7e62e0183ae87ff6d5aab5a4e499d974a2b216847461f850",
+        "baseline_tokens_sha256": "4ce6be98b2b67c31238087a821fb78c7e91f6849f46864036d6942259705803a",
+        "baseline_sha256": "fb4a15f2c7be87215bde2efed1d5fe0c2779d7c8ab88fb1c568919ddc4a36da8",
+        "baseline_directives_sha256": "d27e91f2b5d852c241473b3c705ac6e3029af74a6ca1b691dd66e81051a2d86c"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_pool3d_big_kernel.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_pool3d_big_kernel.h",
+        "source_sha256": "6b319e62dbbc47c57be41f9c5fa5617298fc1b572f74d40f112bf53ed8232ad4",
+        "sha256": "f0e6c4d374542798707498b88a00639257c2f57be166b5237529a790874828ae",
+        "baseline_tokens_sha256": "989cddea5ebb6b611b476c12639b91757a781fa6582f7ac173bed76a7359e0ca",
+        "baseline_sha256": "2abd2491c7cd51e0486b37ea8e61183330ba106a34e1318cbde2a4de9fe77ac7",
+        "baseline_directives_sha256": "87b701bdba13559199c0226b5b79e31d6ba1cb466582f834afc2302b752f99b6"
+      },
+      "adaptive_pool3d_common/arch35/adaptive_pool3d_tiling_struct.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_pool3d_common/op_kernel/arch35/adaptive_pool3d_tiling_struct.h",
+        "source_sha256": "079a1b992364e331e26f71cf6bcb9a1cf202180e72ed8c6bb45988a9ce808f24",
+        "sha256": "0447f1053ccc249ba2634b9a011796f749a103e93e63769e459fd8ea57224c0f",
+        "baseline_tokens_sha256": "1430863ed6ec60cd1e36d0fff5b60717b9efec2ae56a1df7ac0098fc4c2d9acc",
+        "baseline_sha256": "e574432ed000eb219e3def6d05fac228b6c5a3352b5c1bfb430f9bd1a99ea7f9",
+        "baseline_directives_sha256": "243bc044e279d36d3ffd9887d08cdb44a13fe7b522b6507928aa7f35b5f42d2d"
+      },
+      "op_api/aclnn_adaptive_avg_pool3d.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.cpp",
+        "source_sha256": "1a7d0d70ab984f80e29cc974f276da3fc5f5c9b381404eb71483dcdfb51f6396",
+        "sha256": "4147bdc6e5bec9a78db7e7151f955781112ebedaeadfa2737c2a5cccd347fa45",
+        "baseline_tokens_sha256": "9d9222ca7bd4479b77699efb1d471083a68e844b23c85b40edc52c2249ad8fee",
+        "baseline_sha256": "3442b63b084d2422a83b164e2d4bfbc4a93eb7478dfd228dc1c185a21b73c955",
+        "baseline_directives_sha256": "81f22d5c8577a50913571ac45404480cd00ad27077a2ec6a47832c81396f9cdc"
+      },
+      "op_api/aclnn_adaptive_avg_pool3d.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_api/aclnn_adaptive_avg_pool3d.h",
+        "source_sha256": "9d3f894b2e829f66bec311551d9d7ef94e7fe571fec90470df15e90334c5729e",
+        "sha256": "9d3f894b2e829f66bec311551d9d7ef94e7fe571fec90470df15e90334c5729e",
+        "baseline_tokens_sha256": "747508bd4b798af5ede26b583322fecdc570e3ce50edbe10666c865c2ca781f7",
+        "baseline_sha256": "834ae854a704dcaf0a2ba58d1cef7e86cf299d0dea76a629988d1140d7e427b0",
+        "baseline_directives_sha256": "beea3134f9df19e06eebae10a1a5a1df6a9e5fa28762783784889525269edc83"
+      },
+      "op_api/adaptive_avg_pool3d.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_api/adaptive_avg_pool3d.cpp",
+        "source_sha256": "b621e62560866ba943b19217e4ee88537badc475755129f2a45afb62456886be",
+        "sha256": "b621e62560866ba943b19217e4ee88537badc475755129f2a45afb62456886be",
+        "baseline_tokens_sha256": "6d28ff8a3ccd6cf9f3d1623b7460cfd955f1d6c96685a6584227cf041369e360",
+        "baseline_sha256": "252e1d8db0708d3dcd50610eb32f0409733d4f439eea16a234036ec2cfe8608a",
+        "baseline_directives_sha256": "2189be9109eae9827aa2530765b2bbc22688f0096e69a7bbd703b569b050be33"
+      },
+      "op_api/adaptive_avg_pool3d.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_api/adaptive_avg_pool3d.h",
+        "source_sha256": "19413f62a06b711c21f6a3be142147f645df5931f704099320bbdef2b9c831b2",
+        "sha256": "19413f62a06b711c21f6a3be142147f645df5931f704099320bbdef2b9c831b2",
+        "baseline_tokens_sha256": "9ed4b364a675295fea51749536016756be56e0a9371e224af2ff42ca7eec2fd7",
+        "baseline_sha256": "19413f62a06b711c21f6a3be142147f645df5931f704099320bbdef2b9c831b2",
+        "baseline_directives_sha256": "5f089f471cf1aa304c1026e2ced9c8c6787bd12c15c334841b9fec365ec43001"
+      },
+      "op_host/adaptive_avg_pool3d_def.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_def.cpp",
+        "source_sha256": "4096b59a4fcecd07b1e770ca0c6af0d68995bff0ffbff695beba80b6ea45ddd5",
+        "sha256": "4096b59a4fcecd07b1e770ca0c6af0d68995bff0ffbff695beba80b6ea45ddd5",
+        "baseline_tokens_sha256": "f353d1bd520924b9058fcd34cdb53ecefab44a4e0ec6ff6e0231ca9a164d0b47",
+        "baseline_sha256": "9dda3c2d60276cfcfd8d8f7648ca855558b657d69b08c147e5ba88f56a1b4dff",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/adaptive_avg_pool3d_infershape.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_infershape.cpp",
+        "source_sha256": "d3effd44c43b730e03be8d11c9257b6426c38683b9c0764c1692fbc9a1406384",
+        "sha256": "d8e6ea008b3f257b4c848d38c6c729c845612debc4313726dd55967d7b5dba6a",
+        "baseline_tokens_sha256": "dd4edf65abf2826219c724aab4e2ce49f71cd7bda8d8bd9c396863fcf2f3513d",
+        "baseline_sha256": "b48d5ba1378aba63e1757fea54560c8a3811b23e2a0897862ba9f553d2f4b463",
+        "baseline_directives_sha256": "78b174f9776f486663845ab9272074d5a65aa660dc3747383cf771d285b2cfb7"
+      },
+      "op_host/adaptive_avg_pool3d_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.cpp",
+        "source_sha256": "a89cd2fe5c4dbf5287ca5dc8cde4b7c96c21a6a4770bcb80f3a7bb968363c336",
+        "sha256": "1406309ce0ae8ab999190345b4372da9cdff7e73a797a93e28377a6a6f573c36",
+        "baseline_tokens_sha256": "e7e88fd22c4d6b5201aa09b069e0b8919af41c509b0724a6dab1213d565d4012",
+        "baseline_sha256": "aefc89ebfb6d6b45596772aa00fe6fb39adbb786ef1d53ec8217f30343a083e3",
+        "baseline_directives_sha256": "521dddce39731a93e6302d0053ae0c41df4353eff2a28e0a4a23efbdf9afab5a"
+      },
+      "op_host/adaptive_avg_pool3d_tiling.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/adaptive_avg_pool3d_tiling.h",
+        "source_sha256": "1dc45f10e13c0e7b2763602586607d9016f9315b923e84d405a59b1ad9e60771",
+        "sha256": "1dc45f10e13c0e7b2763602586607d9016f9315b923e84d405a59b1ad9e60771",
+        "baseline_tokens_sha256": "13408ded56f52b3dab4ba3f2a8a9e4f3691448aeafcbc04a61e5e4803cbcc1ee",
+        "baseline_sha256": "1dc45f10e13c0e7b2763602586607d9016f9315b923e84d405a59b1ad9e60771",
+        "baseline_directives_sha256": "db20d9b94c6ee16d589da9988e219d1c13f1a9567a605534d50e7feb5152bdff"
+      },
+      "op_host/config/ascend310p/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/kirinx90/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_tokens_sha256": "04a1158485804ef29ddb30a7b7699ddac6e4402f63fc5359c9276a62b64135bb",
+        "baseline_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910_93/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/ascend910b/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "baseline_tokens_sha256": "e9d29ad7068ef971ae7074ceb775c2a2c9f5d754ea2daf2b5c998ce1afef08ca",
+        "baseline_sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/ascend910b/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "baseline_tokens_sha256": "e9d29ad7068ef971ae7074ceb775c2a2c9f5d754ea2daf2b5c998ce1afef08ca",
+        "baseline_sha256": "bfb9cf2b0e3a9ae8501cdb67647ce40a0312c82c47fd5cff50def80a590f9c4d",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend950/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/ascend950/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "b91a8e8e7c5d4b6c460801801de4d19357a908159ea8b7e4b05d1d04938f2ffe",
+        "sha256": "b91a8e8e7c5d4b6c460801801de4d19357a908159ea8b7e4b05d1d04938f2ffe",
+        "baseline_tokens_sha256": "ac949a32d6bea171b1d0b8bf9b8795320c319c1e5b4363653e7123fd4aaf15a2",
+        "baseline_sha256": "b91a8e8e7c5d4b6c460801801de4d19357a908159ea8b7e4b05d1d04938f2ffe",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirin9030/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/kirinx90/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_tokens_sha256": "04a1158485804ef29ddb30a7b7699ddac6e4402f63fc5359c9276a62b64135bb",
+        "baseline_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirinx90/adaptive_avg_pool3d_binary.json": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_host/config/kirinx90/adaptive_avg_pool3d_binary.json",
+        "source_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_tokens_sha256": "04a1158485804ef29ddb30a7b7699ddac6e4402f63fc5359c9276a62b64135bb",
+        "baseline_sha256": "ebf27d0a01b9e6ad73142e3906f7a5ff861624b6e04de6406f6b2e41fc5b6995",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_kernel/adaptive_avg_pool3d.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d.cpp",
+        "source_sha256": "4636626bf4a9012bb28d69ef2eba8a0d6d9fbbcfb3599765f75671cc28b8b0a5",
+        "sha256": "4636626bf4a9012bb28d69ef2eba8a0d6d9fbbcfb3599765f75671cc28b8b0a5",
+        "baseline_tokens_sha256": "27a2932261611036905576607a0d84798a5c17cc353b443815fac16f27f3972a",
+        "baseline_sha256": "4636626bf4a9012bb28d69ef2eba8a0d6d9fbbcfb3599765f75671cc28b8b0a5",
+        "baseline_directives_sha256": "230e0e2b00230f4aaa1f67033908895adb08a96c7a3c4bfefd8c64763c79a71f"
+      },
+      "op_kernel/adaptive_avg_pool3d_apt.cpp": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_apt.cpp",
+        "source_sha256": "4070c492cc620457c791f7af4126cf0e0408f23e6cb6dd5c4a848a9b9337695c",
+        "sha256": "bb4b6678c2e1d920bbbd3045cb854bd9551c373fcef99f61e9100169615079be",
+        "baseline_tokens_sha256": "b0a94a09f9d6b5942f7a159417590997ed0f1a12a7a8c42c6b843ccde46900fc",
+        "baseline_sha256": "a2acc4b5bc3c717815ca6309ac3fe2321fab7fcdd21e4b9261881a5d522c9d99",
+        "baseline_directives_sha256": "f3925ad6103d482ac6f964feb1b1d8b123f3af8517a4e3ef38115f99921b759e"
+      },
+      "op_kernel/adaptive_avg_pool3d_common.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_common.h",
+        "source_sha256": "79e26ebe85753d8c40624ba0446e474b3efbc8a2eeec07b88156957d36630199",
+        "sha256": "79e26ebe85753d8c40624ba0446e474b3efbc8a2eeec07b88156957d36630199",
+        "baseline_tokens_sha256": "8f8341404af19cf4762ad761ac986ec4ee1eb953a1ff2be53c703632ad61e417",
+        "baseline_sha256": "162b329ffd1991931e46b059f5673843e5115e3e01f6b7ffe09a11757319f45f",
+        "baseline_directives_sha256": "bf87e5d9e9d1883d6bcaccd0a14bb95e1ff32c60dbeb724b9c470d4e619234a4"
+      },
+      "op_kernel/adaptive_avg_pool3d_multi_w.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_multi_w.h",
+        "source_sha256": "4c26f2e77de27ef6d1cda90c2ef454f9e9f424a0baeff51c08cfc3198d1c423e",
+        "sha256": "4c26f2e77de27ef6d1cda90c2ef454f9e9f424a0baeff51c08cfc3198d1c423e",
+        "baseline_tokens_sha256": "09084247d992489c7180bc532d97701fd21bc9d0b8161e073f01b04b7e802dc7",
+        "baseline_sha256": "e925a9aa34b7965b8064f14e0d2b998fd9849b33ca2694fe4920cc9c79e8ba69",
+        "baseline_directives_sha256": "894c7caf1f8aef0e921402fc7138dfe832660fe47fad5b764608bd490a0d2ed1"
+      },
+      "op_kernel/adaptive_avg_pool3d_split_c.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_split_c.h",
+        "source_sha256": "946a2112abbf63e6bc2850e5d9d76bbe5740cf8feca7f7a4c72fe8734cdd35c3",
+        "sha256": "946a2112abbf63e6bc2850e5d9d76bbe5740cf8feca7f7a4c72fe8734cdd35c3",
+        "baseline_tokens_sha256": "5d31e3f3fed714a613376b064c83ef1d79c1cbada996a1628ed77957c6187b57",
+        "baseline_sha256": "706293376bbffd80f26f348273ef25e60913487fc3ed9805d719fbb1996fdf85",
+        "baseline_directives_sha256": "07b8203b6c2e669c4f0f5bbca2609d0ab719433568a2900bdd0d25721d0e7398"
+      },
+      "op_kernel/adaptive_avg_pool3d_split_w.h": {
+        "repository": "ops-nn",
+        "source": "pooling/adaptive_avg_pool3d/op_kernel/adaptive_avg_pool3d_split_w.h",
+        "source_sha256": "8d0275af4da865dc64e44f42cad05538c7518b40fdf9b08fc79e9c312ec4cced",
+        "sha256": "8d0275af4da865dc64e44f42cad05538c7518b40fdf9b08fc79e9c312ec4cced",
+        "baseline_tokens_sha256": "9d1940f6fabb3ba015f53373f424b4d299da7d19888ace205d9aa6efad1b0981",
+        "baseline_sha256": "89c6d6389f01f174d14805b83d7e5e279c794a583769787c5514bf2beb42942c",
+        "baseline_directives_sha256": "a7574f4692b660800ae7adfb69ba2731e9b0a169c136db187199614e77f17fac"
+      }
+    },
+    "expand_into_jagged_permute": {
+      "CMakeLists.txt": {
+        "sha256": "35ed0dcc84d448fb80848092be4f649431b6aa8597b6655b37479b6c80dc8fb9",
+        "override": "expand_into_jagged_permute/CMakeLists.txt",
+        "baseline_sha256": "35ed0dcc84d448fb80848092be4f649431b6aa8597b6655b37479b6c80dc8fb9",
+        "baseline_directives_sha256": "582d5a17dbd56bacd038ff0583ae033ae11ff4086d41014201670c447a5353cd"
+      },
+      "op_host/config/ascend910_93/expand_into_jagged_permute_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_host/config/ascend910b/expand_into_jagged_permute_binary.json",
+        "source_sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "baseline_tokens_sha256": "a53ee41f8804e163ff61282b00323fac478d8c8070e2d234e03f6fd972d6ded6",
+        "baseline_sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/expand_into_jagged_permute_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_host/config/ascend910b/expand_into_jagged_permute_binary.json",
+        "source_sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "baseline_tokens_sha256": "a53ee41f8804e163ff61282b00323fac478d8c8070e2d234e03f6fd972d6ded6",
+        "baseline_sha256": "aae8fdfce7eecb9741ab39f250a514a89cadd0fa63e4bd1adfc7123c8cfbcf91",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/expand_into_jagged_permute_def.cpp": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_def.cpp",
+        "source_sha256": "1911dfc449df42275aae0dae40234afb79ac267063e66575c1791f2d8548bcd5",
+        "sha256": "1911dfc449df42275aae0dae40234afb79ac267063e66575c1791f2d8548bcd5",
+        "baseline_tokens_sha256": "1bfb066e4d168ac73d8d2158eaec97dbe9004074b95617fd7205300dc8adfde6",
+        "baseline_sha256": "7a2ad86e866e2c4119e1d382217ff5d60c9b38d4356930adbd32995bf74dfde1",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/expand_into_jagged_permute_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.cpp",
+        "source_sha256": "542fcf25a54a324b608c5b526bdd1af81659eb174adec984657ede2efcc53820",
+        "sha256": "021ad7d28c553eecb92271a025f280b66e407cfaf6cecfec5e5b3c40afc67093",
+        "baseline_tokens_sha256": "ac9a82a160b38e3812cea7e6266a30aac09a4ce0c56f20c0c489ffc3b8a85d4b",
+        "baseline_sha256": "8ee6bfc8bb10be7a53127cddc6348eac7196b83a9266f76dc5d18d4cad561064",
+        "baseline_directives_sha256": "ed0391ea4484642bbb4fc25b47a7a10f64a99f20a8a55f90886965bb00482420"
+      },
+      "op_host/expand_into_jagged_permute_tiling.h": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_host/expand_into_jagged_permute_tiling.h",
+        "source_sha256": "1f5604f1c6ab4a113d4d198572424793c03bab3154d306b50a1f64f03c65eac1",
+        "sha256": "1f5604f1c6ab4a113d4d198572424793c03bab3154d306b50a1f64f03c65eac1",
+        "baseline_tokens_sha256": "39bf9d4565e69e1ed4086d714b9f99659a2d871751b9bf5ad8ecc9be3d22a334",
+        "baseline_sha256": "d232eaaaad9dfb9b90f96d828d037aa54a85d90b6611de757834568347768259",
+        "baseline_directives_sha256": "77e01d9be2e179c4a63c6f351808228322ac7778e5ec2d3b2be3669a8465b809"
+      },
+      "op_kernel/expand_into_jagged_permute.cpp": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_kernel/expand_into_jagged_permute.cpp",
+        "source_sha256": "22c8c1c8adb570316ab89764b8344d72f10b7974603874f08bb2c6195f25b1eb",
+        "sha256": "22c8c1c8adb570316ab89764b8344d72f10b7974603874f08bb2c6195f25b1eb",
+        "baseline_tokens_sha256": "bca02ce0c7f31040bf25980dd3646ba8e8c26a7f830a7b44d104b074f1343179",
+        "baseline_sha256": "f145b949d51ee0b62470c055c7c4d40c0e3478cc147c3c68c58f7c75a0e91923",
+        "baseline_directives_sha256": "a8106336f3866f80785a356aea01831f48bf6e717eb28629a6c0aa4ef122ee3f"
+      },
+      "op_kernel/expand_into_jagged_permute.h": {
+        "repository": "ops-nn",
+        "source": "index/expand_into_jagged_permute/op_kernel/expand_into_jagged_permute.h",
+        "source_sha256": "5fd2cff202a4a494cd2d175146354c0bd1853b40522a27a5cc93e60f67c59ade",
+        "sha256": "5fd2cff202a4a494cd2d175146354c0bd1853b40522a27a5cc93e60f67c59ade",
+        "baseline_tokens_sha256": "ea49f4a712f1ea30e11f49181d947c9b9570ed09bb62df047d61f75011fb655a",
+        "baseline_sha256": "5d96c02a90ee87c554c52940eac81b987e033c3053fd4d8d4d467a6bca0168ef",
+        "baseline_directives_sha256": "703ea9de2137788f6555017c3d250e69e8161b3c80dc818baf4ea54a5093281e"
+      }
+    },
+    "group_quant": {
+      "CMakeLists.txt": {
+        "sha256": "2f411034ab5062af870a4bc6ca56f7df03760303c2b269721b9d43c2ada054ae",
+        "override": "group_quant/CMakeLists.txt",
+        "baseline_sha256": "2f411034ab5062af870a4bc6ca56f7df03760303c2b269721b9d43c2ada054ae",
+        "baseline_directives_sha256": "140e16b282f797ebc37db596b7d9804c1dd9c6ccabb6c7be955dc74bf14b1ccf"
+      },
+      "_deps/common/inc/op_api/aclnn_util.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_api/aclnn_util.h",
+        "source_sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "baseline_tokens_sha256": "b682b89d3ab593d1018c903a2fc8db271bcd0c002af9874fbd4e53dfc687b6ae",
+        "baseline_sha256": "4109a4c5196ce92795f58d2f9d14bcfd26540132259d2f24028bd57cc41793ae",
+        "baseline_directives_sha256": "a70dad78128f0430ddb7545ab007d4d82d1341cd22003fbf4825da82cd1d9b61"
+      },
+      "_deps/common/inc/op_host/static_register_symbol.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/static_register_symbol.h",
+        "source_sha256": "1cbb8db24c2944ad12be18e4a995d7dd05922317f8961e073248dc4c2dda6f33",
+        "sha256": "e3ee1bf94555fd0f3a47b3417dd38463ba0482f7641a21282ce8d5e68633825a",
+        "baseline_tokens_sha256": "f7dc75863a55b62f88ef8623a2d4008b84f9f01541f07cd851dc3794cd236f7c",
+        "baseline_sha256": "7f41885a3ceb55ca19ca07b965cc73294e071222d7e26840c8e5005d8285d4a2",
+        "baseline_directives_sha256": "fb8c16eb9db96cf08bdab5c07ed7f6efc92f69f5b637e149fe6e0a90493bbe55"
+      },
+      "_deps/common/inc/op_host/tiling_base.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_base.h",
+        "source_sha256": "61b279a4cf97e594c5ce7acfa149f9fb08aace1ab669e29b1b0484ecb61c2d17",
+        "sha256": "e6f47cab333f18b5e4bae8770dd857eb7463ef60148e57d7db253f7d95aebde1",
+        "baseline_tokens_sha256": "f32a2ce04828d864ec4ea60335228d43c4f51884ee23c02f311f36abeff9814e",
+        "baseline_sha256": "c0a0ed4438e9309d0fcf150be7948a2b34cb9ef9c2fd0f13945cc04b82b95c9a",
+        "baseline_directives_sha256": "8ffd1ce5413a3f7a78d1adb7640b19d67a3e1755d30b65fb707ef60d36cbf098"
+      },
+      "_deps/common/inc/op_host/tiling_templates_registry.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_templates_registry.h",
+        "source_sha256": "55914293627689e4846033d5c84bb286eadaf453bb8cd0a39c52fecb0389795a",
+        "sha256": "1589eee427e269ec9e647673901c27bb9d5802c51c1b2b5d270b482123f6cc78",
+        "baseline_tokens_sha256": "61604603ae178876ffc2f77116b5a7295184d85cecda54f97e28db69b7b32abb",
+        "baseline_sha256": "ddbd4dfe36fab8b05ea2a47c39ca2cb28cb762c29e25acd2095b4afc60d7f5aa",
+        "baseline_directives_sha256": "84f5f950510d5c5911755a3c0ea704c879f181c3df57afdd8c9f382a8f6fefc6"
+      },
+      "op_api/aclnn_group_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/op_api/aclnn_group_quant.cpp",
+        "source_sha256": "66abd8e0815bb5cb956eb07e7721a603689d988e64cbebf2b61103db5a995c34",
+        "sha256": "66abd8e0815bb5cb956eb07e7721a603689d988e64cbebf2b61103db5a995c34",
+        "baseline_tokens_sha256": "d2d7c58587b8245f6827c3cd4c2c178636ce0c8d9aa6be9a0cdc7d7c0ce4cfcd",
+        "baseline_sha256": "9a4d038ef4729c849fdb0725d8fb23ec25b295f5021b10a148ba2dc5d3c38c9f",
+        "baseline_directives_sha256": "f7a3771333833ead11851f4d18afe56b4fcbe3e8be3f163e0c7b939ea8416927"
+      },
+      "op_api/aclnn_group_quant.h": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/op_api/aclnn_group_quant.h",
+        "source_sha256": "d6ab42ac3735e76c107a6277cc6da4fa72d3cbe78eebf02415065d222691c20c",
+        "sha256": "d6ab42ac3735e76c107a6277cc6da4fa72d3cbe78eebf02415065d222691c20c",
+        "baseline_tokens_sha256": "f539ef96384f23280defaa96f7a192bcad0e61ed6d760c987c80b5563bb9ded9",
+        "baseline_sha256": "fc1320395d9cb2a216ded4cde9b71913a73bb1941b2fb2410b90f89d72b38331",
+        "baseline_directives_sha256": "b516b0a7b37f7f1cacea32b761809b0d32e82c6c616aee1c30fca50d868cff23"
+      },
+      "op_api/group_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/op_api/group_quant.cpp",
+        "source_sha256": "0de278c4d64ad3f4844744e0b7e953cff144bdcba234b2ac392fd589bc980a90",
+        "sha256": "0de278c4d64ad3f4844744e0b7e953cff144bdcba234b2ac392fd589bc980a90",
+        "baseline_tokens_sha256": "a17ccc4190071527ec1109a625a0f7ccbfdbe9b187e441da1a91fb14680bf292",
+        "baseline_sha256": "a57e58c3ebfb1331d9c8f3eb5d6edda7ea76d181b1cb24f4d2c5646908cf2023",
+        "baseline_directives_sha256": "50ab1dd7bb22c20884db87584e942c57e88b4936adbd655e4953e615d93aa0cd"
+      },
+      "op_api/group_quant.h": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/op_api/group_quant.h",
+        "source_sha256": "be64867b4f3a1b0b4ce228d263a0a98c9cba3d0436d38fd7c35a3d806bed5f23",
+        "sha256": "be64867b4f3a1b0b4ce228d263a0a98c9cba3d0436d38fd7c35a3d806bed5f23",
+        "baseline_tokens_sha256": "59cb5519d183ce05a0ea67146f88d1337d77d91321c4050b1c4b5fe055f593cc",
+        "baseline_sha256": "b73470fbee947e3462bffa27da86c4a3133432b5b62f9720caac7a6c4036502f",
+        "baseline_directives_sha256": "177551135a1e96752e5b59054c005c8f18057c604b40834e4d577b322a62830d"
+      },
+      "op_host/config/ascend910_93/group_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/config/ascend950/group_quant_binary.json",
+        "source_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_tokens_sha256": "51cb5337edd77b2fc3247ca79e2ecc373d3c4c439ed0472a09e7a3730fcbf20c",
+        "baseline_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/group_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/config/ascend950/group_quant_binary.json",
+        "source_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_tokens_sha256": "51cb5337edd77b2fc3247ca79e2ecc373d3c4c439ed0472a09e7a3730fcbf20c",
+        "baseline_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend950/group_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/config/ascend950/group_quant_binary.json",
+        "source_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_tokens_sha256": "51cb5337edd77b2fc3247ca79e2ecc373d3c4c439ed0472a09e7a3730fcbf20c",
+        "baseline_sha256": "8ac67ca32f39a142eb44c4bdb1c61b9649e778556b3e464613de1d4b7851e7de",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirin9030/group_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/config/kirinx90/group_quant_binary.json",
+        "source_sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "baseline_tokens_sha256": "c7db0b3c227f7be28e4bd68354a267c59a3177ab88e868dbb2ece2cbc06cca6f",
+        "baseline_sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirinx90/group_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/config/kirinx90/group_quant_binary.json",
+        "source_sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "baseline_tokens_sha256": "c7db0b3c227f7be28e4bd68354a267c59a3177ab88e868dbb2ece2cbc06cca6f",
+        "baseline_sha256": "7eab06080e18da651ab14e9d7315f307f88f35b52e5488f34dcfa188ff6412e5",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/group_quant_def.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/group_quant_def.cpp",
+        "source_sha256": "3a4f62ec4cdd95110874ccb64d3253f3f0cd90ea4de5311742c69f594d9fc0a2",
+        "sha256": "3a4f62ec4cdd95110874ccb64d3253f3f0cd90ea4de5311742c69f594d9fc0a2",
+        "baseline_tokens_sha256": "6ef38d66d958cf29d703939ad28539eb8d23120daa5fe390140b79d48c1fda22",
+        "baseline_sha256": "33f8352ca03b020be3a6f3a3be5eb607f317404f8552344854d559375db01e4d",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/group_quant_infershape.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/group_quant_infershape.cpp",
+        "source_sha256": "b82c9e4fe599756e60ad1fc760fb75fed6909008e296e07dc74fce31fa8555ea",
+        "sha256": "b82c9e4fe599756e60ad1fc760fb75fed6909008e296e07dc74fce31fa8555ea",
+        "baseline_tokens_sha256": "c0d127c1697b929ffda4fbb6513114e266d6c3213121230c75b587c3d35c8404",
+        "baseline_sha256": "ee3f615c9f11d49b9870f0d05979503a8a37f2ba2c6a910e52951bb92d83101d",
+        "baseline_directives_sha256": "fad7d38875456bc86d499744109ac9b9dcfca6ac300db44eda2bd4f7bc65bcf2"
+      },
+      "op_host/group_quant_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/group_quant_tiling.cpp",
+        "source_sha256": "2007f5e04eb3d46ed6c65d5258ac172a23239b5d5a50b28761f52d6d8dd4c742",
+        "sha256": "2007f5e04eb3d46ed6c65d5258ac172a23239b5d5a50b28761f52d6d8dd4c742",
+        "baseline_tokens_sha256": "b87754e47543b664d8cb2c270d743fc0f3f5c189f57affbbaa743c5bb700dfa2",
+        "baseline_sha256": "2e0c835479d536d588c71e431c87dde275d7de5e02b0bd51eae0ce941d183f2c",
+        "baseline_directives_sha256": "c6dd29bfaf4062f73004d5951c5786d409a7f16914a29a33fc785121dcd49854"
+      },
+      "op_host/group_quant_tiling.h": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_host/group_quant_tiling.h",
+        "source_sha256": "f4d812b4b0778b83fc2ecdff76cfa3c72a2952d3292527c98762106d55564af7",
+        "sha256": "f4d812b4b0778b83fc2ecdff76cfa3c72a2952d3292527c98762106d55564af7",
+        "baseline_tokens_sha256": "3a4ec4c9bfae9597e6e65acf425a5a9a56f01d910f16333a33cf48d9485e6f8c",
+        "baseline_sha256": "b11fd907d0d13702d3711b9648909c487ed8ae5c775af02d52192e5aff38cdc8",
+        "baseline_directives_sha256": "221ae16d87bc45e9d1ec1a053e075d5e9e738529daa67d37971d8205b0d2ff50"
+      },
+      "op_kernel/group_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_kernel/group_quant.cpp",
+        "source_sha256": "60d72c040fa3a25fe66229d8c70be63b44feed61f4d8ff913e0fecb4e02b4dd5",
+        "sha256": "60d72c040fa3a25fe66229d8c70be63b44feed61f4d8ff913e0fecb4e02b4dd5",
+        "baseline_tokens_sha256": "969181bc2a7c07dfbf3b4aa7703c97738946faaed0da74b410732bc7e7054c63",
+        "baseline_sha256": "03c014b677d6fd374cf3ede1fba2b156e07a014fa8634a9d3d6d49beaa243bde",
+        "baseline_directives_sha256": "ee335894f08d72ec66cfb00313b0ae5e8122a0d48ec9cba8096ecd8bcd603447"
+      },
+      "op_kernel/group_quant_base.h": {
+        "repository": "ops-nn",
+        "source": "quant/group_quant/op_kernel/group_quant_base.h",
+        "source_sha256": "d421e9c893f662d27cbb304b22dfb58304cb83b920446f32341ecf953ffbe1a0",
+        "sha256": "d421e9c893f662d27cbb304b22dfb58304cb83b920446f32341ecf953ffbe1a0",
+        "baseline_tokens_sha256": "5b7e9f8fb9d3ec01ef7fbdf6f0630670f217058b9f4c13a9ba750d78d548d177",
+        "baseline_sha256": "e3db01a5fdde83c739a1f2556d33b9a4802adbdcbaa5bbec8d3b6af0247b8ffe",
+        "baseline_directives_sha256": "3b8e74b00d270b18c9b59610893614d5f06f1f5ab533f0855989313c9edc5bae"
+      }
+    },
+    "group_norm_silu_quant": {
+      "CMakeLists.txt": {
+        "sha256": "7889ae4cf9a071ff1ba49c50123c75a7dbd1ffa9c9f81f4be7520ad6a9f502c0",
+        "override": "group_norm_silu_quant/CMakeLists.txt",
+        "baseline_sha256": "7889ae4cf9a071ff1ba49c50123c75a7dbd1ffa9c9f81f4be7520ad6a9f502c0",
+        "baseline_directives_sha256": "a88af17f1933ebe1f9f0b0d9d08bb14f29fbc396b67605e4e4d384e6acf952cf"
+      },
+      "_deps/common/inc/op_host/static_register_symbol.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/static_register_symbol.h",
+        "source_sha256": "1cbb8db24c2944ad12be18e4a995d7dd05922317f8961e073248dc4c2dda6f33",
+        "sha256": "e3ee1bf94555fd0f3a47b3417dd38463ba0482f7641a21282ce8d5e68633825a",
+        "baseline_tokens_sha256": "f7dc75863a55b62f88ef8623a2d4008b84f9f01541f07cd851dc3794cd236f7c",
+        "baseline_sha256": "7f41885a3ceb55ca19ca07b965cc73294e071222d7e26840c8e5005d8285d4a2",
+        "baseline_directives_sha256": "fb8c16eb9db96cf08bdab5c07ed7f6efc92f69f5b637e149fe6e0a90493bbe55"
+      },
+      "_deps/common/inc/op_host/tiling_base.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_base.h",
+        "source_sha256": "61b279a4cf97e594c5ce7acfa149f9fb08aace1ab669e29b1b0484ecb61c2d17",
+        "sha256": "e6f47cab333f18b5e4bae8770dd857eb7463ef60148e57d7db253f7d95aebde1",
+        "baseline_tokens_sha256": "f32a2ce04828d864ec4ea60335228d43c4f51884ee23c02f311f36abeff9814e",
+        "baseline_sha256": "c0a0ed4438e9309d0fcf150be7948a2b34cb9ef9c2fd0f13945cc04b82b95c9a",
+        "baseline_directives_sha256": "8ffd1ce5413a3f7a78d1adb7640b19d67a3e1755d30b65fb707ef60d36cbf098"
+      },
+      "_deps/common/inc/op_host/tiling_templates_registry.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_host/tiling_templates_registry.h",
+        "source_sha256": "55914293627689e4846033d5c84bb286eadaf453bb8cd0a39c52fecb0389795a",
+        "sha256": "1589eee427e269ec9e647673901c27bb9d5802c51c1b2b5d270b482123f6cc78",
+        "baseline_tokens_sha256": "61604603ae178876ffc2f77116b5a7295184d85cecda54f97e28db69b7b32abb",
+        "baseline_sha256": "ddbd4dfe36fab8b05ea2a47c39ca2cb28cb762c29e25acd2095b4afc60d7f5aa",
+        "baseline_directives_sha256": "84f5f950510d5c5911755a3c0ea704c879f181c3df57afdd8c9f382a8f6fefc6"
+      },
+      "_deps/common/stub/op_api/level0/fill.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/fill.h",
+        "source_sha256": "11759d7c779dec30280920051aa6e79a0c75d4966aed37bfabea17b061f41503",
+        "sha256": "11759d7c779dec30280920051aa6e79a0c75d4966aed37bfabea17b061f41503",
+        "baseline_tokens_sha256": "576abe670b931b7abb2347f668a230cbaf26d5907e59ff9d0b67f7aeea595821",
+        "baseline_sha256": "44d8fe188d65f5bf0623b916ea53a3bc51b5b800d5213b6a6c5627491f47ae56",
+        "baseline_directives_sha256": "1931353ecbd2c5bb5152a55b1484a14a1b9875e65720fa7e96401bcd46ddd8eb"
+      },
+      "_deps/common/stub/op_api/level0/ones_like.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/ones_like.h",
+        "source_sha256": "5f51a57becd1521e08edf056960e26809e88a01c78ec6c8d32016e088a7743e8",
+        "sha256": "5f51a57becd1521e08edf056960e26809e88a01c78ec6c8d32016e088a7743e8",
+        "baseline_tokens_sha256": "a3d1482543728854f5e6cb36b8da32b89ecb5ad135d590d8292875654a4242a6",
+        "baseline_sha256": "4d2678197accda3bdf73467e3c16cd6dcda849e3347b7c580f37bd5a589e85cf",
+        "baseline_directives_sha256": "a180888572fafef381fe83850dcdc5d73697551f9454675ed15fc0815ad337d0"
+      },
+      "_deps/common/stub/op_api/level0/zero_op.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/zero_op.h",
+        "source_sha256": "561688838ef2366597cf59c497e6f98fa1d05739d17fff7c804d7b2c12cdb0ce",
+        "sha256": "5eaaa16f34a74ccff0b991aec94bf2cf2c6052e9888d07c4d6c28bcdc8528327",
+        "baseline_tokens_sha256": "6f1c15b23d844bce397cabcd8ed27e3d6956385a04a54899bc2cbd86bb00dab7",
+        "baseline_sha256": "61cb1aa2c589ff9005377eb666b575e6e6c6c543ab8e980d43f94dea7e8f7063",
+        "baseline_directives_sha256": "ab8ac8fbdf2df552369be48b2d658f57424602687c5f3b32d81ba5a61f679c3d"
+      },
+      "op_api/aclnn_group_norm_silu_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/op_api/aclnn_group_norm_silu_quant.cpp",
+        "source_sha256": "79ddb3ed96c64dfaae2002deb6662afc31dbff6b551e49e3666e416f9aa6d6e1",
+        "sha256": "3d27f6191fa9ac5eaecd17cf506d3bd4d7bf9769839e8c76c1aa1c228e1ba1d6",
+        "baseline_tokens_sha256": "d61370c717a024bfe5a075d82f42cfe7469f82ee620f76b751779bd37f2e8475",
+        "baseline_sha256": "becb8206221482d94608a3bca2c909ddc9c7f7c5a4a297edc4b74d948ac30fd9",
+        "baseline_directives_sha256": "a9d5ee5f46f5ee7eb8cbe6a74b7f3b71f08599c10b97c0d7cf0280270298c4d1"
+      },
+      "op_api/aclnn_group_norm_silu_quant.h": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/op_api/aclnn_group_norm_silu_quant.h",
+        "source_sha256": "aa8c98e4d8ffea51b9c4565d54a9b908e9016993c6e8ddca017b6f435f8d57e3",
+        "sha256": "aa8c98e4d8ffea51b9c4565d54a9b908e9016993c6e8ddca017b6f435f8d57e3",
+        "baseline_tokens_sha256": "563534a111ebc71c532789eccd98c12fc4aa0e564fb74ab1d69593c316ba664a",
+        "baseline_sha256": "30d1fd73c886c2ae9c6441c4e7477da6e98a22cd5a64da6da8dc6c3c30a123e1",
+        "baseline_directives_sha256": "0bb64cd278ea983a80204c4201b496da690af6a0b8485752d457ffa3a43ef2aa"
+      },
+      "op_api/group_norm_silu_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/op_api/group_norm_silu_quant.cpp",
+        "source_sha256": "7ed9e6c224ec6eb8c5f1416feccf6cade9754b89afe698f57fc18f8dc1ee8d51",
+        "sha256": "7ed9e6c224ec6eb8c5f1416feccf6cade9754b89afe698f57fc18f8dc1ee8d51",
+        "baseline_tokens_sha256": "af67f6c22db68959e40b0788688fd0e9f8310f72b6e754e5c7f6d1216116a91e",
+        "baseline_sha256": "765391413719c0bdd14e0a5dd7044260aa18a716dd896217ba79debce939288b",
+        "baseline_directives_sha256": "a05909beb2f3fc83c99841ecbf9f75b80794124453b20950a586baf75c97a49b"
+      },
+      "op_api/group_norm_silu_quant.h": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/op_api/group_norm_silu_quant.h",
+        "source_sha256": "967b3d7f4a0df73c4ca56770e3f7ecb7f75863a3479f2b5bd7753381dff173e1",
+        "sha256": "967b3d7f4a0df73c4ca56770e3f7ecb7f75863a3479f2b5bd7753381dff173e1",
+        "baseline_tokens_sha256": "e8cd198c3cf31cfaa4a92af643b6f19c60d755d5a24437abd4c0c64c335b3e39",
+        "baseline_sha256": "a55c5350d403d043e3c250422f6e234aafab53f3979855e509d52930c609ce5d",
+        "baseline_directives_sha256": "5d9aa70de58cf9c5dd0643e01bd17ec9200dbda70ed021a804d92985c3fa7d3c"
+      },
+      "op_host/config/ascend910_93/group_norm_silu_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/config/ascend910_93/group_norm_silu_quant_binary.json",
+        "source_sha256": "91b7bb994f496a08ed6e917c99b68b5d863c87169da5b3de638af9efacd72125",
+        "sha256": "91b7bb994f496a08ed6e917c99b68b5d863c87169da5b3de638af9efacd72125",
+        "baseline_tokens_sha256": "14cdbfb3f88a9f24b11ef124d3275626cf0b00d911e64f70c98865b3899eac45",
+        "baseline_sha256": "91b7bb994f496a08ed6e917c99b68b5d863c87169da5b3de638af9efacd72125",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/group_norm_silu_quant_binary.json": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/config/ascend910b/group_norm_silu_quant_binary.json",
+        "source_sha256": "086a3d49043bc44b740b4cdf8087b50997368623c1abd4879b71a4501fbab8ed",
+        "sha256": "086a3d49043bc44b740b4cdf8087b50997368623c1abd4879b71a4501fbab8ed",
+        "baseline_tokens_sha256": "131c3e5a0ab63ae989dda9f921e11cf3ca3efec3e04a3b308a8defdd767ee61f",
+        "baseline_sha256": "086a3d49043bc44b740b4cdf8087b50997368623c1abd4879b71a4501fbab8ed",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/group_norm_silu_quant_def.cpp": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/group_norm_silu_quant_def.cpp",
+        "source_sha256": "1a5b826873658ff9c5eb377394ece4d78d11f02d99f1bd7519e3e39a5baf6c3f",
+        "sha256": "c007a27ba5015aa9696f70b53bc6cbf5d9fe7b820eb9a47cb2fb4739ebbbd626",
+        "baseline_tokens_sha256": "c9d4956236e87e0222d2d8a12212b3442db274ca73a2a87798d3c2d8a4a4a1b7",
+        "baseline_sha256": "ecbe0ba47064040fef3fa35e9a57f6ff066d35dde12aa903c8e6ed508cb4b3ba",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/group_norm_silu_quant_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/arch22/group_norm_silu_quant_tiling.cpp",
+        "source_sha256": "303b1f4a4948fadc3ccf25f5f55cfe02cdc75c4812e01f8d102d01090ae379a5",
+        "sha256": "303b1f4a4948fadc3ccf25f5f55cfe02cdc75c4812e01f8d102d01090ae379a5",
+        "baseline_tokens_sha256": "8f4f7742ea8a450d3fe838d2fdf94ec5755782c80fa639d0a308711ed185580f",
+        "baseline_sha256": "f509ad403e8e890f1212f953bb2e4ce3a8a01724b5345cda43758f29476fa237",
+        "baseline_directives_sha256": "a1512cd7ffd86b0ede48074b68c2f94122cfab4917b195799c73e72427112b71"
+      },
+      "op_host/group_norm_silu_quant_tiling.h": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_host/arch22/group_norm_silu_quant_tiling.h",
+        "source_sha256": "6f4af6aa9856c754a4c4512d793cc75b2647f4d2f82750dd91910d3c3214aee4",
+        "sha256": "6f4af6aa9856c754a4c4512d793cc75b2647f4d2f82750dd91910d3c3214aee4",
+        "baseline_tokens_sha256": "be7d7514d6826f6da7ba86967ecd1f06c1ac353b495463c7a804a4495d001126",
+        "baseline_sha256": "3d703ff94bf9e7fb139259000c2f3cfe39463bbd70b5c936be650d708aa757ab",
+        "baseline_directives_sha256": "d24c8ecd61954cc43b6eff0c08c0a50b729bead315bf55f2e702494d34dd4cc2"
+      },
+      "op_kernel/group_norm_silu_quant.cpp": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant.cpp",
+        "source_sha256": "22c62681701b3e9f946f725b2e776c9acf962ff49b2428e8f21910a1f22c4e97",
+        "sha256": "22c62681701b3e9f946f725b2e776c9acf962ff49b2428e8f21910a1f22c4e97",
+        "baseline_tokens_sha256": "eaec5b7c46095221b05afafcf2b0644888cbcf7ea00cc8449e83aecb31d276db",
+        "baseline_sha256": "8850c7a621155d58316e8a02a8dd8140a6ba1607229bc693869acb43a8452431",
+        "baseline_directives_sha256": "918b3d3a21fe6613576c170dc0910f9f42f3c47fc935927d44e255039d2b6717"
+      },
+      "op_kernel/group_norm_silu_quant_b16.h": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant_b16.h",
+        "source_sha256": "e7a91d8f3c234f02002bd6b2dbf2f8b68f29265152d1107b5445a8d64575e1f2",
+        "sha256": "e7a91d8f3c234f02002bd6b2dbf2f8b68f29265152d1107b5445a8d64575e1f2",
+        "baseline_tokens_sha256": "beefbe18128147e3c61c8b4bf1878efebaa1b89fe900e1647ae8c0613c31fb55",
+        "baseline_sha256": "4f1434c668aed06df9796f7ecdc9e4463e9356ad86c8dce33099fb62d333f140",
+        "baseline_directives_sha256": "e990434ebffd716f5b70278c4276ca11081fc29c366f284e68b83af99a06de9f"
+      },
+      "op_kernel/group_norm_silu_quant_base.h": {
+        "repository": "ops-nn",
+        "source": "norm/group_norm_silu_quant/op_kernel/group_norm_silu_quant_base.h",
+        "source_sha256": "e14460148ea7f22bf037e3766b4395c8fc05f5fee5a195bffa28aa6e33da66e8",
+        "sha256": "e14460148ea7f22bf037e3766b4395c8fc05f5fee5a195bffa28aa6e33da66e8",
+        "baseline_tokens_sha256": "f8da835b4f203cb145632eb1c864b1d87844e65a35250b8e06762fa0a4ae3e7b",
+        "baseline_sha256": "35a57e30717ddf2335a1f25257ca6d26dbc5edad0076a87710d4506279c4a3ea",
+        "baseline_directives_sha256": "dc22095536b9e304698acd7bec3fb542abeec4a030867c6207fc9ab2b4318461"
+      }
+    },
+    "gather_elements_v2": {
+      "CMakeLists.txt": {
+        "sha256": "a9fa730577f407b881fbea137c79175c5027148eff5bc5eeb0403e4732348e9d",
+        "override": "gather_elements_v2/CMakeLists.txt",
+        "baseline_sha256": "a9fa730577f407b881fbea137c79175c5027148eff5bc5eeb0403e4732348e9d",
+        "baseline_directives_sha256": "5269a7514461ce8475243513f6ba9ea978b2d9006f72cf8afc2e066d9414f6e6"
+      },
+      "_deps/common/inc/op_api/aclnn_util.h": {
+        "repository": "ops-nn",
+        "source": "common/inc/op_api/aclnn_util.h",
+        "source_sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "sha256": "399aa5972d0195d3bdea450ff351577e957259065f454fabad0c720181e501d9",
+        "baseline_tokens_sha256": "b682b89d3ab593d1018c903a2fc8db271bcd0c002af9874fbd4e53dfc687b6ae",
+        "baseline_sha256": "4109a4c5196ce92795f58d2f9d14bcfd26540132259d2f24028bd57cc41793ae",
+        "baseline_directives_sha256": "a70dad78128f0430ddb7545ab007d4d82d1341cd22003fbf4825da82cd1d9b61"
+      },
+      "_deps/common/stub/op_api/level0/gather_elements.h": {
+        "sha256": "60994e01e8121b925f4fd7c472574e8f6a6b9fd3116589e3ecd45f135aee4372",
+        "override": "gather_elements_v2/_deps/common/stub/op_api/level0/gather_elements.h",
+        "baseline_sha256": "60994e01e8121b925f4fd7c472574e8f6a6b9fd3116589e3ecd45f135aee4372",
+        "baseline_directives_sha256": "7221bf26e5647d9fd1030b5afc5e9228721553889c6d0340a120a514f5200e34"
+      },
+      "_deps/nn/index/gather_v2/op_api/gather_v2.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_v2/op_api/gather_v2.cpp",
+        "source_sha256": "e83a126def9889af96b56d4b6fd43d807b34f70a5b1acd5f62e546eed45654b6",
+        "sha256": "3f29fea030d6d69f8a9520281005cb65be045736ad25aabaf9115d24e1c87ea3",
+        "baseline_tokens_sha256": "aebd4510d61fe4f2474f2f3ac722a465fa33d5aba236cd299e90f2265f6f57ba",
+        "baseline_sha256": "262317e47ddf6d01621a1b099f71190c4998754367c7b53d8949cca693befab7",
+        "baseline_directives_sha256": "846cfabb03884243372dc7fd9063a9f26665769ead2e7b188bf71c7ea1e5a4cf"
+      },
+      "_deps/nn/index/gather_v2/op_api/gather_v2.h": {
+        "sha256": "efa81ca6ebde61aa009c3d0a41082f42eb889c260dd02c11687d54c8629ad5ac",
+        "override": "gather_elements_v2/_deps/nn/index/gather_v2/op_api/gather_v2.h",
+        "baseline_sha256": "efa81ca6ebde61aa009c3d0a41082f42eb889c260dd02c11687d54c8629ad5ac",
+        "baseline_directives_sha256": "9640574e9ceb1c950fe5ed28d41cd87825b8b586cef548b90092d2f5bb54a249"
+      },
+      "op_api/aclnn_gather.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/op_api/aclnn_gather.cpp",
+        "source_sha256": "1c197a243f62153afa50a27a24f0e31e5b9a41dec55494e80a153191f464ab9c",
+        "sha256": "68ace73d66c2b67dbe22eb1ff3e1b41d78c65520be652df1f3877cd7289057c6",
+        "baseline_tokens_sha256": "081b90ca4f361cdbffc882d9517c882077fb08a200c08ecff8722b1175d3a7db",
+        "baseline_sha256": "859f8948bd3e3e369a6eba18f0f40222c6539af7b9a296f34d00900c13f6628d",
+        "baseline_directives_sha256": "d5d5c837d823a309a05faad1be003d90377bea6518f3f2b5caf60555d432ec94"
+      },
+      "op_api/aclnn_gather.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/op_api/aclnn_gather.h",
+        "source_sha256": "0cbe937bbd9452ab83d3ecacd745176c820673e377ca495a623fa1e4d8d4bec5",
+        "sha256": "0cbe937bbd9452ab83d3ecacd745176c820673e377ca495a623fa1e4d8d4bec5",
+        "baseline_tokens_sha256": "481fb39dea9a6d68131f2e76598e578c09808076877bffc7cb5a634f678742d0",
+        "baseline_sha256": "c569a059bc1352d9252cbc9e6ee37f7d21a228fec19f0c58af3180240690c34c",
+        "baseline_directives_sha256": "e6c02f968e7a1e65476d3e5fefadebd24fad446bfb52c68ffeb8961ae8d5b31d"
+      },
+      "op_api/gather_elements_v2.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/op_api/gather_elements_v2.cpp",
+        "source_sha256": "1b250e753f0f5ec192539ef681fd043bfbe02b035274ce30dffcb4d4e5f52a81",
+        "sha256": "1b250e753f0f5ec192539ef681fd043bfbe02b035274ce30dffcb4d4e5f52a81",
+        "baseline_tokens_sha256": "7bfb5e062058511b0456f1d5caf2e0e58f6c42a884c53834124de5ce13a5d22e",
+        "baseline_sha256": "62610365808e48136058cf9607ec5b977961b91e466f9cd7040186bc36c98694",
+        "baseline_directives_sha256": "37cdb3982c6c2b17cbded716f1937b06bcf80cf22380f6f17de0e9138590dd87"
+      },
+      "op_api/gather_elements_v2.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/op_api/gather_elements_v2.h",
+        "source_sha256": "b9b8a07c279c7f42a24d15bb20dcf7788ade57acbec2644c5e50959084329c83",
+        "sha256": "b9b8a07c279c7f42a24d15bb20dcf7788ade57acbec2644c5e50959084329c83",
+        "baseline_tokens_sha256": "4c473e77dc8dca6a7ab3cdcd051cf70e0001f2af930a54ce4f28c0fa4e902feb",
+        "baseline_sha256": "4f839d89cfa4a97bf18cbe4dfe7bfab1d1702ebbb2fe7ee5ccba63bb29207bb6",
+        "baseline_directives_sha256": "0eef8cd58c7155b860270dfc91fcf652fdde9b28f33e35e973ebad7e835937ee"
+      },
+      "op_host/config/ascend910_93/gather_elements_v2_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/config/ascend910b/gather_elements_v2_binary.json",
+        "source_sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "baseline_tokens_sha256": "eae8d588cf38d051448dc6d270a4cc98073aba11590db6d1167de99aee34394b",
+        "baseline_sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/gather_elements_v2_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/config/ascend910b/gather_elements_v2_binary.json",
+        "source_sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "baseline_tokens_sha256": "eae8d588cf38d051448dc6d270a4cc98073aba11590db6d1167de99aee34394b",
+        "baseline_sha256": "1a24cb39929c5a208cb81070eab520f4daa5e0195b6dfc68c3435f5ad308282a",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirin9030/gather_elements_v2_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/config/kirinx90/gather_elements_v2_binary.json",
+        "source_sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "baseline_tokens_sha256": "4e6b524d764e0a418b8a832e4539c6ec104ae1c738b127e96bbbe91e9c3fb49d",
+        "baseline_sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirinx90/gather_elements_v2_binary.json": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/config/kirinx90/gather_elements_v2_binary.json",
+        "source_sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "baseline_tokens_sha256": "4e6b524d764e0a418b8a832e4539c6ec104ae1c738b127e96bbbe91e9c3fb49d",
+        "baseline_sha256": "1d6ac14a2fb601cc3da5ea4ebd485e1e5d0741481e4df5ec12a761befb014697",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/gather_elements_v2_def.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/gather_elements_v2_def.cpp",
+        "source_sha256": "431420b1c590062c893a6ec37e0225a931b50ddc287dd19794fb6d8da8e761ad",
+        "sha256": "431420b1c590062c893a6ec37e0225a931b50ddc287dd19794fb6d8da8e761ad",
+        "baseline_tokens_sha256": "6ce21f7fc5e408f536a1cce2e05ca40574ec5133b116bae2cd62c956ed44b7ac",
+        "baseline_sha256": "256df28d98e19c6244d8cd3afc315b9a0ccd37c5857c25f2c50ff326eac6367f",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/gather_elements_v2_last_dim_tiling.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/gather_elements_v2_last_dim_tiling.h",
+        "source_sha256": "c5c10605e8e2621e3c8fec9e8844b5c541b65877b2037d5c3991689e4f31ec5c",
+        "sha256": "c5c10605e8e2621e3c8fec9e8844b5c541b65877b2037d5c3991689e4f31ec5c",
+        "baseline_tokens_sha256": "26dbce7b8656d66eb8e6c61fa12973af9d0dc956b760621a6309ed914ef7b662",
+        "baseline_sha256": "0469773274133802efdcd62d21e7ea84cfa00de8041c360ab206d27186699b00",
+        "baseline_directives_sha256": "a09b8e4bdffd689569e5fd6d2232e6934c3f85cc9542277bf37d43b8302a4004"
+      },
+      "op_host/gather_elements_v2_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/gather_elements_v2_tiling.cpp",
+        "source_sha256": "c7bb8d76d1741b5c3212a8de9f28bf6f9de5fe2f7d012bfa90780b25e6f12793",
+        "sha256": "c7bb8d76d1741b5c3212a8de9f28bf6f9de5fe2f7d012bfa90780b25e6f12793",
+        "baseline_tokens_sha256": "5e65f7cdfab20980b277254227f7a2d38799dfa6e577fecadfc74a0f3a58ae3c",
+        "baseline_sha256": "51ffb00aeb88e372ffcc0e0d812c98ef264ea1d5f115ac2044cfb44f5d84d259",
+        "baseline_directives_sha256": "9d7b0e846ab9f9c25175a3fc0c75cfc4329eba81187a375eef9f0c0cb8c7819d"
+      },
+      "op_host/gather_elements_v2_tiling.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_host/gather_elements_v2_tiling.h",
+        "source_sha256": "f1a79773c768c1c287fde5716bd4bc750c57880b6404e2c267483bdeaf947387",
+        "sha256": "f1a79773c768c1c287fde5716bd4bc750c57880b6404e2c267483bdeaf947387",
+        "baseline_tokens_sha256": "681aa28c965d5387db2d9d2fe7946188d4d447e37cd101d19fc1749ec92109ad",
+        "baseline_sha256": "f1a79773c768c1c287fde5716bd4bc750c57880b6404e2c267483bdeaf947387",
+        "baseline_directives_sha256": "3e0225827110669603c6c60127df55fca683c9bdec2b7410959f4281243b9c3c"
+      },
+      "op_kernel/gather_elements_v2.cpp": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_kernel/gather_elements_v2.cpp",
+        "source_sha256": "498b490ca98f249fcaf630dc7617996077950a8675790020e2c568f5bb3e77c5",
+        "sha256": "498b490ca98f249fcaf630dc7617996077950a8675790020e2c568f5bb3e77c5",
+        "baseline_tokens_sha256": "e186e3af6073a3b81cd2ffd6381f4a21d909f0ce3160a868977dbfa0fc9c4389",
+        "baseline_sha256": "7f3a6928370b99fbdeb79817fd5fd82b9b48857e0fd03cd7a31144401e153054",
+        "baseline_directives_sha256": "bec89b4f5e364677f5280f07e305fdae6689605c87dec57b1abcf3ef4003e09a"
+      },
+      "op_kernel/gather_elements_v2_common.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_kernel/gather_elements_v2_common.h",
+        "source_sha256": "9416b4da2d863798f4ae2e547867dce2f40e9c3d191937e24ec583602531175a",
+        "sha256": "9416b4da2d863798f4ae2e547867dce2f40e9c3d191937e24ec583602531175a",
+        "baseline_tokens_sha256": "63bab39ee9b37cd8995429786ab8e81ce0dbaeec242d14b7cbdc6de1b5ad01b3",
+        "baseline_sha256": "0174a3eb1929adcb71a87184636c068e62fcdaf811f562b83ef55c0b60921573",
+        "baseline_directives_sha256": "e2128453f918b135eab7022c02b511336946692d437a9c58c0bded9b583fdf49"
+      },
+      "op_kernel/gather_elements_v2_last_dim.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_kernel/gather_elements_v2_last_dim.h",
+        "source_sha256": "caf8774a67ba31a55ef29be6b785545a877eea0eb856777d588f00f6f94a858c",
+        "sha256": "caf8774a67ba31a55ef29be6b785545a877eea0eb856777d588f00f6f94a858c",
+        "baseline_tokens_sha256": "b309953a6da4d86a7a3c054fb7b09c07ab1543600bc96fa4b7b6e81eb482ffcb",
+        "baseline_sha256": "487eec150cba85cb242e240bf0b387796d67acfd4be1ae91d5e9d91ffba12426",
+        "baseline_directives_sha256": "fbc67e0a9c5fe3402f67552ad4af666fc503fc8fe8558f59cb124827ebea174e"
+      },
+      "op_kernel/gather_elements_v2_scalar.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_kernel/gather_elements_v2_scalar.h",
+        "source_sha256": "d7038ab1282e3a89aaecc2123a5b5c6bd3e6ce041703dfcbc63c34a0fbace77f",
+        "sha256": "d7038ab1282e3a89aaecc2123a5b5c6bd3e6ce041703dfcbc63c34a0fbace77f",
+        "baseline_tokens_sha256": "cebc57a2e825dd701edc8a5e2cde2c2f382415fe8adb03257eca146a7d9fa01e",
+        "baseline_sha256": "1a4b2529669a9be6afea797bfcb725a1333b548f460754f917b43e496f19412e",
+        "baseline_directives_sha256": "4ed088ea794229bf19306fe9fdbb1da0ed6f3d4302cb8dcde9c135060f93c158"
+      },
+      "op_kernel/gather_elements_v2_transpose.h": {
+        "repository": "ops-nn",
+        "source": "index/gather_elements_v2/op_kernel/gather_elements_v2_transpose.h",
+        "source_sha256": "cc2ec40a9f9d3cfce1021e356e4e8f2a5f27e1528caaeb2ff1796a6a530c0d75",
+        "sha256": "cc2ec40a9f9d3cfce1021e356e4e8f2a5f27e1528caaeb2ff1796a6a530c0d75",
+        "baseline_tokens_sha256": "7c9a89c1824f3c83ec6b5ad0d9fd5caea4b80ecddf70e401649da37b73841f39",
+        "baseline_sha256": "9082ac8dfd662252f2c8c409ef65ff1258d07d8c268cf9bbd2517c1521194da3",
+        "baseline_directives_sha256": "dbd412dbc73a4f3d0337498671646a2e91971b8e9024553a5e871aff5f9e38ed"
+      }
+    },
+    "chamfer_distance_grad": {
+      "CMakeLists.txt": {
+        "sha256": "9d5330c07eb86f4e73e914ef03250668f414a155f05813e54162d84e8ea4f4ec",
+        "override": "chamfer_distance_grad/CMakeLists.txt",
+        "baseline_sha256": "9d5330c07eb86f4e73e914ef03250668f414a155f05813e54162d84e8ea4f4ec",
+        "baseline_directives_sha256": "9560314f4d906bdc2ac171db702a9ec02bac08ce749b647a9af65c3a8199d6d5"
+      },
+      "_deps/common/stub/op_api/level0/squeeze.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/squeeze.h",
+        "source_sha256": "07ff799233b36b64677e0566900aaa94c496066e9ec746415d02e79919a4c819",
+        "sha256": "07ff799233b36b64677e0566900aaa94c496066e9ec746415d02e79919a4c819",
+        "baseline_tokens_sha256": "9f4a476747abf7197960c6f15b691eabb6ba3fb2eee72db3bb6f8c4a35ac6219",
+        "baseline_sha256": "647ac2374a4652b28839b40ca6c642a4f3c6f2dc5fdc3fe2c6b80afe40e09522",
+        "baseline_directives_sha256": "abf32c1a62c09bed1f71b8e3354d5e953ffdb37317328eb4a46e81c81ed4c37d"
+      },
+      "_deps/common/stub/op_api/level0/unsqueeze.h": {
+        "repository": "ops-nn",
+        "source": "common/stub/op_api/level0/unsqueeze.h",
+        "source_sha256": "3e05c436f18548cc9b67e4bbd4a3957ec1c7e98d572d1cb3a285432e321f70e5",
+        "sha256": "3e05c436f18548cc9b67e4bbd4a3957ec1c7e98d572d1cb3a285432e321f70e5",
+        "baseline_tokens_sha256": "a2ed8bc861321367499448cdba94b3154346d3a55f8ed8cc8071c252217c696a",
+        "baseline_sha256": "31cb974c3498d2eb0be99842d79f3679886811d2771fb2e80aabda62dbed2353",
+        "baseline_directives_sha256": "1697fd3780d04c2c7fb5d214fd5db822c588bfd11c92ef3aab318b03345bea7c"
+      },
+      "op_api/aclnn_chamfer_distance_backward.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/op_api/aclnn_chamfer_distance_backward.cpp",
+        "source_sha256": "19a940b98c22c3c9bb2c55540433ecaad37d84c5cb1253180be828692ed6323d",
+        "sha256": "19a940b98c22c3c9bb2c55540433ecaad37d84c5cb1253180be828692ed6323d",
+        "baseline_tokens_sha256": "aff3095ac4ae2b5d61b6b0ff1029a2ada605da8f2bfb1165ec9c05af0221b722",
+        "baseline_sha256": "4d01784ee86d4225fc0e5def402834a30ba535ab75c177fc8db8ed435c72685a",
+        "baseline_directives_sha256": "af684664e04cee7b7388a38b53690008abb5df0d9559186487917651f005d6ab"
+      },
+      "op_api/aclnn_chamfer_distance_backward.h": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/op_api/aclnn_chamfer_distance_backward.h",
+        "source_sha256": "9aae660c96a2161e5ea56bceaeb666148846580b124a4bc474ae8c6669909121",
+        "sha256": "9aae660c96a2161e5ea56bceaeb666148846580b124a4bc474ae8c6669909121",
+        "baseline_tokens_sha256": "b5368033dd7b60c88504381d184ebc4e77586993b713bc9f7d934510f4ec305e",
+        "baseline_sha256": "caeca10d9cd82171538e8031b9c2a1fd1ff3c65fe1c537b63048d24ee3df07d6",
+        "baseline_directives_sha256": "9323e3076d73d327661c972813a4498679104f61300bc4de923e6ff27acceff0"
+      },
+      "op_api/chamfer_distance_backward.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/op_api/chamfer_distance_backward.cpp",
+        "source_sha256": "bf69227ae1231ba4c3c294a24dbc95ba21dca12a183937d7f9cddff4c5e6eb5a",
+        "sha256": "bf69227ae1231ba4c3c294a24dbc95ba21dca12a183937d7f9cddff4c5e6eb5a",
+        "baseline_tokens_sha256": "2605e89a3778aaf2fbfbb5626a18f78edcc4853f33170836caff8cf786d71cf4",
+        "baseline_sha256": "f3776eaa5e5c2543382acaf8b064620070ec36d0ec1084be81ea67208f61a553",
+        "baseline_directives_sha256": "1289b8483ee49f6f41dc7917659787b572e8e3080f106b56158bf208ad315d33"
+      },
+      "op_api/chamfer_distance_backward.h": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/op_api/chamfer_distance_backward.h",
+        "source_sha256": "d3046214b547ae33a5430043e73e2ba8fedd1b1cc5a0d08a5690e7c2e056377c",
+        "sha256": "d3046214b547ae33a5430043e73e2ba8fedd1b1cc5a0d08a5690e7c2e056377c",
+        "baseline_tokens_sha256": "2bd032827e3c5e6c60210aa2681841c5022f7c13aef22a02973c7ea7fd31caab",
+        "baseline_sha256": "8fafb069cc59b1c1775294bee7de3d9162068b1d57e5e464b089bb7e06108242",
+        "baseline_directives_sha256": "15de46ba8b12f383654e533180cf3b88cac29838002fac7096d9133704fef494"
+      },
+      "op_host/chamfer_distance_grad_def.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_def.cpp",
+        "source_sha256": "a2b9152e621a0823cb9026098bb13aebc8434367a7db97a57eccdb571723e854",
+        "sha256": "51f1a5b2e90cff984165e69f1b41a63a66987fe6f0c9cc9ba6bf05e725aed04f",
+        "baseline_tokens_sha256": "f476d8f94c2099aa4155d9e07a1565c967b4cf9a8ec8a05f02aba27560577147",
+        "baseline_sha256": "2aa80ae220961c3f77344dfb7271a09d07ba360a71707411142705510731e883",
+        "baseline_directives_sha256": "b95febbf8a9950a3fbadab6f49386a48c75a277f94d84939ebd32e48794290c2"
+      },
+      "op_host/chamfer_distance_grad_infershape.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_infershape.cpp",
+        "source_sha256": "665a18b2fb5722b64a3d76bd42827a9816bdab1b7f592db01de4966b6c81e6e0",
+        "sha256": "1243d1fb2ae89cb8752977fdbdaa18eb9a9f845810361e2bf94358b005b62f60",
+        "baseline_tokens_sha256": "203bff717cff6ce8bf8fd74498836f0ec04028c7d943011896dd022203a96689",
+        "baseline_sha256": "5ec71b7b3db712ac5c45751265c821fe1dd7575e134f85a90a7619314d20426b",
+        "baseline_directives_sha256": "a6fc552637f234c6487f14639edbf32f3b0f75a90cb900c8d59dc95fcaff211a"
+      },
+      "op_host/chamfer_distance_grad_tiling.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.cpp",
+        "source_sha256": "35f045970534f3ba8861d05c66424b82c7ce60ca032765775f55e618d83ebde6",
+        "sha256": "f1a5479130096815cd67a00cfd47b5e1392cd36cdc4485e50fd91cb1b4d98ef2",
+        "baseline_tokens_sha256": "d0024ac6e3367a0512885fe6db8f0ebc8df78aef5d3c972204c2febd279ccf3f",
+        "baseline_sha256": "e445bdb0174b6b80ea9d19582f575c33932795d4e17a3ebd7ff1552d76961e42",
+        "baseline_directives_sha256": "4b2f3a415b1b6cdf06eaaa758b2487a82381bfeb4efe18801d20afb51ad6c316"
+      },
+      "op_host/chamfer_distance_grad_tiling.h": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/chamfer_distance_grad_tiling.h",
+        "source_sha256": "668d2a4a48b657895e47e68b12c4afb4f21388de79c9ee5a347a1dcb0278de65",
+        "sha256": "5149f0ea369abc9e1a67772036c4c6acff76677c6bdaa99da9b9bfabe63811cb",
+        "baseline_tokens_sha256": "80880545319042f71797db06fec16d5b6b9392410d71870cd60ff30a9f882cc3",
+        "baseline_sha256": "5149f0ea369abc9e1a67772036c4c6acff76677c6bdaa99da9b9bfabe63811cb",
+        "baseline_directives_sha256": "4c2d85975d7e26b292fb2cc2e828fe6976555afd261e4a5461dfa3d86796e3bf"
+      },
+      "op_host/config/ascend910_93/chamfer_distance_grad_binary.json": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/config/ascend950/chamfer_distance_grad_binary.json",
+        "source_sha256": "1ae5456591af382545d6758385d6f435ebdcb1676415df2e12a8020691ace30c",
+        "sha256": "1ae5456591af382545d6758385d6f435ebdcb1676415df2e12a8020691ace30c",
+        "baseline_tokens_sha256": "fdce42fed698cfbc30cc5f8da243f0d53da2c94c66e7c25a68d02d632690aa2b",
+        "baseline_sha256": "95b757799ff939ff70baed6e11fe271393ae9134224b9d8604f049f822aa4bb2",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/chamfer_distance_grad_binary.json": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_host/config/ascend950/chamfer_distance_grad_binary.json",
+        "source_sha256": "1ae5456591af382545d6758385d6f435ebdcb1676415df2e12a8020691ace30c",
+        "sha256": "1ae5456591af382545d6758385d6f435ebdcb1676415df2e12a8020691ace30c",
+        "baseline_tokens_sha256": "fdce42fed698cfbc30cc5f8da243f0d53da2c94c66e7c25a68d02d632690aa2b",
+        "baseline_sha256": "31693583f2eaefa6ffdcf0987134edd8f19eaad58377b48ab9f4485eb9eda58a",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_kernel/chamfer_distance_grad.cpp": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_kernel/chamfer_distance_grad.cpp",
+        "source_sha256": "c9fa2b86e0d88552f4ffb0167cf779979130365256c9237ccfcea374dacb804d",
+        "sha256": "b783aa60778bcaf73a1be27a6440a3c14f8e39cc90181187071ea9ccf407203f",
+        "baseline_tokens_sha256": "ea8987fdf6b77634553b3f047ea86614b74d635c30facaa20b9bf9f4343dcc8a",
+        "baseline_sha256": "1f8abe77c7a6c62f0678ed239b17741811c42d6d5a41612cb42e3e224e653f57",
+        "baseline_directives_sha256": "7f2488acddf4176a1723ead2c0b95f70adddb215d205886641f618955b0e74da"
+      },
+      "op_kernel/chamfer_distance_grad.h": {
+        "repository": "ops-nn",
+        "source": "loss/chamfer_distance_grad/op_kernel/chamfer_distance_grad.h",
+        "source_sha256": "3fd966c4ef97473de603ee782a3ad22dc47c490f1d277595d090a3de29241a6f",
+        "sha256": "61d244f6cd009450ecafc1d8713c52a88d07d150e4bbde9a9f68d6afad5edb1b",
+        "baseline_tokens_sha256": "846b9985e9f3224559f7b49c8b65497a7c91d5c3a4d79b5ddf90f8ed2d13da42",
+        "baseline_sha256": "9ae76f83a7530bd4708a82b11780f2d654759d85a30f9fcc714278630a90b95f",
+        "baseline_directives_sha256": "5bcda7bfc73a6969c03bcb74b1eac03d5a0f5b1fe02e2c3513ded66c62215c08",
+        "fixes": [
+          "Process an exact full tile in both gradient directions."
+        ]
+      }
+    },
+    "apply_rotary_pos_emb": {
+      "CMakeLists.txt": {
+        "sha256": "8102e7b5105aebced9635e6fc28daa421e8bc84afb6d7c710976d579bd45a465",
+        "override": "apply_rotary_pos_emb/CMakeLists.txt",
+        "baseline_sha256": "8102e7b5105aebced9635e6fc28daa421e8bc84afb6d7c710976d579bd45a465",
+        "baseline_directives_sha256": "b58bd0f22d2857f3aaf327441ad133fb1d876211efb2a45f3ed1259cd51a9c29"
+      },
+      "_deps/common/include/tiling_base/tiling_base.h": {
+        "repository": "ops-transformer",
+        "source": "common/include/op_host/tiling_base.h",
+        "source_sha256": "9c2eaa05cde7c6a5b1ce94338b99e93496f15292020b888fe422cfce8a51fe18",
+        "sha256": "3415afc5433d3685e9f254f3de2fb36246b2b3c2126ab1b6854de8911fd29780",
+        "baseline_tokens_sha256": "759bf465f5d4ce2eb7400952df5ee916638b1794b539b7d695c3a10245efcecb",
+        "baseline_sha256": "889ffb4a428892cf9598ef08675d81a1e82a76767077c9b1e0acbc60bc93044b",
+        "baseline_directives_sha256": "ab10041b04a1a2849cb3c7483e53e0ac4d3b8a8e52683eb62a7fff887cc2dc2d"
+      },
+      "_deps/common/include/tiling_base/tiling_templates_registry.h": {
+        "repository": "ops-transformer",
+        "source": "common/include/op_host/tiling_templates_registry.h",
+        "source_sha256": "4292b089fc2b5fa6b1e735322b5c41be8795c0bf6327f9585fb050b26f1eccad",
+        "sha256": "a37f5ae653e78baaeb6a08159f1e149f872d479c5a2d512b1728285e34919b13",
+        "baseline_tokens_sha256": "d4b97d98ab5f66cd606752315d5e1ca74af00f84a3321a0ccf81c87d0e710d4c",
+        "baseline_sha256": "f755f61af2970798abdee335ce0a9d3d69cb97c3b9109ee51e9c438e7065e429",
+        "baseline_directives_sha256": "b279aa6e40e18f3c27fc5f1773aad6115831abc3de65fee3d74c58e428a8bcd0"
+      },
+      "_deps/common/include/tiling_base/tiling_util.h": {
+        "repository": "ops-transformer",
+        "source": "common/include/op_host/tiling_util.h",
+        "source_sha256": "f4f03b637b50c954b881e9a0a41aaff1087bca8d58aae7a649035ec4bdfd0199",
+        "sha256": "f4f03b637b50c954b881e9a0a41aaff1087bca8d58aae7a649035ec4bdfd0199",
+        "baseline_tokens_sha256": "70d8b16b2349db018fef4c4aa1878b56d1d53fcd134a4da08208aa5a67169ed3",
+        "baseline_sha256": "35486c592c7a9907a93dfc6ff82fe4be2ca6d3e86c28618a22ebd31fcf6f96b1",
+        "baseline_directives_sha256": "f3d845ecf96169553d8390adced2f564191467f3a5e384d6c2dbf3e402de1e5d"
+      },
+      "_deps/common/src/tiling_base/tiling_util.cpp": {
+        "repository": "ops-transformer",
+        "source": "common/src/op_host/tiling_util.cpp",
+        "source_sha256": "b356cfc93442d58ae7a1ce2cbbfffdd05282d9fc0fa66b737e9128fb0fd092e8",
+        "sha256": "4e8633169ad3bac711e679b50d39ac9eed6e4abde30a4e22a26f80358e1cc748",
+        "baseline_tokens_sha256": "4be7bf25dd97225bf88f582a6f4218495c275524a52b77da78a4135e91e915a6",
+        "baseline_sha256": "19e5e0588a288e747b245fb60c6602c8fecf1d3219e5530ad01af66bb76a9bed",
+        "baseline_directives_sha256": "9f93f577a04eaa5f35e2af0755a57fb7b98f4ff87c4b9ee820fead737fc9bbaa"
+      },
+      "op_api/aclnn_apply_rotary_pos_emb.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb.cpp",
+        "source_sha256": "90a15a84b22b3ff021615ffe493f516c779675c5907f5707a88defd3cda2f80b",
+        "sha256": "ec976db96d8f2d36c8523023418d89869fc25f7aa2a11c131541c80cd983ecfa",
+        "baseline_tokens_sha256": "b33d537392b922c1705bf68e21ee65b899ad3519cb2fcea95b79871110f7d454",
+        "baseline_sha256": "2eecc52dfcda84650ddcf2dac264057877a9ab20343a50e0af4a2e47de9a1f15",
+        "baseline_directives_sha256": "1742f73b9d7343c8a57bc7009b4d6159bcdff843b820225a21b84e270b39c25b"
+      },
+      "op_api/aclnn_apply_rotary_pos_emb.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb.h",
+        "source_sha256": "ac36b1cd9118380d74387a0406e1490eb11fc33bd1a0a1ced0f5054af4dfea5a",
+        "sha256": "ac36b1cd9118380d74387a0406e1490eb11fc33bd1a0a1ced0f5054af4dfea5a",
+        "baseline_tokens_sha256": "33ce6bcd7b9ce66028f45b4d06ebc79348bab7c9c6c6849e0f30caea46ec9f04",
+        "baseline_sha256": "ac36b1cd9118380d74387a0406e1490eb11fc33bd1a0a1ced0f5054af4dfea5a",
+        "baseline_directives_sha256": "0b5129f3ffbc4f51a50a047a473927a11d0c2ae12840710a7106414c4203f12c"
+      },
+      "op_api/aclnn_apply_rotary_pos_emb_v2.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb_v2.cpp",
+        "source_sha256": "a28b445b12ebdadf156a9a035cb2be4959e1864a6898aa269b116d3c94558f15",
+        "sha256": "a54e36e70f92244b9a484ba3693b0c085865d0862153e5831c5520aa60e1e6b7",
+        "baseline_tokens_sha256": "fd7bc6503c1042ec2716c2464cbd84d539b5c9c11e81696dbe84a5d1f0c10594",
+        "baseline_sha256": "da9c39904b1a59317a3f1de6ec70885b1a446d7ae49ca4c81b32ce2c0c49ca40",
+        "baseline_directives_sha256": "22839414db455cec0b040752f0a2adf0578d77717e95c11274bd5dbd098ab09c"
+      },
+      "op_api/aclnn_apply_rotary_pos_emb_v2.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/op_api/aclnn_apply_rotary_pos_emb_v2.h",
+        "source_sha256": "5cbdcac9ef0d19e13b8eba44bb39231c31582b941cca3f889bfea7d453a17504",
+        "sha256": "5cbdcac9ef0d19e13b8eba44bb39231c31582b941cca3f889bfea7d453a17504",
+        "baseline_tokens_sha256": "b7c9dcb05461317666af05cf6258ef6bd41ae3e08cabca766dfca055798b9543",
+        "baseline_sha256": "5cbdcac9ef0d19e13b8eba44bb39231c31582b941cca3f889bfea7d453a17504",
+        "baseline_directives_sha256": "6e39912a176420180abb4f7323451e9ecaf52224534ce6d490a4f1222038a7f2"
+      },
+      "op_host/apply_rotary_pos_emb_def.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_def.cpp",
+        "source_sha256": "687f70a45de02dacaacb0984df543ba557d828edc40c8a4b31d28bb0a801158a",
+        "sha256": "d851abae7479e68e370bdc2c0426f2a400004c29fda12a654500b52b19ee6793",
+        "baseline_tokens_sha256": "10c6c675db298f59003ea078d6f573a922a61158c858db90a220732e8da5986b",
+        "baseline_sha256": "2100197bfc29622f43f8c796ad655c72daba0d2b029b80e92f43446def90694b",
+        "baseline_directives_sha256": "9efdd53e8d31414216ecd0b03147b2e4e77a359fefd603e1c0d603cd0274c4b3"
+      },
+      "op_host/apply_rotary_pos_emb_infershape.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_infershape.cpp",
+        "source_sha256": "29ef4fc5c5eed60c30ada4a946404d8f71fe7c77775f49c99188e2b1e472cb6b",
+        "sha256": "29ef4fc5c5eed60c30ada4a946404d8f71fe7c77775f49c99188e2b1e472cb6b",
+        "baseline_tokens_sha256": "8693b5ba1f9060ecce4ef41c7d052c121decc066a76c4dc84c555bff966193b9",
+        "baseline_sha256": "29ef4fc5c5eed60c30ada4a946404d8f71fe7c77775f49c99188e2b1e472cb6b",
+        "baseline_directives_sha256": "232e8de5fe947c06b186ccd1990f87786bb5240aa345f545eee1f02c787d1f18"
+      },
+      "op_host/apply_rotary_pos_emb_tiling.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.cpp",
+        "source_sha256": "32afdc9a80ac8d7d85fd78df8e874eac1249bb828bca7ea89c5d774bc6501ed2",
+        "sha256": "b9af77fbe424c8b9c01e0cc837c1d47dad3f4ad353662b9c5c526b1192901fb3",
+        "baseline_tokens_sha256": "a2500fcc32d4160b8ee50c374206062d12a8c430a00992a7d4fe61ba57f54c95",
+        "baseline_sha256": "f339cb594ce6eaf871ba2afadc5f60d49f73b20d2b391ac82dbd5262f6cd591f",
+        "baseline_directives_sha256": "0fa9e3a56ce86133884dfa74b5b0dcf31908313bc4c39ee895182e6e131e892b"
+      },
+      "op_host/apply_rotary_pos_emb_tiling.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling.h",
+        "source_sha256": "f45b754f481f2f20802d4c0f946a3f080a1efe6a55e831e10beb6562dc267709",
+        "sha256": "381a490f53856df676aa97100ba057235bd3475fa3d7816964add4b0ebfe9652",
+        "baseline_tokens_sha256": "e6ff751199b15d2ba6a46b8cb7bb99a50df39846a12d54787ff3f19607cb983b",
+        "baseline_sha256": "381a490f53856df676aa97100ba057235bd3475fa3d7816964add4b0ebfe9652",
+        "baseline_directives_sha256": "225c4c88205d7431db7ce874b15b905646cde5a203cfbdfc50abd2a966bb8af0"
+      },
+      "op_host/apply_rotary_pos_emb_tiling_ab_arch35.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_ab_arch35.cpp",
+        "source_sha256": "4b7bb87f09ce0ff6bf58ca1ab4e3312c1e12947feb08a672f94c6ea3468a4288",
+        "sha256": "79288cb740fbf220e0d3b34d9f8c1f57a924822f736d8b7da8bcad427acc2691",
+        "baseline_tokens_sha256": "77abc078759b620e337ad17c913fd129824f30b6525dbc26a5ee7010769eb7ed",
+        "baseline_sha256": "c43ab4f20d85794d9071b9052b6e351d44d02a9ad5d88722fffb1894a755a524",
+        "baseline_directives_sha256": "5a2507dac0e6d52d044ce565c59412a15e2beed09b8a0ea9a95dd8d063d8055a"
+      },
+      "op_host/apply_rotary_pos_emb_tiling_aba_and_ba_arch35.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_aba_and_ba_arch35.cpp",
+        "source_sha256": "6b2dac451f38cae1495bb5d60e2afc817c49558c0c9ba918a26b05ac663cbecc",
+        "sha256": "a68808b58567411576940ad6a480cac9aac97aa72b3701e8bb6f36888c86607c",
+        "baseline_tokens_sha256": "c8e23dd4fd35d0f571c7e90572f1c51975ed30235cb56d2d5dbc392dbdf36ad1",
+        "baseline_sha256": "a68808b58567411576940ad6a480cac9aac97aa72b3701e8bb6f36888c86607c",
+        "baseline_directives_sha256": "da4982159a3c9126bf97dfa310f926713f66482bbeeca1f0161b374126116b7a"
+      },
+      "op_host/apply_rotary_pos_emb_tiling_bab_arch35.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_bab_arch35.cpp",
+        "source_sha256": "59b20faa332b37feb7f9b3a253c10f1b74ed89a070683fcda534abc6f6314509",
+        "sha256": "209ebc94bafbe323d0597da93647eabb49b83d4cee176d4733a5243cbdae7ee7",
+        "baseline_tokens_sha256": "6b720283628bfee68db97ca58578f6e5fbec557cc46ae3816affa712e6d3ffd2",
+        "baseline_sha256": "d816b8c464443c832dd9c418fe5dedf447a699c91e69baed2105b37e99f4fb8d",
+        "baseline_directives_sha256": "5a2507dac0e6d52d044ce565c59412a15e2beed09b8a0ea9a95dd8d063d8055a"
+      },
+      "op_host/apply_rotary_pos_emb_tiling_base_arch35.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/apply_rotary_pos_emb_tiling_base_arch35.cpp",
+        "source_sha256": "e3b9c00fc1a19f46e5048005ada83cdbd2fbfc0dc12fcbc32d2bb3b400817e1c",
+        "sha256": "712fb45f4954c0a86af311eecda767d260b7db2651d3da3d292075b12de261ec",
+        "baseline_tokens_sha256": "e1326856afc34cca15af594a5abd20d602424de5af1ed1125484b514eef13980",
+        "baseline_sha256": "86ac97c6644a9812e89c27ae708263d2d63568ab63390dbed3aa394fd4ea25c7",
+        "baseline_directives_sha256": "f172e053b8f014c1deb084fb9a483c9926cca6c00eeeb490939340fb762fa2e4"
+      },
+      "op_host/config/ascend310p/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_tokens_sha256": "6131995154264e5819e42c4aad315784aae97d38e7850dca5bae5b50b1f95cc0",
+        "baseline_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend310p/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_tokens_sha256": "6131995154264e5819e42c4aad315784aae97d38e7850dca5bae5b50b1f95cc0",
+        "baseline_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910_93/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/ascend910b/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "baseline_tokens_sha256": "7ce89fdc1acb9a2b959882c688d02d4c901e1067312c19b2cc0be9e51bc1c759",
+        "baseline_sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910_93/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/ascend910b/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "baseline_tokens_sha256": "7ce89fdc1acb9a2b959882c688d02d4c901e1067312c19b2cc0be9e51bc1c759",
+        "baseline_sha256": "3fa6f301a816fad16a3f33d0f0a08695b8ca43c6715e93b74fa6fd1b522f6ad6",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend910b/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend950/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/ascend950/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "2cad332564bf54063071de9496fc8fa212e077221d8565c5c66bc0b7b1a82ffe",
+        "sha256": "2cad332564bf54063071de9496fc8fa212e077221d8565c5c66bc0b7b1a82ffe",
+        "baseline_tokens_sha256": "74a438b6405b0b8d57a38347a6b9d2d39a7ab1cc1bd0b67a15139b8f441f72c6",
+        "baseline_sha256": "2cad332564bf54063071de9496fc8fa212e077221d8565c5c66bc0b7b1a82ffe",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/ascend950/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirin9030/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_tokens_sha256": "6131995154264e5819e42c4aad315784aae97d38e7850dca5bae5b50b1f95cc0",
+        "baseline_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirin9030/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirinx90/apply_rotary_pos_emb_binary.json": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_binary.json",
+        "source_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_tokens_sha256": "6131995154264e5819e42c4aad315784aae97d38e7850dca5bae5b50b1f95cc0",
+        "baseline_sha256": "df9c4dd241eb9890535760d5dcdc4d4c2cc6c7bbb11773c16e545d45d8e7c942",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_host/config/kirinx90/apply_rotary_pos_emb_simplified_key.ini",
+        "source_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_tokens_sha256": "c64fb38ad018da383f5608a2719d1e031f9604db9bfba0e2e96478f9bba9bca5",
+        "baseline_sha256": "f261d362a43c3cba202b94b66cd5e3782d62b285daf5eaf133e3e1b0ce8bb947",
+        "baseline_directives_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "op_kernel/apply_rotary_pos_emb.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb.cpp",
+        "source_sha256": "2a07c29e6bd8b926dd716be17fa1ecfe2a4217707d2a82e09c98e4108f1f0cd6",
+        "sha256": "2a07c29e6bd8b926dd716be17fa1ecfe2a4217707d2a82e09c98e4108f1f0cd6",
+        "baseline_tokens_sha256": "427b8d2d21b62ca15b1ebd2f5a85c5654224e4b963ffcb365bcace08c629ed31",
+        "baseline_sha256": "2a07c29e6bd8b926dd716be17fa1ecfe2a4217707d2a82e09c98e4108f1f0cd6",
+        "baseline_directives_sha256": "750493aa408e809eec8d5a6f5ce5b002fac3c8c9528303a0d0478ee57c465040"
+      },
+      "op_kernel/apply_rotary_pos_emb_apt.cpp": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_apt.cpp",
+        "source_sha256": "45bdf0877ce4288fe371428cb43f13a1448d9ff4bca47b0181474a39f77a5fd4",
+        "sha256": "45bdf0877ce4288fe371428cb43f13a1448d9ff4bca47b0181474a39f77a5fd4",
+        "baseline_tokens_sha256": "f3ec5b4909f2f52221c0d67716cf06ec9e02b165444093da9b53f75aff078761",
+        "baseline_sha256": "45bdf0877ce4288fe371428cb43f13a1448d9ff4bca47b0181474a39f77a5fd4",
+        "baseline_directives_sha256": "c9df2e3d4604f0a010717947fac98ee02a80700d06d953b54d63aca4b0187818"
+      },
+      "op_kernel/apply_rotary_pos_emb_base.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_base.h",
+        "source_sha256": "fbdfae8c071df606c1bd673edf2e754175e31125307946ef6c4291165a29f340",
+        "sha256": "fbdfae8c071df606c1bd673edf2e754175e31125307946ef6c4291165a29f340",
+        "baseline_tokens_sha256": "41fbc7bb316a6567ba019b63e6e08e9f8e855d3f2a330d5e2e68be0a2103c4ed",
+        "baseline_sha256": "fbdfae8c071df606c1bd673edf2e754175e31125307946ef6c4291165a29f340",
+        "baseline_directives_sha256": "ae44c3083640701f9024ffb91b9b297495bffe1f184bdd86b1a3ff6ebc653867"
+      },
+      "op_kernel/apply_rotary_pos_emb_compute_ab.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_compute_ab.h",
+        "source_sha256": "c67b9c19a85c3ad2fa1a6484e9a493870cf4e1ca7afe5bdf37d9d606be3573b8",
+        "sha256": "c67b9c19a85c3ad2fa1a6484e9a493870cf4e1ca7afe5bdf37d9d606be3573b8",
+        "baseline_tokens_sha256": "5d39165d52dc7346faf6b23544565d45f945beb408e1a268d5aab1fa096847fa",
+        "baseline_sha256": "c67b9c19a85c3ad2fa1a6484e9a493870cf4e1ca7afe5bdf37d9d606be3573b8",
+        "baseline_directives_sha256": "9cb09e5b3befd11bad71df80c9e94f391e48cb8a34666a499569470cf90fc540"
+      },
+      "op_kernel/apply_rotary_pos_emb_compute_ab_cast.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_compute_ab_cast.h",
+        "source_sha256": "5da727a6192631258ae974f7642f856d2375b435ff002926ebfba52cf9a94c35",
+        "sha256": "5da727a6192631258ae974f7642f856d2375b435ff002926ebfba52cf9a94c35",
+        "baseline_tokens_sha256": "dab761866856f776c1857f579fb6864f1571c1f17dd79269e3d396fc688fc048",
+        "baseline_sha256": "5da727a6192631258ae974f7642f856d2375b435ff002926ebfba52cf9a94c35",
+        "baseline_directives_sha256": "5eb0c1c22afab4d683d707c653f588b601a47ec1c7966e8ad70224b7cf017c05"
+      },
+      "op_kernel/apply_rotary_pos_emb_small.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/apply_rotary_pos_emb_small.h",
+        "source_sha256": "bb8426dcd21ed04138308f771d16755bdc9d84b52760ae75633d92647119c83e",
+        "sha256": "bb8426dcd21ed04138308f771d16755bdc9d84b52760ae75633d92647119c83e",
+        "baseline_tokens_sha256": "fa2872f82cf26860845f34b10a0ed4d6b61b287b456b5234f8211619333977bf",
+        "baseline_sha256": "bb8426dcd21ed04138308f771d16755bdc9d84b52760ae75633d92647119c83e",
+        "baseline_directives_sha256": "69432bd91291964676937a3cc85c0465c8fed3b9b98bf8c09a9b2cf245a9f955"
+      },
+      "op_kernel/arch35/apply_rotary_pos_emb_ab.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_ab.h",
+        "source_sha256": "aadadf5686f379e6196d7c3858dafa0ef80fc170302e285a11f710615823bfb1",
+        "sha256": "aadadf5686f379e6196d7c3858dafa0ef80fc170302e285a11f710615823bfb1",
+        "baseline_tokens_sha256": "9e966233cbbb5cb2008345de6865db032bbdf1dcc6a0f520ad51708a7cc1e23f",
+        "baseline_sha256": "aadadf5686f379e6196d7c3858dafa0ef80fc170302e285a11f710615823bfb1",
+        "baseline_directives_sha256": "b6bd27545096d778812fa5a7c7d340853457b0c6950d397e8ea68132a72b129e"
+      },
+      "op_kernel/arch35/apply_rotary_pos_emb_aba_and_ba.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_aba_and_ba.h",
+        "source_sha256": "d7c7505d4baa5cae07fb602fd41d7a74e75c97fef939d87750a966d3180ea3b2",
+        "sha256": "8c5eb60425b8858dd64b1df8e8053d422f40c9fcddee9156016e10e7edeaf671",
+        "baseline_tokens_sha256": "0fd0f141960247c420878b2b4b8e99dcfb61db54d92e6acb1bcc7019f1f3667b",
+        "baseline_sha256": "ce71e38bebf4463e70ed96dd1b3ef86078825514fa2cf128cad9441e1aaf20b5",
+        "baseline_directives_sha256": "d6a19db80ec8452b08f257433df6c44dd094462e7c337bb16807e0c6b03242b3"
+      },
+      "op_kernel/arch35/apply_rotary_pos_emb_bab.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_bab.h",
+        "source_sha256": "d12c7763ad68badc4b3473e3a1fc34a21f4be33adec14ff73bd5a96216d500fc",
+        "sha256": "d12c7763ad68badc4b3473e3a1fc34a21f4be33adec14ff73bd5a96216d500fc",
+        "baseline_tokens_sha256": "089395af911c9cf7c6cb78d00264c646c4e888ab249b5ec5cd9238f45f0a0e31",
+        "baseline_sha256": "d12c7763ad68badc4b3473e3a1fc34a21f4be33adec14ff73bd5a96216d500fc",
+        "baseline_directives_sha256": "34087a76220518a5bf74b3f972ef5f7001ca6766a7bc8622801b613f999b7ecf"
+      },
+      "op_kernel/arch35/apply_rotary_pos_emb_common.h": {
+        "repository": "ops-transformer",
+        "source": "posembedding/apply_rotary_pos_emb/op_kernel/arch35/apply_rotary_pos_emb_common.h",
+        "source_sha256": "df19e64d00c72f1057dce6289a7d7e0061b37843d4883a0602b0ae68f5962500",
+        "sha256": "7f78ef12413b14d05e3a488a4fe2d1c09bdabd3ca9d2ff8048e93475341474f9",
+        "baseline_tokens_sha256": "e6f54da8203b29c5c52a7a4e6896ba20d71e47f12d0d4b34b8283bcca6a273e5",
+        "baseline_sha256": "bdc576157366c4759e4e00d8d1fa408554e73e0310ad890628142ec67a7133ee",
+        "baseline_directives_sha256": "27098ff29c8ebf0728156283af1058c06d62a4fb73b0d8aa81e477382fc16132"
+      }
+    }
+  },
+  "baseline_reference_commit": "4f5a8470ae174184a0617d3c6a3ef7a99053764d"
+}

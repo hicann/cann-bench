@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 # torch/torch_npu 钉 2.10.0,其余精确版本交 uv.lock 锁定。
 dependencies = [
     "build",
+    "pybind11",
     "torch==2.10.0",
     "numpy>=1.21.0",
     "pyyaml>=6.0",
@@ -19,6 +20,7 @@ dependencies = [
     "psutil",
     "tornado",
     "expecttest",
+    "jinja2",
     "protobuf",
     "ruamel.yaml>=0.18",
     "torch_npu==2.10.0.post4",

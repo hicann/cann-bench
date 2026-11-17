@@ -1,0 +1,92 @@
+[
+  {
+    "case_id": "case_01",
+    "inputs": {
+      "grad_dist1": {"shape": [4, 32], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "xyz1": {"shape": [4, 32, 2], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "xyz2": {"shape": [4, 32, 2], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "idx1": {"shape": [4, 32], "dtype": "int32"},
+      "idx2": {"shape": [4, 32], "dtype": "int32"},
+      "grad_dist2": {"shape": [4, 32], "dtype": "float16", "min": -1.0, "max": 1.0}
+    },
+    "attrs": {},
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_host/test_aclnn_chamfer_distance_grad.cpp:Ascend910B_case_float_normal",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_02",
+    "inputs": {
+      "grad_dist1": {"shape": [3, 17], "dtype": "float32", "min": -1.0, "max": 1.0},
+      "xyz1": {"shape": [3, 17, 2], "dtype": "float32", "min": -1.0, "max": 1.0},
+      "xyz2": {"shape": [3, 17, 2], "dtype": "float32", "min": -1.0, "max": 1.0},
+      "idx1": {"shape": [3, 17], "dtype": "int32"},
+      "idx2": {"shape": [3, 17], "dtype": "int32"},
+      "grad_dist2": {"shape": [3, 17], "dtype": "float32", "min": -1.0, "max": 1.0}
+    },
+    "attrs": {},
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "examples/test_aclnn_chamfer_distance_grad.cpp:xyz1Shape={2,2,2} scaled_to_prime",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_03",
+    "inputs": {
+      "xyz1": {"shape": [2, 16, 2], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "xyz2": {"shape": [2, 16, 2], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "idx1": {"shape": [2, 16], "dtype": "int32"},
+      "idx2": {"shape": [2, 16], "dtype": "int32"},
+      "grad_dist1": {"shape": [2, 16], "dtype": "float16", "min": -1.0, "max": 1.0},
+      "grad_dist2": {"shape": [2, 16], "dtype": "float16", "min": -1.0, "max": 1.0}
+    },
+    "attrs": {},
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "README.md:xyz1,xyz2 shape=(B,N,2)",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_04",
+    "inputs": {
+      "xyz1": {"shape": [3, 8, 2], "dtype": "float32", "min": -0.0001, "max": 0.0001},
+      "xyz2": {"shape": [3, 8, 2], "dtype": "float32", "min": -0.0001, "max": 0.0001},
+      "idx1": {"shape": [3, 8], "dtype": "int32"},
+      "idx2": {"shape": [3, 8], "dtype": "int32"},
+      "grad_dist1": {"shape": [3, 8], "dtype": "float32", "min": -0.0001, "max": 0.0001},
+      "grad_dist2": {"shape": [3, 8], "dtype": "float32", "min": -0.0001, "max": 0.0001}
+    },
+    "attrs": {},
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "docs/aclnnChamferDistanceBackward.md:xyz1=[B,N,2] prime_batch_probe",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  },
+  {
+    "case_id": "case_05",
+    "inputs": {
+      "grad_dist1": {"shape": [1, 5], "dtype": "float16", "min": 0.0, "max": 0.0},
+      "xyz1": {"shape": [1, 5, 2], "dtype": "float16", "min": 0.0, "max": 0.0},
+      "xyz2": {"shape": [1, 5, 2], "dtype": "float16", "min": 0.0, "max": 0.0},
+      "idx1": {"shape": [1, 5], "dtype": "int32"},
+      "idx2": {"shape": [1, 5], "dtype": "int32"},
+      "grad_dist2": {"shape": [1, 5], "dtype": "float16", "min": 0.0, "max": 0.0}
+    },
+    "attrs": {},
+    "roles": ["smoke-test", "correctness-must-pass", "corr-default"],
+    "meta": {
+      "provenance-vendor-fixture": "tests/ut/op_kernel/chamfer_distance_grad_data/gen_data.py:uniform_ranges_replaced_with_zero",
+      "precision-level-l1": true,
+      "op-compute-type": "float_compute"
+    }
+  }
+]

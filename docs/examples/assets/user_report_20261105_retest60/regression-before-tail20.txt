@@ -1,0 +1,20 @@
+E        +  where PosixPath('/tmp/pytest-of-<user>/pytest-59/test_active_cann_is_selected_w1/user/Ascend/cann-9.0.0/set_env.sh') = <function _resolve_env_script at 0xffffbaf54160>('')
+E        +    where <function _resolve_env_script at 0xffffbaf54160> = optimize._resolve_env_script
+
+tests/ut/test_arena_pipeline_integrity.py:350: AssertionError
+=============================== warnings summary ===============================
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0 owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+../../../..$HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58
+  $HOME/miniconda3/envs/ascend-arena/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-9.1.0/aarch64-linux/ascend_toolkit_install.info owner does not match the current owner.
+    warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/ut/test_arena_pipeline_integrity.py::test_active_cann_is_selected_without_install_write_permission[False]
+FAILED tests/ut/test_arena_pipeline_integrity.py::test_active_cann_is_selected_without_install_write_permission[True]
+================= 2 failed, 14 deselected, 4 warnings in 8.44s =================

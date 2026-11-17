@@ -1,0 +1,20 @@
+case_id=case_31 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_31 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_32 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_32 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_33 seed=0 passed=False max_abs_diff=4.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_33 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_34 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_34 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_35 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_35 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_36 seed=0 passed=False max_abs_diff=255.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_36 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_37 seed=0 passed=False max_abs_diff=3.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_37 passed_runs=0 total_runs=1 pass_rate=0.000000
+case_id=case_38 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_38 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_39 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_39 passed_runs=1 total_runs=1 pass_rate=1.000000
+case_id=case_40 seed=0 passed=True max_abs_diff=0.000000 max_rel_diff=0.000000 MARE=0.000000 MERE=0.000000 RMSE=0.000000 small_value_errors=0/0
+case_id=case_40 passed_runs=1 total_runs=1 pass_rate=1.000000
