@@ -21,6 +21,26 @@ TASKS = ROOT / "tasks"
 MANIFEST = json.loads((TASKS / "suite_manifest.json").read_text(encoding="utf-8"))
 
 
+@pytest.mark.parametrize(
+    "platform,minimum_us", [("910c", 1.0), ("950pr", 0.5), ("950dt", 0.5)]
+)
+def test_published_timing_respects_platform_minimum(platform, minimum_us):
+    data = json.loads(
+        (TASKS / "metadata" / f"{platform}.json").read_text(encoding="utf-8")
+    )
+    checked = 0
+    for level, operators in data.items():
+        if not level.startswith("level"):
+            continue
+        for operator, cases in operators.items():
+            for case_id, entry in cases.items():
+                label = f"{platform}/{level}/{operator}/{case_id}"
+                assert entry["t_hw_us"] >= minimum_us, label
+                assert entry["baseline_perf_us"] > entry["t_hw_us"], label
+                checked += 1
+    assert checked == (1160 if platform == "910c" else 1200)
+
+
 def test_manifest_version_matches_runtime_task_version():
     from kernel_eval._version import read_tasks_version
 
