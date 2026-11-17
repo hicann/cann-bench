@@ -287,7 +287,7 @@ def _reference_health(native, cpu, staged_cpu=None):
                 "mare",
                 "small_value_error_count",
                 "cancel_error_count",
-                "normal_error_count",
+                "normal_mare",
                 "small_value_passed",
                 "cancel_passed",
                 "normal_passed",

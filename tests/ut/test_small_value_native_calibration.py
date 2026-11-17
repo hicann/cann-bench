@@ -93,17 +93,18 @@ class TestCompareLevel:
         """正常值域超标不被小值域营救波及——区分度保留。
 
         小值域兜底是计数比值制（与现行 spec/fp16 算子语义一致，幅度不敏感，
-        幅度感知标准属 issue #311 缺陷 1/2 的后续议题）；真正的硬闸在正常
-        值域：参考干净而候选超标 → 一票判负。
+        幅度感知标准属 issue #311 缺陷 1/2 的后续议题）；正常值域单独使用
+        MARE/MERE 比值阈值判定，候选的大幅偏差不能被小值域兜底营救。
         """
         golden, _, native = _cancellation_profile(11, 22)
-        gg = torch.Generator().manual_seed(33)
         bad = golden.clone()
         bad[:8] += 1e-2  # 正常域（|g|~1.0）注入超 mare 阈的误差；参考此处干净
         res = _compare_single_tensor(bad.to(torch.float32), golden, FP32_THRESHOLD,
                                      "float32", native_output=native)
         assert not res.passed
-        assert res.normal_error_count > 0 if hasattr(res, "normal_error_count") else True
+        assert res.small_value_passed and res.cancel_passed
+        assert not res.normal_passed
+        assert res.normal_mare_ratio > 5.0
 
 
 class TestGoldenDualPrecision:

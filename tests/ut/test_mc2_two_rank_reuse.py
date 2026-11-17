@@ -294,7 +294,10 @@ def test_cancelling_matmul_allreduce_reference_invalidates_scoring(dtype, profil
     result = compare_mc2_outputs(native, native, cpu, 0)[0]
     assert not result.passed
     assert result.metadata["failure_type"] == FAILURE_TYPE_REFERENCE_INVALID
-    assert result.metadata["reference_check"]["normal_error_count"] > 0
+    reference_check = result.metadata["reference_check"]
+    assert not reference_check["normal_passed"]
+    assert "normal" in reference_check["failed_regions"]
+    assert reference_check["mare"] > 10 * reference_check["threshold"]
     score = aggregate_eq4(
         True, 1, [(False, None)], weights=profile, n_reference_invalid=1
     )

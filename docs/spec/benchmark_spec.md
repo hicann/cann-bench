@@ -459,13 +459,13 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 
 ### 4.4 精度标准
 
-当前采用[生态算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/experimental_standard.md)，后续会引入[昇腾算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/commercial_standard.md)
+当前采用[生态算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/experimental_standard.md)，后续会引入[昇腾算子精度标准](https://gitcode.com/cann/opbase/blob/master/docs/zh/ops_precision_standard/commercial_standard.md)。
 
 **生态算子精度标准**
 ##### 误差指标
 
 该标准主要用来衡量生态贡献中（贡献在experimental目录下）的计算类算子精度是否达标，通过该标准作为生态贡献的必要条件。
-该标准采用平均相对误差和最大相对误差指标来判断，计算公式如下：$actual$为NPU实际输出的结果；$golden$为参考计算的真值
+该标准采用平均相对误差和最大相对误差指标来判断，计算公式如下：$actual$ 为 NPU 实际输出；$golden$ 为参考计算的真值。
 
 1. 平均相对误差（Mean Relative Error，MERE）：采样点中相对误差平均值。
 
@@ -501,48 +501,77 @@ benchmark 总分     = Σ_{所有算子} EachOperatorScore
 所有位置 → 计算整体相对误差 →
   若 MERE < threshold 且 MARE < mare_threshold → 通过 ✓
   若不通过 → 分析失败位置所属场景 →
-    ├─ 正常值域位置失败 → 同精度参考(native)在这些点也超标? → 是: 用 ErrorCount 比值标准; 否: 直接失败 ✗
+    ├─ 正常值域位置失败 → 先按 MERE/MARE 阈值判定，未通过再按 MARE/MERE 比值判定
     ├─ 小值域位置失败 → 使用小值域标准判定
     └─ 相消位置失败 → 使用相消标准判定
 ```
 
 **设计说明：**
+
 - 相对误差是基础判定标准
 - 小值域和相消位置采用绝对误差(ErrorCount比值)标准，适用于相对误差计算不稳定的场景
 - 三种场景综合判断，确保判定结果全面准确
 
+##### 符号描述
+
+- **$actual$** 是 NPU 实际输出，计算误差时升为 FP64，阈值仍按其原始输出 dtype（$target\_dtype$）选择。
+- **$golden_{truncated}$** 是理论真值 golden（FP64）经过精度截断后的值（FP64 → target_dtype → FP64），表示目标精度下能表示的“理想值”。
+
 ##### 正常值域判定
+
+**判定范围：** 有效位置中排除小值域和相消位置的部分。
 
 **误差指标：**
 
-1. 平均相对误差（MERE）：采样点中相对误差平均值。
+1. 平均相对误差（Mean Relative Error，MERE）：正常值域内相对误差的平均值。
 
    $$
-   \text{MERE} = \text{avg}(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
+   \text{MERE} = \text{avg}\left(\frac{|actual - golden_{truncated}|}{|golden_{truncated}| + 10^{-7}}\right)
    $$
 
-2. 最大相对误差（MARE）：采样点中相对误差最大值。
+2. 最大相对误差（Max Relative Error，MARE）：正常值域内相对误差的最大值。
 
    $$
-   \text{MARE} = \max(\frac{\text{abs}(actual - golden)}{\text{abs}(golden)+\text{1e-7}})
+   \text{MARE} = \max\left(\frac{|actual - golden_{truncated}|}{|golden_{truncated}| + 10^{-7}}\right)
    $$
 
-**通过阈值：**
+**通过阈值：** 沿用整体判定的 dtype 阈值。
 
 | 数据类型 | FLOAT16 | BFLOAT16 | FLOAT32 | HiFLOAT32 | FLOAT8 E4M3 | FLOAT8 E5M2 |
 |----------|---------|----------|---------|-----------|-------------|-------------|
 | **通过阈值(Threshold)** | 2^-10 | 2^-7 | 2^-13 | 2^-11 | 2^-3 | 2^-2 |
-| **MARE阈值(10×Threshold)** | 2^-7 | 2^-4 | 2^-10 | 2^-8 | 2^-0 | 2^-1 |
+| **MARE阈值(10 × Threshold)** | 10 × 2^-10 | 10 × 2^-7 | 10 × 2^-13 | 10 × 2^-11 | 10 × 2^-3 | 10 × 2^-2 |
 
-**通过标准：** MERE < Threshold 且 MARE < 10 × Threshold
+**正常判定：** MERE < Threshold 且 MARE < 10 × Threshold 时，正常值域直接通过，跳过该值域的同精度兜底判定。正常值域为空时，该值域通过。
 
-**同精度兜底（issue #92，深归约 fp32 场景）：** 当 MARE 超标点均在正常值域，但**同精度参考（native）自身**在这些点也超过 MARE 阈值时（大 reduce 深度的固有 fp32 舍入，如 conv K = C·kH·kW = 9216——此时连正确的 fp32 参考实现都无法满足固定阈值），采用与小值域/相消一致的 ErrorCount 比值标准：
+**同精度兜底：** 正常判定未通过时，计算同精度参考（native）在同一正常值域内的 MARE、MERE，并与 NPU 的误差指标比较比值：
+
+同精度参考的正常域 MARE/MERE 含 NaN/Inf 时，判为参考失效，不据此放宽候选精度。
 
 $$
-\frac{\text{ErrorCount}_{\text{npu, normal}}}{\max(\text{ErrorCount}_{\text{cpu, normal}}, 1)} \leq 2
+\text{MARE\_ratio} = \frac{\text{MARE}_{\text{npu}}}{\max(\text{MARE}_{\text{native}}, S_{ratio})}
 $$
 
-其中 ErrorCount 为该值域内相对误差超过 MARE 阈值的点数。**仅当同精度参考自身也超标时才启用此兜底**；参考在正常值域干净（$\text{ErrorCount}_{\text{cpu, normal}} = 0$）时维持"任一正常值域超标即失败"的固定阈值判定——因此对非病态（非深归约）场景无任何放宽。缺同精度参考（native）时同样退化为固定阈值判定。
+$$
+\text{MERE\_ratio} = \frac{\text{MERE}_{\text{npu}}}{\max(\text{MERE}_{\text{native}}, S_{ratio})}
+$$
+
+两侧均使用同一正常值域和比较基准 $golden_{truncated}$，按上文公式计算最大、平均相对误差。$S$ 为对应输出 dtype 的小值域阈值，见“小值域阈值对应表”。比值分母下限按实际基础精度阈值调整：
+
+$$
+S_{ratio} = S \times \min\left(1, \frac{T_{effective}}{T_{default}}\right)
+$$
+
+$T_{effective}$ 为实际生效的正基础精度阈值，$T_{default}$ 为输出 dtype 的默认阈值。未配置更严格阈值时，$S_{ratio}=S$；配置更严格阈值时，同比缩小分母下限。该调整只作用于比值计算，小值域划分仍使用 $S$。
+
+**比值阈值：**
+
+| 指标 | 阈值变量 | 上限 |
+|------|----------|-----:|
+| 正常域 MARE 比值 | `mare_ratio_threshold` | 5.0 |
+| 正常域 MERE 比值 | `mere_ratio_threshold` | 1.5 |
+
+**通过标准：** 两项比值均不超过上限，边界比较仅容忍浮点计算舍入误差。正常值域为空时，该值域通过。
 
 ##### 小值域判定
 
@@ -570,7 +599,6 @@ $$
 - $\mathbb{I}(⋅)$ 是指示函数（条件成立时为 1，否则为 0）
 - $∧$ 表示逻辑"且"
 - $error$、$threshold$ 请参考上表
-- **$golden_{truncated}$** 是理论真值 golden（FP64）经过精度截断后的值（FP64 → target_dtype → FP64），表示目标精度下能表示的"理想值"
 
 **比较基准一致性：**
 
@@ -595,8 +623,8 @@ $$
 
 **相消判定条件：**
 - $|output| < cancel\_zero\_threshold$（output 因相消接近零）
-- $|golden| < cancel\_boundary$（golden 在精度边界附近）
-- $|golden| \geq small\_value\_threshold$（排除小值域）
+- $|golden_{truncated}| < cancel\_boundary$（golden 在精度边界附近）
+- $|golden_{truncated}| \geq small\_value\_threshold$（排除小值域）
 
 **相消阈值对应表：**
 
@@ -616,7 +644,7 @@ $$
 上文的 $golden_{truncated}$（fp64 理论真值）与 CPU 同精度参考（$\text{ErrorCount}_{\text{cpu标准精度}}$）默认都由同一份 plain golden 提供。但当 golden 对浮点/量化操作数硬编码 `.float()`/`.double()` 时，fp64 真值会被下采成 fp32，使同精度参考与真值在相消/小值域 cell 上 $|bench - oracle| \equiv 0$、$\text{ErrorCount}_{\text{cpu}}$ 恒为 0，令上面的 $\leq 2$ 判据在合法舍入误差下误杀（任何 NPU 算子都无法通过）。为此 golden 可选地拆成两个角色：
 
 - **oracle**（`<op>_oracle`）：dtype-agnostic 的 fp64 数学真值，提供 $golden_{truncated}$（不硬编码 `.float()`/`.double()`）；
-- **bench**（plain golden，或 `<op>_bench` 覆盖）：按 case dtype 的同精度参考，提供 $\text{ErrorCount}_{\text{cpu标准精度}}$。
+- **bench**（plain golden，或 `<op>_bench` 覆盖）：按 case dtype 的同精度参考，提供正常值域 MARE/MERE 及 $\text{ErrorCount}_{\text{cpu标准精度}}$。
 
 evaluator 缺任一钩子时回退到 plain golden，未拆分的算子行为不变。golden 侧编写规范见 [contributing.md](../guide/contributing.md) §2.4。
 

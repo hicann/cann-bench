@@ -20,6 +20,7 @@ from kernel_eval.base.result import (
 )
 from kernel_eval.base.score_weights import SCORE_WEIGHTS_ENV, score_weights_context
 from kernel_eval.checkers.mc2_three_way_checker import (
+    _reference_health,
     check_mc2_references,
     compare_mc2_outputs,
 )
@@ -143,6 +144,56 @@ def test_fixed_reference_diagnostics_show_physical_dtype_threshold():
     native = cpu.bfloat16()
     result = check_mc2_references(native, cpu, 0)[0]
     assert result.metadata["reference_check"]["threshold"] == 2**-7
+
+
+def test_fixed_reference_reports_normal_mare_from_normal_region_only():
+    cpu = torch.tensor([1.0, 1e-8, 1e-8, 1e-8])
+    native = torch.tensor([1.0002, 1e-5, 1e-5, 1e-5])
+    result = check_mc2_references(native, cpu, 0)[0]
+    health = result.to_dict()["reference_check"]
+    expected = float(abs(native[0].double() - cpu[0].double()) / (cpu[0].double().abs() + 1e-7))
+    assert health["normal_mare"] == pytest.approx(expected)
+    # Small-value failure makes the display MARE use the whole output.
+    assert not health["small_value_passed"]
+    assert health["mare"] > 100 * health["normal_mare"]
+    assert "normal_error_count" not in health
+
+
+def test_overall_pass_reports_zero_normal_mare():
+    cpu = torch.ones(8)
+    result = compare_mc2_outputs(cpu, cpu, cpu, 0)[0].to_dict()
+    assert result["passed"]
+    assert result["reference_check"]["normal_mare"] == 0.0
+    assert "normal_mare" not in result
+
+
+def test_staged_reference_does_not_generate_normal_mare():
+    cpu = torch.ones(8)
+    native = cpu.bfloat16()
+    health = _reference_health(native, cpu, staged_cpu=cpu)
+    assert "normal_mare" not in health
+    result = compare_mc2_outputs(native, native, cpu, 0, cascade_golden=cpu)[0].to_dict()
+    assert result["passed"]
+    assert "normal_mare" not in result["reference_check"]
+    assert "normal_mare" not in result
+
+
+def test_legacy_rank_output_reports_zero_or_actual_normal_mare():
+    from kernel_eval.eval.mc2_distributed_runner import _rank_output_results
+    from kernel_eval.utils.compare import compare_tensors
+
+    golden = torch.ones(8)
+    for offset in (0.0, 0.1):
+        candidate = golden + offset
+        compared = compare_tensors(candidate, golden.double())
+        report = _rank_output_results(compared, 0)[0]
+        assert "normal_mare" in report
+        assert "normal_mare" in compared.to_dict()
+        if offset:
+            expected = float(((candidate.double() - golden.double()).abs() / (golden.double().abs() + 1e-7)).max())
+            assert report["normal_mare"] == pytest.approx(expected)
+        else:
+            assert report["normal_mare"] == 0.0
 
 
 def test_existing_cancellation_allowance_is_preserved():

@@ -301,6 +301,9 @@ def test_get_input_hook_falls_back_only_in_prefer(evaluator, case, mode, capsys)
 @pytest.mark.parametrize("unsupported", ["native_npu", "other_bench"])
 def test_unsupported_reference_policy_falls_back_only_in_prefer(evaluator, case, mode, unsupported):
     # Test dispatch on CPU; this does not claim to execute a native NPU reference.
+    # Keep oracle and candidate computation precision aligned: this test covers
+    # unsupported cache policies, not BF16-vs-FP32 cross-entropy accuracy.
+    case = replace(case, dtypes=["float32", "float32", "int32"])
     candidate = evaluator.golden_loader.get_golden_function(case.rel_path)
     owner, attribute, value = ((evaluator.bench_config, "golden_precision", "native_npu")
                                if unsupported == "native_npu" else (evaluator, "bench_name", "other"))

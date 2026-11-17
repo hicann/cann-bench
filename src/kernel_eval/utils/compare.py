@@ -17,7 +17,7 @@
 职责：
 1. 提供 compare_tensors() — 张量对比主入口（支持多输出）
 2. SingleOutputResult / CompareResult 数据类
-3. MERE/MARE 计算 + 小值域/相消兜底判定
+3. 正常值域 MERE/MARE 三方比值 + 小值域/相消兜底判定
 
 从 utils/precision.py 拆分出来；阈值查询依赖 utils/thresholds.py。
 """
@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 
 import torch
 
+from ..base.result import FAILURE_TYPE_REFERENCE_INVALID
 from .tensor_utils import non_contiguous_reason
 from .thresholds import (
     get_threshold,
@@ -41,6 +42,12 @@ from .thresholds import (
 
 
 _logger = logging.getLogger(__name__)
+
+# Normal-region three-way MARE/MERE ratio limits.
+_NORMAL_MARE_RATIO_LIMIT = 5.0
+_NORMAL_MERE_RATIO_LIMIT = 1.5
+# Only absorb FP64 reduction/division rounding at the closed ratio limits.
+_NORMAL_RATIO_REL_TOL = 1e-12
 
 
 # Integer dtypes that should use absolute-difference / exact comparison
@@ -116,15 +123,17 @@ class CompareResult:
     cancel_total_count: int = 0  # 相消位置总计数
     small_value_passed: bool = True  # 小值域兜底判定是否通过
     cancel_passed: bool = True       # 相消兜底判定是否通过
-    normal_error_count: int = 0       # 正常值域 NPU 错误计数
-    normal_cpu_error_count: int = 0   # 正常值域 CPU(同精度参考) 错误计数
-    normal_total_count: int = 0       # 正常值域总计数
+    normal_total_count: int = 0      # 兜底时统计正常域元素数；整体提前通过时未统计，保持 0
     normal_passed: bool = True        # 正常值域同精度兜底判定是否通过
+    normal_mare: float = 0.0         # 正常域最大相对误差；整体提前通过时未统计，保持 0
+    normal_mare_ratio: Optional[float] = None
+    normal_mere_ratio: Optional[float] = None
     error_msg: Optional[str] = None
     output_results: List[SingleOutputResult] = field(default_factory=list)  # 各输出独立结果
+    failure_type: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             'passed': self.passed,
             'dtype': self.dtype,
             'threshold': self.threshold,
@@ -143,13 +152,17 @@ class CompareResult:
             'cancel_total_count': self.cancel_total_count,
             'small_value_passed': self.small_value_passed,
             'cancel_passed': self.cancel_passed,
-            'normal_error_count': self.normal_error_count,
-            'normal_cpu_error_count': self.normal_cpu_error_count,
             'normal_total_count': self.normal_total_count,
             'normal_passed': self.normal_passed,
+            'normal_mare': self.normal_mare,
+            'normal_mare_ratio': self.normal_mare_ratio,
+            'normal_mere_ratio': self.normal_mere_ratio,
             'error_msg': self.error_msg,
             'output_results': [r.to_dict() for r in self.output_results],
         }
+        if self.failure_type is not None:
+            result['failure_type'] = self.failure_type
+        return result
 
     def format_all_outputs(self) -> str:
         """格式化所有输出判定结果（用于日志）"""
@@ -234,6 +247,7 @@ class _MaskedStats:
             self._sum += float(selected.sum())
             block_max = float(selected.max())
             self._max = block_max if self._max is None else max(self._max, block_max)
+            del selected  # 下一块分配前释放，最多驻留一块 gather
 
     def __len__(self) -> int:
         return self.count
@@ -243,6 +257,36 @@ class _MaskedStats:
 
     def max(self) -> float:
         return self._max if self._max is not None else 0.0
+
+
+def _normal_error_ratio(candidate: float, native: float, floor: float) -> Optional[float]:
+    """Return a finite ratio, or None when the ratio is unavailable."""
+    if not math.isfinite(candidate) or not math.isfinite(native):
+        return None
+    if candidate == 0 and native == 0:
+        return 1.0
+    denominator = max(native, floor)
+    if denominator <= 0:
+        return None
+    ratio = candidate / denominator
+    return ratio if math.isfinite(ratio) else None
+
+
+def _normal_ratio_passed(ratio: Optional[float], limit: float) -> bool:
+    return ratio is not None and math.isfinite(ratio) and (
+        ratio <= limit
+        or math.isclose(ratio, limit, rel_tol=_NORMAL_RATIO_REL_TOL, abs_tol=0.0)
+    )
+
+
+def _normal_failure_message(mare_ratio, mere_ratio):
+    mare = f"{mare_ratio:.6g}" if mare_ratio is not None else "不可用（非有限比值）"
+    mere = f"{mere_ratio:.6g}" if mere_ratio is not None else "不可用（非有限比值）"
+    return (
+        f"正常值域三方比对失败: MARE_ratio={mare} "
+        f"(limit={_NORMAL_MARE_RATIO_LIMIT}), MERE_ratio={mere} "
+        f"(limit={_NORMAL_MERE_RATIO_LIMIT})"
+    )
 
 
 def _compare_single_tensor(
@@ -257,7 +301,10 @@ def _compare_single_tensor(
     生态算子精度标准：
     1. 平均相对误差（MERE）= avg(|actual - golden| / (|golden| + 1e-7))
     2. 最大相对误差（MARE）= max(|actual - golden| / (|golden| + 1e-7))
-    3. 通过标准: MERE < threshold 且 MARE < 10 * threshold
+    3. 整体 MERE < threshold 且 MARE < 10 * threshold 时直接通过。
+       否则有 native 时，正常值域兜底按比值阈值判定：MARE_ratio <= 5 且 MERE_ratio <= 1.5；
+       分母以对应 dtype 的 small_value_threshold 夹底。
+       无 native 时保留候选与 golden 的原两方比较策略。
 
     小值域处理（来自 docs/kernel_bench_design_v1.0.md）：
     当 |golden| < small_value_threshold 时，采用小值域通过标准：
@@ -596,6 +643,7 @@ def _compare_single_tensor(
     mismatch_mask = relative_error > mare_threshold
     mismatch_mask[~valid_mask] = False
     mismatch_count = int(mismatch_mask.sum())
+    del mismatch_mask
 
     # === 小值域处理 ===
     # 获取小值域阈值
@@ -683,41 +731,56 @@ def _compare_single_tensor(
     else:
         cancel_passed = True
 
-    # === 分析失败原因 ===
-    # 检查相对误差超标的点是否都在小值域/相消范围内
-    # （曾另算 mismatch_in_small_value / mismatch_in_cancel 两个掩码，但从未被读取，已删）
-    mismatch_in_normal = mismatch_mask & ~small_value_mask & ~cancel_mask
-    del mismatch_mask
-
-    normal_mismatch_count = int(mismatch_in_normal.sum())
-    del mismatch_in_normal
-
-    # === 正常值域兜底判定（issue #92）===
-    # 与小值域/相消对齐，正常值域也做同精度对照，但更保守：仅当同精度参考(native)
-    # 自身在正常值域也超标时才放宽（深归约/病态 fp32 场景，如 conv K=9216 的固有舍入）；
-    # 参考干净时维持"任一正常值域超标即失败"的现状严格判定——故对非病态场景零改动。
-    # 缺 native_output 时 cpu_relative_error≡0 → normal_cpu_error_count=0 → 走严格分支，不放宽。
+    # === 正常值域判定：先检查候选误差，未达标再做同精度兜底 ===
     normal_region_mask = ~small_value_mask & ~cancel_mask & valid_mask
     del small_value_mask, cancel_mask, valid_mask
-    normal_total_count = int(normal_region_mask.sum())
-    normal_error_count = normal_mismatch_count  # NPU 在正常值域的超标点数
-    normal_cpu_error_count = int(
-        (normal_region_mask & (cpu_relative_error > mare_threshold)).sum())
-    del cpu_relative_error
-    if normal_error_count == 0:
-        normal_passed = True
-    elif normal_cpu_error_count == 0:
-        # 同精度参考干净、候选却超标 → 失败（与现状一致，不放宽）
-        normal_passed = False
+    # 复用已有误差数组和 mask 分块归约；候选达标时跳过 native 归约及比值计算。
+    normal_relative_error = _MaskedStats(relative_error, normal_region_mask)
+    normal_total_count = len(normal_relative_error)
+    normal_mare = normal_relative_error.max()
+    normal_mere = normal_relative_error.mean()
+    normal_mare_ratio = normal_mere_ratio = None
+    normal_error_msg = None
+    failure_type = None
+    if native_output is not None and normal_total_count:
+        if normal_mere < threshold and normal_mare < mare_threshold:
+            normal_passed = True
+        else:
+            normal_native_error = _MaskedStats(cpu_relative_error, normal_region_mask)
+            native_mare = normal_native_error.max()
+            native_mere = normal_native_error.mean()
+            if not math.isfinite(native_mare) or not math.isfinite(native_mere):
+                # A nonfinite reference cannot serve as an infinitely loose baseline.
+                normal_passed = False
+                failure_type = FAILURE_TYPE_REFERENCE_INVALID
+                normal_error_msg = (
+                    "正常值域同精度参考失效: native MARE/MERE 含 NaN/Inf "
+                    f"(MARE={native_mare}, MERE={native_mere})，无法进行三方比对"
+                )
+            else:
+                # Tighten only the ratio floor for a stricter effective threshold;
+                # retain the dtype threshold for small-value region partitioning.
+                ratio_floor = small_value_threshold
+                default_threshold = get_threshold(dtype)
+                if 0 < threshold < default_threshold:
+                    ratio_floor *= threshold / default_threshold
+                normal_mare_ratio = _normal_error_ratio(normal_mare, native_mare, ratio_floor)
+                normal_mere_ratio = _normal_error_ratio(normal_mere, native_mere, ratio_floor)
+                normal_passed = (
+                    _normal_ratio_passed(normal_mare_ratio, _NORMAL_MARE_RATIO_LIMIT)
+                    and _normal_ratio_passed(normal_mere_ratio, _NORMAL_MERE_RATIO_LIMIT)
+                )
+                if not normal_passed:
+                    normal_error_msg = _normal_failure_message(normal_mare_ratio, normal_mere_ratio)
     else:
-        # 同精度参考自身也超标（fp32 固有深归约误差）→ 允许候选不差于 2× 参考
-        normal_passed = (normal_error_count / normal_cpu_error_count) <= 2
+        # 无 native 时沿用候选与 golden 的原两方比较严格判定。
+        normal_passed = normal_mare <= mare_threshold
+    del cpu_relative_error  # 正常域判定后立即释放；归约仅保留标量统计
 
     # 最终判定：三个值域各自兜底判定，全部通过才算通过。
     passed = normal_passed and small_value_passed and cancel_passed
 
     # 显示用 MERE/MARE
-    normal_relative_error = _MaskedStats(relative_error, normal_region_mask)
     del relative_error, normal_region_mask
     if not normal_passed:
         # 正常值域导致失败：显示排除小值域/相消后的 MERE/MARE
@@ -761,10 +824,13 @@ def _compare_single_tensor(
         cancel_total_count=cancel_total_count,
         small_value_passed=small_value_passed,
         cancel_passed=cancel_passed,
-        normal_error_count=normal_error_count,
-        normal_cpu_error_count=normal_cpu_error_count,
         normal_total_count=normal_total_count,
         normal_passed=normal_passed,
+        normal_mare=normal_mare,
+        normal_mare_ratio=normal_mare_ratio,
+        normal_mere_ratio=normal_mere_ratio,
+        error_msg=normal_error_msg,
+        failure_type=failure_type,
     )
 
 
@@ -785,7 +851,7 @@ def compare_tensors(
         golden: Golden参考输出（单个张量或多张量），通常为 FP64 精度
         dtype: 数据类型字符串
         threshold: 精度阈值（可选，默认根据dtype自动选择）
-        native_output: 同精度参考输出（可选，用于小值域比较）
+        native_output: 同精度参考输出（可选，用于正常值域三方比值及小值域/相消计数）
                        如果不提供，则使用 golden 截断到目标精度作为参考
         ignore_output_indices: 需要忽略对比的输出索引列表
         custom_thresholds: 自定义精度阈值表（优先级高于默认阈值）
@@ -794,7 +860,9 @@ def compare_tensors(
         CompareResult: 对比结果
 
     通过条件:
-        正常值域: MERE < threshold 且 MARE < 10 * threshold
+        正常值域（有 native）: MERE < threshold 且 MARE < 10 * threshold 时通过，
+                             否则要求 MARE_ratio <= 5 且 MERE_ratio <= 1.5
+        正常值域（无 native）: 保留候选与 golden 的原两方比较严格判定
         小值域: ErrorCount_npu / max(ErrorCount_native, 1) ≤ 2
     """
     # 获取阈值（优先使用自定义阈值）
@@ -849,10 +917,11 @@ def compare_tensors(
         cancel_total_count = 0
         all_small_value_passed = True
         all_cancel_passed = True
-        normal_error_count = 0
-        normal_cpu_error_count = 0
         normal_total_count = 0
         all_normal_passed = True
+        normal_mare = 0.0
+        normal_mare_ratios = []
+        normal_mere_ratios = []
 
         # 记录每个输出的独立判定结果
         single_output_results: List[SingleOutputResult] = []
@@ -917,13 +986,18 @@ def compare_tensors(
                     'cancel_total_count': result.cancel_total_count,
                     'small_value_passed': result.small_value_passed,
                     'cancel_passed': result.cancel_passed,
-                    'normal_error_count': result.normal_error_count,
-                    'normal_cpu_error_count': result.normal_cpu_error_count,
                     'normal_total_count': result.normal_total_count,
                     'normal_passed': result.normal_passed,
+                    'normal_mare': result.normal_mare,
+                    'normal_mare_ratio': result.normal_mare_ratio,
+                    'normal_mere_ratio': result.normal_mere_ratio,
+                    'normal_mare_ratio_limit': _NORMAL_MARE_RATIO_LIMIT,
+                    'normal_mere_ratio_limit': _NORMAL_MERE_RATIO_LIMIT,
                 },
             )
             single_output_results.append(single_result)
+            if result.failure_type is not None:
+                single_result.metadata['failure_type'] = result.failure_type
 
             is_passed = result.passed
             all_passed = all_passed and is_passed
@@ -941,10 +1015,13 @@ def compare_tensors(
             cancel_total_count += result.cancel_total_count
             all_small_value_passed = all_small_value_passed and result.small_value_passed
             all_cancel_passed = all_cancel_passed and result.cancel_passed
-            normal_error_count += result.normal_error_count
-            normal_cpu_error_count += result.normal_cpu_error_count
             normal_total_count += result.normal_total_count
             all_normal_passed = all_normal_passed and result.normal_passed
+            normal_mare = max(normal_mare, result.normal_mare)
+            if result.normal_mare_ratio is not None:
+                normal_mare_ratios.append(result.normal_mare_ratio)
+            if result.normal_mere_ratio is not None:
+                normal_mere_ratios.append(result.normal_mere_ratio)
 
         if total_count > 0:
             mere = mere_sum / total_count
@@ -966,6 +1043,8 @@ def compare_tensors(
                 result_threshold = sr.metadata.get('threshold', threshold)
                 break
 
+        invalid_reference = next((sr for sr in single_output_results
+                                  if sr.metadata.get('failure_type') == FAILURE_TYPE_REFERENCE_INVALID), None)
         return CompareResult(
             passed=passed,
             dtype=result_dtype,
@@ -985,11 +1064,14 @@ def compare_tensors(
             cancel_total_count=cancel_total_count,
             small_value_passed=all_small_value_passed,
             cancel_passed=all_cancel_passed,
-            normal_error_count=normal_error_count,
-            normal_cpu_error_count=normal_cpu_error_count,
             normal_total_count=normal_total_count,
             normal_passed=all_normal_passed,
+            normal_mare=normal_mare,
+            normal_mare_ratio=max(normal_mare_ratios, default=None),
+            normal_mere_ratio=max(normal_mere_ratios, default=None),
             output_results=single_output_results,  # 新增：各输出独立结果
+            failure_type=FAILURE_TYPE_REFERENCE_INVALID if invalid_reference is not None else None,
+            error_msg=invalid_reference.error_msg if invalid_reference is not None else None,
         )
 
     except Exception as e:

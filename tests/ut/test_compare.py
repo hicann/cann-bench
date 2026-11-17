@@ -49,7 +49,8 @@ _SCALAR_FIELDS = (
     "mismatch_count", "total_count", "mismatch_ratio",
     "small_value_error_count", "small_value_cpu_error_count", "small_value_total_count",
     "cancel_error_count", "cancel_cpu_error_count", "cancel_total_count",
-    "normal_error_count", "normal_cpu_error_count", "normal_total_count",
+    "normal_mare_ratio", "normal_mere_ratio",
+    "normal_total_count",
     "small_value_passed", "cancel_passed", "normal_passed",
 )
 
@@ -701,8 +702,8 @@ class TestCompareResultFallbackFlags:
         assert 'MERE=' in summary
 
 
-class TestNormalRegionSamePrecisionGate:
-    """issue #92：正常值域同精度兜底门（深归约 fp32 固有误差场景）。
+class TestNormalRegionThreeWayGate:
+    """正常值域 MARE/MERE 三方比值阈值兜底判定。
 
     fp32 阈值：mare_threshold = 10*2^-13 ≈ 1.22e-3；|golden|=1.0 远高于
     small_value_threshold(6.1e-5)/cancel_boundary(3.9e-3)，注入点均落在正常值域。
@@ -721,32 +722,35 @@ class TestNormalRegionSamePrecisionGate:
         return compare_tensors(output, golden, dtype="float32", native_output=native)
 
     def test_candidate_equals_native_passes(self):
-        """候选 == 同精度参考（issue #92 复现）→ npu==cpu → ratio 1 → 通过。"""
+        """候选与同精度参考一致，两个误差比值均为 1。"""
         ref = self._mk(k=100)
         r = self._cmp(ref, ref)
-        assert r.normal_error_count == 100 and r.normal_cpu_error_count == 100
+        assert r.normal_mare_ratio == pytest.approx(1.0)
+        assert r.normal_mere_ratio == pytest.approx(1.0)
         assert r.normal_passed is True and r.passed is True
 
-    def test_candidate_within_2x_reference_passes(self):
-        r = self._cmp(self._mk(k=150), self._mk(k=100))  # 1.5x 参考
-        assert r.normal_error_count == 150 and r.normal_cpu_error_count == 100
+    def test_candidate_within_reference_ratio_limits_passes(self):
+        r = self._cmp(self._mk(k=125), self._mk(k=100))
+        assert r.normal_mare_ratio == pytest.approx(1.0)
+        assert r.normal_mere_ratio == pytest.approx(1.25)
         assert r.normal_passed is True and r.passed is True
 
-    def test_candidate_worse_than_2x_reference_fails(self):
-        r = self._cmp(self._mk(k=300), self._mk(k=100))  # 3x 参考
-        assert r.normal_error_count == 300 and r.normal_cpu_error_count == 100
+    def test_candidate_above_mere_ratio_limit_fails(self):
+        r = self._cmp(self._mk(k=300), self._mk(k=100))
+        assert r.normal_mare_ratio == pytest.approx(1.0)
+        assert r.normal_mere_ratio == pytest.approx(3.0)
         assert r.normal_passed is False and r.passed is False
 
     def test_clean_reference_keeps_strict(self):
-        """守卫：参考干净(0 错点)、候选却超标 → 仍失败（非病态场景零放宽）。"""
+        """参考误差为零时，候选 MARE 超出噪声地板的 5 倍仍失败。"""
         r = self._cmp(self._mk(k=5), self._mk(k=0))
-        assert r.normal_cpu_error_count == 0 and r.normal_error_count == 5
+        assert r.normal_mare_ratio > 5.0
         assert r.normal_passed is False and r.passed is False
 
     def test_candidate_better_than_reference_passes(self):
-        """候选比参考还好(0 错点) → 通过。"""
+        """候选精确匹配 golden 时整体判定直接通过。"""
         r = self._cmp(self._mk(k=0), self._mk(k=100))
-        assert r.normal_error_count == 0
+        assert r.normal_mare_ratio is None and r.normal_mere_ratio is None
         assert r.normal_passed is True and r.passed is True
 
 
@@ -795,8 +799,8 @@ class TestMergedHostConversion:
         assert sr.metadata['mere'] == result.mere
         assert sr.metadata['mare'] == result.mare
 
-    def test_normal_region_failure_counts_match_legacy(self):
-        """正常值域失败路径（含 native 参考）：各计数与旧两步转换一致"""
+    def test_normal_region_failure_statistics_match_legacy_conversion(self):
+        """正常值域失败路径：整体计数、误差及三方比值与旧转换口径一致。"""
         golden = torch.rand(256, dtype=torch.float64) + 1.0
         output = golden.float()
         output[0] = 10.0
@@ -814,12 +818,11 @@ class TestMergedHostConversion:
         cpu_relative_error = (
             torch.abs(cpu_output_fp64 - golden_truncated) / (torch.abs(golden_truncated) + 1e-7)
         )
-        expected_cpu_errors = int((cpu_relative_error > mare_threshold).sum())
+        native_mare = float(cpu_relative_error.max())
+        native_mere = float(cpu_relative_error.mean())
 
         assert result.passed is False
         assert result.mismatch_count == expected_mismatch == 3
-        assert result.normal_error_count == 3
-        assert result.normal_cpu_error_count == expected_cpu_errors == 0
         assert result.normal_passed is False
         # 全部落在正常值域：小值域/相消计数为零
         assert result.small_value_total_count == 0
@@ -828,6 +831,10 @@ class TestMergedHostConversion:
         valid_rel = relative_error[valid_mask]
         assert result.mere == float(valid_rel.mean())
         assert result.mare == float(valid_rel.max())
+        assert result.normal_mare_ratio == pytest.approx(
+            result.mare / max(native_mare, 2**-14))
+        assert result.normal_mere_ratio == pytest.approx(
+            result.mere / max(native_mere, 2**-14))
 
     def test_inf_saturation_does_not_mutate_caller_tensor(self):
         """inf 饱和替换发生在 fp64 转换副本上，调用方原生 dtype 张量不被改写"""

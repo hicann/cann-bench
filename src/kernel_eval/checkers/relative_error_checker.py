@@ -18,7 +18,9 @@
 - MERE (平均相对误差) = avg(|actual - golden| / (|golden| + 1e-7))
 - MARE (最大相对误差) = max(|actual - golden| / (|golden| + 1e-7))
 
-通过条件: MERE < threshold AND MARE < 10*threshold
+整体 MERE/MARE 达标直接通过；否则正常值域兜底按三方比值阈值判定:
+MARE_ratio <= 5 AND MERE_ratio <= 1.5
+无 native 参考时保留候选与 golden 的原两方比较策略：整体 MERE/MARE 优先，正常域兜底检查 MARE。
 
 整数类型: 精确匹配（内部分支，不拆出独立 Checker）
 
@@ -265,6 +267,11 @@ class RelativeErrorChecker(CorrectnessChecker):
             'cancel_total_count': compare_result.cancel_total_count,
             'small_value_passed': compare_result.small_value_passed,
             'cancel_passed': compare_result.cancel_passed,
+            'normal_total_count': compare_result.normal_total_count,
+            'normal_passed': compare_result.normal_passed,
+            'normal_mare': compare_result.normal_mare,
+            'normal_mare_ratio': compare_result.normal_mare_ratio,
+            'normal_mere_ratio': compare_result.normal_mere_ratio,
             'failure_type': failure_type,
         }
 
