@@ -128,7 +128,7 @@ class ParamBuilder:
         Args:
             golden_func: Golden 函数
             case: 测试用例信息（包含 input_shapes, attrs 等）
-            input_tensors: 已生成的输入张量列表（不含 null 位置的 tensor）
+            input_tensors: 已生成的输入张量列表（包含 null 位置的 None 占位）
             override_shapes: 可选的形状覆盖（用于 get_input 后重新排序的情况）
 
         Returns:
@@ -193,7 +193,8 @@ class ParamBuilder:
                     if len(val) > 1:
                         input_tensors = input_tensors[:tensor_idx] + [v for v in val[1:]] + input_tensors[tensor_idx:]
                 elif param_name in all_tensor_list_params:
-                    params[param_name] = val if isinstance(val, list) else [val]
+                    # 保留 None 和列表，仅将非列表的实际输入包装为 TensorList。
+                    params[param_name] = val if val is None or isinstance(val, list) else [val]
                     tensor_idx += 1
                 else:
                     params[param_name] = val
