@@ -7,8 +7,8 @@
 ## 前置条件
 
 - Python 3.10+
-- PyTorch 2.0+
-- torch_npu（NPU 模式）
+- PyTorch 2.10.0 + torch_npu 2.10.0.post4；x86_64 的 pip 清单使用 torch 2.10.0+cpu
+- Linux 昇腾环境；Python CLI 的若干模块会导入 torch_npu，`--device cpu` 不代表所有 CLI 路径都能在未安装扩展的纯 CPU 环境运行
 - CANN 9.1.0 及以上版本（NPU 模式）
 
 > CANN 版本不得低于 9.1.0：ACLNN 示例（examples/aclnn_launch_example）引用的 `aclnn_kernels/contiguous.h` 头文件仅在 CANN 9.1.0+ 提供。使用前请 source 对应版本的环境脚本并确认 `ASCEND_HOME_PATH` 指向 9.1.0+ 的 CANN 安装目录：
@@ -149,13 +149,17 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 | `--no-perf-batch-cases` | 关闭批量 case，恢复逐 case Profiler | False |
 | `--perf-batch-case-memory-limit-mb <mb>` | correctness 阶段单 case VmRSS 峰值上限；超限或采样失败的 case 改走逐 case Profiler | 32768 |
 | `--profiler-level <level>` | Profiler 级别 (Level1/Level2) | Level1 |
+| `--reports-dir <path>` | 报告输出目录 | reports/ 或 reports/&lt;bench_name&gt;/ |
+| `--eval-seed <n>` | 输入生成种子 | 0（自动确定性） |
+| `--input-dist <dist>` | uniform / normal（别名 norm） | uniform |
+| `--build-timeout <seconds>` | 构建超时，正整数秒；CLI > CANN_BENCH_BUILD_TIMEOUT_SEC > 默认 | 600 |
 
-> shell 暴露的是最常用子集。若需要 `--op-timeout-sec` / `--no-iterative-compile` / `--eval-code` / `--eval-seed` / `--input-dist` 等更精细控制，请直调 cli：
+> shell 已支持 `--reports-dir`、`--eval-seed`、`--input-dist` 和 `--build-timeout`。需要 `--op-timeout-sec` / `--no-iterative-compile` / `--eval-code` 等其他选项时可直调 CLI：
 > ```bash
 > PYTHONPATH=src python -m kernel_eval.cli eval --source-dir /path/to/ai_ops \
 >     --op-timeout-sec 480
 > ```
-> cli 完整参数表见 [evaluator_design.md §3.3](../design/evaluator_design.md#33-命令行参数)。
+> 当前参数以 `bash scripts/run_evaluation.sh --help` 和 `PYTHONPATH=src python -m kernel_eval.cli eval --help` 为准；设计文档中的参数表是设计时快照。
 
 ## Golden 自验证
 
@@ -173,11 +177,13 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 >
 > ```bash
 > pip uninstall -y cann_bench
-> pip install examples/aclnn_launch_example/dist/cann_bench-*.whl
+> pip install --force-reinstall --no-deps examples/aclnn_launch_example/dist/cann_bench-*.whl
 > # 或：export PYTHONPATH="$(pwd)/examples/aclnn_launch_example:${PYTHONPATH}"
 > ```
 
 ## 评测报告
+
+默认 NPU 脚本入口分正确性、性能和最终汇总阶段；`--no-perf` 不请求性能阶段。精度失败、候选运行失败、性能未完成和 `reference_invalid` 的含义不同：参考失效表示评分不可判定，不能视为候选零分。退出码契约见[评测规范](../spec/benchmark_spec.md)。
 
 评测完成后，报告输出到 `reports/`（其它评测集为 `reports/<bench_name>/`）目录。文件名由“语义前缀 + 阶段 + 时间戳”组成，形如 `<bench>_<stage>_eval_<时间戳>.{json,md,html}`（cann 分阶段评测会分别产出 `cann_correctness_eval_*`、`cann_performance_eval_*`、`cann_final_eval_*`）：
 
@@ -185,6 +191,16 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 - `<...>.md`：Markdown 格式报告
 - `<...>.html`：HTML 格式报告
 - `reports/prof_data/`：性能采集数据
+
+从已有 JSON 重建 HTML 时，当前脚本默认模板仍指向不存在的 `tasks/description.html`。可显式指定归档模板：
+
+```bash
+JSON_REPORT="reports/cann_final_eval_YYYYMMDD_HHMMSS.json"  # 替换为实际文件名
+bash scripts/utils/gen_report.sh --json "$JSON_REPORT" \
+  --template archives/season1/tasks/description.html
+```
+
+此模板来自 Season1，当前评分以 JSON 字段及规范为准。脚本重建尚未完整透传所有新增诊断/评分字段，不应覆盖原始 JSON，也不能把重建 HTML 当作新的评分结果。
 
 ## 下一步
 

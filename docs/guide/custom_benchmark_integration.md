@@ -1,12 +1,16 @@
 # 自定义评测集接入指南
 
+> **阅读范围与接入前置检查**：正文包含接入设计及示意代码，不能将其中截取的类实现直接视为当前可执行插件。真实签名以 `src/kernel_eval/base/`、`registry/bench_registry.py` 和现有 bench 为准，普通精度路径也支持 CPU 执行，性能采集仍要求昇腾 NPU。
+>
+> 新的 CANN 风格 bundle 应提供 `<bench_root>/metadata/VERSION`、对应权重档和平台 metadata；不得静默借用主线题集版本。参考与输出契约、版本/权重、命令参数分别以[贡献指南](contributing.md)、[版本策略](version_policy.md)、[快速入门](quick_start.md)为准；尚未注册的框架/平台需要独立适配和验证。
+
 ## 概述
 
 cann-bench 支持接入其他评测体系。本文档介绍如何接入自定义评测集。
 
 **重要说明**：
 - cann-bench 是针对 **CANN/NPU** 的评测体系，性能采集使用 `torch_npu.profiler`
-- 仅支持 **Ascend NPU** 后端，不支持 CUDA 或其他硬件平台
+- 性能采集仅支持 **Ascend NPU**；另有 CPU 精度验证路径，不支持 CUDA 性能采集
 - 接入其他评测集时，正确性验证和评分计算可适配，但性能采集必须在 NPU 上执行
 
 ## 架构层次
@@ -28,7 +32,7 @@ cann-bench 支持接入其他评测体系。本文档介绍如何接入自定义
 │  Benches Layer（CANN 特化）                                   │
 │  ├─ cann_loader.py: CannTaskLoader / CannCaseLoader          │
 │  ├─ cann_spec.py: CannTaskSpec / CannCaseSpec                │
-│  ├─ relative_error_checker.py: RelativeErrorChecker / RelativeErrorOutputResult   │
+│  ├─ checker 实现位于独立 checkers/，不在 benches/          │
 │  ├─ cann_matcher.py: OperatorMatcher                         │
 │  ├─ cann_scoring.py: CannScoringScheme / SOL-Score           │
 │  └─ cann.py: 导出 + Registry 注册                            │
@@ -65,7 +69,6 @@ src/kernel_eval/
 │   ├── cann_loader.py     # CannTaskLoader, CannCaseLoader, GoldenLoader
 │   ├── cann_spec.py       # CannTaskSpec, CannCaseSpec, CannInputSpec, CannOutputSpec
 │   ├── cann_solution.py   # CannSolutionSpec
-│   ├── relative_error_checker.py    # RelativeErrorChecker, RelativeErrorOutputResult
 │   ├── cann_matcher.py    # OperatorMatcher
 │   ├── cann_scoring.py    # CannScoringScheme, SimpleComparisonScheme, RecordingOnlyScheme
 │   ├── cann.py            # 导出所有 CANN 组件 + Registry 注册
@@ -94,12 +97,14 @@ src/kernel_eval/
 │   └── report_generator.py
 │
 ├── utils/                 # 工具层
-│   ├── precision.py
+│   ├── compare.py
 │   ├── tensor_utils.py
 │   └── ...
 │
 └── cli.py                 # CLI 入口
 ```
+
+通用 checker 位于 `src/kernel_eval/checkers/relative_error_checker.py` 和 `allclose_checker.py`；阈值位于 `utils/thresholds.py`。
 
 ## BenchRegistry：统一配置机制
 
@@ -124,10 +129,10 @@ BenchRegistry.register('my_bench', BenchConfig(
 
 ```bash
 # 使用评测集（自动加载所有配置）
-kernel-bench eval --bench-name my_bench
+PYTHONPATH=src python -m kernel_eval.cli eval --bench-name my_bench
 
 # 使用默认 CANN 评测集
-kernel-bench eval --bench-name cann
+PYTHONPATH=src python -m kernel_eval.cli eval --bench-name cann
 ```
 
 ### golden_precision 精度策略
@@ -1571,32 +1576,30 @@ BenchRegistry.register('external_bench', BenchConfig(
 
 ```bash
 # 列出已注册的评测集（含描述）
-kernel-bench config --list-benches
-
-# 列出已注册的评分方案
-kernel-bench config --list-scoring-schemes
-
-# 列出已注册的精度判断器
-kernel-bench config --list-checkers
+PYTHONPATH=src python -m kernel_eval.cli config --list-benches
 
 # 列出 CANN 评测集的算子
-kernel-bench list --bench-name cann
+PYTHONPATH=src python -m kernel_eval.cli list --bench-name cann
 
 # 列出自定义评测集的算子
-kernel-bench list --bench-name my_bench
+PYTHONPATH=src python -m kernel_eval.cli list --bench-name my_bench
 
 # 列出用例
-kernel-bench list --bench-name my_bench --cases
+PYTHONPATH=src python -m kernel_eval.cli list --bench-name my_bench --cases
 
 # 查看算子详情
-kernel-bench info --bench-name my_bench --operator MyOperator
+PYTHONPATH=src python -m kernel_eval.cli info --bench-name my_bench --operator MyOperator
 
 # 执行评测（自动加载评测集配置）
-kernel-bench eval --bench-name my_bench
+PYTHONPATH=src python -m kernel_eval.cli eval --bench-name my_bench
 
 # 执行评测（筛选算子）
-kernel-bench eval --bench-name my_bench --operator MyOperator
+PYTHONPATH=src python -m kernel_eval.cli eval --bench-name my_bench --operator MyOperator
 ```
+
+### 当前 CLI 限制
+
+`config --list-scoring-schemes` / `config --list-checkers` 虽已声明参数，当前 `cmd_config` 仍引用旧模块路径，可能抛 `ModuleNotFoundError`，不能据此判断插件注册失败。实际 registry 位于 `registry/scoring_registry.py`、`registry/checker_registry.py`；需在修复导入后再验证这两条命令。本文不改动该代码缺陷。
 
 ### 参数说明
 

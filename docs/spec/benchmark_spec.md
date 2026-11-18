@@ -41,11 +41,11 @@
 
 本评测方案以"场景驱动、社区共建、持续演进"为核心理念，分阶段推进榜单建设与评分体系完善。
 
-#### 1.5.1 阶段一：基础覆盖（当前阶段）
+#### 1.5.1 基础覆盖与当前发布范围
 
 聚焦算子场景覆盖和泛化性，建立基础评测框架：
 
-- **算子覆盖**：完成算子泛化场景下53个算子（L1=8、L2=16、L3=21、L4=8）的规格定义、用例设计和Golden实现，覆盖Elementwise、Reduce、Matmul、Convolution、Attention等核心计算模式
+- **算子覆盖**：主线 Season2 为 60 题（L1=2、L2=13、L3=27、L4=13、L5=5），每题 20 个公开 case，共 1200 条。原 53 题为 Season1 历史集合，已归档；平台排除与性能数据状态见 [Season2 迁移说明](../guide/season2_migration.md)。
 - **评测维度**：建立编译/运行正确性、精度正确性、性能优化性三大评测维度，形成综合评分体系
 - **泛化验证**：每个算子提供20开放用例，覆盖Shape维度、数据类型、属性取值等泛化场景
 - **基准建立**：发布第一版算子榜单，为AI生成算子代码能力提供量化评估基准
@@ -92,7 +92,7 @@
 | 数据项 | 说明 | 文件格式 |
 |--------|------|----------|
 | 算子规格描述 | 算子原型定义、输入输出schema、属性列表 | proto.yaml |
-| 算子分类与难度分级 | L1~L4四级难度体系，不同难度对应不同分值权重 | 元数据标签 |
+| 算子分类与难度分级 | L1~L5 五级难度标签；当前评分档不按难度另设权重 | 元数据标签 |
 | 测试用例集 | 每个算子20+开放用例，覆盖Shape/dtype/属性/值域 | cases.csv |
 | Golden实现 | 基于PyTorch官方API的标杆计算函数 | golden.py |
 | 性能基线 | 每个用例对应的基准执行时间与硬件下界（baseline_perf_us / t_hw_us） | metadata/&lt;hardware&gt;.json |
@@ -335,12 +335,12 @@ def exp(
 
 | 维度 | 权重（tasks 2.x） | 评测重点 | 评测工具 | 评分范围 |
 |------|------|----------|----------|----------|
-| 编译/运行正确性 | w_c = 0.05 | 编译通过，且用例不存在非数值精度类运行/接口错误 | cmake、gtest | δ_compile/runtime ∈ [0, 1] |
-| 精度正确性 | w_f = 0.20 | 通过测试用例Golden数值精度对比 | cmake、gtest | δ_precision,i ∈ {0, 1} |
-| 全用例通过 bonus | w_b = 0.05 | 全部 N 个用例精度通过（δ_all = ∏ δ_precision,i） | cmake、gtest | δ_all ∈ {0, 1} |
-| 性能优化性 | w_p = 0.70 | hardware-anchored 分数（见 §4.2）| msprof、cannsim | score_i ∈ [0, ≥1] |
+| 编译/运行正确性 | w_c = 0.05 | 编译通过，且用例不存在非数值精度类运行/接口错误 | Python harness 与候选构建工具链 | δ_compile/runtime ∈ [0, 1] |
+| 精度正确性 | w_f = 0.20 | 通过测试用例Golden数值精度对比 | Python harness 与候选构建工具链 | δ_precision,i ∈ {0, 1} |
+| 全用例通过 bonus | w_b = 0.05 | 全部 N 个用例精度通过（δ_all = ∏ δ_precision,i） | Python harness 与候选构建工具链 | δ_all ∈ {0, 1} |
+| 性能优化性 | w_p = 0.70 | hardware-anchored 分数（见 §4.2）| torch_npu.profiler 与性能指标策略 | score_i ∈ [0, 3]（有效锚点） |
 
-权重之和 = 1，单算子满分 100。
+权重之和 = 1，单算子名义满分 100；奖励和封顶规则见 §4.2。
 
 **权重档**：单一事实来源在 `src/kernel_eval/base/score_weights.py`，提供两套
 并存配置：
@@ -431,7 +431,7 @@ tasks 2.x 的权重为 (w_c, w_f, w_p, w_b) = (0.05, 0.20, 0.70, 0.05)（`2` 档
 ```
 Level-N 得分       = Σ_{op ∈ Level-N} EachOperatorScore
 benchmark 总分     = Σ_{所有算子} EachOperatorScore
-                   = Level1 得分 + Level2 得分 + Level3 得分 + Level4 得分
+                   = Level1 得分 + Level2 得分 + Level3 得分 + Level4 得分 + Level5 得分
 ```
 
 ### 4.3 编译/运行评测

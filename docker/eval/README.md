@@ -8,9 +8,9 @@ harness 冻结在镜像里(`src/kernel_eval` + `tasks/` + `cann_bench_utils` 全
 | `/submission` | AI 生成的算子源码目录 | 只读即可(entrypoint 会先复制) |
 | `/reports` | 评测报告 + `prof_data/` + `build/`(编译日志、wheel) | 读写 |
 
-**镜像 tag 就是 benchmark 版本 + 目标**:
+**镜像 tag 当前使用框架 VERSION + 目标配置**:
 `cann-bench-eval:<VERSION>-<NPU_ARCH>-<ARCH>-ops<OPS_MODE>`,
-例如 `cann-bench-eval:1.0.0-ascend910b-aarch64-opsnone`。
+例如 `cann-bench-eval:1.0.0-ascend910b-aarch64-opsnone`。题集版本独立位于 `tasks/metadata/VERSION`；相同 tag 可能被重建覆盖，不能单独证明题集/评测器相同。应同时归档镜像 digest、构建提交、实际题集版本和报告中的评分档/公式。
 
 ## 分工:哪一层管什么
 
@@ -92,7 +92,7 @@ docker run --rm --privileged --ipc=host \
   -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
   -e LD_LIBRARY_PATH=/usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/driver/lib64 \
   -v /path/to/ai_ops:/submission:ro -v "$PWD/reports:/reports" \
-  cann-bench-eval:1.0.0-ascend910b-opsnone --operator Exp
+  cann-bench-eval:1.0.0-ascend910b-aarch64-opsnone --operator Exp
 ```
 
 ### entrypoint 契约
@@ -162,7 +162,7 @@ docker run ... -v "$PWD:/opt/cann-bench" cann-bench-eval:... /submission --opera
 
 ## 已知取舍
 
-- `tasks/` 烘进镜像,所以镜像 tag 即 benchmark 版本;开发期用上面的 `-v` 覆盖回工作树。
+- `tasks/` 烘进镜像，但 tag 不单独编码题集版本；开发期用 `-v` 覆盖工作树后更应记录实际提交与题集版本。
 - `cann_bench_utils` 在 build 期就编好装好(只要 bisheng,不需要 NPU),容器起来直接开跑,
   `ensure_cann_bench_utils()` 短路返回。它含 SoC 相关 kernel,所以本镜像 per-SoC。
 - **原生构建,没有交叉编译**:base 和 eval 必须在目标架构的机器上建。`uname -m` 与 base 的

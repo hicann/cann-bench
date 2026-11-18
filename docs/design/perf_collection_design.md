@@ -1,5 +1,9 @@
 # 性能采集设计文档
 
+> **当前实现范围**：性能执行入口在 `eval/perf_eval.py`，解析策略已分离至 `base/perf_strategy.py`，不是正文图中单个 `_parse_kernel_details` 方法。默认候选路径使用 `torch_npu.profiler`，warmup=3、repeat=5；脚本默认支持批量 case 采集及逐 case 回退。默认 `kernel_details` 指标统计设备 kernel 耗时，不是 Python 调用端到端墙钟。
+>
+> `trace_view`、`msprof_summary` 等策略有不同适用范围，不能混称同一性能口径；baseline 脚本的采集模式见[baseline 设计顶部现状说明](baseline_collection_design.md)。参数以[使用指南](../guide/quick_start.md)和实际 `--help` 为准。
+
 **文档版本：参见 [changelog](../changelog.md)**
 
 本文档详细描述评测工程的性能采集机制设计，包括 NPU Profiler 采集、kernel_details.csv 解析、升频清 Cache、Warmup Kernel 精确过滤等核心机制。

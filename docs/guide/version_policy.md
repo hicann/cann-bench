@@ -1,168 +1,71 @@
 # CANN-Bench 版本管理策略
 
-> 版本管理策略文档，记录版本规则、里程碑触发条件、发布流程。
+## 1. 框架与题集独立版本
 
-## 1. 双层版本体系
+| 文件 | 管理范围 | 当前主线 |
+|---|---|---|
+| 根目录 `VERSION` | `kernel_eval` 与 `auto_pipeline` 框架 | 1.0.0 |
+| `tasks/metadata/VERSION` | 当前正式题集 | 2.1.0（Season2） |
+| `<bench_root>/metadata/VERSION` | 实际传给评测入口的其他题集 | 以该文件为准 |
 
-CANN-Bench 采用 **框架版本** + **评测集版本** 双层版本体系：
+当前正式题集的范围、摘要及平台限制见 [Season2 迁移说明](season2_migration.md)与 [suite_manifest.json](../../tasks/suite_manifest.json)。Season1 位于 `archives/season1/tasks/`，使用归档题集自己的 metadata；不得用框架安装目录下的主线题集版本替代实际被评测 bundle 的版本。
 
-| VERSION 文件 | 管理范围 | 当前值 |
-|-------------|---------|--------|
-| `VERSION`（项目根） | 框架核心包（`kernel_eval` + `auto_pipeline`） | 1.0.0 |
-| `tasks/VERSION` | 评测集数据（`tasks/` 目录下的算子规格、用例、golden） | 1.0.0 |
+## 2. 运行时读取和评分选择
 
-两层版本 **独立演进**：
-- 框架 bug 修复 → 框架版本 PATCH 升级，评测集不动
-- 新增算子到 tasks → 评测集版本 MINOR 升级，框架不动
-- 里程碑版本（如评分公式改版 + 新增10个算子） → 两者同时升级
-
-## 2. 版本真相源
-
-**唯一真相源**：项目根 `VERSION` 文件和 `tasks/VERSION` 文件。
-
-所有代码通过 `src/kernel_eval/_version.py` 动态读取：
+[`_version.py`](../../src/kernel_eval/_version.py) 提供：
 
 ```python
-from kernel_eval._version import FRAMEWORK_VERSION, TASKS_VERSION
-# 或
 import kernel_eval
-kernel_eval.__version__       # 框架版本
-kernel_eval.TASKS_VERSION     # 评测集版本
+from kernel_eval._version import read_tasks_version
+
+framework_version = kernel_eval.__version__  # 根 VERSION
+bundled_tasks_version = kernel_eval.TASKS_VERSION  # 安装目录中 tasks/metadata/VERSION
+actual_tasks_version = read_tasks_version("tasks")  # 显式指定本次题集根目录
 ```
 
-**禁止在代码中硬编码版本号**。版本一致性由单元测试 `tests/ut/test_version_consistency.py` 自动校验。
+`read_tasks_version` 严格读取 `<bench_root>/metadata/VERSION` 的第一行，要求 `X.Y.Z`；缺失、非法格式会报错。后续兼容性注释不参与版本解析。`FRAMEWORK_VERSION` / `TASKS_VERSION` 常量则用于框架自报及安装内容版本，不能与本次评测 bundle 的版本混用。
 
-## 3. 语义化版本规范（SemVer）
+权重选择优先级为：显式 profile > `CANN_BENCH_SCORE_WEIGHTS` > 实际题集版本的大版本。支持的档位见 [score_weights.py](../../src/kernel_eval/base/score_weights.py)：
 
-采用 `MAJOR.MINOR.PATCH` 格式：
+| 档位 | 编译/运行 | 精度 | 全通过 bonus | 性能 |
+|---|---:|---:|---:|---:|
+| 1 | 0.20 | 0.30 | 0 | 0.50 |
+| 2 | 0.05 | 0.20 | 0.05 | 0.70 |
 
-### 框架版本升级时机
+没有有效版本且未显式覆盖、或解析出未知档位时，不会静默回落。缺 VERSION 的历史/自定义数据复算可显式选择支持的档位，但报告应标明版本未知。`eq3` / `eq3_log` 公式选择由独立的 `CANN_BENCH_PERF_METRIC` 控制，不能从权重档推断。报告中的 `tasks_version`、`score_weight_profile`、`perf_metric` 应一并归档。
 
-| 版本段 | 含义 | 升级时机 |
-|--------|------|----------|
-| **MAJOR** | 架构重大变更 | 评分公式根本性改变、框架不兼容重构 |
-| **MINOR** | 功能新增 | 新增评测维度、新增 bench 注册、评分公式兼容性调整 |
-| **PATCH** | 问题修复 | Bug 修复、阈值微调、文档修正 |
+## 3. 版本变更和发布
 
-### 评测集版本升级时机
+框架与题集采用语义版本，分别审批与发布：不兼容契约变更用 MAJOR，兼容能力/题目扩展用 MINOR，修复用 PATCH。具体升级范围需结合发布影响确认，不能仅根据修改文件数量自动决定。
 
-| 版本段 | 含义 | 升级时机 |
-|--------|------|----------|
-| **MAJOR** | 用例规范重大变更 | 用例规范根本性改变、难度等级体系重构 |
-| **MINOR** | 新增算子 | 新增算子评测集 |
-| **PATCH** | 用例修正 | 用例参数修正、golden 修复 |
+题集变更除版本外，还需同步公开范围、case ID、YAML/CSV、文件摘要及分平台 metadata。当前固定题集测试也要随经批准的新范围更新。修改版本文件只会更新运行时的版本读取结果，**不会自动刷新 manifest、数据或测试**。
 
-### Pre-release 标记
+发布检查顺序：
 
-开发期可用以下标记：
-- `0.3.1-dev` — 开发中版本
-- `0.4.0-alpha.1` — 内部测试版本
-- `0.4.0-beta.1` — 外部测试版本
+1. 确认本次框架/题集版本和兼容范围。
+2. 更新根 `VERSION` 或实际题集的 `metadata/VERSION`，同步 `suite_manifest.json` 及对应 metadata。
+3. 更新 [changelog](../changelog.md)，区分框架与题集变更。
+4. 在仓库根目录运行相关检查：
 
-## 4. 里程碑驱动的版本发布
+   ```bash
+   PYTHONPATH=src python -m pytest tests/ut/test_version_consistency.py \
+     tests/ut/test_season2_public_suite.py
+   ```
 
-### 里程碑触发条件
+5. 完成目标硬件的软件配套、编译、精度和性能发布验收；CPU 检查不替代 NPU 验证。
+6. 通过 PR 合入后，由发布维护者按批准的提交创建 `vX.Y.Z`（框架）、`tasks-vX.Y.Z`（题集）标签。两层独立变更，不要求每次同时打双标签。
 
-| 里程碑 | 框架版本升级 | 评测集版本升级 |
-|--------|-------------|-------------|
-| 新增 ≥5 个算子 | 不动或 PATCH | MINOR |
-| 评分公式改版 | MINOR | 不动或 PATCH |
-| 框架重大重构 | MAJOR | 不动或 PATCH |
-| 两者同时升级（联合里程碑） | MINOR/MAJOR | MINOR/MAJOR |
-| Bug 修复（随时） | PATCH | PATCH |
+## 4. 兼容性声明与其他目录
 
-### 版本发布流程
+题集版本文件示例：
 
-```bash
-# 1. 判断是否到达里程碑触发条件
-# 2. 修改 VERSION 文件
-echo "1.0.0" > VERSION
-
-# 3. 修改 tasks/VERSION（如果评测集也升级）
-echo "1.0.0" > tasks/VERSION
-echo "# requires-framework: >=1.0.0" >> tasks/VERSION
-
-# 4. 更新 docs/changelog.md（新增版本条目，标注里程碑）
-
-# 5. 运行版本一致性校验
-pytest tests/ut/test_version_consistency.py
-
-# 6. 提交
-git add VERSION tasks/VERSION docs/changelog.md
-git commit -m "release: V1.0.0 / tasks-v1.0.0"
-
-# 7. 打 tag
-git tag -a v1.0.0 -m "V1.0.0: <里程碑描述>"
-git tag -a tasks-v1.0.0 -m "tasks-v1.0.0: <里程碑描述>"  # 如评测集也升级
-
-# 8. 推送
-git push origin master --follow-tags
-```
-
-## 5. Git Tag 规范
-
-| Tag 格式 | 含义 | 示例 |
-|----------|------|------|
-| `vX.Y.Z` | 框架正式发布 | `v0.4.0` |
-| `tasks-vX.Y.Z` | 评测集正式发布 | `tasks-v0.4.0` |
-| `vX.Y.Z-alpha.N` | 框架内部测试 | `v0.4.0-alpha.1` |
-| `vX.Y.Z-beta.N` | 框架外部测试 | `v0.4.0-beta.1` |
-
-里程碑发布时打 **双 tag**：`v1.0.0` + `tasks-v1.0.0`（如果两者同时升级）。
-
-## 6. Changelog 维护规范
-
-保留 `docs/changelog.md` 手写格式，增加以下规范：
-
-1. **框架条目**：标注 `V{version}`，附 git tag
-2. **评测集条目**：标注 `tasks-v{version}`，列出新增/修改的算子清单
-3. **每个版本条目下方标注 git tag**：便于追溯
-4. **PR 中检查版本更新**：是否需要升级 VERSION / tasks/VERSION
-
-Changelog 条目格式示例：
-
-```markdown
-## V1.0.0 (2026-07-XX) · git tag: v1.0.0
-
-**里程碑：新增5个L2算子 + 性能评测流程优化**
-
-### 框架变更
-- 性能评测增加 InputPool 防缓存攻击机制
-- 修复 case_loader 参数解析 bug
-
-### 评测集变更 (tasks-v1.0.0)
-- 新增 L2 算子：ApplyRotaryPosEmb、CrossEntropyLoss、DynamicQuant、Gather、GroupNorm
-- 修正 L1 Exp 用例 value_range 参数
-```
-
-## 7. 评测集兼容性
-
-`tasks/VERSION` 文件中标注兼容的框架版本范围：
-
-```
-1.0.0
+```text
+2.1.0
 # requires-framework: >=1.0.0
 ```
 
-框架加载评测集时应校验兼容性，不兼容时给出警告。
+`requires-framework` 目前是兼容性声明；`read_tasks_version` 不解析或强制执行这个条件，发布者与使用者仍需核对配套版本，不能声称框架已经自动完成兼容性检查。
 
-## 8. 不纳入版本管理的目录
+`bench_lab/` 和 `examples/` 不随正式 `tasks/` 统一发布，但其中被实际送入评分入口的集合仍需满足版本/权重选择约定。例如 `examples/tasks/metadata/VERSION` 为 1.0.0。实验集合不得因没有正式发布版本而静默借用主线的评分档位。
 
-| 目录 | 原因 |
-|------|------|
-| `bench_lab/` | 孵化区，算子经测试成熟后迁移到 `tasks/`。迁移时触发评测集版本升级 |
-| `examples/` | 独立的 whl 包示例（cann_bench），有自己的版本号，与框架版本无关 |
-| `nouse/` | 已废弃代码，不纳入版本管理 |
-
-## 9. 版本一致性校验
-
-版本一致性由单元测试 `tests/ut/test_version_consistency.py` 自动校验，每次 pytest 运行时检查：
-
-1. VERSION 文件存在性
-2. VERSION 文件格式（X.Y.Z）
-3. `kernel_eval.__version__` 与 VERSION 文件一致
-4. `kernel_eval.TASKS_VERSION` 与 tasks/VERSION 文件一致
-5. src/kernel_eval/ 中无残留硬编码版本字符串
-6. changelog 最新版本号与 VERSION 文件一致
-
-**修改版本时只需编辑 VERSION 和 tasks/VERSION 文件，所有引用自动跟随变化。**
+Docker tag 当前由框架 VERSION、SoC、CPU 架构及 ops 模式组成；它不单独标识题集版本。成绩复现还需镜像 digest / 构建提交、题集版本、硬件与实际评分口径，详见 [docker/eval](../../docker/eval/README.md)。

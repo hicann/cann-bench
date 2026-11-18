@@ -17,7 +17,7 @@
 monitor watch 每次刷新会清屏重绘；run 到达终态后自动退出，已结束的 run 只渲染一次；`Ctrl-C` 只关闭 monitor，不会杀后台 run。
 如果需要在当前终端前台执行实际 pipeline，加 `--foreground`；如果只想纯后台启动不打开 monitor，加 `--no-monitor`。
 
-`scripts/run_auto_pipeline.sh` 只设置 `PYTHONPATH=src`，然后转发到：
+`scripts/run_auto_pipeline.sh` 设置 `PYTHONPATH=src`、确保 `cann_bench_utils` 已构建安装，并在匹配的 PyPTO workspace 中注册 agent/skills，然后转发到：
 
 ```bash
 python -m auto_pipeline.cli
@@ -29,11 +29,14 @@ Generators：
 
 - `akg-agent`
 - `pypto`
+- `pypto-pro`
 
 Converters：
 
 - `pypto -> cann`
 - `pypto -> stanford`
+- `pypto-pro -> cann`
+- `pypto-pro -> stanford`
 - `akg-agent -> cann`
 - `akg-agent -> stanford`
 
@@ -59,12 +62,14 @@ benchmark:
     - bench_lab/pypto_cann_bench/level1/sigmoid
 ```
 
-当前保留的示例配置：
+仓内保留以下示例配置；它们包含历史任务路径，使用前须按当前题集和目标 bench 核实，不应把文件存在等同于全链路已验证：
 
 ```text
 src/auto_pipeline/config/akg_cann_exp_sigmoid.yaml
 src/auto_pipeline/config/pypto_cann_exp_sigmoid.yaml
 ```
+
+被送入评分入口的自定义 bench 需有有效的 `metadata/VERSION`，或显式设置 `CANN_BENCH_SCORE_WEIGHTS` 选择档位，见[版本策略](version_policy.md)。
 
 旧的 `bench`、`generation`、`submission`、`converter`、`agent_output`、`dsl`、
 `generator`、`convert`、`eval`、`cases` 都不是当前配置入口。
@@ -146,6 +151,8 @@ PyPTO 默认使用传入的 `--workspace` 作为运行仓库，并在该 workspa
 
 ## AKG 示例
 
+将以下配置保存为仓库根目录的 `akg_exp.yaml`：
+
 ```yaml
 agent:
   type: akg-agent
@@ -158,12 +165,12 @@ agent:
 benchmark:
   name: cann
   tasks:
-    - tasks/level1/gelu
+    - tasks/level1/exp
 ```
 
 ```bash
 ./scripts/run_auto_pipeline.sh run \
-  --config src/auto_pipeline/config/akg_cann_exp_sigmoid.yaml \
+  --config akg_exp.yaml \
   --workspace /path/to/akg_repo \
   --output benchmark_runs/akg_cann_exp_sigmoid \
   --devices 0,1 \

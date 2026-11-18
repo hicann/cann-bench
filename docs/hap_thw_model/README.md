@@ -16,7 +16,7 @@ t_hw = max(t_cube, t_vector, t_hbm_read, t_write)   [微秒]
 - **vector**：`元素操作数 / vector_rate(op_kind, dtype)`；**reduction 按 flat 计**（`N/peak`，**无 log2**——log2 是树深/延迟，不是吞吐代价）；**scan/prefix 才有 log2**（`N*ceil(log2(N_scan))`）
 - cast 是真实 vector 分量；FixP 写回旁路（dtype 转换/scale/bias）免费
 - cube 与 vector 并行（取 max）；同一 engine 内的分量串行（求和）
-- 下表代表脚本的收尾约定：`t_hw_us = max(raw, 1.0)`（1µs clip）；`baseline_cap_us = max(10*t_hw_us, 10.0)` 是对应发布基线的**封顶值**——`baseline_perf_us = min(实测, baseline_cap_us)`（见 `tasks/metadata/910b2.json` 的 `_metadata` 块），仅在无实测处直接取封顶值。代表脚本输出的是封顶值，单凭 `t_hw` 不能复现实测基线；其他测评集的固定基线来源与处理方式见各自模型说明。
+- 下表代表脚本使用各自的收尾约定，例如 1µs clip 和 `baseline_cap_us = max(10*t_hw_us, 10.0)`；这些脚本输出不能统一解释为当前正式题集的 baseline。当前 Season2 的估算/修订记录由各平台 metadata 的 `_metadata`、`imputed_baseline_cases` 和 `task_revision_cases` 说明；单凭 `t_hw` 不能复现实测基线，也不能把历史封顶策略推广到所有发布记录。
 
 ## 代表算子
 

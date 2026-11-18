@@ -337,25 +337,16 @@
 
 ## 7. 验证方案
 
-### 7.1 效率验证
+### 7.1 当前入口
+
+`test_thread/*.py` 是设计调研阶段的临时脚本名，未随当前仓库交付。当前多卡/进程控制使用统一评测入口；各方案对比需固定候选、题集、种子与报告目录，不能声称下面命令复现了历史测量值：
 
 ```bash
-# 单线程基准
-python test_thread/baseline_single.py --case-limit 20
-
-# 多卡测试
-python test_thread/multi_card_eval.py --max-cards 2 --threads-per-card 2 --case-limit 20
+bash scripts/run_evaluation.sh --source-dir generated_project --processes-per-card 2
+bash scripts/run_test.sh ut
 ```
 
-### 7.2 精度验证
-
-```bash
-# 详细精度对比
-python test_thread/precision_comparison.py --operators Sigmoid Exp --case-ids 1 2 3 4 5 6 7 8 9 10
-
-# 生成报告
-python test_thread/generate_precision_report.py
-```
+原来的逐 case 精度与性能对照需基于当前报告另行组织。附录 `test_thread` 文件名仅保留为历史实验资料索引，不是可运行入口。
 
 ---
 

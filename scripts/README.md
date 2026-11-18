@@ -28,7 +28,7 @@ auto_pipeline 的 shell 包装，等价于在仓库根目录设置 `PYTHONPATH=s
 
 ```bash
 export PTO_TILE_LIB_CODE_PATH=/path/to/pto-isa
-./scripts/run_auto_pipeline.sh \
+./scripts/run_auto_pipeline.sh run \
   --config path/to/config.yaml \
   --workspace /path/to/agent/repo \
   --model deepseek/deepseek-v4-pro \
@@ -36,7 +36,7 @@ export PTO_TILE_LIB_CODE_PATH=/path/to/pto-isa
   --parallel 1
 ```
 
-`run_auto_pipeline.sh` 只设置 `PYTHONPATH=src` 并转发到 `python -m auto_pipeline.cli`。
+`run_auto_pipeline.sh` 设置 `PYTHONPATH=src`，确保 `cann_bench_utils` 可用；检测到对应 PyPTO workspace 布局时还会注册本地 agent/skills，再转发到 `python -m auto_pipeline.cli`。
 当前 `auto_pipeline` 的使用说明见
 [`docs/guide/auto_pipeline_usage.md`](../docs/guide/auto_pipeline_usage.md)，实现设计见
 [`docs/design/benchmark_orchestrator_architecture.md`](../docs/design/benchmark_orchestrator_architecture.md)。
@@ -67,6 +67,7 @@ AI 生成算子源码评测脚本，支持完整流程（扫描→编译→安�
 | 选项 | 说明 |
 |------|------|
 | `--task-dir <path>` | 指定评测目录，默认：`tasks`。支持：`tasks`、`tasks/level1`、`tasks/level1/exp` 等 |
+| `--reports-dir <path>` | 设置报告输出目录 |
 
 #### 设备配置
 
@@ -80,7 +81,7 @@ AI 生成算子源码评测脚本，支持完整流程（扫描→编译→安�
 | 选项 | 说明 |
 |------|------|
 | `--processes-per-card <n>` | 每卡进程数（默认：2） |
-| `--timeout-per-process <n>` | 单进程超时（秒，默认：300）。**等价于 cli 的 `--timeout-per-operator`**；shell 通过环境变量 `KERNEL_BENCH_TIMEOUT_PER_PROCESS` 传给底层 |
+| `--timeout-per-process <n>` | 单进程超时（秒，默认：300）。**等价于 cli 的 `--timeout-per-operator`**；shell 通过命令行参数传递，不依赖名为 `KERNEL_BENCH_TIMEOUT_PER_PROCESS` 的环境变量 |
 
 #### 用例筛选
 
@@ -105,7 +106,7 @@ AI 生成算子源码评测脚本，支持完整流程（扫描→编译→安�
 | `-v, --verbose` | 详细输出 |
 | `-h, --help` | 显示帮助信息 |
 
-> shell 只透传最常用参数子集。若需要 `--no-subprocess-isolation` / `--op-timeout-sec` / `--no-iterative-compile` / `--reports-dir` / `--eval-code` 等，请直调 cli（`python -m kernel_eval.cli eval ...`），完整参数表见 [docs/design/evaluator_design.md §3.3](../docs/design/evaluator_design.md#33-命令行参数)。
+> shell 已支持 `--reports-dir`、`--eval-seed`、`--input-dist` 和 `--build-timeout`。需要 `--op-timeout-sec` / `--no-iterative-compile` / `--eval-code` 等其他选项时可直调 CLI；`--no-subprocess-isolation` 不是当前参数。实际支持项以脚本及 Python CLI 的 `--help` 为准。
 
 ### 使用示例
 
@@ -183,9 +184,9 @@ AI 生成算子源码评测脚本，支持完整流程（扫描→编译→安�
 ### 输出
 
 评测报告保存在 `reports/` 目录：
-- `reports/eval_report.json`：JSON 格式详细报告
-- `reports/eval_report.md`：Markdown 格式报告
-- `reports/summary.md`：摘要报告
+- CANN 默认分阶段报告为 `cann_correctness_eval_*`、`cann_performance_eval_*`、`cann_final_eval_*`，分别输出 JSON / Markdown / HTML。
+- 其他 bench 通常位于 `reports/<bench_name>/`；`--reports-dir` 可指定根目录。
+- 报告是否成功应结合退出码、阶段状态及失败分类判断，不能只检查文件存在。
 
 ---
 
@@ -201,13 +202,13 @@ Golden whl 打包脚本，将 tasks/ 下 golden.py 函数收集打包成纯 Pyth
 ./scripts/utils/build_golden_wheel.sh --install
 
 # 只打包指定算子
-./scripts/utils/build_golden_wheel.sh --operator Mish --install
+./scripts/utils/build_golden_wheel.sh --operator Exp --install
 
 # 只打包指定级别
 ./scripts/utils/build_golden_wheel.sh --level 1 --install
 
 # 构建后通过 run_evaluation 评测
-./scripts/run_evaluation.sh --task-dir tasks/level1/mish --no-perf
+./scripts/run_evaluation.sh --task-dir tasks/level1/exp --no-perf
 ```
 
 详见 `scripts/utils/build_golden_wheel.py` 中的完整参数说明。

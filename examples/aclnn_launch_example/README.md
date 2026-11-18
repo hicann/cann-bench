@@ -177,20 +177,11 @@ TORCH_LIBRARY_FRAGMENT(cann_bench, m) {
 }
 ```
 
-### 第三步：创建硬链接到统一kernel目录
+### 第三步：按算子组织 kernel
 
-```bash
-# 在 csrc/ops/op_kernel/ 创建硬链接
-cd csrc/ops/op_kernel
+当前样例将 kernel 放在各算子目录中，例如 `csrc/ops/add/op_kernel/`，不需要创建统一的 `csrc/ops/op_kernel/` 或硬链接。若新 Mul 实现位于 `csrc/ops/mul/op_kernel/arch22/`，把源码及头文件放在该目录，并在下一步显式注册。
 
-# 链接kernel入口文件(假设为 mul_arch22.cpp)
-ln -f ../mul/op_kernel/arch22/mul_arch22.cpp mul_arch22.cpp
-
-# 链接头文件
-ln -f ../mul/op_kernel/arch22/mul.h mul.h
-ln -f ../mul/op_kernel/arch22/mul_tiling_data.h mul_tiling_data.h
-ln -f ../mul/op_kernel/arch22/mul_tiling_key.h mul_tiling_key.h
-```
+顶层 `npu_op_kernel_library` 的 `SRC_BASE` 为 `csrc/ops`；注册的 `KERNEL_DIR` 应相对这个根目录填写，而非相对当前算子目录。
 
 ### 第四步：编写算子CMakeLists.txt
 
@@ -220,7 +211,7 @@ register_aclnn_op(
     Mul                      # 算子类型名
     "${MUL_HOST_SRCS}"       # Host源文件列表
     "${MUL_API_SRCS}"        # API源文件列表
-    op_kernel                # Kernel目录名(相对于算子目录)
+    mul/op_kernel/arch22     # 相对于顶层 SRC_BASE=csrc/ops
     mul_arch22.cpp           # Kernel入口文件名
     op_kernel/arch22         # Tiling include目录
     op_api                   # API include目录

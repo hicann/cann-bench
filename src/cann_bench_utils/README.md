@@ -38,7 +38,7 @@ bash build.sh --clean
 ## Install
 
 ```bash
-pip install dist/*.whl
+pip install --force-reinstall --no-deps dist/*.whl
 ```
 
 ## Usage

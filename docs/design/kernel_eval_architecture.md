@@ -1,5 +1,7 @@
 # kernel_eval 模块架构图
 
+> **范围**：本文保留架构设计时的结构图，不是逐提交生成的 API 清单。当前普通 CLI 和 staged 调度分别见 `src/kernel_eval/cli.py`、`staged_eval.py`；题集版本及权重见[版本策略](../guide/version_policy.md)，当前入口见[快速入门](../guide/quick_start.md)。
+
 ## 整体架构
 
 ```
@@ -22,7 +24,7 @@
 │  ┌──────────────────────────┐  ┌──────────────────────────────────────┐    │
 │  │        config.py         │  │          _version.py                 │    │
 │  │  Config 数据类:          │  │  FRAMEWORK_VERSION (VERSION 文件)    │    │
-│  │  - device_type/warmup    │  │  TASKS_VERSION (tasks/VERSION)       │    │
+│  │  - device_type/warmup    │  │  TASKS_VERSION (tasks/metadata/VERSION)       │    │
 │  │  - bench_name/checker    │  │                                      │    │
 │  │  - eval_seed             │  │                                      │    │
 │  │  - torch_op_guard_mode   │  │                                      │    │

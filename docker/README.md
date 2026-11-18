@@ -5,7 +5,7 @@
 ```
 base/  (cann-toolkit-base)          环境底座: CANN toolkit + torch/torch_npu, 0 ops, 自己不评测
   └── eval/  (cann-bench-eval)      评测器: 烘入 kernel_eval + tasks/, docker run 即跑评测
-dev/   (cann-bench:cann9.0.0-*)     AscendHub 全量 CANN 的交互/CI 调试镜像 (独立血统)
+dev/   (cann-bench:cann9.1.0-*)     AscendHub 全量 CANN 的交互/CI 调试镜像 (独立血统)
 ```
 
 **base 就是 common。** 它到 toolkit 为止不装 ops,唯一的变量是 CPU 架构(`ARCH`,写进
@@ -32,8 +32,8 @@ dev/   (cann-bench:cann9.0.0-*)     AscendHub 全量 CANN 的交互/CI 调试镜
 `scripts/run_evaluation.sh` 从自身位置推 `PROJECT_ROOT`,报告写回仓库 `reports/`。于是评测依赖
 被机器之间搬来搬去的环境和二进制,而且"这个分数出自哪个 benchmark 版本"没有答案。
 
-`eval/` 把 harness(`src/kernel_eval` + `tasks/` + `cann_bench_utils`)冻结进镜像,**镜像 tag 就是
-benchmark 版本**;外部只挂两样东西:提交源码(`/submission`,只读)和报告目录(`/reports`)。
+`eval/` 把 harness(`src/kernel_eval` + `tasks/` + `cann_bench_utils`)冻结进镜像,镜像 tag 当前包含框架 VERSION、SoC、CPU 架构与 ops 模式；题集另有
+`metadata/VERSION`，复现还需记录镜像 digest / 构建提交及报告评分口径;外部只挂两样东西:提交源码(`/submission`,只读)和报告目录(`/reports`)。
 
 ```bash
 bash docker/eval/build.sh

@@ -1,5 +1,9 @@
 # 评测报告生成系统设计
 
+> **当前实现与模板状态**：正文是报告系统的设计快照。当前 NPU 脚本会输出 correctness/performance/final 分阶段报告，版本、评分与参考失效字段见[快速入门](../guide/quick_start.md)及[评测规范](../spec/benchmark_spec.md)。
+>
+> 主线 `tasks/description.html` 已迁移，现存文件为 `archives/season1/tasks/description.html`。当前生成器/重建脚本仍尝试旧默认路径，不能把正文中的旧路径视为已修复；重建时应显式传入现存模板，并保留原 JSON。脚本未完整透传新增诊断字段，重建 HTML 不应被当作新的评分依据。
+
 **文档版本：参见 [changelog](../changelog.md)**
 
 ## 目录

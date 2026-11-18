@@ -2,11 +2,22 @@
 
 **创建算子目录**
 
-  评测正式集放在 `tasks/levelN/<op_name>/`（`N` 取 1/2/3/4，对应难度等级）。被 `python -m kernel_eval.cli` 实际加载的就是这个目录。
+  评测正式集放在 `tasks/levelN/<op_name>/`（`N` 取 1/2/3/4/5，对应难度等级）。被 `python -m kernel_eval.cli` 实际加载的就是这个目录。
 
   `bench_lab/` 是**实验/孵化区**：准备测试要放入 cann-bench 的算子可先放此处暂存，本地测试无误后通过 PR 转入对应 `tasks/levelN/` 主测试集合。
 
   示例：新增 L2 算子 `MyOp` → 创建 `tasks/level2/my_op/`，按下文 1~6 节的规范放好 `proto.yaml`、`golden.py`、`desc.md`、`cases.yaml`、`cases.csv`，并通过 §6 的一致性检查清单。
+
+## 正式题集发布约束
+
+当前 `tasks/` 是固定的 Season2 60 题、每题 20 个公开 case，不是添加目录即可自动扩展的集合。新任务宜先在 `bench_lab/` 孵化；正式发布由维护者确认范围，并同步：
+
+- `suite_manifest.json` 的题目条目、平台支持范围和公开文件摘要；摘要策略为 `utf8_text_crlf_to_lf`，只将 CRLF 转为 LF，不忽略其他文本变化。
+- `cases.yaml` / `cases.csv` 一致性、case ID 和分平台 `metadata/<hardware>.json`，区分实测、估算和不支持记录。
+- 实际题集 `metadata/VERSION`、发布记录及固定题集测试；框架版本和题集版本分别维护。
+- 验证硬件、最低资源、软件版本与实际编译/精度/性能验收结果；静态/CPU 检查不替代 NPU 发布验收。
+
+范围见 [Season2 迁移说明](season2_migration.md)，版本与权重见 [版本策略](version_policy.md)。相关自动检查包括 `tests/ut/test_season2_public_suite.py`、`tests/ut/test_cases_yaml_csv_consistency.py`。不要通过删除检查来绕过题集发布约束。
 
 ## 贡献规范
 
@@ -544,7 +555,7 @@ dtype: [float32]                  # 单值简写，自动展开为6个float32
 
 ---
 
-## 6. 四文件一致性检查清单
+## 6. 任务文件与发布清单一致性检查
 
 提交前请确认：
 
@@ -559,3 +570,6 @@ dtype: [float32]                  # 单值简写，自动展开为6个float32
 - [ ] `golden.py` 只 import `torch`，无额外依赖
 - [ ] `golden.py` 中 `get_input`/`get_output`（如有）返回值为 list，长度与 proto.yaml inputs/outputs 一致
 - [ ] `proto.yaml` 中 type 使用统一命名：`ListInt`/`ListFloat`/`Int`/`float`/`bool`
+
+- [ ] 正式题集变更已同步 manifest 摘要、metadata、平台支持范围及版本/发布测试
+- [ ] PR 区分 CPU 校验与目标 NPU 编译、精度和性能验收结果

@@ -547,13 +547,17 @@ Broadcast依赖 → Prefix-scan依赖
 
 ### 8.1 快速回归评测
 
-运行 Micro-Benchmark 16 个算子替代完整 53 个：
+本设计对应 Season1 的 53 题，而不是当前 Season2。复现下列 16 题时使用归档路径；CLI 没有 `--task-list` 参数。命令在仓库根目录执行，候选 wheel 及运行环境需事先准备；每题分别生成报告。
 
 ```bash
-python -m kernel_eval.cli eval --bench-name cann --task-list \
-  swi_glu,foreach_addcdiv_scalar,rms_norm,softmax,apply_rotary_pos_emb,\
-  cummin,scatter,gather,grouped_matmul,quant_matmul,dequant_swiglu_quant,\
-  add_rms_norm_dynamic_quant,top_k,transpose,mla_prolog,mla
+export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
+for op in \
+  swi_glu foreach_addcdiv_scalar rms_norm softmax apply_rotary_pos_emb \
+  cummin scatter gather grouped_matmul quant_matmul dequant_swiglu_quant \
+  add_rms_norm_dynamic_quant top_k transpose mla_prolog mla; do
+  python -m kernel_eval.cli eval --bench-name cann \
+    --task-dir archives/season1/tasks/level*/"$op" || exit $?
+done
 ```
 
 ### 8.2 叙事链专项分析

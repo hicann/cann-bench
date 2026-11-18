@@ -279,7 +279,7 @@ y = cann_bench.gelu(x)
 run_evaluation.sh --source-dir examples/tilelang_cann_example
   │
   ├─ build.sh → cann_bench-1.0.0.whl
-  ├─ pip install cann_bench-1.0.0.whl
+  ├─ pip install --force-reinstall --no-deps cann_bench-1.0.0.whl
   ├─ import cann_bench → 扫描接口: softmax, exp
   ├─ 匹配 tasks/ 中的算子定义
   │

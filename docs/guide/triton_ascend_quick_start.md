@@ -20,8 +20,7 @@ Triton-Ascend 编译器和运行时。完整调用链和源码见
 
 ## 1. 构建环境
 
-推荐直接使用 CANN 9.0.0 正式版镜像，不要把 Triton-Ascend 3.2.1 与其他
-CANN beta 版本混用。
+下列 CANN 9.0.0 + Triton-Ascend 3.2.1 命令保留为历史独立 JIT smoke 的环境记录，不代表当前完整评测流程的最低配置。当前 `docker/dev` 默认 CANN 9.1.0；运行 CANN Bench 的 ACLNN 样例和支持 kernel 前，应按[当前环境指南](quick_start.md)及 [Docker 配套说明](../../docker/dev/README.md)重新确认软件组合，并完成目标硬件验证。不能把独立 Triton smoke 成功当作完整 harness 验收。
 
 ```bash
 cd docker/dev

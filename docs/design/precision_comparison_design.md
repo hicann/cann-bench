@@ -1,5 +1,9 @@
 # 精度对比方案设计文档
 
+> **当前判定入口**：本文保留分值域方法的设计背景；当前完整标准见 [benchmark_spec §4.4](../spec/benchmark_spec.md)，实现见 `utils/compare.py`、`utils/thresholds.py`。整体 MERE/MARE 达标可提前通过；正常域兜底已比较候选/native 的 MARE、MERE 比值，上限分别为 5、1.5，严格自定义阈值会同比缩小比值分母 floor，非有限 native 正常域指标视为参考失效。旧正常域错误数量不再作为判据或报告字段。
+>
+> 实际参考路由支持 plain / `_oracle` / `_bench` 钩子；MC2 有独立指标和参考健康策略，见 [MC2 指南](../guide/mc2_accuracy.md)。正文中的简化调用和旧阈值表不能替代这些路径。
+
 ## 1. 概述
 
 ### 1.1 背景
@@ -59,6 +63,12 @@ $$
 $$
 
 ---
+
+### 2.4 正常域同精度兜底（现行）
+
+整体基础精度未直接通过时，对排除小值域/相消位置的正常域统计候选与 native 的 MARE/MERE。候选正常域基础精度达标则直接通过；否则要求 `MARE_ratio <= 5` 且 `MERE_ratio <= 1.5`。分母使用 native 对应误差与 dtype floor 的较大值；严格自定义阈值会按有效阈值/默认阈值的比例缩小 floor。native 正常域指标非有限时为参考失效，不据此放宽精度。
+
+无 native 的路径保留两方比较规则；正常域为空则通过。`normal_mare`、`normal_mare_ratio`、`normal_mere_ratio` 等诊断字段以 `CompareResult` 为准。完整边界和舍入处理见[评测规范](../spec/benchmark_spec.md)。
 
 ## 3. 小值域处理
 
@@ -186,7 +196,7 @@ passed = normal_passed && small_value_passed && cancel_passed
 
 | 维度 | 通过条件 |
 |------|----------|
-| 正常值域 | MERE < threshold 且 MARE < 10×threshold |
+| 正常值域 | 基础精度通过，或满足 §2.4 的同精度比值兜底；无 native 时按两方规则 |
 | 小值域 | ErrorCount_npu / max(ErrorCount_cpu, 1) ≤ 2 |
 | 相消位置 | CancelErrorCount_npu / max(CancelErrorCount_cpu, 1) ≤ 2 |
 
@@ -201,7 +211,7 @@ passed = normal_passed && small_value_passed && cancel_passed
 │  3. 获取 NPU/算子输出                                        │
 │  4. 计算相对误差（MERE/MARE）                                │
 │  5. 判断三个维度：                                           │
-│     ├─ 正常值域：标准 MERE/MARE 判断                         │
+│     ├─ 正常值域：基础标准 + 同精度 MARE/MERE 比值兜底        │
 │     ├─ 小值域：ErrorCount 比值判断                           │
 │     │   条件：|golden| < small_value_threshold              │
 │     └─ 相消位置：CancelErrorCount 比值判断                   │

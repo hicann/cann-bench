@@ -1144,38 +1144,11 @@ def geometric_mean_speedup(speedups):
 | whl包 | `cann_bench_xxx.whl` | Python包，包含算子接口 |
 | run包 | `cann_bench_xxx.run` | NPU内核二进制包 |
 
-### 7.3 评分公式 (bench.tex §3.3 / Eq. 3, 4, 5)
+### 7.3 当前评分入口
 
-```
-权重: w_c = 0.2, w_f = 0.3, w_p = 0.5  (sum = 1, 单算子满分 100)
+完整公式与异常处理见 [benchmark_spec §4](../spec/benchmark_spec.md)。权重由实际题集 `metadata/VERSION` 选择：档 1 为编译/运行 20%、精度 30%、性能 50%；档 2 为编译/运行 5%、精度 20%、全通过 bonus 5%、性能 70%。编译/运行项按用例执行状态折算，不再用单个二值编译标志替代运行失败比例。
 
-单用例 hardware-anchored 性能得分 (Eq. 3):
-  score_i = (T_baseline - T_HW) / ((T_cand - T_HW) + (T_baseline - T_HW))
-
-  T_HW    = metadata/<hw>.json 中 t_hw_us (硬件下界)
-  T_baseline = metadata/<hw>.json 中 baseline_perf_us
-  T_cand  = 候选 kernel 实测时间
-
-  锚点:
-    T_cand = T_baseline ⇒ score = 0.5
-    T_cand = T_HW       ⇒ score = 1.0
-    T_cand → ∞          ⇒ score → 0
-
-  Fallback: baseline 缺失时 proxy_baseline = max(t_hw*10, 10)
-
-单算子综合评分 (Eq. 4):
-  EachOperatorScore = [ w_c · δ_pass + Σ_i δ_acc,i · (w_f + w_p · score_i) / N ] · 100
-
-  δ_pass ∈ {0, 1}      整份提交编译是否通过
-  δ_acc,i ∈ {0, 1}     用例 i 是否通过精度门
-  N = len(cases)
-
-聚合 (Eq. 5):
-  Level-N 得分   = Σ 该 level 内 EachOperatorScore
-  benchmark 总分 = Σ 所有算子 EachOperatorScore
-```
-
-实现位于 `src/kernel_eval/report/scoring.py`。
+常规 `eq3` 仍使用 baseline 和 `t_hw_us` 两个锚点；`T_cand < T_HW` 走独立奖励分支，当前单例上限为 3、单算子总分上限为 120。`reference_invalid` 表示不可判分。实现分别位于 `base/score_weights.py`、`base/perf_metric.py`、`report/scoring.py` 和 `benches/cann_scoring.py`，不要依据早期图中的固定权重重新实现评分。
 
 ### 7.4 BenchConfig 默认配置（CANN 评测集）
 

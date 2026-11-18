@@ -1,5 +1,7 @@
 # Module Panorama - NPU Operator Benchmark Framework
 
+> **范围**：文件数、类数及依赖统计为设计时快照，不代表当前仓库的实时清单。现行契约与运行方式从[文档索引](../README.md)进入，模块签名以当前 `src/` 实现为准。
+
 > Auto-generated: 2026-06-03 | Sources: `src/kernel_eval/`, `src/auto_pipeline/`, `scripts/`, `tests/`
 
 ---

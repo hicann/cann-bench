@@ -98,7 +98,7 @@ python -m pip install -r examples/pypto_pro_example/requirements.txt
   │    └─ 记录编译结果
   │
   ├─ stage2 correctness (enable_profiler=False):
-  │    ├─ pip install cann_bench-1.0.0-py3-none-any.whl
+  │    ├─ pip install --force-reinstall --no-deps cann_bench-1.0.0-py3-none-any.whl
   │    ├─ import cann_bench → 扫描接口: rms_norm
   │    ├─ 匹配 tasks/level2/rms_norm 算子定义
   │    └─ 每个 case 由独立 eval-child 跑精度（不采性能，耗时显示 N/A 属正常）
