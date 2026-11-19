@@ -144,22 +144,28 @@ class TestA5GmmNumerics(unittest.TestCase):
         messages = []
         for source in range(2):
             tensors = all_inputs[source]
-            weight = tensors["gmm_weight"]
+            x, weight = tensors["gmm_x"], tensors["gmm_weight"]
             if attrs["trans_gmm_weight"]:
                 weight = weight.transpose(1, 2)
             blocks = [[], []]
             offset = 0
             for expert in range(experts):
-                for destination in range(2):
-                    rows = counts[source][destination][expert]
-                    value = (
-                        tensors["gmm_x"][offset : offset + rows].float()
-                        @ weight[expert].float()
-                    )
-                    if cascade:
-                        value = value.to(tensors["gmm_x"].dtype)
-                    blocks[destination].append(value)
-                    offset += rows
+                rows_by_dest = [counts[source][dest][expert] for dest in range(2)]
+                if cascade:
+                    # Match the matmul dtype and shape: native BF16 CPU matmul
+                    # can differ from FP32 matmul followed by a BF16 cast.
+                    end = offset + sum(rows_by_dest)
+                    values = x[offset:end] @ weight[expert]
+                    for dest, chunk in enumerate(values.split(rows_by_dest, dim=0)):
+                        blocks[dest].append(chunk)
+                    offset = end
+                else:
+                    for dest, rows in enumerate(rows_by_dest):
+                        end = offset + rows
+                        blocks[dest].append(
+                            x[offset:end].float() @ weight[expert].float()
+                        )
+                        offset = end
             messages.append([torch.cat(parts, dim=0) for parts in blocks])
         return messages
 
