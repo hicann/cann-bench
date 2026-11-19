@@ -283,14 +283,30 @@ endforeach()
 ## 安装使用
 
 ### run包安装
+
+构建完成后，在本示例目录执行。`--install-path` 指定 OPP 根目录，安装器在实际 vendor 的 `bin/` 下生成环境脚本：
+
 ```bash
 # --quiet：非交互安装(Makeself 选项，自动接受 EULA)。勿用 --install(非法选项，会跳过安装)
-./dist/cann_bench_*.run --quiet
-# 安装后按提示将 op_api/lib 加入库搜索路径：
-export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/opp/vendors/custom_ops/op_api/lib/:${LD_LIBRARY_PATH}
+OPP_INSTALL_ROOT="${ASCEND_OPP_PATH:-${ASCEND_HOME_PATH}/opp}"
+./dist/cann_bench_*.run --quiet --install-path="${OPP_INSTALL_ROOT}"
+
+# 按安装输出填写实际 vendor 目录；本示例默认 vendor 名称为 custom_ops
+export CANN_BENCH_VENDOR_DIR="${OPP_INSTALL_ROOT}/vendors/custom_ops"
+source "${CANN_BENCH_VENDOR_DIR}/bin/set_env.bash"
 ```
 
+`LD_LIBRARY_PATH` 必须包含该 vendor 的 `op_api/lib`，`ASCEND_CUSTOM_OPP_PATH` 必须包含 vendor 根目录。若旧安装没有生成 `bin/set_env.bash`，手动设置：
+
+```bash
+export ASCEND_CUSTOM_OPP_PATH="${CANN_BENCH_VENDOR_DIR}${ASCEND_CUSTOM_OPP_PATH:+:${ASCEND_CUSTOM_OPP_PATH}}"
+export LD_LIBRARY_PATH="${CANN_BENCH_VENDOR_DIR}/op_api/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+```
+
+这些配置须在**启动 Python 前**完成；每个新终端都需要重新加载。通过 `scripts/run_evaluation.sh` 安装和评测时，vendor 环境只在评测进程及其子进程中生效，不会修改调用它的终端。
+
 ### wheel包安装
+
 ```bash
 python -m pip install dist/cann_bench-*.whl --no-deps
 ```
@@ -300,6 +316,9 @@ python -m pip install dist/cann_bench-*.whl --no-deps
 > ⚠️ **包名冲突提示**：本示例构建的 wheel 与仓库 golden 自验证 wheel（`scripts/utils/build_golden_wheel.sh` 产物）同名，都叫 `cann_bench`，二者互斥、不能同时安装。若当前环境已安装 golden wheel，调用 `cann_bench.add()` 会报 `module 'cann_bench' has no attribute 'add'`，请先 `pip uninstall -y cann_bench` 卸载后再安装本示例 wheel；或将本工程目录加入 `PYTHONPATH` 以优先导入本包。
 
 ### Python API
+
+确认已在当前终端加载上面的 vendor 环境，再启动 Python：
+
 ```python
 import cann_bench
 z = cann_bench.add(x, y)          # Add算子
@@ -308,3 +327,9 @@ m = cann_bench.mul(x, y)          # 新增Mul算子
 # 或通过torch.ops调用
 z = torch.ops.cann_bench.add(x, y)
 ```
+
+### 动态库加载问题排查
+
+- `Failed to load libcust_opapi.so`：检查 `.run` 的实际安装目录、当前终端的 `LD_LIBRARY_PATH` / `ASCEND_CUSTOM_OPP_PATH`，并重新加载 vendor 环境后启动新的 Python 进程。错误中的 `Dynamic loader error` 保留底层加载失败原因。
+- 库文件存在但仍加载失败：运行 `ldd "${CANN_BENCH_VENDOR_DIR}/op_api/lib/libcust_opapi.so"`，检查 CANN 等依赖是否缺失，以及 CANN 环境是否与构建时匹配。
+- `Required custom operator symbol ... was not found`：库已加载，但没有所需符号。检查 `.run` 是否包含该算子，以及是否因多个 vendor 的同名库而加载了旧包或其他包。

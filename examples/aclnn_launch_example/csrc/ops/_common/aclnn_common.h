@@ -24,8 +24,10 @@
 
 #include <ATen/Tensor.h>
 #include <c10/util/Exception.h>
+#include <cstdlib>
 #include <dlfcn.h>
 #include <functional>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -94,48 +96,67 @@ constexpr aclDataType kATenScalarTypeToAclDataTypeTable[static_cast<int64_t>(at:
 
 #define GET_OP_API_FUNC(apiName) reinterpret_cast<_##apiName>(GetOpApiFuncAddr(#apiName))
 
-inline const char *GetCustOpApiLibName(void) { return "libcust_opapi.so"; }
-inline const char *GetOpApiLibName(void) { return "libopapi.so"; }
-
-inline void *GetOpApiFuncAddrInLib(void *handler, const char *libName, const char *apiName)
+inline const char* GetCustOpApiLibName(void)
 {
+    return "libcust_opapi.so";
+}
+inline const char* GetOpApiLibName(void)
+{
+    return "libopapi.so";
+}
+
+inline std::string GetOpApiEnvironment()
+{
+    const char* libraryPath = std::getenv("LD_LIBRARY_PATH");
+    const char* vendorPath = std::getenv("ASCEND_CUSTOM_OPP_PATH");
+    return std::string("\nLD_LIBRARY_PATH=") + (libraryPath ? libraryPath : "<unset>") +
+           "\nASCEND_CUSTOM_OPP_PATH=" + (vendorPath ? vendorPath : "<unset>");
+}
+
+inline void* GetOpApiFuncAddrInLib(void* handler, const char* libName, const char* apiName, bool required = false)
+{
+    dlerror();
     auto funcAddr = dlsym(handler, apiName);
     if (funcAddr == nullptr) {
-        ASCEND_LOGW("dlsym %s from %s failed, error:%s.", apiName, libName, dlerror());
+        const char* error = dlerror();
+        const std::string detail = error ? error : "unknown dynamic loader error";
+        TORCH_CHECK(!required, "Required custom operator symbol '", apiName, "' was not found in ", libName,
+                    ". Dynamic loader error: ", detail,
+                    ". Verify that the installed .run package contains this operator and LD_LIBRARY_PATH "
+                    "selects the matching vendor's op_api/lib directory.",
+                    GetOpApiEnvironment());
+        ASCEND_LOGW("dlsym %s from %s failed, error:%s.", apiName, libName, detail.c_str());
     }
     return funcAddr;
 }
 
-inline void *GetOpApiLibHandler(const char *libName, int flags = RTLD_LAZY)
+inline void* GetOpApiLibHandler(const char* libName, int flags = RTLD_LAZY, bool required = false)
 {
+    dlerror();
     auto handler = dlopen(libName, flags);
     if (handler == nullptr) {
-        ASCEND_LOGW("dlopen %s failed, error:%s.", libName, dlerror());
+        const char* error = dlerror();
+        const std::string detail = error ? error : "unknown dynamic loader error";
+        TORCH_CHECK(
+            !required, "Failed to load ", libName, ". Dynamic loader error: ", detail,
+            ". Source the installed vendor's <vendor>/bin/set_env.bash in this terminal before starting Python. "
+            "Check LD_LIBRARY_PATH contains <vendor>/op_api/lib and ASCEND_CUSTOM_OPP_PATH contains <vendor>. "
+            "Use ldd <vendor>/op_api/lib/",
+            libName, " to check missing dependencies.", GetOpApiEnvironment());
+        ASCEND_LOGW("dlopen %s failed, error:%s.", libName, detail.c_str());
     }
     return handler;
 }
 
-inline void *GetOpApiFuncAddr(const char *apiName)
+inline void* GetOpApiFuncAddr(const char* apiName, bool required = false)
 {
     // 先加载 libopapi.so（RTLD_GLOBAL），使内部依赖符号（l0op::Contiguous、
     // l0op::ViewCopy 等）全局可见，供 libcust_opapi.so 解析依赖。
     // 但 API 符号（aclnnMish 等）仅从 libcust_opapi.so 获取，不 fallback 到内置。
     static auto opApiHandler = GetOpApiLibHandler(GetOpApiLibName(), RTLD_LAZY | RTLD_GLOBAL);
 
-    static auto custOpApiHandler = GetOpApiLibHandler(GetCustOpApiLibName());
-    if (custOpApiHandler == nullptr) {
-        ASCEND_LOGE("dlopen %s failed, cannot resolve symbol '%s'. "
-                     "Ensure the run package is installed correctly. "
-                     "dlerror: %s", GetCustOpApiLibName(), apiName, dlerror());
-        return nullptr;
-    }
-    auto funcAddr = GetOpApiFuncAddrInLib(custOpApiHandler, GetCustOpApiLibName(), apiName);
-    if (funcAddr == nullptr) {
-        ASCEND_LOGE("symbol '%s' not found in %s. "
-                     "The operator may not be included in the custom op package.",
-                     apiName, GetCustOpApiLibName());
-    }
-    return funcAddr;
+    static auto custOpApiHandler = GetOpApiLibHandler(GetCustOpApiLibName(), RTLD_LAZY, true);
+    return GetOpApiFuncAddrInLib(custOpApiHandler, GetCustOpApiLibName(), apiName, required);
 }
 
 inline c10::Scalar ConvertTensorToScalar(const at::Tensor &tensor)
@@ -409,15 +430,11 @@ auto DecodeDevice(Ts &...args) -> at::Device
     do {                                                                                                    \
         auto device = DecodeDevice(__VA_ARGS__);                                                            \
         const c10::OptionalDeviceGuard device_guard(device);                                                \
-        static const auto getWorkspaceSizeFuncAddr = GetOpApiFuncAddr(#aclnn_api "GetWorkspaceSize");       \
-        static const auto opApiFuncAddr = GetOpApiFuncAddr(#aclnn_api);                                     \
+        static const auto getWorkspaceSizeFuncAddr = GetOpApiFuncAddr(#aclnn_api "GetWorkspaceSize", true); \
+        static const auto opApiFuncAddr = GetOpApiFuncAddr(#aclnn_api, true);                               \
         static const auto initMemAddr = GetOpApiFuncAddr("InitHugeMemThreadLocal");                         \
         static const auto unInitMemAddr = GetOpApiFuncAddr("UnInitHugeMemThreadLocal");                     \
         static const auto releaseMemAddr = GetOpApiFuncAddr("ReleaseHugeMem");                              \
-        TORCH_CHECK(getWorkspaceSizeFuncAddr != nullptr && opApiFuncAddr != nullptr,                        \
-            #aclnn_api, " or ", #aclnn_api "GetWorkspaceSize",                                              \
-            " not found in libcust_opapi.so. ",                                                             \
-            "Ensure the run package is installed correctly.");                                  \
         auto acl_stream = c10_npu::getCurrentNPUStream().stream(false);                                     \
         uint64_t workspace_size = 0;                                                                        \
         uint64_t *workspace_size_addr = &workspace_size;                                                    \

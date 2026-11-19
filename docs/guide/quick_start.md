@@ -63,6 +63,16 @@ export PYTHONPATH="$(pwd)/src:${PYTHONPATH}"
 
 详见 [examples/tasks/README.md](../../examples/tasks/README.md)。
 
+评测成功后若要在独立 Python 进程中直接调用 `cann_bench.add`，还需在当前终端加载 `.run` 实际安装的 vendor 环境。评测脚本中的环境配置不会传回终端：
+
+```bash
+# 已 source CANN 的 set_env.sh；按 .run 安装输出调整实际 vendor 目录
+export CANN_BENCH_VENDOR_DIR="${ASCEND_OPP_PATH:-${ASCEND_HOME_PATH}/opp}/vendors/custom_ops"
+source "${CANN_BENCH_VENDOR_DIR}/bin/set_env.bash"
+```
+
+再启动 Python 执行调用。旧安装没有环境脚本时，手动配置及动态库排查步骤见 [ACLNN 示例安装使用](../../examples/aclnn_launch_example/README.md#安装使用)。
+
 ### 从源码目录评测（推荐）
 
 自动扫描、编译、安装 AI 生成的算子源码：
