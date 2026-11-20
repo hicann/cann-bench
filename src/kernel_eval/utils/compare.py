@@ -54,9 +54,58 @@ _NORMAL_RATIO_REL_TOL = 1e-12
 # rather than the floating-point MERE/MARE path. Must stay in sync with
 # the int threshold entries in `thresholds.py` (which declares all 8).
 _INTEGER_DTYPES = (
-    torch.int8, torch.int16, torch.int32, torch.int64,
-    torch.uint8, torch.uint16, torch.uint32, torch.uint64,
+    torch.int8,
+    torch.int16,
+    torch.int32,
+    torch.int64,
+    torch.uint8,
+    torch.uint16,
+    torch.uint32,
+    torch.uint64,
 )
+
+
+def _exact_integer_errors(output: torch.Tensor, golden: torch.Tensor, threshold: float):
+    """Subtract 64-bit integers exactly using two int64 limbs.
+
+    Each limb holds 32 bits, so subtraction and borrow cannot overflow int64.
+    Keep tolerance comparisons in integer arithmetic; only report statistics
+    are converted to float64 after the exact absolute difference is computed.
+    """
+
+    def split(tensor):
+        bits = tensor.to(torch.int64)
+        high = bits >> 32
+        if tensor.dtype == torch.uint64:
+            high = high & 0xFFFFFFFF
+        return high, bits & 0xFFFFFFFF
+
+    out_high, out_low = split(output)
+    gold_high, gold_low = split(golden)
+    high = out_high - gold_high
+    low = out_low - gold_low
+    negative = (high < 0) | ((high == 0) & (low < 0))
+    high = torch.where(negative, -high, high)
+    low = torch.where(negative, -low, low)
+    borrow = (low < 0).to(torch.int64)
+    high = high - borrow
+    low = low + (borrow << 32)
+
+    limit = max(threshold, 0)
+    # Also covers mixed signed/unsigned references. Infinity/NaN retain the
+    # ordinary tensor comparison semantics (no difference exceeds the limit).
+    if limit < 3 * 2**63:
+        limit_high, limit_low = divmod(math.floor(limit), 2**32)
+        mismatch = (high > limit_high) | ((high == limit_high) & (low > limit_low))
+        mismatch_count = int(mismatch.sum())
+    else:
+        mismatch_count = 0
+
+    diff = high.to(torch.float64) * 2**32 + low.to(torch.float64)
+    max_diff = float(diff.max()) if diff.numel() else 0.0
+    mean_diff = float(diff.mean()) if diff.numel() else 0.0
+    return mismatch_count, max_diff, mean_diff
+
 
 # Bit-exact 浮点路径支持的 fp -> int view 映射（字节级比较）。
 # 提到模块级：device 归一化需要在进入分支前判断是否走 bit-exact 路径。
@@ -71,24 +120,25 @@ _BIT_VIEW = {
 @dataclass
 class SingleOutputResult:
     """单个输出的对比结果（通用容器，各 checker 通过 metadata 扩展特有指标）"""
-    index: int                      # 输出索引
-    name: str = ""                  # 输出名称（可选）
-    dtype: str = ""                 # 数据类型
+
+    index: int  # 输出索引
+    name: str = ""  # 输出名称（可选）
+    dtype: str = ""  # 数据类型
     passed: bool = True
-    mismatch_count: int = 0         # 不匹配元素数
-    total_count: int = 0            # 总元素数
+    mismatch_count: int = 0  # 不匹配元素数
+    total_count: int = 0  # 总元素数
     error_msg: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         d = {
-            'index': self.index,
-            'name': self.name,
-            'dtype': self.dtype,
-            'passed': self.passed,
-            'mismatch_count': self.mismatch_count,
-            'total_count': self.total_count,
-            'error_msg': self.error_msg,
+            "index": self.index,
+            "name": self.name,
+            "dtype": self.dtype,
+            "passed": self.passed,
+            "mismatch_count": self.mismatch_count,
+            "total_count": self.total_count,
+            "error_msg": self.error_msg,
         }
         d.update(self.metadata)
         return d
@@ -105,6 +155,7 @@ class SingleOutputResult:
 @dataclass
 class CompareResult:
     """对比结果（支持多输出算子）"""
+
     passed: bool
     dtype: str
     threshold: float  # 精度阈值（聚合值）
@@ -122,46 +173,48 @@ class CompareResult:
     cancel_cpu_error_count: int = 0  # 相消位置 CPU 错误计数
     cancel_total_count: int = 0  # 相消位置总计数
     small_value_passed: bool = True  # 小值域兜底判定是否通过
-    cancel_passed: bool = True       # 相消兜底判定是否通过
-    normal_total_count: int = 0      # 兜底时统计正常域元素数；整体提前通过时未统计，保持 0
-    normal_passed: bool = True        # 正常值域同精度兜底判定是否通过
-    normal_mare: float = 0.0         # 正常域最大相对误差；整体提前通过时未统计，保持 0
+    cancel_passed: bool = True  # 相消兜底判定是否通过
+    normal_total_count: int = 0  # 兜底时统计正常域元素数；整体提前通过时未统计，保持 0
+    normal_passed: bool = True  # 正常值域同精度兜底判定是否通过
+    normal_mare: float = 0.0  # 正常域最大相对误差；整体提前通过时未统计，保持 0
     normal_mare_ratio: Optional[float] = None
     normal_mere_ratio: Optional[float] = None
     error_msg: Optional[str] = None
-    output_results: List[SingleOutputResult] = field(default_factory=list)  # 各输出独立结果
+    output_results: List[SingleOutputResult] = field(
+        default_factory=list
+    )  # 各输出独立结果
     failure_type: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         result = {
-            'passed': self.passed,
-            'dtype': self.dtype,
-            'threshold': self.threshold,
-            'mere': self.mere,
-            'mare': self.mare,
-            'max_diff': self.max_diff,
-            'mean_diff': self.mean_diff,
-            'mismatch_count': self.mismatch_count,
-            'total_count': self.total_count,
-            'mismatch_ratio': self.mismatch_ratio,
-            'small_value_error_count': self.small_value_error_count,
-            'small_value_cpu_error_count': self.small_value_cpu_error_count,
-            'small_value_total_count': self.small_value_total_count,
-            'cancel_error_count': self.cancel_error_count,
-            'cancel_cpu_error_count': self.cancel_cpu_error_count,
-            'cancel_total_count': self.cancel_total_count,
-            'small_value_passed': self.small_value_passed,
-            'cancel_passed': self.cancel_passed,
-            'normal_total_count': self.normal_total_count,
-            'normal_passed': self.normal_passed,
-            'normal_mare': self.normal_mare,
-            'normal_mare_ratio': self.normal_mare_ratio,
-            'normal_mere_ratio': self.normal_mere_ratio,
-            'error_msg': self.error_msg,
-            'output_results': [r.to_dict() for r in self.output_results],
+            "passed": self.passed,
+            "dtype": self.dtype,
+            "threshold": self.threshold,
+            "mere": self.mere,
+            "mare": self.mare,
+            "max_diff": self.max_diff,
+            "mean_diff": self.mean_diff,
+            "mismatch_count": self.mismatch_count,
+            "total_count": self.total_count,
+            "mismatch_ratio": self.mismatch_ratio,
+            "small_value_error_count": self.small_value_error_count,
+            "small_value_cpu_error_count": self.small_value_cpu_error_count,
+            "small_value_total_count": self.small_value_total_count,
+            "cancel_error_count": self.cancel_error_count,
+            "cancel_cpu_error_count": self.cancel_cpu_error_count,
+            "cancel_total_count": self.cancel_total_count,
+            "small_value_passed": self.small_value_passed,
+            "cancel_passed": self.cancel_passed,
+            "normal_total_count": self.normal_total_count,
+            "normal_passed": self.normal_passed,
+            "normal_mare": self.normal_mare,
+            "normal_mare_ratio": self.normal_mare_ratio,
+            "normal_mere_ratio": self.normal_mere_ratio,
+            "error_msg": self.error_msg,
+            "output_results": [r.to_dict() for r in self.output_results],
         }
         if self.failure_type is not None:
-            result['failure_type'] = self.failure_type
+            result["failure_type"] = self.failure_type
         return result
 
     def format_all_outputs(self) -> str:
@@ -232,15 +285,18 @@ class _MaskedStats:
 
     __slots__ = ("count", "_sum", "_max")
 
-    def __init__(self, values: torch.Tensor, mask: torch.Tensor,
-                 chunk: int = _MASKED_CHUNK) -> None:
+    def __init__(
+        self, values: torch.Tensor, mask: torch.Tensor, chunk: int = _MASKED_CHUNK
+    ) -> None:
         flat_values = values.reshape(-1)
         flat_mask = mask.reshape(-1)
         self.count = 0
         self._sum = 0.0
         self._max: Optional[float] = None
         for start in range(0, flat_values.numel(), chunk):
-            selected = flat_values[start:start + chunk][flat_mask[start:start + chunk]]
+            selected = flat_values[start : start + chunk][
+                flat_mask[start : start + chunk]
+            ]
             if selected.numel() == 0:
                 continue
             self.count += selected.numel()
@@ -259,7 +315,9 @@ class _MaskedStats:
         return self._max if self._max is not None else 0.0
 
 
-def _normal_error_ratio(candidate: float, native: float, floor: float) -> Optional[float]:
+def _normal_error_ratio(
+    candidate: float, native: float, floor: float
+) -> Optional[float]:
     """Return a finite ratio, or None when the ratio is unavailable."""
     if not math.isfinite(candidate) or not math.isfinite(native):
         return None
@@ -273,9 +331,13 @@ def _normal_error_ratio(candidate: float, native: float, floor: float) -> Option
 
 
 def _normal_ratio_passed(ratio: Optional[float], limit: float) -> bool:
-    return ratio is not None and math.isfinite(ratio) and (
-        ratio <= limit
-        or math.isclose(ratio, limit, rel_tol=_NORMAL_RATIO_REL_TOL, abs_tol=0.0)
+    return (
+        ratio is not None
+        and math.isfinite(ratio)
+        and (
+            ratio <= limit
+            or math.isclose(ratio, limit, rel_tol=_NORMAL_RATIO_REL_TOL, abs_tol=0.0)
+        )
     )
 
 
@@ -325,7 +387,7 @@ def _compare_single_tensor(
             passed=False,
             dtype=dtype,
             threshold=threshold,
-            error_msg=f"形状不匹配: output={output.shape}, golden={golden.shape}"
+            error_msg=f"形状不匹配: output={output.shape}, golden={golden.shape}",
         )
 
     # 检查候选输出的内存布局 (issue #146)。必须在下面的 .cpu() 之前做 --
@@ -348,9 +410,8 @@ def _compare_single_tensor(
     # - bit-exact / 整数路径需要原生 dtype 的 host 副本，在此 .cpu()；
     # - 浮点 MERE/MARE 路径在下方直接单次完成 device→host + fp64 转换，
     #   不再额外驻留一份原生 dtype 的全量 host 临时张量（巨型 case 可省数 GB 峰值）。
-    needs_native_host_copy = (
-        output.dtype in _INTEGER_DTYPES
-        or (threshold == 0 and output.is_floating_point() and output.dtype in _BIT_VIEW)
+    needs_native_host_copy = output.dtype in _INTEGER_DTYPES or (
+        threshold == 0 and output.is_floating_point() and output.dtype in _BIT_VIEW
     )
     if needs_native_host_copy and (output.is_cuda or output.device.type == "npu"):
         output = output.cpu()
@@ -371,7 +432,8 @@ def _compare_single_tensor(
                     "compare(bit-exact): golden cast 到 %s 时产生 %d 处新 inf "
                     "(数据范围超 output dtype)，bit-exact 失败可能源自数据溢出而非"
                     "计算错误。",
-                    output.dtype, int(new_inf.sum().item()),
+                    output.dtype,
+                    int(new_inf.sum().item()),
                 )
             output_c = output.contiguous()
             out_bits = output_c.view(int_dtype)
@@ -404,7 +466,9 @@ def _compare_single_tensor(
                 mean_diff=0.0,
                 mismatch_count=mismatch_count,
                 total_count=output.numel(),
-                mismatch_ratio=mismatch_count / output.numel() if output.numel() > 0 else 0.0,
+                mismatch_ratio=mismatch_count / output.numel()
+                if output.numel() > 0
+                else 0.0,
                 cancel_error_count=0,
                 cancel_cpu_error_count=0,
                 cancel_total_count=0,
@@ -431,12 +495,21 @@ def _compare_single_tensor(
                 cancel_total_count=0,
             )
 
-        # 不完全相等时，检查差值是否在容差范围内
-        diff = torch.abs(output.long() - golden.long())
-        mismatch_mask = diff > max(threshold, 0)
-        mismatch_count = int(mismatch_mask.sum())
-
-        diff_float = diff.float()
+        # Use exact limbs if either integer tensor is 64-bit, after the
+        # equal-tensor fast path, for tolerance checks and diagnostics.
+        if output.dtype in (torch.int64, torch.uint64) or golden.dtype in (
+            torch.int64,
+            torch.uint64,
+        ):
+            mismatch_count, max_diff, mean_diff = _exact_integer_errors(
+                output, golden, threshold
+            )
+        else:
+            diff = torch.abs(output.long() - golden.long())
+            mismatch_mask = diff > max(threshold, 0)
+            mismatch_count = int(mismatch_mask.sum())
+            max_diff = float(diff.max()) if diff.numel() > 0 else 0.0
+            mean_diff = float(diff.float().mean()) if diff.numel() > 0 else 0.0
         if mismatch_count == 0:
             return CompareResult(
                 passed=True,
@@ -444,8 +517,8 @@ def _compare_single_tensor(
                 threshold=threshold,
                 mere=0.0,
                 mare=0.0,
-                max_diff=float(diff.max()) if diff.numel() > 0 else 0.0,
-                mean_diff=float(diff_float.mean()) if diff.numel() > 0 else 0.0,
+                max_diff=max_diff,
+                mean_diff=mean_diff,
                 mismatch_count=0,
                 total_count=output.numel(),
                 mismatch_ratio=0.0,
@@ -460,11 +533,13 @@ def _compare_single_tensor(
             threshold=threshold,
             mere=0.0,
             mare=0.0,
-            max_diff=float(diff.max()) if diff.numel() > 0 else 0.0,
-            mean_diff=float(diff_float.mean()) if diff.numel() > 0 else 0.0,
+            max_diff=max_diff,
+            mean_diff=mean_diff,
             mismatch_count=mismatch_count,
             total_count=output.numel(),
-            mismatch_ratio=mismatch_count / output.numel() if output.numel() > 0 else 0.0,
+            mismatch_ratio=mismatch_count / output.numel()
+            if output.numel() > 0
+            else 0.0,
             cancel_error_count=0,
             cancel_cpu_error_count=0,
             cancel_total_count=0,
@@ -488,15 +563,16 @@ def _compare_single_tensor(
                 passed=False,
                 dtype=dtype,
                 threshold=threshold,
-                error_msg="NaN位置不匹配"
+                error_msg="NaN位置不匹配",
             )
 
     # 处理 Inf
     # 饱和边界处理：当一方 inf 另一方有限值时，将 inf 替换为 dtype 最大有限值后继续比较。
     # 这处理 fp16 饱和边界场景（NPU fp32→fp16 截断到 inf，golden fp64→fp16 未越界）。
     # 替换后由 MRE/MARE 决定 pass/fail——只有底层数值本身足够接近才能通过。
-    replaced_inf = False
-    inf_match_mask = torch.zeros_like(output_fp64, dtype=torch.bool)  # 初始化 inf 匹配掩码
+    inf_match_mask = torch.zeros_like(
+        output_fp64, dtype=torch.bool
+    )  # 初始化 inf 匹配掩码
     if torch.any(torch.isinf(output_fp64)) or torch.any(torch.isinf(golden_truncated)):
         inf_out = torch.isinf(output_fp64)
         inf_gold = torch.isinf(golden_truncated)
@@ -519,28 +595,30 @@ def _compare_single_tensor(
             _logger.info(
                 "[inf_sat] %d element(s) saturated to inf on one side only, "
                 "replacing inf with %s and continuing comparison",
-                mismatch_count, max_finite,
+                mismatch_count,
+                max_finite,
             )
 
             # 替换 inf 为最大有限值（保留符号）
             if torch.any(inf_out & ~inf_gold):
                 mask = inf_out & ~inf_gold
                 output_fp64[mask] = torch.sign(output_fp64[mask]) * max_finite
-                replaced_inf = True
             if torch.any(inf_gold & ~inf_out):
                 mask = inf_gold & ~inf_out
                 golden_truncated[mask] = torch.sign(golden_truncated[mask]) * max_finite
-                replaced_inf = True
 
         # 双方都 inf 且符号相同的位置，直接视为匹配并排除后续比较
         both_inf = inf_out & inf_gold
         if torch.any(both_inf):
-            if not torch.all(torch.sign(output_fp64[both_inf]) == torch.sign(golden_truncated[both_inf])):
+            if not torch.all(
+                torch.sign(output_fp64[both_inf])
+                == torch.sign(golden_truncated[both_inf])
+            ):
                 return CompareResult(
                     passed=False,
                     dtype=dtype,
                     threshold=threshold,
-                    error_msg="Inf符号不匹配"
+                    error_msg="Inf符号不匹配",
                 )
             inf_match_mask[both_inf] = True  # 更新 inf 匹配掩码
 
@@ -555,7 +633,9 @@ def _compare_single_tensor(
     del denominator  # 只用于这一次除法；巨型 case 上留着它就是 8 B/元素的净损耗
 
     # 排除 NaN、Inf 和匹配的 Inf 位置
-    valid_mask = ~(torch.isnan(relative_error) | torch.isinf(relative_error) | inf_match_mask)
+    valid_mask = ~(
+        torch.isnan(relative_error) | torch.isinf(relative_error) | inf_match_mask
+    )
     del inf_match_mask
     valid_relative_error = _MaskedStats(relative_error, valid_mask)
 
@@ -566,13 +646,16 @@ def _compare_single_tensor(
         #   维持兼容；调用方可基于 mismatch_count 决定是否进一步排查）
         # - 全部位置都是 Inf 且符号匹配 → 同上（已由 inf_match_mask 保证）
         # 若调用方需要更严格的判定，可在外层检查 (mere==0 and total>0)。
-        has_nan = torch.isnan(output_fp64).any().item() if output_fp64.numel() > 0 else False
+        has_nan = (
+            torch.isnan(output_fp64).any().item() if output_fp64.numel() > 0 else False
+        )
         if has_nan:
             _logger.warning(
                 "compare: 所有有效位置均为 NaN/Inf 且匹配；两个算子均输出 NaN 的"
                 "极端情况可能掩盖独立的数值 bug，请人工核查 case 输入分布。"
                 " (total=%d, dtype=%s)",
-                output_fp64.numel(), dtype,
+                output_fp64.numel(),
+                dtype,
             )
         return CompareResult(
             passed=True,
@@ -704,7 +787,9 @@ def _compare_single_tensor(
     # 检测相消位置
     output_near_zero = torch.abs(output_fp64) < cancel_zero_threshold
     del output_fp64  # total_count 已在上面取过；后续只用掩码
-    golden_in_cancel_range = (golden_abs < cancel_boundary) & (golden_abs >= small_value_threshold)
+    golden_in_cancel_range = (golden_abs < cancel_boundary) & (
+        golden_abs >= small_value_threshold
+    )
     cancel_mask = output_near_zero & golden_in_cancel_range & valid_mask
     del output_near_zero, golden_in_cancel_range
     cancel_total_count = int(cancel_mask.sum())
@@ -764,14 +849,19 @@ def _compare_single_tensor(
                 default_threshold = get_threshold(dtype)
                 if 0 < threshold < default_threshold:
                     ratio_floor *= threshold / default_threshold
-                normal_mare_ratio = _normal_error_ratio(normal_mare, native_mare, ratio_floor)
-                normal_mere_ratio = _normal_error_ratio(normal_mere, native_mere, ratio_floor)
-                normal_passed = (
-                    _normal_ratio_passed(normal_mare_ratio, _NORMAL_MARE_RATIO_LIMIT)
-                    and _normal_ratio_passed(normal_mere_ratio, _NORMAL_MERE_RATIO_LIMIT)
+                normal_mare_ratio = _normal_error_ratio(
+                    normal_mare, native_mare, ratio_floor
                 )
+                normal_mere_ratio = _normal_error_ratio(
+                    normal_mere, native_mere, ratio_floor
+                )
+                normal_passed = _normal_ratio_passed(
+                    normal_mare_ratio, _NORMAL_MARE_RATIO_LIMIT
+                ) and _normal_ratio_passed(normal_mere_ratio, _NORMAL_MERE_RATIO_LIMIT)
                 if not normal_passed:
-                    normal_error_msg = _normal_failure_message(normal_mare_ratio, normal_mere_ratio)
+                    normal_error_msg = _normal_failure_message(
+                        normal_mare_ratio, normal_mere_ratio
+                    )
     else:
         # 无 native 时沿用候选与 golden 的原两方比较严格判定。
         normal_passed = normal_mare <= mare_threshold
@@ -837,7 +927,7 @@ def _compare_single_tensor(
 def compare_tensors(
     output: Union[torch.Tensor, Tuple, List],
     golden: Union[torch.Tensor, Tuple, List],
-    dtype: str = 'float32',
+    dtype: str = "float32",
     threshold: Optional[float] = None,
     native_output: Optional[Union[torch.Tensor, Tuple, List]] = None,
     ignore_output_indices: Optional[List[int]] = None,
@@ -883,14 +973,16 @@ def compare_tensors(
         # 处理多输出情况
         outputs = _normalize_outputs(output)
         goldens = _normalize_outputs(golden)
-        native_outputs = _normalize_outputs(native_output) if native_output is not None else None
+        native_outputs = (
+            _normalize_outputs(native_output) if native_output is not None else None
+        )
 
         if len(outputs) != len(goldens):
             return CompareResult(
                 passed=False,
                 dtype=dtype,
                 threshold=threshold,
-                error_msg=f"输出数量不匹配: output={len(outputs)}, golden={len(goldens)}"
+                error_msg=f"输出数量不匹配: output={len(outputs)}, golden={len(goldens)}",
             )
 
         if native_outputs is not None and len(native_outputs) != len(goldens):
@@ -898,7 +990,7 @@ def compare_tensors(
                 passed=False,
                 dtype=dtype,
                 threshold=threshold,
-                error_msg=f"同精度输出数量不匹配: native_output={len(native_outputs)}, golden={len(goldens)}"
+                error_msg=f"同精度输出数量不匹配: native_output={len(native_outputs)}, golden={len(goldens)}",
             )
 
         # 逐个对比
@@ -930,36 +1022,50 @@ def compare_tensors(
             # 处理可选输出：双方均为 None 则跳过，否则报错
             if out_tensor is None or gold_tensor is None:
                 both_none = out_tensor is None and gold_tensor is None
-                single_output_results.append(SingleOutputResult(
-                    index=i,
-                    name="",
-                    dtype="none",
-                    passed=both_none,
-                    error_msg="" if both_none else f"output[{i}] is None (candidate={'None' if out_tensor is None else 'Tensor'}, golden={'None' if gold_tensor is None else 'Tensor'})",
-                    metadata={'dtype_category': 'none'},
-                ))
+                single_output_results.append(
+                    SingleOutputResult(
+                        index=i,
+                        name="",
+                        dtype="none",
+                        passed=both_none,
+                        error_msg=""
+                        if both_none
+                        else f"output[{i}] is None (candidate={'None' if out_tensor is None else 'Tensor'}, golden={'None' if gold_tensor is None else 'Tensor'})",
+                        metadata={"dtype_category": "none"},
+                    )
+                )
                 continue
 
             # 跳过不需要对比的输出
             if ignore_output_indices and i in ignore_output_indices:
                 # 创建跳过标记的 SingleOutputResult
-                single_output_results.append(SingleOutputResult(
-                    index=i,
-                    name="",  # 名称由调用方填充
-                    dtype=str(out_tensor.dtype).replace('torch.', ''),
-                    passed=True,  # 跳过的输出视为通过
-                    error_msg="(跳过对比)",
-                    metadata={'dtype_category': 'int' if out_tensor.dtype in _INTEGER_DTYPES else 'float'},
-                ))
+                single_output_results.append(
+                    SingleOutputResult(
+                        index=i,
+                        name="",  # 名称由调用方填充
+                        dtype=str(out_tensor.dtype).replace("torch.", ""),
+                        passed=True,  # 跳过的输出视为通过
+                        error_msg="(跳过对比)",
+                        metadata={
+                            "dtype_category": "int"
+                            if out_tensor.dtype in _INTEGER_DTYPES
+                            else "float"
+                        },
+                    )
+                )
                 continue
 
             # 根据每个输出的实际 dtype 获取阈值（优先自定义阈值）
-            out_dtype_str = str(out_tensor.dtype).replace('torch.', '')
+            out_dtype_str = str(out_tensor.dtype).replace("torch.", "")
             out_threshold = _get_output_threshold(out_dtype_str)
-            out_dtype_category = 'int' if out_tensor.dtype in _INTEGER_DTYPES else 'float'
+            out_dtype_category = (
+                "int" if out_tensor.dtype in _INTEGER_DTYPES else "float"
+            )
 
             native_tensor = native_outputs[i] if native_outputs is not None else None
-            result = _compare_single_tensor(out_tensor, gold_tensor, out_threshold, out_dtype_str, native_tensor)
+            result = _compare_single_tensor(
+                out_tensor, gold_tensor, out_threshold, out_dtype_str, native_tensor
+            )
 
             # 转换 CompareResult 到 SingleOutputResult
             single_result = SingleOutputResult(
@@ -971,33 +1077,35 @@ def compare_tensors(
                 total_count=result.total_count,
                 error_msg=result.error_msg or "",
                 metadata={
-                    'dtype_category': out_dtype_category,
-                    'threshold': out_threshold,
-                    'mere': result.mere,
-                    'mare': result.mare,
-                    'max_diff': result.max_diff,
-                    'mean_diff': result.mean_diff,
-                    'max_abs_diff': int(result.max_diff) if out_dtype_category == 'int' else 0,
-                    'small_value_error_count': result.small_value_error_count,
-                    'small_value_cpu_error_count': result.small_value_cpu_error_count,
-                    'small_value_total_count': result.small_value_total_count,
-                    'cancel_error_count': result.cancel_error_count,
-                    'cancel_cpu_error_count': result.cancel_cpu_error_count,
-                    'cancel_total_count': result.cancel_total_count,
-                    'small_value_passed': result.small_value_passed,
-                    'cancel_passed': result.cancel_passed,
-                    'normal_total_count': result.normal_total_count,
-                    'normal_passed': result.normal_passed,
-                    'normal_mare': result.normal_mare,
-                    'normal_mare_ratio': result.normal_mare_ratio,
-                    'normal_mere_ratio': result.normal_mere_ratio,
-                    'normal_mare_ratio_limit': _NORMAL_MARE_RATIO_LIMIT,
-                    'normal_mere_ratio_limit': _NORMAL_MERE_RATIO_LIMIT,
+                    "dtype_category": out_dtype_category,
+                    "threshold": out_threshold,
+                    "mere": result.mere,
+                    "mare": result.mare,
+                    "max_diff": result.max_diff,
+                    "mean_diff": result.mean_diff,
+                    "max_abs_diff": int(result.max_diff)
+                    if out_dtype_category == "int"
+                    else 0,
+                    "small_value_error_count": result.small_value_error_count,
+                    "small_value_cpu_error_count": result.small_value_cpu_error_count,
+                    "small_value_total_count": result.small_value_total_count,
+                    "cancel_error_count": result.cancel_error_count,
+                    "cancel_cpu_error_count": result.cancel_cpu_error_count,
+                    "cancel_total_count": result.cancel_total_count,
+                    "small_value_passed": result.small_value_passed,
+                    "cancel_passed": result.cancel_passed,
+                    "normal_total_count": result.normal_total_count,
+                    "normal_passed": result.normal_passed,
+                    "normal_mare": result.normal_mare,
+                    "normal_mare_ratio": result.normal_mare_ratio,
+                    "normal_mere_ratio": result.normal_mere_ratio,
+                    "normal_mare_ratio_limit": _NORMAL_MARE_RATIO_LIMIT,
+                    "normal_mere_ratio_limit": _NORMAL_MERE_RATIO_LIMIT,
                 },
             )
             single_output_results.append(single_result)
             if result.failure_type is not None:
-                single_result.metadata['failure_type'] = result.failure_type
+                single_result.metadata["failure_type"] = result.failure_type
 
             is_passed = result.passed
             all_passed = all_passed and is_passed
@@ -1013,7 +1121,9 @@ def compare_tensors(
             cancel_error_count += result.cancel_error_count
             cancel_cpu_error_count += result.cancel_cpu_error_count
             cancel_total_count += result.cancel_total_count
-            all_small_value_passed = all_small_value_passed and result.small_value_passed
+            all_small_value_passed = (
+                all_small_value_passed and result.small_value_passed
+            )
             all_cancel_passed = all_cancel_passed and result.cancel_passed
             normal_total_count += result.normal_total_count
             all_normal_passed = all_normal_passed and result.normal_passed
@@ -1040,11 +1150,17 @@ def compare_tensors(
         for sr in single_output_results:
             if not sr.passed and not sr.error_msg.startswith("(跳过"):
                 result_dtype = sr.dtype
-                result_threshold = sr.metadata.get('threshold', threshold)
+                result_threshold = sr.metadata.get("threshold", threshold)
                 break
 
-        invalid_reference = next((sr for sr in single_output_results
-                                  if sr.metadata.get('failure_type') == FAILURE_TYPE_REFERENCE_INVALID), None)
+        invalid_reference = next(
+            (
+                sr
+                for sr in single_output_results
+                if sr.metadata.get("failure_type") == FAILURE_TYPE_REFERENCE_INVALID
+            ),
+            None,
+        )
         return CompareResult(
             passed=passed,
             dtype=result_dtype,
@@ -1070,8 +1186,12 @@ def compare_tensors(
             normal_mare_ratio=max(normal_mare_ratios, default=None),
             normal_mere_ratio=max(normal_mere_ratios, default=None),
             output_results=single_output_results,  # 新增：各输出独立结果
-            failure_type=FAILURE_TYPE_REFERENCE_INVALID if invalid_reference is not None else None,
-            error_msg=invalid_reference.error_msg if invalid_reference is not None else None,
+            failure_type=FAILURE_TYPE_REFERENCE_INVALID
+            if invalid_reference is not None
+            else None,
+            error_msg=invalid_reference.error_msg
+            if invalid_reference is not None
+            else None,
         )
 
     except Exception as e:
@@ -1081,7 +1201,7 @@ def compare_tensors(
             passed=False,
             dtype=dtype,
             threshold=threshold,
-            error_msg=f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
+            error_msg=f"{type(e).__name__}: {e}\n{traceback.format_exc()}",
         )
 
 
@@ -1107,7 +1227,7 @@ def compare_with_custom_threshold(
         threshold_dict = _DEFAULT_THRESHOLDS
 
     # 从张量推断dtype
-    dtype_str = str(output.dtype).replace('torch.', '')
+    dtype_str = str(output.dtype).replace("torch.", "")
     threshold = get_threshold(dtype_str)
     if dtype_str.lower() in threshold_dict:
         threshold = threshold_dict[dtype_str.lower()]

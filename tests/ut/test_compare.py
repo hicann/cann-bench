@@ -30,6 +30,7 @@ from kernel_eval.utils.compare import (
 def _npu_available():
     try:
         import torch_npu  # noqa: F401
+
         return bool(torch.npu.is_available())
     except Exception:
         return False
@@ -45,13 +46,28 @@ requires_npu = pytest.mark.skipif(
 )
 
 _SCALAR_FIELDS = (
-    "passed", "dtype", "threshold", "mere", "mare", "max_diff", "mean_diff",
-    "mismatch_count", "total_count", "mismatch_ratio",
-    "small_value_error_count", "small_value_cpu_error_count", "small_value_total_count",
-    "cancel_error_count", "cancel_cpu_error_count", "cancel_total_count",
-    "normal_mare_ratio", "normal_mere_ratio",
+    "passed",
+    "dtype",
+    "threshold",
+    "mere",
+    "mare",
+    "max_diff",
+    "mean_diff",
+    "mismatch_count",
+    "total_count",
+    "mismatch_ratio",
+    "small_value_error_count",
+    "small_value_cpu_error_count",
+    "small_value_total_count",
+    "cancel_error_count",
+    "cancel_cpu_error_count",
+    "cancel_total_count",
+    "normal_mare_ratio",
+    "normal_mere_ratio",
     "normal_total_count",
-    "small_value_passed", "cancel_passed", "normal_passed",
+    "small_value_passed",
+    "cancel_passed",
+    "normal_passed",
 )
 
 
@@ -63,54 +79,97 @@ class TestSingleOutputResult:
     """SingleOutputResult 数据类测试"""
 
     def test_creation_float(self):
-        r = SingleOutputResult(index=0, dtype="float32", passed=True,
-                               metadata={"dtype_category": "float", "threshold": 2**-13,
-                                         "mere": 0.001, "mare": 0.005})
+        r = SingleOutputResult(
+            index=0,
+            dtype="float32",
+            passed=True,
+            metadata={
+                "dtype_category": "float",
+                "threshold": 2**-13,
+                "mere": 0.001,
+                "mare": 0.005,
+            },
+        )
         assert r.index == 0
         assert r.dtype == "float32"
         assert r.passed is True
 
     def test_creation_int(self):
-        r = SingleOutputResult(index=1, dtype="int64", passed=True,
-                               mismatch_count=0, total_count=100,
-                               metadata={"dtype_category": "int", "threshold": 0})
+        r = SingleOutputResult(
+            index=1,
+            dtype="int64",
+            passed=True,
+            mismatch_count=0,
+            total_count=100,
+            metadata={"dtype_category": "int", "threshold": 0},
+        )
         assert r.metadata["dtype_category"] == "int"
         assert r.mismatch_count == 0
 
     def test_to_dict(self):
-        r = SingleOutputResult(index=0, dtype="float32", passed=True,
-                               metadata={"threshold": 0.001, "mere": 1e-5, "mare": 2e-5})
+        r = SingleOutputResult(
+            index=0,
+            dtype="float32",
+            passed=True,
+            metadata={"threshold": 0.001, "mere": 1e-5, "mare": 2e-5},
+        )
         d = r.to_dict()
         assert d["index"] == 0
         assert d["passed"] is True
         assert d["mere"] == 1e-5
 
     def test_format_summary_float_pass(self):
-        r = SingleOutputResult(index=0, dtype="float32", passed=True,
-                               metadata={"dtype_category": "float", "threshold": 2**-13,
-                                         "mere": 1e-5, "mare": 2e-5})
+        r = SingleOutputResult(
+            index=0,
+            dtype="float32",
+            passed=True,
+            metadata={
+                "dtype_category": "float",
+                "threshold": 2**-13,
+                "mere": 1e-5,
+                "mare": 2e-5,
+            },
+        )
         s = r.format_summary()
         assert "✅" in s
 
     def test_format_summary_float_fail(self):
-        r = SingleOutputResult(index=0, dtype="float32", passed=False,
-                               error_msg="MARE exceeded threshold",
-                               metadata={"dtype_category": "float", "threshold": 2**-13,
-                                         "mere": 0.01, "mare": 0.05})
+        r = SingleOutputResult(
+            index=0,
+            dtype="float32",
+            passed=False,
+            error_msg="MARE exceeded threshold",
+            metadata={
+                "dtype_category": "float",
+                "threshold": 2**-13,
+                "mere": 0.01,
+                "mare": 0.05,
+            },
+        )
         s = r.format_summary()
         assert "❌" in s
 
     def test_format_summary_int_pass(self):
-        r = SingleOutputResult(index=0, dtype="int64", passed=True,
-                               mismatch_count=0, total_count=100,
-                               metadata={"dtype_category": "int", "threshold": 0})
+        r = SingleOutputResult(
+            index=0,
+            dtype="int64",
+            passed=True,
+            mismatch_count=0,
+            total_count=100,
+            metadata={"dtype_category": "int", "threshold": 0},
+        )
         s = r.format_summary()
         assert "✅" in s
 
     def test_format_summary_int_fail(self):
-        r = SingleOutputResult(index=0, dtype="int64", passed=False,
-                               mismatch_count=5, total_count=100,
-                               metadata={"dtype_category": "int", "threshold": 0})
+        r = SingleOutputResult(
+            index=0,
+            dtype="int64",
+            passed=False,
+            mismatch_count=5,
+            total_count=100,
+            metadata={"dtype_category": "int", "threshold": 0},
+        )
         s = r.format_summary()
         assert "❌" in s
 
@@ -120,16 +179,24 @@ class TestCompareResult:
 
     def test_creation(self):
         result = CompareResult(
-            passed=True, dtype="float32", threshold=2**-13,
-            mere=1e-5, mare=2e-5,
+            passed=True,
+            dtype="float32",
+            threshold=2**-13,
+            mere=1e-5,
+            mare=2e-5,
         )
         assert result.passed is True
         assert result.dtype == "float32"
 
     def test_to_dict(self):
         result = CompareResult(
-            passed=True, dtype="float32", threshold=0.0001,
-            mere=1e-5, mare=2e-5, mismatch_count=0, total_count=100,
+            passed=True,
+            dtype="float32",
+            threshold=0.0001,
+            mere=1e-5,
+            mare=2e-5,
+            mismatch_count=0,
+            total_count=100,
         )
         d = result.to_dict()
         assert d["passed"] is True
@@ -138,8 +205,12 @@ class TestCompareResult:
 
     def test_failed_result(self):
         result = CompareResult(
-            passed=False, dtype="float32", threshold=0.0001,
-            mere=0.01, mare=0.05, error_msg="MARE exceeded threshold",
+            passed=False,
+            dtype="float32",
+            threshold=0.0001,
+            mere=0.01,
+            mare=0.05,
+            error_msg="MARE exceeded threshold",
         )
         assert result.passed is False
         assert result.error_msg == "MARE exceeded threshold"
@@ -165,11 +236,20 @@ class TestCompareResult:
         assert result.mare == 0.0
 
     def test_format_all_outputs(self):
-        sr = SingleOutputResult(index=0, dtype="float32", passed=True,
-                                metadata={"dtype_category": "float", "threshold": 2**-13,
-                                          "mere": 1e-5, "mare": 2e-5})
-        result = CompareResult(passed=True, dtype="float32", threshold=2**-13,
-                               output_results=[sr])
+        sr = SingleOutputResult(
+            index=0,
+            dtype="float32",
+            passed=True,
+            metadata={
+                "dtype_category": "float",
+                "threshold": 2**-13,
+                "mere": 1e-5,
+                "mare": 2e-5,
+            },
+        )
+        result = CompareResult(
+            passed=True, dtype="float32", threshold=2**-13, output_results=[sr]
+        )
         s = result.format_all_outputs()
         assert "float32" in s
 
@@ -207,6 +287,92 @@ class TestCompareTensors:
         output = torch.tensor([1, 2, 4], dtype=torch.int64)
         result = compare_tensors(output, golden, "int32")
         assert result.passed is False
+
+    @pytest.mark.parametrize(
+        "actual,expected",
+        [
+            (-(2**63), 0),
+            (0, -(2**63)),
+            (-(2**63), 2**63 - 1),
+            (2**63 - 1, -(2**63)),
+        ],
+    )
+    def test_int64_extreme_mismatch_does_not_overflow(self, actual, expected):
+        golden = torch.tensor([expected, 1], dtype=torch.int64)
+        output = torch.tensor([actual, 1], dtype=torch.int64)
+        result = compare_tensors(output, golden, "int64")
+        assert result.passed is False
+        assert result.mismatch_count == 1
+        assert result.max_diff == float(abs(actual - expected))
+        assert result.mean_diff == float(abs(actual - expected) / 2)
+
+    @pytest.mark.parametrize("actual,expected", [(2**64 - 1, 0), (0, 2**64 - 1)])
+    def test_uint64_extreme_mismatch_does_not_overflow(self, actual, expected):
+        golden = torch.tensor([expected, 1], dtype=torch.uint64)
+        output = torch.tensor([actual, 1], dtype=torch.uint64)
+        result = compare_tensors(output, golden, "uint64")
+        assert result.passed is False
+        assert result.mismatch_count == 1
+        assert result.max_diff == float(2**64 - 1)
+        assert result.mean_diff == float((2**64 - 1) / 2)
+
+    @pytest.mark.parametrize(
+        "dtype,actual,expected,tolerance,passed",
+        [
+            (torch.int64, 2**63 - 2, 2**63 - 1, 1, True),
+            (torch.int64, 2**63 - 3, 2**63 - 1, 1, False),
+            (torch.int64, -(2**63), -(2**63) + 1, 1.5, True),
+            (torch.int64, -(2**63), 0, 2**63 - 1, False),
+            (torch.int64, 2**53 + 1, 0, float(2**53), False),
+            (torch.uint64, 2**64 - 1, 2**64 - 2, 1, True),
+            (torch.uint64, 2**64 - 1, 2**64 - 3, 1, False),
+            (torch.uint64, 2**63, 2**63 - 1, 1, True),
+            (torch.uint64, 2**64 - 1, 0, 2**64 - 2, False),
+        ],
+    )
+    def test_wide_integer_tolerance_uses_exact_difference(
+        self,
+        dtype,
+        actual,
+        expected,
+        tolerance,
+        passed,
+    ):
+        golden = torch.tensor([expected], dtype=dtype)
+        output = torch.tensor([actual], dtype=dtype)
+        dtype_name = str(dtype).replace("torch.", "")
+        result = compare_tensors(
+            output, golden, dtype_name, custom_thresholds={dtype_name: tolerance}
+        )
+        assert result.passed is passed
+        assert result.mismatch_count == (0 if passed else 1)
+        assert result.max_diff == float(abs(actual - expected))
+
+    @pytest.mark.parametrize(
+        "output_dtype,actual,expected,tolerance,passed",
+        [
+            (torch.int32, 0, -(2**63), 0, False),
+            (torch.int32, -1, 2**63 - 1, 0, False),
+            (torch.uint8, 0, -(2**63), 0, False),
+            (torch.int32, 0, -(2**63), 2**63 - 1, False),
+            (torch.int32, 0, -(2**63), 2**63, True),
+            (torch.int32, 1, 2, 1, True),
+        ],
+    )
+    def test_wide_integer_golden_uses_exact_difference(
+        self, output_dtype, actual, expected, tolerance, passed
+    ):
+        output = torch.tensor([actual, 1], dtype=output_dtype)
+        golden = torch.tensor([expected, 1], dtype=torch.int64)
+        dtype_name = str(output_dtype).replace("torch.", "")
+        result = compare_tensors(
+            output, golden, dtype_name, custom_thresholds={dtype_name: tolerance}
+        )
+        assert result.passed is passed
+        assert result.mismatch_count == (0 if passed else 1)
+        assert result.total_count == 2
+        assert result.max_diff == float(abs(actual - expected))
+        assert result.mean_diff == float(abs(actual - expected) / 2)
 
     def test_multiple_outputs(self):
         golden = [torch.tensor([1.0, 2.0]), torch.tensor([3.0, 4.0])]
@@ -345,8 +511,10 @@ class TestContiguousLayout:
 
     def test_scalar_and_empty_are_contiguous(self):
         """0 维 / 空张量天然连续, 不会被误伤"""
-        for golden in (torch.tensor(3.0, dtype=torch.float64),
-                       torch.tensor([], dtype=torch.float64)):
+        for golden in (
+            torch.tensor(3.0, dtype=torch.float64),
+            torch.tensor([], dtype=torch.float64),
+        ):
             result = compare_tensors(golden.clone(), golden, "float32")
             assert result.passed is True
 
@@ -366,8 +534,8 @@ class TestSmallValueFallback:
         n = 1000
         golden = torch.zeros(n, dtype=torch.float64)
         small_count = 500
-        golden[:small_count] = 1e-6   # 小值域区域
-        golden[small_count:] = 1.0    # 正常区域
+        golden[:small_count] = 1e-6  # 小值域区域
+        golden[small_count:] = 1.0  # 正常区域
 
         # output 基本匹配，但在 3 个小值域位置有巨大偏差（ratio = 3 / max(0,1) = 3 > 2）
         output = golden.half()
@@ -391,11 +559,11 @@ class TestSmallValueFallback:
         """
         n = 1000
         golden = torch.zeros(n, dtype=torch.float64)
-        golden[:500] = 1e-6   # 小值域区域
-        golden[500:] = 1.0    # 正常区域
+        golden[:500] = 1e-6  # 小值域区域
+        golden[500:] = 1.0  # 正常区域
 
         output = golden.half()
-        output[0] = 65504.0   # 2 个小值域巨大偏差
+        output[0] = 65504.0  # 2 个小值域巨大偏差
         output[1] = 65504.0
 
         result = compare_tensors(output, golden, "float16")
@@ -411,12 +579,12 @@ class TestSmallValueFallback:
         # 构造 native_output 使得 CPU 也有小值域误差
         n = 100
         golden = torch.zeros(n, dtype=torch.float64)
-        golden[:50] = 1e-6   # 小值域
-        golden[50:] = 1.0    # 正常
+        golden[:50] = 1e-6  # 小值域
+        golden[50:] = 1.0  # 正常
 
         output = golden.half()
         # NPU 在小值域有 2 个错误
-        output[0] = 0.001   # 误差 > small_value_error
+        output[0] = 0.001  # 误差 > small_value_error
         output[1] = 0.002
 
         # native_output 也有小值域误差（模拟 CPU 精度截断也会犯错）
@@ -479,8 +647,8 @@ class TestCancelFallback:
         """golden=0.01（相消区间内），output≈0.01（near-zero 但非错误），
         前 n_err 个位置 output=0（相消错误）。native_output=None → CPU 无相消错误。"""
         golden = torch.full((n,), 0.01, dtype=torch.float64)
-        output = golden.half()          # ≈0.01，near-zero 区间内，rel_err 极小→非错误
-        output[:n_err] = 0.0            # n_err 个 near-zero 巨大相对误差→相消错误
+        output = golden.half()  # ≈0.01，near-zero 区间内，rel_err 极小→非错误
+        output[:n_err] = 0.0  # n_err 个 near-zero 巨大相对误差→相消错误
         return output, golden
 
     def test_cancel_over_2_errors_fail_when_cpu_clean(self):
@@ -514,8 +682,12 @@ class TestBitExactFloat:
     BIT_EXACT = {"float16": 0, "bfloat16": 0, "float32": 0}
 
     def test_identical_fp32_passes(self):
-        a = torch.tensor([1.0, -1.0, 0.0, float("inf"), -float("inf")], dtype=torch.float32)
-        result = compare_tensors(a.clone(), a, "float32", custom_thresholds=self.BIT_EXACT)
+        a = torch.tensor(
+            [1.0, -1.0, 0.0, float("inf"), -float("inf")], dtype=torch.float32
+        )
+        result = compare_tensors(
+            a.clone(), a, "float32", custom_thresholds=self.BIT_EXACT
+        )
         assert result.passed is True
         assert result.mismatch_count == 0
 
@@ -549,9 +721,12 @@ class TestBitExactFloat:
             x_fp64 = x.double()
             golden_fp64, _ = torch.unique(x_fp64, return_inverse=True)
             output, _ = torch.unique(x, return_inverse=True)
-            result = compare_tensors(output, golden_fp64, dtype_str,
-                                     custom_thresholds=self.BIT_EXACT)
-            assert result.passed, f"{target_dtype} round-trip via fp64 should pass bit-exact"
+            result = compare_tensors(
+                output, golden_fp64, dtype_str, custom_thresholds=self.BIT_EXACT
+            )
+            assert result.passed, (
+                f"{target_dtype} round-trip via fp64 should pass bit-exact"
+            )
 
 
 class TestCompareResultFallbackFlags:
@@ -590,6 +765,7 @@ class TestCompareResultFallbackFlags:
     def test_small_value_passed_reflected_in_output_metadata(self):
         """small_value_passed 应通过 output_results metadata 传播"""
         from kernel_eval.checkers.relative_error_checker import RelativeErrorChecker
+
         n = 100
         golden = torch.zeros(n, dtype=torch.float64)
         golden[:50] = 1e-6
@@ -601,105 +777,114 @@ class TestCompareResultFallbackFlags:
         accuracy = checker.check(
             ai_outputs=output,
             golden_outputs=golden,
-            dtype='float16',
+            dtype="float16",
             threshold=2**-10,
         )
 
         # 验证 output_results metadata 包含 small_value_passed
         for or_ in accuracy.output_results:
-            assert 'small_value_passed' in or_.metadata
-            assert 'cancel_passed' in or_.metadata
+            assert "small_value_passed" in or_.metadata
+            assert "cancel_passed" in or_.metadata
 
     def test_format_summary_shows_small_value_failure_when_both_fail(self):
         """当相对误差和兜底判定都失败时，format_summary 应同时展示两者"""
-        from kernel_eval.checkers.relative_error_checker import RelativeErrorOutputResult
+        from kernel_eval.checkers.relative_error_checker import (
+            RelativeErrorOutputResult,
+        )
+
         # 构造一个 passed=False 且 small_value_passed=False 的结果
         result = RelativeErrorOutputResult(
             index=0,
-            dtype='float16',
+            dtype="float16",
             passed=False,
-            error_msg='',
+            error_msg="",
             mismatch_count=10,
             total_count=100,
             metadata={
-                'dtype_category': 'float',
-                'threshold': 2**-10,
-                'mere': 0.5,
-                'mare': 2.0,
-                'small_value_error_count': 5,
-                'small_value_cpu_error_count': 0,
-                'small_value_total_count': 10,
-                'cancel_error_count': 0,
-                'cancel_cpu_error_count': 0,
-                'cancel_total_count': 0,
-                'small_value_passed': False,
-                'cancel_passed': True,
+                "dtype_category": "float",
+                "threshold": 2**-10,
+                "mere": 0.5,
+                "mare": 2.0,
+                "small_value_error_count": 5,
+                "small_value_cpu_error_count": 0,
+                "small_value_total_count": 10,
+                "cancel_error_count": 0,
+                "cancel_cpu_error_count": 0,
+                "cancel_total_count": 0,
+                "small_value_passed": False,
+                "cancel_passed": True,
             },
         )
         summary = result.format_summary()
         # 验证摘要中包含小值域兜底失败信息
-        assert '❌' in summary
-        assert '小值域兜底❌' in summary
-        assert 'NPU/CPU错误=5/0' in summary
+        assert "❌" in summary
+        assert "小值域兜底❌" in summary
+        assert "NPU/CPU错误=5/0" in summary
 
     def test_format_summary_shows_cancel_failure_when_both_fail(self):
         """当相对误差和相消兜底判定都失败时，format_summary 应同时展示两者"""
-        from kernel_eval.checkers.relative_error_checker import RelativeErrorOutputResult
+        from kernel_eval.checkers.relative_error_checker import (
+            RelativeErrorOutputResult,
+        )
+
         result = RelativeErrorOutputResult(
             index=0,
-            dtype='float16',
+            dtype="float16",
             passed=False,
-            error_msg='',
+            error_msg="",
             mismatch_count=5,
             total_count=100,
             metadata={
-                'dtype_category': 'float',
-                'threshold': 2**-10,
-                'mere': 0.3,
-                'mare': 1.5,
-                'small_value_error_count': 0,
-                'small_value_cpu_error_count': 0,
-                'small_value_total_count': 0,
-                'cancel_error_count': 3,
-                'cancel_cpu_error_count': 0,
-                'cancel_total_count': 5,
-                'small_value_passed': True,
-                'cancel_passed': False,
+                "dtype_category": "float",
+                "threshold": 2**-10,
+                "mere": 0.3,
+                "mare": 1.5,
+                "small_value_error_count": 0,
+                "small_value_cpu_error_count": 0,
+                "small_value_total_count": 0,
+                "cancel_error_count": 3,
+                "cancel_cpu_error_count": 0,
+                "cancel_total_count": 5,
+                "small_value_passed": True,
+                "cancel_passed": False,
             },
         )
         summary = result.format_summary()
-        assert '❌' in summary
-        assert '相消兜底❌' in summary
-        assert 'NPU/CPU错误=3/0' in summary
+        assert "❌" in summary
+        assert "相消兜底❌" in summary
+        assert "NPU/CPU错误=3/0" in summary
 
     def test_format_summary_no_fallback_info_when_all_passed(self):
         """当只有相对误差失败但兜底都通过时，不追加兜底信息"""
-        from kernel_eval.checkers.relative_error_checker import RelativeErrorOutputResult
+        from kernel_eval.checkers.relative_error_checker import (
+            RelativeErrorOutputResult,
+        )
+
         result = RelativeErrorOutputResult(
             index=0,
-            dtype='float32',
+            dtype="float32",
             passed=False,
-            error_msg='',
+            error_msg="",
             metadata={
-                'dtype_category': 'float',
-                'threshold': 2**-13,
-                'mere': 0.5,
-                'mare': 2.0,
-                'small_value_passed': True,
-                'cancel_passed': True,
-                'small_value_error_count': 0,
-                'small_value_cpu_error_count': 0,
-                'small_value_total_count': 0,
-                'cancel_error_count': 0,
-                'cancel_cpu_error_count': 0,
-                'cancel_total_count': 0,
+                "dtype_category": "float",
+                "threshold": 2**-13,
+                "mere": 0.5,
+                "mare": 2.0,
+                "small_value_passed": True,
+                "cancel_passed": True,
+                "small_value_error_count": 0,
+                "small_value_cpu_error_count": 0,
+                "small_value_total_count": 0,
+                "cancel_error_count": 0,
+                "cancel_cpu_error_count": 0,
+                "cancel_total_count": 0,
             },
         )
         summary = result.format_summary()
-        assert '小值域兜底❌' not in summary
-        assert '相消兜底❌' not in summary
+        assert "小值域兜底❌" not in summary
+        assert "相消兜底❌" not in summary
         # 只显示 MERE/MARE
-        assert 'MERE=' in summary
+        assert "MERE=" in summary
 
 
 class TestNormalRegionThreeWayGate:
@@ -796,8 +981,8 @@ class TestMergedHostConversion:
         assert result.mean_diff == float(valid_diff.mean())
         assert result.total_count == output.numel()
         sr = result.output_results[0]
-        assert sr.metadata['mere'] == result.mere
-        assert sr.metadata['mare'] == result.mare
+        assert sr.metadata["mere"] == result.mere
+        assert sr.metadata["mare"] == result.mare
 
     def test_normal_region_failure_statistics_match_legacy_conversion(self):
         """正常值域失败路径：整体计数、误差及三方比值与旧转换口径一致。"""
@@ -810,13 +995,15 @@ class TestMergedHostConversion:
 
         result = compare_tensors(output, golden, "float32", native_output=native)
 
-        golden_truncated, _, relative_error, valid_mask = self._legacy_fp64(output, golden)
+        golden_truncated, _, relative_error, valid_mask = self._legacy_fp64(
+            output, golden
+        )
         mare_threshold = 10 * 2**-13
         expected_mismatch = int(((relative_error > mare_threshold) & valid_mask).sum())
         # 旧两步转换的同精度参考路径：native.cpu().double() 与 golden_truncated 比较
         cpu_output_fp64 = native.cpu().double()
-        cpu_relative_error = (
-            torch.abs(cpu_output_fp64 - golden_truncated) / (torch.abs(golden_truncated) + 1e-7)
+        cpu_relative_error = torch.abs(cpu_output_fp64 - golden_truncated) / (
+            torch.abs(golden_truncated) + 1e-7
         )
         native_mare = float(cpu_relative_error.max())
         native_mere = float(cpu_relative_error.mean())
@@ -832,14 +1019,20 @@ class TestMergedHostConversion:
         assert result.mere == float(valid_rel.mean())
         assert result.mare == float(valid_rel.max())
         assert result.normal_mare_ratio == pytest.approx(
-            result.mare / max(native_mare, 2**-14))
+            result.mare / max(native_mare, 2**-14)
+        )
         assert result.normal_mere_ratio == pytest.approx(
-            result.mere / max(native_mere, 2**-14))
+            result.mere / max(native_mere, 2**-14)
+        )
 
     def test_inf_saturation_does_not_mutate_caller_tensor(self):
         """inf 饱和替换发生在 fp64 转换副本上，调用方原生 dtype 张量不被改写"""
-        golden = torch.tensor([60000.0, 1.0], dtype=torch.float64)  # 60000 在 fp16 范围内
-        output = torch.tensor([float("inf"), 1.0], dtype=torch.float16)  # NPU 饱和到 inf
+        golden = torch.tensor(
+            [60000.0, 1.0], dtype=torch.float64
+        )  # 60000 在 fp16 范围内
+        output = torch.tensor(
+            [float("inf"), 1.0], dtype=torch.float16
+        )  # NPU 饱和到 inf
 
         result = compare_tensors(output, golden, "float16")
 
@@ -865,12 +1058,17 @@ class TestMergedHostConversion:
         zero_threshold = {"float32": 0.0}
         golden = torch.tensor([1.0, -0.0], dtype=torch.float64)
         output_same = golden.float()
-        assert compare_tensors(output_same, golden, "float32",
-                               custom_thresholds=zero_threshold).passed is True
+        assert (
+            compare_tensors(
+                output_same, golden, "float32", custom_thresholds=zero_threshold
+            ).passed
+            is True
+        )
         # +0.0 vs -0.0 字节不等 → 失败
         output_flip = torch.tensor([1.0, 0.0], dtype=torch.float32)
-        result = compare_tensors(output_flip, golden, "float32",
-                                 custom_thresholds=zero_threshold)
+        result = compare_tensors(
+            output_flip, golden, "float32", custom_thresholds=zero_threshold
+        )
         assert result.passed is False
         assert "bit-exact" in result.output_results[0].error_msg
 
@@ -906,7 +1104,9 @@ class TestDeviceResidentOutput:
         native = golden.to(dtype)
 
         on_cpu = compare_tensors(out_cpu, golden, dtype_str, native_output=native)
-        on_npu = compare_tensors(out_cpu.to("npu"), golden, dtype_str, native_output=native)
+        on_npu = compare_tensors(
+            out_cpu.to("npu"), golden, dtype_str, native_output=native
+        )
 
         assert on_npu.passed is True
         assert _scalars(on_npu) == _scalars(on_cpu)
@@ -930,9 +1130,12 @@ class TestDeviceResidentOutput:
         golden = torch.tensor([1.0, -0.0, 3.5], dtype=torch.float64)
         out_cpu = golden.float()
 
-        on_cpu = compare_tensors(out_cpu, golden, "float32", custom_thresholds=zero_threshold)
-        on_npu = compare_tensors(out_cpu.to("npu"), golden, "float32",
-                                 custom_thresholds=zero_threshold)
+        on_cpu = compare_tensors(
+            out_cpu, golden, "float32", custom_thresholds=zero_threshold
+        )
+        on_npu = compare_tensors(
+            out_cpu.to("npu"), golden, "float32", custom_thresholds=zero_threshold
+        )
 
         assert on_npu.passed is True
         assert _scalars(on_npu) == _scalars(on_cpu)

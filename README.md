@@ -126,6 +126,15 @@ cann-bench/
   > **为什么要求 CANN 9.1.0+**：ACLNN 示例（[examples/aclnn_launch_example/](examples/aclnn_launch_example/)）的算子代码引用了 `aclnn_kernels/contiguous.h` 头文件，该头文件仅在 CANN 9.1.0+ 提供。若 `ASCEND_HOME_PATH` 指向 CANN 9.0.1 等更低版本，`cann_bench_utils` 与 ACLNN 示例会编译失败，请切换到 9.1.0+ 后重新 source 对应的 `set_env.sh`。（另注：CMake 3.31+ 默认向链接器传递 `--dependency-file` 参数，bisheng 链接器不支持该参数，仓库构建脚本已内置规避，详见 `src/cann_bench_utils/QUICKSTART.md`。）
   >
 
+**基础依赖：**
+
+- python >= 3.7.0
+- gcc >= 7.3.0
+- cmake >= 3.16.0
+- dos2unix
+- make
+- patch
+
 ## 🚀 Quick Start
 
 > **评测前必读**：[评测输入与接口规范](docs/spec/submission_spec.md)说明源码目录、构建产物、接口发现和 auto-pipeline 校验规则；[算子提交行为与禁止规则](docs/guide/submission_rules.md)统一说明检测范围、提交约束、违规处理及行为示例。`cannbench.com` 网站提交还需满足网站自身的 ZIP 上传限制。
