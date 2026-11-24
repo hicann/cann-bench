@@ -1,5 +1,0 @@
-operator,case_id,input_shape,dtype,attrs,value_range,note
-Sqrt,1,"[[1024, 1024]]",['float16'],{},"[0, 1]",fixture-S-float16-1M-对齐-非负小值域 | pipeline_smoke_test
-Sqrt,2,"[[2048, 2048]]",['float32'],{},"[0, 4]",fixture-M-float32-4M-对齐-非负中值域 | pipeline_smoke_test
-Sqrt,3,"[[1023, 1023]]",['float16'],{},"[0, 2]",fixture-S-float16-1M-非对齐-非负小值域 | pipeline_smoke_test
-Sqrt,4,"[[2049, 513]]",['float16'],{},"[0, 100]",fixture-S-float16-1M-非对齐-非负大值域 | pipeline_smoke_test

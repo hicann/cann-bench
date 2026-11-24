@@ -1,324 +1,54 @@
-# CANN Bench: CANN 领域评测
+# CANNBench 赛题接入模板
 
-CANNBot 是 [CANN](https://hiascend.com/software/cann) 社区的 Infra 智能体层，用 Agent 完成 AscendC/PyPTO/TileLang/Triton 等各类语言的算子开发、模型迁移与推理优化，并延伸至图模式、Runtime 等更多 CANN 开发场景。
+`skeleton` 分支面向想接入自有赛题的团队。它提供任务包、题集和评测适配器的起点。接入新赛题时，可以从最接近的示例复制任务包，再替换评测资产和适配器。
 
-本仓（cann-bench）是其评测仓；仓群还包括 [cannbot](https://gitcode.com/cann/cannbot)、[cannbot-skills](https://gitcode.com/cann/cannbot-skills)、[cannbot-knowledge](https://gitcode.com/cann/cannbot-knowledge)、[cannbot-dsl](https://gitcode.com/cann/cannbot-dsl)、[cannbot-sentry](https://gitcode.com/cann/cannbot-sentry) 等仓库，结构如下。
+| 示例 | 可参考的部分 |
+|---|---|
+| **整网模型优化** | 用同一批输入验证基线和候选的整网输出，再比较端到端耗时。示例模型有两层固定权重的仿射变换，示例答案将两层合并。[分类模型任务包](tasks/example.model.classifier/) |
+| **算子实现** | 根据输入输出契约实现 ReLU，以参考实现验证每个公开用例。[ReLU 任务包](tasks/example.operator.relu/) |
 
-![CANNBot 仓群结构](docs/figures/cannbot-repo-map.png)
+## 1. 克隆并跑通示例
 
-评测AI在处理CANN领域代码任务的能力，涵盖算子生成、算子优化等领域，支撑模型选型、训练效果评估，统一量化评估标准，识别Agent能力短板，构建CANN领域评测平台，推动AI能力在CANN领域的持续演进。
-
-📖 [查看详细技术报告](docs/technical-report.pdf)
-
-## 👋 Task Description
-
-评测AI模型生成Ascend C算子代码的能力，当前主线为 Season2 的 60 个算子，按算子复杂度分为5个等级。原 53 题已完整归档至 [Season1](archives/season1/README.md)；本轮题集、平台限制及性能数据状态见 [Season2 迁移说明](docs/guide/season2_migration.md)。
-
-- **Level 1**: 基础算子 (Element-wise, Activation)
-  基础逐元素计算，如 Exp、SwiGLU
-- **Level 2**: 中级算子 (Normalization, Reduction, Gather/Scatter)
-  多输入、轻量级Broadcast、归约与索引操作，如 Gather、Softmax、ImageResizeNormalize
-- **Level 3**: 高级算子 (Conv, Pooling, MoE)
-  多维度归约、多Tiling策略可选，如 TopK、Conv2D、Matmul、NMS
-- **Level 4**: 复杂算子 (Attention, RNN)
-  矩阵运算、多算子融合、复杂数据流，如 LSTM、SelectiveScan、LinearCrossEntropy
-- **Level 5**: 挑战级算子 (Stateful / Sparse Attention / Tensor Programs)
-  复杂数据依赖、多阶段协同或数据驱动控制流，如 KimiDeltaAttention、LactTttChunk、TensorProgramVm
-
-## ⚖️ Evaluation
-
-### 三层评测框架
-
-- **数据层**：评测任务集（算子规格描述、Golden实现、测试用例、泛化验证集）
-- **评测层**：评测维度（编译正确性、功能精度、性能优化性）
-- **应用层**：评测报告、CI流水线工程、问题改进、评测结果网站
-
-### 核心评测指标
-
-| 维度       | 指标                | 权重    | 说明                       |
-| ---------- | ------------------- | ------- | -------------------------- |
-| 编译正确性 | Pass/Fail           | w_c=0.2 | 是否编译通过（算子级一次） |
-| 功能正确性 | 精度用例通过        | w_f=0.3 | 单用例是否通过精度标准测试 |
-| 性能优化性 | 性能用例评分（HAP） | w_p=0.5 | 见下方公式                 |
-
-**单用例性能得分 HAP（Hardware-Anchored Performance，硬件锚定性能）** ：HAP 以硬件理论性能上界 $T_{\text{HW}}$ 为锚点对候选 kernel 计分，因此得名“硬件锚定”。
-
-$$
-\text{HAP}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}
-$$
-
-其中 `T_HW = t_hw_us` 为硬件理论性能上界，`T_baseline = baseline_perf_us` 为CANN基线性能（由于torch接口功能限制，部分基线实现由算子拼接得到）——二者均由 `<bench>/tasks/metadata/<hardware>.json` 按硬件提供（不再内嵌于 cases.yaml/csv）；`T_cand` 为候选 kernel 实测时间。这个公式的设计保证了如果性能低于基线（T_cand > T_baseline），HAP 为 0-0.5；如果性能优于基线（T_cand < T_baseline），HAP 0.5 以上；如果性能达到硬件上界或更高（T_cand <= T_HW），HAP 为 1 以上。
-
-基线来源以对应 metadata 的来源字段为准。MC2 A5 的 950DT 有 300 条固定实测基线，950PR 有 180 条固定实测基线；理论下界 `t_hw_us` 与实测耗时分别维护。来源、适用范围及无 NPU 自检命令见 [MC2 A5 模型说明](docs/hap_thw_model/mc2_a5.md)。
-
-> **HAP 是饱和型指标，不是加速比（speedup）。** 它衡量的是“候选 kernel 逼近硬件理论上界的程度”，而非“比 baseline 快多少倍”。当 baseline 本身很慢（$T_{\text{baseline}} \gg T_{\text{HW}}$）时，即使候选相对 baseline 有巨大的 speedup，HAP 也只会趋近于 1 附近而不会线性放大；只有 $T_{\text{cand}} < T_{\text{HW}}$（快于硬件理论上界）时 HAP 才会 > 1。
->
-> **边界与异常取值。** 当锚点非法（$T_{\text{cand}} \le 0$ 或 $T_{\text{HW}} \le 0$），或分母 $(T_{\text{cand}}-T_{\text{HW}}) + (T_{\text{baseline}}-T_{\text{HW}}) \le 0$（罕见，例如 $T_{\text{baseline}} \approx T_{\text{HW}}$ 且 $T_{\text{cand}} < T_{\text{HW}}$）时，当前实现对该用例的 HAP 返回 `None`（该用例不计入性能项），**不会输出 $\pm\infty$ 或负分**。
-> ![HAP 示例曲线](docs/assets/perf_score.png)
-> **单算子综合评分** ：
-
-$$
-\text{EachOperatorScore} = \left[ w_c \cdot \delta_{\text{pass}} + \sum_{i \in \text{cases}} \frac{\delta_{\text{accuracy},i} (w_f + w_p \cdot \text{HAP}_i)}{|\text{cases}|} \right] \cdot 100
-$$
-
-- 在 $T_{\text{cand}} \ge T_{\text{HW}}$ 的常规物理有效区间内，单算子满分约 100；若候选快于硬件理论上界（$T_{\text{cand}} < T_{\text{HW}}$），HAP 与算子分**允许超过 100**（不做上界截断）。编译失败时 `δ_pass=0` ⇒ 整算子计 0；某个用例精度不过则只扣除该用例得分（`δ_accuracy,i=0`），HAP 按用例总和计算。
-- **编译失败处理（整批计 0，不隔离/不补救）**：一份提交多算子一起编译（`build.sh`）时，只要编译失败，本次提交相关算子**全部按编译失败计 0 分**，框架汇总编译错误（见 `_compile.log`）但**不隔离失败算子、不修改用户源码**。这样设计是出于**评测并行化的需要**——避免早期"迭代隔离编译"移动/重编用户源码、产生跨算子串行依赖，使各算子可独立并行编译评测。运行时/功能错误仍按用例级隔离。编译失败时评测进程**退出码非零**（供 CI/CD 判定），报告中相关算子记 0 分并附编译错误摘要。详见 [docs/spec/benchmark_spec.md §4.3](docs/spec/benchmark_spec.md)。
-  > ⚠️ **提交前请务必本地验证编译通过**（先跑 `bash build.sh` 确认无编译错误，再提交）。只要任一算子编译失败，本次提交涉及的算子会**整批计 0 分**——这是最容易因疏忽而丢分的环节。
-  >
-- Level-N 得分 = 该 level 内算子 EachOperatorScore 总和
-- benchmark 总分 = 全部算子 EachOperatorScore（= Level1 + Level2 + Level3 + Level4 + Level5）总和
-
-## 🔍 Directory Structure
-
-```
-cann-bench/
-├── tasks/                  # 评测主集合（algo desc / golden / cases / proto）
-│   ├── level1/             # L1 基础算子（Elementwise / Activation）
-│   ├── level2/             # L2 中级算子（Norm / Reduce / Gather/Scatter）
-│   ├── level3/             # L3 高级算子（Conv / Pool / MoE）
-│   ├── level4/             # L4 复杂算子（Attention / RNN）
-│   └── level5/             # L5 挑战级算子
-├── archives/season1/tasks/ # 原 53 题及其原始 metadata，非默认评测集合
-├── bench_lab/              # 实验/孵化区，本地测试通过后转入 tasks
-├── examples/               # 算子工程样例 & 评测任务样例
-│   ├── aclnn_launch_example/    # ACLNN 自定义算子样例
-│   ├── direct_launch_example/   # Direct launch 算子样例
-│   ├── tasks/                    # 评测任务样例（add/sqrt fixture，验证评测流水线）
-│   ├── tilelang_cann_example/   # TileLang → CANN 算子样例
-│   ├── triton_ascend_cann_example/ # Triton-Ascend → CANN 算子样例
-│   ├── cannbot_dsl_example/     # CANNBot-DSL 算子样例（add/sqrt，对接 examples/tasks 做流水线 smoke 验证）
-│   └── stanfordbench_example/   # Stanford benchmark 样例
-├── docker/                 # 镜像
-│   ├── eval/               # 评测镜像：docker run 即评测（harness + tasks 冻结在镜像内）
-│   ├── base/               # toolkit-only 底座（eval 的 FROM）
-│   └── dev/                # AscendHub 全量 CANN 的交互/CI 调试镜像
-├── docs/                   # 规范 / 设计 / 指南文档
-├── scripts/                # 评测/测试入口脚本
-│   ├── run_evaluation.sh   # AI 算子评测入口（编译→安装→评测）
-│   ├── run_test.sh         # 测试入口（ut/e2e）
-│   └── utils/              # 工具脚本
-│       ├── gen_report.sh   # 从 JSON 生成评测报告
-├── src/                    # 源代码
-│   ├── kernel_eval/        # 算子评测模块（CLI / 数据 / 评测 / 报告 / 安全）
-│   └── auto_pipeline/      # 算子自动生成流水线（core / prompt / generator / converter）
-├── tests/                  # 测试代码（含 docs/test_report.md）
-├── requirements.txt        # Python 依赖
-├── LICENSE                 # 许可证
-└── README.md               # 本文档
-```
-
-## 🔧 Setup
-
-### 环境要求
-
-- 910B / 910_93 / 950 开发环境
-- **CANN 9.1.0 及以上版本**。安装请参考 [CANN快速安装](https://www.hiascend.com/cann/download)：体验最新 master 能力或开发时可选择 **Weekly版本**，使用已发布版本时可选择 **稳定版本**，均需满足本仓库的最低版本要求。
-
-  根据实际产品系列、CPU 架构和操作系统选择配套软件包，并按页面提供的命令完成安装。运行评测需安装 NPU 驱动、CANN toolkit 包及适配芯片的 CANN ops 包。安装完成后，正确配置环境变量：
-
-  ```bash
-  # 以默认安装路径为例（如安装在其他路径，请相应调整）
-  source /usr/local/Ascend/ascend-toolkit/set_env.sh
-  # 或显式指定 CANN 安装目录（构建脚本按此变量定位工具链）
-  export ASCEND_HOME_PATH=/usr/local/Ascend/ascend-toolkit/latest
-  ```
-
-  > **为什么要求 CANN 9.1.0+**：ACLNN 示例（[examples/aclnn_launch_example/](examples/aclnn_launch_example/)）的算子代码引用了 `aclnn_kernels/contiguous.h` 头文件，该头文件仅在 CANN 9.1.0+ 提供。若 `ASCEND_HOME_PATH` 指向 CANN 9.0.1 等更低版本，`cann_bench_utils` 与 ACLNN 示例会编译失败，请切换到 9.1.0+ 后重新 source 对应的 `set_env.sh`。（另注：CMake 3.31+ 默认向链接器传递 `--dependency-file` 参数，bisheng 链接器不支持该参数，仓库构建脚本已内置规避，详见 `src/cann_bench_utils/QUICKSTART.md`。）
-  >
-
-**基础依赖：**
-
-- python >= 3.7.0
-- gcc >= 7.3.0
-- cmake >= 3.16.0
-- dos2unix
-- make
-- patch
-
-## 🚀 Quick Start
-
-> **评测前必读**：[评测输入与接口规范](docs/spec/submission_spec.md)说明源码目录、构建产物、接口发现和 auto-pipeline 校验规则；[算子提交行为与禁止规则](docs/guide/submission_rules.md)统一说明检测范围、提交约束、违规处理及行为示例。`cannbench.com` 网站提交还需满足网站自身的 ZIP 上传限制。
-
-### 1. 配置环境
-
-1. **克隆项目仓库**
-
-   ```bash
-   git clone https://gitcode.com/cann/cann-bench.git
-   cd cann-bench
-   ```
-2. **安装依赖**
-
-- 确保已安装CANN开发环境（**9.1.0 及以上版本**，要求见上文"环境要求"）和TorchNpu扩展
-- 确保已安装Ascend C 算子开发工具链。
+两个示例可在 CPU 上执行，需要 Git 和 Python 3.10+。以下命令适用于 Bash。PowerShell 中用 `$env:PYTHONPATH = "$PWD/src"` 设置模块路径，其余命令相同。
 
 ```bash
-# 安装依赖
-pip install -r requirements.txt
+git clone --depth 1 --single-branch --branch skeleton https://gitcode.com/cann/cann-bench.git cannbench-template
+cd cannbench-template
+python -m pip install -r requirements.txt
+export PYTHONPATH="$PWD/src"
+
+python -m cannbench validate --schema
+python -m cannbench tasks --suite examples
+python -m cannbench show example.model.classifier
+python -m cannbench run example.model.classifier --suite examples --source-dir tasks/example.model.classifier/answer --reports-dir reports/model
+python -m cannbench run example.operator.relu --suite examples --source-dir tasks/example.operator.relu/answer --reports-dir reports/relu
 ```
 
-### 2. 生成算子代码
+报告分别写入 `reports/model/example_result.json` 和 `reports/relu/example_result.json`。每次运行使用新的报告目录。将 `run` 换成 `plan` 可先查看评测器收到的参数。
 
-参考 examples 中的算子工程样例，根据算子规格描述生成 Ascend C 算子代码工程（例如 `generated_project/`）。
+在模型报告里，`correct` 表示已执行用例全部通过，`complete` 表示覆盖了全部用例。完整通过后，报告逐用例记录基线耗时、候选耗时和加速比，`score` 是用例加速比的几何平均。若只想排查一条用例，可加 `--case-id 1 --no-perf`，报告仍保留正确性结果。示例耗时会随主机和运行环境变化。
 
-- **ACLNN 算子工程样例**：[examples/aclnn_launch_example/](examples/aclnn_launch_example/)
-- **直调算子工程样例**：[examples/direct_launch_example/](examples/direct_launch_example/)
+如果候选 `solution.py` 加载失败，CLI 返回退出码 `1`，并在 `example_result.json` 中通过 `error.stage`（`candidate_import`）、`error.type` 和 `error.message` 记录原因。此时 `correct` 和 `complete` 都为 `false`，`score` 为 `null`。
 
-### 3. 运行评测
+在仓库根目录运行 `python -m unittest discover -s tests`，可重跑两个 CPU 示例并检查导入失败的报告。分支的 CPU 冒烟工作流还会运行 `python -m cannbench validate --schema`，校验任务和题集清单。
 
-1. **准备测试用例**
-   `tasks/levelN/<op>/` 下已包含 `proto.yaml`、`golden.py`、`cases.yaml`、`cases.csv`、`desc.md`。无需另外生成。
-2. **运行评测** —— 两种方式
+## 2. 新增自己的赛题
 
-   **A. Docker（推荐）**：harness 与 `tasks/` 冻结在镜像里，镜像 tag 即评测集版本，不依赖本机
-   装好的 CANN/torch_npu 环境。只挂提交源码和报告目录：
+复制接近目标的示例任务包，填好题目契约、工作负载、验收门槛和评分规则。用答案示例及典型失败提交验证评测后，再将固定任务版本加入题集。[新增赛题指南](docs/guide/adding_tasks.md)
 
-   ```bash
-   # OPERATOR_NAME 填写当前评测集 proto.yaml 中的 operator.name
-   bash docker/eval/build.sh                              # 首次：构建评测镜像
-   bash docker/eval/run.sh generated_project              # 评测
-   bash docker/eval/run.sh generated_project --operator "$OPERATOR_NAME" --no-perf
-   ```
+若赛题是在已有模型上优化性能，可参考分类模型示例如何组织基线、端到端计时和答案。[整网模型优化接入指南](docs/guide/model_optimization.md)
 
-   详见 [docker/eval/README.md](docker/eval/README.md)。
+## 3. 配置和代码各放在哪里
 
-   **B. 直接跑脚本**（需本机已备好 CANN 开发环境）：
+| 目录 | 团队应在这里维护什么 |
+|---|---|
+| `tasks/<task-id>/` | 该题的目标、资产引用、可改范围、最低资源和评分规则引用。[任务包契约](docs/spec/task_package.md) |
+| `scoring/` | 可复用的计分公式、用例聚合和失败处理。用 `evaluation.scoring_rule` 引用固定版本。[端到端耗时比规则](scoring/latency-ratio.v1.yaml) |
+| `profiles/` | 硬件、软件环境和测量边界。同一评分规则可由多道题使用，每道题选自己的测量配置。[CPU 端到端测量配置](profiles/measurement/python-e2e.yaml) |
+| `suites/` | 题集成员及任务版本。需要榜单总分时，由团队定义跨题权重和聚合。[示例题集](suites/examples.yaml) |
+| `schemas/` | 任务、题集、提交和结果的结构约束。[任务 Schema](schemas/task.schema.json) |
+| `src/cannbench/` | 任务加载、CLI、执行编排和适配器注册。[执行入口](src/cannbench/engine.py) · [CPU 示例适配器](src/cannbench/adapters/python_example.py) |
 
-   ```bash
-   # 从 AI 生成的源码目录评测（自动扫描、编译、安装、评测）
-   ./scripts/run_evaluation.sh --source-dir generated_project
+CPU 示例适配器用于运行可信的本地 Python 提交。部署昇腾或多卡赛题时，接入团队自己的执行和隔离环境。共享评分规则描述公开口径，具体计算由评测器实现。
 
-   # 或位置参数形式：
-   ./scripts/run_evaluation.sh generated_project
-   ```
-
-   评测报告输出到 `reports/`（其它评测集为 `reports/<bench_name>/`），文件名形如 `<bench>_<stage>_eval_<时间戳>.{json,md,html}`（cann 分阶段评测分别产出 `cann_correctness_eval_*`、`cann_performance_eval_*`、`cann_final_eval_*`）。
-
-   更多用法见 [docs/guide/quick_start.md](docs/guide/quick_start.md)。
-
-   对 LCE 等 CPU reference 开销较大的任务，可显式选择预构建的输入/参考输出缓存；
-   默认关闭，精度检查规则不变。容器格式、dtype 策略、构建和使用命令见
-   [可选 tensor cache](docs/design/tensor_cache.md)。
-3. **生成评测报告**（从已有 JSON 重新生成）
-
-   ```bash
-   # 使用默认模板 (tasks/description.html)
-   ./scripts/utils/gen_report.sh reports/cann/eval_xxx.json
-
-   # 指定自定义模板
-   ./scripts/utils/gen_report.sh --json eval.json --template custom/index.html
-   ```
-
-## 📋 Test Case Structure
-
-每个算子目录下包含以下文件作为开发算子的输入文件：
-
-| 文件           | 说明                                               |
-| -------------- | -------------------------------------------------- |
-| `cases.csv`  | 测试用例 CSV 格式                                  |
-| `cases.yaml` | 测试用例 YAML 格式（内容与CSV相同，方便Agent读取） |
-| `golden.py`  | PyTorch 参考实现，用于结果验证                     |
-| `proto.yaml` | 算子原型定义                                       |
-| `desc.md`    | 算子详细说明文档                                   |
-
-### 待评测算子工程样例与评测任务样例
-
-项目提供了多种示例：
-
-**算子实现样例**（教你"怎么写算子"）：
-
-1. **ACLNN 算子启动示例**：[examples/aclnn_launch_example/](examples/aclnn_launch_example/)
-2. **直调算子启动示例**：[examples/direct_launch_example/](examples/direct_launch_example/)
-3. **Triton-Ascend submission 示例**：[examples/triton_ascend_cann_example/](examples/triton_ascend_cann_example/)
-4. **CANNBot-DSL 算子示例**：[examples/cannbot_dsl_example/](examples/cannbot_dsl_example/) — 用 CANNBot-DSL 实现 add/sqrt，可对接下方评测任务 fixture 走通整条流水线
-
-**评测任务样例**（教你"怎么评算子"）：
-
-5. **评测任务 fixture**：[examples/tasks/](examples/tasks/) — 提供 Add/Sqrt 两个轻量算子的评测定义（proto.yaml + golden.py + cases.yaml + metadata/），用于验证评测流水线是否正常工作
-
-使用自定义算子（以 ACLNN 示例为例）：先按[安装使用说明](examples/aclnn_launch_example/README.md#安装使用)完成示例的构建、`.run` 和 wheel 安装。
-
-在当前终端加载实际安装的 vendor 环境，再启动 Python。下例为默认的 `custom_ops`，自定义安装路径或 vendor 名称请按 `.run` 安装输出调整：
-
-```bash
-# 先 source 对应 CANN 版本的 set_env.sh，确保 ASCEND_HOME_PATH 已设置
-export CANN_BENCH_VENDOR_DIR="${ASCEND_OPP_PATH:-${ASCEND_HOME_PATH}/opp}/vendors/custom_ops"
-source "${CANN_BENCH_VENDOR_DIR}/bin/set_env.bash"
-```
-
-评测脚本在其进程中加载的环境不会传回当前终端；即使评测已安装 `.run`，新终端或独立运行下方代码前也需要执行上述配置。旧安装没有 `set_env.bash` 时，按示例[安装使用说明](examples/aclnn_launch_example/README.md#安装使用)手动配置 `LD_LIBRARY_PATH` 和 `ASCEND_CUSTOM_OPP_PATH`。
-
-```python
-import torch
-import torch_npu
-import cann_bench
-
-x = torch.randn(10, 32, dtype=torch.float32).npu()
-y = torch.randn(10, 32, dtype=torch.float32).npu()
-result = cann_bench.add(x, y)
-```
-
-> ⚠️ **注意：`cann_bench` 包名冲突**。仓库中存在两个同名的 `cann_bench` Python 包，二者**互斥**，同时只应安装其一：
->
-> - **Golden 参考 wheel**：由 `./scripts/utils/build_golden_wheel.sh` 构建，将 `tasks/` 下的 golden.py 打包为纯 Python 包（提供当前评测集的 golden 算子，注册到 `torch.ops.cann_bench`），仅用于 golden 自验证；
-> - **ACLNN 示例 wheel**：由 [examples/aclnn_launch_example/](examples/aclnn_launch_example/) 构建（`dist/cann_bench-*.whl`），提供 `cann_bench.add` / `cann_bench.sqrt` 等自定义算子。
->
-> 若安装了 golden wheel，再调用 `cann_bench.add()` 会报 `module 'cann_bench' has no attribute 'add'`。此时需先卸载 golden wheel，再安装 ACLNN 示例 wheel；或将示例工程目录加入 `PYTHONPATH` 以导入正确的包：
->
-> ```bash
-> pip uninstall -y cann_bench
-> pip install examples/aclnn_launch_example/dist/cann_bench-*.whl
-> # 或改用 PYTHONPATH 导入示例包（需先完成示例构建）
-> export PYTHONPATH="$(pwd)/examples/aclnn_launch_example:${PYTHONPATH}"
-> ```
-
-## 👥 社区贡献
-
-我们欢迎社区开发者贡献新的评测任务，共同丰富CANN领域的评测体系。以下是贡献新评测任务的详细流程：
-
-### 贡献流程
-
-1. **创建算子目录**
-   在 `tasks/levelN/` 下创建算子目录（如 `tasks/level2/my_op/`）；或先在 `bench_lab/` 实验/孵化区暂存，测试通过后 PR 转入主集合。详见 [docs/guide/contributing.md](docs/guide/contributing.md)。
-2. **准备核心文件**每个算子目录需包含以下文件作为评测输入：
-
-   | 文件                            | 说明                                                                                                                         |
-   | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-   | `proto.yaml`                  | 算子原型定义，包括输入输出张量形状、数据类型、属性参数等                                                                     |
-   | `golden.py`                   | PyTorch参考实现，用于功能正确性验证（需覆盖所有测试用例场景）                                                                |
-   | `desc.md`                     | 算子详细说明文档，包括功能描述、数学公式、实现约束、参考资料等                                                               |
-   | `cases.csv` 或 `cases.yaml` | 测试用例定义，包含输入 shape、dtype、属性、值域等信息（推荐Yaml格式）；性能基线已外置到 `<bench>/metadata/<hardware>.json` |
-3. **提交PR**将算子目录提交至主仓库，PR需包含：
-
-   - 完整的算子评测文件
-   - 简要的功能说明和测试验证结果
-   - （可选）算子实现难度分级建议（Level 1-4）
-
-### 贡献规范
-
-- **算子原型**：需符合Ascend C算子开发规范，支持动态shape、数据类型兼容性等特性。
-- **参考实现**：需通过PyTorch官方接口实现，确保在CPU/NPU环境可正确运行。
-- **测试用例**：需覆盖典型场景。
-- **文档描述**：需清晰说明算子功能、适用场景及与同类算子的差异。
-
-## 🛣️ Roadmap
-
-- 工程平台构建
-
-  - [ ] 建立持续评测 CI 流水线
-  - [ ] 发布官方评测网站
-  - [ ] 评测结果可视化展示，用户友好的分析工具
-- 评测集构建
-
-  - [ ] 增加更多算子类型覆盖
-  - [ ] 根据领域场景分类，算子特征等，构建出更多独立榜单集合，覆盖不同评测场景的需求
-- 评测标准构建
-
-  - [ ] 评测精度标准，精度衡量方法构建
-  - [ ] 理论性能评估方法构建
-  - [ ] 评分算法优化（算子分级/分类方法），科学评价生成能力
-  - [ ] 防作弊体系构建
-
-## 🪪 License
-
-CANN Open Software License Agreement Version 2.0
+[许可证](LICENSE)

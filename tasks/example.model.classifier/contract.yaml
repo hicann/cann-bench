@@ -1,0 +1,8 @@
+schema_version: 1
+entrypoint: "solution.py:predict(batch)"
+input: Read-only batch of two finite features per sample
+output: Two logits per sample in original order
+editable: [solution.py]
+allowed_strategies: [operator_composition, static_weight_folding, fused_implementation]
+tolerance: {absolute: 1.0e-12, relative: 1.0e-12}
+measurement_profile: profiles/measurement/python-e2e.yaml

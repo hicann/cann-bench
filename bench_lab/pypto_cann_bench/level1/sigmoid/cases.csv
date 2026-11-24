@@ -1,3 +1,0 @@
-operator,case_id,input_shape,dtype,attrs,value_range,note
-Sigmoid,8,"[[1537, 769]]","[""float32""]",{},"[-5, 10]",S-float32-1M-非对齐-非对称中值域 | baseline_kernels: Sigmoid×1
-Sigmoid,15,"[[512, 2049]]","[""float32""]",{},"[-0.5, 0.5]",S-float32-1M-非对齐-对称微小值域 | baseline_kernels: Sigmoid×1

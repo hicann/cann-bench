@@ -1,5 +1,0 @@
-torch>=2.0
-torch_npu
-pytest>=7.0
-build>=0.10
-wheel>=0.40

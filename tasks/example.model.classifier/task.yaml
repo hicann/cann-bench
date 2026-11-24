@@ -1,0 +1,25 @@
+schema_version: 1
+id: example.model.classifier
+version: 0.1.0
+status: example
+objective: optimize
+scope: model
+assets:
+  problem: tasks/example.model.classifier/problem.md
+  contract: tasks/example.model.classifier/contract.yaml
+  oracle: tasks/example.model.classifier/baseline.py
+  starter: tasks/example.model.classifier/baseline.py
+  performance_baseline: tasks/example.model.classifier/baseline.py
+  workloads: tasks/example.model.classifier/workloads.yaml
+  answer_example: tasks/example.model.classifier/answer
+resources:
+  profiles:
+    - profiles/hardware/local-cpu.yaml
+    - profiles/environments/python.yaml
+    - profiles/measurement/python-e2e.yaml
+  validated_platforms: []
+  minimum: null
+evaluation:
+  adapter: python_example
+  submission_kinds: [source]
+  scoring_rule: scoring/latency-ratio.v1.yaml

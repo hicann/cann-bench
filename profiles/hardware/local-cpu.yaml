@@ -1,0 +1,5 @@
+schema_version: 1
+id: local-cpu
+kind: hardware
+device: cpu
+purpose: local runnable example

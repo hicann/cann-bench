@@ -1,0 +1,6 @@
+schema_version: 1
+entrypoint: "solution.py:predict(batch)"
+input: Read-only two-dimensional sequence of finite numbers
+output: Same shape and order as input
+editable: [solution.py]
+tolerance: {absolute: 1.0e-12, relative: 1.0e-12}

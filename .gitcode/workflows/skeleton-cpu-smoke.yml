@@ -1,0 +1,27 @@
+name: Skeleton CPU smoke
+'on':
+  push:
+    branches: [skeleton]
+  pull_request:
+    branches: [skeleton]
+permissions:
+  repository: read
+jobs:
+  cpu-smoke:
+    runs-on: [ubuntu-latest, x64, slim]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: src
+    steps:
+      - name: Check out source
+        uses: checkout
+      - name: Set up Python 3.10
+        uses: setup-python
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Validate task and suite schemas
+        run: python -m cannbench validate --schema
+      - name: Run CPU smoke tests
+        run: python -m unittest discover -s tests

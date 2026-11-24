@@ -1,0 +1,20 @@
+schema_version: 1
+id: example.operator.relu
+version: 0.1.0
+status: example
+objective: implement
+scope: operator
+assets:
+  problem: tasks/example.operator.relu/problem.md
+  contract: tasks/example.operator.relu/contract.yaml
+  oracle: tasks/example.operator.relu/reference.py
+  workloads: tasks/example.operator.relu/workloads.yaml
+  answer_example: tasks/example.operator.relu/answer
+resources:
+  profiles: [profiles/hardware/local-cpu.yaml, profiles/environments/python.yaml]
+  validated_platforms: []
+  minimum: null
+evaluation:
+  adapter: python_example
+  submission_kinds: [source]
+  scoring_rule: scoring/all-cases-correct.v1.yaml

@@ -1,0 +1,8 @@
+schema_version: 1
+id: python-e2e
+kind: measurement
+boundary: Synchronous predict(batch), including output creation
+excluded: [module_import, workload_loading, correctness_check]
+warmup: 3
+rounds: 5
+calls_per_round: 1000

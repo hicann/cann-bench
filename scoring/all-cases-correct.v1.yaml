@@ -1,0 +1,7 @@
+schema_version: 1
+id: all-cases-correct
+version: 1
+metric: all-cases-correct
+formula: 1 after passing all required cases
+partial_cases: No task score
+incorrect_or_missing_cases: No task score

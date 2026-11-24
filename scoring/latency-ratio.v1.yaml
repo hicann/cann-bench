@@ -1,0 +1,8 @@
+schema_version: 1
+id: latency-ratio
+version: 1
+metric: latency-ratio
+per_case: Median baseline time divided by median candidate time
+aggregate: Geometric mean of all required case ratios, with equal case weights
+partial_cases: No task score
+incorrect_or_missing_cases: No task score

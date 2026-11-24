@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CANNBench task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "version", "status", "objective", "scope", "assets", "resources", "evaluation"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "generated_by": {"const": "migrate_task_catalog"},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]*$"},
+    "version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["published", "archived", "experimental", "example", "draft"]},
+    "objective": {"enum": ["implement", "optimize", "diagnose", "repair", null]},
+    "scope": {"enum": ["operator", "subgraph", "model", null]},
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "problem": {"$ref": "#/$defs/path"},
+        "contract": {"$ref": "#/$defs/path"},
+        "oracle": {"$ref": "#/$defs/path"},
+        "workloads": {"$ref": "#/$defs/path"},
+        "workloads_csv": {"$ref": "#/$defs/path"},
+        "starter": {"$ref": "#/$defs/path"},
+        "performance_baseline": {"$ref": "#/$defs/path"},
+        "answer_example": {"$ref": "#/$defs/path"},
+        "checks": {"$ref": "#/$defs/path"}
+      },
+      "required": ["contract"]
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profiles", "validated_platforms", "minimum"],
+      "properties": {
+        "profiles": {"type": "array", "items": {"$ref": "#/$defs/path"}, "uniqueItems": true},
+        "validated_platforms": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "minimum": {"$ref": "#/$defs/resources"},
+        "recommended": {"$ref": "#/$defs/resources"}
+      }
+    },
+    "legacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bench_root", "selector", "id", "files"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "bench_root": {"$ref": "#/$defs/path"},
+        "selector": {"$ref": "#/$defs/path"},
+        "id": {"type": "string", "minLength": 1},
+        "files": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/path"}, "uniqueItems": true}
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "submission_kinds"],
+      "properties": {
+        "adapter": {"type": ["string", "null"]},
+        "scoring_rule": {"$ref": "#/$defs/path"},
+        "submission_kinds": {
+          "type": "array", "items": {"enum": ["source", "wheel", "patch", "report"]}, "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "path": {"type": "string", "minLength": 1},
+    "resources": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "cards": {"type": "integer", "minimum": 1},
+        "device_memory_bytes": {"type": ["integer", "null"], "minimum": 1},
+        "host_memory_bytes": {"type": ["integer", "null"], "minimum": 1},
+        "interconnect": {"type": ["string", "null"], "minLength": 1}
+      }
+    }
+  }
+}

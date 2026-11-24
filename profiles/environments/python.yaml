@@ -1,0 +1,5 @@
+schema_version: 1
+id: python-cpu
+kind: environment
+python: ">=3.10"
+dependencies: requirements.txt

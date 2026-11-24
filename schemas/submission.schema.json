@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CANNBench submission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "path"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "kind": {"enum": ["source", "wheel", "patch", "report"]},
+    "path": {"type": "string", "minLength": 1}
+  }
+}

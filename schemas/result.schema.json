@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CANNBench execution result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "task_version", "suite_id", "suite_version", "adapter", "execution"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "task_version": {"type": "string", "minLength": 1},
+    "suite_id": {"type": ["string", "null"]},
+    "suite_version": {"type": ["string", "null"]},
+    "adapter": {"type": "string", "minLength": 1},
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exit_code", "reports"],
+      "properties": {
+        "exit_code": {"type": "integer"},
+        "reports": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    }
+  }
+}

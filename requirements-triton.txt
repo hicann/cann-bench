@@ -1,9 +1,0 @@
-# Optional Triton-Ascend runtime for CANN 9.0.0 evaluation images.
-# Install after the core environment:
-#   pip install -r requirements.txt -r requirements-triton.txt
-#
-# Keep the extra index: Triton-Ascend wheels are not published on normal PyPI.
---index-url https://mirrors.huaweicloud.com/repository/pypi/simple
---extra-index-url https://triton-ascend.osinfra.cn/pypi/simple
-
-triton-ascend==3.2.1

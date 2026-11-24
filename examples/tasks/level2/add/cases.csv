@@ -1,6 +1,0 @@
-operator,case_id,input_shape,dtype,attrs,value_range,note
-Add,1,"[[1024, 1024], [1024, 1024]]","['float16', 'float16']",{},"[[-1, 1], [-1, 1]]",fixture-S-float16-1M-对齐-对称小值域 | pipeline_smoke_test
-Add,2,"[[2048, 2048], [2048, 2048]]","['float32', 'float32']",{},"[[-2, 2], [-2, 2]]",fixture-M-float32-4M-对齐-对称小值域 | pipeline_smoke_test
-Add,3,"[[1023, 1023], [1023, 1023]]","['bfloat16', 'bfloat16']",{},"[[-1, 1], [-1, 1]]",fixture-S-bfloat16-1M-非对齐-对称小值域 | pipeline_smoke_test
-Add,4,"[[512, 512], [512, 512]]","['int32', 'int32']",{},"[[-100, 100], [-100, 100]]",fixture-S-int32-256K-对齐-整数小值域 | pipeline_smoke_test
-Add,5,"[[2049, 513], [2049, 513]]","['float16', 'float16']",{},"[[-10, 10], [-10, 10]]",fixture-S-float16-1M-非对齐-中等值域 | pipeline_smoke_test

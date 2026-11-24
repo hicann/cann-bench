@@ -1,0 +1,12 @@
+schema_version: 1
+id: examples
+version: 0.1.0
+status: example
+source_revision: null
+members:
+  - task: example.operator.relu
+    version: 0.1.0
+  - task: example.model.classifier
+    version: 0.1.0
+assets: {}
+scoring: null
