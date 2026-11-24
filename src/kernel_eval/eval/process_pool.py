@@ -389,16 +389,21 @@ class ProcessPoolCoordinator:
         self._available_cards = healthy_cards
         return len(healthy_cards)
 
-    # npu-smi 的 health 列位置随驱动/CANN 版本变化（有时 id+name 合并、有时 health
-    # 不在 parts[3]）。fail-open：仅当某行**明确**出现坏状态词且能解析出 npu_id 时才跳过；
-    # 解析不出或列错位时一律保留，避免把健康卡误杀导致整 eval 无可用卡（见 ST 0-case 故障）。
+    # npu-smi 的列布局随驱动版本变化，设备编号和名称可能合并在同一单元格。
+    # 仅在识别到明确异常状态，并能将对应设备编号映射到当前进程的
+    # User Device ID 时排除设备；A3 使用 Phy-ID，950PR/950DT 使用 NPU ID。
+    # 查询失败、解析失败或无法确认上述对应关系时，不排除对应设备，仍允许评测使用。
     _NPU_BAD_HEALTH = ("ALARM", "CRITICAL", "WARNING", "ABNORMAL", "FAULT", "ERROR")
 
     def _filter_healthy_cards(self, card_count: int) -> List[int]:
-        """通过 npu-smi info 检测卡健康状态，返回健康卡的 ID 列表（fail-open）。
+        """通过 npu-smi info 检测卡健康状态，返回 User Device ID 列表。
 
-        列布局不固定，故扫描整行的 `|` 分隔 cell：任一 cell 命中坏状态词才视为异常行，
-        再从行内取首个可解析为 int 的 cell 作为 npu_id。无法对齐/解析时保留该卡。
+        ``torch.npu.device_count()`` 返回的是当前进程的 User Device ID 数量，
+        而 npu-smi 的编号取决于硬件：950PR/950DT 使用 NPU ID，A3/Ascend910
+        使用芯片行中的 Phy-ID。先用当前进程的可见设备列表把 User Device ID
+        映射到 npu-smi 的编号，再做健康过滤。无法确认 User Device ID 与健康信息
+        的对应关系时，保留该设备供后续评测使用，不从可用设备列表中排除；
+        保留并不表示已确认设备健康。
         """
         healthy = list(range(card_count))
         try:
@@ -411,31 +416,96 @@ class ProcessPoolCoordinator:
             if result.returncode != 0 or not result.stdout.strip():
                 return healthy
 
-            for line in result.stdout.strip().split("\n"):
-                if "|" not in line:
-                    continue
-                parts = [p.strip() for p in line.split("|")]
-                # 行内任一 cell 是坏状态词才考虑跳过；否则保留（fail-open）
-                if not any(p.upper() in self._NPU_BAD_HEALTH for p in parts):
-                    continue
-                # npu-smi 数据行：首个 cell 的首 token 是 NPU ID
-                # （可能单独 "0" 或与 name 合并 "1 Ascend910"）
-                first_cell = parts[1] if len(parts) > 1 else ""
-                id_tokens = first_cell.split()
-                if not id_tokens:
-                    continue
-                try:
-                    npu_id = int(id_tokens[0])
-                except ValueError:
-                    continue
-                if npu_id < card_count and npu_id in healthy:
-                    print(f"[WARN] NPU:{npu_id} 状态异常，跳过该卡")
-                    healthy.remove(npu_id)
+            output = result.stdout
+            smi_ids = self._parse_health_device_ids(output)
+            if not smi_ids:
+                return healthy
+
+            visible_ids = self._visible_device_ids(card_count)
+            for user_device_id, smi_id in enumerate(visible_ids):
+                status = smi_ids.get(smi_id)
+                if status in self._NPU_BAD_HEALTH:
+                    print(
+                        f"[WARN] User Device ID {user_device_id} "
+                        f"(npu-smi ID {smi_id}) 状态异常，跳过该卡"
+                    )
+                    healthy.remove(user_device_id)
         except FileNotFoundError:
             pass
         except Exception:
             pass
         return healthy
+
+    @staticmethod
+    def _parse_health_device_ids(output: str) -> Dict[int, str]:
+        """解析 ``npu-smi info`` 的设备编号和健康状态。
+
+        950PR/950DT 的健康行直接给出 NPU ID；A3/Ascend910 的健康行后面
+        紧跟芯片行，第二个数字是 Phy-ID。物理 Device ID 与逻辑 Device ID
+        在评测环境中按相同编号处理，不在这里引入额外的逻辑 ID 映射。
+        """
+        lines = output.splitlines()
+        is_a3 = "PHY-ID" in output.upper()
+        states = set(ProcessPoolCoordinator._NPU_BAD_HEALTH) | {"OK"}
+        parsed: Dict[int, str] = {}
+
+        for index, line in enumerate(lines):
+            if "|" not in line:
+                continue
+            parts = [part.strip() for part in line.split("|")]
+            status = next(
+                (part.upper() for part in parts if part.upper() in states), None
+            )
+            if status is None:
+                continue
+
+            first_cell = parts[1] if len(parts) > 1 else ""
+            fields = first_cell.split()
+            if not fields or not fields[0].isdigit():
+                continue
+
+            if is_a3:
+                # A3 health row: ``NPU Name``; following row: ``Chip Phy-ID``.
+                if index + 1 >= len(lines):
+                    continue
+                next_parts = lines[index + 1].split("|")
+                chip_fields = next_parts[1].split() if len(next_parts) > 1 else []
+                if len(chip_fields) == 2 and all(f.isdigit() for f in chip_fields):
+                    parsed[int(chip_fields[1])] = status
+            else:
+                # 950PR/950DT health row: first cell is the NPU ID.
+                parsed[int(fields[0])] = status
+        return parsed
+
+    @staticmethod
+    def _visible_device_ids(card_count: int) -> List[int]:
+        """Return npu-smi IDs in User Device ID order.
+
+        The runner supplies the physical/logical visible IDs through the
+        visibility variables. If no list is supplied, evaluation environments
+        use the same numbering for User Device ID and the npu-smi ID.
+        """
+        visibility = (
+            os.environ.get("BENCH_DEVICE_VISIBILITY")
+            or os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
+            or os.environ.get("ASCEND_VISIBLE_DEVICES")
+            or os.environ.get("NPU_VISIBLE_DEVICES")
+            or ""
+        )
+        if visibility:
+            try:
+                ids = [int(item.strip()) for item in visibility.split(",")]
+            except ValueError:
+                ids = []
+            if (
+                len(ids) == card_count
+                and len(set(ids)) == card_count
+                and all(device_id >= 0 for device_id in ids)
+            ):
+                return ids
+            print("[诊断] 可见设备列表无法匹配 User Device ID，保留设备")
+            return []
+        return list(range(card_count))
 
     def _check_npu_smi(self):
         """调用 npu-smi info 检查硬件状态"""

@@ -457,8 +457,12 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             base_config=self.base_config,
             process_config=ProcessConfig(enable_profiler=True),
         )
-        task = TaskUnit(operator="Exp", rel_path="level1/test",
-                        cases=[make_case("Exp", 1), make_case("Exp", 2)], device_id=0)
+        task = TaskUnit(
+            operator="Exp",
+            rel_path="level1/test",
+            cases=[make_case("Exp", 1), make_case("Exp", 2)],
+            device_id=0,
+        )
         cmd = coordinator._build_child_cmd(task, "/tmp/cases.json", "/tmp/out.json")
         self.assertIn("--perf-restore-inputs", cmd)
         self.assertIn("--no-perf-batch-cases", cmd)
@@ -796,12 +800,149 @@ class TestProcessPoolCoordinator(unittest.TestCase):
             "| 1  Ascend910   | Alarm  | 0     |\n"
             "+---+\n"
         )
-        with patch(
-            "src.kernel_eval.eval.process_pool.subprocess.run",
-            return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr=""),
+        # 健康筛选在没有可见设备配置时按 User Device ID 0,1 解释 npu-smi
+        # 编号；隔离宿主/CI 的 ASCEND_* 环境，避免外部设备映射污染该单元测试。
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.run",
+                return_value=Mock(returncode=0, stdout=fake_npu_smi, stderr=""),
+            ),
         ):
             healthy = coordinator._filter_healthy_cards(2)
         self.assertEqual(healthy, [0])  # 仅跳过 Alarm 卡
+
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
+    def test_filter_a3_uses_phy_id_and_maps_to_user_device_id(self, mock_detect):
+        """A3 按 Phy-ID 定位芯片，再返回当前进程的 User Device ID"""
+        mock_detect.return_value = 2
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=ProcessConfig(enable_profiler=False),
+        )
+        smi_output = (
+            "| NPU   Name                | Health |\n"
+            "| Chip  Phy-ID             | Bus-Id |\n"
+            "| 4     Ascend910         | Alarm  |\n"
+            "| 0     8                  | bus    |\n"
+            "| 4     Ascend910         | OK     |\n"
+            "| 1     9                  | bus    |\n"
+        )
+        with (
+            patch.dict(
+                os.environ,
+                {"ASCEND_RT_VISIBLE_DEVICES": "8,9"},
+                clear=True,
+            ),
+            patch(
+                "src.kernel_eval.eval.process_pool.subprocess.run",
+                return_value=Mock(returncode=0, stdout=smi_output, stderr=""),
+            ),
+        ):
+            healthy = coordinator._filter_healthy_cards(2)
+        self.assertEqual(healthy, [1])
+
+    @patch("src.kernel_eval.eval.process_pool.ProcessPoolCoordinator._detect_cards")
+    def test_filter_950_uses_npu_id_and_maps_to_user_device_id(self, mock_detect):
+        """950PR/950DT 按 NPU ID 定位设备，再返回 User Device ID"""
+        mock_detect.return_value = 2
+        coordinator = ProcessPoolCoordinator(
+            base_config=self.base_config,
+            process_config=ProcessConfig(enable_profiler=False),
+        )
+        smi_output = (
+            "| NPU ID | Name             | Health |\n"
+            "| 4      | Ascend950PR      | Alarm  |\n"
+            "| 5      | Ascend950PR      | OK     |\n"
+        )
+        for model in ("Ascend950PR", "Ascend950DT"):
+            with (
+                self.subTest(model=model),
+                patch.dict(
+                    os.environ,
+                    {"ASCEND_RT_VISIBLE_DEVICES": "4,5"},
+                    clear=True,
+                ),
+                patch(
+                    "src.kernel_eval.eval.process_pool.subprocess.run",
+                    return_value=Mock(
+                        returncode=0,
+                        stdout=smi_output.replace("Ascend950PR", model),
+                        stderr="",
+                    ),
+                ),
+            ):
+                self.assertEqual(coordinator._filter_healthy_cards(2), [1])
+
+    def test_filter_a3_issue_302_alarm_pattern(self):
+        """Issue 输出中告警的 Phy-ID 为 0、5、7、8、9；只过滤可见集中的对应项。"""
+        coordinator = object.__new__(ProcessPoolCoordinator)
+        lines = ["| NPU Name | Health |", "| Chip Phy-ID | Bus-Id |"]
+        for phy_id in range(16):
+            state = "Alarm" if phy_id in {0, 5, 7, 8, 9} else "OK"
+            lines.extend(
+                [
+                    f"| {phy_id // 2} Ascend910 | {state} |",
+                    f"| {phy_id % 2} {phy_id} | 0000:01:00.0 |",
+                    "+----------------+",
+                ]
+            )
+        lines.extend(["| NPU Chip | Process id |", "| 1 1 | 1805025 | python3 |"])
+        smi_output = "\n".join(lines)
+        scenarios = [
+            ({}, 16, [1, 2, 3, 4, 6, 10, 11, 12, 13, 14, 15]),
+            ({"ASCEND_RT_VISIBLE_DEVICES": "10,11"}, 2, [0, 1]),
+            ({"ASCEND_RT_VISIBLE_DEVICES": "8,9"}, 2, []),
+            ({"ASCEND_RT_VISIBLE_DEVICES": "9,10"}, 2, [1]),
+            (
+                {
+                    "BENCH_DEVICE_VISIBILITY": "10,11",
+                    "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+                },
+                2,
+                [0, 1],
+            ),
+        ]
+        for env, count, expected in scenarios:
+            with (
+                self.subTest(env=env),
+                patch.dict(os.environ, env, clear=True),
+                patch(
+                    "src.kernel_eval.eval.process_pool.subprocess.run",
+                    return_value=Mock(returncode=0, stdout=smi_output, stderr=""),
+                ),
+            ):
+                self.assertEqual(coordinator._filter_healthy_cards(count), expected)
+
+    def test_filter_invalid_visibility_keeps_devices(self):
+        """无法解释可见列表时，不把宿主机 NPU 0 告警错用于 User Device ID 0。"""
+        coordinator = object.__new__(ProcessPoolCoordinator)
+        for visibility in ("8", "8,8", "unknown", "-1,9", "8,"):
+            with (
+                self.subTest(visibility=visibility),
+                patch.dict(
+                    os.environ, {"ASCEND_RT_VISIBLE_DEVICES": visibility}, clear=True
+                ),
+                patch(
+                    "src.kernel_eval.eval.process_pool.subprocess.run",
+                    return_value=Mock(
+                        returncode=0, stdout="| 0 | Ascend950PR | Alarm |", stderr=""
+                    ),
+                ),
+            ):
+                self.assertEqual(coordinator._filter_healthy_cards(2), [0, 1])
+
+    def test_parse_a3_missing_chip_row_does_not_use_model_number(self):
+        smi_output = (
+            "| NPU Name | Health |\n"
+            "| Chip Phy-ID | Bus-Id |\n"
+            "| 4 Ascend910 | Alarm |\n"
+            "| 4 Ascend910 | OK |\n"
+            "| 1 9 | 0000:8F:00.0 |\n"
+        )
+        self.assertEqual(
+            ProcessPoolCoordinator._parse_health_device_ids(smi_output), {9: "OK"}
+        )
 
     def test_build_child_cmd_passes_tasks_root(self):
         """eval-child 应接收 tasks_root，避免 full rel_path 被重复拼接"""
