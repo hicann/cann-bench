@@ -263,6 +263,13 @@ result = cann_bench.add(x, y)
 > - **Golden 参考 wheel**：由 `./scripts/utils/build_golden_wheel.sh` 构建，将 `tasks/` 下的 golden.py 打包为纯 Python 包（提供当前评测集的 golden 算子，注册到 `torch.ops.cann_bench`），仅用于 golden 自验证；
 > - **ACLNN 示例 wheel**：由 [examples/aclnn_launch_example/](examples/aclnn_launch_example/) 构建（`dist/cann_bench-*.whl`），提供 `cann_bench.add` / `cann_bench.sqrt` 等自定义算子。
 >
+> `run_evaluation.sh --source-dir ...`（或传入源码目录位置参数）会先卸载当前 Python 环境中
+> 已安装的 `cann_bench` / `cann_bench_golden`，包括手工安装的上述 wheel，以避免算子注册冲突。
+> 原包在评测结束或失败后不会自动恢复。之后不带 `--source-dir` 运行前，需要重新安装包含
+> 目标算子的 wheel：golden 自验证运行 `./scripts/utils/build_golden_wheel.sh --install`；
+> 自定义实现使用 `python -m pip install --force-reinstall --no-deps /path/to/cann_bench.whl`
+> （替换为实际 wheel 路径），或继续使用 `--source-dir` 评测。
+>
 > 若安装了 golden wheel，再调用 `cann_bench.add()` 会报 `module 'cann_bench' has no attribute 'add'`。此时需先卸载 golden wheel，再安装 ACLNN 示例 wheel；或将示例工程目录加入 `PYTHONPATH` 以导入正确的包：
 >
 > ```bash

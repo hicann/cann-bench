@@ -7,7 +7,7 @@
 # CANN Open Software License Agreement Version 2.0 (the "License").
 # Please refer to the License for details. You may not use this file except in compliance with the License.
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR THE PURPOSE.
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 # ----------------------------------------------------------------------------------------------------------
 
@@ -20,8 +20,9 @@ Golden whl 打包脚本
 验证 golden(NPU) 与 golden(CPU fp64) 的精度一致性。
 
 用法:
+    OP_NAME 请先设置为所选算子目录 proto.yaml 中的 operator.name。
     python scripts/utils/build_golden_wheel.py                   # 构建所有算子
-    python scripts/utils/build_golden_wheel.py --operator Mish   # 只打包指定算子
+    python scripts/utils/build_golden_wheel.py --operator "$OP_NAME" # 只打包指定算子
     python scripts/utils/build_golden_wheel.py --install         # 构建后自动安装
 """
 
@@ -51,7 +52,9 @@ def _available_level_choices(tasks_root: Path) -> tuple[int, ...]:
     return tuple(sorted(levels))
 
 
-def scan_golden_operators(tasks_root: Path, operator_filter: list = None, level_filter: int = None):
+def scan_golden_operators(
+    tasks_root: Path, operator_filter: list = None, level_filter: int = None
+):
     """扫描 tasks/ 目录，收集每个算子的信息
 
     Returns:
@@ -72,10 +75,10 @@ def scan_golden_operators(tasks_root: Path, operator_filter: list = None, level_
         op_name = op_info.get("name", "")
         schema = op_info.get("schema", "")
 
-        # 从 schema 提取函数名: "mish(Tensor x) -> Tensor y" -> "mish"
+        # 从 schema 提取函数名: "op_func(Tensor x) -> Tensor y" -> "op_func"
         func_name = op_name.lower()  # 默认
         if schema:
-            match = re.match(r'^(\w+)\s*\(', schema.strip())
+            match = re.match(r"^(\w+)\s*\(", schema.strip())
             if match:
                 func_name = match.group(1)
 
@@ -94,12 +97,14 @@ def scan_golden_operators(tasks_root: Path, operator_filter: list = None, level_
         if not golden_path.exists():
             continue
 
-        operators.append({
-            "rel_path": rel_path,
-            "op_name": op_name,
-            "func_name": func_name,
-            "golden_path": golden_path,
-        })
+        operators.append(
+            {
+                "rel_path": rel_path,
+                "op_name": op_name,
+                "func_name": func_name,
+                "golden_path": golden_path,
+            }
+        )
 
     return operators
 
@@ -115,12 +120,8 @@ def generate_init_py(operators: list) -> str:
     for op in operators:
         func_name = op["func_name"]
         # 子模块名用 func_name（snake_case）
-        import_lines.append(
-            f"from ._goldens.{func_name} import {func_name}"
-        )
+        import_lines.append(f"from ._goldens.{func_name} import {func_name}")
         op_entries.append(f'    "{func_name}": {func_name},')
-
-    ops_dict = "\n".join(op_entries)
 
     # 用普通字符串模板避免 f-string 与 {} 冲突
     TEMPLATE = '''#!/usr/bin/env python3
@@ -159,20 +160,22 @@ for _name, _func in _OPS.items():
     imports_block = "\n".join(import_lines)
     ops_dict_block = "\n".join(op_entries)
 
-    content = TEMPLATE.replace("IMPORTS_BLOCK", imports_block).replace("OPS_DICT", ops_dict_block)
+    content = TEMPLATE.replace("IMPORTS_BLOCK", imports_block).replace(
+        "OPS_DICT", ops_dict_block
+    )
     return content
 
 
 def generate_goldens_init_py() -> str:
     """生成 cann_bench/_goldens/__init__.py（空包声明）"""
-    return '''#!/usr/bin/env python3
+    return """#!/usr/bin/env python3
 # Golden operator submodules
-'''
+"""
 
 
 def generate_setup_py() -> str:
     """生成 setup.py（纯 Python 包）"""
-    return '''#!/usr/bin/env python3
+    return """#!/usr/bin/env python3
 from setuptools import setup, find_packages
 
 setup(
@@ -185,10 +188,16 @@ setup(
     python_requires=">=3.8",
     zip_safe=False,
 )
-'''
+"""
 
 
-def build_wheel(build_dir: Path, output_dir: Path, operators: list, tasks_root: Path, verbose: bool = False):
+def build_wheel(
+    build_dir: Path,
+    output_dir: Path,
+    operators: list,
+    tasks_root: Path,
+    verbose: bool = False,
+):
     """构建纯 Python cann_bench whl 包
 
     Args:
@@ -213,7 +222,9 @@ def build_wheel(build_dir: Path, output_dir: Path, operators: list, tasks_root: 
         dst = goldens_dir / f"{op['func_name']}.py"
         shutil.copy2(str(src), str(dst))
         if verbose:
-            print(f"  拷贝: {op['rel_path']}/golden.py -> _goldens/{op['func_name']}.py")
+            print(
+                f"  拷贝: {op['rel_path']}/golden.py -> _goldens/{op['func_name']}.py"
+            )
 
     # 2. 生成 _goldens/__init__.py
     (goldens_dir / "__init__.py").write_text(generate_goldens_init_py())
@@ -226,14 +237,18 @@ def build_wheel(build_dir: Path, output_dir: Path, operators: list, tasks_root: 
     (build_dir / "setup.py").write_text(generate_setup_py())
 
     # 5. 构建 whl
-    print(f"\n[INFO] 构建 whl 包...")
+    print("\n[INFO] 构建 whl 包...")
     dist_dir = output_dir / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
 
     cmd = [
-        sys.executable, "-m", "build",
-        "--wheel", "--no-isolation",
-        "--outdir", str(dist_dir),
+        sys.executable,
+        "-m",
+        "build",
+        "--wheel",
+        "--no-isolation",
+        "--outdir",
+        str(dist_dir),
     ]
     result = subprocess.run(cmd, cwd=str(build_dir), capture_output=True, text=True)
     if result.returncode != 0:
@@ -253,10 +268,11 @@ def build_wheel(build_dir: Path, output_dir: Path, operators: list, tasks_root: 
 
 def install_wheel(whl_path: Path, verbose: bool = False):
     """安装 whl 包（先卸载旧版本）"""
-    print(f"\n[INFO] 卸载旧版本 cann_bench...")
+    print("\n[INFO] 卸载旧版本 cann_bench...")
     subprocess.run(
         [sys.executable, "-m", "pip", "uninstall", "cann_bench", "-y"],
-        capture_output=True, timeout=30,
+        capture_output=True,
+        timeout=30,
     )
 
     print(f"[INFO] 安装: {whl_path}")
@@ -271,20 +287,34 @@ def install_wheel(whl_path: Path, verbose: bool = False):
 
 def main():
     parser = argparse.ArgumentParser(description="Golden whl 打包脚本")
-    parser.add_argument("--task-dir", type=str, default=None,
-                        help="指定 tasks 目录（默认: 项目根目录下的 tasks）")
-    parser.add_argument("--operator", type=str, nargs="*", default=None,
-                        help="只打包指定算子（如 Mish Sigmoid），可指定多个")
-    parser.add_argument("--level", type=int, default=None,
-                        help="只打包指定级别（按 --task-dir 下的 level<N> 目录校验）")
-    parser.add_argument("--output-dir", type=str, default=None,
-                        help="输出目录（默认: 项目根目录下 dist/golden_wheel）")
-    parser.add_argument("--install", action="store_true",
-                        help="构建后自动安装")
-    parser.add_argument("--clean", action="store_true",
-                        help="清理构建临时目录")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="详细输出")
+    parser.add_argument(
+        "--task-dir",
+        type=str,
+        default=None,
+        help="指定 tasks 目录（默认: 项目根目录下的 tasks）",
+    )
+    parser.add_argument(
+        "--operator",
+        type=str,
+        nargs="*",
+        default=None,
+        help="只打包指定算子（proto.yaml 中的 operator.name），可指定多个",
+    )
+    parser.add_argument(
+        "--level",
+        type=int,
+        default=None,
+        help="只打包指定级别（按 --task-dir 下的 level<N> 目录校验）",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="输出目录（默认: 项目根目录下 dist/golden_wheel）",
+    )
+    parser.add_argument("--install", action="store_true", help="构建后自动安装")
+    parser.add_argument("--clean", action="store_true", help="清理构建临时目录")
+    parser.add_argument("-v", "--verbose", action="store_true", help="详细输出")
 
     args = parser.parse_args()
 
@@ -299,9 +329,15 @@ def main():
         available_levels = _available_level_choices(tasks_root)
         if args.level not in available_levels:
             choices = ", ".join(str(level) for level in available_levels) or "无"
-            parser.error(f"--level {args.level} 在 {tasks_root} 下没有对应目录；可选级别: {choices}")
+            parser.error(
+                f"--level {args.level} 在 {tasks_root} 下没有对应目录；可选级别: {choices}"
+            )
 
-    output_dir = Path(args.output_dir) if args.output_dir else project_root / "dist" / "golden_wheel"
+    output_dir = (
+        Path(args.output_dir)
+        if args.output_dir
+        else project_root / "dist" / "golden_wheel"
+    )
     build_dir = output_dir / "_build_tmp"
 
     # 扫描算子
@@ -328,14 +364,16 @@ def main():
         return
 
     # 构建 whl
-    whl_path = build_wheel(build_dir, output_dir, operators, tasks_root, verbose=args.verbose)
+    whl_path = build_wheel(
+        build_dir, output_dir, operators, tasks_root, verbose=args.verbose
+    )
 
     # 安装
     if args.install:
         install_wheel(whl_path, verbose=args.verbose)
 
     # 验证
-    print(f"\n[INFO] 验证注册...")
+    print("\n[INFO] 验证注册...")
     verify_script = (
         "import torch; import cann_bench; "
         "ops = [n for n in dir(cann_bench) if not n.startswith('_')]; "
@@ -349,7 +387,10 @@ def main():
 
     print(f"\n[OK] 完成! whl 包: {whl_path}")
     print(f"安装命令: pip install --no-deps {whl_path}")
-    print(f"评测命令: ./scripts/run_evaluation.sh --task-dir tasks/level1/mish --no-perf")
+    print(
+        '评测命令: ./scripts/run_evaluation.sh --task-dir "tasks/level<N>/<op_dir>" --no-perf'
+    )
+    print("请将占位路径替换为本次已打包算子的实际目录；自定义题集请使用对应路径。")
 
 
 if __name__ == "__main__":

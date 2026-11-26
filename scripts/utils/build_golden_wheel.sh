@@ -16,15 +16,16 @@
 # 验证 golden(NPU) 与 golden(CPU fp64) 的精度一致性。
 #
 # 用法:
+#   OP_NAME 为所选目录 proto.yaml 的 operator.name；TASK_DIR 为该算子的实际目录。
 #   ./scripts/utils/build_golden_wheel.sh                     # 构建所有算子
-#   ./scripts/utils/build_golden_wheel.sh --operator Mish     # 只打包指定算子
+#   ./scripts/utils/build_golden_wheel.sh --operator "$OP_NAME" # 只打包指定算子
 #   ./scripts/utils/build_golden_wheel.sh --level 1           # 只打包 level1
 #   ./scripts/utils/build_golden_wheel.sh --install           # 构建后自动安装
 #   ./scripts/utils/build_golden_wheel.sh --clean             # 清理构建临时目录
 #
 # 评测流程:
 #   1. ./scripts/utils/build_golden_wheel.sh --install
-#   2. ./scripts/run_evaluation.sh --task-dir tasks/level1/mish --no-perf
+#   2. ./scripts/run_evaluation.sh --task-dir "$TASK_DIR" --no-perf
 
 set -e
 
@@ -51,7 +52,7 @@ Golden whl 打包脚本
 用法: ./scripts/utils/build_golden_wheel.sh [选项]
 
 选项:
-  --operator <name>       只打包指定算子（如 Mish, Sigmoid），可多次指定
+  --operator <op_name>    只打包指定算子（proto.yaml 的 operator.name），可多次指定
   --level <N>             只打包指定级别 (取值取决于 --task-dir 下实际存在的 levelN 目录)
   --task-dir <path>       指定 tasks 目录（默认: 项目根目录下的 tasks）
   --output-dir <path>     输出目录（默认: dist/golden_wheel）
@@ -61,18 +62,23 @@ Golden whl 打包脚本
   -h, --help              显示此帮助信息
 
 示例:
+  # 先查看当前题集，以下占位值须替换为实际名称和目录后再执行
+  ./scripts/run_evaluation.sh -a list
+  OP_NAME="<op_name>"                # 所选目录 proto.yaml 的 operator.name
+  TASK_DIR="tasks/level<N>/<op_dir>"  # 与 OP_NAME 对应的实际算子目录
+
   # 构建所有算子的 golden whl
   ./scripts/utils/build_golden_wheel.sh
 
-  # 只打包 Mish 算子并安装
-  ./scripts/utils/build_golden_wheel.sh --operator Mish --install
+  # 只打包所选算子并安装
+  ./scripts/utils/build_golden_wheel.sh --operator "$OP_NAME" --install
 
   # 只打包 level1 算子
   ./scripts/utils/build_golden_wheel.sh --level 1
 
   # 构建后通过 run_evaluation 评测
   ./scripts/utils/build_golden_wheel.sh --install
-  ./scripts/run_evaluation.sh --task-dir tasks/level1/mish --no-perf
+  ./scripts/run_evaluation.sh --task-dir "$TASK_DIR" --no-perf
 
 EOF
 }

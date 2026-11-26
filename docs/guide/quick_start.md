@@ -81,7 +81,22 @@ source "${CANN_BENCH_VENDOR_DIR}/bin/set_env.bash"
 ./scripts/run_evaluation.sh --source-dir /path/to/ai_ops
 ```
 
+使用 `--source-dir` 或第一个位置参数指定源码目录时，脚本会先卸载当前 Python 环境中
+已安装的 `cann_bench` / `cann_bench_golden`，以避免与本次构建的包发生算子注册冲突。
+这也会卸载此前手工安装的 golden 或 ACLNN 示例 wheel，评测结束或失败后不会自动恢复原包。
+
 ### 评测指定算子
+
+以下不带 `--source-dir` 的命令使用当前 Python 环境中的 `cann_bench` 包，需先安装包含
+目标算子实现的 wheel。若刚运行过上面的源码评测，请重新安装所需 wheel；Add/Sqrt 示例包
+只能评测它实际提供实现的算子。需要 golden 自验证时，可以先执行：
+
+```bash
+./scripts/utils/build_golden_wheel.sh --install
+```
+
+评测自己的实现时，重新执行 `python -m pip install --force-reinstall --no-deps /path/to/cann_bench.whl`
+（将路径替换为实际 wheel），或继续通过 `--source-dir` 指定对应源码目录。
 
 正式评测集会随版本变化，先运行 `./scripts/run_evaluation.sh -a list` 查看当前算子。
 以下命令中的 `TASK_DIR` 填写实际的 `tasks/levelN/<op>` 目录，`OPERATOR_NAME`
@@ -175,13 +190,27 @@ source "${CANN_BENCH_VENDOR_DIR}/bin/set_env.bash"
 
 将 golden 函数打包成 `cann_bench` whl，通过 `run_evaluation.sh` 验证 golden(NPU) 与 golden(CPU fp64) 的精度一致性：
 
-```bash
-# 1. 构建 golden whl 并安装
-./scripts/utils/build_golden_wheel.sh --install
+先运行 `./scripts/run_evaluation.sh -a list` 查看当前题集。下面的 `<op_name>`、
+`level<N>` 和 `<op_dir>` 都是占位值，执行前请替换为实际值：`OP_NAME` 使用所选
+目录 `proto.yaml` 中的 `operator.name`，`TASK_DIR` 使用同一算子的目录路径。
+算子名称和目录名不一定相同，不要通过名称直接拼接路径。
 
-# 2. 评测（golden 作为 AI 算子，golden(CPU fp64) 作为参考）
+```bash
+# 1. 替换占位值，选择当前题集中的同一个算子
+OP_NAME="<op_name>"
+TASK_DIR="tasks/level<N>/<op_dir>"
+
+# 2. 构建所选算子的 golden whl 并安装
+./scripts/utils/build_golden_wheel.sh --operator "$OP_NAME" --install
+
+# 3. 评测（golden 作为 AI 算子，golden(CPU fp64) 作为参考）
 ./scripts/run_evaluation.sh --task-dir "$TASK_DIR" --no-perf
 ```
+
+验证其他算子时，同时修改构建的 `--operator` 和评测的 `--task-dir`；省略构建的
+`--operator` 则打包全部 golden。完成横幅中的评测路径也是占位值，执行前请替换为
+本次已打包算子的实际目录；使用自定义题集时填写对应路径。
+安装后直接运行不带 `--source-dir` 的命令，以使用该 golden wheel。
 
 > ⚠️ **`cann_bench` 包名冲突**：golden whl 与 [examples/aclnn_launch_example](../../examples/aclnn_launch_example/) 构建的 wheel 同名（都叫 `cann_bench`），二者互斥。golden wheel 是纯 Python 包，只提供 `torch.ops.cann_bench` 下的 golden 算子（取决于当前评测集），**不包含**示例的 `cann_bench.add` / `cann_bench.sqrt`。golden 自验证完成后如需使用示例算子，请先卸载 golden wheel，再安装示例 wheel 或将示例目录加入 `PYTHONPATH`：
 >

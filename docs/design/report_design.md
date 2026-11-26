@@ -136,6 +136,9 @@ eval_YYYYMMDD_HHMMSS.html    ← 完整 HTML 报告
 
 ### 3.1 JSON 报告 (`eval_xxx.json`)
 
+以下结构示例中的 `level<N>/<op_dir>` 和 `<op_name>` 为占位值；实际报告分别填写
+算子相对路径和 `proto.yaml` 中的 `operator.name`，不依赖某一版题集的具体算子。
+
 ```json
 {
   "version": "1.0",
@@ -175,8 +178,8 @@ eval_YYYYMMDD_HHMMSS.html    ← 完整 HTML 报告
   },
   "operators": [
     {
-      "rel_path": "level1/mish",
-      "operator": "Mish",
+      "rel_path": "level<N>/<op_dir>",
+      "operator": "<op_name>",
       "total_cases": 20,
       "passed_cases": 17,
       "pass_rate": 0.85,

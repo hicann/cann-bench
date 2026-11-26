@@ -26,7 +26,7 @@ def _shell_path(path):
     return value
 
 
-def _run_with_python_stub(tmp_path, args):
+def _run_with_python_stub(tmp_path, args, installed_packages=()):
     bash = shutil.which("bash")
     if bash is None:
         pytest.skip("Bash is required for shell entrypoint tests")
@@ -51,7 +51,13 @@ def _run_with_python_stub(tmp_path, args):
         "#!/bin/bash\n"
         "if [[ \"$1\" == --version ]]; then echo 'Python stub 3.12'; exit 0; fi\n"
         'if [[ "$1" == -c ]]; then exit 0; fi\n'
-        'if [[ "$1" == -m && "$2" == pip ]]; then exit 1; fi\n'
+        'if [[ "$1" == -m && "$2" == pip ]]; then\n'
+        '  if [[ "$3" == show && " $STUB_INSTALLED_PACKAGES " == *" $4 "* ]]; then exit 0; fi\n'
+        '  if [[ "$3" == uninstall ]]; then\n'
+        '    printf \'%s\\n\' "$4" >> "$CAPTURE_PIP_FILE"; exit 0\n'
+        "  fi\n"
+        "  exit 1\n"
+        "fi\n"
         'printf \'%s\\n\' --CALL-- "$@" >> "$CAPTURE_FILE"\n'
         'printf \'%s\\n\' "$CANN_BENCH_BUILD_TIMEOUT_SEC" "$CANN_BENCH_SOURCE_BUILD_ARGS" '
         '> "$CAPTURE_ENV_FILE"\n',
@@ -70,6 +76,8 @@ def _run_with_python_stub(tmp_path, args):
     env["LC_ALL"] = "C.UTF-8"
     env["CAPTURE_FILE"] = _shell_path(capture)
     env["CAPTURE_ENV_FILE"] = _shell_path(capture_env)
+    env["STUB_INSTALLED_PACKAGES"] = " ".join(installed_packages)
+    env["CAPTURE_PIP_FILE"] = _shell_path(tmp_path / "pip-uninstalled.txt")
     result = subprocess.run(
         [bash, _shell_path(script), *args],
         cwd=project,
@@ -165,3 +173,32 @@ def test_eval_preserves_paths_range_and_build_environment(
         assert argv.count(option) == 1
         assert argv[argv.index(option) + 1] == value
     assert environment == ["7200", build_args]
+
+
+@pytest.mark.parametrize(
+    "source_args", [["--source-dir", "/tmp/source path"], ["/tmp/source path"]]
+)
+def test_source_eval_explains_package_removal_before_uninstall(tmp_path, source_args):
+    packages = ("cann_bench", "cann_bench_golden")
+    argv, stdout, _ = _run_with_python_stub(
+        tmp_path, source_args, installed_packages=packages
+    )
+
+    assert "--source-dir" in argv
+    notice = stdout.index("原包不会自动恢复")
+    assert notice < stdout.index("卸载已安装的包: cann_bench")
+    assert stdout.count("原包不会自动恢复") == 1
+    assert "重新安装包含目标算子的 wheel" in stdout
+    assert "./scripts/utils/build_golden_wheel.sh --install" in stdout
+    assert (tmp_path / "pip-uninstalled.txt").read_text().splitlines() == list(packages)
+
+
+def test_installed_package_eval_does_not_uninstall_or_warn(tmp_path):
+    _, stdout, _ = _run_with_python_stub(
+        tmp_path,
+        ["--operator", "Exp", "--no-perf"],
+        installed_packages=("cann_bench", "cann_bench_golden"),
+    )
+
+    assert "原包不会自动恢复" not in stdout
+    assert not (tmp_path / "pip-uninstalled.txt").exists()

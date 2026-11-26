@@ -80,6 +80,8 @@ print_help() {
     echo "  -a, --action <action>     操作类型: eval(评测), list(列表), info(详情), config(配置)"
     echo "                            默认: eval"
     echo "  --source-dir <dir>        AI生成的算子源码目录（显式指定，与位置参数等效）"
+    echo "                            会卸载当前 Python 环境中的 cann_bench/cann_bench_golden，原包不会自动恢复"
+    echo "                            后续不带源码目录评测前，需重新安装包含目标算子的 wheel"
     echo "  --source-build-args <s>   透传给源码目录 build.sh 的参数字符串"
     echo "                            例如: \"--pkg --soc=ascend950 --ops=foo,bar\""
     echo ""
@@ -346,8 +348,15 @@ source "${PROJECT_ROOT}/scripts/ensure_cann_bench_utils.sh"
 # 卸载已安装的cann_bench包（避免算子重复注册冲突）
 # V3 Anti-Cheat: 排除 cann_bench_utils（强制依赖，不能卸载）
 uninstall_packages() {
+    local warned=false
     for pkg in cann_bench cann_bench_golden; do
         if python -m pip show "${pkg}" &> /dev/null; then
+            if [[ "${warned}" == false ]]; then
+                log_warn "源码评测将卸载当前 Python 环境中已安装的 cann_bench/cann_bench_golden，以避免算子注册冲突。"
+                log_warn "原包不会自动恢复；之后不带 --source-dir 评测前，请重新安装包含目标算子的 wheel。"
+                log_info "Golden 自验证可重新执行: ./scripts/utils/build_golden_wheel.sh --install"
+                warned=true
+            fi
             log_info "卸载已安装的包: ${pkg}"
             python -m pip uninstall "${pkg}" -y &> /dev/null || true
         fi
